@@ -172,7 +172,7 @@ describe('JinaReaderConnector', () => {
       expect((result as { ok: boolean; error?: string }).error).toBe('Invalid URL');
     });
 
-    it('should handle errors', async () => {
+    it('should handle errors without code', async () => {
       const error: HttpError = new Error('Network error');
       error.response = { status: 500, data: { message: 'Server error' } };
       mockClient.post.mockRejectedValue(error);
@@ -182,6 +182,117 @@ describe('JinaReaderConnector', () => {
           url: 'https://example.com',
         })
       ).rejects.toThrow('Network error');
+    });
+
+    it('should handle errors with code by returning error response', async () => {
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 400,
+        data: {
+          code: 400,
+          message: 'Invalid URL provided',
+        },
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.browse.handler(mockContext, {
+        url: 'https://invalid-url',
+      });
+
+      expect((result as { ok: boolean }).ok).toBe(false);
+      expect((result as { code?: number }).code).toBe(400);
+    });
+
+    it('should handle errors with different numeric codes', async () => {
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 404,
+        data: {
+          code: 404,
+          message: 'Resource not found',
+        },
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.browse.handler(mockContext, {
+        url: 'https://example.com/not-found',
+      });
+
+      expect((result as { ok: boolean }).ok).toBe(false);
+      expect((result as { code?: number }).code).toBe(404);
+    });
+
+    it('should use default return format when not provided', async () => {
+      const mockResponse = {
+        data: {
+          data: {
+            title: 'Test Page',
+            content: 'Test Content',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await JinaReaderConnector.actions.browse.handler(mockContext, {
+        url: 'https://example.com',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://r.jina.ai',
+        {
+          url: 'https://example.com',
+          respondWith: 'content', // default format
+        },
+        {
+          headers: { Accept: 'application/json' },
+        }
+      );
+    });
+
+    it('should test all return format mappings', async () => {
+      const formats = [
+        { input: 'markdown', expected: 'content' },
+        { input: 'fullMarkdown', expected: 'markdown' },
+        { input: 'plainText', expected: 'text' },
+        { input: '1stScreenScreenshot', expected: 'screenshot' },
+        { input: 'fullPageScreenshot', expected: 'pageshot' },
+        { input: 'html', expected: 'html' },
+      ];
+
+      for (const format of formats) {
+        jest.clearAllMocks();
+        const mockResponse = {
+          data: {
+            data: {
+              title: 'Test Page',
+              content: 'Test Content',
+            },
+          },
+        };
+        mockClient.post.mockResolvedValue(mockResponse);
+
+        await JinaReaderConnector.actions.browse.handler(mockContext, {
+          url: 'https://example.com',
+          returnFormat: format.input as
+            | 'markdown'
+            | 'fullMarkdown'
+            | 'plainText'
+            | '1stScreenScreenshot'
+            | 'fullPageScreenshot'
+            | 'html',
+        });
+
+        expect(mockClient.post).toHaveBeenCalledWith(
+          'https://r.jina.ai',
+          {
+            url: 'https://example.com',
+            respondWith: format.expected,
+          },
+          {
+            headers: { Accept: 'application/json' },
+          }
+        );
+      }
     });
   });
 
@@ -310,6 +421,37 @@ describe('JinaReaderConnector', () => {
       expect((result as { ok: boolean; error?: string }).ok).toBe(false);
       expect((result as { ok: boolean; error?: string }).error).toBe('Invalid query');
     });
+
+    it('should handle errors with code by returning error response', async () => {
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 400,
+        data: {
+          code: 400,
+          message: 'Invalid search query',
+        },
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.search.handler(mockContext, {
+        query: 'invalid',
+      });
+
+      expect((result as { ok: boolean }).ok).toBe(false);
+      expect((result as { code?: number }).code).toBe(400);
+    });
+
+    it('should handle errors without code by rejecting', async () => {
+      const error: HttpError = new Error('Network error');
+      error.response = { status: 500, data: { message: 'Server error' } };
+      mockClient.post.mockRejectedValue(error);
+
+      await expect(
+        JinaReaderConnector.actions.search.handler(mockContext, {
+          query: 'test',
+        })
+      ).rejects.toThrow('Network error');
+    });
   });
 
   describe('fileToMarkdown action', () => {
@@ -377,6 +519,41 @@ describe('JinaReaderConnector', () => {
 
       expect(mockClient.post).toHaveBeenCalled();
     });
+
+    it('should handle errors with code by returning error response', async () => {
+      const fileContent = Buffer.from('test file content').toString('base64');
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 400,
+        data: {
+          code: 400,
+          message: 'Invalid file format',
+        },
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.fileToMarkdown.handler(mockContext, {
+        file: fileContent,
+        filename: 'test.pdf',
+      });
+
+      expect((result as { ok: boolean }).ok).toBe(false);
+      expect((result as { code?: number }).code).toBe(400);
+    });
+
+    it('should handle errors without code by rejecting', async () => {
+      const fileContent = Buffer.from('test file content').toString('base64');
+      const error: HttpError = new Error('Network error');
+      error.response = { status: 500, data: { message: 'Server error' } };
+      mockClient.post.mockRejectedValue(error);
+
+      await expect(
+        JinaReaderConnector.actions.fileToMarkdown.handler(mockContext, {
+          file: fileContent,
+          filename: 'test.pdf',
+        })
+      ).rejects.toThrow('Network error');
+    });
   });
 
   describe('fileToRenderedImage action', () => {
@@ -423,6 +600,61 @@ describe('JinaReaderConnector', () => {
       });
 
       expect(mockClient.post).toHaveBeenCalled();
+    });
+
+    it('should not include page number URL when pageNumber is 1', async () => {
+      const fileContent = Buffer.from('test file content').toString('base64');
+      const mockResponse = {
+        data: {
+          data: {
+            screenshotUrl: 'https://example.com/screenshot.png',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await JinaReaderConnector.actions.fileToRenderedImage.handler(mockContext, {
+        file: fileContent,
+        filename: 'test.pdf',
+        pageNumber: 1,
+      });
+
+      expect(mockClient.post).toHaveBeenCalled();
+    });
+
+    it('should handle errors with code by returning error response', async () => {
+      const fileContent = Buffer.from('test file content').toString('base64');
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 400,
+        data: {
+          code: 400,
+          message: 'Failed to render document',
+        },
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.fileToRenderedImage.handler(mockContext, {
+        file: fileContent,
+        filename: 'test.pdf',
+      });
+
+      expect((result as { ok: boolean }).ok).toBe(false);
+      expect((result as { code?: number }).code).toBe(400);
+    });
+
+    it('should handle errors without code by rejecting', async () => {
+      const fileContent = Buffer.from('test file content').toString('base64');
+      const error: HttpError = new Error('Network error');
+      error.response = { status: 500, data: { message: 'Server error' } };
+      mockClient.post.mockRejectedValue(error);
+
+      await expect(
+        JinaReaderConnector.actions.fileToRenderedImage.handler(mockContext, {
+          file: fileContent,
+          filename: 'test.pdf',
+        })
+      ).rejects.toThrow('Network error');
     });
 
     it('should include additional options', async () => {
@@ -621,6 +853,7 @@ describe('JinaReaderConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
       expect(result.ok).toBe(false);
       expect(result.message).toContain('Failed to connect');
+      expect(result.message).toContain('Network error');
     });
 
     it('should use overrideBrowseUrl from config', async () => {
