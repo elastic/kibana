@@ -417,15 +417,12 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const [
-          { addControlsFromSavedSession },
-          { apiPublishesEditablePauseFetch, apiHasUniqueId },
-          { apiPublishesESQLVariables },
-        ] = await Promise.all([
-          getEmbeddableServices(),
-          import('@kbn/presentation-publishing'),
-          import('@kbn/esql-types'),
-        ]);
+        const {
+          addControlsFromSavedSession,
+          apiPublishesEditablePauseFetch,
+          apiHasUniqueId,
+          apiPublishesESQLVariables,
+        } = await getEmbeddableServices();
 
         const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
 
