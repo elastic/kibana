@@ -10,8 +10,9 @@ plugins:
     - observability_onboarding
     - painless_lab
     - security_solution
-    - streams_app
     - slo
+    - spaces
+    - streams_app
   disabled:
 
 packages:

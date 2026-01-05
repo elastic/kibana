@@ -14,7 +14,7 @@ import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
+import type { SaveDiscoverSessionParams, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { internalStateActions } from '..';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
@@ -56,8 +56,13 @@ const setup = ({
     );
   const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');
   const dataViewsClearCacheSpy = jest.spyOn(services.dataViews, 'clearInstanceCache');
+  const savedSearch: SavedSearch = {
+    ...savedSearchMock,
+    timeRestore: false,
+  };
+  savedSearch.searchSource.setField('filter', []);
   const state = getDiscoverStateMock({
-    savedSearch: { ...savedSearchMock, timeRestore: false },
+    savedSearch,
     additionalPersistedTabs: additionalPersistedTabs?.(services),
     services,
   });
