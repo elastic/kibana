@@ -38,6 +38,7 @@ export const performMatchSearch = async ({
   const semanticTextFields = fields.filter((field) => field.type === 'semantic_text');
   const allSearchableFields = [...textFields, ...semanticTextFields];
 
+  // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch`
   const searchRequest: any = {
     index,
     size,
