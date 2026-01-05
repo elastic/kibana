@@ -9,7 +9,11 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export type { SavedSearchComponentDependencies, SavedSearchComponentProps } from './src/types';
+export type {
+  SavedSearchComponentDependencies,
+  SavedSearchComponentProps,
+  SavedSearchTableConfig,
+} from './src/types';
 
 export const LazySavedSearchComponent = dynamic(() =>
   import('./src/components/saved_search').then((mod) => ({
