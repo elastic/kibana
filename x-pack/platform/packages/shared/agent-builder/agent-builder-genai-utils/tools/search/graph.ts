@@ -54,7 +54,7 @@ export const createSearchToolGraph = ({
   logger: Logger;
   events: ToolEventEmitter;
 }) => {
-  const relevanceTool = createRelevanceSearchTool({ model, esClient, events });
+  const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
 
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
