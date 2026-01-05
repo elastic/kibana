@@ -9,7 +9,6 @@ import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/help
 import {
   waitForPluginInitialized,
   cleanupEntityStore,
-  waitForEnrichIndexPopulated,
   waitForEntityDataIndexed,
   enableAssetInventory,
   executeEnrichPolicy,
@@ -323,8 +322,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             if (config.useEnrichPolicy) {
               // Execute enrich policy to pick up entity data
               await executeEnrichPolicy({ es, retry });
-              // Wait for enrich index to be created and populated with data
-              await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
             }
           });
 

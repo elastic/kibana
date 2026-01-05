@@ -1166,10 +1166,6 @@ export default function (providerContext: FtrProviderContext) {
                 // Explicitly execute enrich policies to ensure they have the latest entity data
                 await entityStoreHelpers.executeEnrichPolicy();
                 await entityStoreHelpers.executeEnrichPolicy(customNamespaceId);
-
-                // Wait for enrich indexes to be created AND populated with data
-                await entityStoreHelpers.waitForEnrichIndexPopulated();
-                await entityStoreHelpers.waitForEnrichIndexPopulated(customNamespaceId);
               }
               await entityStoreHelpers.installCloudAssetInventoryPackage();
             });

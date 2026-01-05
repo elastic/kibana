@@ -40,29 +40,6 @@ export const cleanupEntityStore = async ({
 };
 
 /**
- * Helper to wait for enrich index to be populated
- */
-export const waitForEnrichIndexPopulated = async ({
-  es,
-  logger,
-  retry,
-  enrichIndexName,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'logger' | 'retry'> & { enrichIndexName: string }) => {
-  await retry.waitFor('enrich index to be created and populated', async () => {
-    try {
-      const count = await es.count({
-        index: enrichIndexName,
-      });
-      logger.debug(`Enrich index count: ${count.count}`);
-      return count.count > 0;
-    } catch (e) {
-      logger.debug(`Waiting for enrich index: ${e.message}`);
-      return false;
-    }
-  });
-};
-
-/**
  * Helper to wait for entity data to be indexed
  */
 export const waitForEntityDataIndexed = async ({
