@@ -35,10 +35,7 @@ import type {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  ForLastExpression,
-  RECOMMENDED_TIMESIZE_WARNING,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -96,6 +93,13 @@ const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar):
       return timeWindowSize;
   }
 };
+
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.observability.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {

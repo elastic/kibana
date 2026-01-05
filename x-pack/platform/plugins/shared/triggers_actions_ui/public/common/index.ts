@@ -14,7 +14,6 @@ export {
   WhenExpression,
   OfExpression,
   ThresholdExpression,
-  RECOMMENDED_TIMESIZE_WARNING,
 } from './expression_items';
 export { builtInComparators, builtInAggregationTypes, builtInGroupByTypes } from './constants';
 export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
