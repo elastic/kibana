@@ -1,0 +1,124 @@
+{
+  "id": "@kbn/workplaceai-api-keys-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-components",
+        "id": "def-public.ApiKeyFlyoutWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyFlyoutWrapper",
+        "description": [],
+        "signature": [
+          "({ onCancel, onSuccess, }: ApiKeyFlyoutWrapperProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/src/components/api_key_flyout_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-components",
+            "id": "def-public.ApiKeyFlyoutWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  onCancel,\n  onSuccess,\n}",
+            "description": [],
+            "signature": [
+              "ApiKeyFlyoutWrapperProps"
+            ],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/src/components/api_key_flyout_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-components",
+        "id": "def-public.ApiKeyForm",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyForm",
+        "description": [],
+        "signature": [
+          "({ hasTitle }: ApiKeyFormProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/src/components/api_key_form.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-components",
+            "id": "def-public.ApiKeyForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ hasTitle = true }",
+            "description": [],
+            "signature": [
+              "ApiKeyFormProps"
+            ],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/src/components/api_key_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-components",
+        "id": "def-public.useWorkplaceAIApiKey",
+        "type": "Function",
+        "tags": [],
+        "label": "useWorkplaceAIApiKey",
+        "description": [],
+        "signature": [
+          "() => UseWorkplaceAIApiKeyParams"
+        ],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/src/hooks/use_workplaceai_api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-components",
+        "id": "def-public.Status",
+        "type": "Enum",
+        "tags": [],
+        "label": "Status",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

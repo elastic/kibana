@@ -10,6 +10,8 @@ import type { IlmGetLifecycleLifecycle } from '@elastic/elasticsearch/lib/api/ty
 import { appContextService } from '../../../app_context';
 import { getSettingsOrUndefined, saveSettings } from '../../../settings';
 
+export const DATA_STREAM_TYPES_DEPRECATED_ILMS = ['logs', 'metrics', 'synthetics'];
+
 export async function getILMPolicies(
   dataStreamTypes: string[]
 ): Promise<

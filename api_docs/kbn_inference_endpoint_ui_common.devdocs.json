@@ -11,7 +11,7 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.InferenceFlyoutWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n}",
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  enableEisPromoTour,\n}",
             "description": [],
             "signature": [
               "InferenceFlyoutWrapperProps"
@@ -44,7 +44,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, enableCustomHeaders, reenterSecretsOnEdit, }, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, enableEisPromoTour, }, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    enableCustomHeaders,\n    reenterSecretsOnEdit,\n  },\n}",
+            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    enableEisPromoTour,\n  },\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
@@ -290,7 +290,7 @@
             "label": "providerConfig",
             "description": [],
             "signature": [
-              "Record<string, unknown> | undefined"
+              "ProviderConfig | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
@@ -319,6 +319,27 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.Config.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-endpoint-ui-common",
+                "scope": "public",
+                "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
+                "section": "def-public.Map",
+                "text": "Map"
+              },
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
@@ -653,6 +674,55 @@
                 "section": "def-public.Secrets",
                 "text": "Secrets"
               }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.InferenceEndpointUiCommonPluginStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpointUiCommonPluginStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.InferenceEndpointUiCommonPluginStartDependencies.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.InferenceEndpointUiCommonPluginStartDependencies.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudStart",
+                "text": "CloudStart"
+              },
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
@@ -2276,6 +2346,55 @@
                 "description": [],
                 "signature": [
                   "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.groq",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.groq]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.groq.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.groq.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.groq.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
                 "deprecated": false,

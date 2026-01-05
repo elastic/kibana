@@ -123,7 +123,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const categories = getColorCategories(currentData?.rows, props.accessor);
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       {props.accessor === firstNonCollapsedColumnId && (
         <ColorMappingByTerms
           isDarkMode={props.isDarkMode}
@@ -162,7 +162,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           setConfig={setConfig}
         />
       )}
-    </>
+    </div>
   );
 }
 

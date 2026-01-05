@@ -73,7 +73,8 @@ export function SchemaChangesReviewModal({
     onClose();
   }, [submitChanges, onClose]);
 
-  const [hasSimulationErrors, setHasSimulationErrors] = React.useState(false);
+  const [hasBlockingSimulationErrors, setHasBlockingSimulationErrors] = React.useState(false);
+  const [hasNonBlockingSimulationErrors, setHasNonBlockingSimulationErrors] = React.useState(false);
   const [simulationError, setSimulationError] = React.useState<string | null>(null);
   const [isSimulating, setIsSimulating] = React.useState(false);
   useEffect(() => {
@@ -103,12 +104,32 @@ export function SchemaChangesReviewModal({
         );
 
         if (simulationResults.status === 'failure') {
-          setHasSimulationErrors(true);
+          setHasBlockingSimulationErrors(true);
           setSimulationError(simulationResults.simulationError);
         }
       } catch (err) {
-        setHasSimulationErrors(true);
-        setSimulationError(getFormattedError(err).message);
+        const errorMessage = getFormattedError(err).message;
+
+        // Check if error is caused by expensive queries being disabled
+        const isExpensiveQueriesError = errorMessage.includes('allow_expensive_queries');
+
+        if (isExpensiveQueriesError) {
+          setHasNonBlockingSimulationErrors(true);
+          setSimulationError(
+            i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.expensiveQueriesDisabledWarning',
+              {
+                defaultMessage:
+                  'Field simulation is unavailable because expensive queries are disabled on your cluster. ' +
+                  'The schema changes can still be applied, but field compatibility cannot be verified in advance. ' +
+                  'Proceed with caution - incompatible field types may cause ingestion errors.',
+              }
+            )
+          );
+        } else {
+          setHasBlockingSimulationErrors(true);
+          setSimulationError(errorMessage);
+        }
       } finally {
         setIsSimulating(false);
       }
@@ -312,7 +333,7 @@ export function SchemaChangesReviewModal({
           )}
         </EuiText>
         <EuiSpacer size="m" />
-        {hasSimulationErrors && (
+        {(hasBlockingSimulationErrors || hasNonBlockingSimulationErrors) && (
           <>
             <EuiCallOut
               announceOnMount
@@ -347,7 +368,7 @@ export function SchemaChangesReviewModal({
           color="primary"
           onClick={handleSubmit}
           isLoading={loading || isSimulating}
-          disabled={isSimulating || hasSimulationErrors}
+          disabled={isSimulating || hasBlockingSimulationErrors}
           data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
           {isSimulating

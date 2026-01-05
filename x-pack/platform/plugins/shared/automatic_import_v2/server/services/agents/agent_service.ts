@@ -39,7 +39,8 @@ export class AgentService {
     // Fetch samples from the index (decoupled from agent building)
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
-      dataStreamId
+      dataStreamId,
+      this.esClient
     );
 
     // Create tools at the service level

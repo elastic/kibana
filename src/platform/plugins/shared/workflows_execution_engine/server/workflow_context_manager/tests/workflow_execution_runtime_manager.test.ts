@@ -7,19 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { CoreStart } from '@kbn/core/server';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  StackFrame,
+  WorkflowContext,
+  WorkflowExecutionContext,
+} from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { buildWorkflowContext } from '../build_workflow_context';
+import type { ContextDependencies } from '../types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
+jest.mock('../build_workflow_context', () => {
+  return {
+    buildWorkflowContext: jest.fn(),
+  };
+});
+const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
+  typeof buildWorkflowContext
+>;
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
   let workflowExecution: EsWorkflowExecution;
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
+  let fakeCoreStart: jest.Mocked<CoreStart>;
+  let fakeContextDependencies: jest.Mocked<ContextDependencies>;
   const originalDateCtor = global.Date;
   let mockDateNow: Date;
 
@@ -96,11 +115,16 @@ describe('WorkflowExecutionRuntimeManager', () => {
       }
     });
 
+    fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
+    fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
+
     underTest = new WorkflowExecutionRuntimeManager({
       workflowExecution,
       workflowExecutionGraph,
       workflowLogger,
       workflowExecutionState,
+      coreStart: fakeCoreStart as CoreStart,
+      dependencies: fakeContextDependencies,
     });
   });
 
@@ -253,12 +277,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
     });
 
-    it('should save the current workflow execution state', async () => {
-      await underTest.saveState();
-
-      expect(workflowExecutionState.flush).toHaveBeenCalled();
-    });
-
     it('should complete workflow execution if no nodes to process', async () => {
       // Mock the WorkflowExecutionRuntimeManager to have no current node
       (underTest as any).nextNodeId = undefined;
@@ -303,7 +321,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should fail workflow execution if workflow error is set', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         startedAt: '2025-08-05T00:00:00.000Z',
-        error: 'Second step failed',
+        error: {
+          message: 'Second step failed',
+          type: 'Error',
+        },
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
 
@@ -329,7 +350,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should log workflow failure', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         startedAt: '2025-08-05T00:00:00.000Z',
-        error: 'Second step failed',
+        error: {
+          message: 'Second step failed',
+          type: 'Error',
+        },
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
 
@@ -340,6 +364,59 @@ describe('WorkflowExecutionRuntimeManager', () => {
           outcome: 'failure',
         },
         tags: ['workflow', 'execution', 'complete'],
+      });
+    });
+
+    describe.each(TerminalExecutionStatuses)('for status %s', (status) => {
+      beforeEach(() => {
+        (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+          startedAt: '2025-08-05T00:00:00.000Z',
+          status,
+        } as Partial<EsWorkflowStepExecution>);
+        buildWorkflowContextMock.mockReturnValue({} as WorkflowContext);
+      });
+
+      it('should set finishedAt and duration if not set', async () => {
+        await underTest.saveState();
+
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            finishedAt: '2025-08-06T00:00:04.000Z',
+          })
+        );
+      });
+
+      it('should update duration', async () => {
+        await underTest.saveState();
+
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            duration: 86404000,
+          })
+        );
+      });
+
+      it('should build final workflow context', async () => {
+        buildWorkflowContextMock.mockReturnValue({
+          execution: {} as WorkflowExecutionContext,
+        } as WorkflowContext);
+        await underTest.saveState();
+
+        expect(buildWorkflowContextMock).toHaveBeenCalledWith(
+          {
+            startedAt: '2025-08-05T00:00:00.000Z',
+            status,
+          },
+          fakeCoreStart,
+          fakeContextDependencies
+        );
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            context: {
+              execution: {},
+            },
+          })
+        );
       });
     });
   });

@@ -76,10 +76,9 @@ export function regenerateMoonProjects() {
       skip: [],
     };
 
-    const packages: Package[] = filter?.length
-      ? filterPackages(getPackages(REPO_ROOT), filter)
-      : getPackages(REPO_ROOT);
-    const packageIds = packages.map((pkg) => pkg.name);
+    const allPackages = getPackages(REPO_ROOT);
+    const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
+    const allPackageIds = allPackages.map((pkg) => pkg.name);
 
     for (const pkg of packages) {
       log.verbose(`Generating project configuration for ${pkg.name}`);
@@ -90,7 +89,7 @@ export function regenerateMoonProjects() {
 
       applyTsConfigSettings(projectConfig, {
         tsConfigPath: pathInPackage('tsconfig.json'),
-        allPackageIds: packageIds,
+        allPackageIds,
         includeDependencies,
       });
 

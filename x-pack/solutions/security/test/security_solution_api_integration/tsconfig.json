@@ -2,7 +2,13 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest", "@kbn/ambient-ftr-types"]
+    "types": [
+      "node",
+      "cheerio",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-ftr-types"
+    ],
   },
   "include": [
     "**/*",

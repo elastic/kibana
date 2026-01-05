@@ -17,12 +17,17 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-monaco
-dependsOn: []
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/repo-info'
+  - '@kbn/esql-language'
+  - '@kbn/esql-types'
 tags:
   - is-webpack-built
-  - platform
-  - shared
+  - package
   - prod
+  - group-platform
+  - shared
   - jest-unit-tests
 fileGroups:
   src:
@@ -50,9 +55,9 @@ tasks:
     inputs:
       - '@group(src)'
       - webpack.config.js
-      - /src/platform/packages/shared/kbn-esql-ast/**/*.{js,ts,tsx}
+      - /src/platform/packages/shared/kbn-esql-language/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-esql-types/**/*.{js,ts,tsx}
-      - /src/platform/packages/shared/kbn-esql-validation-autocomplete/**/*.{js,ts,tsx}
+      - /src/platform/packages/shared/kbn-esql-language/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-i18n/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
     outputs:

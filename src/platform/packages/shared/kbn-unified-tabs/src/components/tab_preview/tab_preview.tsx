@@ -89,11 +89,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
       setTabPreviewData(previewData);
 
       setTabPosition({
-        top: rect.bottom + window.scrollY,
+        top: rect.bottom + window.scrollY + euiTheme.base / 2,
         left: leftPosition,
       });
     }
-  }, [showPreview, previewData, tabItem]);
+  }, [showPreview, previewData, tabItem, euiTheme.base]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {

@@ -26,6 +26,7 @@ import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privilege
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
+import { registerSiemRuleMigrationsEnhanceRoute } from './rules/enhance';
 import { registerSiemRuleMigrationsCreateQRadarRulesRoute } from './rules/qradar/create';
 import { registerSiemRuleMigrationsDeleteRoute } from './delete';
 import { registerSiemRuleMigrationsIntegrationsStatsRoute } from './integrations_stats';
@@ -48,9 +49,11 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsCreateRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
+
   /** Qradar */
   if (config.experimentalFeatures.qradarRulesMigration) {
     registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
+    registerSiemRuleMigrationsEnhanceRoute(router, logger);
   }
   /** *******/
   /** *******/

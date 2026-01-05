@@ -23,12 +23,12 @@ export function getDashboardMeta(
   return {
     error: savedObject.error,
     managed: savedObject.managed,
-    updatedAt: savedObject.updated_at,
-    updatedBy: savedObject.updated_by,
+    updated_at: savedObject.updated_at,
+    updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
     ...(['create', 'read', 'search'].includes(operation) && {
-      createdAt: savedObject.created_at,
-      createdBy: savedObject.created_by,
+      created_at: savedObject.created_at,
+      created_by: savedObject.created_by,
     }),
   };
 }
@@ -47,7 +47,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
-    references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
+    references = transformReferencesOut(savedObject.references ?? []);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
@@ -56,7 +56,13 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
-      references,
+      ...(savedObject?.accessControl && {
+        access_control: {
+          access_mode: savedObject.accessControl.accessMode,
+          owner: savedObject.accessControl.owner,
+        },
+      }),
+      ...(references.length && { references }),
     },
     meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,

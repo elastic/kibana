@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FieldDefinitionConfig } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
-import { getAdvancedParameters } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
-import { useMemo, useCallback, useState } from 'react';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
-import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { Streams, getAdvancedParameters } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { MappedSchemaField, SchemaField, SchemaEditorField } from '../types';
-import { convertToFieldDefinitionConfig, isFieldUncommitted } from '../utils';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { getFormattedError } from '../../../../util/errors';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import type { SchemaEditorField, SchemaField } from '../types';
+import { buildSchemaSavePayload, isFieldUncommitted } from '../utils';
 
 export const useSchemaFields = ({
   definition,
@@ -101,7 +98,7 @@ export const useSchemaFields = ({
     ]);
 
     const unmappedFields: SchemaField[] =
-      unmappedFieldsValue?.unmappedFields
+      (unmappedFieldsValue?.unmappedFields ?? [])
         .filter((field) => !allFoundFieldsSet.has(field))
         .map((field) => ({
           name: field,
@@ -161,12 +158,7 @@ export const useSchemaFields = ({
 
   const submitChanges = useCallback(async () => {
     try {
-      const mappedFields = fields
-        .filter((field) => field.status === 'mapped')
-        .reduce((acc, field) => {
-          acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
-          return acc;
-        }, {} as Record<string, FieldDefinitionConfig>);
+      const body = buildSchemaSavePayload(definition, fields);
 
       await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
         signal: abortController.signal,
@@ -174,24 +166,7 @@ export const useSchemaFields = ({
           path: {
             name: definition.stream.name,
           },
-          body: {
-            ingest: {
-              ...definition.stream.ingest,
-              ...(Streams.WiredStream.GetResponse.is(definition)
-                ? {
-                    wired: {
-                      ...definition.stream.ingest.wired,
-                      fields: mappedFields,
-                    },
-                  }
-                : {
-                    classic: {
-                      ...definition.stream.ingest.classic,
-                      field_overrides: mappedFields,
-                    },
-                  }),
-            },
-          },
+          body,
         },
       });
 

@@ -47,7 +47,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       },
     ]
   }
-  message={null}
+  noItemsMessage={null}
   pagination={
     Object {
       "initialPageSize": 20,
@@ -110,6 +110,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     }
   }
   sorting={true}
+  tableCaption="Logstash pipelines"
   tableLayout="fixed"
 />
 `;

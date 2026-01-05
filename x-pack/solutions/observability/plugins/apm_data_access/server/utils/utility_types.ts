@@ -10,7 +10,7 @@ import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 
 const {
   CLOUD,
@@ -37,6 +37,8 @@ export const KNOWN_MULTI_VALUED_FIELDS = [
   APM_EVENT_FIELDS_MAP.PROCESS_ARGS,
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_TRACE_ID,
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_SPAN_ID,
+  APM_EVENT_FIELDS_MAP.SPAN_LINKS_TRACE_ID,
+  APM_EVENT_FIELDS_MAP.SPAN_LINKS_SPAN_ID,
 ] as const;
 
 export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;

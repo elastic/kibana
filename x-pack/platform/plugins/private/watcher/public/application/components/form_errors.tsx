@@ -13,6 +13,7 @@ export const ErrableFormRow = ({
   isShowingErrors,
   errors,
   children,
+  id,
   ...rest
 }: {
   errorKey: string;
@@ -20,14 +21,16 @@ export const ErrableFormRow = ({
   errors: { [key: string]: string[] };
   children: ReactElement;
   [key: string]: any;
+  id?: string;
 }) => {
   return (
     <EuiFormRow
       isInvalid={isShowingErrors && errors[errorKey].length > 0}
       error={errors[errorKey]}
+      id={id}
       {...rest}
     >
-      <Fragment>{Children.map(children, (child) => cloneElement(child))}</Fragment>
+      <Fragment>{Children.map(children, (child) => cloneElement(child, { id }))}</Fragment>
     </EuiFormRow>
   );
 };

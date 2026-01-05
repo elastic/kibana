@@ -126,6 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               name: 'test-group',
               description: 'A Group stream',
+              updated_at: response.body.stream.updated_at,
               group: {
                 metadata: {},
                 tags: [],
@@ -168,6 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               name: 'test-group',
               description: 'A Group stream',
+              updated_at: response.body.stream.updated_at,
               group: {
                 metadata: {},
                 tags: [],

@@ -14,8 +14,23 @@
  *
  * Examples:
  * - undefined - Search across all projects (default)
+ * - '_alias:*' - Search across all projects
  * - '_alias:_origin' - Search only in the current project
  *
  * @public
  */
 export type ProjectRouting = string | undefined;
+
+/**
+ * Sanitizes project routing value for Elasticsearch API calls.
+ *
+ * @param value - The project routing value from application state
+ * @returns The sanitized value for Elasticsearch, or undefined to search all projects
+ *
+ * @public
+ */
+export function sanitizeProjectRoutingForES(value: ProjectRouting) {
+  if (value === '_alias:_origin') {
+    return value;
+  }
+}

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { isValidNamespace } from '../../services';
+import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
 
 export const PackagePolicyNamespaceSchema = schema.string({
   validate: (value) => {
@@ -134,7 +135,10 @@ export const PackagePolicyBaseSchema = {
         meta: {
           description: 'IDs of the agent policies which that package policy will be added to.',
         },
-      })
+      }),
+      {
+        maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
+      }
     )
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -143,6 +147,17 @@ export const PackagePolicyBaseSchema = {
       schema.string({
         meta: {
           description: 'ID of the cloud connector associated with this package policy.',
+        },
+      })
+    )
+  ),
+  cloud_connector_name: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description: 'Transient field for cloud connector name during creation.',
         },
       })
     )
@@ -250,6 +265,19 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
           'Force package policy creation even if the package is not verified, or if the agent policy is managed.',
       },
     })
+  ),
+  // supports_agentless is deprecated for package policy creation in favor of agentless policies API
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
+          deprecated: true,
+        },
+      })
+    )
   ),
 });
 
@@ -409,6 +437,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
         meta: {
           description: 'IDs of the agent policies which that package policy will be added to.',
         },
+        maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
       })
     ),
     force: schema.maybe(
@@ -420,6 +449,19 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
       })
     ),
     package: PackagePolicyPackageSchema,
+    // supports_agentless is deprecated for package policy creation in favor of agentless policies API
+    supports_agentless: schema.maybe(
+      schema.nullable(
+        schema.boolean({
+          defaultValue: false,
+          meta: {
+            description:
+              'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
+            deprecated: true,
+          },
+        })
+      )
+    ),
   });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({

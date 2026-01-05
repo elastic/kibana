@@ -113,8 +113,9 @@ describe('<VisualizationsSection />', () => {
       alertIds: undefined,
       statsNodes: undefined,
     });
+    // Default mock: graph visualization not available (UI setting is false by default)
     mockUseGraphPreview.mockReturnValue({
-      hasGraphRepresentation: true,
+      shouldShowGraph: false,
       eventIds: [],
     });
     mockUseFetchGraphData.mockReturnValue({
@@ -176,6 +177,12 @@ describe('<VisualizationsSection />', () => {
       }
 
       return useUiSetting$Mock(key, defaultValue);
+    });
+
+    // Mock useGraphPreview to reflect that graph is available when UI setting is enabled
+    mockUseGraphPreview.mockReturnValue({
+      shouldShowGraph: true,
+      eventIds: [],
     });
 
     const { getByTestId } = renderVisualizationsSection();

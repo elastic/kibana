@@ -30,7 +30,7 @@ import { v4 as uuid } from 'uuid';
 
 import { fromCountAPItoLensState, fromCountLensStateToAPI } from './count';
 import type {
-  LensApiAllMetricOperations,
+  LensApiAllMetricOrFormulaOperations,
   LensApiCountMetricOperation,
   LensApiCounterRateOperation,
   LensApiCumulativeSumOperation,
@@ -84,7 +84,7 @@ import {
  * Specialized function signatures for transforming metric API operations to Lens state columns
  */
 export function fromMetricAPItoLensState(
-  options: LensApiAllMetricOperations
+  options: LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation
 ): AnyMetricLensStateColumn[] {
   if (isAPIColumnOfType<LensApiCountMetricOperation>('count', options)) {
     return [fromCountAPItoLensState(options)];
@@ -138,7 +138,10 @@ export function fromMetricAPItoLensState(
       return [];
     }
     return [
-      fromCounterRateAPItoLensState(options, { id: uuid(), field: refColumn.sourceField }),
+      fromCounterRateAPItoLensState(options, {
+        id: uuid(),
+        field: refColumn.sourceField,
+      }),
       refColumn,
     ];
   }
@@ -202,7 +205,7 @@ export function getMetricReferableApiColumnFromLensState(
 export function getMetricApiColumnFromLensState(
   options: AnyMetricLensStateColumn,
   columns: Record<string, AnyLensStateColumn>
-): LensApiAllMetricOperations {
+): LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation {
   if (isLensStateColumnOfType<CountIndexPatternColumn>('count', options)) {
     return fromCountLensStateToAPI(options);
   }

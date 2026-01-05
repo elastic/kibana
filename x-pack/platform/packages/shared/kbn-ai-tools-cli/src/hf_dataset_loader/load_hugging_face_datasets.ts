@@ -99,7 +99,7 @@ export async function loadHuggingFaceDatasets({
       logger,
       bulkHelperOverrides: {
         // With embeddings already generated, larger flush size will not overload ELSER inference and improves performance
-        flushBytes: 1024 * 1024 * 5,
+        flushBytes: 1024 * 1024,
       },
     });
 

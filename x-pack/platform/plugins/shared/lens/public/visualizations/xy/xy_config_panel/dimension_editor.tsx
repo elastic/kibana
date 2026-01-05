@@ -142,20 +142,22 @@ export function DataDimensionEditor(
     const formatter = props.formatFactory(columnMeta?.params);
 
     return !layer.collapseFn ? (
-      <ColorMappingByTerms
-        isDarkMode={isDarkMode}
-        colorMapping={layer.colorMapping}
-        palette={layer.palette}
-        isInlineEditing={isInlineEditing}
-        setPalette={setPalette}
-        setColorMapping={setColorMapping}
-        paletteService={props.paletteService}
-        palettes={props.palettes}
-        panelRef={props.panelRef}
-        categories={splitCategories}
-        formatter={formatter}
-        allowCustomMatch={allowCustomMatch}
-      />
+      <div className="lnsIndexPatternDimensionEditor--padded">
+        <ColorMappingByTerms
+          isDarkMode={isDarkMode}
+          colorMapping={layer.colorMapping}
+          palette={layer.palette}
+          isInlineEditing={isInlineEditing}
+          setPalette={setPalette}
+          setColorMapping={setColorMapping}
+          paletteService={props.paletteService}
+          palettes={props.palettes}
+          panelRef={props.panelRef}
+          categories={splitCategories}
+          formatter={formatter}
+          allowCustomMatch={allowCustomMatch}
+        />
+      </div>
     ) : null;
   }
 
@@ -168,7 +170,7 @@ export function DataDimensionEditor(
     : undefined;
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <ColorPicker
         {...props}
         overwriteColor={overwriteColor}
@@ -230,7 +232,7 @@ export function DataDimensionEditor(
           }}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
 

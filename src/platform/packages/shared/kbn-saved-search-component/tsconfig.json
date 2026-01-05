@@ -27,5 +27,6 @@
     "@kbn/presentation-publishing",
     "@kbn/saved-search-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/unified-data-table",
   ]
 }

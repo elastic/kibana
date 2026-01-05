@@ -316,22 +316,28 @@ describe('CloudConnectorSetup', () => {
       expect(mockUpdatePolicyWithExistingCredentials).toHaveBeenCalledWith(mockCredentials);
     });
 
-    it('should not call update functions when switching tabs without credentials', () => {
+    it('should call update functions when switching tabs even with empty credentials to reset validation state', () => {
       setupMocks([]);
 
       renderComponent();
 
       const onTabClick = mockCloudConnectorTabs.mock.calls[0][0].onTabClick;
 
+      // Switch to existing connection tab
       act(() => {
         onTabClick({ id: 'existing-connection', name: 'Existing Connection', content: null });
       });
+
+      // Should be called even with empty credentials to reset validation
+      expect(mockUpdatePolicyWithExistingCredentials).toHaveBeenCalledWith({});
+
+      // Switch back to new connection tab
       act(() => {
         onTabClick({ id: 'new-connection', name: 'New Connection', content: null });
       });
 
-      expect(mockUpdatePolicyWithNewCredentials).not.toHaveBeenCalled();
-      expect(mockUpdatePolicyWithExistingCredentials).not.toHaveBeenCalled();
+      // Should be called to ensure validation state is correct for the active tab
+      expect(mockUpdatePolicyWithNewCredentials).toHaveBeenCalledWith({});
     });
   });
 

@@ -83,14 +83,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
           },
           {
@@ -225,14 +217,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/event_filters/service/service_actions.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
           },
           {
             "plugin": "securitySolution",
@@ -527,19 +511,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.ts"
           },
           {
             "plugin": "securitySolution",
@@ -592,26 +576,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/endpoint_exceptions_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/endpoint_exceptions_validator.ts"
           },
           {
             "plugin": "lists",
@@ -764,50 +728,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "@kbn/test-suites-security-solution-apis",
@@ -972,14 +892,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
           },
           {
             "plugin": "lists",

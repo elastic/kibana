@@ -21,7 +21,8 @@ export async function stepInstallILMPolicies(context: InstallContext) {
 
   // Array that gets updated by each operation. This allows each operation to accurately update the
   // installation object with its references without requiring a refresh of the SO index on each update (faster).
-  let esReferences = installedPkg?.attributes.installed_es ?? [];
+  let esReferences =
+    context.esReferences ?? context.esReferences ?? installedPkg?.attributes.installed_es ?? [];
 
   // currently only the base package has an ILM policy
   // at some point ILM policies can be installed/modified

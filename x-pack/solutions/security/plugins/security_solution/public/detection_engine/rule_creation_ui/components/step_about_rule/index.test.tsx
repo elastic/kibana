@@ -37,11 +37,13 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
 jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
+jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -54,6 +56,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 const mockedUseKibana = mockUseKibana();
+(useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((param) => {
+  return param === 'endpointExceptionsMovedUnderManagement';
+});
 
 export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',
@@ -141,6 +146,19 @@ describe('StepAboutRuleComponent', () => {
     );
 
     expect(wrapper.find(StepRuleDescription).exists()).toBeTruthy();
+  });
+
+  it('only shows endpoint exceptions for rule definition if feature flag enabled', async () => {
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
+    await act(async () => {
+      expect(
+        wrapper
+          .find('[data-test-subj="detectionEngineStepAboutRuleAssociatedToEndpointList"]')
+          .exists()
+      ).toBeFalsy();
+    });
   });
 
   it('is invalid if description is not present', async () => {

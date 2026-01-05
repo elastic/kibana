@@ -12,7 +12,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
-  EuiSelect,
+  EuiComboBox,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -90,13 +90,13 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
     return agentPolicies
       .filter((agentPolicy) => !agentPolicy.is_managed)
       .map((agentPolicy) => ({
-        value: agentPolicy.id,
-        text: agentPolicy.name,
+        key: agentPolicy.id,
+        label: agentPolicy.name,
       }));
   }, [agentPolicies]);
 
   const form = useCreateApiKeyForm(
-    selectPolicyOptions.length > 0 ? selectPolicyOptions[0].value : undefined,
+    selectPolicyOptions.length > 0 ? selectPolicyOptions[0].key : undefined,
     (key: EnrollmentAPIKey) => {
       onClose(key);
       notifications.toasts.addSuccess(
@@ -140,11 +140,26 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
           {...form.policyIdInput.formRowProps}
         >
-          <EuiSelect
+          <EuiComboBox
             data-test-subj="createEnrollmentTokenSelectField"
-            required={true}
-            {...form.policyIdInput.props}
+            fullWidth
+            singleSelection={{ asPlainText: true }}
             options={selectPolicyOptions}
+            selectedOptions={
+              form.policyIdInput.value
+                ? [
+                    selectPolicyOptions.find((option) => option.key === form.policyIdInput.value),
+                  ].filter((v): v is NonNullable<typeof v> => v !== undefined)
+                : []
+            }
+            onChange={(newOptions) => {
+              const newValue = newOptions.length > 0 ? newOptions[0].key : '';
+              form.policyIdInput.props.onChange({
+                target: { value: newValue },
+              } as React.ChangeEvent<HTMLInputElement>);
+            }}
+            isClearable={true}
+            isInvalid={form.policyIdInput.props.isInvalid}
           />
         </EuiFormRow>
       </form>

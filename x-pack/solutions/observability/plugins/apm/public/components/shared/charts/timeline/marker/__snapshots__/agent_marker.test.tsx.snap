@@ -4,6 +4,7 @@ exports[`AgentMarker renders correctly 1`] = `
 <div>
   <span
     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    id="agent-wrapper"
   >
     <div
       class="css-1ejn3a9-Container en0jakt1"

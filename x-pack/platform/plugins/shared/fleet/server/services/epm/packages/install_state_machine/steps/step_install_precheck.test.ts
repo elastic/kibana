@@ -11,8 +11,10 @@ import {
 } from '../../../elasticsearch/template/default_settings';
 
 import { stepInstallPrecheck } from './step_install_precheck';
+import { ensureFleetGlobalEsAssets } from '../../../../setup/ensure_fleet_global_es_assets';
 
 jest.mock('../../../..');
+jest.mock('../../../../setup/ensure_fleet_global_es_assets');
 jest.mock('../../../elasticsearch/template/default_settings', () => ({
   ...jest.requireActual('../../../elasticsearch/template/default_settings'),
   getILMMigrationStatus: jest.fn().mockResolvedValue(new Map()),
@@ -131,5 +133,11 @@ describe('stepInstallPrecheck', () => {
         ['synthetics', 'success'],
       ])
     );
+  });
+
+  it('should call ensureFleetGlobalEsAssets', async () => {
+    await stepInstallPrecheck();
+
+    expect(jest.mocked(ensureFleetGlobalEsAssets)).toHaveBeenCalled();
   });
 });

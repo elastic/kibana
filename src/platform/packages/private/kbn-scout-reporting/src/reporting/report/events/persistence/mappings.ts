@@ -18,9 +18,6 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
-  message: {
-    type: 'text',
-  },
   build: {
     type: 'object',
     properties: {

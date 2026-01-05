@@ -45,9 +45,9 @@
     "@kbn/tooling-log",
     "@kbn/babel-register",
     "@kbn/expect",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/alerting-plugin",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace",
     "@kbn/esql-datagrid",
     "@kbn/alerting-comparators",
     "@kbn/core-lifecycle-browser",
@@ -57,8 +57,7 @@
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/rule-registry-plugin",
-    "@kbn/esql-validation-autocomplete",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/field-types",
     "@kbn/security-plugin",
     "@kbn/observability-plugin",
@@ -88,7 +87,9 @@
     "@kbn/licensing-types",
     "@kbn/utility-types-jest",
     "@kbn/zod",
-    "@kbn/connector-schemas"
+    "@kbn/connector-schemas",
+    "@kbn/agent-builder-plugin",
+    "@kbn/object-utils",
   ],
   "exclude": ["target/**/*"]
 }

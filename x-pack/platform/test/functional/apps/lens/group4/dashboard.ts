@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await lens.hasChartSwitchWarning('line')).to.eql(false);
 
-      await lens.switchToVisualization('line');
+      await lens.switchToVisualization('line', undefined, 1);
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',

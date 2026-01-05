@@ -216,3 +216,47 @@ FROM .kibana-evaluations
     """
 }
 ```
+
+## AI Insights Evaluations
+
+The package includes evaluations for AI Insights, which assess the correctness of LLM-generated summaries for alerts.
+
+
+### Prerequisites
+
+Before running AI Insights evaluations, you need to set up snapshot data from Google Cloud Storage.
+
+#### Step 1: Install gcloud CLI
+
+Install the Google Cloud CLI by following the [official installation guide](https://cloud.google.com/sdk/docs/install-sdk).
+
+#### Step 2: Sync Snapshot Data to Local Repository
+
+The Scout server uses `/tmp/repo` as the default `path.repo` value for Elasticsearch snapshot repositories. Sync snapshot data from Google Cloud Storage to this local directory:
+
+```bash
+gcloud storage rsync --recursive gs://YOUR-BUCKET-NAME/snapshot-name /tmp/repo
+```
+
+Replace `YOUR-BUCKET-NAME` with the actual GCS bucket name (shared internally to avoid bucket-squatting). This command downloads the snapshot data locally, making it accessible to Elasticsearch.
+
+#### Step 3: Verify Setup
+
+Confirm that the snapshot data was synced successfully:
+
+```bash
+ls -la /tmp/repo
+```
+
+You should see snapshot metadata files (e.g., `index-*`, `meta-*`, `snap-*`) in the directory.
+
+Now you have datasets ready for executing the evals.
+
+### Running AI Insights Evaluations
+
+```bash
+EVALUATION_CONNECTOR_ID=your-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-observability/ai_insights/playwright.config.ts \
+  --project="your-connector"
+```

@@ -17,7 +17,8 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import type { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { MaintenanceWindowBaseCell } from '@kbn/response-ops-alerts-table/components/maintenance_windows_cell';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';

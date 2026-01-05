@@ -86,6 +86,17 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-server.SavedObjectConfig.enableAccessControl",
+            "type": "boolean",
+            "tags": [],
+            "label": "enableAccessControl",
+            "description": [],
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
             "id": "def-server.SavedObjectConfig.Unnamed",
             "type": "Function",
             "tags": [],
@@ -114,7 +125,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; maxImportExportSize: number; allowHttpApiAccess: boolean; }>"
+                  "; maxImportExportSize: number; allowHttpApiAccess: boolean; enableAccessControl: boolean; }>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
@@ -1682,6 +1693,24 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-server.ISavedObjectTypeRegistryInternal",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectTypeRegistryInternal",
+        "description": [],
+        "signature": [
+          "ISavedObjectTypeRegistryInternal",
+          " extends ",
+          "ISavedObjectTypeRegistry"
+        ],
+        "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_type_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-server.IsDowngradeRequiredOptions",
         "type": "Interface",
         "tags": [],
@@ -1831,7 +1860,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly maxImportExportSize: number; readonly allowHttpApiAccess: boolean; }"
+          "; readonly maxImportExportSize: number; readonly allowHttpApiAccess: boolean; readonly enableAccessControl: boolean; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
@@ -3238,7 +3267,15 @@
                 "section": "def-common.ConditionalType",
                 "text": "ConditionalType"
               },
-              "<true, boolean, boolean>; }>"
+              "<true, boolean, boolean>; enableAccessControl: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean>; }>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,

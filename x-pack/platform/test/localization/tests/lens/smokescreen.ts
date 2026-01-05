@@ -325,8 +325,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.switchToVisualization('line', termTranslator('line'));
 
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('line'));
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql(termTranslator('line'));
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -340,9 +342,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -363,7 +366,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.createLayer('data', undefined, 'bar');
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -379,12 +382,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // only changes one layer for compatible chart
       await lens.switchToVisualization('line', termTranslator('line'), 1);
 
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('bar'));
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('line'));
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql(termTranslator('line'));
 
       // generates new one layer chart based on selected layer
       await lens.switchToVisualization('pie', termTranslator('pie'), 1);
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('pie'));
+      expect(await lens.getLayerType()).to.eql(termTranslator('pie'));
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
 

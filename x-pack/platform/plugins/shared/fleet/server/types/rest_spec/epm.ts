@@ -72,6 +72,7 @@ export const EsAssetReferenceSchema = schema.object({
     schema.literal('transform'),
     schema.literal('ml_model'),
     schema.literal('knowledge_base'),
+    schema.literal('esql_view'),
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),

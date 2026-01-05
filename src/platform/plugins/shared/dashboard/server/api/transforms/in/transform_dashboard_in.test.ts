@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
@@ -38,11 +37,11 @@ describe('transformDashboardIn', () => {
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
       },
       panels: [
         {
@@ -59,8 +58,8 @@ describe('transformDashboardIn', () => {
       ],
       tags: [],
       title: 'title',
-      refreshInterval: { pause: true, value: 1000 },
-      timeRange: {
+      refresh_interval: { pause: true, value: 1000 },
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -98,24 +97,21 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should handle missing optional state keys', () => {
+  it('should not provide default values for optional properties', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      description: 'my description',
-      panels: [],
-      options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
     const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "description": "my description",
+          "description": "",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
-          "panelsJSON": "[]",
+          "optionsJSON": "{}",
+          "panelsJSON": "",
           "timeRestore": false,
           "title": "title",
         },
@@ -123,5 +119,48 @@ describe('transformDashboardIn', () => {
         "references": Array [],
       }
     `);
+  });
+
+  it('should return error when passed non-control group reference', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      references: [
+        {
+          name: 'someTagRef',
+          type: 'tag',
+          id: '1',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: References are only supported for controlGroupInput.],
+        "references": null,
+      }
+    `);
+  });
+
+  it('should transform project_routing to attributes', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      project_routing: '_alias:_origin',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes?.projectRouting).toBe('_alias:_origin');
+  });
+
+  it('should not include projectRouting in attributes when it is undefined', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 });
