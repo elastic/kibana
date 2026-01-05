@@ -146,6 +146,12 @@ const resolveLensConfig = (panel: unknown, resultStore?: ToolResultStore): LensA
     return visualization as LensApiSchemaType;
   }
 
+  if (typeof panel !== 'object' || panel === null || !('type' in panel)) {
+    throw new Error(
+      `Invalid panel configuration. Expected a Lens API config object with a "type" property.`
+    );
+  }
+
   return panel as LensApiSchemaType;
 };
 
