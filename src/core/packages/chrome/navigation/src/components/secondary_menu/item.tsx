@@ -17,7 +17,7 @@ import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
-import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { ITEM_HORIZONTAL_SPACING_OFFSET, NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
@@ -90,13 +90,14 @@ export const SecondaryMenuItemComponent = ({
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    /* Account for section padding (16px) + item padding (8px) + ellipsis space (~6px) */
-    max-width: ${SIDE_PANEL_WIDTH - 30}px;
+    max-width: ${SIDE_PANEL_WIDTH / 16 - ITEM_HORIZONTAL_SPACING_OFFSET / 16}rem;
   `;
 
   const content = (
     <div css={labelAndBadgeStyles}>
-      <span css={labelTextStyles}>{children}</span>
+      <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
+        {children}
+      </span>
       {badgeType && <BetaBadge type={badgeType} />}
     </div>
   );
