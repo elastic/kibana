@@ -127,17 +127,24 @@ export const JinaReaderConnector: ConnectorSpec = {
           returnFormat?: RETURN_FORMAT;
           options?: Record<string, unknown>;
         };
-        const response = await ctx.client.post(
-          (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
-          {
-            url: typedInput.url,
-            respondWith: mapPluginReturnFormatToReaderReturnFormat(typedInput.returnFormat),
-            ...typedInput.options,
-          },
-          {
-            headers: { Accept: 'application/json' },
-          }
-        );
+        const response = await ctx.client
+          .post(
+            (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
+            {
+              url: typedInput.url,
+              respondWith: mapPluginReturnFormatToReaderReturnFormat(typedInput.returnFormat),
+              ...typedInput.options,
+            },
+            {
+              headers: { Accept: 'application/json' },
+            }
+          )
+          .catch((err) => {
+            if (err.response.data?.code) {
+              return err.response;
+            }
+            return Promise.reject(err);
+          });
         return response.data?.data
           ? { ok: true, ...response.data.data, external: undefined }
           : { ok: false, ...response.data };
@@ -160,19 +167,26 @@ export const JinaReaderConnector: ConnectorSpec = {
           returnFormat?: RETURN_FORMAT;
           options?: Record<string, unknown>;
         };
-        const response = await ctx.client.post(
-          (ctx.config?.overrideSearchUrl as string | undefined) || JINA_READER_SEARCH_URL,
-          {
-            q: typedInput.query,
-            respondWith: typedInput.returnFormat
-              ? mapPluginReturnFormatToReaderReturnFormat(typedInput.returnFormat)
-              : 'no-content',
-            ...typedInput.options,
-          },
-          {
-            headers: { Accept: 'application/json' },
-          }
-        );
+        const response = await ctx.client
+          .post(
+            (ctx.config?.overrideSearchUrl as string | undefined) || JINA_READER_SEARCH_URL,
+            {
+              q: typedInput.query,
+              respondWith: typedInput.returnFormat
+                ? mapPluginReturnFormatToReaderReturnFormat(typedInput.returnFormat)
+                : 'no-content',
+              ...typedInput.options,
+            },
+            {
+              headers: { Accept: 'application/json' },
+            }
+          )
+          .catch((err) => {
+            if (err.response.data?.code) {
+              return err.response;
+            }
+            return Promise.reject(err);
+          });
         return response.data?.data
           ? { ok: true, results: response.data.data }
           : { ok: false, ...response.data };
@@ -198,13 +212,20 @@ export const JinaReaderConnector: ConnectorSpec = {
         for (const [key, value] of Object.entries(typedInput.options || {})) {
           formData.append(key, `${value}`);
         }
-        const response = await ctx.client.post(
-          (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
-          formData,
-          {
-            headers: { Accept: 'application/json' },
-          }
-        );
+        const response = await ctx.client
+          .post(
+            (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
+            formData,
+            {
+              headers: { Accept: 'application/json' },
+            }
+          )
+          .catch((err) => {
+            if (err.response.data?.code) {
+              return err.response;
+            }
+            return Promise.reject(err);
+          });
         return response.data?.data
           ? { ok: true, ...response.data.data }
           : { ok: false, ...response.data };
@@ -236,13 +257,20 @@ export const JinaReaderConnector: ConnectorSpec = {
           formData.set('url', `blob:-#${typedInput.pageNumber}`);
         }
         formData.set('respondWith', 'screenshot');
-        const response = await ctx.client.post(
-          (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
-          formData,
-          {
-            headers: { Accept: 'application/json' },
-          }
-        );
+        const response = await ctx.client
+          .post(
+            (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
+            formData,
+            {
+              headers: { Accept: 'application/json' },
+            }
+          )
+          .catch((err) => {
+            if (err.response.data?.code) {
+              return err.response;
+            }
+            return Promise.reject(err);
+          });
         return response.data?.data
           ? { ok: true, ...response.data.data }
           : { ok: false, ...response.data };
