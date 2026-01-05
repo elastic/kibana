@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface FeatureIdentificationEvaluationExample {
+export interface SystemIdentificationEvaluationExample {
   input: {
     stream: {
       name: string;
@@ -22,16 +22,16 @@ export interface FeatureIdentificationEvaluationExample {
   metadata: {};
 }
 
-export interface FeatureIdentificationEvaluationDataset {
+export interface SystemIdentificationEvaluationDataset {
   name: string;
   description: string;
-  examples: FeatureIdentificationEvaluationExample[];
+  examples: SystemIdentificationEvaluationExample[];
 }
 
-export const FEATURE_IDENTIFICATION_DATASETS: {
-  loghub: FeatureIdentificationEvaluationDataset[];
-  serverless: FeatureIdentificationEvaluationDataset[];
-  mixed: FeatureIdentificationEvaluationDataset[];
+export const SYSTEM_IDENTIFICATION_DATASETS: {
+  loghub: SystemIdentificationEvaluationDataset[];
+  serverless: SystemIdentificationEvaluationDataset[];
+  mixed: SystemIdentificationEvaluationDataset[];
 } = {
   loghub: [
     {
