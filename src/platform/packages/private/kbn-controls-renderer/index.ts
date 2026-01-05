@@ -13,4 +13,4 @@ export type {
   HasPrependWrapperRef,
   PublishesControlsLayout,
 } from './src/types';
-export { apiHasPrependWrapperRef, apiPublishesControlsLayout } from './src/types';
+export { apiHasPrependWrapperRef, apiPublishesControlsLayout } from './src/utils';

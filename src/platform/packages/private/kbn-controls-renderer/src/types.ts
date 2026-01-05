@@ -36,13 +36,6 @@ export interface PublishesControlsLayout {
   layout$: BehaviorSubject<ControlsLayout>;
 }
 
-export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout => {
-  return Boolean(
-    (api as PublishesControlsLayout).layout$ &&
-      Object.keys((api as PublishesControlsLayout).layout$.getValue()).includes('controls')
-  );
-};
-
 export type ControlsRendererParentApi = Pick<
   PresentationContainer,
   'children$' | 'addNewPanel' | 'replacePanel'
@@ -59,6 +52,3 @@ export type ControlsRendererParentApi = Pick<
 export interface HasPrependWrapperRef {
   prependWrapperRef: React.RefObject<HTMLDivElement>;
 }
-
-export const apiHasPrependWrapperRef = (api: unknown): api is HasPrependWrapperRef =>
-  Boolean((api as HasPrependWrapperRef).prependWrapperRef);
