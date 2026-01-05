@@ -116,11 +116,6 @@ export const Expressions: React.FC<Props> = (props) => {
     [ruleParams.groupBy]
   );
 
-  const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
-    (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
-      (!hasGroupBy && !!ruleParams.alertOnNoData)
-  );
-
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
       return metadata.currentOptions as MetricsExplorerOptions;
@@ -181,12 +176,9 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
-      const hasGroup = !!group && group.length > 0;
       setRuleParams('groupBy', group && group.length ? group : '');
-      setRuleParams('alertOnGroupDisappear', hasGroup && isNoDataChecked);
-      setRuleParams('alertOnNoData', !hasGroup && isNoDataChecked);
     },
-    [setRuleParams, isNoDataChecked]
+    [setRuleParams]
   );
 
   const emptyError = useMemo(() => {
@@ -293,22 +285,9 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('sourceId', source?.id || 'default');
     }
 
-    if (typeof ruleParams.alertOnNoData === 'undefined') {
-      setRuleParams('alertOnNoData', false);
-    }
-
-    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      setRuleParams('alertOnGroupDisappear', false);
-    }
-
     if (typeof ruleParams.noDataBehavior === 'undefined') {
       setRuleParams('noDataBehavior', 'recover');
     }
-
-    setIsNoDataChecked(
-      (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
-        (!hasGroupBy && !!ruleParams.alertOnNoData)
-    );
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
@@ -484,19 +463,6 @@ export const Expressions: React.FC<Props> = (props) => {
             }
             onChange={(id) => {
               setRuleParams('noDataBehavior', id as NoDataBehavior);
-              setIsNoDataChecked(id === 'alertOnNoData');
-              if (id === 'alertOnNoData') {
-                if (hasGroupBy) {
-                  setRuleParams('alertOnGroupDisappear', true);
-                  setRuleParams('alertOnNoData', false);
-                } else {
-                  setRuleParams('alertOnGroupDisappear', false);
-                  setRuleParams('alertOnNoData', true);
-                }
-              } else {
-                setRuleParams('alertOnGroupDisappear', false);
-                setRuleParams('alertOnNoData', false);
-              }
             }}
             data-test-subj="metrics-alert-no-data-behavior"
           />
