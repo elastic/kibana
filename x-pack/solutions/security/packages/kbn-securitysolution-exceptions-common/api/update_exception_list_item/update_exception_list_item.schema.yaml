@@ -185,6 +185,8 @@ components:
               type: string
               enum: [endpoint_list]
               example: endpoint_list
+          required:
+            - list_id
 
     UpdateExceptionListItemTrustedApps:
       allOf:
@@ -196,6 +198,8 @@ components:
               type: string
               enum: [endpoint_trusted_apps]
               example: endpoint_trusted_apps
+          required:
+            - list_id
 
     UpdateExceptionListItemTrustedDevices:
       allOf:
@@ -207,6 +211,8 @@ components:
               type: string
               enum: [endpoint_trusted_devices]
               example: endpoint_trusted_devices
+          required:
+            - list_id
 
     UpdateExceptionListItemEventFilters:
       allOf:
@@ -218,6 +224,8 @@ components:
               type: string
               enum: [endpoint_event_filters]
               example: endpoint_event_filters
+          required:
+            - list_id
 
     UpdateExceptionListItemHostIsolation:
       allOf:
@@ -229,6 +237,8 @@ components:
               type: string
               enum: [endpoint_host_isolation_exceptions]
               example: endpoint_host_isolation_exceptions
+          required:
+            - list_id
 
     UpdateExceptionListItemBlocklist:
       allOf:
@@ -240,6 +250,8 @@ components:
               type: string
               enum: [endpoint_blocklists]
               example: endpoint_blocklists
+          required:
+            - list_id
 
     UpdateExceptionListItemComment:
       type: object

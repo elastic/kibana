@@ -76,14 +76,14 @@ export type UpdateExceptionListItemEndpointList = z.infer<
 >;
 export const UpdateExceptionListItemEndpointList = UpdateExceptionListItemGeneric.merge(
   z.object({
-    list_id: z.literal('endpoint_list').optional(),
+    list_id: z.literal('endpoint_list'),
   })
 );
 
 export type UpdateExceptionListItemTrustedApps = z.infer<typeof UpdateExceptionListItemTrustedApps>;
 export const UpdateExceptionListItemTrustedApps = UpdateExceptionListItemGeneric.merge(
   z.object({
-    list_id: z.literal('endpoint_trusted_apps').optional(),
+    list_id: z.literal('endpoint_trusted_apps'),
   })
 );
 
@@ -92,7 +92,7 @@ export type UpdateExceptionListItemTrustedDevices = z.infer<
 >;
 export const UpdateExceptionListItemTrustedDevices = UpdateExceptionListItemGeneric.merge(
   z.object({
-    list_id: z.literal('endpoint_trusted_devices').optional(),
+    list_id: z.literal('endpoint_trusted_devices'),
   })
 );
 
@@ -101,7 +101,7 @@ export type UpdateExceptionListItemEventFilters = z.infer<
 >;
 export const UpdateExceptionListItemEventFilters = UpdateExceptionListItemGeneric.merge(
   z.object({
-    list_id: z.literal('endpoint_event_filters').optional(),
+    list_id: z.literal('endpoint_event_filters'),
   })
 );
 
@@ -110,14 +110,14 @@ export type UpdateExceptionListItemHostIsolation = z.infer<
 >;
 export const UpdateExceptionListItemHostIsolation = UpdateExceptionListItemGeneric.merge(
   z.object({
-    list_id: z.literal('endpoint_host_isolation_exceptions').optional(),
+    list_id: z.literal('endpoint_host_isolation_exceptions'),
   })
 );
 
 export type UpdateExceptionListItemBlocklist = z.infer<typeof UpdateExceptionListItemBlocklist>;
 export const UpdateExceptionListItemBlocklist = UpdateExceptionListItemGeneric.merge(
   z.object({
-    list_id: z.literal('endpoint_blocklists').optional(),
+    list_id: z.literal('endpoint_blocklists'),
   })
 );
 
