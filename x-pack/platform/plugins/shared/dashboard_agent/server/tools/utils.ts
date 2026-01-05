@@ -118,7 +118,10 @@ export const normalizePanels = (
   return dashboardPanels;
 };
 
-const resolveLensConfig = (panel: unknown, resultStore?: ToolResultStore): LensApiSchemaType => {
+export const resolveLensConfig = (
+  panel: unknown,
+  resultStore?: ToolResultStore
+): LensApiSchemaType => {
   if (typeof panel === 'string') {
     if (!isToolResultId(panel)) {
       throw new Error(
