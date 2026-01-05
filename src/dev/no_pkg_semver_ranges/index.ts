@@ -12,40 +12,84 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
+const YARN_LOCK_PATH = resolve(REPO_ROOT, 'yarn.lock');
 const FIELDS_TO_CHECK = ['dependencies', 'devDependencies', 'resolutions', 'engines'] as const;
-const pkg = JSON.parse(readFileSync(PKG_JSON_PATH, 'utf-8'));
 
-type FieldName = (typeof FIELDS_TO_CHECK)[number];
+export function checkSemverRanges(
+  runOptions: {
+    fix?: boolean;
+    pkgJsonContent?: string;
+    yarnLockContent?: string;
+  } = {}
+) {
+  const pkgJsonContent =
+    runOptions.pkgJsonContent ?? readFileSync(PKG_JSON_PATH, { encoding: 'utf-8' });
+  const yarnLockContent =
+    runOptions.yarnLockContent ?? readFileSync(YARN_LOCK_PATH, { encoding: 'utf-8' });
+  const fix = runOptions.fix ?? false;
 
-let totalFixes = 0;
-const fixesPerField: Partial<Record<FieldName, number>> = {};
+  if (!yarnLockContent || !pkgJsonContent) {
+    throw new Error('Both package.json and yarn.lock contents must be provided.');
+  }
 
-for (const field of FIELDS_TO_CHECK) {
-  const deps = pkg[field];
-  if (!deps || typeof deps !== 'object') continue;
+  const pkg = JSON.parse(pkgJsonContent);
+  const resolveVersionFromYarnLock = (name: string): string | null => {
+    const pattern = new RegExp(`^${name.replaceAll('/', '\\/')}@.+:\\s+version "(.*?)"$`, 'm');
+    const match = yarnLockContent.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return null;
+  };
 
-  for (const [name, version] of Object.entries(deps)) {
-    if (typeof version !== 'string') continue;
+  type FieldName = (typeof FIELDS_TO_CHECK)[number];
 
-    if (version.startsWith('^') || version.startsWith('~')) {
-      deps[name] = version.slice(1);
-      totalFixes++;
+  let totalFixes = 0;
+  const fixesPerField: Partial<Record<FieldName, number>> = {};
 
-      fixesPerField[field] = (fixesPerField[field] ?? 0) + 1;
+  for (const field of FIELDS_TO_CHECK) {
+    const deps = pkg[field];
+    if (!deps || typeof deps !== 'object') continue;
+
+    for (const [name, version] of Object.entries(deps)) {
+      if (typeof version !== 'string') continue;
+
+      if (version.startsWith('^') || version.startsWith('~')) {
+        const resolvedVersion = resolveVersionFromYarnLock(name);
+        if (!resolvedVersion) {
+          throw new Error(
+            `Could not resolve version for ${name} with version ${version} from yarn.lock`
+          );
+        }
+
+        deps[name] = resolvedVersion;
+        totalFixes++;
+
+        fixesPerField[field] = (fixesPerField[field] ?? 0) + 1;
+      }
     }
   }
-}
 
-if (totalFixes > 0) {
-  writeFileSync(PKG_JSON_PATH, JSON.stringify(pkg, null, 2));
+  if (totalFixes > 0) {
+    const fieldsSummary = Object.entries(fixesPerField)
+      .map(([field, count]) => `${field}: ${count}`)
+      .join(', ');
 
-  const fieldsSummary = Object.entries(fixesPerField)
-    .map(([field, count]) => `${field}: ${count}`)
-    .join(', ');
+    if (fix) {
+      writeFileSync(PKG_JSON_PATH, JSON.stringify(pkg, null, 2));
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[no-pkg-semver-ranges] Removed ^/~ from ${totalFixes} version(s) ` +
+          `in package.json (${fieldsSummary})`
+      );
+    } else {
+      throw new Error(
+        `[no-pkg-semver-ranges] Found ${totalFixes} version(s) ` +
+          `with ^/~ in package.json (${fieldsSummary}). ` +
+          `Run the script with --fix to automatically resolve them.`
+      );
+    }
+  }
 
-  // eslint-disable-next-line no-console
-  console.warn(
-    `[no-pkg-semver-ranges] Removed ^/~ from ${totalFixes} version(s) ` +
-      `in package.json (${fieldsSummary})`
-  );
+  return { totalFixes, fixesPerField };
 }

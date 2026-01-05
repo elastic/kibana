@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/no_pkg_semver_ranges');
+require('../src/dev/no_pkg_semver_ranges').checkSemverRanges({ fix: true });
