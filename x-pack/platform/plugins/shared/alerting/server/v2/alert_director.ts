@@ -53,6 +53,7 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM ${ALERT_EVENTS_INDEX}
 // pending -> active
 // recoverig -> inactive
 //
+// TODO: Can't time filter on transitions, can be in a given state for a while
 // Queries work without {timeFilter} but have this filter for performance reasons
 export const DIRECTOR_ACTIVE_INACTIVE_QUERY = `FROM ${ALERT_TRANSITIONS_INDEX}
   {timeFilter}
