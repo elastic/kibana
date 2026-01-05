@@ -24,13 +24,13 @@ import { encode } from '@kbn/rison';
 import { ALERT_EVALUATION_VALUE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ErrorRateChart } from '../../../slo/error_rate_chart';
 import type { BurnRateAlert } from '../../types';
 import { getActionGroupWindow } from '../../utils/alert';
 import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
 import { getAlertTimeRange, getChartTimeRange } from '../../utils/time_range';
-import React from 'react';
 
 interface Props {
   alert: BurnRateAlert;
