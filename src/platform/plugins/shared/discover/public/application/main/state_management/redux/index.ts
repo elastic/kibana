@@ -52,6 +52,7 @@ export {
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
   DEFAULT_HISTOGRAM_KEY_PREFIX,

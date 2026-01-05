@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import {
   mockTitleGeneration,
   mockAgentToolCall,
   mockHandoverToAnswer,
   mockFinalAnswer,
-} from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/proxy_scenario/calls';
-import { createToolCallMessage } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+} from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/proxy_scenario/calls';
+import { createToolCallMessage } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { LLM_PROXY_FINAL_MESSAGE } from './constants';
 
 const MOCKED_TITLE = 'Mocked conversation title';

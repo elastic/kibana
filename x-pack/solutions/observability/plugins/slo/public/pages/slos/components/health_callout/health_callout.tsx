@@ -8,9 +8,9 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { uniqBy } from 'lodash';
 import React, { useState } from 'react';
-import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
 

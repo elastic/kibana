@@ -17,6 +17,7 @@ import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfal
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
+import { CriticalPathToggle } from './critical_path';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
@@ -37,6 +38,8 @@ export interface Props {
   showLegend?: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  agentMarks?: Record<string, number>;
+  showCriticalPathControl?: boolean;
 }
 
 export function TraceWaterfall({
@@ -52,6 +55,8 @@ export function TraceWaterfall({
   showLegend = false,
   serviceName,
   isFiltered,
+  agentMarks,
+  showCriticalPathControl = false,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -67,6 +72,8 @@ export function TraceWaterfall({
       serviceName={serviceName}
       isFiltered={isFiltered}
       errors={errors}
+      agentMarks={agentMarks}
+      showCriticalPathControl={showCriticalPathControl}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -89,10 +96,23 @@ function TraceWaterfallComponent() {
     showAccordion,
     isAccordionOpen,
     toggleAllAccordions,
+    agentMarks,
+    showCriticalPath,
+    setShowCriticalPath,
+    showCriticalPathControl,
   } = useTraceWaterfallContext();
+
+  const marks = useMemo(() => {
+    return [...agentMarks, ...errorMarks];
+  }, [agentMarks, errorMarks]);
 
   return (
     <EuiFlexGroup direction="column">
+      {showCriticalPathControl && (
+        <EuiFlexItem>
+          <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
+        </EuiFlexItem>
+      )}
       {showLegend && serviceName && (
         <EuiFlexItem>
           <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
@@ -122,7 +142,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
-              marks={errorMarks}
+              marks={marks}
             />
           </div>
           <VerticalLinesContainer
@@ -133,7 +153,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
-            marks={errorMarks}
+            marks={marks}
           />
           <div
             css={css`
