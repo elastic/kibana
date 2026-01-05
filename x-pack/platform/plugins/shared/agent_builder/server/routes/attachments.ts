@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
-import { isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -25,22 +24,28 @@ import { publicApiPath } from '../../common/constants';
 
 /**
  * Check if an attachment is referenced in any conversation round.
- * This checks tool call results for the __attachment_operation__ marker.
+ * This checks tool calls to see if any attachment tools were used with this attachment ID.
  */
 function isAttachmentReferencedInRounds(
   attachmentId: string,
   rounds: ConversationRound[]
 ): boolean {
+  const attachmentToolIds = [
+    'platform.core.attachment_read',
+    'platform.core.attachment_update',
+    'platform.core.attachment_diff',
+  ];
+
   for (const round of rounds) {
     for (const step of round.steps) {
       if (isToolCallStep(step)) {
         const toolCallStep = step as ToolCallStep;
-        for (const result of toolCallStep.results) {
-          if (isOtherResult(result)) {
-            const data = result.data as Record<string, unknown>;
-            if (data.__attachment_operation__ && data.attachment_id === attachmentId) {
-              return true;
-            }
+        // Check if this is an attachment tool call
+        if (attachmentToolIds.includes(toolCallStep.tool_id)) {
+          // Check if the params reference this attachment ID
+          const params = toolCallStep.params as Record<string, unknown>;
+          if (params.attachment_id === attachmentId) {
+            return true;
           }
         }
       }
