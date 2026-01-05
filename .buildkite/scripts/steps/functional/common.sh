@@ -22,20 +22,15 @@ upload_scout_cypress_events() {
     cd "${KIBANA_DIR:-$(git rev-parse --show-toplevel)}"
 
     # Check if reports exist before uploading
-    if [ -d ".scout/reports" ] && [ "$(ls -A .scout/reports 2>/dev/null)" ]; then
+    if compgen -G '.scout/reports/*' > /dev/null; then
       echo "--- Upload Scout reporter events to AppEx QA's team cluster for $test_name"
       node scripts/scout upload-events --dontFailOnError
 
       # Clean up only Cypress event reports to avoid double ingestion
       # Only remove scout-cypress-* directories, preserving other test reports and failure reports
-      echo "🧹 Cleaning up Scout Cypress event reports"
-      if [ -d ".scout/reports" ]; then
-        for dir in .scout/reports/scout-cypress-*; do
-          if [ -d "$dir" ]; then
-            echo "Removing $dir"
-            rm -rf "$dir"
-          fi
-        done
+      if compgen -G '.scout/reports/scout-cypress-*' > /dev/null; then
+       echo "🧹 Cleaning up Scout Cypress event reports"
+       rm -rf .scout/reports/scout-cypress-*
       fi
     else
       echo "❌ No Scout reports found for $test_name"
