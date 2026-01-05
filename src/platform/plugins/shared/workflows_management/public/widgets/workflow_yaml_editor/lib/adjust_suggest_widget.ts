@@ -29,7 +29,7 @@ export const adjustSuggestWidget = (editor: monaco.editor.IStandaloneCodeEditor)
       // they will remain switched off:
       suggestWidget._setDetailsVisible(true);
     }
-    // I also wanted my widget to be shorter by default:
+    // Make the suggestions widget larger by default (500x500px) to include long suggestions
     if (suggestWidget && suggestWidget._persistedSize) {
       suggestWidget._persistedSize.store({ width: 500, height: 500 });
     }
@@ -39,8 +39,8 @@ export const adjustSuggestWidget = (editor: monaco.editor.IStandaloneCodeEditor)
       const detailsOverlay = suggestWidget._details;
       // Override placeAtAnchor to always pass true for preferAlignAtTop
       const originalPlaceAtAnchor = detailsOverlay.placeAtAnchor.bind(detailsOverlay);
-      detailsOverlay.placeAtAnchor = function (anchor: HTMLElement, preferAlignAtTop: boolean) {
-        originalPlaceAtAnchor(anchor, true); // Always force true
+      detailsOverlay.placeAtAnchor = function (anchor: HTMLElement, _preferAlignAtTop: boolean) {
+        originalPlaceAtAnchor(anchor, true); // Force preferAlignAtTop to true for always aligning at the top
       };
     }
   }
