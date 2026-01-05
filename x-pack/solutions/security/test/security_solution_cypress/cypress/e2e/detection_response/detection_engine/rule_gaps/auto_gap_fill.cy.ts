@@ -171,14 +171,10 @@ describe(
             .should('exist')
             .each(($row) => {
               cy.wrap($row).find('td').eq(1).contains('No gaps');
-              
+
               // Verify tooltip appears on hover and contains the expected text
-              cy.wrap($row)
-                .find('td')
-                .eq(1)
-                .find('.euiBadge')
-                .realHover();
-              
+              cy.wrap($row).find('td').eq(1).find('.euiBadge').realHover();
+
               // Check that the tooltip is visible and contains the expected message
               cy.get(TOOLTIP)
                 .should('be.visible')
