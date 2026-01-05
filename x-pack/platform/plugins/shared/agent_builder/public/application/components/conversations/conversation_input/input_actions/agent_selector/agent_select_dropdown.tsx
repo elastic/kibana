@@ -6,13 +6,12 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
-  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -89,7 +88,8 @@ const AgentListFooter: React.FC = () => {
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButton
+          <EuiButtonEmpty
+            size="s"
             iconType="gear"
             color="text"
             aria-label={manageAgentsAriaLabel}
@@ -99,15 +99,20 @@ const AgentListFooter: React.FC = () => {
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
               defaultMessage="Manage"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton iconType="plus" aria-label={createAgentAriaLabel} href={createAgentHref}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="plus"
+            aria-label={createAgentAriaLabel}
+            href={createAgentHref}
+          >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.createNewAgent"
               defaultMessage="New"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
