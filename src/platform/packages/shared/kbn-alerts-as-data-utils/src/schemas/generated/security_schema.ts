@@ -120,6 +120,9 @@ const SecurityAlertRequired = rt.type({
 });
 // prettier-ignore
 const SecurityAlertOptional = rt.partial({
+  'data_stream.dataset': schemaString,
+  'data_stream.namespace': schemaString,
+  'data_stream.type': schemaString,
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
