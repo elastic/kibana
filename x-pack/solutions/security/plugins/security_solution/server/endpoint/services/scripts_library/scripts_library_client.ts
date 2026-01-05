@@ -489,7 +489,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       .get({ id: scriptSo.attributes.file_id })
       .catch(
         catchAndWrapError.withMessage(
-          `Failed to initialise File instance for file id [${scriptSo.attributes.file_id}] of script [${scriptId}]`
+          `Failed to initialize File instance for file id [${scriptSo.attributes.file_id}] of script [${scriptId}]`
         )
       );
 

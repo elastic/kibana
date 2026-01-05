@@ -81,7 +81,7 @@ describe('Download script API route', () => {
   });
 
   describe('Download script route handler', () => {
-    it('should get scripts client with correct space ID and call update() method', async () => {
+    it('should get scripts client with correct space ID and call download() method', async () => {
       await apiTestSetup
         .getRegisteredVersionedRoute('get', SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
