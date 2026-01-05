@@ -33,8 +33,8 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
-import { docLinks } from '../../../../../common/doc_links';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import { useTool } from '../../../hooks/tools/use_tools';
 import { ToolFormMode } from '../form/tool_form';
@@ -221,6 +221,7 @@ export interface ToolTestFlyoutProps {
 
 export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const { docLinksService } = useAgentBuilderServices();
   const [response, setResponse] = useState<string>('{}');
   // Re-mount new responses, needed for virtualized EuiCodeBlock
   // https://github.com/elastic/eui/issues/9034
@@ -270,7 +271,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href={`${docLinks.tools}#testing-your-tools`} target="_blank">
+            <EuiLink href={`${docLinksService.tools}#testing-your-tools`} target="_blank">
               {i18n.translate('xpack.agentBuilder.tools.testFlyout.documentationLink', {
                 defaultMessage: 'Documentation - Testing tools',
               })}
