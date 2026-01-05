@@ -24,6 +24,7 @@ import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
+import * as i18n from './translations';
 
 const ALLOWED_ACTION_TYPE_IDS = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
 
@@ -98,14 +99,14 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
   if (isLoadingTypes) {
     return (
       <EuiFlyout
-        aria-label="Create AI Connector"
+        aria-label={i18n.CREATE_AI_CONNECTOR_TITLE}
         onClose={onClose}
         size="s"
         data-test-subj="connectorSetupFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>Create AI Connector</h2>
+            <h2>{i18n.CREATE_AI_CONNECTOR_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -122,15 +123,15 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
       <EuiFlyout
         onClose={onClose}
         size="s"
-        aria-label="Create AI Connector"
+        aria-label={i18n.CREATE_AI_CONNECTOR_TITLE}
         data-test-subj="connectorSetupFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>Create AI Connector</h2>
+            <h2>{i18n.CREATE_AI_CONNECTOR_TITLE}</h2>
           </EuiTitle>
           <EuiText size="s" color="subdued">
-            Select a connector type to get started
+            {i18n.SELECT_CONNECTOR_TYPE_DESCRIPTION}
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -165,7 +166,7 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
             ))}
             {(!actionTypes || actionTypes.length === 0) && (
               <EuiText color="subdued" textAlign="center" data-test-subj="noConnectorTypes">
-                No AI connector types available
+                {i18n.NO_CONNECTOR_TYPES_AVAILABLE}
               </EuiText>
             )}
           </EuiFlexGroup>

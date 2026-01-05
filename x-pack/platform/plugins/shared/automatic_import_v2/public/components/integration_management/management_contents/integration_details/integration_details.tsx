@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -26,21 +25,16 @@ import * as i18n from './translations';
 
 const useLayoutStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const subduedBgCss = useEuiBackgroundColor('subdued');
   return {
-    left: css`
-      padding: ${euiTheme.size.l};
+    leftPanel: css`
       width: 100%;
       max-width: 600px;
-      border: ${euiTheme.border.thin};
-      border-radius: ${euiTheme.border.radius.medium};
-      display: flex;
-      flex-direction: column;
-      gap: ${euiTheme.size.xs};
 
       @media (max-width: ${euiTheme.breakpoint.m}px) {
         max-width: 100%;
       }
+    `,
+    formRowSpacing: css`
       .euiFormRow {
         margin-block: 0;
 
@@ -60,17 +54,10 @@ const useLayoutStyles = () => {
         margin-block-start: ${euiTheme.size.xs};
       }
     `,
-    right: css`
-      padding: ${euiTheme.size.l};
-      background: ${subduedBgCss};
-      width: 100%;
-      max-width: 234px;
-      border-radius: ${euiTheme.border.radius.medium};
-    `,
     container: css`
       width: 100%;
     `,
-    form: css`
+    formField: css`
       background: ${euiTheme.colors.backgroundBaseSubdued};
     `,
   };
@@ -141,73 +128,81 @@ export const IntegrationDetails = React.memo(() => {
 
         <EuiPanel paddingSize="none" hasShadow={false}>
           <EuiFlexGroup direction="row" gutterSize="m">
-            <EuiFlexItem css={styles.left}>
-              <UseField path="title">
-                {(field) => (
-                  <EuiFormRow
-                    label={getStyledLabel(i18n.TITLE_LABEL)}
-                    isInvalid={field.errors.length > 0}
-                    error={field.errors.map((e) => e.message)}
-                    fullWidth
-                    data-test-subj="integrationTitleFormRow"
-                  >
-                    <EuiFieldText
-                      value={field.value as string}
-                      onChange={(e) => field.setValue(e.target.value)}
+            <EuiFlexItem css={styles.leftPanel}>
+              <EuiPanel
+                paddingSize="l"
+                hasBorder
+                hasShadow={false}
+                borderRadius="m"
+                css={styles.formRowSpacing}
+              >
+                <UseField path="title">
+                  {(field) => (
+                    <EuiFormRow
+                      label={getStyledLabel(i18n.TITLE_LABEL)}
                       isInvalid={field.errors.length > 0}
+                      error={field.errors.map((e) => e.message)}
                       fullWidth
-                      css={styles.form}
-                      data-test-subj="integrationTitleInput"
-                    />
-                  </EuiFormRow>
-                )}
-              </UseField>
+                      data-test-subj="integrationTitleFormRow"
+                    >
+                      <EuiFieldText
+                        value={field.value as string}
+                        onChange={(e) => field.setValue(e.target.value)}
+                        isInvalid={field.errors.length > 0}
+                        fullWidth
+                        css={styles.formField}
+                        data-test-subj="integrationTitleInput"
+                      />
+                    </EuiFormRow>
+                  )}
+                </UseField>
 
-              <UseField path="description">
-                {(field) => (
-                  <EuiFormRow
-                    label={getStyledLabel(i18n.DESCRIPTION_LABEL)}
-                    isInvalid={field.errors.length > 0}
-                    error={field.errors.map((e) => e.message)}
-                    fullWidth
-                    data-test-subj="integrationDescriptionFormRow"
-                  >
-                    <EuiFieldText
-                      value={field.value as string}
-                      onChange={(e) => field.setValue(e.target.value)}
-                      fullWidth
+                <UseField path="description">
+                  {(field) => (
+                    <EuiFormRow
+                      label={getStyledLabel(i18n.DESCRIPTION_LABEL)}
                       isInvalid={field.errors.length > 0}
-                      css={styles.form}
-                      data-test-subj="integrationDescriptionInput"
-                    />
-                  </EuiFormRow>
-                )}
-              </UseField>
-
-              <UseField<string | undefined> path="logo">
-                {(field) => (
-                  <EuiFormRow
-                    label={getStyledLabel(i18n.LOGO_LABEL)}
-                    fullWidth
-                    isInvalid={!!logoError}
-                    error={logoError}
-                    data-test-subj="integrationLogoFormRow"
-                  >
-                    <EuiFilePicker
-                      id="logoFilePicker"
-                      initialPromptText={initialSVGPickerText}
-                      display="large"
+                      error={field.errors.map((e) => e.message)}
                       fullWidth
-                      aria-label="Upload an SVG logo image"
-                      accept="image/svg+xml"
-                      onChange={(files) => processLogoFile(files, field, setLogoError)}
+                      data-test-subj="integrationDescriptionFormRow"
+                    >
+                      <EuiFieldText
+                        value={field.value as string}
+                        onChange={(e) => field.setValue(e.target.value)}
+                        fullWidth
+                        isInvalid={field.errors.length > 0}
+                        css={styles.formField}
+                        data-test-subj="integrationDescriptionInput"
+                      />
+                    </EuiFormRow>
+                  )}
+                </UseField>
+
+                <UseField<string | undefined> path="logo">
+                  {(field) => (
+                    <EuiFormRow
+                      label={getStyledLabel(i18n.LOGO_LABEL)}
+                      fullWidth
                       isInvalid={!!logoError}
-                      css={styles.form}
-                      data-test-subj="integrationLogoFilePicker"
-                    />
-                  </EuiFormRow>
-                )}
-              </UseField>
+                      error={logoError}
+                      data-test-subj="integrationLogoFormRow"
+                    >
+                      <EuiFilePicker
+                        id="logoFilePicker"
+                        initialPromptText={initialSVGPickerText}
+                        display="large"
+                        fullWidth
+                        aria-label="Upload an SVG logo image"
+                        accept="image/svg+xml"
+                        onChange={(files) => processLogoFile(files, field, setLogoError)}
+                        isInvalid={!!logoError}
+                        css={styles.formField}
+                        data-test-subj="integrationLogoFilePicker"
+                      />
+                    </EuiFormRow>
+                  )}
+                </UseField>
+              </EuiPanel>
             </EuiFlexItem>
 
             <PackageCardPreview />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useEuiTheme, EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { useEuiTheme, EuiCard, EuiIcon, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useIntegrationForm } from '../../forms/integration_form';
 import * as i18n from './translations';
@@ -37,11 +37,8 @@ const useCardCss = () => {
       }
     `,
     panel: css`
-      background: ${euiTheme.colors.backgroundBaseFormsPrepend};
-      padding: ${euiTheme.size.l};
       width: 100%;
       max-width: 234px;
-      border-radius: ${euiTheme.border.radius.medium};
 
       @media (max-width: ${euiTheme.breakpoint.m}px) {
         max-width: 100%;
@@ -67,26 +64,24 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({}) => {
 
   return (
     <EuiFlexItem grow={false} css={cardCss.panel}>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiCard
-            css={cardCss.card}
-            data-test-subj="packageCardPreview"
-            layout="horizontal"
-            title={title ?? ''}
-            description={description ?? ''}
-            titleSize="xs"
-            hasBorder
-            icon={
-              <EuiIcon size={'xl'} type={logo ? `data:image/svg+xml;base64,${logo}` : 'package'} />
-            }
-            betaBadgeProps={{
-              label: i18n.PREVIEW,
-              tooltipContent: i18n.PREVIEW_TOOLTIP,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPanel paddingSize="l" color="subdued" hasShadow={false} borderRadius="m">
+        <EuiCard
+          css={cardCss.card}
+          data-test-subj="packageCardPreview"
+          layout="horizontal"
+          title={title ?? ''}
+          description={description ?? ''}
+          titleSize="xs"
+          hasBorder
+          icon={
+            <EuiIcon size={'xl'} type={logo ? `data:image/svg+xml;base64,${logo}` : 'package'} />
+          }
+          betaBadgeProps={{
+            label: i18n.PREVIEW,
+            tooltipContent: i18n.PREVIEW_TOOLTIP,
+          }}
+        />
+      </EuiPanel>
     </EuiFlexItem>
   );
 });

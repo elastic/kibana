@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiSelectableProps,
+  EuiSelectableOption,
+} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,6 +25,7 @@ import type { ConnectorSelectableComponentProps } from '@kbn/ai-assistant-connec
 import { ConnectorSelectable } from '@kbn/ai-assistant-connector-selector-action';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { useKibana } from '../hooks/use_kibana';
@@ -70,13 +75,220 @@ export interface ConnectorSelectorProps {
   displayFancy?: (label: string, connector?: ActionConnector) => React.ReactNode;
 }
 
+interface ConnectorData {
+  connectors: ActionConnector[] | undefined;
+  customConnectors: ConnectorSelectableComponentProps['customConnectors'];
+  preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
+  defaultConnectorId: string | undefined;
+  settingsDefaultConnectorId: string | undefined;
+  isLoading: boolean;
+}
+
+interface UIState {
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: (isOpen: boolean) => void;
+}
+
+interface ConnectorHandlers {
+  onAddConnectorClick: () => void;
+  onManageConnectorsClick: () => void;
+}
+
+interface ConnectorFieldProps {
+  field: FieldHook<string>;
+  connectorData: ConnectorData;
+  uiState: UIState;
+  handlers: ConnectorHandlers;
+  fullWidth: boolean;
+  isDisabled: boolean;
+  displayFancy?: (label: string, connector?: ActionConnector) => React.ReactNode;
+}
+
+const ConnectorField: React.FC<ConnectorFieldProps> = ({
+  field,
+  connectorData,
+  uiState,
+  handlers,
+  fullWidth,
+  isDisabled,
+  displayFancy,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const {
+    connectors,
+    customConnectors,
+    preConfiguredConnectors,
+    defaultConnectorId,
+    settingsDefaultConnectorId,
+    isLoading,
+  } = connectorData;
+  const { isPopoverOpen, setIsPopoverOpen } = uiState;
+  const { onAddConnectorClick, onManageConnectorsClick } = handlers;
+
+  const selectedId = field.value ?? '';
+  const connectorExists = some(connectors, ['id', selectedId]);
+
+  const setFieldValue = field.setValue;
+
+  useEffect(() => {
+    if (!selectedId && defaultConnectorId && !isLoading) {
+      setFieldValue(defaultConnectorId);
+    }
+  }, [selectedId, defaultConnectorId, isLoading, setFieldValue]);
+
+  const handleChangeConnector = useCallback(
+    (connectorId: string) => {
+      setFieldValue(connectorId);
+      setIsPopoverOpen(false);
+    },
+    [setFieldValue, setIsPopoverOpen]
+  );
+
+  const handleOpenPopover = useCallback(() => {
+    setIsPopoverOpen(true);
+  }, [setIsPopoverOpen]);
+
+  const handleClosePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, [setIsPopoverOpen]);
+
+  const selectedOrDefaultConnectorId = selectedId || defaultConnectorId;
+  const selectedOrDefaultConnector = useMemo(
+    () => connectors?.find((connector) => connector.id === selectedOrDefaultConnectorId),
+    [connectors, selectedOrDefaultConnectorId]
+  );
+  const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.SELECT_CONNECTOR_PLACEHOLDER;
+
+  const renderOption: EuiSelectableProps['renderOption'] = useCallback(
+    (option: EuiSelectableOption) => (
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false} data-test-subj={`connector-${option.label}`}>
+          {option.label}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
+    () => [
+      {
+        id: 0,
+        width: '100%',
+        content: (
+          <ConnectorSelectable
+            preConfiguredConnectors={preConfiguredConnectors}
+            customConnectors={customConnectors}
+            value={selectedOrDefaultConnector?.id}
+            onValueChange={handleChangeConnector}
+            onAddConnectorClick={onAddConnectorClick}
+            onManageConnectorsClick={onManageConnectorsClick}
+            defaultConnectorId={settingsDefaultConnectorId}
+            renderOption={renderOption}
+          />
+        ),
+      },
+    ],
+    [
+      preConfiguredConnectors,
+      customConnectors,
+      selectedOrDefaultConnector?.id,
+      handleChangeConnector,
+      onAddConnectorClick,
+      onManageConnectorsClick,
+      settingsDefaultConnectorId,
+      renderOption,
+    ]
+  );
+
+  const buttonStyle = useMemo(
+    () => ({
+      borderWidth: fullWidth ? 1 : 0,
+      backgroundColor: 'transparent',
+    }),
+    [fullWidth]
+  );
+
+  const contentPropsStyle = useMemo(
+    () => ({
+      display: 'flex',
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      color: isDisabled ? euiTheme.colors.textDisabled : euiTheme.colors.textPrimary,
+    }),
+    [isDisabled, euiTheme.colors.textDisabled, euiTheme.colors.textPrimary]
+  );
+
+  const input = (
+    <EuiButton
+      iconType="arrowDown"
+      iconSide="right"
+      size="s"
+      color="text"
+      fullWidth={fullWidth}
+      onClick={handleOpenPopover}
+      style={buttonStyle}
+      contentProps={{ style: contentPropsStyle }}
+      data-test-subj="connector-selector"
+      isDisabled={isDisabled || isLoading}
+    >
+      {isLoading ? (
+        <EuiLoadingSpinner size="s" data-test-subj="connectorSelectorLoading" />
+      ) : (
+        displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel
+      )}
+    </EuiButton>
+  );
+
+  if (!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        alignItems="flexEnd"
+        data-test-subj="connectorSelectorNoConnectors"
+      >
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            data-test-subj="addNewConnectorButton"
+            iconType="plusInCircle"
+            isDisabled={isDisabled}
+            size="xs"
+            onClick={onAddConnectorClick}
+          >
+            {i18n.ADD_CONNECTOR_BUTTON_LABEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" alignItems="flexEnd" data-test-subj="connectorSelectorWrapper">
+      <EuiFlexItem>
+        <EuiInputPopover
+          input={input}
+          isOpen={isPopoverOpen}
+          closePopover={handleClosePopover}
+          panelPaddingSize="none"
+          anchorPosition="downRight"
+          fullWidth={fullWidth}
+          panelMinWidth={300}
+          data-test-subj="connectorSelectorPopover"
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiInputPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   path = 'connectorId',
   fullWidth = false,
   isDisabled = false,
   displayFancy,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { settings, application } = useKibana().services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -123,159 +335,76 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     [connectors]
   );
 
-  const handleAddConnectorClick = () => {
+  const handleAddConnectorClick = useCallback(() => {
     setIsPopoverOpen(false);
     setIsConnectorModalVisible(true);
-  };
+  }, []);
 
-  const handleManageConnectorsClick = () => {
+  const handleManageConnectorsClick = useCallback(() => {
     setIsPopoverOpen(false);
     application.navigateToApp('management', {
       path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
     });
-  };
+  }, [application]);
 
   const handleConnectorCreated = useCallback(() => {
     setIsConnectorModalVisible(false);
     refetch();
   }, [refetch]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsConnectorModalVisible(false);
-  };
+  }, []);
+
+  const connectorData: ConnectorData = useMemo(
+    () => ({
+      connectors,
+      customConnectors,
+      preConfiguredConnectors,
+      defaultConnectorId,
+      settingsDefaultConnectorId,
+      isLoading,
+    }),
+    [
+      connectors,
+      customConnectors,
+      preConfiguredConnectors,
+      defaultConnectorId,
+      settingsDefaultConnectorId,
+      isLoading,
+    ]
+  );
+
+  const uiState: UIState = useMemo(
+    () => ({
+      isPopoverOpen,
+      setIsPopoverOpen,
+    }),
+    [isPopoverOpen, setIsPopoverOpen]
+  );
+
+  const handlers: ConnectorHandlers = useMemo(
+    () => ({
+      onAddConnectorClick: handleAddConnectorClick,
+      onManageConnectorsClick: handleManageConnectorsClick,
+    }),
+    [handleAddConnectorClick, handleManageConnectorsClick]
+  );
 
   return (
     <>
       <UseField<string> path={path}>
-        {(field) => {
-          const selectedId = field.value ?? '';
-
-          const connectorExists = some(connectors, ['id', selectedId]);
-
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          useEffect(() => {
-            if (!selectedId && defaultConnectorId && !isLoading) {
-              field.setValue(defaultConnectorId);
-            }
-          }, [selectedId, field]);
-
-          const onChangeConnector = (connectorId: string) => {
-            field.setValue(connectorId);
-            setIsPopoverOpen(false);
-          };
-
-          const selectedOrDefaultConnectorId = selectedId || defaultConnectorId;
-          const selectedOrDefaultConnector = connectors?.find(
-            (connector) => connector.id === selectedOrDefaultConnectorId
-          );
-          const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.SELECT_CONNECTOR_PLACEHOLDER;
-
-          const panels: EuiContextMenuPanelDescriptor[] = [
-            {
-              id: 0,
-              width: '100%',
-              content: (
-                <ConnectorSelectable
-                  preConfiguredConnectors={preConfiguredConnectors}
-                  customConnectors={customConnectors}
-                  value={selectedOrDefaultConnector?.id}
-                  onValueChange={onChangeConnector}
-                  onAddConnectorClick={handleAddConnectorClick}
-                  onManageConnectorsClick={handleManageConnectorsClick}
-                  defaultConnectorId={settingsDefaultConnectorId}
-                  renderOption={(option) => (
-                    <EuiFlexGroup
-                      justifyContent="spaceBetween"
-                      gutterSize="none"
-                      alignItems="center"
-                    >
-                      <EuiFlexItem grow={false} data-test-subj={`connector-${option.label}`}>
-                        {option.label}
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                />
-              ),
-            },
-          ];
-
-          const input = (
-            <EuiButton
-              iconType="arrowDown"
-              iconSide="right"
-              size="s"
-              color="text"
-              fullWidth={fullWidth}
-              onClick={() => setIsPopoverOpen(true)}
-              style={{
-                borderWidth: fullWidth ? 1 : 0,
-                backgroundColor: 'transparent',
-              }}
-              contentProps={{
-                style: {
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  color: isDisabled ? euiTheme.colors.textDisabled : euiTheme.colors.textPrimary,
-                },
-              }}
-              data-test-subj="connector-selector"
-              isDisabled={isDisabled || isLoading}
-            >
-              {isLoading ? (
-                <EuiLoadingSpinner size="s" data-test-subj="connectorSelectorLoading" />
-              ) : (
-                displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel
-              )}
-            </EuiButton>
-          );
-
-          if (!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0) {
-            return (
-              <EuiFlexGroup
-                direction="column"
-                alignItems="flexEnd"
-                data-test-subj="connectorSelectorNoConnectors"
-              >
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    data-test-subj="addNewConnectorButton"
-                    iconType="plusInCircle"
-                    isDisabled={isDisabled}
-                    size="xs"
-                    onClick={handleAddConnectorClick}
-                  >
-                    {i18n.ADD_CONNECTOR_BUTTON_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          }
-
-          return (
-            <EuiFlexGroup
-              direction="column"
-              alignItems="flexEnd"
-              data-test-subj="connectorSelectorWrapper"
-            >
-              <EuiFlexItem>
-                <EuiInputPopover
-                  input={input}
-                  isOpen={isPopoverOpen}
-                  closePopover={() => setIsPopoverOpen(false)}
-                  panelPaddingSize="none"
-                  anchorPosition="downRight"
-                  fullWidth={fullWidth}
-                  panelMinWidth={300}
-                  data-test-subj="connectorSelectorPopover"
-                >
-                  <EuiContextMenu initialPanelId={0} panels={panels} />
-                </EuiInputPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }}
+        {(field) => (
+          <ConnectorField
+            field={field}
+            connectorData={connectorData}
+            uiState={uiState}
+            handlers={handlers}
+            fullWidth={fullWidth}
+            isDisabled={isDisabled}
+            displayFancy={displayFancy}
+          />
+        )}
       </UseField>
 
       {isConnectorModalVisible && (
