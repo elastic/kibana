@@ -242,7 +242,7 @@ export const likePatternItems: ISuggestionItem[] = [
     text: '"${0:*}"',
     asSnippet: true,
     kind: 'Value',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.likeAsteriskDoc', {
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.likeAsteriskDoc', {
       defaultMessage: 'Matches any sequence of zero or more characters',
     }),
     sortText: '1',
@@ -252,7 +252,7 @@ export const likePatternItems: ISuggestionItem[] = [
     text: '"${0:?}"',
     asSnippet: true,
     kind: 'Value',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.likeQuestionMarkDoc', {
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.likeQuestionMarkDoc', {
       defaultMessage: 'Matches any single character',
     }),
     sortText: '1',
