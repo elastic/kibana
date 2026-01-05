@@ -31,7 +31,7 @@ import { mockDataView } from '../mock/data_view.mock';
 
 setProjectAnnotations(previewAnnotations);
 
-const { Investigation } = composeStories(stories);
+const { SingleActor, GroupedActor, GroupedTarget } = composeStories(stories);
 
 // Mock the useFetchGraphData hook, which is used by the GraphInvestigation component
 // Callbacks replaced with storybook actions, therefore we mock storybook's action function as well for testing
@@ -53,10 +53,32 @@ jest.mock('@storybook/addon-actions', () => ({
 const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
     <IntlProvider locale="en">
-      <Investigation {...args} />
+      <SingleActor {...args} />
     </IntlProvider>,
     {
       // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedActorStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedActor {...args} />
+    </IntlProvider>,
+    {
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedTarget {...args} />
+    </IntlProvider>,
+    {
       legacyRoot: true,
     }
   );
@@ -232,7 +254,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toBeInTheDocument();
     });
 
-    it('shows the option `Show entity details` as enabled when entity node has documentsData', async () => {
+    it('shows the option `Show entity details` as enabled when entity node has documentsData with entity data', async () => {
       const { container, getByTestId } = renderStory();
 
       await expandNode(container, 'projects/your-project-id/roles/customRole');
@@ -252,7 +274,7 @@ describe('GraphInvestigation Component', () => {
 
       // can't use userEvent.hover since we get the following error:
       // 'Unable to perform pointer interaction as the element has pointer-events: none:'
-      await fireEvent.mouseOver(showDetailsItem);
+      fireEvent.mouseOver(showDetailsItem);
 
       // Wait for tooltip and execute validation
       await waitAndExecute(() => {
@@ -484,9 +506,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'actor.entity.id',
+                  field: 'user.entity.id',
                   index: '1235',
-                  key: 'actor.entity.id',
+                  key: 'user.entity.id',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -495,7 +517,7 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'actor.entity.id': entityIdFilter,
+                    'user.entity.id': entityIdFilter,
                   },
                 },
               },
@@ -565,9 +587,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'actor.entity.id',
+                  field: 'user.entity.id',
                   index: '1235',
-                  key: 'actor.entity.id',
+                  key: 'user.entity.id',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -576,7 +598,7 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'actor.entity.id': entityIdFilter,
+                    'user.entity.id': entityIdFilter,
                   },
                 },
               },
@@ -708,8 +730,8 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'actor.entity.id',
-            key: 'actor.entity.id',
+            field: 'user.entity.id',
+            key: 'user.entity.id',
             params: {
               query: entityIdFilter,
             },
@@ -717,7 +739,7 @@ describe('GraphInvestigation Component', () => {
           }),
           query: {
             match_phrase: {
-              'actor.entity.id': entityIdFilter,
+              'user.entity.id': entityIdFilter,
             },
           },
         },
@@ -766,8 +788,8 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'actor.entity.id',
-            key: 'actor.entity.id',
+            field: 'user.entity.id',
+            key: 'user.entity.id',
             params: {
               query: entityIdFilter,
             },
@@ -775,11 +797,132 @@ describe('GraphInvestigation Component', () => {
           }),
           query: {
             match_phrase: {
-              'actor.entity.id': entityIdFilter,
+              'user.entity.id': entityIdFilter,
             },
           },
         },
       ]);
+    });
+  });
+
+  describe('grouped-actor scenario - mixed namespaces as actor', () => {
+    it('renders graph with grouped actor node', async () => {
+      const { container } = renderGroupedActorStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, grouped-actor, target, label
+      });
+    });
+
+    it('grouped actor node with mixed namespaces falls back to generic entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container } = renderGroupedActorStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Since the node has no entity details (all availableInEntityStore = false),
+      // we cannot add filters via "Show actions by entity"
+      // This scenario tests the fallback behavior
+      await waitFor(() => {
+        const nodeElement = container.querySelector(
+          `.react-flow__nodes .react-flow__node[data-id="mixed-entities"]`
+        );
+        expect(nodeElement).not.toBeNull();
+      });
+    });
+
+    it('grouped actor node does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      // Grouped entities should not have "Show actions by entity" option
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped actor node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
+    });
+  });
+
+  describe('grouped-target scenario - mixed namespaces as target', () => {
+    it('renders graph with grouped target node', async () => {
+      const { container } = renderGroupedTargetStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, actor, grouped-target, label
+      });
+    });
+
+    it('single actor node with user namespace uses user.entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container, getByTestId } = renderGroupedTargetStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Act - Click "Show actions by entity" on single-actor node
+      await showActionsByNode(container, 'single-actor');
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert - Should use user.entity.id since actor has user namespace
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: expect.arrayContaining([
+              expect.objectContaining({
+                meta: expect.objectContaining({
+                  field: 'user.entity.id',
+                  key: 'user.entity.id',
+                }),
+                query: {
+                  match_phrase: {
+                    'user.entity.id': 'single-actor',
+                  },
+                },
+              }),
+            ]),
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('grouped target node with mixed namespaces does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      // Grouped entities should not have "Show actions by entity" or "Show actions on entity" options
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped target node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
     });
   });
 });

@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'sampleLongRunningRecurringTask',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -59,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Sender',
         'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
+        'ProductDocBase:EnsureSecurityLabsUpToDate',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
         'ProductDocBase:UninstallAll',
@@ -170,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_analytics:monitoring:privileges:engine',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'entity_store:health',
         'entity_store:snapshot',
         'fleet:agent-status-change-task',
         'fleet:agentless-deployment-sync-task',
@@ -184,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:policy-revisions-cleanup-task',
         'fleet:privilege_level_change:retry',
         'fleet:reassign_action:retry',
+        'fleet:reindex_integration_knowledge',
         'fleet:request_diagnostics:retry',
         'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',
@@ -221,6 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:bulk-delete-task',
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
+        'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
         'workflow:resume',

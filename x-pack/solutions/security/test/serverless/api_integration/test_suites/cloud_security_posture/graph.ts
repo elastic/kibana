@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin@example.com',
+                      'user.entity.id': 'admin@example.com',
                     },
                   },
                 ],

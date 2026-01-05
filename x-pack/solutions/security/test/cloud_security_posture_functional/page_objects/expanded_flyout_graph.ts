@@ -34,6 +34,16 @@ const {
   GRAPH_IPS_POPOVER_IP_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
+  GRAPH_CALLOUT_TEST_ID,
+  GRAPH_NODE_ENTITY_DETAILS_ID,
+  GRAPH_NODE_ENTITY_TAG_TEXT_ID,
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
+  GROUPED_ITEM_TEST_ID,
+  GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TARGET_TEST_ID,
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
@@ -239,5 +249,80 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       const ipText = await popoverContent.getVisibleText();
       expect(ipText).to.contain(expectedIp);
     }
+  }
+
+  async assertCalloutVisible(): Promise<void> {
+    await this.testSubjects.existOrFail(GRAPH_CALLOUT_TEST_ID, {
+      timeout: 10000,
+    });
+  }
+
+  async dismissCallout(): Promise<void> {
+    const callout = await this.testSubjects.find(GRAPH_CALLOUT_TEST_ID);
+    const dismissButton = await callout.findByTestSubject('euiDismissCalloutButton');
+    await dismissButton.click();
+    await this.testSubjects.missingOrFail(GRAPH_CALLOUT_TEST_ID);
+  }
+
+  async assertNodeEntityTag(nodeId: string, expectedTagValue: string): Promise<void> {
+    const node = await this.selectNode(nodeId);
+    const tagWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_TEXT_ID);
+    const tagText = await tagWrapper.getVisibleText();
+    expect(tagText.toLowerCase()).to.contain(expectedTagValue.toLowerCase());
+  }
+
+  async assertNodeEntityDetails(nodeId: string, expectedDetails: string): Promise<void> {
+    const node = await this.selectNode(nodeId);
+    const detailsElement = await node.findByTestSubject(GRAPH_NODE_ENTITY_DETAILS_ID);
+    const fullTextElement = await detailsElement.findByTestSubject('fullText');
+    const detailsText = await fullTextElement.getVisibleText();
+    expect(detailsText).to.be(expectedDetails);
+  }
+
+  async assertPreviewPanelGroupedItemTitleTextNumber(expected: number): Promise<void> {
+    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+    const titleTextElements = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
+    expect(titleTextElements.length).to.be(expected);
+  }
+
+  async assertPreviewPanelGroupedItemTitleLinkNumber(expected: number): Promise<void> {
+    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+    const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_LINK);
+    expect(groupedItems.length).to.be(expected);
+  }
+
+  async closePreviewSection(): Promise<void> {
+    await this.testSubjects.click(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID);
+  }
+
+  async assertGroupedItemActorAndTargetValues(
+    expectedCount: number,
+    actor: string,
+    target: string
+  ): Promise<void> {
+    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+    const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
+    expect(groupedItems.length).to.be.greaterThan(0);
+
+    // Count how many grouped items have the specified actor and target
+    let matchingCount = 0;
+    for (const groupedItem of groupedItems) {
+      try {
+        const actorElement = await groupedItem.findByTestSubject(GROUPED_ITEM_ACTOR_TEST_ID);
+        const targetElement = await groupedItem.findByTestSubject(GROUPED_ITEM_TARGET_TEST_ID);
+
+        const actorText = await actorElement.getVisibleText();
+        const targetText = await targetElement.getVisibleText();
+
+        if (actorText.includes(actor) && targetText.includes(target)) {
+          matchingCount++;
+        }
+      } catch (e) {
+        // This grouped item might not have actor/target (could be an entity), continue checking others
+        continue;
+      }
+    }
+
+    expect(matchingCount).to.be(expectedCount);
   }
 }
