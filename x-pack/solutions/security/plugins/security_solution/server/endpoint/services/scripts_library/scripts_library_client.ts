@@ -417,7 +417,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   public async get(scriptId: string): Promise<EndpointScript> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(scriptId));
   }
 
   public async list({
@@ -466,10 +466,43 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   public async delete(scriptId: string): Promise<void> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    const scriptSo = await this.getScriptSavedObject(scriptId);
+
+    await this.soClient
+      .delete(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)
+      .catch(catchAndWrapError.withMessage(`Failed to delete script with id: ${scriptId}`));
+
+    try {
+      await this.filesClient.delete({ id: scriptSo.attributes.file_id }).catch(catchAndWrapError);
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete file [${scriptSo.attributes.file_id}] for script [${scriptId}].File is now orphaned. ${error.message}`,
+        { error }
+      );
+    }
   }
 
   public async download(scriptId: string): Promise<ScriptDownloadResponse> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    const scriptSo = await this.getScriptSavedObject(scriptId);
+
+    const file = await this.filesClient
+      .get({ id: scriptSo.attributes.file_id })
+      .catch(
+        catchAndWrapError.withMessage(
+          `Failed to initialize File instance for file id [${scriptSo.attributes.file_id}] of script [${scriptId}]`
+        )
+      );
+
+    return {
+      stream: await file
+        .downloadContent()
+        .catch(
+          catchAndWrapError.withMessage(
+            `Failed to download file content for file id [${scriptSo.attributes.file_id}] of script [${scriptId}]`
+          )
+        ),
+      fileName: scriptSo.attributes.file_name,
+      mimeType: file.data.mimeType,
+    };
   }
 }
