@@ -55,6 +55,12 @@ export const EditSignificantEventFlyout = ({
     name: definition.stream.name,
   });
 
+  const onCloseFlyout = () => {
+    setIsEditFlyoutOpen(false);
+    setQueryToEdit(undefined);
+    setSelectedFeatures([]);
+  };
+
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
@@ -77,7 +83,7 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
 
                 telemetryClient.trackSignificantEventsCreated({
@@ -135,7 +141,7 @@ export const EditSignificantEventFlyout = ({
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
               },
               (error) => {
@@ -151,11 +157,7 @@ export const EditSignificantEventFlyout = ({
             break;
         }
       }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedFeatures([]);
-      }}
+      onClose={onCloseFlyout}
       initialFlow={initialFlow}
       initialSelectedFeatures={selectedFeatures}
       features={features}
