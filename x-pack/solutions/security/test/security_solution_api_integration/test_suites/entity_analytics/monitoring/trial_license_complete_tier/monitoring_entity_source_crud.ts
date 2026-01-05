@@ -16,12 +16,10 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { PrivMonUtils } from './utils';
-import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
   const privMonUtils = PrivMonUtils(getService);
-  const kibanaServer = getService('kibanaServer');
   const typedListEntitySources = async ({ query }: { query: ListEntitySourcesRequestQuery }) => {
     const listResponse = await api.listEntitySources({ query });
     return { ...listResponse, body: listResponse.body as ListEntitySourcesResponse };
@@ -69,14 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   describe('@ess @serverless @skipInServerlessMKI Monitoring Entity Source CRUD', () => {
-    before(async () => {
-      await enablePrivmonSetting(kibanaServer);
-    });
-
-    after(async () => {
-      await disablePrivmonSetting(kibanaServer);
-    });
-
     beforeEach(async () => {
       await privMonUtils.initPrivMonEngine();
     });

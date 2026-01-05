@@ -13,12 +13,10 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { DeleteEntitySourceRequestParams } from '../../../../../../common/api/entity_analytics';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const deleteMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -48,10 +46,6 @@ export const deleteMonitoringEntitySourceRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
 

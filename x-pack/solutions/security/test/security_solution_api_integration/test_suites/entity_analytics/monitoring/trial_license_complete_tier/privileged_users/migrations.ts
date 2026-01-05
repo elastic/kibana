@@ -19,7 +19,6 @@ import { PrivMonUtils } from '../utils';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log);
   const entityAnalyticsApi = getService('entityAnalyticsApi');
