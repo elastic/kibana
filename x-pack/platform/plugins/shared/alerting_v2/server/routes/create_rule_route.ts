@@ -13,9 +13,12 @@ import { inject, injectable } from 'inversify';
 import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
-
+import type { TypeOf } from '@kbn/config-schema';
 import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
-import { createEsqlRuleDataSchema } from '../application/esql_rule/methods/create';
+import {
+  createEsqlRuleDataSchema,
+  type CreateEsqlRuleData,
+} from '../application/esql_rule/methods/create';
 import { RulesClient } from '../application/esql_rule/lib/rules_client';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
@@ -39,7 +42,12 @@ export class CreateRuleRoute implements RouteHandler {
 
   constructor(
     @inject(Logger) private readonly logger: KibanaLogger,
-    @inject(Request) private readonly request: KibanaRequest,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      TypeOf<typeof createRuleParamsSchema>,
+      unknown,
+      CreateEsqlRuleData
+    >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}
@@ -47,8 +55,8 @@ export class CreateRuleRoute implements RouteHandler {
   async handle() {
     try {
       const created = await this.rulesClient.createEsqlRule({
-        data: this.request.body as any,
-        options: { id: (this.request.params as any).id },
+        data: this.request.body,
+        options: { id: this.request.params.id },
       });
 
       return this.response.ok({ body: created });
