@@ -280,7 +280,11 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const { assetIds } = request.body;
   const savedObjectsClient = coreContext.savedObjects.getClient({
-    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate, KibanaSavedObjectType.alert],
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.alert,
+      KibanaSavedObjectType.sloTemplate,
+    ],
   });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(

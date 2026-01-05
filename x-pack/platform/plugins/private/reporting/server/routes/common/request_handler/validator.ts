@@ -113,6 +113,7 @@ const jobParamsSchema = z
     columns: z.array(z.string()).optional(), // this is for CSV v1 compatibility
     relativeUrls: relativeUrlsSchema.optional(), // used in tests could be legacy
     relativeUrl: relativeUrlSchema.optional(), // used in tests could be legacy
+    isEsqlMode: z.boolean().optional(), // for CSV reports
   })
   .strict();
 

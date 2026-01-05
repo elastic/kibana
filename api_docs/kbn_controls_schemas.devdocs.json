@@ -37,7 +37,7 @@
         "label": "ControlsGroupState",
         "description": [],
         "signature": [
-          "{ readonly enhancements?: Record<string, any> | undefined; readonly ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; readonly controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; readonly labelPosition: \"oneLine\" | \"twoLine\"; readonly chainingSystem: \"HIERARCHICAL\" | \"NONE\"; readonly autoApplySelections: boolean; }"
+          "{ readonly enhancements?: Record<string, any> | undefined; readonly ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; readonly controls: Readonly<{ id?: string | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; readonly labelPosition: \"oneLine\" | \"twoLine\"; readonly chainingSystem: \"HIERARCHICAL\" | \"NONE\"; readonly autoApplySelections: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "deprecated": false,
@@ -82,7 +82,7 @@
         "label": "ControlState",
         "description": [],
         "signature": [
-          "{ readonly id?: string | undefined; readonly grow?: boolean | undefined; readonly width?: \"small\" | \"medium\" | \"large\" | undefined; readonly controlConfig?: Readonly<{} & {}> | undefined; readonly type: string; readonly order: number; }"
+          "{ readonly id?: string | undefined; readonly width?: \"small\" | \"medium\" | \"large\" | undefined; readonly grow?: boolean | undefined; readonly controlConfig?: Readonly<{} & {}> | undefined; readonly type: string; readonly order: number; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "deprecated": false,
@@ -129,7 +129,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]>; labelPosition: ",
+          "<Readonly<{ id?: string | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]>; labelPosition: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
