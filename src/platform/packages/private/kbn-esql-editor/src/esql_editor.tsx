@@ -90,6 +90,7 @@ import {
 } from './custom_editor_commands';
 import { IndicesBrowserPopup } from './indices_browser/indices_browser_popup';
 import { FieldsBrowserPopup } from './fields_browser/fields_browser_popup';
+import { useCommandBadges } from './command_badges/use_command_badges';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -836,6 +837,9 @@ const ESQLEditorInternal = function ESQLEditor({
     onNewFieldsAddedToLookupIndex,
     onOpenQueryInNewTab
   );
+
+  // Add command badges for FROM and WHERE commands
+  useCommandBadges(editorRef, editorModel, query.esql, enableIndicesBrowser);
 
   useDebounceWithOptions(
     async () => {

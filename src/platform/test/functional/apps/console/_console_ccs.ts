@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
   // FLAKY: https://github.com/elastic/kibana/issues/240147
-  describe.skip('Console App CCS', function describeIndexTests() {
+  describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
