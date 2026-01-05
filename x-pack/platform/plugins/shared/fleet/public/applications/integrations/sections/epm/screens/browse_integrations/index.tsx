@@ -37,8 +37,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm,
     setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
@@ -46,7 +44,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlandReplaceHistory({
-      searchString: searchTerm,
+      searchString: '',
       categoryId: '',
       subCategoryId: '',
       onlyAgentless: onlyAgentlessFilter,
@@ -80,7 +78,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <SearchAndFiltersBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <SearchAndFiltersBar />
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
             grow={1}
