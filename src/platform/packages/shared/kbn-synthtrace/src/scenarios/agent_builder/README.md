@@ -29,7 +29,7 @@ node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenario
 ### 2. Running the Tool via API
 
 To execute a tool via the Kibana API, use the following `curl` command.
-**Note:** Replace `<tool_name>` with the specific tool identifier (e.g., `process_list`, `aws_s3`).
+**Note:** Replace `<tool_name>` with the a valid tool name
 
 ```bash
 curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
