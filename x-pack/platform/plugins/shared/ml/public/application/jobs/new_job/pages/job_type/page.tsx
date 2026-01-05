@@ -285,6 +285,7 @@ export const Page: FC = () => {
           }
         />
       </MlPageHeader>
+      <EuiSpacer size="l" />
 
       {isTimeBasedIndex === false && (
         <>
@@ -306,7 +307,7 @@ export const Page: FC = () => {
               />
             </EuiLink>
           </EuiCallOut>
-          <EuiSpacer size="xxl" />
+          <EuiSpacer size="l" />
         </>
       )}
 
