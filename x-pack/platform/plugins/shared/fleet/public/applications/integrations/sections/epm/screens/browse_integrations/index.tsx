@@ -12,7 +12,7 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
-import { PackageGrid } from './components/package_grid';
+import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
@@ -93,7 +93,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             {filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (
-              <PackageGrid
+              <ResponsivePackageGrid
                 items={filteredCards}
                 isLoading={
                   isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations

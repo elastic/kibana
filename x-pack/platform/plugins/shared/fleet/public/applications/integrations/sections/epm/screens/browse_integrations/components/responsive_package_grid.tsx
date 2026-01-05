@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useIsWithinMaxBreakpoint } from '@elastic/eui';
 
 import { GridColumn } from '../../../components/package_list_grid/grid';
 import type { IntegrationCardItem } from '../../home';
@@ -15,6 +16,10 @@ export interface PackageGridProps {
   isLoading: boolean;
 }
 
-export const PackageGrid: React.FC<PackageGridProps> = ({ items, isLoading }) => {
-  return <GridColumn list={items} isLoading={isLoading} columnCount={2} gutterSize="s" />;
+export const ResponsivePackageGrid: React.FC<PackageGridProps> = ({ items, isLoading }) => {
+  const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
+  const isWithinSmallBreakpoint = useIsWithinMaxBreakpoint('s');
+
+  const columnCount = isWithinSmallBreakpoint ? 1 : isWithinLargeBreakpoint ? 2 : 3;
+  return <GridColumn list={items} isLoading={isLoading} columnCount={columnCount} gutterSize="s" />;
 };
