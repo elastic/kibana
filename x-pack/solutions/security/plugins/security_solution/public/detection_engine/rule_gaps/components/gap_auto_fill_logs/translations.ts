@@ -195,7 +195,8 @@ export const GAP_AUTO_FILL_STATUS_SKIPPED_RULES_DISABLED_TOOLTIP = i18n.translat
 export const GAP_AUTO_FILL_STATUS_SKIPPED_SOME_SUCCEEDED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSkippedSomeSucceededTooltip',
   {
-    defaultMessage: 'At least 1 rule successfully scheduled. No capacity to schedule more backfills.',
+    defaultMessage:
+      'At least 1 rule successfully scheduled. No capacity to schedule more backfills.',
   }
 );
 

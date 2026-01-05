@@ -121,9 +121,7 @@ describe('getStatusTooltip', () => {
         status: GAP_AUTO_FILL_STATUS.SKIPPED,
         message:
           'Skipped execution: gap auto-fill capacity limit reached. This task can schedule at most 10 gap backfills at a time, and existing backfills must finish before new ones can be scheduled.',
-        results: [
-          { rule_id: 'rule-1', status: 'success', processed_gaps: 5 },
-        ],
+        results: [{ rule_id: 'rule-1', status: 'success', processed_gaps: 5 }],
       };
 
       const tooltip = getStatusTooltip(logEntry);
