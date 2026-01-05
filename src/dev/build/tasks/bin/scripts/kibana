@@ -38,6 +38,7 @@ fi
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
 fi
+KBN_ENABLE_JEMALLOC='true' # for testing temporarily
 if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
   export LD_PRELOAD='/usr/lib/libjemalloc.so.2'
   if [ ! -f "$LD_PRELOAD" ]; then
