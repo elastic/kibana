@@ -57,8 +57,7 @@ export const createDeletionDetectionService = (
     ) {
       // Proceed with deletion detection
       dataClient.log('debug', `Full sync detected for ${source.id}. Running deletion detection...`);
-      // get all users in the integrations docs between the two timestamps
-      // TODO: testing, ensure this works with partial and full sync markers. Using NEW shared aggregate query.
+      // get all users in the integrations docs between the two timestamps  
       const allIntegrationsUserNames = await getAllUserNamesInAggregation({
         dataClient,
         indexPattern: source.indexPattern,
