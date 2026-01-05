@@ -10,7 +10,7 @@ import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/s
 import pMap from 'p-map';
 import { dump } from 'js-yaml';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
 import { inputsFormat } from '../../../common/constants';
 
@@ -59,6 +59,8 @@ import { getAutoUpgradeAgentsStatus } from '../../services/agents';
 import { cleanupPolicyRevisions } from '../../tasks/fleet_policy_revisions_cleanup/cleanup_policy_revisions';
 
 import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents';
+
+const deduplicateIds = (ids: string[]) => uniq(ids);
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -188,7 +190,8 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   try {
     const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
-    const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+    const { full: withPackagePolicies = false, ignoreMissing = false } = request.body;
+    const ids = deduplicateIds(request.body.ids);
     if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
       throw new FleetUnauthorizedError(
         'full query parameter require agent policies read permissions'
