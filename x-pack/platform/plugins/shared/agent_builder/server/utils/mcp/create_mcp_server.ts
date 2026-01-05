@@ -9,10 +9,13 @@ import type { ZodTypeAny } from '@kbn/zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import type { PromptManagerInitialState, Runner } from '@kbn/agent-builder-server/runner';
 import { KibanaMcpHttpTransport } from './kibana_mcp_http_transport';
 import type { ToolRegistry } from '../../services/tools';
 
@@ -21,12 +24,16 @@ const MCP_SERVER_VERSION = '0.0.1';
 
 export const createMcpServer = async ({
   logger,
+  request,
   toolRegistry,
+  runner,
   serverName = MCP_SERVER_NAME,
   serverVersion = MCP_SERVER_VERSION,
 }: {
   logger: Logger;
+  request: KibanaRequest;
   toolRegistry: ToolRegistry;
+  runner: Runner;
   serverName?: string;
   serverVersion?: string;
 }) => {
@@ -44,7 +51,7 @@ export const createMcpServer = async ({
   const idMapping = createToolIdMappings(tools);
 
   for (const tool of tools) {
-    await addTool({ server, tool, toolRegistry, idMapping });
+    await addTool({ server, tool, runner, request, idMapping });
   }
 
   return { server, transport };
@@ -52,18 +59,20 @@ export const createMcpServer = async ({
 
 const addTool = async ({
   server,
+  request,
+  runner,
   idMapping,
-  toolRegistry,
   tool,
 }: {
   server: McpServer;
+  request: KibanaRequest;
   tool: InternalToolDefinition;
-  toolRegistry: ToolRegistry;
+  runner: Runner;
   idMapping: ToolIdMapping;
 }) => {
   const toolId = idMapping.get(tool.id) ?? tool.id;
   const toolSchema = await tool.getSchema();
-  const toolHandler = createHandler({ server, tool, toolRegistry });
+  const toolHandler = createHandler({ server, tool, runner, request });
 
   server.registerTool(
     toolId,
@@ -74,18 +83,43 @@ const addTool = async ({
 
 const createHandler = ({
   tool,
-  toolRegistry,
   server,
+  request,
+  runner,
 }: {
   tool: InternalToolDefinition;
-  toolRegistry: ToolRegistry;
+  runner: Runner;
+  request: KibanaRequest;
   server: McpServer;
 }) => {
-  const handler: ToolCallback<ZodTypeAny> = async (args, extra) => {
-    const toolResult = await toolRegistry.execute({ toolId: tool.id, toolParams: args });
+  const handler: ToolCallback<ZodTypeAny> = async (args) => {
+    const promptState: PromptManagerInitialState = {
+      promptMap: {},
+    };
 
-    if (toolResult.prompt) {
-      // TODO
+    const callTool = () => {
+      return runner.runTool({
+        toolId: tool.id,
+        toolParams: args,
+        promptState,
+        request,
+      });
+    };
+
+    let toolResult = await callTool();
+
+    // Handle prompts in a loop - tool can return multiple prompts sequentially
+    while (toolResult.prompt) {
+      const confirmed = await elicitConfirmation({ confirmation: toolResult.prompt, server });
+
+      // Update promptState with the user's confirmation response
+      promptState.promptMap[toolResult.prompt.id] = {
+        type: AgentPromptType.confirmation,
+        confirmed,
+      };
+
+      // User confirmed, call the tool again - it may return another prompt or the final result
+      toolResult = await callTool();
     }
 
     return {

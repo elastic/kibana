@@ -59,10 +59,11 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, runnerFactory } = getInternalServices();
         const toolRegistry = await toolService.getRegistry({ request });
+        const runner = runnerFactory.getRunner();
 
-        const { server, transport } = await createMcpServer({ logger, toolRegistry });
+        const { server, transport } = await createMcpServer({ logger, runner, toolRegistry });
 
         request.events.aborted$.subscribe(async () => {
           await transport.close().catch((error) => {

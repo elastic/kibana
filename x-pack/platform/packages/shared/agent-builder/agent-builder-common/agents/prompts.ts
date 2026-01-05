@@ -49,6 +49,7 @@ export interface ConfirmPromptDefinition {
 }
 
 export interface ConfirmationPromptResponse {
+  type: AgentPromptType.confirmation;
   confirmed: boolean;
 }
 
@@ -58,6 +59,8 @@ export interface ConfirmationPrompt extends ConfirmPromptDefinition {
 
 // all types of prompt
 export type PromptRequest = ConfirmationPrompt;
+// all types of prompt response
+export type PromptResponse = ConfirmationPromptResponse;
 
 export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
   return prompt.type === AgentPromptType.confirmation;
