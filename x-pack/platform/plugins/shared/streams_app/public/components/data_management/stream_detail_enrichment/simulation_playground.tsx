@@ -116,7 +116,12 @@ export const SimulationPlayground = ({
                 onClick={viewSimulationDetectedFields}
                 append={
                   detectedFields.length > 0 ? (
-                    <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+                    <EuiNotificationBadge
+                      size="m"
+                      data-test-subj="streamsAppModifiedFieldsBadge"
+                    >
+                      {detectedFields.length}
+                    </EuiNotificationBadge>
                   ) : undefined
                 }
               >
