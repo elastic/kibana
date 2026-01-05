@@ -7,7 +7,11 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { Conversation, ConversationRound, VersionedAttachment } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { registerAttachmentRoutes } from './attachments';
