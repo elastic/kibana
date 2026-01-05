@@ -21,8 +21,7 @@ import { SuggestionCategory } from '../../../../../../shared';
 
 /**
  * Suggests completions after the cast (::) keyword.
- * We suggest only casting types that can be applied to the value being casted, and
- * only those types that are expected for the containing expression.
+ * We suggest only casting types that can be applied to the value being casted.
  */
 export async function suggestAfterCast(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
   // If there is not expression root, suggest all casting types as we don't have enough information for filtering.
