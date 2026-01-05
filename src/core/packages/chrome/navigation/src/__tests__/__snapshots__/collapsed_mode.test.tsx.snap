@@ -15,7 +15,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         id="generated-id_euiToolTipAnchor"
       >
         <div
-          class="css-1foxb6k-wrapperStyles"
+          class="css-fudlyt-wrapperStyles"
           data-test-subj="kbnChromeNav-logoWrapper"
         >
           <a
@@ -192,7 +192,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-9dycdq-root"
+        class="css-3mngca-root"
         data-test-subj="kbnChromeNav-footer"
       >
         <div

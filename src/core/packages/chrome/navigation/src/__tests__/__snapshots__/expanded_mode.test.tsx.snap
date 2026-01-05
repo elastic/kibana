@@ -11,7 +11,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
       class="kbnChromeNav-root css-vka7tb-getNavWrapperStyles"
     >
       <div
-        class="css-mz8mhp-wrapperStyles"
+        class="css-1ja8ujo-wrapperStyles"
         data-test-subj="kbnChromeNav-logoWrapper"
       >
         <a
@@ -33,7 +33,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
             />
           </div>
           <div
-            class="euiText emotion-euiText-xs-euiTextAlign-center-textStyles-labelStyles"
+            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
           >
             Solution
           </div>
@@ -81,7 +81,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Dashboards
               </div>
@@ -117,7 +117,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Discover
               </div>
@@ -161,7 +161,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>
@@ -177,7 +177,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-rid3i7-root"
+        class="css-18gcnxt-root"
         data-test-subj="kbnChromeNav-footer"
       >
         <div
