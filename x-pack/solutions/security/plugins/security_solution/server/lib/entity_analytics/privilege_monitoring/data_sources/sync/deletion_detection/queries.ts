@@ -9,12 +9,6 @@ import type { AfterKey, StaleUsersAggregations } from '../types';
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 
 /**
- *  Shared Queries to use across both plain index and integration sources
- * // TODO: if file structure changes to deletion detection and update detection folders, move to common deletion detection folder.
- * Unless this is used for update detection too - check this
- */
-
-/**
  * Builds the search body to find users with sync markers (time range)
  * For integrations sync, time range filter is required due to full and partial sync markers.
  * @param timeGte - earliest sync time
