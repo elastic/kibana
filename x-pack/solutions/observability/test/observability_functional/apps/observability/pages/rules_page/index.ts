@@ -11,63 +11,23 @@ import { createRulesPageHelpers } from './helpers';
 
 const RULE_ALERT_INDEX_PATTERN = '.alerts-stack.alerts-*';
 
-export default ({ getService, getPageObjects }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
-  const find = getService('find');
   const retry = getService('retry');
   const rulesService = getService('rules');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const RULE_ENDPOINT = '/api/alerting/rule';
 
-  const PageObjects = getPageObjects(['header']);
-
-  const { getRuleByName, deleteRuleById, navigateAndOpenRuleTypeModal } =
-    createRulesPageHelpers(getService);
+  const { deleteRuleById } = createRulesPageHelpers(getService);
 
   async function createRule(rule: any): Promise<string> {
     const ruleResponse = await supertest.post(RULE_ENDPOINT).set('kbn-xsrf', 'foo').send(rule);
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
   }
-
-  const getRulesList = async (tableRows: any[]) => {
-    const rows = [];
-    for (const euiTableRow of tableRows) {
-      const $ = await euiTableRow.parseDomContent();
-      rows.push({
-        name: $.findTestSubjects('rulesTableCell-name').text(),
-        enabled: $.findTestSubjects('rulesTableCell-status').find('button').attr('title'),
-      });
-    }
-    return rows;
-  };
-
-  const selectAndFillInEsQueryRule = async (ruleName: string) => {
-    await testSubjects.click(`.es-query-SelectOption`);
-    await retry.waitFor(
-      'Create Rule form is visible',
-      async () => await testSubjects.exists('ruleForm')
-    );
-
-    await testSubjects.setValue('ruleDetailsNameInput', ruleName);
-    await testSubjects.click('queryFormType_esQuery');
-    await testSubjects.click('selectIndexExpression');
-    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await indexComboBox.click();
-    await indexComboBox.type('*');
-    const filterSelectItems = await find.allByCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItems[1].click();
-    await testSubjects.click('thresholdAlertTimeFieldSelect');
-    await retry.try(async () => {
-      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-      expect(fieldOptions[1]).not.to.be(undefined);
-      await fieldOptions[1].click();
-    });
-    await testSubjects.click('closePopover');
-  };
 
   describe('Observability Rules page', function () {
     this.tags('includeFirefox');
