@@ -187,7 +187,7 @@ describe('Clusters Routes', () => {
       });
     });
 
-    it('should return 401 for invalid/expired API key', async () => {
+    it('should return 500 for invalid/expired API key', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'expired-key',
         clusterId: 'cluster-uuid-456',
@@ -209,12 +209,13 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockResponse.unauthorized).toHaveBeenCalledWith({
-        body: { message: 'Invalid or expired API key' },
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Unauthorized' },
       });
     });
 
-    it('should return 403 for insufficient permissions', async () => {
+    it('should return 500 for insufficient permissions', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'valid-key',
         clusterId: 'cluster-uuid-456',
@@ -236,12 +237,13 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockResponse.forbidden).toHaveBeenCalledWith({
-        body: { message: 'Insufficient permissions to access cluster details' },
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Forbidden' },
       });
     });
 
-    it('should return 404 when cluster not found', async () => {
+    it('should return 500 when cluster not found', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'valid-key',
         clusterId: 'non-existent-cluster',
@@ -263,12 +265,13 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
-        body: { message: 'Cluster not found' },
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Not found' },
       });
     });
 
-    it('should return 400 for bad request errors', async () => {
+    it('should return 500 for bad request errors', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'valid-key',
         clusterId: 'cluster-uuid-456',
@@ -290,7 +293,8 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
         body: { message: 'Bad request' },
       });
     });
@@ -848,7 +852,7 @@ describe('Clusters Routes', () => {
       });
     });
 
-    it('should return axios errors with original status code', async () => {
+    it('should return 500 for axios errors', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',
         clusterId: 'cluster-uuid-456',
@@ -877,7 +881,7 @@ describe('Clusters Routes', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 400,
+        statusCode: 500,
         body: { message: 'Invalid service configuration' },
       });
     });

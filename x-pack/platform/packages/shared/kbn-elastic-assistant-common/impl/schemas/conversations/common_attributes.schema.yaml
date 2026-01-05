@@ -443,6 +443,9 @@ components:
           type: string
           description: Message content.
           example: 'Hello, how can I assist you today?'
+        refusal:
+          type: string
+          description: Refusal reason returned by the model when content is filtered.
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
