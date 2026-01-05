@@ -63,27 +63,43 @@ Uses "categorize_text" aggregation to group similar unstructured messages into p
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
     handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
-      const logIndexPatterns = await getLogsIndices({ core, logger });
+      try {
+        const logIndexPatterns = await getLogsIndices({ core, logger });
 
-      const topLogChangePoints = await getToolHandler({
-        esClient,
-        start,
-        end,
-        index: index || logIndexPatterns.join(','),
-        kqlFilter,
-        messageField,
-      });
+        const topLogChangePoints = await getToolHandler({
+          esClient,
+          start,
+          end,
+          index: index || logIndexPatterns.join(','),
+          kqlFilter,
+          messageField,
+        });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              changePoints: topLogChangePoints,
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                changePoints: topLogChangePoints,
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error getting log change points: ${error.message}`);
+        logger.debug(error);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Error getting log change points: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

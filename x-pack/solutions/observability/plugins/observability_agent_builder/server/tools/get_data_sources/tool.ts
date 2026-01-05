@@ -48,16 +48,32 @@ export function createGetDataSourcesTool({
       },
     },
     handler: async () => {
-      const data = await getToolHandler({ core, plugins, logger });
+      try {
+        const data = await getToolHandler({ core, plugins, logger });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data,
-          },
-        ],
-      };
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data,
+            },
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error getting observability data sources: ${error.message}`);
+        logger.debug(error);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Failed to retrieve observability data sources: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

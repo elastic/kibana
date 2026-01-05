@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
@@ -89,7 +90,7 @@ When to use:
       toolParams,
       { esClient, request }
     ): Promise<{
-      results: GetAnomalyDetectionJobsToolResult[];
+      results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
       const {
         jobIds,
@@ -100,29 +101,45 @@ When to use:
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 
-      const mlJobs = await getToolHandler({
-        core,
-        plugins,
-        mlClient,
-        request,
-        logger,
-        jobIds,
-        jobsLimit,
-        rangeStart,
-        rangeEnd,
-      });
+      try {
+        const mlJobs = await getToolHandler({
+          core,
+          plugins,
+          mlClient,
+          request,
+          logger,
+          jobIds,
+          jobsLimit,
+          rangeStart,
+          rangeEnd,
+        });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              jobs: mlJobs,
-              totalReturned: mlJobs.length,
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                jobs: mlJobs,
+                totalReturned: mlJobs.length,
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error retrieving anomaly detection jobs: ${error.message}`);
+        logger.debug(error);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Failed to retrieve anomaly detection jobs: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

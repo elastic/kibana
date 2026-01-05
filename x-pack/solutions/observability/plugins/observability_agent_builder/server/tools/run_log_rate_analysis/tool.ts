@@ -84,29 +84,44 @@ Do NOT use for:
     handler: async (toolParams, context) => {
       const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
 
-      const esClient = context.esClient.asCurrentUser;
+      try {
+        const esClient = context.esClient.asCurrentUser;
 
-      const { analysisType, items } = await getToolHandler({
-        esClient,
-        logger,
-        index,
-        timeFieldName,
-        baseline,
-        deviation,
-        searchQuery,
-      });
+        const { analysisType, items } = await getToolHandler({
+          esClient,
+          logger,
+          index,
+          timeFieldName,
+          baseline,
+          deviation,
+          searchQuery,
+        });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              analysisType,
-              items,
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                analysisType,
+                items,
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      } catch (error) {
+        logger.error(`Log rate analysis tool failed: ${error.message}`);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: error.message,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

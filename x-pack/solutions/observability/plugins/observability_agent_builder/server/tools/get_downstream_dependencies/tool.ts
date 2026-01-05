@@ -73,28 +73,45 @@ When to use:
       } = toolParams;
       const { request } = context;
 
-      const { dependencies } = await getToolHandler({
-        request,
-        dataRegistry,
-        serviceName,
-        serviceEnvironment,
-        start,
-        end,
-      });
+      try {
+        const { dependencies } = await getToolHandler({
+          request,
+          dataRegistry,
+          serviceName,
+          serviceEnvironment,
+          start,
+          end,
+        });
 
-      const total = dependencies?.length ?? 0;
+        const total = dependencies?.length ?? 0;
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              total,
-              dependencies,
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                total,
+                dependencies,
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error getting APM downstream dependencies: ${error.message}`);
+        logger.debug(error);
+
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Failed to fetch downstream dependencies: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

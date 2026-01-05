@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ErrorResult, OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -94,7 +94,10 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (toolParams, { request }): Promise<ToolHandlerReturn<GetHostsToolResult>> => {
+    handler: async (
+      toolParams,
+      { request }
+    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
       const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
@@ -102,26 +105,43 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
         kqlFilter,
       } = toolParams;
 
-      const { hosts, total } = await getToolHandler({
-        request,
-        dataRegistry,
-        start,
-        end,
-        limit,
-        kqlFilter,
-      });
+      try {
+        const { hosts, total } = await getToolHandler({
+          request,
+          dataRegistry,
+          start,
+          end,
+          limit,
+          kqlFilter,
+        });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other as const,
-            data: {
-              hosts,
-              total,
+        return {
+          results: [
+            {
+              type: ToolResultType.other as const,
+              data: {
+                hosts,
+                total,
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error fetching hosts: ${error.message}`);
+        logger.debug(error);
+
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Failed to fetch hosts: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

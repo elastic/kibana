@@ -120,48 +120,65 @@ Do NOT use for:
         maxLogsPerSequence = 200,
       } = toolParams;
 
-      const { sequences } = await getToolHandler({
-        core,
-        logger,
-        esClient,
-        start,
-        end,
-        kqlFilter,
-        errorLogsOnly,
-        index,
-        correlationFields,
-        logId,
-        logSourceFields,
-        maxSequences,
-        maxLogsPerSequence,
-      });
-
-      if (sequences.length === 0) {
-        const message = getNoResultsMessage({
-          logId,
-          kqlFilter,
-          errorLogsOnly,
-          correlationFields,
+      try {
+        const { sequences } = await getToolHandler({
+          core,
+          logger,
+          esClient,
           start,
           end,
+          kqlFilter,
+          errorLogsOnly,
+          index,
+          correlationFields,
+          logId,
+          logSourceFields,
+          maxSequences,
+          maxLogsPerSequence,
         });
+
+        if (sequences.length === 0) {
+          const message = getNoResultsMessage({
+            logId,
+            kqlFilter,
+            errorLogsOnly,
+            correlationFields,
+            start,
+            end,
+          });
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  sequences: [],
+                  message,
+                },
+              },
+            ],
+          };
+        }
+
+        return {
+          results: [{ type: ToolResultType.other, data: { sequences } }],
+        };
+      } catch (error) {
+        logger.error(`Error fetching errors and surrounding logs: ${error.message}`);
+        logger.debug(error);
 
         return {
           results: [
             {
-              type: ToolResultType.other,
+              type: ToolResultType.error,
               data: {
-                sequences: [],
-                message,
+                message: `Failed to fetch errors and surrounding logs: ${error.message}`,
+                stack: error.stack,
               },
             },
           ],
         };
       }
-
-      return {
-        results: [{ type: ToolResultType.other, data: { sequences } }],
-      };
     },
   };
 

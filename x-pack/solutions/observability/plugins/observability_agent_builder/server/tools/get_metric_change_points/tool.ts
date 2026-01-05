@@ -74,28 +74,44 @@ When to use:
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
     handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
-      const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
+      try {
+        const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 
-      const topMetricChangePoints = await getToolHandler({
-        esClient,
-        start,
-        end,
-        index: index || metricIndexPatterns.join(','),
-        kqlFilter,
-        aggregation,
-        groupBy,
-      });
+        const topMetricChangePoints = await getToolHandler({
+          esClient,
+          start,
+          end,
+          index: index || metricIndexPatterns.join(','),
+          kqlFilter,
+          aggregation,
+          groupBy,
+        });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              changePoints: topMetricChangePoints,
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                changePoints: topMetricChangePoints,
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error getting metric change points: ${error.message}`);
+        logger.debug(error);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Error getting metric change points: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 

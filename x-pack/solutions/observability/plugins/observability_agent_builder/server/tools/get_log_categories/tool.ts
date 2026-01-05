@@ -89,24 +89,41 @@ Do NOT use for:
         terms,
       } = toolParams;
 
-      const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
-        core,
-        logger,
-        esClient,
-        index,
-        start,
-        end,
-        terms,
-      });
+      try {
+        const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
+          core,
+          logger,
+          esClient,
+          index,
+          start,
+          end,
+          terms,
+        });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: { highSeverityCategories, lowSeverityCategories },
-          },
-        ],
-      };
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { highSeverityCategories, lowSeverityCategories },
+            },
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error fetching log categories: ${error.message}`);
+        logger.debug(error);
+
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Failed to fetch log categories: ${error.message}`,
+                stack: error.stack,
+              },
+            },
+          ],
+        };
+      }
     },
   };
 
