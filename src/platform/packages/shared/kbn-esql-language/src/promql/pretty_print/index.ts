@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LoadingIndices } from './loading_indices';
+export {
+  PromQLBasicPrettyPrinter,
+  type PromQLBasicPrettyPrinterOptions,
+} from './basic_pretty_printer';
