@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "payment-service"',
+            kqlFilter: 'service.name: "payment-service"',
           },
         });
 
@@ -97,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "payment-service"',
+            kqlFilter: 'service.name: "payment-service"',
           },
         });
 
@@ -119,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "non-existing-service"',
+            kqlFilter: 'service.name: "non-existing-service"',
           },
         });
 
@@ -153,7 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "checkout-service"',
+            kqlFilter: 'service.name: "checkout-service"',
           },
         });
 
@@ -167,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "checkout-service"',
+            kqlFilter: 'service.name: "checkout-service"',
           },
         });
 
@@ -222,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "multi-service"',
+            kqlFilter: 'service.name: "multi-service"',
           },
         });
 
@@ -236,7 +236,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "multi-service"',
+            kqlFilter: 'service.name: "multi-service"',
           },
         });
 
@@ -292,15 +292,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "no-correlation-service"',
+            kqlFilter: 'service.name: "no-correlation-service"',
           },
         });
 
         const { sequences, message } = results[0].data;
         expect(sequences.length).to.be(0);
-        expect(message).to.contain('No log sequences found');
-        expect(message).to.contain('No matching logs exist in this time range');
-        expect(message).to.contain('`logsFilter` is too restrictive');
+        expect(message).to.contain('No log sequences found.');
       });
     });
 
@@ -333,7 +331,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "service-a"',
+            kqlFilter: 'service.name: "service-a"',
           },
         });
 
@@ -408,7 +406,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsFilter: `service.name: "${service}"`,
+              kqlFilter: `service.name: "${service}"`,
             },
           });
 
@@ -444,7 +442,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "priority-service"',
+            kqlFilter: 'service.name: "priority-service"',
           },
         });
 
@@ -505,7 +503,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsFilter: `service.name: "${service}"`,
+              kqlFilter: `service.name: "${service}"`,
             },
           });
 
@@ -636,7 +634,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsFilter: `service.name: "${service}"`,
+              kqlFilter: `service.name: "${service}"`,
             },
           });
 
@@ -732,7 +730,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsFilter: 'service.name: "fields-service"',
+            kqlFilter: 'service.name: "fields-service"',
             logSourceFields: ['message', 'service.name'],
           },
         });
@@ -776,7 +774,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsFilter: 'service.name: "limit-service"',
+              kqlFilter: 'service.name: "limit-service"',
               maxSequences: 3,
             },
           });
@@ -820,7 +818,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsFilter: 'service.name: "limit-logs-service"',
+              kqlFilter: 'service.name: "limit-logs-service"',
               maxLogsPerSequence: 5,
             },
           });
@@ -866,7 +864,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-5m',
             end: 'now',
-            logsFilter: 'service.name: "starvation-service"',
+            kqlFilter: 'service.name: "starvation-service"',
             maxSequences: 10,
           },
         });

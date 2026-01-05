@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
       repository: elastic/kibana
-      branch_configuration: main 9.3 9.2 9.1 8.19
+      branch_configuration: main
       default_branch: main
       pipeline_file: ".buildkite/pipelines/node_glibc_217.yml"
       provider_settings:
@@ -30,18 +30,6 @@ spec:
       schedules:
         Daily run (main):
           branch: main
-          cronline: "@daily"
-        Daily run (9.3):
-          branch: '9.3'
-          cronline: "@daily"
-        Daily run (9.2):
-          branch: '9.2'
-          cronline: "@daily"
-        Daily run (9.1):
-          branch: '9.1'
-          cronline: "@daily"
-        Daily run (8.19):
-          branch: '8.19'
           cronline: "@daily"
       teams:
         kibana-operations:
