@@ -201,18 +201,17 @@ export class RulesClient {
     }
 
     try {
-      await savedObjectsClient.create<RuleSavedObjectAttributes>(
+      await savedObjectsClient.update<RuleSavedObjectAttributes>(
         RULE_SAVED_OBJECT_TYPE,
+        id,
         nextAttrs,
         {
-          id,
-          overwrite: true,
           ...(existingVersion ? { version: existingVersion } : {}),
         }
       );
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`ES|QL rule with id "${id}" has already been updated by another user`);
+        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
       }
       throw e;
     }

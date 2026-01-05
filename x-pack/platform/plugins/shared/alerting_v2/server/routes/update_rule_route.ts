@@ -8,9 +8,7 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { Logger as KibanaLogger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
-import { Logger } from '@kbn/core-di';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -29,7 +27,7 @@ const updateRuleParamsSchema = schema.object({
 
 @injectable()
 export class UpdateRuleRoute {
-  static method = 'put' as const;
+  static method = 'patch' as const;
   static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id}`;
   static security = DEFAULT_ALERTING_V2_ROUTE_SECURITY;
   static options = { access: 'internal', tags: ['access:alerting'] } as const;
@@ -41,7 +39,6 @@ export class UpdateRuleRoute {
   } as const;
 
   constructor(
-    @inject(Logger) private readonly logger: KibanaLogger,
     @inject(Request)
     private readonly request: KibanaRequest<
       TypeOf<typeof updateRuleParamsSchema>,
