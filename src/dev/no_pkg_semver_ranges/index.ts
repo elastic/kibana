@@ -33,11 +33,19 @@ export function checkSemverRanges(
   }
 
   const pkg = JSON.parse(pkgJsonContent);
-  const resolveVersionFromYarnLock = (name: string): string | null => {
-    const pattern = new RegExp(`^\"?${name.replaceAll('/', '\\/')}@.+?:\\s+version "(.*?)"$`, 'm');
-    const match = yarnLockContent.match(pattern);
-    if (match && match[1]) {
-      return match[1];
+  const yarnLockLines = yarnLockContent.split('\n');
+  const resolveVersionFromYarnLock = (name: string, version: string): string | null => {
+    const versionSpec = `${name}@${version}`;
+    const versionLineIndex = yarnLockLines.findIndex(
+      (line) => line.includes(versionSpec) || line.includes(`"${versionSpec}"`)
+    );
+    if (versionLineIndex === -1) {
+      return null;
+    }
+
+    const versionMatch = yarnLockLines[versionLineIndex + 1].match('^\\s+version "(.*?)"$');
+    if (versionMatch && versionMatch[1]) {
+      return versionMatch[1];
     }
     return null;
   };
@@ -55,7 +63,7 @@ export function checkSemverRanges(
       if (typeof version !== 'string') continue;
 
       if (version.startsWith('^') || version.startsWith('~')) {
-        const resolvedVersion = resolveVersionFromYarnLock(name);
+        const resolvedVersion = resolveVersionFromYarnLock(name, version);
         if (!resolvedVersion) {
           throw new Error(
             `Could not resolve version for ${name} with version ${version} from yarn.lock`

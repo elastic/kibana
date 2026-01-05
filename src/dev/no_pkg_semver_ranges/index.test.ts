@@ -96,6 +96,42 @@ typescript@~4.9.5:
     );
   });
 
+  it(`finds the correct version bump in the yarn.lock`, () => {
+    const pkgJson = JSON.stringify({
+      dependencies: {
+        lodash: '^4.17.20',
+      },
+    });
+    const yarnLock = `
+lodash@^5.22.23:
+  version "5.29.0"
+lodash@^4.17.20:
+  version "4.17.20"
+`;
+    const result = checkSemverRanges({
+      pkgJsonContent: pkgJson,
+      yarnLockContent: yarnLock,
+      fix: true,
+    });
+
+    expect(result.totalFixes).toBe(1);
+    expect(result.fixesPerField).toEqual({
+      dependencies: 1,
+    });
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      expect.any(String),
+      JSON.stringify(
+        {
+          dependencies: {
+            lodash: '4.17.20',
+          },
+        },
+        null,
+        2
+      )
+    );
+  });
+
   it('should throw an error if a version cannot be resolved from yarn.lock', () => {
     const pkgJson = JSON.stringify({
       dependencies: {
