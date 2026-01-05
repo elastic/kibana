@@ -8,12 +8,13 @@
 import type {
   ConfirmPromptDefinition,
   ConfirmationStatus,
+  ConfirmationPromptResponse,
+  PromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
-import type { ConfirmationPromptWithResponse } from '../agents/prompts';
 import type { ToolHandlerPromptReturn } from '../tools/handler';
 
 export interface PromptManager {
-  set(promptId: string, prompt: ConfirmationPromptWithResponse): void;
+  set(promptId: string, response: ConfirmationPromptResponse): void;
   clear(): void;
   forTool(opts: {
     toolId: string;
@@ -35,4 +36,8 @@ export interface ToolPromptManager {
    * Creates a confirmation prompt which can be returned by the tool handler
    */
   askForConfirmation(opts: ConfirmPromptDefinition): ToolHandlerPromptReturn;
+}
+
+export interface PromptManagerInitialState {
+  promptMap: Record<string, PromptResponse>;
 }

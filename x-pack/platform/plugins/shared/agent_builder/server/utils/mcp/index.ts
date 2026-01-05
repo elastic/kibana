@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import type {
-  ConfirmationPrompt,
-  ConfirmationPromptResponse,
-} from '@kbn/agent-builder-common/agents/prompts';
-
-export type ConfirmationPromptWithResponse = ConfirmationPrompt & {
-  response: ConfirmationPromptResponse;
-};
+export { createMcpServer } from './create_mcp_server';

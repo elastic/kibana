@@ -6,17 +6,26 @@
  */
 
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
-import type { PromptManager, ToolPromptManager } from '@kbn/agent-builder-server/runner';
-import type { ConfirmationPromptWithResponse } from '@kbn/agent-builder-server/agents/prompts';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type {
+  PromptManager,
+  ToolPromptManager,
+  PromptManagerInitialState,
+} from '@kbn/agent-builder-server/runner';
+import type { PromptResponse, PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 
-export const createPromptManager = (): PromptManager => {
-  const promptMap = new Map<string, ConfirmationPromptWithResponse>();
+export const createPromptManager = (state?: PromptManagerInitialState): PromptManager => {
+  const promptMap = new Map<string, PromptResponse>();
+
+  if (state) {
+    for (const [promptId, response] of Object.entries(state.promptMap)) {
+      promptMap.set(promptId, response);
+    }
+  }
 
   return {
-    set: (promptId, interrupt) => {
-      promptMap.set(promptId, interrupt);
+    set: (promptId, response) => {
+      promptMap.set(promptId, response);
     },
     clear: () => {
       promptMap.clear();
@@ -28,14 +37,9 @@ export const createPromptManager = (): PromptManager => {
           if (!prompt) {
             return { status: ConfirmationStatus.unprompted };
           }
-          if (prompt.type === AgentPromptType.confirmation) {
-            return {
-              status: prompt.response.confirmed
-                ? ConfirmationStatus.accepted
-                : ConfirmationStatus.rejected,
-            };
-          }
-          throw new Error('Trying to check confirmation status of non-confirmation prompt.');
+          return {
+            status: prompt.confirmed ? ConfirmationStatus.accepted : ConfirmationStatus.rejected,
+          };
         },
         askForConfirmation: (confirm) => {
           const prompt: PromptRequest = {
@@ -63,10 +67,7 @@ export const initPromptManager = ({
     const interrupt = lastRound.pending_prompt;
     const confirmed = (input.prompt_response?.confirmed as boolean) ?? false;
     if (interrupt) {
-      promptManager.set(interrupt.id, {
-        ...interrupt,
-        response: { confirmed },
-      });
+      promptManager.set(interrupt.id, { type: AgentPromptType.confirmation, confirmed });
     }
   }
 };

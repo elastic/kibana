@@ -28,7 +28,9 @@ import type {
   ScopedRunnerRunInternalToolParams,
   ConversationStateManager,
   PromptManager,
+  PromptManagerInitialState,
 } from '@kbn/agent-builder-server/runner';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -149,15 +151,17 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     defaultConnectorId,
     conversation,
     nextInput,
+    promptManagerState,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
     conversation?: Conversation;
     nextInput?: ConverseInput;
+    promptManagerState?: PromptManagerInitialState;
   }): ScopedRunner => {
     const resultStore = createResultStore(conversation?.rounds);
     const stateManager = createConversationStateManager(conversation);
-    const promptManager = createPromptManager();
+    const promptManager = createPromptManager(promptManagerState);
 
     if (nextInput !== undefined) {
       initPromptManager({ promptManager, conversation, input: nextInput });
@@ -194,8 +198,35 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         defaultConnectorId,
         conversation: params.agentParams.conversation,
         nextInput: params.agentParams.nextInput,
+        promptManagerState: getAgentPromptManagerState({
+          input: params.agentParams.nextInput,
+          conversation: params.agentParams.conversation,
+        }),
       });
       return runner.runAgent(otherParams);
     },
   };
+};
+
+const getAgentPromptManagerState = ({
+  input,
+  conversation,
+}: {
+  input: ConverseInput;
+  conversation?: Conversation;
+}): PromptManagerInitialState => {
+  const state: PromptManagerInitialState = {
+    promptMap: {},
+  };
+
+  if (conversation?.rounds.length) {
+    const lastRound = conversation.rounds[conversation.rounds.length - 1];
+    const interrupt = lastRound.pending_prompt;
+    const confirmed = (input.prompt_response?.confirmed as boolean) ?? false;
+    if (interrupt) {
+      state.promptMap[interrupt.id] = { type: AgentPromptType.confirmation, confirmed };
+    }
+  }
+
+  return state;
 };

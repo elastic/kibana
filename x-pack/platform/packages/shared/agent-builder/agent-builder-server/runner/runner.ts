@@ -12,6 +12,7 @@ import type { ToolType } from '@kbn/agent-builder-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 import type { InternalToolDefinition } from '../tools/internal';
+import type { PromptManagerInitialState } from './prompt_manager';
 
 /**
  * Return type for tool invocation APIs.
@@ -130,6 +131,10 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    */
   toolCallId?: string;
   /**
+   * Prompt state to use to resume invocation.
+   */
+  promptState?: PromptManagerInitialState;
+  /**
    * Optional event handler.
    */
   onEvent?: ToolEventHandlerFn;
@@ -157,12 +162,12 @@ export type RunInternalToolParams<TParams = Record<string, unknown>> = Omit<
  */
 export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
   RunToolParams<TParams>,
-  'request'
+  'request' | 'promptState'
 >;
 
 export type ScopedRunnerRunInternalToolParams<TParams = Record<string, unknown>> = Omit<
   RunInternalToolParams<TParams>,
-  'request'
+  'request' | 'promptState'
 >;
 
 /**

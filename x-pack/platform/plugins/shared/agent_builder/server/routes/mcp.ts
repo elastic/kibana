@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
-import type { RouteDependencies } from './types';
-import { getHandlerWrapper } from './wrap_handler';
-import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { MCP_SERVER_PATH } from '../../common/mcp';
-
-const MCP_SERVER_NAME = 'elastic-mcp-server';
-const MCP_SERVER_VERSION = '0.0.1';
+import { createMcpServer } from '../utils/mcp';
+import type { RouteDependencies } from './types';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { getHandlerWrapper } from './wrap_handler';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -35,6 +31,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -60,73 +59,43 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        let transport: KibanaMcpHttpTransport | undefined;
-        let server: McpServer | undefined;
+        const { tools: toolService, runnerFactory } = getInternalServices();
+        const toolRegistry = await toolService.getRegistry({ request });
+        const runner = runnerFactory.getRunner();
+
+        const { server, transport } = await createMcpServer({ logger, runner, toolRegistry });
+
+        request.events.aborted$.subscribe(async () => {
+          await transport.close().catch((error) => {
+            logger.error('MCP Server: Error closing transport', { error });
+          });
+          await server.close().catch((error) => {
+            logger.error('MCP Server: Error closing server', { error });
+          });
+        });
 
         try {
-          transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
-
-          // Instantiate new MCP server upon every request, no session persistence
-          server = new McpServer({
-            name: MCP_SERVER_NAME,
-            version: MCP_SERVER_VERSION,
-          });
-
-          const { tools: toolService } = getInternalServices();
-
-          const registry = await toolService.getRegistry({ request });
-          const tools = await registry.list({});
-
-          const idMapping = createToolIdMappings(tools);
-
-          // Expose tools scoped to the request
-          for (const tool of tools) {
-            const toolSchema = await tool.getSchema();
-            server.tool(
-              idMapping.get(tool.id) ?? tool.id,
-              tool.description,
-              toolSchema.shape,
-              async (args: { [x: string]: any }) => {
-                const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
-                return {
-                  content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
-                };
-              }
-            );
-          }
-
-          request.events.aborted$.subscribe(async () => {
-            await transport?.close().catch((error) => {
-              logger.error('MCP Server: Error closing transport', { error });
-            });
-            await server?.close().catch((error) => {
-              logger.error('MCP Server: Error closing server', { error });
-            });
-          });
-
+          // connect server to transport first
           await server.connect(transport);
-
+          // then have transport handle the request
           return await transport.handleRequest(request, response);
         } catch (error) {
-          logger.error('MCP Server: Error handling request', { error });
+          logger.error(`MCP Server: Error handling request: ${error.message}`);
           try {
             await transport?.close();
           } catch (closeError) {
-            logger.error('MCP Server: Error closing transport during error handling', {
-              error: closeError,
-            });
+            logger.error(
+              `MCP Server: Error closing transport during error handling: ${closeError.message}`
+            );
           }
-          if (server) {
-            try {
-              await server.close();
-            } catch (closeError) {
-              logger.error('MCP Server: Error closing server during error handling', {
-                error: closeError,
-              });
-            }
+          try {
+            await server?.close();
+          } catch (closeError) {
+            logger.error(
+              `MCP Server: Error closing server during error handling: ${closeError.message}`
+            );
           }
 
-          logger.error('MCP Server: Error handling request', { error });
           return response.customError({
             statusCode: 500,
             body: {
