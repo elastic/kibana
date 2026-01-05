@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { isValidNamespace } from '../../services';
+import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
 
 export const PackagePolicyNamespaceSchema = schema.string({
   validate: (value) => {
@@ -134,7 +135,10 @@ export const PackagePolicyBaseSchema = {
         meta: {
           description: 'IDs of the agent policies which that package policy will be added to.',
         },
-      })
+      }),
+      {
+        maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
+      }
     )
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -433,6 +437,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
         meta: {
           description: 'IDs of the agent policies which that package policy will be added to.',
         },
+        maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
       })
     ),
     force: schema.maybe(

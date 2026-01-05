@@ -17,3 +17,5 @@ export const inputsFormat = {
 } as const;
 
 export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
+
+export const MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY = 1000;
