@@ -5,35 +5,27 @@
  * 2.0.
  */
 
-import type {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskRunCreatorFunction,
-} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import type { EntityStoreLogger } from '../infra/logging';
 import type { TaskConfig } from './config';
+import { TaskManager } from '../types';
+import { RunResult } from '@kbn/task-manager-plugin/server/task';
 
 export abstract class EntityStoreTask {
-  protected config: TaskConfig;
-  protected logger: EntityStoreLogger;
-
-  constructor(config: TaskConfig, logger: EntityStoreLogger) {
+  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected readonly logger: EntityStoreLogger) {
+    this.taskManager = taskManager;
     this.config = config;
     this.logger = logger;
   }
-  
-  static generate(...params: any): EntityStoreTask {
-    throw new Error(`can't generate EntityStoreTask`);
-  }
-  
+
   abstract get name(): string;
 
-  register(taskManager: TaskManagerSetupContract): void {
+  public register(): void {
     const taskName = this.name;
     this.logger.info(`Registering task ${taskName}`);
-    
+
     try {
-      taskManager.registerTaskDefinitions({
+      this.taskManager.registerTaskDefinitions({
         [taskName]: {
           title: this.config.title,
           timeout: this.config.timeout,
@@ -48,29 +40,42 @@ export abstract class EntityStoreTask {
         e.message.includes(taskName)
       ) {
         this.logger.warn(`Task ${taskName} is already registered`);
-        throw new Error(`Task ${taskName} is already registered`);
+        return;
       }
       throw e;
     }
   }
 
-  private createRunnerFactory(): TaskRunCreatorFunction {
-    return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        return {
-            run: async () => {
-                return this.run(taskInstance);
-            },
-            cancel: async () => {
-                return this.cancel();
-            },
-        };
-    };
+  public async schedule(): Promise<void> {
+    const taskName = this.name;
+    const interval = this.config.interval;
+
+    try {
+      await this.taskManager.ensureScheduled({
+        id: taskName,
+        taskType: taskName,
+        schedule: {
+          interval,
+        },
+        params: {},
+        state: {},
+      });
+      this.logger.info(`Task ${taskName} scheduled successfully with interval ${interval}`);
+    } catch (e) {
+      this.logger.error(`Error scheduling task ${taskName}: ${e}`);
+      throw e;
+    }
   }
 
-  protected abstract run(taskInstance: ConcreteTaskInstance): Promise<{
-    state: Record<string, unknown>;
-  }>;
+  private createRunnerFactory(): TaskRunCreatorFunction {
+    return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+      run: async () => this.run(taskInstance),
+      cancel: async () => this.cancel()
+    });
+  }
 
-  protected abstract cancel(): Promise<void>;
+  protected abstract run(taskInstance: ConcreteTaskInstance): Promise<RunResult>;
+
+  protected abstract cancel(): Promise<RunResult | void>;
 }
 

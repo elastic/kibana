@@ -7,7 +7,9 @@
 
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
+export type TaskManager = TaskManagerSetupContract & TaskManagerStartContract;
+
 export interface EntityStorePlugins {
-  taskManager: TaskManagerSetupContract | TaskManagerStartContract;
+  taskManager: TaskManager;
 };
 

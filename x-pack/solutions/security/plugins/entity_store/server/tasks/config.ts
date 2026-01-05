@@ -5,13 +5,15 @@ export interface TaskConfig extends Partial<TaskRegisterDefinition> {
     title: string;
     type: string;
     timeout: string;
+    interval: string;
 }
 
 const config: Record<EntityStoreTaskType, TaskConfig> = {
     [EntityStoreTaskType.Values.entity]: {
         title: 'Entity Store - Execute Entity Task',
         type: 'entity_store:v2:entity',
-        timeout: '30m',
+        timeout: '25s',
+        interval: '30s',
     }
 };
 

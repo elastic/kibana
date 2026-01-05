@@ -7,8 +7,8 @@
 
 import { EntityType } from './definitions/constants';
 import type { EntityStoreLogger } from '../infra/logging';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { entityTasks } from '../tasks/entity_task';
+import type { TaskManager } from '../types';
+import { ExtractEntityTask } from '../tasks/extract_entity_task';
 
 export class ResourcesService {
   logger: EntityStoreLogger;
@@ -17,12 +17,16 @@ export class ResourcesService {
     this.logger = logger;
   }
 
-  install(types: EntityType[], taskManager: TaskManagerSetupContract) {
+  public async install(types: EntityType[], taskManager: TaskManager) {
     this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
-    
-    types.forEach(entityType => {
-      const task = entityTasks[entityType](this.logger);
-      task.register(taskManager);
-    });
+    await this.initExtractEntitiesTasks(taskManager, this.logger, types);
+  }
+
+  private async initExtractEntitiesTasks(taskManager: TaskManager, logger: EntityStoreLogger, types: EntityType[]) {
+    const tasks = types.map(type => new ExtractEntityTask(taskManager, logger, type));
+    await Promise.all(tasks.map(async task => {
+      task.register();
+      await task.schedule();
+    }));
   }
 }

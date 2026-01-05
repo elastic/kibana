@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { CoreSetup, IRouter } from '@kbn/core/server';
 import { registerInstall } from './install';
 import type { EntityStoreDependencies } from '../dependencies';
 import { EntityStorePlugins } from '../types';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
-export const registerRoutes = (
+export const registerRoutes = ({ router, dependencies, plugins, core }: {
   router: IRouter,
-  { resourcesService, logger }: EntityStoreDependencies,
-  { taskManager }: EntityStorePlugins
-) => {
-  registerInstall({ router, resourcesService, logger, taskManager: taskManager as TaskManagerSetupContract });
+  dependencies: EntityStoreDependencies,
+  plugins: EntityStorePlugins,
+  core: CoreSetup
+}) => {
+  registerInstall({ router, dependencies, plugins, core });
 };

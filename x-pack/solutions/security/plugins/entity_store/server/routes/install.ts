@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { CoreSetup, IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
 import { EntityType } from '../domain/definitions/constants';
-import type { ResourcesService } from '../domain/resources_service';
-import type { EntityStoreLogger } from '../infra/logging';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { EntityStorePlugins, TaskManager } from '../types';
+import { EntityStoreDependencies } from '../dependencies';
+import { getTaskManager } from '../utils';
 
 type QueryParametersSchema = z.infer<typeof QueryParametersSchema>;
 const QueryParametersSchema = z.object({
@@ -27,11 +27,11 @@ const fallbackTypes = (types?: EntityType[]): EntityType[] => {
   return types;
 };
 
-export function registerInstall({ router, resourcesService, logger, taskManager }: {
+export function registerInstall({ router, dependencies, plugins, core }: {
   router: IRouter,
-  resourcesService: ResourcesService,
-  logger: EntityStoreLogger,
-  taskManager: TaskManagerSetupContract
+  dependencies: EntityStoreDependencies,
+  plugins: EntityStorePlugins,
+  core: CoreSetup
 }) {
   router.versioned
     .post({
@@ -51,10 +51,12 @@ export function registerInstall({ router, resourcesService, logger, taskManager 
         },
       },
       async (ctx, req, res) => {
+        const { logger, resourcesService } = dependencies;
         logger.debug('Install api called');
         const types = fallbackTypes(req.query.entityType);
+        const taskManager = await getTaskManager(core, plugins);
 
-        resourcesService.install(types, taskManager);
+        await resourcesService.install(types, taskManager);
 
         return res.ok({
           body: {

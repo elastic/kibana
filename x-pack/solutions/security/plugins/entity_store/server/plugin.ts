@@ -20,7 +20,7 @@ export class EntityStorePlugin implements Plugin {
   setup(core: CoreSetup, plugins: EntityStorePlugins) {
     const router = core.http.createRouter();
 
-    registerRoutes(router, this.dependencies, plugins);
+    registerRoutes({router, dependencies: this.dependencies, plugins, core});
   }
 
   start(core: CoreStart, plugins: EntityStorePlugins) {
