@@ -7,20 +7,24 @@
 
 import { v4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_TRANSITIONS_INDEX } from './create_indices';
+import { ALERT_EVENTS_INDEX, ALERT_TRANSITIONS_INDEX } from './create_indices';
 
-export const DIRECTOR_INTERVAL = 1000;
+export const DIRECTOR_INTERVAL_MS = 1000;
+export const ADDITIONAL_LOOKBACK_MS = 5000;
 
 // Query for:
 // inactive <> pending
 // active <> recovering
-export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
+//
+// Queries work without {timeFilter} but have this filter for performance reasons
+export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM ${ALERT_EVENTS_INDEX}
+  {timeFilter}
   | STATS
       last_status = LAST(status, @timestamp),
       last_event_timestamp = MAX(@timestamp)
         BY rule.id, alert_series_id
   | RENAME alert_series_id AS event_alert_series_id, last_event_timestamp AS event_last_event_timestamp
-  | LOOKUP JOIN .kibana_alert_transitions
+  | LOOKUP JOIN ${ALERT_TRANSITIONS_INDEX}
         ON rule.id == rule_id AND event_alert_series_id == alert_series_id
   | STATS
       last_tracked_state = COALESCE(LAST(end_state, @timestamp), "inactive"),
@@ -48,14 +52,17 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
 // Query for:
 // pending -> active
 // recoverig -> inactive
-export const DIRECTOR_ACTIVE_INACTIVE_QUERY = `FROM .kibana_alert_transitions
+//
+// Queries work without {timeFilter} but have this filter for performance reasons
+export const DIRECTOR_ACTIVE_INACTIVE_QUERY = `FROM ${ALERT_TRANSITIONS_INDEX}
+  {timeFilter}
   | STATS
       last_tracked_state = LAST(end_state, @timestamp),
       last_transition = MAX(last_event_timestamp)
         BY rule_id, alert_series_id, episode_id
   | WHERE last_tracked_state == "pending" OR last_tracked_state == "recovering"
   | RENAME alert_series_id AS transition_alert_series_id
-  | LOOKUP JOIN .kibana_alert_events
+  | LOOKUP JOIN ${ALERT_EVENTS_INDEX}
         ON rule.id == rule_id AND alert_series_id == transition_alert_series_id
   | WHERE @timestamp >= last_transition
   | STATS breached_event_count = COUNT(*) WHERE status == "breach", recover_event_count = COUNT(*) WHERE status == "recover", last_event_timestamp = MAX(@timestamp)
@@ -76,12 +83,19 @@ export interface AlertDirectorOpts {
 }
 
 export function alertDirector({ esClient }: AlertDirectorOpts) {
+  let lastStartForPendingAndRecoveringQuery: number;
   async function runDirectorForPendingAndRecoveringTransitions() {
-    const start = Date.now();
+    const queryLookback = lastStartForPendingAndRecoveringQuery
+      ? `| WHERE @timestamp > "${new Date(
+          lastStartForPendingAndRecoveringQuery - ADDITIONAL_LOOKBACK_MS
+        ).toISOString()}"`
+      : '';
+    lastStartForPendingAndRecoveringQuery = Date.now();
     try {
       const result = await esClient.esql.query({
-        query: DIRECTOR_PENDING_RECOVERING_QUERY,
+        query: DIRECTOR_PENDING_RECOVERING_QUERY.replace('{timeFilter}', queryLookback),
       });
+      // eslint-disable-next-line no-console
       console.log(
         `${new Date().toISOString()} Director query for pending and recovering transitions took ${
           result.took
@@ -97,22 +111,30 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
       });
       await createAlertTransitions(results, esClient);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(`${new Date().toISOString()} Director failed: ${e.message}`);
     } finally {
       setTimeout(
         runDirectorForPendingAndRecoveringTransitions,
-        Math.max(DIRECTOR_INTERVAL - (Date.now() - start), 0)
+        Math.max(DIRECTOR_INTERVAL_MS - (Date.now() - lastStartForPendingAndRecoveringQuery), 0)
       );
     }
   }
   runDirectorForPendingAndRecoveringTransitions();
 
+  let lastStartForActiveAndInactiveQuery: number;
   async function runDirectorForActiveAndInactiveTransitions() {
-    const start = Date.now();
+    const queryLookback = lastStartForActiveAndInactiveQuery
+      ? `| WHERE @timestamp > "${new Date(
+          lastStartForActiveAndInactiveQuery - ADDITIONAL_LOOKBACK_MS
+        ).toISOString()}"`
+      : '';
+    lastStartForActiveAndInactiveQuery = Date.now();
     try {
       const result = await esClient.esql.query({
-        query: DIRECTOR_ACTIVE_INACTIVE_QUERY,
+        query: DIRECTOR_ACTIVE_INACTIVE_QUERY.replace('{timeFilter}', queryLookback),
       });
+      // eslint-disable-next-line no-console
       console.log(
         `${new Date().toISOString()} Director query for active and inactive transitions took ${
           result.took
@@ -128,11 +150,12 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
       });
       await createAlertTransitions(results, esClient);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(`${new Date().toISOString()} Director failed: ${e.message}`);
     } finally {
       setTimeout(
         runDirectorForActiveAndInactiveTransitions,
-        Math.max(DIRECTOR_INTERVAL - (Date.now() - start), 0)
+        Math.max(DIRECTOR_INTERVAL_MS - (Date.now() - lastStartForActiveAndInactiveQuery), 0)
       );
     }
   }
@@ -168,5 +191,6 @@ async function createAlertTransitions(
     index: ALERT_TRANSITIONS_INDEX,
     body: bulkRequest,
   });
+  // eslint-disable-next-line no-console
   console.log(`${new Date().toISOString()} Indexed ${alertTransitions.length} transitions`);
 }
