@@ -189,6 +189,10 @@ export interface McpConnectorItem extends ConnectorItem {
 }
 
 export const isMcpConnectorItem = (connector: ConnectorItem): connector is McpConnectorItem => {
+  if (connector.config?.MCP === 'Enabled') {
+    return true;
+  }
+
   return connector.actionTypeId === MCP_CONNECTOR_ID;
 };
 
