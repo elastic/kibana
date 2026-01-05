@@ -67,19 +67,23 @@ export function buildStructuredOutputSchema(
 ): z.ZodObject {
   const { allowMultipleCategories, includeRationale, categories, fallbackCategory } = params;
 
-  const categorySchema = fallbackCategory
+  let categorySchema: z.ZodType = fallbackCategory
     ? z.enum(categories.concat([fallbackCategory]))
-    : z.union([z.enum(categories), z.null()]);
+    : z.enum(categories);
+
+  if (!fallbackCategory) {
+    categorySchema = categorySchema.nullable();
+  }
 
   let shape: Record<string, z.ZodType> = {};
 
   if (allowMultipleCategories) {
     shape = {
-      categories: z.array(z.string().nullable()),
+      categories: z.array(categorySchema),
     };
   } else {
     shape = {
-      category: z.string().nullable(),
+      category: categorySchema,
     };
   }
 

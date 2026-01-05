@@ -46,53 +46,11 @@ function parseModelResponse(content: string): ClassificationResponse {
   }
 }
 
-function validateClassificationResponse(
-  response: ClassificationResponse,
-  categories: string[],
-  allowMultipleCategories: boolean,
-  fallbackCategory?: string
-): { category: string; rationale?: string } | { categories: string[]; rationale?: string } {
-  if (allowMultipleCategories) {
-    if (!response.categories || !Array.isArray(response.categories)) {
-      throw new Error('Model response must include a "categories" array');
-    }
+function validateModelResponse(response: unknown, schema: z.ZodType): void {
+  const safeParseResult = schema.safeParse(response);
 
-    // Validate all categories are in the allowed list or fallback
-    const invalidCategories = response.categories.filter(
-      (cat) => !categories.includes(cat) && cat !== fallbackCategory
-    );
-    if (invalidCategories.length > 0) {
-      throw new Error(
-        `Model returned invalid categories: ${invalidCategories.join(
-          ', '
-        )}. Must be one of: ${categories.join(', ')}${
-          fallbackCategory ? `, ${fallbackCategory}` : ''
-        }`
-      );
-    }
-
-    return {
-      categories: response.categories,
-      rationale: response.rationale,
-    };
-  } else {
-    if (!response.category) {
-      throw new Error('Model response must include a "category" field');
-    }
-
-    // Validate category is in the allowed list or fallback
-    if (!categories.includes(response.category) && response.category !== fallbackCategory) {
-      throw new Error(
-        `Model returned invalid category: ${response.category}. Must be one of: ${categories.join(
-          ', '
-        )}${fallbackCategory ? `, ${fallbackCategory}` : ''}`
-      );
-    }
-
-    return {
-      category: response.category,
-      rationale: response.rationale,
-    };
+  if (safeParseResult.error) {
+    throw new Error(`Model returned invalid JSON. Message: ${safeParseResult.error}`);
   }
 }
 
@@ -149,6 +107,7 @@ export const aiClassifyStepDefinition = (
       });
 
       const parsedResponse = parseModelResponse(modelResponse.content as string);
+      validateModelResponse(parsedResponse, structuredOutputSchema);
 
       return {
         output: parsedResponse,
