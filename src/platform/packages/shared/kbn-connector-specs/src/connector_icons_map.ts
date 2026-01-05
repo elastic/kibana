@@ -40,4 +40,8 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
     ),
   ],
+  [
+    '.github',
+    lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
+  ],
 ]);

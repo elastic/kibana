@@ -140,9 +140,10 @@
     "@kbn/react-query",
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/agent-builder-plugin",    
+    "@kbn/synthtrace",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
-    "@kbn/onechat-plugin",
     "@kbn/observability-agent-builder-plugin",
   ],
   "exclude": ["target/**/*"]
