@@ -11,8 +11,8 @@ import type { RunContext } from '@kbn/task-manager-plugin/server';
 
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
-import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { RawEsqlRule } from '../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { RuleSavedObjectAttributes } from '../saved_objects';
 import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
 import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
@@ -49,15 +49,19 @@ export function createRuleExecutorTaskRunner({
           params.spaceId
         );
 
-        let rawRule: RawEsqlRule;
+        let ruleAttributes: RuleSavedObjectAttributes;
         try {
           const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
-            includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
           });
-          const doc = await soClient.get<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, params.ruleId, {
-            namespace,
-          });
-          rawRule = doc.attributes;
+          const doc = await soClient.get<RuleSavedObjectAttributes>(
+            RULE_SAVED_OBJECT_TYPE,
+            params.ruleId,
+            {
+              namespace,
+            }
+          );
+          ruleAttributes = doc.attributes;
         } catch (e) {
           if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
             // Rule was deleted.
@@ -66,9 +70,11 @@ export function createRuleExecutorTaskRunner({
           throw e;
         }
 
-        logger.debug(() => `Raw rule: ${JSON.stringify(rawRule, null, 2)}`);
+        logger.debug(
+          () => `Rule saved object attributes: ${JSON.stringify(ruleAttributes, null, 2)}`
+        );
 
-        if (!rawRule.enabled) {
+        if (!ruleAttributes.enabled) {
           return { state: taskInstance.state };
         }
 
@@ -80,12 +86,12 @@ export function createRuleExecutorTaskRunner({
           rule: {
             id: params.ruleId,
             spaceId: params.spaceId,
-            name: rawRule.name,
+            name: ruleAttributes.name,
           },
           params: {
-            esql: rawRule.esql,
-            timeField: rawRule.timeField,
-            lookbackWindow: rawRule.lookbackWindow,
+            esql: ruleAttributes.esql,
+            timeField: ruleAttributes.timeField,
+            lookbackWindow: ruleAttributes.lookbackWindow,
           },
         });
 
@@ -116,7 +122,7 @@ export function createRuleExecutorTaskRunner({
           input: {
             ruleId: params.ruleId,
             spaceId: params.spaceId,
-            rawRule,
+            ruleAttributes,
             esqlResponse,
             taskRunKey,
           },

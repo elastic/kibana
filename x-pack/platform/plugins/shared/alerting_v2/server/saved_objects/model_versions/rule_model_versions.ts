@@ -6,14 +6,14 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawEsqlRuleSchemaV1 } from '../schemas/raw_esql_rule';
+import { ruleSavedObjectAttributesSchemaV1 } from '../schemas/rule_saved_object_attributes';
 
-export const esqlRuleModelVersions: SavedObjectsModelVersionMap = {
+export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
-      forwardCompatibility: rawEsqlRuleSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: rawEsqlRuleSchemaV1,
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV1,
     },
   },
 };

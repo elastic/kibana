@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { rawEsqlRuleSchema } from './v1';
+import { ruleSavedObjectAttributesSchema } from './v1';
 
-export type RawEsqlRule = TypeOf<typeof rawEsqlRuleSchema>;
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchema>;
 
-export { rawEsqlRuleSchema as rawEsqlRuleSchemaV1 };
+export { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 };

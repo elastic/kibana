@@ -12,11 +12,11 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { catchError, filter, lastValueFrom, map, throwError } from 'rxjs';
 import { hasStartEndParams } from '@kbn/esql-utils';
-import type { RawEsqlRule } from '../saved_objects/schemas/raw_esql_rule';
+import type { RuleSavedObjectAttributes } from '../saved_objects/schemas/rule_saved_object_attributes';
 import { parseDurationToMs } from '../lib/duration';
 
 export const getEsqlQuery = (
-  params: ExecuteEsqlRuleParams,
+  params: ExecuteRuleParams,
   dateStart: string,
   dateEnd: string
 ): ESQLSearchParams => {
@@ -46,7 +46,10 @@ export const getEsqlQuery = (
   return query;
 };
 
-export type ExecuteEsqlRuleParams = Pick<RawEsqlRule, 'esql' | 'timeField' | 'lookbackWindow'>;
+export type ExecuteRuleParams = Pick<
+  RuleSavedObjectAttributes,
+  'esql' | 'timeField' | 'lookbackWindow'
+>;
 
 export async function executeEsqlRule({
   logger,
@@ -59,7 +62,7 @@ export async function executeEsqlRule({
   searchClient: IScopedSearchClient;
   abortController: AbortController;
   rule: { id: string; spaceId: string; name: string };
-  params: ExecuteEsqlRuleParams;
+  params: ExecuteRuleParams;
 }): Promise<ESQLSearchResponse> {
   const dateEnd = new Date().toISOString();
   const dateStart = new Date(Date.now() - parseDurationToMs(params.lookbackWindow)).toISOString();

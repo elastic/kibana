@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { esqlRuleModelVersions } from './esql_rule_model_versions';
+export { ruleModelVersions } from './rule_model_versions';

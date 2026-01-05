@@ -30,7 +30,7 @@ describe('writeEsqlAlerts', () => {
       input: {
         ruleId: 'rule-123',
         spaceId: 'default',
-        rawRule: {
+        ruleAttributes: {
           name: 'My ES|QL Rule',
           tags: ['esql', 'test'],
           schedule: '1m',

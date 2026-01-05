@@ -8,9 +8,9 @@
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 
 /**
- * Mappings for the ES|QL rule saved object.
+ * Mappings for the rule saved object.
  */
-export const esqlRuleMappings: SavedObjectsTypeMappingDefinition = {
+export const ruleMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     name: { type: 'text' },

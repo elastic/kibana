@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import type { RawEsqlRule } from '../saved_objects';
+import type { RuleSavedObjectAttributes } from '../saved_objects';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -58,7 +58,7 @@ export interface WriteEsqlAlertsOpts {
   input: {
     ruleId: string;
     spaceId: string;
-    rawRule: RawEsqlRule;
+    ruleAttributes: RuleSavedObjectAttributes;
     esqlResponse: ESQLSearchResponse;
     /**
      * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
@@ -69,7 +69,7 @@ export interface WriteEsqlAlertsOpts {
 
 export async function writeEsqlAlerts({
   services: { logger, esClient, dataStreamName },
-  input: { ruleId, spaceId, rawRule, esqlResponse, taskRunKey },
+  input: { ruleId, spaceId, ruleAttributes, esqlResponse, taskRunKey },
 }: WriteEsqlAlertsOpts) {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
@@ -91,7 +91,7 @@ export async function writeEsqlAlerts({
     const rowDoc = rowToDocument(columns, row);
     const grouping = buildGrouping({
       rowDoc,
-      groupKeyFields: rawRule.groupKey ?? [],
+      groupKeyFields: ruleAttributes.groupKey ?? [],
       get fallbackSeed(): string {
         return `${executionUuid}|row:${i}|${JSON.stringify(rowDoc)}`;
       },
@@ -106,14 +106,14 @@ export async function writeEsqlAlerts({
       scheduled_timestamp: scheduledTimestamp,
       rule: {
         id: ruleId,
-        ...(rawRule.tags?.length ? { tags: rawRule.tags } : {}),
+        ...(ruleAttributes.tags?.length ? { tags: ruleAttributes.tags } : {}),
       },
       grouping,
       data: rowDoc,
       status: 'breach',
       alert_series_id: alertSeriesId,
       source: 'internal',
-      ...(rawRule.tags?.length ? { tags: rawRule.tags } : {}),
+      ...(ruleAttributes.tags?.length ? { tags: ruleAttributes.tags } : {}),
     };
 
     return [{ create: { _index: dataStreamName, _id: alertUuid } }, doc];

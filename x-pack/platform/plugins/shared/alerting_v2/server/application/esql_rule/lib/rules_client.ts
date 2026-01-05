@@ -21,7 +21,7 @@ import { inject, injectable, optional } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
-import { ESQL_RULE_SAVED_OBJECT_TYPE, type RawEsqlRule } from '../../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
 import {
   ensureRuleExecutorTaskScheduled,
   getRuleExecutorTaskId,
@@ -49,7 +49,7 @@ export class RulesClient {
 
   private getSavedObjectsClient(): SavedObjectsClientContract {
     return this.savedObjects.getScopedClient(this.request, {
-      includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
     });
   }
 
@@ -73,7 +73,7 @@ export class RulesClient {
     const username = await this.getUserName();
     const nowIso = new Date().toISOString();
 
-    const attributes: RawEsqlRule = {
+    const ruleAttributes: RuleSavedObjectAttributes = {
       name: params.data.name,
       tags: params.data.tags ?? [],
       schedule: params.data.schedule,
@@ -90,10 +90,14 @@ export class RulesClient {
     };
 
     try {
-      await savedObjectsClient.create<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, attributes, {
-        id,
-        overwrite: false,
-      });
+      await savedObjectsClient.create<RuleSavedObjectAttributes>(
+        RULE_SAVED_OBJECT_TYPE,
+        ruleAttributes,
+        {
+          id,
+          overwrite: false,
+        }
+      );
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(`ES|QL rule with id "${id}" already exists`);
@@ -102,29 +106,29 @@ export class RulesClient {
     }
 
     let scheduledTaskId: string | null = null;
-    if (attributes.enabled) {
+    if (ruleAttributes.enabled) {
       try {
         const { id: taskId } = await ensureRuleExecutorTaskScheduled({
           services: { taskManager: this.taskManager },
           input: {
             ruleId: id,
             spaceId,
-            schedule: { interval: attributes.schedule },
+            schedule: { interval: ruleAttributes.schedule },
             request: this.request as unknown as CoreKibanaRequest,
           },
         });
         scheduledTaskId = taskId;
-        await savedObjectsClient.update<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, id, {
+        await savedObjectsClient.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, {
           scheduledTaskId,
         });
       } catch (e) {
-        await savedObjectsClient.delete(ESQL_RULE_SAVED_OBJECT_TYPE, id).catch(() => {});
+        await savedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id).catch(() => {});
         throw e;
       }
     }
 
     // Keep response shape identical to the previous method implementation.
-    return { id, ...attributes, scheduledTaskId };
+    return { id, ...ruleAttributes, scheduledTaskId };
   }
 
   public async updateEsqlRule({
@@ -148,10 +152,13 @@ export class RulesClient {
     const username = await this.getUserName();
     const nowIso = new Date().toISOString();
 
-    let existingAttrs: RawEsqlRule;
+    let existingAttrs: RuleSavedObjectAttributes;
     let existingVersion: string | undefined;
     try {
-      const doc = await savedObjectsClient.get<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, id);
+      const doc = await savedObjectsClient.get<RuleSavedObjectAttributes>(
+        RULE_SAVED_OBJECT_TYPE,
+        id
+      );
       existingAttrs = doc.attributes;
       existingVersion = doc.version;
     } catch (e) {
@@ -164,7 +171,7 @@ export class RulesClient {
     const wasEnabled = Boolean(existingAttrs.enabled);
     const willBeEnabled = data.enabled !== undefined ? Boolean(data.enabled) : wasEnabled;
 
-    let nextAttrs: RawEsqlRule = {
+    let nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       ...data,
       updatedBy: username,
@@ -194,11 +201,15 @@ export class RulesClient {
     }
 
     try {
-      await savedObjectsClient.create<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, nextAttrs, {
-        id,
-        overwrite: true,
-        ...(existingVersion ? { version: existingVersion } : {}),
-      });
+      await savedObjectsClient.create<RuleSavedObjectAttributes>(
+        RULE_SAVED_OBJECT_TYPE,
+        nextAttrs,
+        {
+          id,
+          overwrite: true,
+          ...(existingVersion ? { version: existingVersion } : {}),
+        }
+      );
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(`ES|QL rule with id "${id}" has already been updated by another user`);

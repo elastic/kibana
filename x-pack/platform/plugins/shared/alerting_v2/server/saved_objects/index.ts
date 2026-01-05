@@ -8,11 +8,11 @@
 import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
-import type { RawEsqlRule } from './schemas/raw_esql_rule';
-import { esqlRuleMappings } from './esql_rule_mappings';
-import { esqlRuleModelVersions } from './model_versions';
+import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+import { ruleMappings } from './rule_mappings';
+import { ruleModelVersions } from './model_versions';
 
-export const ESQL_RULE_SAVED_OBJECT_TYPE = 'alerting_esql_rule';
+export const RULE_SAVED_OBJECT_TYPE = 'alerting_esql_rule';
 
 export function registerSavedObjects({
   savedObjects,
@@ -22,21 +22,19 @@ export function registerSavedObjects({
   logger: Logger;
 }) {
   savedObjects.registerType({
-    name: ESQL_RULE_SAVED_OBJECT_TYPE,
+    name: RULE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
-    mappings: esqlRuleMappings,
+    mappings: ruleMappings,
     management: {
       importableAndExportable: false,
-      getTitle(esqlRuleSavedObject: SavedObject<RawEsqlRule>) {
+      getTitle(esqlRuleSavedObject: SavedObject<RuleSavedObjectAttributes>) {
         return `Rule: [${esqlRuleSavedObject.attributes.name}]`;
       },
     },
-    modelVersions: esqlRuleModelVersions,
+    modelVersions: ruleModelVersions,
   });
-
-  logger.debug(`Registered saved object type [${ESQL_RULE_SAVED_OBJECT_TYPE}]`);
 }
 
-export type { RawEsqlRule } from './schemas/raw_esql_rule';
+export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
