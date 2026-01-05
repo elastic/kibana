@@ -308,7 +308,6 @@ export interface CloudConnectorSOAttributes {
   cloudProvider: CloudProvider;
   accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
   created_at: string;
   updated_at: string;
 }
