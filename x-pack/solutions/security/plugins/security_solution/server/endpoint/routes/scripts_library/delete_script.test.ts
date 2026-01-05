@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import type { GetOneScriptRequestParams } from '../../../../common/api/endpoint';
+import type { DeleteScriptRequestParams } from '../../../../common/api/endpoint';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
-import { registerGetScriptRoute } from './get_script';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { EndpointAuthorizationError } from '../../errors';
+import { registerDeleteScriptRoute } from './delete_script';
 
-describe('Get one script API route', () => {
+describe('Delete Script API route', () => {
   let apiTestSetup: HttpApiTestSetupMock;
   let httpRequestMock: ReturnType<
-    HttpApiTestSetupMock<GetOneScriptRequestParams, undefined, undefined>['createRequestMock']
+    HttpApiTestSetupMock<DeleteScriptRequestParams, undefined, undefined>['createRequestMock']
   >;
   let httpHandlerContextMock: HttpApiTestSetupMock<
-    GetOneScriptRequestParams,
+    DeleteScriptRequestParams,
     undefined,
     undefined
   >['httpHandlerContextMock'];
   let httpResponseMock: HttpApiTestSetupMock<
-    GetOneScriptRequestParams,
+    DeleteScriptRequestParams,
     undefined,
     undefined
   >['httpResponseMock'];
 
   beforeEach(async () => {
-    apiTestSetup = createHttpApiTestSetupMock<GetOneScriptRequestParams, undefined, undefined>();
+    apiTestSetup = createHttpApiTestSetupMock<DeleteScriptRequestParams, undefined, undefined>();
 
     ({ httpHandlerContextMock, httpResponseMock } = apiTestSetup);
 
@@ -43,13 +42,13 @@ describe('Get one script API route', () => {
       'space_a'
     );
 
-    registerGetScriptRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
+    registerDeleteScriptRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
-  describe('registerGetScriptRoute()', () => {
+  describe('registerDeleteScriptRoute()', () => {
     it('should register the route', () => {
       const registeredRoute = apiTestSetup.getRegisteredVersionedRoute(
-        'get',
+        'delete',
         SCRIPTS_LIBRARY_ROUTE_ITEM,
         '2023-10-31'
       );
@@ -68,7 +67,7 @@ describe('Get one script API route', () => {
       );
 
       await apiTestSetup
-        .getRegisteredVersionedRoute('get', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
+        .getRegisteredVersionedRoute('delete', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
@@ -77,10 +76,10 @@ describe('Get one script API route', () => {
     });
   });
 
-  describe('Get script route handler', () => {
-    it('should get scripts client with correct space ID and call get() method', async () => {
+  describe('Delete script route handler', () => {
+    it('should get scripts client with correct space ID and call delete() method', async () => {
       await apiTestSetup
-        .getRegisteredVersionedRoute('get', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
+        .getRegisteredVersionedRoute('delete', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(
@@ -88,18 +87,16 @@ describe('Get one script API route', () => {
       ).toHaveBeenCalledWith('space_a', 'unknown');
 
       expect(
-        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').get
+        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').delete
       ).toHaveBeenCalledWith(httpRequestMock.params.script_id);
     });
 
     it('should respond with the correct body payload', async () => {
       await apiTestSetup
-        .getRegisteredVersionedRoute('get', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
+        .getRegisteredVersionedRoute('delete', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
-      expect(httpResponseMock.ok).toHaveBeenCalledWith({
-        body: { data: ScriptsLibraryMock.generateScriptEntry() },
-      });
+      expect(httpResponseMock.ok).toHaveBeenCalledWith();
     });
   });
 });
