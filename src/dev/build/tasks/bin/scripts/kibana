@@ -28,11 +28,12 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-{{#darwin}}
 NODE="${DIR}/node/default/bin/node"
-{{/darwin}}
 {{#linux}}
-NODE="${DIR}/node/glibc-217/bin/node"
+if ! "$NODE" --version >/dev/null 2>&1; then
+  NODE="${DIR}/node/glibc-217/bin/node"
+fi
+{{/linux}}
 {{#serverless}}
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
@@ -41,7 +42,6 @@ fi
 {{#forcePointerCompression}}
 NODE="${DIR}/node/pointer-compression/bin/node"
 {{/forcePointerCompression}}
-{{/linux}}
 test_node
 
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
