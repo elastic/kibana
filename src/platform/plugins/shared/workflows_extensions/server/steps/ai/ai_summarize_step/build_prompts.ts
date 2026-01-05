@@ -8,11 +8,6 @@
  */
 
 import type { MessageFieldWithRole } from '@langchain/core/messages';
-import type { CoreSetup } from '@kbn/core/server';
-import { resolveConnectorId } from './utils/resolve_connector_id';
-import { AiSummarizeStepCommonDefinition } from '../../../common/steps/ai';
-import { createServerStepDefinition } from '../../step_registry/types';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
 
 export function buildSystemPart(): MessageFieldWithRole[] {
   return [
@@ -94,52 +89,3 @@ ${instructions}
     },
   ];
 }
-
-export const aiSummarizeStepDefinition = (
-  coreSetup: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>
-) =>
-  createServerStepDefinition({
-    ...AiSummarizeStepCommonDefinition,
-    handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
-
-      const resolvedConnectorId = await resolveConnectorId(
-        context.config['connector-id'],
-        inference,
-        context.contextManager.getFakeRequest()
-      );
-
-      const chatModel = await inference.getChatModel({
-        connectorId: resolvedConnectorId,
-        request: context.contextManager.getFakeRequest(),
-        chatModelOptions: {
-          temperature: context.input.temperature,
-          maxRetries: 0,
-        },
-      });
-
-      const modelInput: MessageFieldWithRole[] = [
-        ...buildSystemPart(),
-        ...buildDataPart(context.input.input),
-        ...buildRequirementsPart({ maxLength: context.input.maxLength }),
-        ...buildInstructionsPart(context.input.instructions),
-      ];
-
-      const modelResponse = await chatModel.invoke(modelInput, {
-        signal: context.abortSignal,
-      });
-
-      // Convert content to string if it's an array
-      const content =
-        typeof modelResponse.content === 'string'
-          ? modelResponse.content
-          : modelResponse.content.map((part) => ('text' in part ? part.text : '')).join('');
-
-      return {
-        output: {
-          content,
-          metadata: modelResponse.response_metadata,
-        },
-      };
-    },
-  });
