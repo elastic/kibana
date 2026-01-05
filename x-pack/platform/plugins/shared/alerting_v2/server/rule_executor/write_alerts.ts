@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import stringify from 'json-stable-stringify';
 
 import type { RuleSavedObjectAttributes } from '../saved_objects';
 
@@ -93,7 +94,7 @@ export async function writeEsqlAlerts({
       rowDoc,
       groupKeyFields: ruleAttributes.groupKey ?? [],
       get fallbackSeed(): string {
-        return `${executionUuid}|row:${i}|${JSON.stringify(rowDoc)}`;
+        return `${executionUuid}|row:${i}|${stringify(rowDoc)}`;
       },
     });
 
