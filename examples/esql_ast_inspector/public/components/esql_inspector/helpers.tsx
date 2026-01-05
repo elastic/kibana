@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import type { EsqlQuery } from '@kbn/esql-language';
-import { Walker } from '@kbn/esql-language';
+import { Parser, Walker } from '@kbn/esql-language';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Annotation } from '../annotations';
 
@@ -18,11 +18,13 @@ const palette = euiPaletteColorBlind();
 const colors = {
   command: palette[2],
   literal: palette[0],
-  source: palette[3],
+  source: '#000',
   operator: palette[9],
   column: palette[6],
   function: palette[8],
 };
+
+const symbolicNames = Parser.create('').lexer.symbolicNames;
 
 export const highlight = (query: EsqlQuery): Annotation[] => {
   const annotations: Annotation[] = [];
@@ -96,9 +98,9 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
   });
 
   for (const token of query.tokens) {
-    switch (token.type) {
-      // PIPE
-      case 51: {
+    const symbol = symbolicNames[token.type];
+    switch (symbol) {
+      case 'PIPE': {
         const pos = token.start;
 
         annotations.push([
@@ -109,9 +111,8 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
 
         break;
       }
-      case 58: // BY
-      case 106: {
-        // METADATA
+      case 'BY':
+      case 'METADATA': {
         const pos = token.start;
 
         annotations.push([
