@@ -62,6 +62,11 @@ describe('addControlsFromSavedSession', () => {
       expect(mockContainer.addNewPanel).not.toHaveBeenCalled();
     });
 
+    it('should return early when controlGroupJson is empty string', () => {
+      addControlsFromSavedSession(mockContainer, '');
+      expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
+    });
+
     it('should return early when container does not have controlGroupApi$', async () => {
       const containerWithoutControlGroup = {
         addNewPanel: jest.fn(),
