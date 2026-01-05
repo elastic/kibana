@@ -7,12 +7,10 @@
 
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Default Sources', () => {
@@ -20,11 +18,9 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {});
       afterEach(async () => {
         await api.deleteMonitoringEngine({ query: { data: true } });
-        await disablePrivmonSetting(kibanaServer);
       });
 
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
-        await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
 
         const sources = await api.listEntitySources({ query: {} });
