@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LRUCache } from 'lru-cache';
+import hash from 'object-hash';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import {
@@ -22,6 +24,7 @@ import {
   type CallToolParams,
   type CallToolResponse,
   type ClientDetails,
+  type ListToolsResponse,
   StreamableHTTPError,
   UnauthorizedError,
 } from '@kbn/mcp-client';
@@ -29,6 +32,22 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
+
+// TTL for list_tools cache: 15 minutes
+export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
+// Maximum number of cached entries (100 servers should be a reasonable max)
+export const LIST_TOOLS_CACHE_MAX_SIZE = 100;
+
+/**
+ * Module-level cache for listTools results.
+ * Shared across all McpConnector instances to reduce redundant calls to MCP servers.
+ */
+export const listToolsCache = new LRUCache<string, ListToolsResponse>({
+  max: LIST_TOOLS_CACHE_MAX_SIZE,
+  ttl: LIST_TOOLS_CACHE_TTL_MS,
+  allowStale: false,
+  ttlAutopurge: false,
+});
 
 /**
  * MCP Connector for Kibana Stack Connectors.
@@ -41,17 +60,18 @@ import { retryWithRecovery, type RetryOptions } from './retry_utils';
  */
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private mcpClient: McpClient;
+  private authHeaders: Record<string, string>;
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
 
     // Build auth headers from secrets based on authType
-    const authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
+    this.authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
 
     // Merge non-secret headers from config with auth headers (auth headers take precedence)
     const headers: Record<string, string> = {
       ...(this.config.headers ?? {}),
-      ...authHeaders,
+      ...this.authHeaders,
     };
 
     // Build client options
@@ -91,6 +111,21 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       method: 'callTool',
       schema: CallToolRequestSchema,
     });
+  }
+
+  /**
+   * Generates a cache key for listTools based on connector id, configuration, and auth headers.
+   * Uses a hash to keep keys short, consistent, and secure (secret values are not directly visible).
+   */
+  private getListToolsCacheKey(): string {
+    const configHash = hash({
+      serverUrl: this.config.serverUrl,
+      headers: this.config.headers,
+      hasAuth: this.config.hasAuth,
+      authType: this.config.authType,
+      authHeaders: this.authHeaders,
+    });
+    return `${this.connector.id}:${configHash}`;
   }
 
   /**
@@ -194,6 +229,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
   /**
    * List all available tools from the MCP server.
+   * Results are cached based on connector id + config to reduce redundant calls.
    * Automatically connects if not already connected.
    * Handles connection failures with automatic recovery.
    */
@@ -203,6 +239,19 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   ): Promise<{
     tools: Array<{ name: string; description?: string; inputSchema: Record<string, unknown> }>;
   }> {
+    const cacheKey = this.getListToolsCacheKey();
+
+    // Check cache first (unless forceRefresh is requested)
+    if (!params.forceRefresh) {
+      const cachedResult = listToolsCache.get(cacheKey);
+      if (cachedResult) {
+        this.logger.debug(
+          `Returning cached listTools result for connector ${this.connector.id} (${cachedResult.tools.length} tools)`
+        );
+        return cachedResult;
+      }
+    }
+
     try {
       connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
@@ -211,6 +260,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
       const result = await this.mcpClient.listTools();
       this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
+
+      // Cache the result
+      listToolsCache.set(cacheKey, result);
 
       return result;
     } catch (error) {
