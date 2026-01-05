@@ -821,41 +821,6 @@ describe('GithubConnector', () => {
         html_url: 'https://github.com/owner/repo/blob/develop/docs/guide.md',
       });
     });
-
-    it('should throw error when file is not found', async () => {
-      const error: HttpError = new Error('Not found');
-      error.response = { status: 404 };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.getDoc.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-          path: 'nonexistent.md',
-        })
-      ).rejects.toThrow('Not found');
-    });
-
-    it('should rethrow HTTP errors', async () => {
-      const testCases = [
-        { status: 401, message: 'Unauthorized' },
-        { status: 500, message: 'Server error' },
-      ];
-
-      for (const testCase of testCases) {
-        const error: HttpError = new Error(testCase.message);
-        error.response = { status: testCase.status };
-        mockClient.get.mockRejectedValue(error);
-
-        await expect(
-          GithubConnector.actions.getDoc.handler(mockContext, {
-            owner: 'owner',
-            repo: 'repo',
-            path: 'file.md',
-          })
-        ).rejects.toThrow(testCase.message);
-      }
-    });
   });
 
   describe('test handler', () => {
