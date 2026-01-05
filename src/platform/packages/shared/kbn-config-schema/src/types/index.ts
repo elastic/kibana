@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions, SomeType } from './type';
+export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions } from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';

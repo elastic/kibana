@@ -20,8 +20,6 @@ import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../o
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
-export type SomeType = Type<any>;
-
 /**
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.

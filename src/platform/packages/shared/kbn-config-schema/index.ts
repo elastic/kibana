@@ -34,7 +34,6 @@ import type {
   URIOptions,
   UnionTypeOptions,
   PropsWithDiscriminator,
-  SomeType,
   ObjectResultUnionType,
 } from './src/types';
 import {
@@ -154,10 +153,77 @@ function recordOf<K extends string, V>(
   return new RecordOfType(keyType, valueType, options);
 }
 
-function oneOf<T extends [SomeType, ...SomeType[]]>(
-  types: T,
-  options?: UnionTypeOptions<T[number]['type']>
-): Type<T[number]['type']> {
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
+): Type<A | B | C | D | E | F | G | H | I | J | K>;
+function oneOf<A, B, C, D, E, F, G, H, I, J>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J>
+): Type<A | B | C | D | E | F | G | H | I | J>;
+function oneOf<A, B, C, D, E, F, G, H, I>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I>
+): Type<A | B | C | D | E | F | G | H | I>;
+function oneOf<A, B, C, D, E, F, G, H>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H>
+): Type<A | B | C | D | E | F | G | H>;
+function oneOf<A, B, C, D, E, F, G>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G>
+): Type<A | B | C | D | E | F | G>;
+function oneOf<A, B, C, D, E, F>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>],
+  options?: UnionTypeOptions<A | B | C | D | E | F>
+): Type<A | B | C | D | E | F>;
+function oneOf<A, B, C, D, E>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>],
+  options?: UnionTypeOptions<A | B | C | D | E>
+): Type<A | B | C | D | E>;
+function oneOf<A, B, C, D>(
+  types: [Type<A>, Type<B>, Type<C>, Type<D>],
+  options?: UnionTypeOptions<A | B | C | D>
+): Type<A | B | C | D>;
+function oneOf<A, B, C>(
+  types: [Type<A>, Type<B>, Type<C>],
+  options?: UnionTypeOptions<A | B | C>
+): Type<A | B | C>;
+function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
+function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
+function oneOf<RTS extends Array<Type<any>>>(
+  types: RTS,
+  options?: UnionTypeOptions<any>
+): Type<any> {
   return new UnionType(types, options);
 }
 
