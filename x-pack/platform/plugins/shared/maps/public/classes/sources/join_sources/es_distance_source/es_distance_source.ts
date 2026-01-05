@@ -9,7 +9,6 @@ import type { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
@@ -136,7 +135,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       distance: {
@@ -161,6 +160,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     return {
