@@ -102,15 +102,13 @@ export async function getTraceMetrics({
     kqlFilter,
   });
 
-  const { documentType, rollupInterval, hasDurationSummaryField } = source;
+  const { rollupInterval, hasDurationSummaryField } = source;
+  const documentType = source.documentType as
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent;
 
-  const durationField = getDurationFieldForTransactions(
-    documentType as
-      | ApmDocumentType.ServiceTransactionMetric
-      | ApmDocumentType.TransactionMetric
-      | ApmDocumentType.TransactionEvent,
-    hasDurationSummaryField
-  );
+  const durationField = getDurationFieldForTransactions(documentType, hasDurationSummaryField);
   const outcomeAggs = getOutcomeAggregation(documentType);
 
   const response = await apmEventClient.search('get_trace_metrics', {
