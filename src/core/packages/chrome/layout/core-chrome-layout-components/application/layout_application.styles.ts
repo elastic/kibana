@@ -36,6 +36,12 @@ const root: EmotionFn = (useEuiTheme) =>
       ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
       // reset the height back to respect the margin bottom
       height: calc(100% - ${layoutVar('application.marginBottom')});
+
+      // Hide scrollbar
+      scrollbar-width: none; /* Firefox */
+      &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Edge */
+      }
     }
   `;
 
