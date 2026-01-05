@@ -20,7 +20,7 @@ import {
   EuiTextTruncate,
   EuiBadgeGroup,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 

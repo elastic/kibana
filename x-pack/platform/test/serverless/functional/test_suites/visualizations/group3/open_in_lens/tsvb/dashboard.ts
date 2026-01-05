@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by value TSVB viz to a Lens viz', async () => {
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Dashboard - TSVB - 1');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Dashboard - TSVB - 1');
       await timePicker.setDefaultAbsoluteRange();
 
       await dashboard.waitForRenderComplete();
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by reference TSVB viz to a Lens viz', async () => {
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Dashboard - TSVB - 2');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Dashboard - TSVB - 2');
       await timePicker.setDefaultAbsoluteRange();
 
       // save it to library

@@ -136,16 +136,16 @@ export function ServiceOverviewInstancesTable({
     showPerPageOptions: false,
   };
 
+  const headerTitle = i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
+    defaultMessage: 'Top {count} {count, plural, one {instance} other {instances}}',
+    values: { count: mainStatsItemCount },
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewInstancesTable">
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h2>
-            {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage: 'Top {count} {count, plural, one {instance} other {instances}}',
-              values: { count: mainStatsItemCount },
-            })}
-          </h2>
+          <h2>{headerTitle}</h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
@@ -154,6 +154,7 @@ export function ServiceOverviewInstancesTable({
           isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
         >
           <EuiBasicTable
+            tableCaption={headerTitle}
             noItemsMessage={
               status === FETCH_STATUS.LOADING
                 ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
@@ -164,6 +165,7 @@ export function ServiceOverviewInstancesTable({
                   })
             }
             data-test-subj="instancesTable"
+            rowHeader="serviceNodeName"
             loading={isLoading}
             items={mainStatsItems}
             columns={columns}

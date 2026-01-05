@@ -22,6 +22,10 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreatePrepackagedRules } from './legacy_create_prepackaged_rules';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../routes/__mocks__/request_context';
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
@@ -77,10 +81,13 @@ jest.mock('../../../../timeline/routes/prepackaged_timelines/install_prepackaged
 
 describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
   let mockExceptionsClient: ExceptionListClient;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     mockExceptionsClient = listMock.getExceptionListClient();
@@ -101,6 +108,11 @@ describe('add_prepackaged_rules_route', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     installPrebuiltRulesAndTimelinesRoute(server.router, clients.logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

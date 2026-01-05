@@ -11,46 +11,48 @@ import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import type {
   BaseStep,
+  DataSetStep,
+  ElasticsearchStep,
   ForEachStep,
   HttpStep,
   IfStep,
-  WaitStep,
-  ElasticsearchStep,
   KibanaStep,
-  WorkflowYaml,
-  WorkflowRetry,
-  StepWithOnFailure,
-  StepWithIfCondition,
   StepWithForeach,
-  WorkflowSettings,
-  WorkflowOnFailure,
+  StepWithIfCondition,
+  StepWithOnFailure,
   TimeoutProp,
+  WaitStep,
+  WorkflowOnFailure,
+  WorkflowRetry,
+  WorkflowSettings,
+  WorkflowYaml,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
+  DataSetGraphNode,
+  ElasticsearchGraphNode,
   EnterConditionBranchNode,
+  EnterContinueNode,
+  EnterFallbackPathNode,
   EnterForeachNode,
   EnterIfNode,
+  EnterNormalPathNode,
+  EnterRetryNode,
+  EnterTimeoutZoneNode,
+  EnterTryBlockNode,
   ExitConditionBranchNode,
+  ExitContinueNode,
+  ExitFallbackPathNode,
   ExitForeachNode,
   ExitIfNode,
-  HttpGraphNode,
-  WaitGraphNode,
-  ElasticsearchGraphNode,
-  KibanaGraphNode,
-  EnterRetryNode,
-  ExitRetryNode,
-  EnterContinueNode,
-  ExitContinueNode,
-  EnterTryBlockNode,
-  ExitTryBlockNode,
-  EnterNormalPathNode,
   ExitNormalPathNode,
-  EnterFallbackPathNode,
-  ExitFallbackPathNode,
-  EnterTimeoutZoneNode,
+  ExitRetryNode,
   ExitTimeoutZoneNode,
+  ExitTryBlockNode,
   GraphNodeUnion,
+  HttpGraphNode,
+  KibanaGraphNode,
+  WaitGraphNode,
   WorkflowGraphType,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
@@ -75,6 +77,7 @@ interface GraphBuildContext {
 function getStepId(node: BaseStep, context: GraphBuildContext): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
   // We should ensure that all steps have an `id` field in the future - either explicitly set or generated from name.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodeId = (node as any).id || node.name;
   const parts: string[] = [];
 
@@ -125,7 +128,7 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return handleTimeout(
       getStepId(step, context),
       'step_level_timeout',
-      step.timeout!,
+      step.timeout as string,
       visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
       context
     );
@@ -133,6 +136,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if ((currentStep as WaitStep).type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
+  }
+
+  if ((currentStep as DataSetStep).type === 'data.set') {
+    return visitDataSetStep(currentStep as DataSetStep, context);
   }
 
   if ((currentStep as HttpStep).type === 'http') {
@@ -166,6 +173,26 @@ export function visitWaitStep(
     },
   };
   graph.setNode(waitNode.id, waitNode);
+
+  return graph;
+}
+
+export function visitDataSetStep(
+  currentStep: DataSetStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const dataSetNode: DataSetGraphNode = {
+    id: getStepId(currentStep, context),
+    type: 'data.set',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(dataSetNode.id, dataSetNode);
 
   return graph;
 }
@@ -349,7 +376,7 @@ function visitOnFailure(
   currentStep: BaseStep,
   onFailureConfiguration: WorkflowOnFailure,
   context: GraphBuildContext
-): any {
+): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const onFailureGraphNode: GraphNodeUnion = {
     id: `onFailure_${stepId}`,
@@ -363,7 +390,7 @@ function visitOnFailure(
     [
       {
         ...currentStep,
-        ['on-failure']: undefined, // Remove 'on-failure' to avoid infinite recursion
+        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
       } as BaseStep,
     ],
     context
@@ -377,8 +404,13 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
-  if (onFailureConfiguration.continue) {
-    graph = createContinue(stepId, graph);
+  // Here we can statically determine that 'continue' is needed if "continue" is boolean.
+  // If condition is a string (expression), we need to evaluate it at runtime, so we always create the continue node.
+  if (
+    typeof onFailureConfiguration.continue === 'string' ||
+    onFailureConfiguration.continue === true
+  ) {
+    graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
   context.stack.pop();
@@ -425,11 +457,12 @@ function handleStepLevelOnFailure(
     stepId: getStepId(step, context),
     stepType: step.type,
   };
-  if (context.stack.some((node) => node.id === stackEntry.id)) {
+  const onFailureConfiguration = (step as StepWithOnFailure)['on-failure'];
+  if (context.stack.some((node) => node.id === stackEntry.id) || !onFailureConfiguration) {
     return null;
   }
   context.stack.push(stackEntry);
-  const result = visitOnFailure(step, (step as StepWithOnFailure)['on-failure']!, context);
+  const result = visitOnFailure(step, onFailureConfiguration, context);
   context.stack.pop();
   return result;
 }
@@ -438,7 +471,12 @@ function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
 ): graphlib.Graph<GraphNodeUnion> | null {
-  if (flowControlStepTypes.has(step.type) || disallowedWorkflowLevelOnFailureSteps.has(step.type)) {
+  const onFailureConfiguration = context.settings?.['on-failure'];
+  if (
+    flowControlStepTypes.has(step.type) ||
+    disallowedWorkflowLevelOnFailureSteps.has(step.type) ||
+    !onFailureConfiguration
+  ) {
     return null;
   }
 
@@ -458,12 +496,16 @@ function handleWorkflowLevelOnFailure(
   }
 
   context.stack.push(stackEntry);
-  const result = visitOnFailure(step, context.settings!['on-failure']!, context);
+  const result = visitOnFailure(step, onFailureConfiguration, context);
   context.stack.pop();
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+function createContinue(
+  stepId: string,
+  condition: string | boolean,
+  innerGraph: WorkflowGraphType
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
@@ -473,6 +515,9 @@ function createContinue(stepId: string, innerGraph: WorkflowGraphType): Workflow
     stepId,
     stepType: 'continue',
     exitNodeId,
+    configuration: {
+      condition,
+    },
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',
@@ -643,9 +688,9 @@ function createStepsSequence(
     });
 
     if (previousGraph) {
-      const previousEndNodes = previousGraph!
+      const previousEndNodes = previousGraph
         .nodes()
-        .filter((nodeId) => previousGraph!.outEdges(nodeId)?.length === 0);
+        .filter((nodeId) => previousGraph?.outEdges(nodeId)?.length === 0);
 
       const currentStartNodes = currentGraph
         .nodes()
@@ -699,7 +744,7 @@ function createForeachGraph(
   stepId: string,
   foreachStep: ForEachStep,
   context: GraphBuildContext
-): any {
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterForeachNodeId = `enterForeach_${stepId}`;
   const exitNodeId = `exitForeach_${stepId}`;
@@ -746,21 +791,23 @@ function createForeachGraphForStepWithForeach(
 }
 
 export function convertToWorkflowGraph(
-  workflowSchema: WorkflowYaml
+  workflowSchema: WorkflowYaml,
+  defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
+  const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
-    settings: workflowSchema.settings,
+    settings: resolvedSettings,
     stack: [],
     parentKey: '',
   };
 
   let finalGraph = createStepsSequence(workflowSchema.steps, context);
 
-  if (workflowSchema.settings?.timeout) {
+  if (resolvedSettings?.timeout) {
     finalGraph = handleTimeout(
       'workflow_level_timeout',
       'workflow_level_timeout',
-      workflowSchema.settings.timeout,
+      resolvedSettings.timeout,
       finalGraph,
       context
     );
@@ -769,6 +816,27 @@ export function convertToWorkflowGraph(
   return finalGraph;
 }
 
+function resolveWorklfowSettings(
+  workflowSettings?: WorkflowSettings,
+  defaultSettings?: WorkflowSettings
+): WorkflowSettings | undefined {
+  if (!defaultSettings) {
+    return workflowSettings;
+  }
+
+  if (!workflowSettings) {
+    return defaultSettings;
+  }
+
+  return {
+    ...workflowSettings,
+    timeout: workflowSettings.timeout ?? defaultSettings.timeout,
+    'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
+    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertToSerializableGraph(graph: graphlib.Graph): any {
   return graphlib.json.write(graph); // GraphLib does not provide type information, so we use `any`
 }

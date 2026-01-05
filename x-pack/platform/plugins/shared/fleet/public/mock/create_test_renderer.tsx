@@ -11,7 +11,7 @@ import React, { memo } from 'react';
 import type { RenderOptions, RenderResult, RenderHookResult } from '@testing-library/react';
 import { render as reactRender, act, waitFor, renderHook } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';

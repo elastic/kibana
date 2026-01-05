@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - TSVB - Top N');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - TSVB - Top N');
       await timePicker.setDefaultAbsoluteRange();
     });
 
@@ -68,8 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Bar');
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
 
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText).to.be('Maximum of memory');
@@ -81,8 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
 
         const xDimensionText = await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0);
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
@@ -102,8 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       expect(await reducedTimeRange.getAttribute('value')).to.be('1 minute (1m)');
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText).to.be('Count of records last 1m');
       });
@@ -114,16 +111,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(2);
+        await lens.assertLayerCount(2);
+
+        await lens.ensureLayerTabIsActive(0);
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
-        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count of records');
+
+        await lens.ensureLayerTabIsActive(1);
+        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText2).to.be('10');
       });
     });
 
-    it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
+    it('visualizes field to Lens and loads fields to the dimension editor', async () => {
       await panelActions.convertToLensByTitle('Top N - Basic');
       await lens.waitForVisualization('xyVisChart');
 

@@ -9,6 +9,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import type { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
@@ -21,6 +22,7 @@ interface Props {
   options?: Partial<MetricsExplorerOptions>;
   series?: MetricsExplorerSeries;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const AlertFlyout = (props: Props) => {
@@ -44,6 +46,7 @@ export const AlertFlyout = (props: Props) => {
             currentOptions: props.options,
             series: props.series,
           }}
+          focusTrapProps={props.focusTrapProps}
         />
       );
     },
@@ -54,9 +57,22 @@ export const AlertFlyout = (props: Props) => {
   return <>{visible && AddAlertFlyout}</>;
 };
 
-export const PrefilledMetricThresholdAlertFlyout = ({ onClose }: { onClose(): void }) => {
+export const PrefilledMetricThresholdAlertFlyout = ({
+  onClose,
+  focusTrapProps,
+}: {
+  onClose(): void;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+}) => {
   const { metricThresholdPrefill } = useAlertPrefillContext();
   const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
 
-  return <AlertFlyout options={{ groupBy, filterQuery, metrics }} visible setVisible={onClose} />;
+  return (
+    <AlertFlyout
+      options={{ groupBy, filterQuery, metrics }}
+      visible
+      setVisible={onClose}
+      focusTrapProps={focusTrapProps}
+    />
+  );
 };

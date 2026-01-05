@@ -16,18 +16,24 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import type { DashboardSearchAPIResult } from '../../../server/content_management';
+import { asyncMap } from '@kbn/std';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import {
-  DASHBOARD_CONTENT_ID,
+  checkForDuplicateDashboardTitle,
+  dashboardClient,
+  findService,
+} from '../../dashboard_client';
+import { getAccessControlClient } from '../../services/access_control_service';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
+import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
+import { logger } from '../../services/logger';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
+import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
-import { coreServices } from '../../services/kibana_services';
-import { logger } from '../../services/logger';
-import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
@@ -35,34 +41,12 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
-import type { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-
-const toTableListViewSavedObject = (
-  hit: DashboardSearchAPIResult['hits'][number]
-): DashboardSavedObjectUserContent => {
-  const { title, description, timeRestore } = hit.attributes;
-  return {
-    type: 'dashboard',
-    id: hit.id,
-    updatedAt: hit.updatedAt!,
-    createdAt: hit.createdAt,
-    createdBy: hit.createdBy,
-    updatedBy: hit.updatedBy,
-    references: hit.references ?? [],
-    managed: hit.managed,
-    attributes: {
-      title,
-      description,
-      timeRestore,
-    },
-  };
-};
 
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
@@ -107,14 +91,12 @@ export const useDashboardListingTable = ({
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
   const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
-  const dashboardContentManagementService = useMemo(
-    () => getDashboardContentManagementService(),
-    []
-  );
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
   );
+
+  const accessControlClient = getAccessControlClient();
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -131,12 +113,24 @@ export const useDashboardListingTable = ({
   }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
-    async (props: UpdateDashboardMetaProps) => {
-      await dashboardContentManagementService.updateDashboardMeta(props);
+    async ({ id, ...updatedState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
+      const dashboard = await findService.findById(id);
+      if (dashboard.status === 'error') {
+        return;
+      }
+      const { references, ...currentState } = dashboard.attributes;
+      await dashboardClient.update(
+        id,
+        {
+          ...currentState,
+          ...updatedState,
+        },
+        dashboard.references
+      );
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardBackupService]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -147,19 +141,17 @@ export const useDashboardListingTable = ({
           fn: async (value: string, id: string) => {
             if (id) {
               try {
-                const [dashboard] =
-                  await dashboardContentManagementService.findDashboards.findByIds([id]);
+                const dashboard = await findService.findById(id);
                 if (dashboard.status === 'error') {
                   return;
                 }
 
-                const validTitle =
-                  await dashboardContentManagementService.checkForDuplicateDashboardTitle({
-                    title: value,
-                    copyOnSave: false,
-                    lastSavedTitle: dashboard.attributes.title,
-                    isTitleDuplicateConfirmed: false,
-                  });
+                const validTitle = await checkForDuplicateDashboardTitle({
+                  title: value,
+                  copyOnSave: false,
+                  lastSavedTitle: dashboard.attributes.title,
+                  isTitleDuplicateConfirmed: false,
+                });
 
                 if (!validTitle) {
                   throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));
@@ -172,7 +164,7 @@ export const useDashboardListingTable = ({
         },
       ],
     }),
-    [dashboardContentManagementService]
+    []
   );
 
   const emptyPrompt = useMemo(
@@ -196,7 +188,7 @@ export const useDashboardListingTable = ({
   );
 
   const findItems = useCallback(
-    (
+    async (
       searchTerm: string,
       {
         references,
@@ -208,35 +200,74 @@ export const useDashboardListingTable = ({
     ) => {
       const searchStartTime = window.performance.now();
 
-      return dashboardContentManagementService.findDashboards
+      const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
+        coreServices.userProfile.getCurrent(),
+        accessControlClient.checkGlobalPrivilege(DASHBOARD_SAVED_OBJECT_TYPE),
+      ]);
+
+      const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
+      const isGloballyAuthorized =
+        globalPrivilegeResponse.status === 'fulfilled'
+          ? globalPrivilegeResponse.value.isGloballyAuthorized
+          : false;
+
+      return findService
         .search({
           search: searchTerm,
-          size: listingLimit,
-          hasReference: references,
-          hasNoReference: referencesToExclude,
-          options: {
-            // include only tags references in the response to save bandwidth
-            includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRestore'],
+          per_page: listingLimit,
+          tags: {
+            included: (references ?? []).map(({ id }) => id),
+            excluded: (referencesToExclude ?? []).map(({ id }) => id),
           },
         })
-        .then(({ total, hits }) => {
+        .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();
           const searchDuration = searchEndTime - searchStartTime;
           reportPerformanceMetricEvent(coreServices.analytics, {
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
+              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             },
           });
+          const tagApi = savedObjectsTaggingService?.getTaggingApi();
+
           return {
             total,
-            hits: hits.map(toTableListViewSavedObject),
+            hits: dashboards.map(({ id, data, meta }) => {
+              const canManageAccessControl =
+                isGloballyAuthorized ||
+                accessControlClient.checkUserAccessControl({
+                  accessControl: {
+                    owner: data?.access_control?.owner,
+                    accessMode: data?.access_control?.access_mode,
+                  },
+                  createdBy: meta.created_at,
+                  userId,
+                });
+
+              return {
+                type: 'dashboard',
+                id,
+                updatedAt: meta.updated_at,
+                createdAt: meta.created_at,
+                createdBy: meta.created_by,
+                updatedBy: meta.updated_by,
+                references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+                managed: meta.managed,
+                attributes: {
+                  title: data.title,
+                  description: data.description,
+                  timeRestore: Boolean(data.time_range),
+                },
+                canManageAccessControl,
+                accessMode: data?.access_control?.access_mode,
+              } as DashboardSavedObjectUserContent;
+            }),
           };
         });
     },
-    [listingLimit, dashboardContentManagementService]
+    [listingLimit, accessControlClient]
   );
 
   const deleteItems = useCallback(
@@ -244,19 +275,17 @@ export const useDashboardListingTable = ({
       try {
         const deleteStartTime = window.performance.now();
 
-        await dashboardContentManagementService.deleteDashboards(
-          dashboardsToDelete.map(({ id }) => {
-            dashboardBackupService.clearState(id);
-            return id;
-          })
-        );
+        await asyncMap(dashboardsToDelete, async ({ id }) => {
+          await dashboardClient.delete(id);
+          dashboardBackupService.clearState(id);
+        });
 
         const deleteDuration = window.performance.now() - deleteStartTime;
         reportPerformanceMetricEvent(coreServices.analytics, {
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_CONTENT_ID,
+            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             total: dashboardsToDelete.length,
           },
         });
@@ -268,7 +297,7 @@ export const useDashboardListingTable = ({
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardBackupService]
   );
 
   const editItem = useCallback(
@@ -291,7 +320,6 @@ export const useDashboardListingTable = ({
     const { showWriteControls } = getDashboardCapabilities();
     return {
       contentEditor: {
-        isReadonly: !showWriteControls,
         onSave: updateItemMeta,
         customValidators: contentEditorValidators,
       },
@@ -314,6 +342,38 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: true,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
+      rowItemActions: (item) => {
+        const isDisabled = () => {
+          if (!showWriteControls) return true;
+          if (item?.managed === true) return true;
+          if (item?.canManageAccessControl === false && item?.accessMode === 'write_restricted')
+            return true;
+          return false;
+        };
+
+        const getReason = () => {
+          if (!showWriteControls) {
+            return contentEditorFlyoutStrings.readonlyReason.missingPrivileges;
+          }
+          if (item?.managed) {
+            return contentEditorFlyoutStrings.readonlyReason.managedEntity;
+          }
+          if (item?.canManageAccessControl === false) {
+            return contentEditorFlyoutStrings.readonlyReason.accessControl;
+          }
+        };
+
+        return {
+          edit: {
+            enabled: !isDisabled(),
+            reason: getReason(),
+          },
+          delete: {
+            enabled: !isDisabled(),
+            reason: getReason(),
+          },
+        };
+      },
     };
   }, [
     contentEditorValidators,

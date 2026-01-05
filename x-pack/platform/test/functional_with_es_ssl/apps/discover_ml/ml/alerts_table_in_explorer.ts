@@ -20,7 +20,7 @@ function getAnomalyDetectionConfig(): Job {
     description: '',
     groups: ['real-time', 'anomaly-alerting-ui'],
     analysis_config: {
-      bucket_span: '1m',
+      bucket_span: '15s',
       detectors: [{ function: 'mean', field_name: 'value', partition_field_name: 'key' }],
       influencers: ['key'],
     },
@@ -99,10 +99,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  async function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   async function createAnomalyDetectionRuleViaUI() {
     // Navigate to alerts and actions page
     await ml.navigation.navigateToAlertsAndAction();
@@ -115,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Configure alert parameters
     await ml.alerting.selectJobs([AD_JOB_ID]);
-    await ml.alerting.selectResultType('bucket');
+    await ml.alerting.selectResultType('record');
     await ml.alerting.setSeverity(0);
 
     // Set advanced settings
@@ -123,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Set alert name and interval
     await pageObjects.triggersActionsUI.setAlertName('ml-explorer-alert-ui');
-    await pageObjects.triggersActionsUI.setAlertInterval(1, 'm');
+    await pageObjects.triggersActionsUI.setAlertInterval(10, 's');
 
     // Save the alert
     await pageObjects.triggersActionsUI.saveAlert();
@@ -200,9 +196,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Ingest anomalous data to trigger the alert
       await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
-
-      // Wait for ML bucket to finalize (bucket_span is 1m)
-      await sleep(60 * 1000);
 
       // Wait for alert to be created
       await waitForAlertsInIndex(1);

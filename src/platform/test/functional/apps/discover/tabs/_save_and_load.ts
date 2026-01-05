@@ -84,6 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const persistedTabColumn1 = 'referer';
       const persistedTabColumn2 = 'bytes';
       const persistedTabHitCount = '9';
+      const persistedTabChartIntervalTitle = 'Hour';
+      const persistedTabChartIntervalValue = 'h';
 
       const adHocTabLabel = 'Ad hoc data view';
       const adHocTabQuery = 'extension : jpg';
@@ -113,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.clickFieldListItemAdd(persistedTabColumn1);
         await unifiedTabs.editTabLabel(0, persistedTabLabel);
+        await discover.setChartInterval(persistedTabChartIntervalTitle);
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
 
         // Ad hoc data view tab
@@ -159,6 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
+        expect(await discover.getChartInterval()).to.be(persistedTabChartIntervalValue);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
           persistedTabColumn1,
         ]);
@@ -206,6 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
+        expect(await discover.getChartInterval()).to.be(persistedTabChartIntervalValue);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
           persistedTabColumn1,
         ]);
@@ -251,6 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
+        expect(await discover.getChartInterval()).to.be(persistedTabChartIntervalValue);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
           persistedTabColumn1,
         ]);
@@ -404,14 +410,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('time based tabs', () => {
       const adHocWithTimeRange = 'log';
       const adHocWithoutTimeRange = 'logs';
-      const persistedWithoutTimeRange = 'logst*';
+      const persistedWithoutTimeRange = 'logstas*';
 
       before(async () => {
         // Create saved data view without time range
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await dataViews.createFromSearchBar({
-          name: 'logst',
+          name: 'logstas',
           adHoc: false,
           hasTimeField: false,
         });

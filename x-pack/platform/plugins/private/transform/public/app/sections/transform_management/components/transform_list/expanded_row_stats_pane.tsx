@@ -48,6 +48,7 @@ const NoStatsFallbackTabContent = ({
   ) : (
     <EuiFlexItem grow={true}>
       <EuiCallOut
+        announceOnMount
         size="s"
         color="warning"
         iconType="info"

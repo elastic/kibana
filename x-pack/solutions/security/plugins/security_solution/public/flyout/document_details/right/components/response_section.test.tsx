@@ -18,21 +18,16 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseSection } from './response_section';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useExpandSection } from '../hooks/use_expand_section';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockedUseKibana = mockUseKibana();
 (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
-const OPEN_FLYOUT_MESSAGE = 'Open alert details to access response actions.';
 
 const renderResponseSection = () =>
   render(
@@ -46,10 +41,6 @@ const renderResponseSection = () =>
   );
 
 describe('<ResponseSection />', () => {
-  beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-  });
-
   it('should render response component', () => {
     const { getByTestId } = renderResponseSection();
 
@@ -114,21 +105,6 @@ describe('<ResponseSection />', () => {
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 
-  it('should render open details flyout message if flyout is in preview mode', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <TestProvider>
-          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
-            <ResponseSection />
-          </DocumentDetailsContext.Provider>
-        </TestProvider>
-      </IntlProvider>
-    );
-    expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(OPEN_FLYOUT_MESSAGE);
-  });
-
   it('should render empty component if document is not signal', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
 
@@ -155,24 +131,18 @@ describe('<ResponseSection />', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  describe('newExpandableFlyoutNavigationDisabled is false', () => {
-    beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    });
-
-    it('should render if isPreviewMode is true', () => {
-      const { getByTestId } = render(
-        <IntlProvider locale="en">
-          <TestProvider>
-            <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
-              <ResponseSection />
-            </DocumentDetailsContext.Provider>
-          </TestProvider>
-        </IntlProvider>
-      );
-      expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toHaveTextContent('Response');
-      expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
-    });
+  it('should render if isPreviewMode is true', () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <TestProvider>
+          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
+            <ResponseSection />
+          </DocumentDetailsContext.Provider>
+        </TestProvider>
+      </IntlProvider>
+    );
+    expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toHaveTextContent('Response');
+    expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });

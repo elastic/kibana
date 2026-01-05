@@ -23,7 +23,7 @@ import { GaugeLabelMajorModes, GaugeTicksPositions, GaugeColorModes } from '../.
 import GaugeComponent from './gauge_component';
 import type { BulletProps, ColorBandSimpleConfig, Color } from '@elastic/charts';
 import { Chart, Bullet, Settings } from '@elastic/charts';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 
 const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   id,

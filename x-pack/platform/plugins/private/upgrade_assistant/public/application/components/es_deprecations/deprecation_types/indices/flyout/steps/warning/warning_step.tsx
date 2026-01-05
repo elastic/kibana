@@ -141,6 +141,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
         {warnings.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutTitle"

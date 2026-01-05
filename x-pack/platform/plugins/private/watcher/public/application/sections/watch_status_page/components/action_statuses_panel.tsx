@@ -237,6 +237,7 @@ export const ActionStatusesPanel = () => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
                 defaultMessage: 'This action contains errors',
               })}
@@ -267,7 +268,7 @@ export const ActionStatusesPanel = () => {
         pagination={PAGINATION}
         sorting={true}
         data-test-subj="watchActionStatusTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
             defaultMessage="No actions to show"

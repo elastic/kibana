@@ -7,20 +7,12 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -35,7 +27,6 @@ import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
 import type { ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
-import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -47,6 +38,7 @@ export interface CreateConnectorFlyoutProps {
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
+  initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -55,6 +47,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onClose,
   onConnectorCreated,
   onTestConnector,
+  initialConnector,
 }) => {
   const {
     application: { capabilities },
@@ -80,7 +73,16 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     preSubmitValidator: null,
   });
 
-  const initialConnector = {
+  useEffect(() => {
+    if (initialConnector && allActionTypes && !actionType) {
+      const foundActionType = allActionTypes[initialConnector.actionTypeId];
+      if (foundActionType) {
+        setActionType(foundActionType);
+      }
+    }
+  }, [initialConnector, allActionTypes, actionType]);
+
+  const emptyConnector = {
     actionTypeId: actionType?.id ?? '',
     isDeprecated: false,
     config: {},
@@ -89,14 +91,26 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isConnectorTypeDeprecated: false,
   };
 
+  const defaultConnector = initialConnector
+    ? {
+        ...emptyConnector,
+        ...initialConnector,
+      }
+    : emptyConnector;
+
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
+  const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
+  const disabled = hasErrors || !canSave;
 
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
+
+  const isTestable =
+    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
@@ -270,6 +284,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="danger"
                   iconType="warning"
@@ -293,52 +308,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
             <ConnectorForm
               actionTypeModel={actionTypeModel}
-              connector={initialConnector}
+              connector={defaultConnector}
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
             />
             {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <>
-                  {onTestConnector && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="primary"
-                        data-test-subj="create-connector-flyout-save-test-btn"
-                        type="submit"
-                        isLoading={isSaving}
-                        disabled={hasErrors || !canSave}
-                        onClick={onTestConnector != null ? testConnector : undefined}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                          defaultMessage="Save & test"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      color="primary"
-                      data-test-subj="create-connector-flyout-save-btn"
-                      type="submit"
-                      isLoading={isSaving}
-                      disabled={hasErrors || !canSave}
-                      onClick={onSubmit}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                        defaultMessage="Save"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem />
-                </>
-              </EuiFlexGroup>
-            </EuiFlexItem>
           </>
         ) : (
           <ActionTypeMenu
@@ -355,6 +330,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         hasConnectorTypeSelected={hasConnectorTypeSelected}
         onBack={resetActionType}
         onCancel={onClose}
+        isUsingInitialConnector={isUsingInitialConnector}
+        onTestConnector={onTestConnector}
+        disabled={disabled}
+        isSaving={isSaving}
+        onSubmit={onSubmit}
+        testConnector={testConnector}
+        isTestable={isTestable}
       />
     </EuiFlyout>
   );

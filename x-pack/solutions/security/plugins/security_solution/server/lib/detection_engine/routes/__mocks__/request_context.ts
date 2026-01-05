@@ -98,7 +98,7 @@ export const createMockClients = () => {
   };
 };
 
-type MockClients = ReturnType<typeof createMockClients>;
+export type MockClients = ReturnType<typeof createMockClients>;
 
 export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
   AwaitedProperties<Omit<SecuritySolutionRequestHandlerContext, 'resolve'>>
@@ -195,6 +195,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
+    getLogger: jest.fn(() => clients.logger),
     getDataViewsService: jest.fn(),
     getEntityStoreApiKeyManager: jest.fn(),
     getPrivilegedUserMonitoringApiKeyManager: jest.fn(),

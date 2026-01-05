@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
-import type { DiscoverServices } from '../build_services';
+import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -49,6 +49,7 @@ import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
+import { createBrowserHistory } from 'history';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -149,11 +150,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
   };
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' });
+  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
   corePluginMock.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('classic'));
+
+  const history = createBrowserHistory<HistoryLocationState>();
+  history.push('/');
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -161,12 +165,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
     chrome: corePluginMock.chrome,
-    history: {
-      location: {
-        search: '',
-      },
-      listen: jest.fn(() => () => {}),
-    },
+    history,
     getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
     dataVisualizer: {
@@ -206,6 +205,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
+      get: jest.fn().mockResolvedValue(''),
     },
     dataViewEditor: {
       openEditor: jest.fn(),
@@ -267,7 +267,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
-    discoverShared: discoverSharedPluginMock.createStartContract().features,
+    discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getTabsEnabled: () => true,
     },

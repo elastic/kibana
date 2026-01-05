@@ -658,6 +658,7 @@ class RuleEditorFlyoutUI extends Component {
               />
             ) : (
               <EuiCallOut
+                announceOnMount={false}
                 title={
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsNotSupportedTitle"
@@ -689,6 +690,7 @@ class RuleEditorFlyoutUI extends Component {
             />
 
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"

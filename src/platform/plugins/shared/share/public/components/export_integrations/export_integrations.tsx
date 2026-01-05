@@ -33,9 +33,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
+import {
+  ShareProvider,
+  type IShareContext,
+  useShareTypeContext,
+  useShareContext,
+} from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
-import type { DraftModeCalloutProps } from '../common/draft_mode_callout';
 import { DraftModeCallout } from '../common/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
@@ -66,6 +70,11 @@ interface ManagedFlyoutProps {
   shareObjectTypeMeta: ReturnType<
     typeof useShareTypeContext<'integration', 'export'>
   >['objectTypeMeta'];
+  onSave?: () => Promise<void>;
+  isSaving?: boolean;
+  sharingData: {
+    [key: string]: unknown;
+  };
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -119,7 +128,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-function ManagedFlyout({
+export function ManagedFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -128,9 +137,22 @@ function ManagedFlyout({
   shareObjectTypeMeta,
   shareObjectType,
   shareObjectTypeAlias,
+  onSave,
+  isSaving,
+  sharingData,
 }: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
+
+  const totalHitsSizeWarning = useMemo(() => {
+    if (exportIntegration.config.renderTotalHitsSizeWarning) {
+      const totalHits: number = (sharingData.totalHits as number) || 0;
+      const warning = exportIntegration.config.renderTotalHitsSizeWarning(totalHits);
+      return warning ? <EuiFlexItem>{warning}</EuiFlexItem> : null;
+    }
+    return null;
+  }, [exportIntegration.config, sharingData.totalHits]);
+
   const getReport = useCallback(async () => {
     try {
       setIsCreatingExport(true);
@@ -145,16 +167,7 @@ function ManagedFlyout({
   }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
 
   const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
-  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
-  const isValidCalloutOverride = React.isValidElement(draftModeCallout);
-  const draftModeCalloutContent = isValidCalloutOverride
-    ? // Retro-compatible case
-      { node: draftModeCallout }
-    : typeof draftModeCallout === 'object'
-    ? // Custom content callout
-      (draftModeCallout as DraftModeCalloutProps)
-    : // Default content callout
-      {};
+  const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
 
   return (
     <React.Fragment>
@@ -172,7 +185,7 @@ function ManagedFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody">
         <EuiFlexGroup direction="column">
           <Fragment>
             {exportIntegration.config.renderLayoutOptionSwitch && (
@@ -227,10 +240,19 @@ function ManagedFlyout({
           <Fragment>
             {publicAPIEnabled && isDirty && draftModeCallout && (
               <EuiFlexItem>
-                <DraftModeCallout {...draftModeCalloutContent} />
+                <DraftModeCallout
+                  {...draftModeCalloutContent}
+                  {...(onSave && {
+                    saveButtonProps: {
+                      onSave,
+                      isSaving,
+                    },
+                  })}
+                />
               </EuiFlexItem>
             )}
           </Fragment>
+          <Fragment>{publicAPIEnabled && totalHitsSizeWarning}</Fragment>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -263,6 +285,7 @@ function ManagedFlyout({
 }
 
 function ExportMenuPopover({ intl }: ExportMenuProps) {
+  const { onSave, isSaving } = useShareContext();
   const {
     onClose,
     anchorElement,
@@ -272,6 +295,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectType,
     objectTypeAlias,
     objectTypeMeta,
+    sharingData,
   } = useShareTypeContext('integration', 'export');
   const { shareMenuItems: exportDerivatives } = useShareTypeContext(
     'integration',
@@ -444,6 +468,9 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               publicAPIEnabled={publicAPIEnabled}
               intl={intl}
               onCloseFlyout={flyoutOnCloseHandler}
+              onSave={onSave}
+              isSaving={isSaving}
+              sharingData={sharingData}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

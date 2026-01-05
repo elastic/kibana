@@ -51,9 +51,11 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -89,9 +91,11 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
           request: GetRemoteSyncedIntegrationsInfoRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

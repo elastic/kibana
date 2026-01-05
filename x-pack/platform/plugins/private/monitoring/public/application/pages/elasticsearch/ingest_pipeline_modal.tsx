@@ -143,6 +143,7 @@ export const IngestPipelineModal = ({
       {error && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.monitoring.esNavigation.ingestPipelineModal.errorCalloutText"

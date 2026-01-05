@@ -35,6 +35,8 @@ import { SiemRulesMigrationsService } from './rule_migrations_service';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import { getMissingCapabilitiesChecker } from '../../common/service';
+import { raiseSuccessToast } from './notification/success_notification';
+import { MigrationSource } from '../../common/types';
 
 // --- Mocks for external modules ---
 
@@ -51,6 +53,7 @@ jest.mock('../api', () => ({
 }));
 
 jest.mock('../../common/service/capabilities', () => ({
+  ...jest.requireActual('../../common/service/capabilities'),
   getMissingCapabilitiesChecker: jest.fn(() => []),
 }));
 
@@ -67,7 +70,7 @@ jest.mock('../../../common/hooks/use_license', () => ({
 }));
 
 jest.mock('./notification/success_notification', () => ({
-  getSuccessToast: jest.fn().mockReturnValue({ title: 'Success' }),
+  raiseSuccessToast: jest.fn(),
 }));
 
 jest.mock('../../common/service/notifications/no_connector_notification', () => ({
@@ -145,7 +148,13 @@ describe('SiemRulesMigrationsService', () => {
 
   describe('createRuleMigration', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.createRuleMigration([], 'test')).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
+      await expect(
+        service.createRuleMigration({
+          rules: [],
+          migrationName: 'test',
+          migrationSource: MigrationSource.SPLUNK,
+        })
+      ).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
     });
 
     it('should create migration with a single batch', async () => {
@@ -154,7 +163,11 @@ describe('SiemRulesMigrationsService', () => {
       (createRuleMigration as jest.Mock).mockResolvedValue({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body, name);
+      const migrationId = await service.createRuleMigration({
+        rules: body,
+        migrationName: name,
+        migrationSource: MigrationSource.SPLUNK,
+      });
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(createRuleMigration).toHaveBeenCalledWith({ name });
@@ -169,7 +182,11 @@ describe('SiemRulesMigrationsService', () => {
       (createRuleMigration as jest.Mock).mockResolvedValueOnce({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body, name);
+      const migrationId = await service.createRuleMigration({
+        rules: body,
+        migrationName: name,
+        migrationSource: MigrationSource.SPLUNK,
+      });
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(addRulesToMigration).toHaveBeenCalledTimes(2);
@@ -369,7 +386,7 @@ describe('SiemRulesMigrationsService', () => {
       expect(getStatsMock).toHaveBeenCalledTimes(2);
 
       // Expect that a success toast was added when the migration finished.
-      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(raiseSuccessToast).toHaveBeenCalled();
 
       // Restore real timers.
       jest.useRealTimers();

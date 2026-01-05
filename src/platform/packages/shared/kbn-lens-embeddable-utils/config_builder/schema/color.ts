@@ -179,7 +179,7 @@ const gradientColorMappingSchema = schema.object({
   unassignedColor: schema.maybe(colorCodeSchema),
 });
 
-const colorMappingSchema = schema.oneOf([
+export const colorMappingSchema = schema.oneOf([
   /**
    * Categorical color mapping: assigns colors from a palette to specific values.
    */

@@ -48,6 +48,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function ensureApiKeyDoesNotExist(apiKeyName: string) {
+    await retry.try(async () => {
+      log.debug(`Checking if API key ("${apiKeyName}") does not exist.`);
+      const exists = await pageObjects.apiKeys.doesApiKeyExist(apiKeyName);
+      if (exists) {
+        throw new Error(`API key ("${apiKeyName}") still exists when it should not.`);
+      }
+      log.debug(`API key ("${apiKeyName}") does not exist.`);
+    });
+  }
+
   describe('Home page', function () {
     before(async () => {
       await clearAllApiKeys(es, log);
@@ -495,13 +506,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('active/expired filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.clickExpiryFilters('active');
         await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+        await ensureApiKeyDoesNotExist('test_api_key');
 
         await pageObjects.apiKeys.clickExpiryFilters('expired');
         await ensureApiKeysExist(['test_api_key']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+        await ensureApiKeyDoesNotExist('my api key');
 
         // reset filter buttons
         await pageObjects.apiKeys.clickExpiryFilters('expired');
@@ -525,6 +537,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('username filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.clickUserNameDropdown();
         expect(
           await testSubjects.exists('userProfileSelectableOption-system_indices_superuser')
@@ -542,6 +555,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('search bar works as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
 
         await ensureApiKeysExist(['test_user_api_key']);
@@ -551,6 +565,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setSearchBarValue('"api"');
         await ensureApiKeysExist(['my api key']);
+      });
+
+      it('loads default view', async () => {
+        // Default view should be personal API keys
+        await ensureApiKeysExist(['test_user_api_key', 'test_api_key']);
       });
     });
   });

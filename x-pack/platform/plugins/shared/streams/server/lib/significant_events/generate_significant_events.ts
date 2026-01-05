@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { type InferenceClient } from '@kbn/inference-common';
-import type { Feature } from '@kbn/streams-schema';
-import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
+import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
+import type { GeneratedSignificantEventQuery, Streams, Feature } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -17,26 +16,31 @@ interface Params {
   start: number;
   end: number;
   feature?: Feature;
+  sampleDocsSize?: number;
+  // optional overrides for templates
+  systemPromptOverride?: string;
 }
 
 interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: ElasticsearchClient;
   logger: Logger;
+  signal: AbortSignal;
 }
 
 export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
-): Promise<GeneratedSignificantEventQuery[]> {
-  const { definition, connectorId, start, end, feature } = params;
-  const { inferenceClient, esClient, logger } = dependencies;
+): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
+  const { definition, connectorId, start, end, feature, sampleDocsSize, systemPromptOverride } =
+    params;
+  const { inferenceClient, esClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
     connectorId,
   });
 
-  const { queries } = await generateSignificantEvents({
+  const { queries, tokensUsed } = await generateSignificantEvents({
     stream: definition,
     start,
     end,
@@ -44,16 +48,21 @@ export async function generateSignificantEventDefinitions(
     inferenceClient: boundInferenceClient,
     logger,
     feature,
+    signal,
+    sampleDocsSize,
+    systemPromptOverride,
   });
 
-  return queries.map((query) => ({
-    title: query.title,
-    kql: query.kql,
-    feature: feature
-      ? {
-          name: feature?.name,
-          filter: feature?.filter,
-        }
-      : undefined,
-  }));
+  return {
+    queries: queries.map((query) => ({
+      title: query.title,
+      kql: query.kql,
+      feature: feature
+        ? { name: feature.name, filter: feature?.filter, type: feature.type }
+        : undefined,
+      severity_score: query.severity_score,
+      evidence: query.evidence,
+    })),
+    tokensUsed,
+  };
 }

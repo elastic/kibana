@@ -36,7 +36,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
-
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -45,6 +45,7 @@ import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -173,14 +174,19 @@ export function initializeFetch({
       tap(() => {
         // abort any in-progress requests
         if (abortController) {
-          abortController.abort();
+          abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
         }
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
+
         setBlockingError(undefined);
-        if (!dataView || !savedSearch.searchSource) {
+        if (
+          !dataView ||
+          !savedSearch.searchSource ||
+          isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)
+        ) {
           return;
         }
 
@@ -235,6 +241,7 @@ export function initializeFetch({
               scopedProfilesManager,
               searchSessionId,
               esqlVariables,
+              projectRouting: fetchContext.projectRouting,
             });
             return {
               columnsMeta: result.esqlQueryColumns
@@ -267,6 +274,7 @@ export function initializeFetch({
               },
               executionContext,
               disableWarningToasts: true,
+              projectRouting: fetchContext.projectRouting,
             })
           );
           const interceptedWarnings: SearchResponseWarning[] = [];

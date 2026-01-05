@@ -20,6 +20,8 @@ export class FleetError<TMeta = unknown> extends Error {
   }
 }
 
+export class FleetVersionConflictError extends FleetError {}
+
 export class PolicyNamespaceValidationError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 

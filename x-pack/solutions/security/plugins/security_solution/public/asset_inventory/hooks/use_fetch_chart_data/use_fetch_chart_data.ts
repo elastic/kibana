@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';

@@ -62,7 +62,7 @@ apiTest.describe(
         templateType: '{{{ }}}',
         description: 'should reject {{{ }}} template syntax',
       },
-    ].forEach(({ templateValue, templateTo, templateType, description }) => {
+    ].forEach(({ templateValue, templateTo, description }) => {
       apiTest(`${description}`, async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -148,7 +148,7 @@ apiTest.describe(
       expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
     });
 
-    apiTest('should throw error if value and copy_from are missing', async ({ testBed }) => {
+    apiTest('should throw error if value and copy_from are missing', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -158,14 +158,22 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ attributes: { status: 'active' } }];
-      await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError(
-        '[value] required property is missing'
+      expect(() => transpile(streamlangDSL)).toThrowError(
+        JSON.stringify(
+          [
+            {
+              code: 'custom',
+              message: 'Set processor must have either value or copy_from, but not both.',
+              path: ['steps', 0, 'value', 'copy_from'],
+            },
+          ],
+          null,
+          2
+        )
       );
     });
 
-    apiTest('should throw error if value and copy_from are both present', async ({ testBed }) => {
+    apiTest('should throw error if value and copy_from are both present', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -177,10 +185,18 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ attributes: { status: 'active' } }];
-      await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError(
-        '[copy_from] cannot set both `copy_from` and `value` in the same processor'
+      expect(() => transpile(streamlangDSL)).toThrowError(
+        JSON.stringify(
+          [
+            {
+              code: 'custom',
+              message: 'Set processor must have either value or copy_from, but not both.',
+              path: ['steps', 0, 'value', 'copy_from'],
+            },
+          ],
+          null,
+          2
+        )
       );
     });
   }

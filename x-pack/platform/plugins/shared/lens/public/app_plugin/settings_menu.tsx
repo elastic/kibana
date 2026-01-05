@@ -14,7 +14,7 @@ import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { LensAppState } from '../state_management';
+import type { LensAppState, LensStartServices as StartServices } from '@kbn/lens-common';
 import {
   disableAutoApply,
   enableAutoApply,
@@ -24,7 +24,6 @@ import {
 } from '../state_management';
 import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
-import type { StartServices } from '../types';
 
 const container = document.createElement('div');
 let isMenuOpen = false;

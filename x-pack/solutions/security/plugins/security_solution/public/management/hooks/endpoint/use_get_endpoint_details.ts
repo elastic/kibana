@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { useHttp } from '../../../common/lib/kibana';

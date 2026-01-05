@@ -69,12 +69,15 @@ import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
+import { getExecutionId } from '../lib/get_execution_id';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
+
+const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -250,8 +253,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @param id
    */
   public isSameTask(executionId: string) {
-    const executionIdParts = executionId.split('::');
-    const executionIdCompare = executionIdParts.length > 0 ? executionIdParts[0] : executionId;
+    const executionIdCompare = getExecutionId(executionId);
     return executionIdCompare === this.id;
   }
 
@@ -388,6 +390,9 @@ export class TaskManagerRunner implements TaskRunner {
       )
     );
 
+    // For long running tasks, update retryAt on an interval to allow for quicker task recovery
+    const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+
     try {
       const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
       const fakeRequest = this.getFakeKibanaRequest(
@@ -406,6 +411,11 @@ export class TaskManagerRunner implements TaskRunner {
       const originalTaskCancel = this.task.cancel;
       this.task.cancel = async function () {
         abortController.abort();
+
+        // Stop updating retryAt for long running tasks if the task is cancelled
+        if (stopUpdatingLongRunningTasks) {
+          stopUpdatingLongRunningTasks();
+        }
         if (originalTaskCancel) return originalTaskCancel.call(this);
       };
 
@@ -443,6 +453,10 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
     } finally {
+      // Stop updating retryAt for long running tasks once the task has finished
+      if (stopUpdatingLongRunningTasks) {
+        stopUpdatingLongRunningTasks();
+      }
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
@@ -932,6 +946,62 @@ export class TaskManagerRunner implements TaskRunner {
 
       return fakeRequest;
     }
+  }
+
+  private updateRetryAtOnIntervalForLongRunningTasks() {
+    let stopped = false;
+
+    const updateRetryAt = async () => {
+      if (!stopped) {
+        try {
+          // Set retryAt to now + 5m
+          const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
+          this.logger.debug(
+            `Attempting to update retryAt to ${updatedRetryAt.toISOString()} for long running task: ${
+              this.id
+            }.`,
+            {
+              tags: [this.id, this.taskType],
+            }
+          );
+          const taskInstance = this.instance.task;
+          this.instance = asReadyToRun(
+            (await this.bufferedTaskStore.partialUpdate(
+              {
+                id: taskInstance.id,
+                retryAt: updatedRetryAt,
+              },
+              { validate: false, doc: taskInstance }
+            )) as ConcreteTaskInstanceWithStartedAt
+          );
+        } catch (error) {
+          // If there is a 409 conflict error, stop the timer and try to cancel the task
+          // as this task may have been picked up by another Kibana node.
+          if (SavedObjectsErrorHelpers.isConflictError(error)) {
+            stop();
+            this.logger.warn(
+              `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
+              { tags: [this.id, this.taskType] }
+            );
+            await this.cancel();
+          } else {
+            this.logger.warn(
+              `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,
+              { tags: [this.id, this.taskType] }
+            );
+          }
+        }
+        timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
+      }
+    };
+
+    let timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
+
+    const stop = () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+    return stop;
   }
 }
 

@@ -15,7 +15,7 @@ const MAX_ERROR_LENGTH = MAX_PARTIAL_ERROR_LENGTH * 2 + ERROR_PARTIAL_SEPARATOR.
  * An error message string could be very long, as it sometimes includes huge
  * amount of base64
  */
-export const errorLogger = (logger: Logger, message: string, err?: Error) => {
+export const errorLogger = (logger: Logger, message: string, err?: Error, tags?: string[]) => {
   if (err) {
     const errString = `${message}: ${err}`;
     const errLength = errString.length;
@@ -28,17 +28,18 @@ export const errorLogger = (logger: Logger, message: string, err?: Error) => {
 
       const partialError = new Error(partialErrString);
       partialError.stack = err.stack;
-      logger.error(partialError);
+      logger.error(partialError, { tags });
       logger.error(
-        `A partial version of the entire error message was logged. The entire error message length is: ${errLength} characters.`
+        `A partial version of the entire error message was logged. The entire error message length is: ${errLength} characters.`,
+        { error: { stack_trace: err.stack }, tags }
       );
     } else {
       const combinedError = new Error(errString);
       combinedError.stack = err.stack;
-      logger.error(combinedError);
+      logger.error(combinedError, { tags });
     }
     return;
   }
 
-  logger.error(message);
+  logger.error(message, { tags });
 };

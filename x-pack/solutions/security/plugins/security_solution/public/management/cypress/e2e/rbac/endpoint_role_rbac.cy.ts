@@ -16,71 +16,59 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
-describe(
-  'When defining a kibana role for Endpoint security access',
-  {
-    tags: '@ess',
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
-        ],
-      },
-    },
-  },
-  () => {
-    const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-      return cy
-        .get(`#featurePrivilegeControls_${SECURITY_FEATURE_ID}`)
-        .findByTestSubj('mutexSubFeaturePrivilegeControl')
-        .closest('.euiFlexGroup');
-    };
+describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
+  const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+    return cy
+      .get(`#featurePrivilegeControls_${SECURITY_FEATURE_ID}`)
+      .findByTestSubj('mutexSubFeaturePrivilegeControl')
+      .closest('.euiFlexGroup');
+  };
 
-    beforeEach(() => {
-      login(ROLE.system_indices_superuser);
-      navigateToRolePage();
-      closeAllToasts();
+  beforeEach(() => {
+    login(ROLE.system_indices_superuser);
+    navigateToRolePage();
+    closeAllToasts();
 
-      openKibanaFeaturePrivilegesFlyout();
-      setKibanaPrivilegeSpace('default');
-      expandSecuritySolutionCategoryKibanaPrivileges();
-      expandEndpointSecurityFeaturePrivileges();
-    });
+    openKibanaFeaturePrivilegesFlyout();
+    setKibanaPrivilegeSpace('default');
+    expandSecuritySolutionCategoryKibanaPrivileges();
+    expandEndpointSecurityFeaturePrivileges();
+  });
 
-    it('should display RBAC entries with expected controls', () => {
-      getAllSubFeatureRows()
-        .then(($subFeatures) => {
-          const featureRows: string[] = [];
-          $subFeatures.each((_, $subFeature) => {
-            featureRows.push($subFeature.textContent ?? '');
-          });
+  it('should display RBAC entries with expected controls', () => {
+    getAllSubFeatureRows()
+      .then(($subFeatures) => {
+        const featureRows: string[] = [];
+        $subFeatures.each((_, $subFeature) => {
+          featureRows.push($subFeature.textContent ?? '');
+        });
 
-          return featureRows;
-        })
-        .should('deep.equal', [
-          'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
-          'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
-          'Global Artifact Management Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management sub-feature privilegeAllNone',
-          'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
-          'Trusted Devices Manage security exceptions for USB and external devices.Trusted Devices sub-feature privilegeAllReadNone',
-          'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
-          'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
-          'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',
-          'Endpoint Exceptions Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.Endpoint Exceptions sub-feature privilegeAllReadNone',
-          'Elastic Defend Policy Management Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.Elastic Defend Policy Management sub-feature privilegeAllReadNone',
-          'Response Actions History Access the history of response actions performed on endpoints.Response Actions History sub-feature privilegeAllReadNone',
-          'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
-          'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',
-          'File Operations Perform file-related response actions in the response console.File Operations sub-feature privilegeAllNone',
-          'Execute Operations Perform script execution response actions in the response console.Execute Operations sub-feature privilegeAllNone',
-          'Scan Operations Perform folder scan response actions in the response console.Scan Operations sub-feature privilegeAllNone',
-        ]);
-    });
+        return featureRows;
+      })
+      .should('deep.equal', [
+        'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
+        'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
+        'SOC Management Access to SOC management capabilities including AI value reporting and analytics.SOC Management sub-feature privilegeAllNone',
+        'Global Artifact Management Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management sub-feature privilegeAllNone',
+        'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
+        'Trusted Devices Manage security exceptions for USB and external devices.Trusted Devices sub-feature privilegeAllReadNone',
+        'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
+        'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
+        'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',
+        'Endpoint Exceptions Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.Endpoint Exceptions sub-feature privilegeAllReadNone',
+        'Elastic Defend Policy Management Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.Elastic Defend Policy Management sub-feature privilegeAllReadNone',
+        'Response Actions History Access the history of response actions performed on endpoints.Response Actions History sub-feature privilegeAllReadNone',
+        'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
+        'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',
+        'File Operations Perform file-related response actions in the response console.File Operations sub-feature privilegeAllNone',
+        'Execute Operations Perform script execution response actions in the response console.Execute Operations sub-feature privilegeAllNone',
+        'Scan Operations Perform folder scan response actions in the response console.Scan Operations sub-feature privilegeAllNone',
+      ]);
+  });
 
-    it('should display all RBAC entries set to None by default', () => {
-      getAllSubFeatureRows()
-        .findByTestSubj('none')
-        .should('have.class', 'euiButtonGroupButton-isSelected');
-    });
-  }
-);
+  it('should display all RBAC entries set to None by default', () => {
+    getAllSubFeatureRows()
+      .findByTestSubj('none')
+      .should('have.class', 'euiButtonGroupButton-isSelected');
+  });
+});

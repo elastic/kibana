@@ -8,7 +8,7 @@
  */
 
 import { Position } from '@elastic/charts';
-import type { AxisExtentConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { InterpolationMode, Scale, ThresholdLine } from '../types';
 
 export interface Bounds {

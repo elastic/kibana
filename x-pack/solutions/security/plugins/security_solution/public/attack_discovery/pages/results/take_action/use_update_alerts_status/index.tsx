@@ -6,7 +6,7 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { updateAlertStatus } from '../../../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -39,7 +39,7 @@ export const useUpdateAlertsStatus = () => {
     {
       onSuccess: (data: UpdatedAlertsResponse, variables: UpdateAlertsStatusParams) => {
         const { ids, kibanaAlertWorkflowStatus } = variables;
-        const { updated, version_conflicts } = data; // eslint-disable-line @typescript-eslint/naming-convention
+        const { updated, version_conflicts } = data;
 
         const alertsCount = ids.length; // total alerts
         const allAlertsUpdated = updated === alertsCount;

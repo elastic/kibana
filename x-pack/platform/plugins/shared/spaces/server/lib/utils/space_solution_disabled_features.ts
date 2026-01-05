@@ -11,7 +11,7 @@ import type { SolutionView } from '../../../common';
 
 const getFeatureIdsForCategories = (
   features: KibanaFeature[],
-  categories: Array<'observability' | 'enterpriseSearch' | 'securitySolution' | 'workplace_ai'>
+  categories: Array<'observability' | 'enterpriseSearch' | 'securitySolution' | 'workplaceai'>
 ) => {
   return features
     .filter((feature) =>
@@ -22,7 +22,7 @@ const getFeatureIdsForCategories = (
               | 'observability'
               | 'enterpriseSearch'
               | 'securitySolution'
-              | 'workplace_ai'
+              | 'workplaceai'
           )
         : false
     )
@@ -37,7 +37,7 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
   security: [],
-  workplace_ai: [],
+  workplaceai: [],
 };
 
 /**
@@ -65,25 +65,25 @@ export function withSpaceSolutionDisabledFeatures(
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'securitySolution',
-      'workplace_ai',
+      'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.es.includes(featureId));
   } else if (spaceSolution === 'oblt') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'securitySolution',
-      'workplace_ai',
+      'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.oblt.includes(featureId));
   } else if (spaceSolution === 'security') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'enterpriseSearch',
-      'workplace_ai',
+      'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.security.includes(featureId));
-  } else if (spaceSolution === 'workplace_ai') {
+  } else if (spaceSolution === 'workplaceai') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'securitySolution',
       'enterpriseSearch',
-    ]).filter((featureId) => !enabledFeaturesPerSolution.workplace_ai.includes(featureId));
+    ]).filter((featureId) => !enabledFeaturesPerSolution.workplaceai.includes(featureId));
   }
 
   return Array.from(new Set([...disabledFeatureKeysFromSolution]));

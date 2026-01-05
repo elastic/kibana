@@ -67,7 +67,7 @@ async function getHttpRequestsTimeseries({
   };
 
   const response = await apmEventClient.search('get_http_requests_chart', {
-    apm: { events: [ProcessorEvent.span] },
+    apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
     track_total_hits: false,
     size: 0,
     query: {

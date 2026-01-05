@@ -227,4 +227,36 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       expect(esqlResult.documentsOrdered[0]['log.time']).toBe('01-01-2025'); // Unchanged
     }
   );
+
+  apiTest(
+    'should parse a date with locale and timezone',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'log.date',
+            formats: ['dd MMMM yyyy'],
+            locale: 'fr',
+            timezone: 'UTC',
+            output_format: 'yyyy-MM-dd',
+          } as DateProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ log: { date: '08 avril 1999' } }];
+      await testBed.ingest('ingest-date-timezone-locale-format', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-date-timezone-locale-format');
+
+      await testBed.ingest('esql-date-timezone-locale-format', docs);
+      const esqlResult = await esql.queryOnIndex('esql-date-timezone-locale-format', query);
+
+      expect(ingestResult[0]['@timestamp']).toBe('1999-04-08');
+      expect(esqlResult.documentsOrdered[0]['@timestamp']).toBe('1999-04-08');
+    }
+  );
 });

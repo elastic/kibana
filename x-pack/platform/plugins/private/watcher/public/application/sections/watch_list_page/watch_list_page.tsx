@@ -518,6 +518,7 @@ export const WatchListPage = () => {
             queryError && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   data-test-subj="watcherListSearchError"
                   iconType="warning"
                   color="danger"
@@ -533,7 +534,7 @@ export const WatchListPage = () => {
               </>
             )
           }
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
               defaultMessage="No watches to show"

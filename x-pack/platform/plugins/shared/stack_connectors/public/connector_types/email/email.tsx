@@ -14,9 +14,12 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  CONNECTOR_ID,
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+} from '@kbn/connector-schemas/email/constants';
 import type { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import type { RegistrationServices } from '..';
-import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
 export const emailServices: Array<EuiSelectOption & { 'kbn-setting-value': string }> = [
   {
@@ -92,7 +95,7 @@ export function getConnectorType(
   services: RegistrationServices
 ): ConnectorTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   return {
-    id: '.email',
+    id: CONNECTOR_ID,
     iconClass: 'email',
     selectMessage: i18n.translate('xpack.stackConnectors.components.email.selectMessageText', {
       defaultMessage: 'Send email from your server.',

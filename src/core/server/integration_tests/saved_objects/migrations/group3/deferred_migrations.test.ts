@@ -15,13 +15,13 @@ import type {
 } from '@kbn/core-saved-objects-server';
 
 import '../jest_matchers';
-import type { KibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import type { KibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import {
   clearLog,
   defaultKibanaIndex,
   startElasticsearch,
   getKibanaMigratorTestKit,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 describe('deferred migrations', () => {
   let client: KibanaMigratorTestKit['client'];

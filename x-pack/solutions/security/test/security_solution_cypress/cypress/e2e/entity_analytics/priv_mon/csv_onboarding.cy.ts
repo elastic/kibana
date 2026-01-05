@@ -7,8 +7,6 @@
 
 import { getDataTestSubjectSelector } from '../../../helpers/common';
 import { ONBOARDING_CALLOUT } from '../../../screens/privileged_user_monitoring';
-
-import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/privmon';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -32,11 +30,9 @@ describe(
 
     beforeEach(() => {
       login();
-      togglePrivilegedUserMonitoring();
     });
 
     afterEach(() => {
-      togglePrivilegedUserMonitoring();
       deletePrivMonEngine();
     });
 

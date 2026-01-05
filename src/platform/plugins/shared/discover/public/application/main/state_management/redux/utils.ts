@@ -15,6 +15,9 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ControlPanelsState } from '@kbn/controls-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { isObject } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -72,6 +75,40 @@ export const createTabItem = (allTabs: TabState[]): TabItem => {
 };
 
 /**
+ * Gets a minimal representation of the data view in a serialized
+ * search source. Useful when you want e.g. the time field name
+ * and don't have access to the full data view.
+ */
+export const getSerializedSearchSourceDataViewDetails = (
+  serializedSearchSource: SerializedSearchSourceFields | undefined,
+  savedDataViews: DataViewListItem[]
+): Pick<DataView, 'id' | 'timeFieldName'> | undefined => {
+  const dataViewIdOrSpec = serializedSearchSource?.index;
+
+  if (!dataViewIdOrSpec) {
+    return undefined;
+  }
+
+  if (isObject(dataViewIdOrSpec)) {
+    return {
+      id: dataViewIdOrSpec.id,
+      timeFieldName: dataViewIdOrSpec.timeFieldName,
+    };
+  }
+
+  const dataViewListItem = savedDataViews.find((item) => item.id === dataViewIdOrSpec);
+
+  if (!dataViewListItem) {
+    return undefined;
+  }
+
+  return {
+    id: dataViewListItem.id,
+    timeFieldName: dataViewListItem.timeFieldName,
+  };
+};
+
+/**
  * Parses a JSON string into a ControlPanelsState object.
  * If the JSON is invalid or null, it returns an empty object.
  *
@@ -105,13 +142,24 @@ export const extractEsqlVariables = (
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
+      const isSingleSelect = panel.singleSelect ?? true;
+      const selectedValues = panel.selectedOptions || [];
+
+      let value: string | number | (string | number)[];
+
+      if (isSingleSelect) {
+        // Single select: return the first selected value, converting to number if possible
+        const singleValue = selectedValues[0];
+        value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
+      } else {
+        // Multi select: return array with numbers converted from strings when possible
+        value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
+      }
+
       acc.push({
         key: panel.variableName,
         type: panel.variableType,
-        // If the selected option is not a number, keep it as a string
-        value: isNaN(Number(panel.selectedOptions?.[0]))
-          ? panel.selectedOptions?.[0]
-          : Number(panel.selectedOptions?.[0]),
+        value,
       });
     }
     return acc;

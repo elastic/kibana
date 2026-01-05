@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import type { WorkflowYaml } from '../spec/schema';
+import type { JsonValue } from '@kbn/utility-types';
+import { z } from '@kbn/zod/v4';
+import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
@@ -27,6 +28,14 @@ export enum ExecutionStatus {
 }
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
 export const ExecutionStatusValues = Object.values(ExecutionStatus);
+
+export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.SKIPPED,
+  ExecutionStatus.TIMED_OUT,
+] as const;
 
 export enum ExecutionType {
   TEST = 'test',
@@ -65,7 +74,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, any>;
+  context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
@@ -73,7 +82,7 @@ export interface EsWorkflowExecution {
   stepId?: string;
   scopeStack: StackFrame[];
   createdAt: string;
-  error: string | null;
+  error: SerializedError | null;
   createdBy: string;
   startedAt: string;
   finishedAt: string;
@@ -85,6 +94,7 @@ export interface EsWorkflowExecution {
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
 }
 
 export interface ProviderInput {
@@ -95,7 +105,7 @@ export interface ProviderInput {
 
 export interface Provider {
   type: string;
-  action: (stepInputs?: Record<string, any>) => Promise<Record<string, any> | void>;
+  action: (stepInputs?: Record<string, unknown>) => Promise<Record<string, unknown> | void>;
   inputsDefinition: Record<string, ProviderInput>;
 }
 
@@ -111,7 +121,7 @@ export interface EsWorkflowStepExecution {
   workflowId: string;
   status: ExecutionStatus;
   startedAt: string;
-  completedAt?: string;
+  finishedAt?: string;
   executionTimeMs?: number;
 
   /** Topological index of step in workflow graph. */
@@ -125,12 +135,12 @@ export interface EsWorkflowStepExecution {
    * There might be several instances of the same stepId if it's inside loops, retries, etc.
    */
   stepExecutionIndex: number;
-  error?: string | null;
-  output?: Record<string, any> | null;
-  input?: Record<string, any> | null;
+  error?: SerializedError;
+  output?: JsonValue;
+  input?: JsonValue;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
-  state?: Record<string, any>;
+  state?: Record<string, unknown>;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -156,16 +166,20 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
+  error: SerializedError | null;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -175,13 +189,9 @@ export type WorkflowExecutionListItemDto = Omit<
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
 }
 
 // TODO: convert to actual elastic document spec
@@ -196,7 +206,7 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowSchema,
+  definition: WorkflowSchema.optional(),
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
@@ -204,8 +214,14 @@ export const EsWorkflowSchema = z.object({
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 
+export type EsWorkflowCreate = Omit<
+  EsWorkflow,
+  'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
+>;
+
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
+  id: z.string().optional(),
 });
 
 export const UpdateWorkflowCommandSchema = z.object({
@@ -218,8 +234,8 @@ export const UpdateWorkflowCommandSchema = z.object({
 
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
-  limit: z.number().default(100),
-  page: z.number().default(0),
+  size: z.number().default(100),
+  page: z.number().default(1),
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
@@ -228,20 +244,20 @@ export const SearchWorkflowCommandSchema = z.object({
 });
 
 export const RunWorkflowCommandSchema = z.object({
-  inputs: z.record(z.any()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   stepId: z.string(),
-  contextOverride: z.record(z.any()).optional(),
+  contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 
 export const TestWorkflowCommandSchema = z.object({
   workflowYaml: z.string(),
-  inputs: z.record(z.any()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 
@@ -259,7 +275,7 @@ export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
-  lastUpdatedAt: Date;
+  lastUpdatedAt: string;
   lastUpdatedBy: string | undefined;
   enabled: boolean;
   valid: boolean;
@@ -271,9 +287,9 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt: string;
   createdBy: string;
-  lastUpdatedAt: Date;
+  lastUpdatedAt: string;
   lastUpdatedBy: string;
   definition: WorkflowYaml | null;
   yaml: string;
@@ -286,20 +302,16 @@ export interface WorkflowListItemDto {
   description: string;
   enabled: boolean;
   definition: WorkflowYaml | null;
-  createdAt: Date;
+  createdAt: string;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
 }
 
 export interface WorkflowListDto {
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
@@ -364,61 +376,75 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
-
-export interface ConnectorContract {
+export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   connectorId?: z.ZodType;
   outputSchema: z.ZodType;
-  description?: string;
-  summary?: string;
-  instances?: ConnectorInstance[];
+  configSchema?: z.ZodObject;
+  summary: string | null;
+  description: string | null;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  examples?: ConnectorExamples;
 }
 
-export interface DynamicConnectorContract extends ConnectorContract {
+export interface DynamicConnectorContract extends BaseConnectorContract {
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
   /** Available connector instances */
-  instances: Array<{
-    id: string;
-    name: string;
-    isPreconfigured: boolean;
-    isDeprecated: boolean;
-  }>;
+  instances: ConnectorInstance[];
   /** Whether this connector type is enabled */
   enabled?: boolean;
   /** Whether this is a system action type */
   isSystemActionType?: boolean;
 }
 
-export interface InternalConnectorContract extends ConnectorContract {
+export const KNOWN_HTTP_METHODS = [
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS',
+] as const;
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+
+export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
+  examples: ConnectorExamples;
+}
+
+export interface InternalConnectorContract extends BaseConnectorContract {
   /** HTTP method(s) for this API endpoint */
-  methods?: string[];
-  /** Summary for this API endpoint */
-  summary?: string;
+  methods: HttpMethod[];
   /** URL pattern(s) for this API endpoint */
-  patterns?: string[];
-  /** Whether this is an internal connector with hardcoded endpoint details */
-  isInternal?: boolean;
-  /** Documentation URL for this API endpoint */
-  documentation?: string | null;
+  patterns: string[];
   /** Parameter type metadata for proper request building */
-  parameterTypes?: {
-    pathParams?: string[];
-    urlParams?: string[];
-    bodyParams?: string[];
+  parameterTypes: {
+    headerParams: string[];
+    pathParams: string[];
+    urlParams: string[];
+    bodyParams: string[];
   };
 }
 
 export interface ConnectorExamples {
-  params?: Record<string, any>;
+  params?: Record<string, string>;
   snippet?: string;
 }
 
-export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
-  examples?: ConnectorExamples;
-}
+export type ConnectorContractUnion =
+  | DynamicConnectorContract
+  | BaseConnectorContract
+  | InternalConnectorContract;
 
-export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+export interface WorkflowsSearchParams {
+  size: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
+}

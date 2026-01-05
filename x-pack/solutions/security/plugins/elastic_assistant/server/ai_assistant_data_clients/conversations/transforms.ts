@@ -51,6 +51,7 @@ export const transformESToConversation = (
           messageContent: message.content,
           replacements,
         }),
+        ...(message.refusal ? { refusal: message.refusal } : {}),
         ...(message.is_error ? { isError: message.is_error } : {}),
         ...(message.reader ? { reader: message.reader } : {}),
         ...(message.user ? { user: message.user } : {}),
@@ -60,6 +61,12 @@ export const transformESToConversation = (
               metadata: {
                 ...(message.metadata.content_references
                   ? { contentReferences: message.metadata.content_references }
+                  : {}),
+                ...(message.metadata.interrupt_value
+                  ? { interruptValue: message.metadata.interrupt_value }
+                  : {}),
+                ...(message.metadata.interrupt_resume_value
+                  ? { interruptResumeValue: message.metadata.interrupt_resume_value }
                   : {}),
               },
             }

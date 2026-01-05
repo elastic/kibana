@@ -10,11 +10,10 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
-import { createContextAwarenessMocks } from '../../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../../__mocks__';
 import { createObservabilityTracesDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 describe('tracesDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -44,9 +43,7 @@ describe('tracesDocumentProfileProvider', () => {
     isMatch: false,
   };
 
-  const mockServices: ProfileProviderServices = {
-    ...createContextAwarenessMocks().profileProviderServices,
-  };
+  const mockServices = createProfileProviderSharedServicesMock();
 
   describe('when root profile is observability', () => {
     const profileId = OBSERVABILITY_ROOT_PROFILE_ID;

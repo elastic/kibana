@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTreeView, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiTreeView, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PipelineTreeNode } from './types';
@@ -42,7 +42,7 @@ export const PipelineStructureTree = React.memo(
     goBack,
   }: PipelineStructureTreeProps) => {
     const { euiTheme } = useEuiTheme();
-    const styles = getStyles(euiTheme, isExtension);
+    const styles = getStyles(euiTheme);
 
     const treeNode = createTreeNodesFromPipelines(
       pipelineTree,
@@ -52,28 +52,24 @@ export const PipelineStructureTree = React.memo(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+      <>
         {isExtension && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
-              <FormattedMessage
-                id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
-                defaultMessage="Back to previous pipelines"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
+            <FormattedMessage
+              id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
+              defaultMessage="Back to previous pipelines"
+            />
+          </EuiButtonEmpty>
         )}
-        <EuiFlexItem css={{ marginLeft: isExtension ? euiTheme.size.l : '0' }}>
-          <EuiTreeView
-            items={[treeNode]}
-            showExpansionArrows={true}
-            css={styles}
-            aria-label={i18n.translate('ingestPipelines.pipelineStructureTree.treeAriaLabel', {
-              defaultMessage: 'Pipeline structure',
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiTreeView
+          items={[treeNode]}
+          showExpansionArrows={true}
+          css={styles}
+          aria-label={i18n.translate('ingestPipelines.pipelineStructureTree.treeAriaLabel', {
+            defaultMessage: 'Pipeline structure',
+          })}
+        />
+      </>
     );
   }
 );

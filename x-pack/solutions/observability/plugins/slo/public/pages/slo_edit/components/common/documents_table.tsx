@@ -61,7 +61,9 @@ export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
       {error && !loading && (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut color="danger">{error?.message}</EuiCallOut>
+          <EuiCallOut announceOnMount color="danger">
+            {error?.message}
+          </EuiCallOut>
         </>
       )}
       <EuiResizableContainer

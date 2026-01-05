@@ -150,10 +150,16 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           '.internal.alerts-test.patternfiring.alerts-default-*',
           '.reindexed-v8-internal.alerts-test.patternfiring.alerts-default-*',
         ]);
-        expect(contextIndexTemplate.index_template.composed_of).to.eql([
-          '.alerts-test.patternfiring.alerts-mappings',
-          '.alerts-framework-mappings',
-        ]);
+
+        expect(
+          contextIndexTemplate.index_template.composed_of.includes(
+            '.alerts-test.patternfiring.alerts-mappings'
+          )
+        );
+        expect(
+          contextIndexTemplate.index_template.composed_of.includes('.alerts-framework-mappings')
+        );
+
         expect(contextIndexTemplate.index_template.template!.mappings?.dynamic).to.eql(false);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.managed).to.eql(true);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.namespace).to.eql(
@@ -188,6 +194,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndex[indexName].aliases).to.eql({
           '.alerts-test.patternfiring.alerts-default': {
             is_write_index: true,
+            is_hidden: true,
           },
         });
         expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);

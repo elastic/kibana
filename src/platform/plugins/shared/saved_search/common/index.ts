@@ -16,6 +16,7 @@ export type {
   DiscoverGridSettingsColumn,
   SavedSearch,
   SavedSearchAttributes,
+  SavedSearchByValueAttributes,
   DiscoverSession,
   DiscoverSessionTab,
 } from './types';

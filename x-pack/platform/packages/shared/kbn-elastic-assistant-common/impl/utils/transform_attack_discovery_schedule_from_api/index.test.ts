@@ -56,6 +56,20 @@ describe('transformAttackDiscoveryScheduleFromApi', () => {
           throttle: '1h',
         },
       },
+      {
+        action_type_id: '.cases',
+        id: 'system-connector-.cases',
+        params: {
+          subAction: 'run',
+          subActionParams: {
+            timeWindow: '7d',
+            reopenClosedCases: false,
+            groupingBy: [],
+            templateId: null,
+          },
+        },
+        uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
+      },
     ],
     last_execution: {
       date: '2025-01-01T12:00:00.000Z',
@@ -112,6 +126,20 @@ describe('transformAttackDiscoveryScheduleFromApi', () => {
             notifyWhen: 'onActiveAlert',
             throttle: '1h',
           },
+        },
+        {
+          actionTypeId: '.cases',
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              groupingBy: [],
+              reopenClosedCases: false,
+              templateId: null,
+              timeWindow: '7d',
+            },
+          },
+          uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
         },
       ],
       lastExecution: {

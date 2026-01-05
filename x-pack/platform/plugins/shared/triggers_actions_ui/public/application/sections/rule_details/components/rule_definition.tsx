@@ -30,6 +30,7 @@ import {
   hasShowActionsCapability,
 } from '../../../lib/capabilities';
 import { RuleActions } from './rule_actions';
+import { useRuleDescriptionFields } from './use_rule_description_fields';
 
 const INITIAL_FILTERED_RULE_TYPES: string[] = [];
 
@@ -118,6 +119,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       return '';
     }, [rule, ruleTypeRegistry]);
 
+    const { descriptionFields } = useRuleDescriptionFields({
+      rule,
+      ruleTypeRegistry,
+    });
+
     const onEditRuleClick = () => {
       if (navigateToEditRuleForm) {
         navigateToEditRuleForm(rule.id);
@@ -197,6 +203,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             },
           ]
         : []),
+      ...descriptionFields,
       {
         title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
           defaultMessage: 'Actions',
@@ -250,7 +257,12 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
+          <EuiDescriptionList
+            compressed={true}
+            type="column"
+            listItems={ruleDefinitionList}
+            css={{ alignItems: 'start' }}
+          />
         </EuiPanel>
       </EuiFlexItem>
     );

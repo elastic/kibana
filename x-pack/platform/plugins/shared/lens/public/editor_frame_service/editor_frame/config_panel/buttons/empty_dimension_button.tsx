@@ -13,9 +13,6 @@ import { useDragDropContext, DropTargetSwapDuplicateCombine, Droppable } from '@
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { isDraggedField } from '../../../../utils';
-import { generateId } from '../../../../id_generator';
-
 import type {
   Datasource,
   VisualizationDimensionGroupConfig,
@@ -23,8 +20,11 @@ import type {
   IndexPatternMap,
   DragDropOperation,
   Visualization,
-} from '../../../../types';
-import { isOperation } from '../../../../types';
+} from '@kbn/lens-common';
+import { isDraggedField } from '../../../../utils';
+import { generateId } from '../../../../id_generator';
+
+import { isOperation } from '../../../../types_guards';
 
 interface EmptyButtonProps {
   isInlineEditing: boolean;

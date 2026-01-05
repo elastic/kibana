@@ -10,10 +10,15 @@ import { serverMock, requestContextMock, requestMock } from '../../../../routes/
 import { GET_RULE_EXECUTION_RESULTS_URL } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getRuleExecutionResultsResponseMock } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 import { getRuleExecutionResultsRoute } from './get_rule_execution_results_route';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
 
 describe('getRuleExecutionResultsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   const getRuleExecutionResultsRequest = () =>
     requestMock.create({
@@ -33,6 +38,11 @@ describe('getRuleExecutionResultsRoute', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     getRuleExecutionResultsRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('when it finds results in rule execution log', () => {

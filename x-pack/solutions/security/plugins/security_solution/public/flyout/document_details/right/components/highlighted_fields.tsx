@@ -127,7 +127,7 @@ export interface HighlightedFieldsProps {
    */
   showCellActions: boolean;
   /**
-   * If true, the edit button will be shown on hover (granted that the editHighlightedFieldsEnabled is also turned on).
+   * If true, the edit button will be shown on hover.
    * This is false by default (for EASE alert summary page) and will be true for the alerts page.
    */
   showEditButton?: boolean;
@@ -201,7 +201,7 @@ export const HighlightedFields = memo(
               columns={columns}
               compressed
               loading={isEditLoading}
-              message={
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
                   defaultMessage="There's no highlighted fields for this alert."

@@ -17,6 +17,7 @@ import type {
   AttachmentFrameworkSchema,
   AttachmentItemsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  ObservablesSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -74,12 +75,44 @@ const statusSchema: StatusSchema = {
   closed: long,
 };
 
+const observablesSchema: ObservablesSchema = {
+  auto: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables automatically extracted' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables automatically extracted' },
+    },
+  },
+  manual: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables manually added' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables manually added' },
+    },
+  },
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of observables' },
+  },
+};
+
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
   totalWithAlerts: long,
   status: statusSchema,
+  observables: observablesSchema,
+  totalWithMaxObservables: {
+    type: 'long',
+    _meta: { description: 'Number of cases with maximum observables' },
+  },
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -107,6 +140,19 @@ export const casesSchema: CasesTelemetrySchema = {
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
+      extractObservablesOn: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting enabled' },
+      },
+      extractObservablesOff: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting disabled' },
+      },
+      observables: observablesSchema,
+      totalWithMaxObservables: {
+        type: 'long',
+        _meta: { description: 'Number of cases with maximum observables' },
+      },
       totalUsers: long,
       totalParticipants: long,
       totalTags: long,

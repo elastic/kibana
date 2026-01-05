@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { randomInt } from 'crypto';
-import type { LogDocument } from '@kbn/apm-synthtrace-client';
-import { timerange, log } from '@kbn/apm-synthtrace-client';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogDocument } from '@kbn/synthtrace-client';
+import { timerange, log } from '@kbn/synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 
 export async function generateFrequentErrorLogs({
   logsSynthtraceEsClient,

@@ -10,11 +10,9 @@ import { createHttpApiTestSetupMock } from '../../mocks';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { registerAgentStatusRoute } from './agent_status_handler';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
-import type { ExperimentalFeatures } from '../../../../common';
 import { agentServiceMocks as mockAgentService } from '../../services/agent/mocks';
 import { getAgentStatusClient as _getAgentStatusClient } from '../../services';
 import type { DeepMutable } from '../../../../common/endpoint/types';
@@ -61,50 +59,11 @@ describe('Agent Status API route handler', () => {
       (await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as jest.Mock
     ).mockReturnValue(sentinelOneMock.createConnectorActionsClient());
 
-    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    };
-
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
-  it.each`
-    agentType                        | featureFlag
-    ${'crowdstrike'}                 | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
-    ${'microsoft_defender_endpoint'} | ${'responseActionsMSDefenderEndpointEnabled'}
-  `(
-    'should error if the $agentType feature flag ($featureFlag) is turned off',
-    async ({
-      agentType,
-      featureFlag,
-    }: {
-      agentType: ResponseActionAgentType;
-      featureFlag: keyof ExperimentalFeatures;
-    }) => {
-      apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-        ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-        [featureFlag]: false,
-      };
-      httpRequestMock.query.agentType = agentType;
-
-      await apiTestSetup
-        .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
-        .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-      expect(httpResponseMock.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: expect.any(CustomHttpRequestError),
-      });
-    }
-  );
-
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {
     httpRequestMock.query.agentType = agentType;
-    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsMSDefenderEndpointEnabled: true,
-    };
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -151,30 +110,7 @@ describe('Agent Status API route handler', () => {
     });
   });
 
-  it('should NOT use space ID in creating SO client when feature is disabled', async () => {
-    // @ts-expect-error
-    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-      false;
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
-      'foo'
-    );
-    await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
-      .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-    expect(httpResponseMock.ok).toHaveBeenCalled();
-    expect(
-      apiTestSetup.endpointAppContextMock.service.savedObjects.createInternalScopedSoClient
-    ).toHaveBeenCalledWith({
-      spaceId: 'default',
-    });
-  });
-
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
-    // @ts-expect-error write to readonly property
-    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-      true;
-
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'foo'
     );

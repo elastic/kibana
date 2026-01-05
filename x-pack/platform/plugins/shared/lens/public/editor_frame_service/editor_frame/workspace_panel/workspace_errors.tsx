@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UserMessage } from '../../../types';
+import type { UserMessage } from '@kbn/lens-common';
 import { getLongMessage } from '../../../user_messages_utils';
 
 interface Props {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { getSummarizedAlerts } from './get_summarized_alerts';
 import { alertsClientMock } from '../../../alerts_client/alerts_client.mock';
 import { mockAAD } from '../../fixtures';
@@ -86,12 +88,23 @@ describe('getSummarizedAlerts', () => {
       id: 1,
       maintenanceWindowIds: ['mw-1'],
     });
-    const alertsWithMaintenanceWindow = { ...newAlertWithMaintenanceWindow, ...newAlert2 };
+    const newAlertWithOutMaintenanceWindow = generateAlert({
+      id: 2,
+    });
+    const alertsWithMaintenanceWindow = {
+      ...newAlertWithMaintenanceWindow,
+      ...newAlertWithOutMaintenanceWindow,
+    };
 
-    const newAADAlerts = [
-      { ...mockAAD, [ALERT_UUID]: newAlertWithMaintenanceWindow[1].getUuid() },
-      { ...mockAAD, [ALERT_UUID]: alerts[2].getUuid() },
-    ];
+    const mockAAD1 = cloneDeep(mockAAD);
+    const mockAAD2 = cloneDeep(mockAAD);
+
+    // alerts in getSummarizedAlerts are not flattened, so we need to set ALERT_UUID on the mockAADs with set()
+    set(mockAAD1, ALERT_UUID, newAlertWithMaintenanceWindow[1].getUuid());
+    set(mockAAD2, ALERT_UUID, newAlertWithOutMaintenanceWindow[2].getUuid());
+
+    const newAADAlerts = [mockAAD1, mockAAD2];
+
     const summarizedAlerts = {
       new: { count: 2, data: newAADAlerts },
       ongoing: { count: 0, data: [] },

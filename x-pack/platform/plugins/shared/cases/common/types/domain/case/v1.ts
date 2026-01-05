@@ -133,6 +133,7 @@ export const CaseAttributesRt = rt.intersection([
     external_service: rt.union([ExternalServiceRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
+    total_observables: rt.union([rt.number, rt.null]),
   }),
   rt.exact(
     rt.partial({

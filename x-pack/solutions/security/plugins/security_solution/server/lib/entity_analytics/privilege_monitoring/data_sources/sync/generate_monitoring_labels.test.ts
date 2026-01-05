@@ -24,6 +24,19 @@ describe('generateMonitoringLabels', () => {
     expect(labels).toEqual([{ field: 'user.role', value: 'Admin', source }]);
   });
 
+  it('matches a single boolean field value', () => {
+    const matchers = [
+      { fields: ['entityanalytics_ad.user.privileged_group_member'], values: [true] },
+    ];
+    const doc = { entityanalytics_ad: { user: { privileged_group_member: true } } };
+
+    const labels = generateMonitoringLabels(source, matchers, doc);
+
+    expect(labels).toEqual([
+      { field: 'entityanalytics_ad.user.privileged_group_member', value: true, source },
+    ]);
+  });
+
   it('matches multiple values in an array field', () => {
     const matchers = [
       {
@@ -103,5 +116,44 @@ describe('generateMonitoringLabels', () => {
     const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([]);
+  });
+
+  it('supports multiple matchers matching', () => {
+    const matchers = [
+      { fields: ['user.role'], values: ['Admin'] },
+      { fields: ['user.department'], values: ['HR', 'Finance'] },
+    ];
+    const doc = { user: { role: 'Admin', department: 'Finance' } };
+
+    const labels = generateMonitoringLabels(source, matchers, doc);
+
+    expect(labels).toEqual([
+      { field: 'user.role', value: 'Admin', source },
+      { field: 'user.department', value: 'Finance', source },
+    ]);
+  });
+
+  it('supports multiple matchers not matching', () => {
+    const matchers = [
+      { fields: ['user.role'], values: ['Admin'] },
+      { fields: ['user.department'], values: ['HR', 'Finance'] },
+    ];
+    const doc = { user: { role: 'User', department: 'Engineering' } };
+
+    const labels = generateMonitoringLabels(source, matchers, doc);
+
+    expect(labels).toEqual([]);
+  });
+
+  it('supports multiple matchers with some matching and some not', () => {
+    const matchers = [
+      { fields: ['user.role'], values: ['Admin'] },
+      { fields: ['user.department'], values: ['HR', 'Finance'] },
+    ];
+    const doc = { user: { role: 'Admin', department: 'Engineering' } };
+
+    const labels = generateMonitoringLabels(source, matchers, doc);
+
+    expect(labels).toEqual([{ field: 'user.role', value: 'Admin', source }]);
   });
 });

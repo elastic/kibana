@@ -193,6 +193,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                   />
                   {successfulGeneration ? (
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.SUCCESS}
                       color="success"
                       iconType="check"

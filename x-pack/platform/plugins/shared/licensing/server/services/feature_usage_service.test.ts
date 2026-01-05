@@ -52,7 +52,7 @@ describe('FeatureUsageService', () => {
           {
             lastUsed: new Date(127001),
             licenseType: 'basic',
-            name: 'feature',
+            id: 'feature',
           },
         ]);
       });
@@ -68,7 +68,7 @@ describe('FeatureUsageService', () => {
           {
             lastUsed: usageTime,
             licenseType: 'basic',
-            name: 'feature',
+            id: 'feature',
           },
         ]);
       });
@@ -85,7 +85,7 @@ describe('FeatureUsageService', () => {
           {
             lastUsed: new Date(42),
             licenseType: 'basic',
-            name: 'feature',
+            id: 'feature',
           },
         ]);
       });
@@ -109,8 +109,8 @@ describe('FeatureUsageService', () => {
         start.notifyUsage('featureB', 6666);
 
         expect(start.getLastUsages()).toEqual([
-          { lastUsed: new Date(127001), licenseType: 'basic', name: 'featureA' },
-          { lastUsed: new Date(6666), licenseType: 'gold', name: 'featureB' },
+          { lastUsed: new Date(127001), licenseType: 'basic', id: 'featureA' },
+          { lastUsed: new Date(6666), licenseType: 'gold', id: 'featureB' },
         ]);
       });
 
@@ -122,7 +122,7 @@ describe('FeatureUsageService', () => {
         start.notifyUsage('featureA', 500);
 
         expect(start.getLastUsages()).toEqual([
-          { lastUsed: new Date(1000), licenseType: 'basic', name: 'featureA' },
+          { lastUsed: new Date(1000), licenseType: 'basic', id: 'featureA' },
         ]);
       });
 
@@ -134,8 +134,8 @@ describe('FeatureUsageService', () => {
         start.notifyUsage('featureA', 127001);
 
         expect(start.getLastUsages()).toEqual([
-          { lastUsed: new Date(127001), licenseType: 'basic', name: 'featureA' },
-          { lastUsed: null, licenseType: 'gold', name: 'featureB' },
+          { lastUsed: new Date(127001), licenseType: 'basic', id: 'featureA' },
+          { lastUsed: null, licenseType: 'gold', id: 'featureB' },
         ]);
       });
     });

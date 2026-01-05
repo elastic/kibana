@@ -19,6 +19,7 @@ import {
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
+import { getEventLog } from '../../../alerting_api_integration/common/lib';
 
 const DASHBOARD_PANEL_TEST_SUBJ = 'dashboardPanel';
 
@@ -44,13 +45,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const sampleData = getService('sampleData');
   const rules = getService('rules');
-  const es = getService('es');
-  const config = getService('config');
-  const retryTimeout = config.get('timeouts.try');
 
-  // Failing: See https://github.com/elastic/kibana/issues/227748
-  // Failing: See https://github.com/elastic/kibana/issues/227748
-  describe.skip('Embeddable alerts panel', () => {
+  describe('Embeddable alerts panel', function () {
+    this.tags('skipFIPS');
+
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -60,18 +58,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       )!;
 
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
-        createEsQueryRule(sampleDataLogsDataView.id, 'stack'),
-        createEsQueryRule(sampleDataLogsDataView.id, 'observability'),
-        createSecurityRule(sampleDataLogsDataView.id),
+        createEsQueryRule(),
+        createCustomThresholdRule(sampleDataLogsDataView.id),
+        createSecurityRule(),
       ]);
 
-      await waitForRuleToBecomeActive(stackRule.id);
-      await waitForRuleToBecomeActive(observabilityRule.id);
-      await waitForRuleToBecomeActive(securityRule.id);
-
-      await waitForAlertsToBeCreated(stackRule.id);
-      await waitForAlertsToBeCreated(observabilityRule.id);
-      await waitForAlertsToBeCreated(securityRule.id);
+      await waitForRuleToExecute(stackRule.id);
+      await waitForRuleToExecute(observabilityRule.id);
+      await waitForRuleToExecute(securityRule.id);
 
       await pageObjects.dashboard.gotoDashboardURL();
     });
@@ -90,6 +84,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should ask for confirmation before resetting filters when switching solution', async () => {
+        await pageObjects.dashboard.gotoDashboardURL();
+        await dashboardAddPanel.openAddPanelFlyout();
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
+
+        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
         await find.clickByCssSelector(`button#observability`);
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
@@ -97,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
-        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
+        await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#security`);
 
         expect(await find.byButtonText('Switch solution')).to.be.ok();
@@ -105,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     for (const solution of ['stack', 'observability', 'security']) {
-      describe(`with ${solution} role`, () => {
+      describe(`with ${solution} role`, function () {
         const ruleName = `${solution}-rule`;
 
         before(async () => {
@@ -121,6 +120,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           if (solution === 'stack' || solution === 'observability') {
             await testSubjects.missingOrFail(SOLUTION_SELECTOR_SUBJ);
           }
+
           await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
           await find.clickByCssSelector(`button#ruleTags`);
           await testSubjects.click('comboBoxToggleListButton');
@@ -151,6 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
+      await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
       await find.clickByCssSelector(`button#observability`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
       await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
@@ -233,34 +234,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   });
 
-  const createEsQueryRule = async (index: string, solution: 'stack' | 'observability') => {
-    const name = `${solution}-rule`;
+  const createEsQueryRule = async () => {
+    const name = 'stack-rule';
     const createdRule = await rules.api.createRule({
       name,
-      ruleTypeId: `.es-query`,
-      schedule: { interval: '5s' },
-      consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
+      schedule: {
+        interval: '5s',
+      },
+      consumer: 'stackAlerts',
+      ruleTypeId: '.es-query',
+      actions: [],
       tags: [name],
       params: {
-        searchConfiguration: {
-          query: {
-            query: '',
-            language: 'kuery',
-          },
-          index,
-        },
-        timeField: 'timestamp',
-        searchType: 'searchSource',
+        searchType: 'esQuery',
         timeWindowSize: 5,
-        timeWindowUnit: 'h',
-        threshold: [-1],
+        timeWindowUnit: 'd',
+        threshold: [0],
         thresholdComparator: '>',
-        size: 1,
+        size: 100,
+        esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
         aggType: 'count',
         groupBy: 'all',
         termSize: 5,
         excludeHitsFromPreviousRun: false,
         sourceFields: [],
+        index: ['kibana_sample_data_logs'],
+        timeField: '@timestamp',
       },
     });
 
@@ -269,39 +268,68 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const createSecurityRule = async (index: string) => {
+  const createCustomThresholdRule = async (dataView: string) => {
+    const name = 'observability-rule';
+    const createdRule = await rules.api.createRule({
+      name,
+      schedule: {
+        interval: '5s',
+      },
+      consumer: 'logs',
+      ruleTypeId: 'observability.rules.custom_threshold',
+      actions: [],
+      tags: [name],
+      params: {
+        criteria: [
+          {
+            comparator: '>',
+            metrics: [
+              {
+                name: 'A',
+                aggType: 'count',
+              },
+            ],
+            threshold: [0],
+            timeSize: 1,
+            timeUnit: 'd',
+          },
+        ],
+        alertOnNoData: false,
+        alertOnGroupDisappear: false,
+        searchConfiguration: {
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          index: dataView,
+        },
+      },
+    });
+
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
+
+    return createdRule;
+  };
+
+  const createSecurityRule = async () => {
+    const name = 'security-rule';
+
     const { body: createdRule } = await supertest
       .post(`/api/detection_engine/rules`)
       .set('kbn-xsrf', 'foo')
       .send({
-        type: 'query',
-        filters: [],
-        language: 'kuery',
-        query: '_id: *',
-        required_fields: [],
-        data_view_id: index,
-        author: [],
-        false_positives: [],
-        references: [],
-        risk_score: 21,
-        risk_score_mapping: [],
-        severity: 'low',
-        severity_mapping: [],
-        threat: [],
-        max_signals: 100,
-        name: 'security-rule',
-        description: 'security-rule',
-        tags: ['security-rule'],
-        setup: '',
-        license: '',
-        interval: '5s',
-        from: 'now-10m',
-        to: 'now',
-        actions: [],
+        name,
+        description: 'Spammy query rule',
         enabled: true,
-        meta: {
-          kibana_siem_app_url: 'http://localhost:5601/app/security',
-        },
+        risk_score: 1,
+        rule_id: 'rule-1',
+        severity: 'low',
+        type: 'query',
+        query: '_id: *',
+        index: ['kibana_sample_data_logs'],
+        from: 'now-1y',
+        interval: '1m',
+        tags: [name],
       })
       .expect(200);
 
@@ -310,43 +338,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const waitForAlertsToBeCreated = async (ruleId: string) => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const response = await es.search({
-        index: '.alerts*',
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'kibana.alert.rule.uuid': ruleId,
-                },
-              },
-            ],
-          },
-        },
+  const waitForRuleToExecute = async (ruleId: string) => {
+    await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId: 'default',
+        type: 'alert',
+        id: ruleId,
+        provider: 'alerting',
+        actions: new Map([['execute', { gte: 1 }]]),
       });
-
-      if (response.hits.hits.length === 0) {
-        throw new Error(`No hits found for index .alerts* and ruleId ${ruleId}`);
-      }
-
-      return response;
-    });
-  };
-
-  const waitForRuleToBecomeActive = async (ruleId: string) => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const rule = await rules.api.getRule(ruleId);
-
-      const { execution_status: executionStatus } = rule || {};
-      const { status } = executionStatus || {};
-
-      if (status === 'active' || status === 'ok') {
-        return executionStatus?.status;
-      }
-
-      throw new Error(`waitForStatus(active|ok): got ${status}`);
     });
   };
 

@@ -35,11 +35,11 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
 }
 
 .c4 {
-  color: #98a2b3;
+  color: #7186A8;
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -186,7 +186,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
       data-test-subj="paginated-basic-table"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -306,6 +306,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"

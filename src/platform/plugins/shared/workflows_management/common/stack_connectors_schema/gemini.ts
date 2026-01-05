@@ -12,15 +12,12 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Gemini connector parameter schema
 export const GeminiParamsSchema = z.object({
-  subAction: z.enum(['run', 'test', 'dashboard']),
-  subActionParams: z.object({
-    body: z.string(),
-    model: z.string().optional(),
-  }),
+  body: z.string(),
+  model: z.string().optional(),
 });
 
 // Gemini connector response schema

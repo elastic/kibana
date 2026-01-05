@@ -7,7 +7,7 @@
 import type { ComponentType } from 'react';
 import React from 'react';
 import { of } from 'rxjs';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';

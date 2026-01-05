@@ -37,13 +37,22 @@ export type IndicesSelectComboBoxProps = Omit<
   'data-telemetry-id'?: string;
   ignoredOptions?: string[];
   label?: string;
+  setIndicesSelectComboBoxDisabled?: (isInvalid: boolean) => void;
 };
 
-export const IndicesSelectComboBox = ({ ignoredOptions, ...props }: IndicesSelectComboBoxProps) => {
+export const IndicesSelectComboBox = ({
+  setIndicesSelectComboBoxDisabled,
+  ignoredOptions,
+  ...props
+}: IndicesSelectComboBoxProps) => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const { makeRequest } = useActions(FetchIndicesForSearchApplicationsAPILogic);
   const { status, data } = useValues(FetchIndicesForSearchApplicationsAPILogic);
   const isInvalid = Boolean(searchQuery && !props.selectedOptions?.length);
+  useEffect(() => {
+    if (!setIndicesSelectComboBoxDisabled) return;
+    setIndicesSelectComboBoxDisabled(isInvalid);
+  }, [isInvalid]);
 
   useEffect(() => {
     makeRequest({ searchQuery });

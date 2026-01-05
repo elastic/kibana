@@ -18,6 +18,7 @@ export type * from './agents';
 export type * from './sentinel_one';
 export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
+export type * from './scripts_library';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -816,6 +817,18 @@ export type SafeEndpointEvent = Partial<{
   }>;
   file: Partial<{ path: ECSField<string> }>;
   registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+  device: Partial<{
+    serial_number: ECSField<string>;
+    vendor: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    product: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    type: ECSField<string>;
+  }>;
 }>;
 
 export interface SafeLegacyEndpointEvent {
@@ -1074,6 +1087,7 @@ export interface PolicyConfig {
   linux: {
     advanced?: {};
     events: {
+      dns?: boolean;
       file: boolean;
       process: boolean;
       network: boolean;

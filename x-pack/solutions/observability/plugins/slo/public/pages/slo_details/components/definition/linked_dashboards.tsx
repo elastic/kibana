@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiText } from '
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import React, { useMemo } from 'react';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SLODefinition } from '../../../../../server/domain/models';

@@ -11,11 +11,11 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   BaseColumn,
   Operation,
-  DataType,
   GenericColumnWithMeta,
   FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
+import type { DataType } from '@kbn/lens-common';
 import {
   getDurationParams,
   inputFormats,
@@ -107,7 +107,7 @@ export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   return false;
 };
 
-export const excludeMetaFromColumn = (column: Column) => {
+export const excludeMetaFromColumn = <T extends Column>(column: T) => {
   if (isColumnWithMeta(column)) {
     const { meta, ...rest } = column;
     return rest;

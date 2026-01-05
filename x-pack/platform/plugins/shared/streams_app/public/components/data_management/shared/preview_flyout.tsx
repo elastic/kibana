@@ -8,8 +8,8 @@
 import React from 'react';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import useAsync from 'react-use/lib/useAsync';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
@@ -24,22 +24,16 @@ export const PreviewFlyout = ({
   setExpandedDoc,
   docViewsRegistry,
   streamName,
+  streamDataView,
 }: {
   currentDoc?: DataTableRecordWithIndex;
   hits: DataTableRecordWithIndex[];
   setExpandedDoc: (doc?: DataTableRecordWithIndex) => void;
   docViewsRegistry: DocViewsRegistry;
   streamName: string;
+  streamDataView?: DataView;
 }) => {
-  const { core, dependencies } = useKibana();
-  const { data } = dependencies.start;
-
-  const { value: streamDataView } = useAsync(() =>
-    data.dataViews.create({
-      title: streamName,
-      timeFieldName: '@timestamp',
-    })
-  );
+  const { core } = useKibana();
 
   return (
     currentDoc &&

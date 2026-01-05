@@ -29,7 +29,7 @@ The registry intelligently handles both exact index pattern matches (e.g., "logs
 
 **Note**: The registry will only return indices (remote or local) that exist in the instance.
 
-**Important:**: Extensions registered through this mechanism are solution-specific. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'workplace_ai') and are only visible when working within the context of that specific solution. Extensions are not displayed in classic or non-solution-based Kibana instances.
+**Important:**: Extensions registered through this mechanism are solution-specific. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'workplaceai') and are only visible when working within the context of that specific solution. Extensions are not displayed in classic or non-solution-based Kibana instances.
 
 ---
 
@@ -51,7 +51,7 @@ Here's an example of how to register `recommendedQueries`:
       esql: ESQLSetup;
       // ... other dependencies
     }
-    const solutionId: SolutionId = 'oblt'; // Or 'security', 'es', 'workplace_ai', etc.
+    const solutionId: SolutionId = 'oblt'; // Or 'security', 'es', 'workplaceai', etc.
 
     // Inside your plugin's `Plugin` class
     public setup(core: CoreSetup, { esql }: SetupDeps) {

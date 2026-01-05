@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiCallOut,
   EuiButton,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PageScope } from '../../../data_view_manager/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
@@ -29,7 +30,6 @@ import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/ri
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../../translations';
 import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../../common';
@@ -37,6 +37,8 @@ import { EntityIconByType } from '../entity_store/helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
+import type { AlertFilter } from './common';
+
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -56,7 +58,8 @@ export const RiskScorePreviewSection: React.FC<{
   includeClosedAlerts: boolean;
   from: string;
   to: string;
-}> = ({ privileges, includeClosedAlerts, from, to }) => {
+  alertFilters?: Array<AlertFilter>;
+}> = ({ privileges, includeClosedAlerts, from, to, alertFilters }) => {
   const sectionBody = useMemo(() => {
     if (privileges.isLoading) {
       return (
@@ -68,11 +71,18 @@ export const RiskScorePreviewSection: React.FC<{
       );
     }
     if (userHasRiskEngineReadPermissions(privileges)) {
-      return <RiskEnginePreview includeClosedAlerts={includeClosedAlerts} from={from} to={to} />;
+      return (
+        <RiskEnginePreview
+          includeClosedAlerts={includeClosedAlerts}
+          from={from}
+          to={to}
+          alertFilters={alertFilters}
+        />
+      );
     }
 
     return <MissingPermissionsCallout />;
-  }, [privileges, includeClosedAlerts, from, to]);
+  }, [privileges, includeClosedAlerts, from, to, alertFilters]);
 
   return (
     <>
@@ -139,23 +149,22 @@ const RiskScorePreviewPanel = ({
   );
 };
 
-const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; to: string }> = ({
-  includeClosedAlerts,
-  from,
-  to,
-}) => {
+const RiskEnginePreview: React.FC<{
+  includeClosedAlerts: boolean;
+  from: string;
+  to: string;
+  alertFilters?: Array<AlertFilter>;
+}> = ({ includeClosedAlerts, from, to, alertFilters }) => {
   const entityTypes = useEntityAnalyticsTypes();
 
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
 
@@ -167,11 +176,14 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
       end: to,
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
+    // Pass filters to API (will only work once backend PR merges)
+    filters: alertFilters && alertFilters.length > 0 ? alertFilters : undefined,
   });
 
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         data-test-subj="risk-preview-error"
         title={i18n.PREVIEW_ERROR_TITLE}
         color="danger"

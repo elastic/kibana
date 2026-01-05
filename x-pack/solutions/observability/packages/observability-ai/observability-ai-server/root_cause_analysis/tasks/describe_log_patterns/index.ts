@@ -6,8 +6,8 @@
  */
 
 import type { InferenceClient } from '@kbn/inference-common';
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import { omit, partition, sumBy } from 'lodash';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
@@ -36,7 +36,7 @@ export async function describeLogPatterns({
   inferenceClient: InferenceClient;
   connectorId: string;
   entity: Record<string, string>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
   contextForEntityInvestigation: string;
   ownPatterns: AnalyzedLogPattern[];
   patternsFromOtherEntities: AnalyzedLogPattern[];

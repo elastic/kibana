@@ -70,6 +70,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
         ignore_unavailable: true,
+        conflicts: 'proceed',
+        refresh: true,
       });
       await server.savedObjects.clean({ types: ['rule'] });
     });

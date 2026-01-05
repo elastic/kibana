@@ -10,17 +10,17 @@ import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { login, ROLE } from '../../../tasks/login';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
-  getNoPrivilegesPage,
-  getArtifactListEmptyStateAddButton,
-  getEndpointManagementPageMap,
-  getEndpointManagementPageList,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
-  ensurePolicyListPageAuthzAccess,
   ensureFleetPermissionDeniedScreen,
-  getFleetAgentListTable,
-  visitFleetAgentList,
   ensurePolicyDetailsPageAuthzAccess,
+  ensurePolicyListPageAuthzAccess,
+  getArtifactListEmptyStateAddButton,
+  getEndpointManagementPageList,
+  getEndpointManagementPageMap,
+  getFleetAgentListTable,
+  getNoPrivilegesPage,
+  visitFleetAgentList,
 } from '../../../screens';
 
 // FLAKY: https://github.com/elastic/kibana/issues/170985
@@ -33,9 +33,6 @@ describe.skip(
         productTypes: [
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
-        ],
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
         ],
       },
     },

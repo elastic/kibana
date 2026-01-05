@@ -11,17 +11,21 @@ import { css } from '@emotion/react';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
-  align-items: baseline;
   height: 100vh;
   width: 100vw;
   min-height: 100%;
   min-width: 100%;
 
+  @media screen {
+    // do not restrict height when printing
+    overflow: hidden;
+  }
+
   display: grid;
 
   grid-template-areas:
     'banner banner banner'
-    'navigation header sidebar'
+    'header header header'
     'navigation application sidebar'
     'footer footer footer';
 `;

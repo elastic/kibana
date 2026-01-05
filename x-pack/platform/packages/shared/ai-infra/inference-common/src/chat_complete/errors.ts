@@ -12,17 +12,26 @@ import type { UnvalidatedToolCall } from './tools';
  * List of code of error that are specific to the {@link ChatCompleteAPI}
  */
 export enum ChatCompletionErrorCode {
-  TokenLimitReachedError = 'tokenLimitReachedError',
+  ContextLengthExceededError = 'contextLengthExceededError',
+  OutputTokenLimitReachedError = 'outputTokenLimitReachedError',
   ToolNotFoundError = 'toolNotFoundError',
   ToolValidationError = 'toolValidationError',
 }
 
 /**
- * Error thrown if the completion call fails because of a token limit
- * error, e.g. when the context window is higher than the limit
+ * Error thrown if the completion call fails because of a context length error,
+ * e.g. when too many input token or tool definitions are sent.
+ */
+export type ChatCompletionContextLengthExceededError = InferenceTaskError<
+  ChatCompletionErrorCode.ContextLengthExceededError,
+  {}
+>;
+
+/**
+ * Error thrown if the completion call fails because of an output token limit error
  */
 export type ChatCompletionTokenLimitReachedError = InferenceTaskError<
-  ChatCompletionErrorCode.TokenLimitReachedError,
+  ChatCompletionErrorCode.OutputTokenLimitReachedError,
   {
     tokenLimit?: number;
     tokenCount?: number;
@@ -38,6 +47,8 @@ export type ChatCompletionToolNotFoundError = InferenceTaskError<
   {
     /** The name of the tool that got called */
     name: string;
+    /** (unparsed) arguments the tool was called with*/
+    arguments: string;
   }
 >;
 
@@ -59,6 +70,18 @@ export type ChatCompletionToolValidationError = InferenceTaskError<
 >;
 
 /**
+ * Check if an error is a {@link ChatCompletionContextLengthExceededError}
+ */
+export function isContextLengthExceededError(
+  error: Error
+): error is ChatCompletionContextLengthExceededError {
+  return (
+    error instanceof InferenceTaskError &&
+    error.code === ChatCompletionErrorCode.ContextLengthExceededError
+  );
+}
+
+/**
  * Check if an error is a {@link ChatCompletionToolValidationError}
  */
 export function isToolValidationError(error?: Error): error is ChatCompletionToolValidationError {
@@ -71,12 +94,12 @@ export function isToolValidationError(error?: Error): error is ChatCompletionToo
 /**
  * Check if an error is a {@link ChatCompletionTokenLimitReachedError}
  */
-export function isTokenLimitReachedError(
+export function isOutputTokenLimitReachedError(
   error: Error
 ): error is ChatCompletionTokenLimitReachedError {
   return (
     error instanceof InferenceTaskError &&
-    error.code === ChatCompletionErrorCode.TokenLimitReachedError
+    error.code === ChatCompletionErrorCode.OutputTokenLimitReachedError
   );
 }
 

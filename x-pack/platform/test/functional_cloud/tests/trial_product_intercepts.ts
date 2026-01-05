@@ -14,8 +14,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   describe('Trial Product Intercept on home screen', () => {
+    /**
+     * @see config.ts
+     */
+    const CONFIGURED_TRIAL_INTERCEPT_INTERVAL = 10 * 1000;
     const trialInterceptSelector = `[data-test-subj*="intercept-${TRIAL_TRIGGER_DEF_ID}"]`;
 
     before(async () => {
@@ -32,12 +37,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await PageObjects.common.navigateToUrl('home');
+      // Wait for the intercept interval to elapse
+      await PageObjects.common.sleep(CONFIGURED_TRIAL_INTERCEPT_INTERVAL + 100);
+      // Refresh the page at this point the configured interval will have elapsed so we expect the intercept to be displayed
+      await browser.refresh();
     });
 
     it('gets dismissed, when the not now button is clicked', async () => {
       await retry.waitFor('wait for product intercept to be displayed', async () => {
-        const intercept = await find.byCssSelector(trialInterceptSelector);
-        return intercept.isDisplayed();
+        return await testSubjects.exists(`*intercept-`);
       });
 
       await testSubjects.click('productInterceptDismissButton');
@@ -49,14 +57,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('would not be displayed again, after dismissal', async () => {
-      try {
-        await retry.waitFor('wait for product intercept to be displayed', async () => {
-          const intercept = await find.byCssSelector(trialInterceptSelector);
-          return intercept.isDisplayed();
-        });
-      } catch (err) {
-        expect(err.message).to.ok();
-      }
+      // Wait for the intercept interval to elapse
+      await PageObjects.common.sleep(CONFIGURED_TRIAL_INTERCEPT_INTERVAL);
+
+      // Refresh the page at this point the configured interval will have elapsed
+      await browser.refresh();
+
+      // expect the intercept to not be displayed
+      await testSubjects.missingOrFail('*intercept-');
     });
   });
 };

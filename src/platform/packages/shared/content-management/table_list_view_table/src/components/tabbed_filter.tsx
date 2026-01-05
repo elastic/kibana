@@ -36,16 +36,6 @@ export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
             defaultMessage="All"
           />
         </EuiTab>
-        <EuiTab
-          onClick={() => props.onSelectedTabChanged('favorite')}
-          isSelected={props.selectedTabId === 'favorite'}
-          data-test-subj="favoriteTab"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.favoriteTabLabel"
-            defaultMessage="Starred"
-          />
-        </EuiTab>
       </EuiTabs>
       <EuiSpacer size={'s'} />
     </>

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { EuiToolTip } from '@elastic/eui';
 import { selectUnit } from '@formatjs/intl-utils';
 import moment from 'moment';
-import { EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import { useFormattedDateTime } from '..';
 
 export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatOptions {

@@ -26,6 +26,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
 } from '../../../../../common/constants';
 import type { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
@@ -37,6 +38,7 @@ import {
   isOnPolicyTrustedDevicesView,
   isOnBlocklistsView,
   isOnProtectionUpdatesView,
+  isOnEndpointExceptionsView,
 } from './policy_common_selectors';
 
 /** Returns the policy details */
@@ -102,6 +104,7 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
   isOnPolicyEventFiltersView(state) ||
   isOnHostIsolationExceptionsView(state) ||
   isOnBlocklistsView(state) ||
+  isOnEndpointExceptionsView(state) ||
   isOnProtectionUpdatesView(state);
 
 /** Returns the license info fetched from the license service */
@@ -122,6 +125,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
         ],
         exact: true,

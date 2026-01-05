@@ -9,8 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-common';
+import { validateAccessor } from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import { LayoutDirection } from '@elastic/charts';
 import type { MetricVisRenderConfig } from '../types';
 import { visType } from '../types';

@@ -14,13 +14,15 @@ import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/ty
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import type {
+  ServiceNowSecretConfigurationType,
+  ServiceNowPublicConfigurationType,
+} from '@kbn/connector-schemas/servicenow';
+import type {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,
   ResponseError,
   ServiceNowError,
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
 } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';

@@ -14,6 +14,7 @@ import {
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
   OBSERVABLE_TYPE_HOSTNAME,
+  OBSERVABLE_TYPE_AGENT_ID,
 } from '../../../common/constants/observables';
 
 export const getIPType = (ip: string): 'IPV4' | 'IPV6' => {
@@ -129,6 +130,13 @@ export const getObservablesFromEcs = (ecsDataArray: FlattedEcsData[][]): Observa
           const names = castArray(datum.value);
           names.forEach((name) => {
             processObservable(observablesMap, name, OBSERVABLE_TYPE_DOMAIN.key, description);
+          });
+        }
+        // Agent ID
+        if (datum.field === 'agent.id') {
+          const agentIds = castArray(datum.value);
+          agentIds.forEach((agentId) => {
+            processObservable(observablesMap, agentId, OBSERVABLE_TYPE_AGENT_ID.key, description);
           });
         }
       }

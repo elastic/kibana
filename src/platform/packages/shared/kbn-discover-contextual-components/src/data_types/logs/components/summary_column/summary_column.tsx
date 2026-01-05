@@ -8,23 +8,26 @@
  */
 
 import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  RESOURCE_FIELDS,
   type ShouldShowFieldInTableHandler,
   TRACE_FIELDS,
-  getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
+import { getAvailableTraceFields } from '@kbn/discover-utils/src';
 import { Resource } from './resource';
 import { Content } from './content';
-import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
+import {
+  createResourceFields,
+  createResourceFieldsWithOtelFallback,
+  formatJsonDocumentForContent,
+  isTraceDocument,
+} from './utils';
 import {
   closeCellActionPopoverText,
   contentLabel,
@@ -74,9 +77,10 @@ const SummaryCell = ({
   const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  const resourceFields = createResourceFields(
+  // For logs, also resolve otel field names directly, even if no alias exists
+  const resourceFields =
     isTracesSummary && isTraceDocument(row)
-      ? {
+      ? createResourceFields({
           row,
           fields: TRACE_FIELDS,
           getAvailableFields: getAvailableTraceFields,
@@ -84,17 +88,15 @@ const SummaryCell = ({
           core,
           share,
           fieldFormats,
-        }
-      : {
+        })
+      : createResourceFieldsWithOtelFallback({
           row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
           dataView,
           core,
           share,
           fieldFormats,
-        }
-  );
+        });
+
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -128,33 +130,40 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
     props;
 
+  const filterAndClosePopover: AllSummaryColumnProps['onFilter'] = useMemo(() => {
+    if (!onFilter) return undefined;
+
+    return (...params) => {
+      onFilter(...params);
+      closePopover();
+    };
+  }, [onFilter, closePopover]);
+
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
 
-  const resourceFields = createResourceFields(
-    isTraceDoc
-      ? {
-          row,
-          fields: TRACE_FIELDS,
-          getAvailableFields: getAvailableTraceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-      : {
-          row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-  );
+  // For logs, also resolve otel field names directly, even if no alias exists
+  const resourceFields = isTraceDoc
+    ? createResourceFields({
+        row,
+        fields: TRACE_FIELDS,
+        getAvailableFields: getAvailableTraceFields,
+        dataView,
+        core,
+        share,
+        fieldFormats,
+      })
+    : createResourceFieldsWithOtelFallback({
+        row,
+        dataView,
+        core,
+        share,
+        fieldFormats,
+      });
+
   const shouldRenderResource = resourceFields.length > 0;
 
-  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(documentOverview, {
+  // Use OTel fallback version that returns the actual field name used
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(row.flattened, {
     includeFormattedValue: true,
   });
   const messageCodeBlockProps = formattedValue
@@ -180,7 +189,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
           <EuiTitle size="xxs">
             <span>{isTraceDoc ? traceLabel : resourceLabel}</span>
           </EuiTitle>
-          <Resource fields={resourceFields} onFilter={onFilter} />
+          <Resource fields={resourceFields} onFilter={filterAndClosePopover} />
         </EuiFlexGroup>
       )}
       <EuiFlexGroup direction="column" gutterSize="s">

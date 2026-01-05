@@ -11,11 +11,11 @@ import type {
   FormulaPublicApi,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { XYLegendValue } from '@kbn/visualizations-plugin/common';
+import type { XYLegendValue } from '@kbn/chart-expressions-common';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 

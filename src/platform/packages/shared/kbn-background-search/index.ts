@@ -8,4 +8,3 @@
  */
 
 export { BackgroundSearchRestoredCallout } from './src/components';
-export { EuiIconBackgroundTask } from './src/components';

@@ -11,7 +11,7 @@ import { renderTemplate } from './render_template';
 
 function mockParams() {
   return {
-    themeTagName: 'v8',
+    themeTagName: 'borealis',
     colorMode: 'light',
     jsDependencyPaths: ['/js-1', '/js-2'],
     styleSheetPaths: ['/style-1', '/style-2'],

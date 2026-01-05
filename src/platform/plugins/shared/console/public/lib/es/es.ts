@@ -31,6 +31,7 @@ interface SendConfig {
   withProductOrigin?: boolean;
   asResponse?: boolean;
   host?: string;
+  isPackagedEnvironment?: boolean;
 }
 
 type Method = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'head';
@@ -44,6 +45,7 @@ export async function send({
   withProductOrigin = false,
   asResponse = false,
   host,
+  isPackagedEnvironment,
 }: SendConfig) {
   const kibanaRequestUrl = getKibanaRequestUrl(path);
 
@@ -51,7 +53,10 @@ export async function send({
     const httpMethod = method.toLowerCase() as Method;
     const url = new URL(kibanaRequestUrl);
     const { pathname, searchParams } = url;
-    const query = Object.fromEntries(searchParams.entries());
+    const query = {
+      ...Object.fromEntries(searchParams.entries()),
+      ...(isPackagedEnvironment && { isKibanaRequest: 'true' }),
+    };
     const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
 
     return await http[httpMethod]<HttpResponse>(pathname, {

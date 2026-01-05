@@ -33,9 +33,6 @@ export const getMigrationDocLink = () => {
   return docLinks.kibanaUpgradeSavedObjects;
 };
 
-export const delay = (seconds: number) =>
-  new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-
 export const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'test-type',
   hidden: false,

@@ -11,21 +11,19 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, LogDocumentOverview } from '../..';
 import { fieldConstants, formatFieldValue } from '../..';
+import { getFieldValueWithFallback } from './get_field_value_with_fallback';
 
 export function getLogDocumentOverview(
   doc: DataTableRecord,
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
 ): LogDocumentOverview {
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
+    // Use fallback to check both ECS and OTel field names
+    const result = getFieldValueWithFallback(doc.flattened, field);
+    const value = result.value;
     return (
-      doc.flattened[field] !== undefined && doc.flattened[field] !== null
-        ? formatFieldValue(
-            doc.flattened[field],
-            doc.raw,
-            fieldFormats,
-            dataView,
-            dataView.fields.getByName(field)
-          )
+      value !== undefined && value !== null
+        ? formatFieldValue(value, doc.raw, fieldFormats, dataView, dataView.fields.getByName(field))
         : undefined
     ) as LogDocumentOverview[T];
   };
@@ -61,8 +59,31 @@ export function getLogDocumentOverview(
   const dataset = formatField(fieldConstants.DATASTREAM_DATASET_FIELD);
   const agentName = formatField(fieldConstants.AGENT_NAME_FIELD);
 
+  // apm  log fields
+  const errorLogLevelArray = doc.flattened[fieldConstants.ERROR_LOG_LEVEL_FIELD];
+  const errorLogLevel =
+    Array.isArray(errorLogLevelArray) && errorLogLevelArray.length > 0
+      ? errorLogLevelArray[0]
+      : errorLogLevelArray;
+  const errorExceptionMessage = formatField(fieldConstants.ERROR_EXCEPTION_MESSAGE);
+  const processorEvent = formatField(fieldConstants.PROCESSOR_EVENT_FIELD);
+
+  // otel log fields
+  const eventName = formatField(fieldConstants.OTEL_EVENT_NAME_FIELD);
+  const exceptionType = formatField(fieldConstants.OTEL_EXCEPTION_TYPE_FIELD);
+
+  // exception message
+  const exceptionMessage = formatField(fieldConstants.EXCEPTION_MESSAGE_FIELD);
+  const otelExpectionMessage = formatField(fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE);
+  const otelExpectionStackTrace = formatField(fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE);
+  const errorExceptionType = formatField(fieldConstants.ERROR_EXCEPTION_TYPE_FIELD);
+
+  // error
+  const errorCulprit = formatField(fieldConstants.ERROR_CULPRIT_FIELD);
+
   return {
     [fieldConstants.LOG_LEVEL_FIELD]: level,
+    [fieldConstants.ERROR_LOG_LEVEL_FIELD]: errorLogLevel,
     [fieldConstants.TIMESTAMP_FIELD]: timestamp,
     [fieldConstants.MESSAGE_FIELD]: message,
     [fieldConstants.ERROR_MESSAGE_FIELD]: errorMessage,
@@ -83,5 +104,14 @@ export function getLogDocumentOverview(
     [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: namespace,
     [fieldConstants.DATASTREAM_DATASET_FIELD]: dataset,
     [fieldConstants.AGENT_NAME_FIELD]: agentName,
+    [fieldConstants.EXCEPTION_MESSAGE_FIELD]: exceptionMessage,
+    [fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE]: otelExpectionMessage,
+    [fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE]: otelExpectionStackTrace,
+    [fieldConstants.PROCESSOR_EVENT_FIELD]: processorEvent,
+    [fieldConstants.OTEL_EVENT_NAME_FIELD]: eventName,
+    [fieldConstants.ERROR_EXCEPTION_MESSAGE]: errorExceptionMessage,
+    [fieldConstants.ERROR_CULPRIT_FIELD]: errorCulprit,
+    [fieldConstants.ERROR_EXCEPTION_TYPE_FIELD]: errorExceptionType,
+    [fieldConstants.OTEL_EXCEPTION_TYPE_FIELD]: exceptionType,
   };
 }

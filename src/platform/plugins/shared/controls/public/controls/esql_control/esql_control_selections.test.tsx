@@ -8,7 +8,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
+import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
 import type { ControlFetchContext } from '../../control_group/control_fetch';
 import { initializeESQLControlSelections } from './esql_control_selections';
@@ -67,6 +67,7 @@ describe('initializeESQLControlSelections', () => {
           "selectedOptions": Array [
             "option1",
           ],
+          "singleSelect": true,
           "title": "",
           "variableName": "variable1",
           "variableType": "values",
@@ -105,11 +106,155 @@ describe('initializeESQLControlSelections', () => {
           "selectedOptions": Array [
             "option1",
           ],
+          "singleSelect": true,
           "title": "",
           "variableName": "variable1",
           "variableType": "values",
         }
       `);
+    });
+  });
+
+  describe('esqlVariable$', () => {
+    test('should emit single value for single-select mode', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        availableOptions: ['option1', 'option2'],
+        variableName: 'myVariable',
+        variableType: 'values',
+        controlType: EsqlControlType.STATIC_VALUES,
+        singleSelect: true,
+        title: 'Test Control',
+        esqlQuery: '',
+      } as ESQLControlState;
+
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+
+      await waitFor(() => {
+        const variable = selections.api.esqlVariable$.getValue();
+        expect(variable).toEqual({
+          key: 'myVariable',
+          value: 'option1',
+          type: 'values',
+        });
+      });
+    });
+
+    test('should emit array for multi-select mode', async () => {
+      const initialState = {
+        selectedOptions: ['option1', 'option2'],
+        availableOptions: ['option1', 'option2', 'option3'],
+        variableName: 'myVariable',
+        variableType: 'values',
+        controlType: EsqlControlType.STATIC_VALUES,
+        singleSelect: false,
+        title: 'Test Control',
+        esqlQuery: '',
+      } as ESQLControlState;
+
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+
+      await waitFor(() => {
+        const variable = selections.api.esqlVariable$.getValue();
+        expect(variable).toEqual({
+          key: 'myVariable',
+          value: ['option1', 'option2'],
+          type: 'values',
+        });
+      });
+    });
+  });
+
+  describe('chaining variables controls', () => {
+    test('should refetch values when the query variables change', async () => {
+      const initialState = {
+        selectedOptions: [],
+        variableName: 'variable2',
+        variableType: ESQLVariableType.VALUES,
+        // query depends on another variable
+        esqlQuery: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+        singleSelect: true,
+        title: 'My variable',
+      } as ESQLControlState;
+
+      const setDataLoadingMock = jest.fn();
+      initializeESQLControlSelections(initialState, controlFetch$, setDataLoadingMock);
+
+      setDataLoadingMock.mockClear();
+      // Initial variables
+      controlFetch$.next({
+        esqlVariables: [
+          {
+            key: 'variable1',
+            value: 'newValue1',
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+      });
+
+      await waitFor(() => {
+        expect(setDataLoadingMock).toHaveBeenCalledWith(false);
+      });
+
+      // Change the variable
+      setDataLoadingMock.mockClear();
+      controlFetch$.next({
+        esqlVariables: [
+          {
+            key: 'variable1',
+            value: 'newValue2',
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+      });
+
+      await waitFor(() => {
+        expect(setDataLoadingMock).toHaveBeenCalledWith(true);
+      });
+    });
+
+    test("should not refetch when the variable value doesn't change", async () => {
+      const initialState = {
+        selectedOptions: [],
+        variableName: 'variable1',
+        variableType: ESQLVariableType.VALUES,
+        esqlQuery: 'FROM foo | WHERE column1 == ?variable2 | STATS BY column2',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+        singleSelect: true,
+        title: 'My variable',
+      } as ESQLControlState;
+
+      const setDataLoadingMock = jest.fn();
+      initializeESQLControlSelections(initialState, controlFetch$, setDataLoadingMock);
+
+      // Initial variables
+      controlFetch$.next({
+        esqlVariables: [
+          {
+            key: 'variable1',
+            value: 'newValue1',
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+      });
+
+      await waitFor(() => {
+        expect(setDataLoadingMock).toHaveBeenCalledWith(false);
+      });
+
+      setDataLoadingMock.mockClear();
+      controlFetch$.next({
+        esqlVariables: [
+          {
+            key: 'variable1',
+            value: 'newValue1',
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+      });
+
+      expect(setDataLoadingMock).not.toHaveBeenCalled();
     });
   });
 });

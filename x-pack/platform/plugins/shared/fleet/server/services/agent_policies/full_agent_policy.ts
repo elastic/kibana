@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
@@ -114,7 +112,7 @@ export async function getFullAgentPolicy(
     fleetServerHost,
     monitoringOutput,
     downloadSource,
-    downloadSourceProxyUri,
+    downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
@@ -228,7 +226,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxyUri),
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxy),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -577,7 +575,6 @@ export function transformOutputToFullPolicyOutput(
       }
     };
 
-    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
@@ -600,7 +597,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
       compression_level,
@@ -608,7 +604,6 @@ export function transformOutputToFullPolicyOutput(
       max_batch_bytes,
       mem_queue_events,
     } = shipper;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     generalShipperData = {
       loadbalance,
@@ -812,7 +807,6 @@ export function getFullMonitoringSettings(
   return monitoring;
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
@@ -834,16 +828,15 @@ function buildShipperQueueData(shipper: ShipperOutput) {
     },
   };
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,
-  downloadSourceProxyUri: string | null
+  downloadSourceProxy: FleetProxy | undefined
 ) {
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
-    ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
   };
+
   if (downloadSource?.ssl) {
     config.ssl = {
       ...(downloadSource.ssl?.certificate_authorities && {
@@ -868,5 +861,27 @@ export function getBinarySourceSettings(
       },
     };
   }
+
+  if (downloadSourceProxy) {
+    if (downloadSourceProxy.url) {
+      config.proxy_url = downloadSourceProxy.url;
+    }
+    if (downloadSourceProxy.proxy_headers) {
+      config.proxy_headers = downloadSourceProxy.proxy_headers;
+    }
+    // if the proxy is configured, get the ssl settings from it
+    config.ssl = {
+      ...(downloadSourceProxy?.certificate_authorities && {
+        certificate_authorities: [downloadSourceProxy.certificate_authorities],
+      }),
+      ...(downloadSourceProxy?.certificate && {
+        certificate: downloadSourceProxy.certificate,
+      }),
+      ...(downloadSourceProxy?.certificate_key && {
+        key: downloadSourceProxy?.certificate_key,
+      }),
+    };
+  }
+
   return config;
 }

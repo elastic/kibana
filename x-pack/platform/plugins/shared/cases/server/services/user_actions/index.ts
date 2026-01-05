@@ -236,7 +236,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string,
-    isCasesWebhook = false
+    hasAdditionalUserActionsConnector = false
   ): Promise<UserActionSavedObjectTransformed | undefined> {
     try {
       this.context.log.debug(
@@ -250,14 +250,15 @@ export class CaseUserActionService {
         filters: [
           UserActionTypes.comment,
           UserActionTypes.description,
-          UserActionTypes.tags,
           UserActionTypes.title,
           /**
-           * TODO: Remove when all connectors support the status and
-           * the severity user actions or if there is a mechanism to
+           * TODO: Remove when all connectors support the status, severity
+           * and tags user actions or if there is a mechanism to
            * define supported user actions per connector type
            */
-          ...(isCasesWebhook ? [UserActionTypes.severity, UserActionTypes.status] : []),
+          ...(hasAdditionalUserActionsConnector
+            ? [UserActionTypes.severity, UserActionTypes.status, UserActionTypes.tags]
+            : []),
         ],
         field: 'type',
         operator: 'or',

@@ -8,11 +8,11 @@
  */
 
 import { SearchWorkflowCommandSchema } from '@kbn/workflows';
-import type { GetWorkflowsParams } from '../workflows_management_api';
-import type { RouteDependencies } from './types';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_READ_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_READ_SECURITY } from './route_security';
+import type { RouteDependencies } from './types';
+import type { GetWorkflowsParams } from '../workflows_management_api';
 
 export function registerPostSearchWorkflowsRoute({
   router,
@@ -31,14 +31,14 @@ export function registerPostSearchWorkflowsRoute({
     },
     async (context, request, response) => {
       try {
-        const { limit, page, enabled, createdBy, query } =
+        const { size, page, enabled, createdBy, query } =
           request.body as unknown as GetWorkflowsParams;
 
         const spaceId = spaces.getSpaceId(request);
         return response.ok({
           body: await api.getWorkflows(
             {
-              limit,
+              size,
               page,
               enabled,
               createdBy,

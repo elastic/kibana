@@ -8,14 +8,14 @@
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
-import type { LensDocument } from '../persistence';
 import type {
+  LensDocument,
   AnnotationGroups,
   Datasource,
   DatasourceMap,
   Visualization,
   VisualizationMap,
-} from '../types';
+} from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 const visualizationType = 'lnsSomeVis';

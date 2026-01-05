@@ -83,8 +83,6 @@ export class ThemeService {
 }
 
 const updateKbnThemeTag = (theme: CoreTheme) => {
-  const name = theme.name === 'amsterdam' ? 'v8' : theme.name;
-
   const globals: any = typeof window === 'undefined' ? {} : window;
-  globals.__kbnThemeTag__ = `${name}${theme.darkMode ? 'dark' : 'light'}`;
+  globals.__kbnThemeTag__ = `${theme.name}${theme.darkMode ? 'dark' : 'light'}`;
 };

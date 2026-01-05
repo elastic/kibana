@@ -158,6 +158,7 @@ export const AddDatabaseModal = ({
             <>
               <EuiSpacer />
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
@@ -180,6 +181,7 @@ export const AddDatabaseModal = ({
             <>
               <EuiSpacer />
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
@@ -239,6 +241,7 @@ export const AddDatabaseModal = ({
           <>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={
                 <FormattedMessage

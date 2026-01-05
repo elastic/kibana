@@ -8,41 +8,33 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils/src';
-import { useFetch } from '@kbn/unified-histogram';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React, { useEffect, useMemo } from 'react';
-import { Provider } from 'react-redux';
-import { Subject } from 'rxjs';
+import React, { useMemo } from 'react';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
-import { store } from '../../store';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
 import { MetricsGridWrapper } from '../metrics_grid_wrapper';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
 export type DataSource = 'apm' | 'otel';
 
 function TraceMetricsGrid({
-  requestParams,
+  fetchParams,
+  fetch$: discoverFetch$,
   services,
-  input$: originalInput$,
-  searchSessionId,
   onBrushEnd,
   onFilter,
-  abortController,
-  query,
   dataSource,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
-  dataView,
-}: ChartSectionProps & {
+}: UnifiedMetricsGridProps & {
   dataSource: DataSource;
 }) {
+  const { query, dataView } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -58,33 +50,12 @@ function TraceMetricsGrid({
     return [...esqlQuery.filters, ...kqlFilters];
   }, [esqlQuery.filters, kqlFilters]);
 
-  const { updateTimeRange } = requestParams;
-
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
+  const toolbar = useMemo(
+    () => ({
+      toggleActions: renderToggleActions(),
+    }),
+    [renderToggleActions]
   );
-
-  const discoverFetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
-
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
-        dismissAllFlyoutsExceptFor(DiscoverFlyouts.inspectorPanel);
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, []);
 
   const indexPattern = dataView?.getIndexPattern();
 
@@ -93,54 +64,46 @@ function TraceMetricsGrid({
   }
 
   return (
-    <Provider store={store}>
-      <MetricsGridWrapper
-        indexPattern={indexPattern}
-        renderToggleActions={renderToggleActions}
-        chartToolbarCss={chartToolbarCss}
-        requestParams={requestParams}
-        fields={[]}
-        isComponentVisible={isComponentVisible}
-        hideRightSideActions
-        hideDimensionsSelector
+    <MetricsGridWrapper
+      id="tracesGrid"
+      toolbarCss={chartToolbarCss}
+      toolbar={toolbar}
+      isComponentVisible={isComponentVisible}
+    >
+      <TraceMetricsProvider
+        value={{
+          dataSource,
+          indexes: indexPattern,
+          filters,
+          services,
+          onBrushEnd,
+          onFilter,
+          fetchParams,
+          discoverFetch$,
+        }}
       >
-        <TraceMetricsProvider
-          value={{
-            dataSource,
-            indexes: indexPattern,
-            filters,
-            requestParams,
-            services,
-            searchSessionId,
-            abortController,
-            onBrushEnd,
-            onFilter,
-            discoverFetch$,
-          }}
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          css={css`
+            height: 100%;
+            align-content: center;
+          `}
         >
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            css={css`
-              height: 100%;
-              align-content: center;
-            `}
-          >
-            <EuiFlexGrid columns={3} gutterSize="s">
-              <EuiFlexItem>
-                <LatencyChart />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErrorRateChart />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ThroughputChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-          </EuiPanel>
-        </TraceMetricsProvider>
-      </MetricsGridWrapper>
-    </Provider>
+          <EuiFlexGrid columns={3} gutterSize="s">
+            <EuiFlexItem>
+              <LatencyChart />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ErrorRateChart />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ThroughputChart />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </EuiPanel>
+      </TraceMetricsProvider>
+    </MetricsGridWrapper>
   );
 }
 

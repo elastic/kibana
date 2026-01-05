@@ -48,9 +48,11 @@ describe.skip('Import rules route', () => {
   let config: ReturnType<typeof configMock.createDefault>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
+  let context: ReturnType<typeof requestContextMock.createTools>['context'];
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     config = configMock.createDefault();
@@ -67,6 +69,13 @@ describe.skip('Import rules route', () => {
     );
     mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
     importRulesRoute(server.router, config, clients.logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    // Reset mock prebuilt rule assets client to release references
+    mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
   });
 
   describe('status codes', () => {

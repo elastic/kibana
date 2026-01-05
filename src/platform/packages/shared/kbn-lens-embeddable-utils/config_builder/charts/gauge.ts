@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState, GaugeVisualizationState } from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, GaugeVisualizationState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensGaugeConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
+  extractReferences,
   mapToFormula,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
@@ -119,18 +118,19 @@ export async function buildGauge(
     getValueColumns,
     dataViewsAPI
   );
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
+
   return {
     title: config.title,
     visualizationType: 'lnsGauge',
-    references: buildReferences(dataviews),
+    references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

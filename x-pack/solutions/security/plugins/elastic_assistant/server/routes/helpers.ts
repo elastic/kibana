@@ -24,6 +24,7 @@ import type {
   ContentReferences,
   MessageMetadata,
   ScreenContext,
+  InterruptValue,
 } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
@@ -49,6 +50,7 @@ import { buildResponse, getLlmType } from './utils';
 import type {
   AgentExecutorParams,
   AssistantDataClients,
+  OnLlmResponse,
   StaticReturnType,
 } from '../lib/langchain/executors/types';
 import { getLangChainMessages } from '../lib/langchain/helpers';
@@ -107,11 +109,13 @@ export const getPluginNameFromRequest = ({
 export const getMessageFromRawResponse = ({
   rawContent,
   metadata,
+  refusal,
   isError,
   traceData,
 }: {
   rawContent?: string;
   metadata?: MessageMetadata;
+  refusal?: string;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -120,6 +124,7 @@ export const getMessageFromRawResponse = ({
     return {
       role: 'assistant',
       content: rawContent,
+      ...(refusal ? { refusal } : {}),
       timestamp: dateTimeString,
       metadata,
       isError,
@@ -177,20 +182,24 @@ export const getSystemPromptFromUserConversation = async ({
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
+  messageRefusal?: string;
   replacements: Replacements;
   conversationId: string;
   contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
+  interruptValue?: InterruptValue;
 }
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
   messageContent,
+  messageRefusal,
   replacements,
   conversationId,
   contentReferences,
   isError = false,
   traceData = {},
+  interruptValue = undefined,
 }: AppendAssistantMessageToConversationParams) => {
   const conversation = await conversationsDataClient.getConversation({ id: conversationId });
   if (!conversation) {
@@ -199,6 +208,7 @@ export const appendAssistantMessageToConversation = async ({
 
   const metadata: MessageMetadata = {
     ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+    interruptValue,
   };
 
   await conversationsDataClient.appendConversationMessages({
@@ -209,6 +219,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        refusal: messageRefusal,
         metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
@@ -248,11 +259,7 @@ export interface LangChainExecuteParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any>;
   logger: Logger;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;

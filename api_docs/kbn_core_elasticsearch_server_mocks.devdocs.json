@@ -24,7 +24,7 @@
         "signature": [
           "{ readonly publicBaseUrl?: string | undefined; setUnauthorizedErrorHandler: jest.MockInstance<void, [handler: ",
           "UnauthorizedErrorHandler",
-          "], unknown>; } & Omit<",
+          "], unknown>; setCpsFeatureFlag: jest.MockInstance<void, [enabled: boolean], unknown>; } & Omit<",
           "ElasticsearchServiceSetup",
           ", \"legacy\"> & { legacy: { config$: ",
           "BehaviorSubject",

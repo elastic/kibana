@@ -37,7 +37,9 @@ export interface SavedQuerySO {
   query: string;
   timeout?: number;
   ecs_mapping: ECSMapping;
+  created_by?: string;
   updated_at: string;
+  updated_by?: string;
   prebuilt?: boolean;
 }
 
@@ -295,7 +297,6 @@ const SavedQueriesPageComponent = () => {
           pagination={pagination}
           sorting={sorting}
           onChange={onTableChange}
-          rowHeader="id"
         />
       )}
     </WithHeaderLayout>

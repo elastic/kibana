@@ -19,7 +19,7 @@ import {
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { TableSuggestion, Visualization, VisualizationSuggestion } from '../../types';
+import type { TableSuggestion, Visualization, VisualizationSuggestion } from '@kbn/lens-common';
 import type { GaugeVisualizationState } from './constants';
 import { gaugeTitlesByType } from './constants';
 

@@ -13,7 +13,7 @@ import React from 'react';
 import { Header } from './header';
 import { PlaygroundFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EuiForm } from '@elastic/eui';
+import { EuiForm, EuiThemeProvider } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
 jest.mock('../hooks/use_source_indices_field', () => ({
@@ -50,15 +50,17 @@ const MockPlaygroundForm = ({
   children: React.ReactElement;
   handleSubmit: React.FormEventHandler;
 }) => (
-  <MockFormProvider>
-    <EuiForm
-      onSubmit={handleSubmit}
-      data-test-subj="chatPage"
-      css={{ display: 'flex', flexGrow: 1 }}
-    >
-      {children}
-    </EuiForm>
-  </MockFormProvider>
+  <EuiThemeProvider>
+    <MockFormProvider>
+      <EuiForm
+        onSubmit={handleSubmit}
+        data-test-subj="chatPage"
+        css={{ display: 'flex', flexGrow: 1 }}
+      >
+        {children}
+      </EuiForm>
+    </MockFormProvider>
+  </EuiThemeProvider>
 );
 
 describe('Header', () => {

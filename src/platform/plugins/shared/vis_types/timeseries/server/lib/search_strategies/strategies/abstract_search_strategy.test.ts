@@ -98,6 +98,7 @@ describe('AbstractSearchStrategy', () => {
         sessionId: '1',
         isRestore: false,
         isStored: true,
+        requestHash: expect.any(String),
       }
     );
   });

@@ -195,6 +195,7 @@ describe('When using get-file action from response actions console', () => {
   });
 
   it.each([
+    'ra_get-file_error_canceled',
     'ra_get-file_error_not-found',
     'ra_get-file_error_is-directory',
     'ra_get-file_error_invalid-input',
@@ -205,6 +206,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-api-unreachable',
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
+    'ra_get-file_error_not-enough-free-space',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
@@ -270,6 +272,9 @@ describe('When using get-file action from response actions console', () => {
     });
 
     it('should display pending message', async () => {
+      apiMocks.responseProvider.getFile.mockDelay.mockImplementation(
+        () => new Promise((r) => setTimeout(r, 100))
+      );
       await render();
       await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 

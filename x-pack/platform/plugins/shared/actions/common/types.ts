@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { SUB_FEATURE } from '@kbn/actions-types';
+import type { SUB_FEATURE, ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export type SubFeature = keyof typeof SUB_FEATURE;
+export type ActionTypeSource = keyof typeof ACTION_TYPE_SOURCES;
 
 export interface PublicValidatorType {
   schema: {
-    validate(value: unknown): unknown;
+    parse(value: unknown): unknown;
   };
 }
 export interface ActionType {
@@ -25,8 +26,10 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
+  source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated: boolean;
+  allowMultipleSystemActions?: boolean;
   validate?: {
     params: PublicValidatorType;
   };

@@ -38,6 +38,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
     if (displayWarning || (error.statusCode === 404 && isCustom)) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             isCustom ? (
               <FormattedMessage
@@ -58,17 +59,6 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
           iconType="warning"
           data-test-subj="missingCustomPipeline"
         >
-          {isCustom && (
-            <p data-test-subj="cause">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.missingCustomPipeline.text"
-                defaultMessage="The pipeline {pipelineName} does not exist."
-                values={{
-                  pipelineName: <EuiCode>{pipelineName}</EuiCode>,
-                }}
-              />
-            </p>
-          )}
           <EuiButton
             color="warning"
             onClick={onCreatePipeline}

@@ -8,7 +8,7 @@
  */
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { KqlLiteralNode, KqlFunctionNode } from '@kbn/es-query/src/kuery/node_types';
+import type { KqlFunctionNode, KqlLiteralNode } from '@kbn/es-query/src/kuery/node_types';
 /**
  * Extracts property paths from a KQL (Kibana Query Language) query string.
  *

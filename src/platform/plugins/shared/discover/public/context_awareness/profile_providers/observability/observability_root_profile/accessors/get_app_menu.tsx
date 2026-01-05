@@ -115,13 +115,15 @@ const registerCustomThresholdRuleAction = (
               ruleTypeRegistry,
               actionTypeRegistry,
             }}
-            consumer={AlertConsumers.LOGS}
+            consumer={AlertConsumers.ALERTS}
             validConsumers={[
               AlertConsumers.LOGS,
               AlertConsumers.INFRASTRUCTURE,
               AlertConsumers.OBSERVABILITY,
               AlertConsumers.STACK_ALERTS,
+              AlertConsumers.ALERTS,
             ]}
+            multiConsumerSelection={AlertConsumers.ALERTS}
             ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
             initialValues={{
               params: {

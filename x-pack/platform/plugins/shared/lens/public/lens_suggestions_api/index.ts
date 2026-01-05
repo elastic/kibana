@@ -7,10 +7,15 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  VisualizeEditorContext,
+  Suggestion,
+  DataViewsState,
+  TypedLensByValueInput,
+} from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from '../types';
-import type { DataViewsState } from '../state_management';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
 interface SuggestionsApiProps {
@@ -79,6 +84,9 @@ export const suggestionsApi = ({
   } as unknown as DataViewsState;
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+  const isInitialSubTypeSupported = preferredChartType
+    ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
+    : undefined;
 
   // find the active visualizations from the context
   const suggestions = getSuggestions({
@@ -88,14 +96,16 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
+    subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
   });
   if (!suggestions.length) return [];
 
-  const activeVisualization = suggestions[0];
+  const primarySuggestion = suggestions[0];
+  const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (
-    activeVisualization.incomplete ||
-    excludedVisualizations?.includes(activeVisualization.visualizationId)
+    primarySuggestion.incomplete ||
+    excludedVisualizations?.includes(primarySuggestion.visualizationId)
   ) {
     return [];
   }
@@ -105,12 +115,12 @@ export const suggestionsApi = ({
     datasourceStates: {
       textBased: {
         isLoading: false,
-        state: activeVisualization.datasourceState,
+        state: primarySuggestion.datasourceState,
       },
     },
     visualizationMap,
-    activeVisualization: visualizationMap[activeVisualization.visualizationId],
-    visualizationState: activeVisualization.visualizationState,
+    activeVisualization,
+    visualizationState: primarySuggestion.visualizationState,
     dataViews,
   }).filter(
     (sug) =>
@@ -130,7 +140,7 @@ export const suggestionsApi = ({
     suggestions: newSuggestions,
     targetTypeId: chartType,
     familyType: 'lnsXY',
-    shouldSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
   });
   if (xyResult) return xyResult;
 
@@ -140,7 +150,7 @@ export const suggestionsApi = ({
     suggestions: newSuggestions,
     targetTypeId: chartType,
     familyType: 'lnsPie',
-    shouldSwitch: preferredChartType === ChartType.Donut,
+    forceSwitch: preferredChartType === ChartType.Donut,
   });
   if (pieResult) return pieResult;
 
@@ -152,7 +162,7 @@ export const suggestionsApi = ({
 
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  const suggestionsList = [activeVisualization, ...newSuggestions];
+  const suggestionsList = [primarySuggestion, ...newSuggestions];
 
   // Handle preferred chart type logic
   if (targetChartType) {

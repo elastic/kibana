@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { LogMeta, Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -18,7 +18,12 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 
+import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
+import { registerAgents } from './agent_builder/agents';
+import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -70,12 +75,12 @@ import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
-import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import {
+  AsyncTelemetryEventsSender,
   DEFAULT_QUEUE_CONFIG,
   DEFAULT_RETRY_CONFIG,
-  AsyncTelemetryEventsSender,
 } from './lib/telemetry/async_sender';
 import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
@@ -108,7 +113,7 @@ import type {
 } from './plugin_contract';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { type CdnConfig, artifactService } from './lib/telemetry/artifact';
+import { artifactService, type CdnConfig } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
@@ -123,11 +128,12 @@ import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
+  registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
-  latestRiskScoreIndexPattern,
   allRiskScoreIndexPattern,
+  latestRiskScoreIndexPattern,
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { assistantTools } from './assistant/tools';
@@ -146,6 +152,7 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -225,16 +232,58 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
+  private registerAgentBuilderAttachmentsAndTools(
+    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
+    core: SecuritySolutionPluginCoreSetupDependencies,
+    logger: Logger
+  ): void {
+    if (!agentBuilder) {
+      return;
+    }
+
+    // The featureFlags service is not available in the core setup, so we need
+    // to wait for the start services to be available to read the feature flags.
+    core
+      .getStartServices()
+      .then(async ([{ featureFlags }]) => {
+        const isAiAgentsEnabled = await featureFlags.getBooleanValue(
+          AI_AGENTS_FEATURE_FLAG,
+          AI_AGENTS_FEATURE_FLAG_DEFAULT
+        );
+
+        if (!isAiAgentsEnabled) {
+          return;
+        }
+
+        registerTools(agentBuilder, core, logger).catch((error) => {
+          this.logger.error(`Error registering security tools: ${error}`);
+        });
+        registerAttachments(agentBuilder).catch((error) => {
+          this.logger.error(`Error registering security attachments: ${error}`);
+        });
+        registerAgents(agentBuilder, core, logger).catch((error) => {
+          this.logger.error(`Error registering security agent: ${error}`);
+        });
+      })
+      .catch((error) => {
+        this.logger.error(`Error checking AI agents feature flag: ${error}`);
+      });
+  }
+
   public setup(
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
+    if (plugins.share) {
+      plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
+
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
-    initSavedObjects(core.savedObjects);
+    initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       logger: this.logger,
@@ -251,18 +300,16 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    if (experimentalFeatures.riskScoringPersistence) {
-      registerRiskScoringTask({
-        getStartServices: core.getStartServices,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        taskManager: plugins.taskManager,
-        telemetry: core.analytics,
-        entityAnalyticsConfig: config.entityAnalytics,
-        experimentalFeatures,
-      });
-    }
+    registerRiskScoringTask({
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
+      taskManager: plugins.taskManager,
+      telemetry: core.analytics,
+      entityAnalyticsConfig: config.entityAnalytics,
+      experimentalFeatures,
+    });
 
     scheduleEntityAnalyticsMigration({
       getStartServices: core.getStartServices,
@@ -298,7 +345,21 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreSnapshotTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
+        telemetry: core.analytics,
         taskManager: plugins.taskManager,
+      });
+
+      registerEntityStoreHealthTask({
+        getStartServices: core.getStartServices,
+        appClientFactory,
+        logger: this.logger,
+        telemetry: core.analytics,
+        taskManager: plugins.taskManager,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        entityStoreConfig: config.entityAnalytics.entityStore,
+        experimentalFeatures,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        isServerless: this.isServerless,
       });
     }
 
@@ -472,6 +533,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
+    registerScriptsLibraryRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
@@ -604,6 +666,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
+
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
 
     return {
       setProductFeaturesConfigurator:
@@ -862,6 +926,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
+        telemetryConfigProvider: this.telemetryConfigProvider,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {

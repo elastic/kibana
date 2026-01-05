@@ -104,6 +104,7 @@ describe('AssistantOverlay', () => {
     expect(reportAssistantInvoked).toHaveBeenCalledWith({ invokedBy: 'url' });
 
     // Restore original location
+    // @ts-expect-error upgrade typescript v5.9.3
     window.location = originalLocation;
   });
 });

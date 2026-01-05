@@ -21,7 +21,6 @@ interface Props {
 
 export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const locationsToDisplay = locations.map((loc) => {
     const locById = `${monitorId}-${loc.id}`;
@@ -31,10 +30,10 @@ export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props
 
     if (overviewStatus?.downConfigs[locById]) {
       status = 'down';
-      color = isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.danger;
+      color = euiTheme.colors.danger;
     } else if (overviewStatus?.upConfigs[locById]) {
       status = 'up';
-      color = isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
+      color = euiTheme.colors.success;
     }
 
     return {

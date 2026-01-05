@@ -6,8 +6,11 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { licenseService } from '../../../common/hooks/use_license';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
+  CreateQRadarRuleMigrationRulesRequestBody,
   CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
   StopRuleMigrationResponse,
@@ -20,16 +23,32 @@ import * as api from '../api';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import * as i18n from './translations';
 import { SiemRulesMigrationsTelemetry } from './telemetry';
+import type { CapabilitiesLevel, MissingCapability } from '../../common/service';
 import {
   SiemMigrationsServiceBase,
+  getMissingCapabilitiesChecker,
   getMissingCapabilitiesToast,
   getNoConnectorToast,
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
-import { getSuccessToast } from './notification/success_notification';
+import { MigrationSource } from '../../common/types';
+import { raiseSuccessToast } from './notification/success_notification';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
+import { requiredRuleMigrationCapabilities } from './capabilities';
 
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
+
+export type CreateRuleMigrationParams =
+  | {
+      rules: CreateRuleMigrationRulesRequestBody;
+      migrationName: string;
+      migrationSource: MigrationSource.SPLUNK;
+    }
+  | {
+      rules: CreateQRadarRuleMigrationRulesRequestBody;
+      migrationName: string;
+      migrationSource: MigrationSource.QRADAR;
+    };
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
   public telemetry: SiemRulesMigrationsTelemetry;
@@ -43,9 +62,39 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     this.telemetry = new SiemRulesMigrationsTelemetry(telemetryService);
   }
 
+  /** Returns any missing capabilities for the user to use this feature */
+  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
+    const getMissingCapabilities = getMissingCapabilitiesChecker(requiredRuleMigrationCapabilities);
+    return getMissingCapabilities(this.core.application.capabilities, level);
+  }
+
+  /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
+  public isAvailable() {
+    const { siemMigrationsDisabled } = ExperimentalFeaturesService.get();
+    return (
+      !siemMigrationsDisabled &&
+      licenseService.isEnterprise() &&
+      !this.hasMissingCapabilities('minimum')
+    );
+  }
+
   /** Accessor for the rule migrations API client */
   public get api() {
     return api;
+  }
+
+  public async addQradarRulesToMigration(
+    migrationId: string,
+    rules: CreateQRadarRuleMigrationRulesRequestBody
+  ) {
+    const rulesCount = rules.xml.length;
+    if (rulesCount === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    const { count } = await api.addRulesToQRadarMigration({ migrationId, body: rules });
+
+    return { count };
   }
 
   /** Adds rules to a rule migration, batching the requests to avoid hitting the max payload size limit of the API */
@@ -66,27 +115,47 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   /** Creates a rule migration with a name and adds the rules to it, returning the migration ID */
-  public async createRuleMigration(
-    data: CreateRuleMigrationRulesRequestBody,
-    migrationName: string
-  ): Promise<string> {
-    const rulesCount = data.length;
-    if (rulesCount === 0) {
-      throw new Error(i18n.EMPTY_RULES_ERROR);
+  public async createRuleMigration({
+    rules,
+    migrationName,
+    migrationSource,
+  }: CreateRuleMigrationParams): Promise<string> {
+    if (!rules) {
+      const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
+      this.telemetry.reportSetupMigrationCreated({ count: 0, error: emptyRulesError });
+      throw emptyRulesError;
     }
 
     try {
-      // create the migration
-      const { migration_id: migrationId } = await api.createRuleMigration({
-        name: migrationName,
-      });
+      if (migrationSource === MigrationSource.QRADAR) {
+        if (!rules.xml) {
+          throw new Error(i18n.EMPTY_RULES_ERROR);
+        }
 
-      await this.addRulesToMigration(migrationId, data);
+        // create the migration
+        const { migration_id: migrationId } = await api.createRuleMigration({
+          name: migrationName,
+        });
+        const { count } = await this.addQradarRulesToMigration(migrationId, rules);
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count });
 
-      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
-      return migrationId;
+        return migrationId;
+      } else {
+        if (rules.length === 0) {
+          throw new Error(i18n.EMPTY_RULES_ERROR);
+        }
+
+        // create the migration
+        const { migration_id: migrationId } = await api.createRuleMigration({
+          name: migrationName,
+        });
+        await this.addRulesToMigration(migrationId, rules);
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count: rules.length });
+
+        return migrationId;
+      }
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
+      this.telemetry.reportSetupMigrationCreated({ count: 0, error });
       throw error;
     }
   }
@@ -238,6 +307,6 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   protected sendFinishedMigrationNotification(taskStats: RuleMigrationStats) {
-    this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
+    raiseSuccessToast(taskStats, this.core);
   }
 }

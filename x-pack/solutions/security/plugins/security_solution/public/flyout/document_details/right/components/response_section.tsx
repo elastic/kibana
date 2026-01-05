@@ -16,7 +16,6 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const KEY = 'response';
 
@@ -24,19 +23,16 @@ const KEY = 'response';
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection = memo(() => {
-  const { isRulePreview, getFieldsData, isPreviewMode } = useDocumentDetailsContext();
+  const { isRulePreview, getFieldsData } = useDocumentDetailsContext();
 
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
   const eventKind = getField(getFieldsData('event.kind'));
-
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
 
   const content = useMemo(() => {
     if (isRulePreview) {
       return (
         <EuiCallOut
+          announceOnMount
           iconType="documentation"
           size="s"
           title={
@@ -58,32 +54,8 @@ export const ResponseSection = memo(() => {
       );
     }
 
-    if (!isNewNavigationEnabled && isPreviewMode) {
-      return (
-        <EuiCallOut
-          iconType="documentation"
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.response.openFlyoutTitle"
-              defaultMessage="Response actions"
-            />
-          }
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.response.openFlyoutAriaLabel',
-            { defaultMessage: 'Response actions' }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.response.openFlyoutMessage"
-            defaultMessage="Open alert details to access response actions."
-          />
-        </EuiCallOut>
-      );
-    }
-
     return <ResponseButton />;
-  }, [isRulePreview, isPreviewMode, isNewNavigationEnabled]);
+  }, [isRulePreview]);
 
   if (eventKind !== EventKind.signal) {
     return null;

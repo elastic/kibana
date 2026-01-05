@@ -23,7 +23,7 @@ import type {
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
-export interface FileUploadStartApi {
+export interface FileUploadPluginStartApi {
   FileUploadComponent: typeof GeoUploadWizardAsyncWrapper;
   IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;
   importerFactory: typeof importerFactory;
@@ -70,7 +70,8 @@ interface HasImportPermissionParams {
 export async function analyzeFile(
   file: string,
   params: Record<string, string> = {},
-  includePreview: boolean
+  includePreview: boolean,
+  signal?: AbortSignal
 ): Promise<AnalysisResult> {
   const query = includePreview ? { ...params, includePreview: 'true' } : params;
   const { getHttp } = await lazyLoadModules();
@@ -81,12 +82,13 @@ export async function analyzeFile(
     version: '1',
     body,
     query,
+    signal,
   });
 }
 
 export async function previewTikaFile(
   data: ArrayBuffer,
-  params: Record<string, string> = {}
+  signal?: AbortSignal
 ): Promise<PreviewTikaResponse> {
   const { getHttp } = await lazyLoadModules();
   const base64File = fromByteArray(new Uint8Array(data));
@@ -98,7 +100,7 @@ export async function previewTikaFile(
     method: 'POST',
     version: '1',
     body,
-    query: params,
+    signal,
   });
 }
 

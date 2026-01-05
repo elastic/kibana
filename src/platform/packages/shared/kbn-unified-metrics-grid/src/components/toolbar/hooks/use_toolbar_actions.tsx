@@ -8,84 +8,73 @@
  */
 
 import React, { useMemo } from 'react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import { useMetricsGridState } from '../../../hooks';
+import type { Dimension, MetricField, UnifiedMetricsGridProps } from '../../../types';
+import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
-interface UseToolbarActionsProps
-  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
-  fields: MetricField[];
-  indexPattern: string;
+interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
+  allMetricFields: MetricField[];
+  dimensions: Dimension[];
   hideDimensionsSelector?: boolean;
+  hideRightSideActions?: boolean;
+  isLoading?: boolean;
 }
+
 export const useToolbarActions = ({
-  fields,
-  requestParams,
-  indexPattern,
+  allMetricFields,
+  dimensions,
   renderToggleActions,
   hideDimensionsSelector = false,
+  hideRightSideActions = false,
+  isLoading = false,
 }: UseToolbarActionsProps) => {
-  const {
-    dimensions,
-    valueFilters,
-    onDimensionsChange,
-    onValuesChange,
-    onClearValues,
-    onClearAllDimensions,
-    isFullscreen,
-    onToggleFullscreen,
-  } = useMetricsGridState();
+  const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
+    useMetricsExperienceState();
 
   const { euiTheme } = useEuiTheme();
 
+  const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
+
+  const toggleActions = useMemo(
+    () => (isFullscreen ? undefined : renderToggleActions()),
+    [isFullscreen, renderToggleActions]
+  );
+
   const leftSideActions = useMemo(
     () => [
-      isFullscreen ? null : renderToggleActions(),
       hideDimensionsSelector ? null : (
         <DimensionsSelector
-          fields={fields}
+          fields={allMetricFields}
+          dimensions={dimensions}
           onChange={onDimensionsChange}
-          selectedDimensions={dimensions}
-          onClear={onClearAllDimensions}
+          selectedDimensions={selectedDimensions}
           singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
+          fullWidth={isSmallScreen}
+          isLoading={isLoading}
         />
       ),
-      dimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
-          indices={[indexPattern]}
-          timeRange={requestParams.getTimeRange()}
-          onClear={onClearValues}
-        />
-      ) : null,
     ],
     [
+      isSmallScreen,
+      selectedDimensions,
+      allMetricFields,
       dimensions,
-      fields,
-      indexPattern,
-      onClearAllDimensions,
-      onClearValues,
       onDimensionsChange,
-      onValuesChange,
-      renderToggleActions,
-      requestParams,
-      valueFilters,
-      isFullscreen,
       hideDimensionsSelector,
+      isLoading,
     ]
   );
 
   const rightSideActions: IconButtonGroupProps['buttons'] = useMemo(() => {
+    if (hideRightSideActions) {
+      return [];
+    }
+
     const fullscreenButtonLabel = isFullscreen
       ? i18n.translate('metricsExperience.fullScreenExitButton', {
           defaultMessage: 'Exit fullscreen (esc)',
@@ -111,9 +100,10 @@ export const useToolbarActions = ({
         `,
       },
     ];
-  }, [isFullscreen, onToggleFullscreen, euiTheme.border.thin]);
+  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, euiTheme.border.thin]);
 
   return {
+    toggleActions,
     leftSideActions,
     rightSideActions,
   };

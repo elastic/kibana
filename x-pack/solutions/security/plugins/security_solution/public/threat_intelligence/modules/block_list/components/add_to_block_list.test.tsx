@@ -8,26 +8,24 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AddToBlockListContextMenu } from './add_to_block_list';
-import { BlockListProvider } from '../../indicators/containers/block_list_provider';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
+
 const TEST_ID = 'test';
 
 describe('<AddToBlockListContextMenu />', () => {
   it('should render an EuiContextMenuItem', () => {
     const mockIndicatorFileHashValue: string = 'abc';
-    const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId, getAllByText } = render(
       <TestProvidersComponent>
         <I18nProvider>
-          <BlockListProvider>
-            <AddToBlockListContextMenu
-              data={mockIndicatorFileHashValue}
-              onClick={mockOnClick}
-              data-test-subj={TEST_ID}
-            />
-          </BlockListProvider>
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={jest.fn()}
+            data-test-subj={TEST_ID}
+            setBlockListIndicatorValue={jest.fn()}
+          />
         </I18nProvider>
       </TestProvidersComponent>
     );
@@ -38,18 +36,16 @@ describe('<AddToBlockListContextMenu />', () => {
 
   it('should render a disabled EuiContextMenuItem if data is null', () => {
     const mockIndicatorFileHashValue = null;
-    const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
       <TestProvidersComponent>
         <I18nProvider>
-          <BlockListProvider>
-            <AddToBlockListContextMenu
-              data={mockIndicatorFileHashValue}
-              onClick={mockOnClick}
-              data-test-subj={TEST_ID}
-            />
-          </BlockListProvider>
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={jest.fn()}
+            data-test-subj={TEST_ID}
+            setBlockListIndicatorValue={jest.fn()}
+          />
         </I18nProvider>
       </TestProvidersComponent>
     );
@@ -59,18 +55,16 @@ describe('<AddToBlockListContextMenu />', () => {
 
   it('should render a disabled EuiContextMenuItem if no write blocklist privilege', () => {
     const mockIndicatorFileHashValue: string = 'abc';
-    const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
       <TestProvidersComponent>
         <I18nProvider>
-          <BlockListProvider>
-            <AddToBlockListContextMenu
-              data={mockIndicatorFileHashValue}
-              onClick={mockOnClick}
-              data-test-subj={TEST_ID}
-            />
-          </BlockListProvider>
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={jest.fn()}
+            data-test-subj={TEST_ID}
+            setBlockListIndicatorValue={jest.fn()}
+          />
         </I18nProvider>
       </TestProvidersComponent>
     );

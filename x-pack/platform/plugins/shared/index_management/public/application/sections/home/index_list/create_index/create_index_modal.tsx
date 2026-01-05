@@ -109,6 +109,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
         {createError && (
           <>
             <EuiCallOut
+              announceOnMount
               color="danger"
               iconType="error"
               title={i18n.translate('xpack.idxMgmt.createIndex.modal.error.title', {

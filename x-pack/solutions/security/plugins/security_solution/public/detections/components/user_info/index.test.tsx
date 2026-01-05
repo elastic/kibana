@@ -44,8 +44,6 @@ describe('useUserInfo', () => {
     });
 
     expect(result.current).toEqual({
-      canUserCRUD: null,
-      canUserREAD: null,
       hasEncryptionKey: null,
       hasIndexManage: null,
       hasIndexMaintenance: null,

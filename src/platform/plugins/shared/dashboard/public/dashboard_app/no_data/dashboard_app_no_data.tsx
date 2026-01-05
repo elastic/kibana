@@ -19,6 +19,7 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
   coreServices,
   dataService,
@@ -29,7 +30,7 @@ import {
   lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { dashboardClient } from '../../dashboard_client';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -59,18 +60,22 @@ export const DashboardAppNoDataPage = ({
 
   useEffect(() => {
     return () => {
-      abortController?.abort();
+      abortController?.abort(AbortReason.CLEANUP);
     };
   }, [abortController]);
 
   const onTryESQL = useCallback(async () => {
-    abortController?.abort();
+    abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
-      const esqlQuery = getInitialESQLQuery(dataView);
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: dataViews,
+        query: `FROM ${indexName}`,
+        http: coreServices.http,
+      });
+      const esqlQuery = getInitialESQLQuery(dataView, true);
 
       try {
         const columns = await getESQLQueryColumns({
@@ -153,8 +158,8 @@ export const isDashboardAppInNoDataState = async () => {
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await getDashboardContentManagementService()
-    .findDashboards.search({ search: '', size: 1 })
+  const { total } = await dashboardClient
+    .search({ search: '', per_page: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

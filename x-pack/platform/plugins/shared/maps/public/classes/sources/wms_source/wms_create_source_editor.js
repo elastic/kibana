@@ -161,6 +161,7 @@ export class WMSCreateSourceEditor extends Component {
         <Fragment>
           <EuiSpacer />
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.maps.source.wms.getCapabilitiesErrorCalloutTitle', {
               defaultMessage: 'Unable to load service metadata',
             })}

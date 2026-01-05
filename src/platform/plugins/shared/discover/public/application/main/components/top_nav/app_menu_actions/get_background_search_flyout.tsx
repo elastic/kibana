@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIconBackgroundTask } from '@kbn/background-search';
 import { AppMenuActionId, AppMenuActionType, type AppMenuItemPrimary } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
@@ -23,8 +22,7 @@ export const getBackgroundSearchFlyout = ({
       label: i18n.translate('discover.localMenu.localMenu.openBackgroundSearchFlyoutTitle', {
         defaultMessage: 'Background searches',
       }),
-      // TODO: Replace when the backgroundTask icon is available in EUI
-      iconType: EuiIconBackgroundTask,
+      iconType: 'backgroundTask',
       testId: 'openBackgroundSearchFlyoutButton',
       onClick,
     },

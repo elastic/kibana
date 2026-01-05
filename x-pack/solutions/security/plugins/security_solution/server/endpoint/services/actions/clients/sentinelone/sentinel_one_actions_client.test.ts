@@ -42,7 +42,7 @@ import type {
   RunScriptActionRequestBody,
   SentinelOneRunScriptActionRequestParams,
 } from '../../../../../../common/api/endpoint';
-import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/sentinelone';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Readable } from 'stream';
@@ -51,7 +51,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type {
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
@@ -1802,7 +1802,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         `'runscript' response action not supported for [sentinel_one]. Feature disabled`
       );
@@ -1838,9 +1837,7 @@ describe('SentinelOneActionsClient class', () => {
         if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
           const scriptsApiResponse = sentinelOneMock.createSentinelOneGetRemoteScriptsApiResponse();
 
-          // @ts-expect-error TS2540: Cannot assign to read-only property.
           scriptsApiResponse.data[0].osTypes = ['windows'];
-          // @ts-expect-error TS2540: Cannot assign to read-only property.
           scriptsApiResponse.data[0].scriptName = 'terminate something';
 
           return responseActionsClientMock.createConnectorActionExecuteResponse({
@@ -2311,7 +2308,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error update readonly property
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.getCustomScripts()).rejects.toThrow(
         "'runscript' response action not supported for [sentinel_one]"
       );
@@ -2373,10 +2369,6 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assignment to readonly prop
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
 
       (

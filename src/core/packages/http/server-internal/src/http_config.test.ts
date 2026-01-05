@@ -677,12 +677,12 @@ describe('http2 protocol', () => {
 });
 
 describe('prototypeHardening', () => {
-  it('defaults to false', () => {
-    expect(config.schema.validate({}).prototypeHardening).toBe(false);
+  it('defaults to true', () => {
+    expect(config.schema.validate({}).prototypeHardening).toBe(true);
   });
 
-  it('can be set to true', () => {
-    expect(config.schema.validate({ prototypeHardening: true }).prototypeHardening).toBe(true);
+  it('can be set to false', () => {
+    expect(config.schema.validate({ prototypeHardening: false }).prototypeHardening).toBe(false);
   });
 });
 

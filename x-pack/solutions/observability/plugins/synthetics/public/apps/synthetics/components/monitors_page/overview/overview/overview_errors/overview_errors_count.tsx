@@ -24,10 +24,8 @@ export const OverviewErrorsCount = ({ from, to }: MonitorErrorsCountProps) => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const filters = useMonitorFilters({});
-
   const time = useMemo(() => ({ from, to }), [from, to]);
 
   return (
@@ -47,7 +45,7 @@ export const OverviewErrorsCount = ({ from, to }: MonitorErrorsCountProps) => {
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
           filters,
-          color: isAmsterdam ? euiTheme.colors.vis.euiColorVis1 : euiTheme.colors.vis.euiColorVis6,
+          color: euiTheme.colors.vis.euiColorVis6,
         },
       ]}
     />

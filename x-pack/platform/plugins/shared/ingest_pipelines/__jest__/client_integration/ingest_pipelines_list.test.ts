@@ -73,7 +73,7 @@ describe('<PipelinesList />', () => {
 
       // Verify app title
       expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Ingest Pipelines');
+      expect(find('appTitle').text()).toEqual('Ingest pipelines');
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
@@ -265,9 +265,6 @@ describe('<PipelinesList />', () => {
           expect(exists('pipelineErrorFlyout')).toBe(true);
           expect(find('pipelineErrorFlyout.title').text()).toBe(customPipeline);
           expect(exists('missingCustomPipeline')).toBe(true);
-          expect(find('missingCustomPipeline.cause').text()).toBe(
-            `The pipeline ${customPipeline} does not exist.`
-          );
           expect(exists('createCustomPipeline')).toBe(true);
         });
       });

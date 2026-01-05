@@ -122,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await testSubjects.existOrFail('tableHeaderCell_createdBy_1');
       await testSubjects.existOrFail(`userAvatarTip-${USERNAME_1}`);
-      await dashboard.gotoDashboardEditMode(DASHBOARD_NAME);
+      await dashboard.loadDashboardInEditMode(DASHBOARD_NAME);
       await dashboard.addVisualizations(['A Pie']);
       await dashboard.saveDashboard(DASHBOARD_NAME, {
         waitDialogIsClosed: false,

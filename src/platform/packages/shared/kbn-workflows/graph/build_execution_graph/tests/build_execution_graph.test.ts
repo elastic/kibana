@@ -10,16 +10,17 @@
 import { graphlib } from '@dagrejs/dagre';
 import type {
   ConnectorStep,
+  ElasticsearchStep,
   ForEachStep,
   HttpStep,
   IfStep,
-  WaitStep,
-  ElasticsearchStep,
   KibanaStep,
+  WaitStep,
   WorkflowYaml,
 } from '../../../spec/schema';
 import type {
   AtomicGraphNode,
+  ElasticsearchGraphNode,
   EnterConditionBranchNode,
   EnterForeachNode,
   EnterIfNode,
@@ -27,9 +28,8 @@ import type {
   ExitForeachNode,
   ExitIfNode,
   HttpGraphNode,
-  WaitGraphNode,
-  ElasticsearchGraphNode,
   KibanaGraphNode,
+  WaitGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 

@@ -90,6 +90,13 @@ export function useReviewSuggestionsForm() {
     }
   };
 
+  const updateSuggestion = (index: number, updates: Partial<PartitionSuggestion>) => {
+    if (!suggestions) return;
+    const updatedSuggestion = { ...suggestions[index], ...updates };
+    const updatedSuggestions = suggestions.toSpliced(index, 1, updatedSuggestion);
+    setSuggestions(updatedSuggestions);
+  };
+
   const resetPreview = () => {
     streamsRoutingActorRef.send({
       type: 'suggestion.preview',
@@ -118,6 +125,7 @@ export function useReviewSuggestionsForm() {
     isLoadingSuggestions,
     fetchSuggestions,
     resetForm,
+    updateSuggestion,
     previewSuggestion: (index: number, toggle?: boolean) => {
       if (suggestions) {
         const partition = suggestions[index];

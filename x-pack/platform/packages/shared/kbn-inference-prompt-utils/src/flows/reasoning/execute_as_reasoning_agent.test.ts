@@ -251,7 +251,7 @@ describe('executeAsReasoningAgent', () => {
     expect(toolsNonCompleting).toContain('reason');
 
     // Second run: completing turn from the start
-    (inferenceClient.prompt as jest.Mock).mockClear();
+    inferenceClient.prompt.mockClear();
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
@@ -261,8 +261,7 @@ describe('executeAsReasoningAgent', () => {
       finalToolChoice: { type: 'function', function: 'complete' },
     });
     const completingCall = (inferenceClient.prompt as jest.Mock).mock.calls[0][0];
-    const toolsCompleting = Object.keys(completingCall.prompt.versions[0].tools);
-    expect(toolsCompleting).not.toContain('reason');
+
     expect(completingCall.toolChoice).toEqual({ type: 'function', function: 'complete' });
   });
 

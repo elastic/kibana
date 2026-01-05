@@ -13,7 +13,7 @@ import { PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components'
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FilePickerField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-import { SSLCertType } from '../../../common/auth/constants';
+import { SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;

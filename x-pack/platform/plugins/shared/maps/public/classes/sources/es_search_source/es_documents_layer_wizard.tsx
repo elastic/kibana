@@ -60,7 +60,7 @@ export const esDocumentsLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = createDefaultLayerDescriptor(sourceConfig, mapColors);
-      if (isPointsOnly) {
+      if (isPointsOnly && layerDescriptor.style) {
         (layerDescriptor.style.properties as Writable<VectorStylePropertiesDescriptor>)[
           VECTOR_STYLES.LINE_WIDTH
         ] = {

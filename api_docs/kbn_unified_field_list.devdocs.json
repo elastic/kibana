@@ -1279,7 +1279,15 @@
             "section": "def-common.DataViewField",
             "text": "DataViewField"
           },
-          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; initialState?: Partial<",
+          ") => boolean) | undefined; onFieldEdited?: ((options: { editedDataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; removedFieldName?: string | undefined; editedFieldName?: string | undefined; }) => Promise<void>) | undefined; initialState?: Partial<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -1295,7 +1303,11 @@
             "section": "def-public.UnifiedFieldListRestorableState",
             "text": "UnifiedFieldListRestorableState"
           },
-          ">) => void) | undefined; } & ",
+          ">) => void) | undefined; initialExistingFieldsInfo?: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined; onInitialExistingFieldsInfoChange?: ((info: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined) => void) | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -1920,6 +1932,58 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.ExistingFieldsFetcherParams.initialExistingFieldsInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "initialExistingFieldsInfo",
+            "description": [
+              "\nCustom container for existing fields info map"
+            ],
+            "signature": [
+              "FetchedExistingFieldsInfo",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.ExistingFieldsFetcherParams.onInitialExistingFieldsInfoChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialExistingFieldsInfoChange",
+            "description": [],
+            "signature": [
+              "((info: ",
+              "FetchedExistingFieldsInfo",
+              " | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-field-list",
+                "id": "def-public.ExistingFieldsFetcherParams.onInitialExistingFieldsInfoChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "info",
+                "description": [],
+                "signature": [
+                  "FetchedExistingFieldsInfo",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1931,7 +1995,7 @@
         "tags": [],
         "label": "ExistingFieldsInfo",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+        "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1951,7 +2015,7 @@
                 "text": "ExistenceFetchStatus"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1965,7 +2029,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1986,7 +2050,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1997,7 +2061,7 @@
             "tags": [],
             "label": "numberOfFetches",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2011,7 +2075,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4112,7 +4176,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -6116,7 +6180,15 @@
             "section": "def-common.DataViewField",
             "text": "DataViewField"
           },
-          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; initialState?: Partial<",
+          ") => boolean) | undefined; onFieldEdited?: ((options: { editedDataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; removedFieldName?: string | undefined; editedFieldName?: string | undefined; }) => Promise<void>) | undefined; initialState?: Partial<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -6132,7 +6204,11 @@
             "section": "def-public.UnifiedFieldListRestorableState",
             "text": "UnifiedFieldListRestorableState"
           },
-          ">) => void) | undefined; }"
+          ">) => void) | undefined; initialExistingFieldsInfo?: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined; onInitialExistingFieldsInfoChange?: ((info: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
         "deprecated": false,

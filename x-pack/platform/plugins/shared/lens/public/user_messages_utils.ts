@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserMessage } from './types';
+import type { UserMessage } from '@kbn/lens-common';
 
 export function getLongMessage(msg: UserMessage) {
   return typeof msg.longMessage === 'function' ? msg.longMessage() : msg.longMessage;

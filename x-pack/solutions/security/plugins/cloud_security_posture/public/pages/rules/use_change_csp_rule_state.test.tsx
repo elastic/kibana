@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import type { RuleStateUpdateRequest } from './use_change_csp_rule_state';

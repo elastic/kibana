@@ -56,18 +56,17 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
         iconType="info"
         title={i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
           defaultMessage:
-            'This action will update {agentCount, plural, one {# agent} other {# agents}}',
+            'This action will update {agentPolicyCount, plural, one {# agent policy} other {# agent policies}} affecting {agentCount, plural, one {# agent} other {# agents}}',
           values: {
             agentCount,
+            agentPolicyCount,
           },
         })}
       >
         <div className="eui-textBreakWord">
           <FormattedMessage
             id="xpack.osquery.agentPolicy.confirmModalCalloutDescription"
-            defaultMessage="Fleet has detected that the selected {agentPolicyCount, plural, one {agent policy} other {agent policies}}, is already in use by
-              some of your agents. As a result of this action, Fleet will deploy updates to all agents
-              that use this {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
+            defaultMessage="Fleet will deploy updates to all agents that use the selected {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             values={{
               agentPolicyCount,

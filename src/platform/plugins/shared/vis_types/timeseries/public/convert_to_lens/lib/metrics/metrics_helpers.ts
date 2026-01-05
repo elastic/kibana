@@ -12,7 +12,7 @@ import { search } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { TimeScaleUnit } from '@kbn/lens-common';
 import { getUISettings } from '../../../services';
 import type { Metric, Panel, Series } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';

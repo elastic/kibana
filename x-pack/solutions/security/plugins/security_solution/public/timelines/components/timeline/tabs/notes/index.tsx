@@ -35,18 +35,16 @@ import { defaultToEmptyTag, getEmptyValue } from '../../../../../common/componen
 import { selectTimelineById } from '../../../../store/selectors';
 import {
   fetchNotesBySavedObjectIds,
+  makeSelectNotesBySavedObjectId,
   ReqStatus,
   selectFetchNotesBySavedObjectIdsError,
   selectFetchNotesBySavedObjectIdsStatus,
-  makeSelectNotesBySavedObjectId,
 } from '../../../../../notes';
 import type { Note } from '../../../../../../common/api/timeline';
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { NotesList } from '../../../../../notes/components/notes_list';
-import { OldNotes } from '../../../notes/old_notes';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
@@ -71,9 +69,7 @@ interface NotesTabContentProps {
 
 /**
  * Renders the notes tab content.
- * At this time the component support the old notes system and the new notes system (via the securitySolutionNotesDisabled feature flag).
- * The old notes system is deprecated and will be removed in the future.
- * In both cases, the component fetches the notes for the timeline and renders:
+ * The component fetches the notes for the timeline and renders:
  * - the timeline description
  * - the notes list
  * - the participants list
@@ -85,10 +81,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
 
   const { notesPrivileges } = useUserPrivileges();
   const canCreateNotes = notesPrivileges.crud;
-
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
@@ -178,42 +170,38 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {securitySolutionNotesDisabled ? (
-            <OldNotes timelineId={timelineId} />
-          ) : (
-            <EuiFlexGroup data-test-subj={'new-notes-screen'}>
-              <EuiFlexItem>
-                {timelineDescription}
-                {fetchStatus === ReqStatus.Loading && (
-                  <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
-                )}
-                {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
-                  <EuiFlexGroup justifyContent="center">
-                    <EuiFlexItem grow={false}>
-                      <p>{NO_NOTES}</p>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <NotesList notes={notes} options={{ hideTimelineIcon: true }} />
-                )}
-                {canCreateNotes && (
-                  <>
-                    <EuiSpacer />
-                    <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
-                      {!isTimelineSaved && <SaveTimelineCallout />}
-                    </AddNote>
-                  </>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem
-                css={css`
-                  max-width: 350px;
-                `}
-              >
-                <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          <EuiFlexGroup data-test-subj={'new-notes-screen'}>
+            <EuiFlexItem>
+              {timelineDescription}
+              {fetchStatus === ReqStatus.Loading && (
+                <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+              )}
+              {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <p>{NO_NOTES}</p>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <NotesList notes={notes} options={{ hideTimelineIcon: true }} />
+              )}
+              {canCreateNotes && (
+                <>
+                  <EuiSpacer />
+                  <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
+                    {!isTimelineSaved && <SaveTimelineCallout />}
+                  </AddNote>
+                </>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                max-width: 350px;
+              `}
+            >
+              <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

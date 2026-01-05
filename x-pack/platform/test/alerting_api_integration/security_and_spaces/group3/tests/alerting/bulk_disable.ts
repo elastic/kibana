@@ -6,7 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
+import {
+  UserAtSpaceScenarios,
+  SuperuserAtSpace1,
+  EnableDisableOnlyUserAtSpace1,
+} from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
@@ -68,7 +72,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     };
 
-    for (const scenario of UserAtSpaceScenarios) {
+    const ScenariosToTest = [...UserAtSpaceScenarios, EnableDisableOnlyUserAtSpace1];
+
+    for (const scenario of ScenariosToTest) {
       const { user, space } = scenario;
 
       describe(scenario.id, () => {
@@ -107,6 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql(getDefaultResponse(response));
               expect(response.statusCode).to.eql(200);
@@ -158,6 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
               expect(response.statusCode).to.eql(403);
               break;
             case 'space_1_all at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -226,6 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 total: 1,
@@ -286,6 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body.total).to.eql(3);
               expect(response.statusCode).to.eql(200);
@@ -341,6 +351,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body.total).to.eql(3);
               expect(response.statusCode).to.eql(200);
@@ -384,6 +395,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',

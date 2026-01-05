@@ -1,7 +1,7 @@
 env:
   PUBLISH_API_DOCS_CHANGES: 'true'
 steps:
-  - command: .buildkite/scripts/steps/check_types.sh
+  - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check types'
     key: check_types
     agents:

@@ -8,11 +8,11 @@
  */
 
 import type { Step, WorkflowYaml } from '@kbn/workflows';
-import { getContextSchemaForPath } from './get_context_for_path';
-import { z } from '@kbn/zod';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
-import { ForEachContextSchema, DynamicStepContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { z } from '@kbn/zod/v4';
+import { getContextSchemaForPath } from './get_context_for_path';
 
 describe('getContextSchemaForPath', () => {
   const definition = {
@@ -22,7 +22,6 @@ describe('getContextSchemaForPath', () => {
     triggers: [
       {
         type: 'manual' as const,
-        enabled: true,
       },
     ],
     steps: [
@@ -88,6 +87,7 @@ describe('getContextSchemaForPath', () => {
         consts: z.object({
           test: z.literal('test'),
         }),
+        variables: z.object({}).optional(),
       })
     );
   });
@@ -113,6 +113,7 @@ describe('getContextSchemaForPath', () => {
         consts: z.object({
           test: z.literal('test'),
         }),
+        variables: z.object({}).optional(),
       })
     );
   });
@@ -125,7 +126,6 @@ describe('getContextSchemaForPath', () => {
       triggers: [
         {
           type: 'manual' as const,
-          enabled: true,
         },
       ],
       consts: {
@@ -144,7 +144,7 @@ describe('getContextSchemaForPath', () => {
         {
           name: 'foreach-step',
           type: 'foreach',
-          foreach: 'consts.items',
+          foreach: '{{consts.items}}',
           steps: [
             {
               name: 'foreach-step-1',

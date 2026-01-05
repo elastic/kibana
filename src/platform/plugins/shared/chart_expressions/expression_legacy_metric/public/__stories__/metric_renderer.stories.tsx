@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { from } from 'rxjs';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { TextAlignment } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';

@@ -48,6 +48,7 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
@@ -65,6 +66,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -112,7 +114,6 @@ import {
   getTypes,
   setNotifications,
 } from './services';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import type { ListingViewRegistry } from './types';
 import type { VisualizationSavedObjectAttributes } from '../common/content_management';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
@@ -157,6 +158,7 @@ export interface VisualizationsStartDeps {
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  cps?: CPSPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
@@ -407,6 +409,7 @@ export class VisualizationsPlugin
           serverless: pluginsStart.serverless,
           noDataPage: pluginsStart.noDataPage,
           contentManagement: pluginsStart.contentManagement,
+          cps: pluginsStart.cps,
         };
 
         params.element.classList.add(styles.visAppWrapper);

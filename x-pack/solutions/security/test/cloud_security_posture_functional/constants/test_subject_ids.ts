@@ -16,6 +16,7 @@ export const testSubjectIds = {
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
   NODE_EXPAND_BUTTON_TEST_ID: 'cloudSecurityGraphNodeExpandButton',
   GRAPH_INVESTIGATION_TEST_ID: 'cloudSecurityGraphGraphInvestigation',
+  GRAPH_GROUPED_NODE_TEST_ID: 'label-node-stacked-shape',
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphNodeExpandPopover',
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID:
     'cloudSecurityGraphGraphInvestigationExploreRelatedEntities',
@@ -41,4 +42,14 @@ export const testSubjectIds = {
   GRAPH_IPS_POPOVER_CONTENT_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverContent',
   GRAPH_IPS_POPOVER_IP_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverId',
   PREVIEW_SECTION_BANNER_PANEL: 'previewSectionBannerPanel',
+  GENERIC_ENTITY_PANEL_HEADER_TEST_ID: 'generic-panel-header',
+  GROUPED_ITEM_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItem',
+  GRAPH_CALLOUT_TEST_ID: 'cloudSecurityGraphGraphInvestigationCallout',
+  GRAPH_NODE_ENTITY_DETAILS_ID: 'cloudSecurityGraphGraphInvestigationEntityNodeDetails',
+  GRAPH_NODE_ENTITY_TAG_TEXT_ID: 'cloudSecurityGraphGraphInvestigationTagText',
+  GROUPED_ITEM_TITLE_TEST_ID_LINK: 'GraphGroupedNodePreviewPanelGroupedItemTitleLink',
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT: 'GraphGroupedNodePreviewPanelGroupedItemTitleText',
+  GROUPED_ITEM_ACTOR_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemActor',
+  GROUPED_ITEM_TARGET_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemTarget',
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID: 'previewSectionCloseButton',
 };

@@ -19,11 +19,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
-import {
-  findAccessor,
-  getFormatByAccessor,
-  isVisDimension,
-} from '@kbn/visualizations-plugin/common/utils';
+import { findAccessor, getFormatByAccessor, isVisDimension } from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { GaugeRenderProps, GaugeLabelMajorMode } from '../../common';
 import { GaugeLabelMajorModes, GaugeColorModes, GaugeTicksPositions } from '../../common';

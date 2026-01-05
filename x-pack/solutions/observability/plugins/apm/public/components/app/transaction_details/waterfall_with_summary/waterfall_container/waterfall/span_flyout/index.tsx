@@ -129,18 +129,21 @@ export function SpanFlyout({
 
   const isLoading = isPending(status);
 
+  const spanDetailsTitle = i18n.translate(
+    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+    {
+      defaultMessage: 'Span details',
+    }
+  );
+
   return (
     <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true} aria-label={spanDetailsTitle}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>
-                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
-                    defaultMessage: 'Span details',
-                  })}
-                </h2>
+                <h2>{spanDetailsTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {span && (
@@ -155,7 +158,7 @@ export function SpanFlyout({
           {span?.span.composite && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiCallOut color="warning" iconType="gear" size="s">
+                <EuiCallOut announceOnMount color="warning" iconType="gear" size="s">
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
                     {

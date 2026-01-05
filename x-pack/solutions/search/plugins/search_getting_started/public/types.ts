@@ -11,12 +11,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-export interface SearchGettingStartedAppInfo {
-  appRoute: string;
-  id: string;
-  title: string;
-}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchGettingStartedPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -28,6 +24,7 @@ export interface SearchGettingStartedAppPluginStartDependencies {
   cloud?: CloudStart;
   searchNavigation?: SearchNavigationPluginStart;
   serverless?: ServerlessPluginStart;
+  share: SharePluginStart;
 }
 
 export type SearchGettingStartedServicesContextDeps =

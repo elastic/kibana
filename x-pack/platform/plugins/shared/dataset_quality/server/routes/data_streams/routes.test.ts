@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreamDefaultRetentionPeriod } from './get_data_streams_default_retention_period';
+import { updateFailureStore } from './update_failure_store';
 import { dataStreamsRouteRepository } from './routes';
 import type { DatasetQualityRouteHandlerResources } from '../types';
 
@@ -17,8 +18,14 @@ const handler =
   dataStreamsRouteRepository['GET /internal/dataset_quality/data_streams/{dataStream}/details']
     .handler;
 
+const updateFailureStoreHandler =
+  dataStreamsRouteRepository[
+    'PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store'
+  ].handler;
+
 jest.mock('./get_data_stream_details');
 jest.mock('./get_data_streams_default_retention_period');
+jest.mock('./update_failure_store');
 
 const mockGetDataStreamDetails = getDataStreamDetails as jest.MockedFunction<
   typeof getDataStreamDetails
@@ -27,6 +34,7 @@ const mockGetDataStreamDefaultRetentionPeriod =
   getDataStreamDefaultRetentionPeriod as jest.MockedFunction<
     typeof getDataStreamDefaultRetentionPeriod
   >;
+const mockUpdateFailureStore = updateFailureStore as jest.MockedFunction<typeof updateFailureStore>;
 
 describe('dataStreamDetailsRoute', () => {
   let mockResources: DatasetQualityRouteHandlerResources & {
@@ -259,6 +267,169 @@ describe('dataStreamDetailsRoute', () => {
 
       expect(mockGetDataStreamDefaultRetentionPeriod).not.toHaveBeenCalled();
       expect(result).toEqual({});
+    });
+  });
+});
+
+describe('updateFailureStoreRoute', () => {
+  let mockResources: DatasetQualityRouteHandlerResources & {
+    params: {
+      path: { dataStream: string };
+      body: { failureStoreEnabled: boolean; customRetentionPeriod: string | undefined };
+    };
+  };
+  let mockLogger: ReturnType<typeof loggerMock.create>;
+  let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+
+  beforeEach(() => {
+    mockLogger = loggerMock.create();
+    mockRequest = httpServerMock.createKibanaRequest();
+    mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
+
+    mockResources = {
+      context: {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: mockEsClient,
+          },
+          savedObjects: {
+            client: jest.fn(),
+          },
+          uiSettings: {
+            client: jest.fn(),
+          },
+        }),
+      } as any,
+      logger: mockLogger,
+      request: mockRequest,
+      plugins: {
+        fleet: {
+          setup: {} as any,
+          start: jest.fn().mockResolvedValue({
+            packageService: {
+              asScoped: jest.fn().mockReturnValue({}),
+            },
+          }),
+        },
+      } as any,
+      getEsCapabilities: jest.fn(),
+      params: {
+        path: {
+          dataStream: 'logs-test-default',
+        },
+        body: {
+          failureStoreEnabled: true,
+          customRetentionPeriod: '30d',
+        },
+      },
+    } as any;
+
+    mockUpdateFailureStore.mockResolvedValue({
+      headers: { 'x-elastic-product': 'Elasticsearch' },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('success scenarios', () => {
+    it('should enable failure store with custom retention period in non-serverless', async () => {
+      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+        serverless: false,
+      });
+
+      await updateFailureStoreHandler(mockResources);
+
+      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+        esClient: mockEsClient.asCurrentUser,
+        dataStream: 'logs-test-default',
+        failureStoreEnabled: true,
+        customRetentionPeriod: '30d',
+        isServerless: false,
+      });
+    });
+
+    it('should enable failure store with custom retention period in serverless', async () => {
+      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+        serverless: true,
+      });
+
+      await updateFailureStoreHandler(mockResources);
+
+      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+        esClient: mockEsClient.asCurrentUser,
+        dataStream: 'logs-test-default',
+        failureStoreEnabled: true,
+        customRetentionPeriod: '30d',
+        isServerless: true,
+      });
+    });
+
+    it('should disable failure store without custom retention period', async () => {
+      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+        serverless: false,
+      });
+
+      mockResources.params.body = {
+        failureStoreEnabled: false,
+        customRetentionPeriod: undefined,
+      };
+
+      await updateFailureStoreHandler(mockResources);
+
+      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+        esClient: mockEsClient.asCurrentUser,
+        dataStream: 'logs-test-default',
+        failureStoreEnabled: false,
+        customRetentionPeriod: undefined,
+        isServerless: false,
+      });
+    });
+
+    it('should enable failure store without custom retention period', async () => {
+      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+        serverless: false,
+      });
+
+      mockResources.params.body = {
+        failureStoreEnabled: true,
+        customRetentionPeriod: undefined,
+      };
+
+      await updateFailureStoreHandler(mockResources);
+
+      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+        esClient: mockEsClient.asCurrentUser,
+        dataStream: 'logs-test-default',
+        failureStoreEnabled: true,
+        customRetentionPeriod: undefined,
+        isServerless: false,
+      });
+    });
+  });
+
+  describe('error handling', () => {
+    it('should propagate errors from updateFailureStore', async () => {
+      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+        serverless: false,
+      });
+
+      const error = new Error('Elasticsearch connection failed');
+      mockUpdateFailureStore.mockRejectedValue(error);
+
+      await expect(updateFailureStoreHandler(mockResources)).rejects.toThrow(
+        'Elasticsearch connection failed'
+      );
+
+      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+        esClient: mockEsClient.asCurrentUser,
+        dataStream: 'logs-test-default',
+        failureStoreEnabled: true,
+        customRetentionPeriod: '30d',
+        isServerless: false,
+      });
     });
   });
 });

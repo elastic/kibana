@@ -300,7 +300,7 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined) => ",
               "AppLeaveConfirmAction"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
@@ -385,7 +385,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+                  "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
@@ -492,7 +492,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
@@ -751,7 +751,7 @@
             "tags": [],
             "label": "navigateToUrl",
             "description": [
-              "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.\n"
+              "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\n**Important**: This method always uses `history.push()` and creates a NEW entry in the browser history stack.\nThis is appropriate for user-initiated navigation (e.g., clicking links or buttons), but NOT for:\n- **In-app navigation** within the same React Router instance - use React Router's `history.replace()` instead\n- **Conditional redirects** in components - use `navigateToApp(appId, { replace: true })` for cross-app redirects\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.\n"
             ],
             "signature": [
               "(url: string, options?: ",

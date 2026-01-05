@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -16,32 +16,36 @@ export default function ({ getService }: FtrProviderContext) {
   describe('validation', () => {
     it('returns error when object is not provided', async () => {
       const response = await supertest
-        .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
+        .put(`${DASHBOARD_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
-        .send({});
+        .send({
+          data: {},
+        });
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.title]: expected value of type [string] but got [undefined]'
+        '[request body.data.title]: expected value of type [string] but got [undefined]'
       );
     });
 
     it('returns error if panels is not an array', async () => {
       const response = await supertest
-        .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
+        .put(`${DASHBOARD_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
         .send({
-          title: 'foo',
-          panels: {},
+          data: {
+            title: 'foo',
+            panels: {},
+          },
         });
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.panels]: expected value of type [array] but got [Object]'
+        '[request body.data.panels]: expected value of type [array] but got [Object]'
       );
     });
   });

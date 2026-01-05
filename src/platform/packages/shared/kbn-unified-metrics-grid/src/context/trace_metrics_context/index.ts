@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { createContext, useContext } from 'react';
-import type { Observable } from 'rxjs';
 import type { DataSource } from '../../components/trace_metrics_grid';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 type TraceMetricsContextProps = {
   dataSource: DataSource;
   indexes: string;
   filters: string[];
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-} & Pick<
-  ChartSectionProps,
-  'requestParams' | 'services' | 'searchSessionId' | 'abortController' | 'onBrushEnd' | 'onFilter'
->;
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+} & Pick<UnifiedMetricsGridProps, 'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter'>;
 
 export const TraceMetricsContext = createContext<TraceMetricsContextProps | undefined>(undefined);
 

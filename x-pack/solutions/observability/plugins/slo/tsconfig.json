@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -25,6 +25,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/kibana-utils-plugin",
     "@kbn/slo-schema",
+    "@kbn/slo-shared-plugin",
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
@@ -114,5 +115,8 @@
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
     "@kbn/deeplinks-management",
+    "@kbn/react-query",
+    "@kbn/deeplinks-observability",
+    "@kbn/observability-get-padded-alert-time-range-util"
   ]
 }

@@ -9,13 +9,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   createKbnUrlStateStorage,
-  withNotifyOnErrors,
-  syncState,
   createStateContainer,
+  syncState,
+  withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export interface WorkflowUrlStateAdvanced {
   tab: 'workflow' | 'executions';

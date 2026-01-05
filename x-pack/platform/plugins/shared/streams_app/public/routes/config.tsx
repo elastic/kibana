@@ -15,6 +15,7 @@ import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
+import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 
 /**
  * The array of route definitions to be used when the application
@@ -37,6 +38,9 @@ const streamsAppRoutes = {
     children: {
       '/': {
         element: <StreamListView />,
+      },
+      '/_discovery': {
+        element: <SignificantEventsDiscoveryPage />,
       },
       '/{key}': {
         element: (
@@ -86,6 +90,16 @@ const streamsAppRoutes = {
                 tab: t.string,
               }),
             }),
+          },
+          /**
+           * This route is added as a catch-all route to redirect to the retention tab in case of a
+           * invalid subtab or a missing subtab.
+           * Works on more in-depth routes as well, e.g. /{key}/management/{tab}/{subtab}/random-path.
+           */
+          '/*': {
+            element: (
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
+            ),
           },
         },
       },

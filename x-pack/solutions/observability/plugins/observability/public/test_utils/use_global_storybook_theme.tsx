@@ -52,9 +52,9 @@ export const decorateWithGlobalStorybookThemeProviders: Decorator = (
 
 const euiThemeFromId = (themeId: string): CoreTheme => {
   switch (themeId) {
-    case 'v8.dark':
-      return { darkMode: true, name: 'amsterdam' };
+    case 'borealis.dark':
+      return { darkMode: true, name: 'borealis' };
     default:
-      return { darkMode: false, name: 'amsterdam' };
+      return { darkMode: false, name: 'borealis' };
   }
 };

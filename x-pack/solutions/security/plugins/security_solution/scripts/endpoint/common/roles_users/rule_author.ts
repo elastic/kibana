@@ -17,10 +17,8 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV3: [
+          siemV5: [
             'all',
-            'read_alerts',
-            'crud_alerts',
             'policy_management_all',
             'endpoint_list_all',
             'global_artifact_management_all',
@@ -29,9 +27,11 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
             'event_filters_all',
             'host_isolation_exceptions_read',
             'blocklist_all',
+            'endpoint_exceptions_all',
             'actions_log_management_read',
             'workflow_insights_all',
           ],
+          securitySolutionRulesV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

@@ -52,23 +52,21 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
 const parentApiMock = createParentApiMock();
 
 const embeddableMock = getLensApiMock({
-  serializeState: jest.fn(() => ({
-    rawState: {
-      attributes: {
-        state: {
-          datasourceStates: {
-            textBased: {
-              layers: [
-                {
-                  timeField: '@timestamp',
-                },
-              ],
-            },
+  getLegacySerializedState: jest.fn(() => ({
+    attributes: {
+      state: {
+        datasourceStates: {
+          textBased: {
+            layers: [
+              {
+                timeField: '@timestamp',
+              },
+            ],
           },
         },
       },
     },
-  })) as unknown as LensApi['serializeState'],
+  })) as unknown as LensApi['getLegacySerializedState'],
   getInspectorAdapters: jest.fn(() => ({
     tables: {
       tables: [],
@@ -494,23 +492,21 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        serializeState: jest.fn(() => ({
-          rawState: {
+        getLegacySerializedState: jest.fn(() => ({
+          attributes: {
             state: {
-              attributes: {
-                datasourceStates: {
-                  textBased: {
-                    layers: [
-                      {
-                        timeField: 'timestamp',
-                      },
-                    ],
-                  },
+              datasourceStates: {
+                textBased: {
+                  layers: [
+                    {
+                      timeField: 'timestamp',
+                    },
+                  ],
                 },
               },
             },
           },
-        })) as unknown as LensApi['serializeState'],
+        })) as unknown as LensApi['getLegacySerializedState'],
         parentApi: parentApiMock,
       });
       await act(async () => await action.execute({ embeddable }));
@@ -562,23 +558,21 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        serializeState: jest.fn(() => ({
-          rawState: {
+        getLegacySerializedState: jest.fn(() => ({
+          attributes: {
             state: {
-              attributes: {
-                datasourceStates: {
-                  textBased: {
-                    layers: [
-                      {
-                        timeField: 'timestamp',
-                      },
-                    ],
-                  },
+              datasourceStates: {
+                textBased: {
+                  layers: [
+                    {
+                      timeField: 'timestamp',
+                    },
+                  ],
                 },
               },
             },
           },
-        })) as unknown as LensApi['serializeState'],
+        })) as unknown as LensApi['getLegacySerializedState'],
       });
       await act(async () => await action.execute({ embeddable }));
       // wait for the async operations to complete

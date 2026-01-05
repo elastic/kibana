@@ -11,7 +11,7 @@ import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteIntegrations } from '../tasks/integrations';
+import { deleteIntegrations, calculateAssetCount } from '../tasks/integrations';
 import { SETTINGS } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ASSETS_PAGE } from '../screens/fleet';
@@ -105,67 +105,77 @@ describe('Assets - Real API for integration with ML and transforms', () => {
       });
   };
   it('should install integration with ML module & transforms', () => {
+    // Intercept the package info API to get the asset count
+    cy.intercept('GET', `**/api/fleet/epm/packages/${integrationWithML}**`).as('getPackageInfo');
     cy.visit(`/app/integrations/detail/${integrationWithML}/settings`);
 
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 4 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(ASSETS_PAGE.TAB).click();
+    cy.wait('@getPackageInfo').then((interception) => {
+      const packageInfo = interception.response?.body.item;
+      const assetCount = calculateAssetCount(packageInfo);
 
-    // Verify that assets associated with ML and transform were created
-    assets.forEach((asset) => {
-      asset.expected.forEach((expectedItem) => {
-        expandAssetPanelIfNeeded(asset);
-        cy.getBySel(ASSETS_PAGE.getContentId(asset.type)).should('contain.text', expectedItem);
-      });
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+      // Assert against the actual asset count from the package
+      cy.get('.euiCallOut').contains(
+        `This action will install ${assetCount} asset${assetCount === 1 ? '' : 's'}`
+      );
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(ASSETS_PAGE.TAB).click();
 
-      if (asset.links) {
-        // If asset is a clickable link, click on link and perform neccesary assertions
-        // then navigate back
-        asset.links.forEach((link) => {
+      // Verify that assets associated with ML and transform were created
+      assets.forEach((asset) => {
+        asset.expected.forEach((expectedItem) => {
           expandAssetPanelIfNeeded(asset);
-          cy.contains('a', link.text).click();
-          cy.intercept(link.expectedEsApi, (req) => {
-            req.reply((res) => {
-              expect(res.statusCode).to.equal(link.expectedResponseStatus);
-              if (link.expectedBody) {
-                link.expectedBody(res);
-              }
+          cy.getBySel(ASSETS_PAGE.getContentId(asset.type)).should('contain.text', expectedItem);
+        });
+
+        if (asset.links) {
+          // If asset is a clickable link, click on link and perform neccesary assertions
+          // then navigate back
+          asset.links.forEach((link) => {
+            expandAssetPanelIfNeeded(asset);
+            cy.contains('a', link.text).click();
+            cy.intercept(link.expectedEsApi, (req) => {
+              req.reply((res) => {
+                expect(res.statusCode).to.equal(link.expectedResponseStatus);
+                if (link.expectedBody) {
+                  link.expectedBody(res);
+                }
+              });
             });
+            cy.go('back');
           });
-          cy.go('back');
-        });
-      }
-    });
-
-    // Verify by API that destination index was created and is healthy
-    request({
-      method: 'GET',
-      url: `/internal/index_management/indices/${destinationIndex}`,
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '1' },
-    }).then((response) => {
-      expect(response.status).to.equal(200);
-    });
-
-    // Verify by API that transform was created and is healthy
-    cy.getBySel(ASSETS_PAGE.getContentId('transform'))
-      .invoke('text')
-      .then((text) => {
-        // We need to grab the text to get the real transformId
-        // depending on package version
-        const transformId = text.trim();
-        request({
-          method: 'GET',
-          url: `/internal/transform/transforms/${transformId}/_stats`,
-          headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '1' },
-        }).then((resp) => {
-          const response = resp as unknown as Cypress.Response<{
-            transforms: Array<{ health: { status: string } }>;
-          }>;
-          expect(response.status).to.equal(200);
-          expect(response.body.transforms[0].health.status).to.equal('green');
-        });
+        }
       });
+
+      // Verify by API that destination index was created and is healthy
+      request({
+        method: 'GET',
+        url: `/internal/index_management/indices/${destinationIndex}`,
+        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '1' },
+      }).then((response) => {
+        expect(response.status).to.equal(200);
+      });
+
+      // Verify by API that transform was created and is healthy
+      cy.getBySel(ASSETS_PAGE.getContentId('transform'))
+        .invoke('text')
+        .then((text) => {
+          // We need to grab the text to get the real transformId
+          // depending on package version
+          const transformId = text.trim();
+          request({
+            method: 'GET',
+            url: `/internal/transform/transforms/${transformId}/_stats`,
+            headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '1' },
+          }).then((resp) => {
+            const response = resp as unknown as Cypress.Response<{
+              transforms: Array<{ health: { status: string } }>;
+            }>;
+            expect(response.status).to.equal(200);
+            expect(response.body.transforms[0].health.status).to.equal('green');
+          });
+        });
+    });
   });
 });

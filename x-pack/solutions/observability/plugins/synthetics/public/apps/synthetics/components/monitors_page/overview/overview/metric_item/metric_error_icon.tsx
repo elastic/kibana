@@ -22,7 +22,7 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
     dispatch(toggleErrorPopoverOpen(configIdByLocation));
   };
   const timer = useRef<NodeJS.Timeout | null>(null);
-  const euiShadow = useEuiShadow('s');
+  const euiShadow = useEuiShadow('s', { border: 'none' });
 
   const theme = useEuiTheme().euiTheme;
   const { darkMode } = useSyntheticsSettingsContext();
@@ -38,7 +38,8 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
         width: 32px;
         height: 32px;
         background: ${darkMode ? theme.colors.backgroundBaseSubdued : theme.colors.lightestShade};
-        border: 1px solid ${darkMode ? theme.colors.darkShade : theme.colors.lightShade};
+        border: ${theme.border.width.thin} solid
+          ${darkMode ? theme.colors.darkShade : theme.colors.lightShade};
         box-shadow: ${euiShadow};
         border-radius: 16px;
         flex: none;

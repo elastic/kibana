@@ -33,13 +33,11 @@ export const EntityInsight = <T,>({
   value,
   field,
   isPreviewMode,
-  isLinkEnabled,
   openDetailsPanel,
 }: {
   value: string;
   field: CloudPostureEntityIdentifier;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -70,7 +68,6 @@ export const EntityInsight = <T,>({
         <AlertsPreview
           alertsData={filteredAlertsData}
           isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -85,7 +82,6 @@ export const EntityInsight = <T,>({
           value={value}
           field={field}
           isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -98,7 +94,6 @@ export const EntityInsight = <T,>({
           value={value}
           field={field}
           isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />

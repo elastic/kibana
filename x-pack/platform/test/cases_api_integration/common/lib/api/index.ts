@@ -41,7 +41,6 @@ import type {
 import type {
   AddObservableRequest,
   UpdateObservableRequest,
-  AlertResponse,
   CaseResolveResponse,
   CasesBulkGetResponse,
   CasesFindResponse,
@@ -52,6 +51,7 @@ import type {
   CasesSimilarResponse,
   UserActionFindRequest,
   UserActionInternalFindResponse,
+  DocumentResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
@@ -72,6 +72,7 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
+export * from './observables';
 
 export { getSpaceUrlPrefix } from './helpers';
 
@@ -596,7 +597,7 @@ export const getAlertsAttachedToCase = async ({
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<AlertResponse> => {
+}): Promise<DocumentResponse> => {
   const { body: theCase } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
     .auth(auth.user.username, auth.user.password)

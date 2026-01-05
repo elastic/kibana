@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import fetchMock from 'fetch-mock';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -17,10 +18,6 @@ import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-brow
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-
-function delay<T>(duration: number) {
-  return new Promise<T>((r) => setTimeout(r, duration));
-}
 
 const BASE_PATH = 'http://localhost/myBase';
 
@@ -624,7 +621,7 @@ describe('Fetch', () => {
       });
 
       fetchInstance.fetch('/my/path').then(unusedSpy, unusedSpy);
-      await delay(1000);
+      await timer(1000);
 
       expect(unusedSpy).toHaveBeenCalledTimes(0);
       expect(usedSpy).toHaveBeenCalledTimes(1);
@@ -645,7 +642,7 @@ describe('Fetch', () => {
       fetchInstance.intercept({ request: usedSpy, response: unusedSpy });
 
       fetchInstance.fetch('/my/path').then(unusedSpy, unusedSpy);
-      await delay(1000);
+      await timer(1000);
 
       expect(fetchMock.called()).toBe(true);
       expect(usedSpy).toHaveBeenCalledTimes(3);
@@ -665,7 +662,7 @@ describe('Fetch', () => {
       fetchInstance.intercept({ response: unusedSpy, responseError: unusedSpy });
 
       fetchInstance.post('/my/path').then(unusedSpy, unusedSpy);
-      await delay(1000);
+      await timer(1000);
 
       expect(fetchMock.called()).toBe(true);
       expect(unusedSpy).toHaveBeenCalledTimes(0);
@@ -840,7 +837,7 @@ describe('Fetch', () => {
       });
 
       fetchInstance.fetch('/my/path');
-      await delay(500);
+      await timer(500);
 
       expect(unusedSpy).toHaveBeenCalledTimes(0);
     });

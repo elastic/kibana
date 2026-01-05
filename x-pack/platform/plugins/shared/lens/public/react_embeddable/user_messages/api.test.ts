@@ -13,8 +13,13 @@ import {
   makeEmbeddableServices,
 } from '../mocks';
 import { faker } from '@faker-js/faker';
-import type { Datasource, SharingSavedObjectProps, UserMessage, Visualization } from '../../types';
-import type { UserMessagesDisplayLocationId } from '../../types';
+import type {
+  Datasource,
+  SharingSavedObjectProps,
+  UserMessage,
+  Visualization,
+  UserMessagesDisplayLocationId,
+} from '@kbn/lens-common';
 import { BehaviorSubject } from 'rxjs';
 import { EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE } from '../../user_messages_ids';
 

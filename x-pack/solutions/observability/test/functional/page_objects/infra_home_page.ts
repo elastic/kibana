@@ -153,7 +153,15 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clearSearchTerm() {
       const input = await testSubjects.find('queryInput');
-      await input.clearValueWithKeyboard();
+
+      // wait for input value to be cleared before submitting
+      // this ensures the React state has caught up with the events
+      await retry.tryForTime(5000, async () => {
+        await input.clearValueWithKeyboard();
+        const value = await input.getAttribute('value');
+        expect(value).to.eql('');
+      });
+
       await input.pressKeys(browser.keys.RETURN);
       return input;
     },
@@ -311,7 +319,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getInfraMissingRemoteClusterIndicesCallout() {
-      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
+      return testSubjects.find('infraIndicesPanelSettingsDangerCallout');
     },
 
     async openSourceConfigurationFlyout() {

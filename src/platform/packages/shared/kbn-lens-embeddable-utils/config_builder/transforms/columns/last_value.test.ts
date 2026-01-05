@@ -8,7 +8,7 @@
  */
 
 import { fromLastValueAPItoLensState, fromLastValueLensStateToAPI } from './last_value';
-import type { LastValueIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES } from '../../schema/constants';
 

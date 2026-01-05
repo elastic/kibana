@@ -33,6 +33,7 @@ import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import {
   CUSTOM_INDEX_TYPE,
@@ -51,6 +52,7 @@ import {
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
@@ -62,6 +64,7 @@ describe('#create', () => {
   let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
@@ -849,6 +852,102 @@ describe('#create', () => {
             }),
           })
         );
+      });
+    });
+
+    describe('access control', () => {
+      it('should not allow creating an object with access control when the type does not support access control', async () => {
+        await expect(
+          repository.create(MULTI_NAMESPACE_TYPE, attributes, {
+            id,
+            namespace,
+            accessControl: {
+              accessMode: 'write_restricted',
+            },
+          })
+        ).rejects.toThrowError(
+          createBadRequestErrorPayload(
+            `Cannot create a saved object of type multiNamespaceType with an access mode because the type does not support access control`
+          )
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
+      it('allows creation of an object with access control when the type supports it', async () => {
+        securityExtension.getCurrentUser.mockReturnValue(
+          mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+        );
+        const accessControl = {
+          accessMode: 'write_restricted' as const,
+        };
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+          accessControl,
+        });
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+          updated_by: 'u_test_user_version',
+          created_by: 'u_test_user_version',
+          accessControl: {
+            accessMode: 'write_restricted',
+            owner: 'u_test_user_version',
+          },
+        });
+      });
+
+      it('throws when trying to create an object with access control and there is no active user profile', async () => {
+        securityExtension.getCurrentUser.mockReturnValueOnce(null);
+        await expect(
+          repository.create(ACCESS_CONTROL_TYPE, attributes, {
+            id,
+            namespace,
+            references,
+            accessControl: {
+              accessMode: 'write_restricted',
+            },
+          })
+        ).rejects.toThrowError(
+          createBadRequestErrorPayload(
+            `Cannot create a saved object of type accessControlType with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
+          )
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
+      // Regression test
+      it('allows creation when the type supports access control and no user is present if access mode is not provided', async () => {
+        securityExtension.getCurrentUser.mockReturnValueOnce(null);
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+        });
+
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+        });
       });
     });
   });

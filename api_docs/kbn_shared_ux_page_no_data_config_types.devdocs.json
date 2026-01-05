@@ -51,8 +51,7 @@
         "label": "NoDataConfigPageKibanaDependencies",
         "description": [],
         "signature": [
-          "KibanaDependencies & ",
-          "RedirectAppLinksKibanaDependencies"
+          "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
         "deprecated": false,
@@ -111,9 +110,7 @@
             "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
             "section": "def-public.Services",
             "text": "Services"
-          },
-          " & ",
-          "RedirectAppLinksServices"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
         "deprecated": false,

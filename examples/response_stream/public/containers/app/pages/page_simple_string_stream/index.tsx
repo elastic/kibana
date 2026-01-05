@@ -91,7 +91,12 @@ export const PageSimpleStringStream: FC = () => {
         <p data-test-subj="responseStreamString">{data}</p>
       </EuiText>
       {errors.length > 0 && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
+        <EuiCallOut
+          announceOnMount
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="warning"
+        >
           {errors.length === 1 ? (
             <p>{errors[0]}</p>
           ) : (

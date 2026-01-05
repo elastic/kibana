@@ -10,7 +10,7 @@
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import type { SavedSearchByValueAttributes } from './types';
+import type { SavedSearchByValueAttributes } from '../../common';
 import { byValueToSavedSearch } from './to_saved_search';
 import type { DiscoverSessionTab } from '../../server';
 
@@ -38,6 +38,7 @@ describe('toSavedSearch', () => {
     ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
+      description: '',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
       grid: {},
@@ -59,6 +60,7 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "message",
           "extension",
@@ -169,6 +171,7 @@ describe('toSavedSearch', () => {
     ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
+      description: '',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
       grid: {},
@@ -190,6 +193,7 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "my",
           "tab",

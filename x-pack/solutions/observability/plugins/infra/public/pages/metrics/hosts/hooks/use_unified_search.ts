@@ -58,7 +58,7 @@ const buildQuerySubmittedPayload = (
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
-  const { metricsView } = useMetricsDataViewContext();
+  const { metricsView, refetch: refetchMetricsView } = useMetricsDataViewContext();
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { services } = useKibanaContextForPlugin();
@@ -88,20 +88,25 @@ export const useUnifiedSearch = () => {
     [kibanaQuerySettings]
   );
 
+  const triggerDataRefresh = useCallback(() => {
+    updateReloadRequestTime();
+    refetchMetricsView();
+  }, [updateReloadRequestTime, refetchMetricsView]);
+
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, triggerDataRefresh]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, triggerDataRefresh]
   );
 
   const onLimitChange = useCallback(
@@ -119,17 +124,17 @@ export const useUnifiedSearch = () => {
       inventoryPrefill.setPrefillState({ schema: preferredSchema ?? 'ecs' });
 
       updateTopbarMenuVisibilityBySchema(preferredSchema);
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [inventoryPrefill, setSearch, updateReloadRequestTime, updateTopbarMenuVisibilityBySchema]
+    [inventoryPrefill, setSearch, triggerDataRefresh, updateTopbarMenuVisibilityBySchema]
   );
 
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, triggerDataRefresh]
   );
 
   const onQueryChange = useCallback(
@@ -138,12 +143,12 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
-        updateReloadRequestTime();
+        triggerDataRefresh();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch, updateReloadRequestTime]
+    [validateQuery, setSearch, triggerDataRefresh]
   );
 
   const onSubmit = useCallback(

@@ -38,6 +38,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { buildInstallCommand } from './build_install_command';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -150,6 +151,7 @@ export const OtelLogsPanel: React.FC = () => {
     <EuiPanel hasBorder paddingSize="xl">
       <EuiFlexGroup direction="column" gutterSize="none">
         <MultiIntegrationInstallBanner />
+        <ManagedOtlpCallout />
         <EuiSteps
           steps={[
             {

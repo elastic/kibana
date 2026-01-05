@@ -17,10 +17,10 @@ import {
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/jira';
 import type {
   CreateCommentParams,
   CreateIncidentParams,
-  ExternalService,
   ExternalServiceCommentResponse,
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
@@ -30,12 +30,10 @@ import type {
   Incident,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  ResponseError,
   UpdateIncidentParams,
-} from './types';
+} from '@kbn/connector-schemas/jira';
+import type { ExternalService, ResponseError } from './types';
 import { escapeJqlSpecialCharacters } from './utils';
-
-import * as i18n from './translations';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
@@ -52,7 +50,7 @@ export const createExternalService = (
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
 
   if (!url || !projectKey || !apiToken || !email) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
@@ -195,7 +193,7 @@ export const createExternalService = (
       return { id: incidentId, key, created: fields.created, updated: fields.updated, ...fields };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to get incident with id ${id}. Error: ${error.message} Reason: ${createErrorMessage(
           error.response?.data
         )}`
@@ -253,7 +251,7 @@ export const createExternalService = (
       };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
           error.response?.data
         )}`
@@ -298,7 +296,7 @@ export const createExternalService = (
       };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to update incident with id ${incidentId}. Error: ${
           error.message
         }. Reason: ${createErrorMessage(error.response?.data)}`
@@ -334,7 +332,7 @@ export const createExternalService = (
       };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to create comment at incident with id ${incidentId}. Error: ${
           error.message
         }. Reason: ${createErrorMessage(error.response?.data)}`
@@ -363,7 +361,7 @@ export const createExternalService = (
       return normalizeIssueTypes(issueTypes || values);
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
           error.response?.data
         )}`
@@ -398,7 +396,7 @@ export const createExternalService = (
       return normalizeFields(fields);
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
           error.response?.data
         )}`
@@ -454,7 +452,7 @@ export const createExternalService = (
       return normalizeSearchResults(res.data?.issues ?? []);
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
           error.response?.data
         )}`
@@ -482,7 +480,7 @@ export const createExternalService = (
       return normalizeIssue(res.data ?? {});
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
           error.response?.data
         )}`

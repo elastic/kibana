@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import { EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
@@ -15,16 +14,16 @@ import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privilege
 import type { EnhancedDataStreamStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
-  definition,
+  hasMonitorPrivileges,
   stats,
   statsError,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  hasMonitorPrivileges: boolean;
   stats?: EnhancedDataStreamStats;
   statsError?: Error;
 }) => {
   const inaccurateMetric = Boolean(
-    stats?.hasFailureStore && !definition.privileges?.manage_failure_store
+    stats?.hasFailureStore && !stats.userPrivileges.canManageFailureStore
   );
   const title = (
     <FormattedMessage
@@ -66,13 +65,15 @@ export const IngestionCard = ({
     {
       data: (
         <PrivilegesWarningIconWrapper
-          hasPrivileges={definition.privileges.monitor}
+          hasPrivileges={hasMonitorPrivileges}
           title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
-            { defaultMessage: 'Daily ingestion rate' }
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.ingestiondailyLabel',
+            { defaultMessage: 'ingestionDaily' }
           )}
         >
-          {statsError ? '-' : stats?.bytesPerDay ? formatBytes(stats.bytesPerDay || 0) : '-'}
+          {statsError || !stats || stats.bytesPerDay === undefined
+            ? '-'
+            : formatBytes(stats.bytesPerDay)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: i18n.translate(
@@ -86,13 +87,15 @@ export const IngestionCard = ({
     {
       data: (
         <PrivilegesWarningIconWrapper
-          hasPrivileges={definition.privileges.monitor}
+          hasPrivileges={hasMonitorPrivileges}
           title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
-            { defaultMessage: 'Monthly ingestion rate' }
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.ingestionmonthlyLabel',
+            { defaultMessage: 'ingestionMonthly' }
           )}
         >
-          {statsError ? '-' : stats?.bytesPerDay ? formatBytes((stats.bytesPerDay || 0) * 30) : '-'}
+          {statsError || !stats || stats.bytesPerDay === undefined
+            ? '-'
+            : formatBytes(stats.bytesPerDay * 30)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: i18n.translate(
@@ -105,5 +108,5 @@ export const IngestionCard = ({
     },
   ];
 
-  return <BaseMetricCard title={title} metrics={metrics} />;
+  return <BaseMetricCard title={title} metrics={metrics} data-test-subj="ingestionCard" />;
 };

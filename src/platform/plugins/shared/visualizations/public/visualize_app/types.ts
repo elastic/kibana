@@ -10,8 +10,10 @@
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { VisParams } from '@kbn/visualizations-common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 import type {
   CoreStart,
@@ -44,13 +46,7 @@ import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-searc
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-  VisSavedObject,
-  PersistedState,
-  VisParams,
-} from '..';
+import type { Vis, VisualizeEmbeddableContract, VisSavedObject, PersistedState } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../legacy/embeddable';
@@ -126,6 +122,7 @@ export interface VisualizeServices extends CoreStart {
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
   contentManagement: ContentManagementPublicStart;
+  cps?: CPSPluginStart;
 }
 
 export interface VisInstance {

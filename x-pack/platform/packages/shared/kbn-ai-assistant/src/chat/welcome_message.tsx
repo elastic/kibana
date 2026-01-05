@@ -21,6 +21,7 @@ import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
+import { ElasticInferenceServiceCallout } from './elastic_inference_service_callout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -81,13 +82,29 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
-        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
-        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
+        {showKnowledgeBaseReIndexingCallout ? (
+          <EuiFlexItem grow={false}>
+            <KnowledgeBaseReindexingCallout />
+          </EuiFlexItem>
+        ) : null}
+        {showElasticLlmCalloutInChat ? (
+          <EuiFlexItem grow={false}>
+            <ElasticLlmConversationCallout />
+          </EuiFlexItem>
+        ) : null}
+        {!connectors.loading && !connectors.connectors?.length ? (
+          <>
+            <EuiFlexItem grow={false} style={{ alignSelf: 'stretch' }}>
+              <ElasticInferenceServiceCallout />
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
+          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'} />
           <WelcomeMessageConnectors
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
@@ -100,6 +117,7 @@ export function WelcomeMessage({
           <StarterPrompts onSelectPrompt={onSelectPrompt} />
           <EuiSpacer size="l" />
           <Disclaimer />
+          <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

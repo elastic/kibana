@@ -90,6 +90,7 @@ export const ServicesContent = ({
     >
       {error ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.infra.assetDetails.services.getServicesRequestErrorTitle', {
             defaultMessage: 'Error',
           })}
@@ -123,10 +124,14 @@ export const ServicesContent = ({
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.services.noServicesMsg"
-            defaultMessage="No services found on this host. Click {apmTutorialLink} to instrument your services with APM."
+            defaultMessage="We were unable to find services running on this host. Click {apmTutorialLink} to instrument your services with APM."
             values={{
               apmTutorialLink: (
                 <EuiLink
+                  aria-label={i18n.translate(
+                    'xpack.infra.servicesContent.euiLink.apmTutorialLinkLabel',
+                    { defaultMessage: 'APM Instrumentation Tutorial' }
+                  )}
                   data-test-subj="assetDetailsTooltipAPMTutorialLink"
                   href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
                 >

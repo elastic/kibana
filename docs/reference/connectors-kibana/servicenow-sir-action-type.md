@@ -166,13 +166,13 @@ For more details, refer to the [{{sn}} product documentation](https://docs.servi
 
 ### Create a {{sn}} integration user [servicenow-sir-connector-prerequisites-integration-user]
 
-To ensure authenticated communication between Elastic and {{sn}}, create a {{sn}} integration user and assign it the appropriate roles. 
+To ensure authenticated communication between Elastic and {{sn}}, create a {{sn}} integration user and assign it the appropriate roles.
 
 1. In your {{sn}} instance, go to **System Security → Users and Groups → Users**.
 2. Click **New**.
 3. Complete the form, then right-click on the menu bar and click **Save**.
 4. Go to the **Roles** tab and click **Edit**.
-5. Assign the integration user the following roles: 
+5. Assign the integration user the following roles:
 
     * `import_set_loader`
     * `import_transformer`

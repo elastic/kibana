@@ -31,8 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const toasts = getService('toasts');
   const dataGrid = getService('dataGrid');
 
-  // Failing: See https://github.com/elastic/kibana/issues/239001
-  describe.skip('discover async search', () => {
+  describe('discover async search', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default'
@@ -109,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigation to context cleans the session', async () => {
-      await timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await timePicker.setCommonlyUsedTime('This_week');
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {

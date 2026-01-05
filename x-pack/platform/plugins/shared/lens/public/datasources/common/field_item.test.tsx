@@ -20,7 +20,7 @@ import type { FieldItemIndexPatternFieldProps } from './field_item';
 import { InnerFieldItem } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type { IndexPattern } from '../../types';
+import type { IndexPattern } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
 

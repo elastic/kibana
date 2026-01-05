@@ -23,6 +23,7 @@ export const MMLCallout: FC = () => {
 
   return jobCreator.modelPlot && highCardinality !== null ? (
     <EuiCallOut
+      announceOnMount
       title={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.mmlWarning.title"

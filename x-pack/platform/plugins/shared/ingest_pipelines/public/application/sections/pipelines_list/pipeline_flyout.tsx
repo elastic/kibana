@@ -7,11 +7,10 @@
 import type { FunctionComponent } from 'react';
 import React, { useState, useEffect } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
-import { FlyoutFooter, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
+import { DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
-import { SectionLoading, useKibana } from '../../../shared_imports';
+import { useKibana } from '../../../shared_imports';
 
 export interface Props {
   ingestPipeline: string;
@@ -64,10 +63,16 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
       onClose={onClose}
       aria-labelledby="pipelineDetailsFlyoutTitle"
       data-test-subj="pipelineDetails"
-      size="l"
-      maxWidth={pipelineTree ? 1100 : 550}
+      size={isResponsiveFlyout ? 'm' : 'l'}
+      maxWidth={pipelineTree && !isResponsiveFlyout ? 1000 : 460}
     >
-      <EuiSplitPanel.Outer direction="row" grow={true} responsive={false} borderRadius="none">
+      <EuiSplitPanel.Outer
+        direction="row"
+        grow={true}
+        responsive={false}
+        borderRadius="none"
+        hasShadow={false}
+      >
         {pipelineTree && (!isResponsiveFlyout || responsiveFlyoutContent === TREE_VIEW) && (
           <TreePanel
             pipelineTree={pipelineTree}
@@ -84,14 +89,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
         )}
 
         {(!isResponsiveFlyout || responsiveFlyoutContent === DETAILS_VIEW) &&
-          (isLoading ? (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.pipelineDetails.loading"
-                defaultMessage="Loading pipeline…"
-              />
-            </SectionLoading>
-          ) : error ? (
+          (error && !isLoading ? (
             <NotFoundPanel
               pipelineName={pipelineName}
               onCreatePipeline={() => onCreateClick(pipelineName)}
@@ -99,21 +97,22 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
               displayWarning={pipelineName !== ingestPipeline}
             />
           ) : (
-            pipeline && <DetailsPanel pipeline={pipeline} />
+            pipeline && (
+              <DetailsPanel
+                pipeline={pipeline}
+                isLoading={isLoading}
+                onEditClick={onEditClick}
+                onCloneClick={onCloneClick}
+                onDeleteClick={onDeleteClick}
+                renderActions={!error}
+                renderViewTreeButton={
+                  isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW
+                }
+                onViewTreeClick={() => setResponsiveFlyoutContent(TREE_VIEW)}
+              />
+            )
           ))}
       </EuiSplitPanel.Outer>
-
-      {((isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW) || !error) && pipeline && (
-        <FlyoutFooter
-          pipeline={pipeline}
-          onEditClick={onEditClick}
-          onCloneClick={onCloneClick}
-          onDeleteClick={onDeleteClick}
-          renderActions={!error}
-          renderViewTreeButton={isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW}
-          onViewTreeClick={() => setResponsiveFlyoutContent(TREE_VIEW)}
-        />
-      )}
     </EuiFlyout>
   );
 };

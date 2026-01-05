@@ -395,7 +395,7 @@ describe('bootstrapRenderer', () => {
       })
     );
 
-    themeName$.next('amsterdam');
+    themeName$.next('borealis');
     await renderer({
       request,
       uiSettingsClient,
@@ -403,7 +403,7 @@ describe('bootstrapRenderer', () => {
 
     expect(renderTemplateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        themeTagName: 'v8',
+        themeTagName: 'borealis',
       })
     );
   });

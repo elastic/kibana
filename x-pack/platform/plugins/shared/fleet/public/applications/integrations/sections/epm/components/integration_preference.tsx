@@ -17,15 +17,12 @@ import {
   EuiForm,
   EuiRadioGroup,
   EuiSpacer,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSwitch,
 } from '@elastic/eui';
 
 import { usePutSettingsMutation, useStartServices, useAuthz } from '../../../hooks';
 
-export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
+export type IntegrationPreferenceType = 'beats' | 'agent';
 
 interface Option {
   type: IntegrationPreferenceType;
@@ -38,37 +35,11 @@ export interface Props {
   prereleaseIntegrationsEnabled: boolean;
 }
 
-const recommendedTooltip = (
-  <FormattedMessage
-    id="xpack.fleet.epm.integrationPreference.recommendedTooltip"
-    defaultMessage="We recommend Elastic Agent integrations when they are generally available."
-  />
-);
-
-const Item = styled(EuiFlexItem)`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
-`;
-
 const EuiSwitchNoWrap = styled(EuiSwitch)`
   white-space: nowrap;
 `;
 
 const options: Option[] = [
-  {
-    type: 'recommended',
-    label: (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.fleet.epm.integrationPreference.recommendedLabel', {
-            defaultMessage: 'Recommended',
-          })}
-        </EuiFlexItem>
-        <Item>
-          <EuiIconTip content={recommendedTooltip} />
-        </Item>
-      </EuiFlexGroup>
-    ),
-  },
   {
     type: 'agent',
     label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {

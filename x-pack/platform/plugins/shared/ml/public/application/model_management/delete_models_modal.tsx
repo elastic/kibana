@@ -101,6 +101,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
         {modelsWithPipelines.length > 0 ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.deleteModal.pipelinesWarningHeader"
@@ -150,6 +151,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
 
         {modelsWithInferenceAPIs.length > 0 ? (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.deleteModal.inferenceAPIWarningHeader"

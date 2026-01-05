@@ -91,7 +91,7 @@ export const useCasesColumns = ({
   const {
     data: { customFields },
     isFetching: isLoadingColumns,
-  } = useGetCaseConfiguration();
+  } = useGetCaseConfiguration({ keepPreviousData: true });
 
   const assignCaseAction = useCallback(
     async (theCase: CaseUI) => {
@@ -198,6 +198,16 @@ export const useCasesColumns = ({
         render: (totalAlerts: CaseUI['totalAlerts']) =>
           totalAlerts != null
             ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+            : getEmptyCellValue(),
+        width: !isSelectorView ? '70px' : '55px',
+      },
+      totalEvents: {
+        field: casesColumnsConfig.totalEvents.field,
+        name: casesColumnsConfig.totalEvents.name,
+        align: RIGHT_ALIGNMENT,
+        render: (totalEvents: CaseUI['totalEvents']) =>
+          totalEvents != null
+            ? renderStringField(`${totalEvents}`, `case-table-column-eventsCount`)
             : getEmptyCellValue(),
         width: !isSelectorView ? '70px' : '55px',
       },

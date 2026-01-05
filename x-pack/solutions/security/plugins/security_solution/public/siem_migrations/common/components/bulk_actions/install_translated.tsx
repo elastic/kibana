@@ -32,8 +32,11 @@ export const InstallTranslatedButton = memo(
     const numberOfSelectedItems = selectedItems.length;
     const installTranslatedItemsSelected = useMemo(
       () =>
-        selectedItems.filter((item) => item.translation_result === MigrationTranslationResult.FULL)
-          .length,
+        selectedItems.filter(
+          (item) =>
+            item.translation_result === MigrationTranslationResult.FULL ||
+            item.translation_result === MigrationTranslationResult.PARTIAL
+        ).length,
       [selectedItems]
     );
     const isSelected = installTranslatedItemsSelected > 0;

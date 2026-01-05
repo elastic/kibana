@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
@@ -317,6 +317,7 @@ describe('AlertsTable', () => {
   let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
   let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
+  let refreshSpy: jest.SpyInstance<void, []>;
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
@@ -324,6 +325,7 @@ describe('AlertsTable', () => {
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
+    refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
   });
 
@@ -1138,6 +1140,18 @@ describe('AlertsTable', () => {
           pageSize: 1,
         })
       );
+    });
+
+    it("doesn't call `refresh` when paginating and using `lastReloadRequestTime`", async () => {
+      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} pageSize={1} />);
+
+      await waitFor(() => expect(onPageIndexChange).not.toBeUndefined());
+
+      act(() => {
+        onPageIndexChange(1);
+      });
+
+      expect(refreshSpy).not.toHaveBeenCalled();
     });
   });
 });

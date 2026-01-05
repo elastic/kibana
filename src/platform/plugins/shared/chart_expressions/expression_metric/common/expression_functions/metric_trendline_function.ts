@@ -9,12 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
-import {
-  validateAccessor,
-  getColumnByAccessor,
-  prepareLogTable,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
+import { validateAccessor, getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { MetricWTrend } from '@elastic/charts';
 import type { TrendlineExpressionFunctionDefinition } from '../types';

@@ -6,20 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-
-const sampleDashboard = {
-  contentTypeId: 'dashboard',
-  data: {
-    title: 'Sample dashboard',
-  },
-  options: {
-    references: [],
-    overwrite: true,
-  },
-  version: 1,
-};
 
 const sampleIndexPattern = {
   contentTypeId: 'index-pattern',
@@ -69,16 +58,26 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${ATestSpace} space`, async () => {
       await supertest
-        .post(`/s/${ATestSpace}/api/content_management/rpc/create`)
+        .post(`/s/${ATestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(sampleDashboard);
+        .set('elastic-api-version', '1')
+        .send({
+          data: {
+            title: 'Sample dashboard',
+          },
+        });
 
       await supertest
-        .post(`/s/${ATestSpace}/api/content_management/rpc/create`)
+        .post(`/s/${ATestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(sampleDashboard);
+        .set('elastic-api-version', '1')
+        .send({
+          data: {
+            title: 'Sample dashboard',
+          },
+        });
 
       await supertest
         .get(`/internal/spaces/${ATestSpace}/content_summary`)
@@ -101,10 +100,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${BTestSpace} space`, async () => {
       await supertest
-        .post(`/s/${BTestSpace}/api/content_management/rpc/create`)
+        .post(`/s/${BTestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(sampleDashboard);
+        .set('elastic-api-version', '1')
+        .send({
+          data: {
+            title: 'Sample dashboard',
+          },
+        });
 
       await supertest
         .post(`/s/${BTestSpace}/api/content_management/rpc/create`)

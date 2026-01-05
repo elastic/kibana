@@ -1,0 +1,26 @@
+##  @kbn/shared-ux-document-data-cascade
+
+This package provides a React component and associated state management for displaying and interacting 
+with hierarchical data in a tabular format. It is designed to be flexible and customizable, 
+allowing developers to tailor the component to their specific needs.
+
+## Usage
+
+Here's a basic example of how to use the `DataCascade` component:
+
+```tsx
+import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '@kbn/shared-ux-document-data-cascade';
+
+<DataCascade {...dataCascadeProps}>
+  <DataCascadeRow {...dataCascadeRowProps}>
+    <DataCascadeRowCell {...dataCascadeRowCellProps}>
+      {({ data }) => {
+        // your cell component
+      }}
+    </DataCascadeRowCell>
+  </DataCascadeRow>
+</DataCascade>
+```
+
+For more detailed usage instructions and examples, please refer to the storybook implementation.
+

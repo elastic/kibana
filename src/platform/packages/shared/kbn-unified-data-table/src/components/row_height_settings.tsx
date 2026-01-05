@@ -17,18 +17,22 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-export enum RowHeightMode {
-  auto = 'auto',
-  custom = 'custom',
-}
+export const RowHeightMode = {
+  auto: 'auto',
+  custom: 'custom',
+} as const;
+
+export type RowHeightModeType = keyof typeof RowHeightMode;
+
 export interface RowHeightSettingsProps {
   lineCountInput: number | undefined;
-  rowHeight?: RowHeightMode;
+  rowHeight?: RowHeightModeType;
   maxRowHeight?: number;
   label: string;
-  onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
+  onChangeRowHeight: (newHeightMode: RowHeightModeType | undefined) => void;
   onChangeLineCountInput: (newRowHeightLines: number, isValid: boolean) => void;
   'data-test-subj'?: string;
+  fullWidth?: boolean;
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -41,6 +45,7 @@ export function RowHeightSettings({
   onChangeLineCountInput,
   maxRowHeight = 20,
   ['data-test-subj']: dataTestSubj,
+  fullWidth,
 }: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
     {
@@ -66,6 +71,7 @@ export function RowHeightSettings({
         aria-label={label}
         display="columnCompressed"
         data-test-subj={dataTestSubj}
+        fullWidth
       >
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiButtonGroup

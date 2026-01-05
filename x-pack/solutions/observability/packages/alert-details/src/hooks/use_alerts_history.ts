@@ -16,7 +16,7 @@ import {
   ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 export interface Props {
   http: HttpSetup | undefined;

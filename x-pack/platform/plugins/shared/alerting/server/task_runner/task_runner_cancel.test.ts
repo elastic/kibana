@@ -230,12 +230,12 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
-      `skipping updating alerts with maintenance windows for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
       { tags: ['1', 'test'] }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       7,
-      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      `skipping updating alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
       { tags: ['1', 'test'] }
     );
 
@@ -586,6 +586,7 @@ describe('Task Runner Cancel', () => {
         rule_type_run_duration_ms: 0,
         total_run_duration_ms: 0,
         trigger_actions_duration_ms: 0,
+        update_alerts_duration_ms: 0,
       },
     });
 
