@@ -16,14 +16,16 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
+const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
+
 const getServicesSchema = z.object({
-  ...timeRangeSchemaRequired,
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   environment: z
     .string()
     .min(1)
@@ -55,13 +57,14 @@ export function createGetServicesTool({
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
     description: `Retrieves a list of services from APM, logs, and metrics data sources.
-
+    
 For APM services, includes health status, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
 For services found only in logs or metrics, basic information like service name and environment is returned.
 
-Useful for:
-- Getting a high-level system overview of all services
-- Identifying unhealthy APM services
+When to use:
+- Getting a high-level overview of system health from a service perspective
+- Identifying key metrics for services like latency, error rate, throughput, anomalies and alert counts
+- Answering "which services are having problems?"
 - Discovering services that may not be instrumented with APM but appear in logs or metrics`,
     schema: getServicesSchema,
     tags: ['observability', 'services'],
@@ -71,7 +74,13 @@ Useful for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, environment, healthStatus }, context) => {
+    handler: async (toolParams, context) => {
+      const {
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+        environment,
+        healthStatus,
+      } = toolParams;
       const { request, esClient } = context;
 
       try {
@@ -93,6 +102,7 @@ Useful for:
             {
               type: ToolResultType.other,
               data: {
+                total: services.length,
                 services,
                 maxCountExceeded,
                 serviceOverflowCount,
