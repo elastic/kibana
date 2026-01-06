@@ -659,6 +659,7 @@ src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
+src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
 src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops

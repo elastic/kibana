@@ -50,12 +50,21 @@ export const createMonitoringEntitySourceRoute = (
       },
       async (context, request, response): Promise<IKibanaResponse<CreateEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
-
+        const monitoringSource = request.body;
         try {
+          if (monitoringSource.type !== 'index') {
+            // currently we own the integration sources so we don't allow creation of other types
+            // we might allow this in the future if we have a way to manage the integration sources
+            return siemResponse.error({
+              statusCode: 400,
+              body: 'Cannot currently create entity source of type other than index',
+            });
+          }
+
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
 
-          const body = await client.init(request.body);
+          const body = await client.create(monitoringSource);
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
           const soClient = privMonDataClient.getScopedSoClient(request, {
             includedHiddenTypes: [

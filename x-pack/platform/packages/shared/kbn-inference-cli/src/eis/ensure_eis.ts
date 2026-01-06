@@ -120,7 +120,7 @@ async function getEisApiKey(log: ToolingLog): Promise<string> {
     return apiKey.trim();
   } catch (error) {
     throw new Error(
-      'Failed to read EIS API key from vault. Please ensure you are logged in to vault (vault login -method=okta) and connected to VPN if needed. See https://docs.elastic.dev/vault',
+      'Failed to read EIS API key from vault. Please ensure you are logged in to vault (vault login --method oidc) and connected to VPN if needed. See https://docs.elastic.dev/vault',
       { cause: error }
     );
   }
@@ -135,7 +135,9 @@ async function setCcmApiKey(
 
   const maxRetries = 3;
   const retryDelayMs = 2000;
-  const esUrl = `${es.baseUrl}/_inference/_ccm`;
+  const ccmEndpoint = '_inference/_ccm';
+  let esUrl = `${es.baseUrl}/${ccmEndpoint}`;
+  let ssl = es.ssl;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -156,7 +158,7 @@ async function setCcmApiKey(
           rejectUnauthorized: false,
         },
         body,
-        es.ssl
+        ssl
       );
 
       if (statusCode >= 200 && statusCode < 300) {
@@ -166,11 +168,28 @@ async function setCcmApiKey(
 
       throw new Error(`HTTP ${statusCode}`);
     } catch (error) {
+      const handshakeFailurePatterns = [
+        'EPROTO',
+        'ERR_SSL_WRONG_VERSION_NUMBER',
+        'packet length too long',
+      ];
+      const handshakeFailure = handshakeFailurePatterns.some((p) => error.message.includes(p));
+
+      if (handshakeFailure && ssl) {
+        log.info('HTTPS handshake failed due to protocol mismatch — falling back to HTTP');
+        ssl = false;
+        esUrl = `http://localhost:9200/${ccmEndpoint}`;
+        // Retry immediately with HTTP (don't count this as a failed attempt)
+        continue;
+      }
+
       if (attempt < maxRetries) {
         log.debug(`Attempt ${attempt} failed, retrying in ${retryDelayMs}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
       } else {
-        throw new Error('Failed to set CCM API key after 3 attempts', { cause: error });
+        throw new Error(`Failed to set CCM API key after ${maxRetries} attempts`, {
+          cause: error,
+        });
       }
     }
   }
