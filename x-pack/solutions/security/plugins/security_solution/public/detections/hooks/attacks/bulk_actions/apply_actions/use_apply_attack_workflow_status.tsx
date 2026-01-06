@@ -22,11 +22,15 @@ interface ApplyAttackWorkflowStatusProps extends BaseApplyAttackProps {
   reason?: AlertClosingReason;
 }
 
+interface ApplyAttackWorkflowStatusReturn {
+  applyWorkflowStatus: (props: ApplyAttackWorkflowStatusProps) => Promise<void>;
+}
+
 /**
  * Hook that provides a function to apply workflow status to attacks and optionally related alerts.
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
-export const useApplyAttackWorkflowStatus = () => {
+export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn => {
   const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();
   const showModalIfNeeded = useUpdateAttacksModal();
 

@@ -17,6 +17,10 @@ export interface ShowUpdateAttacksModalProps {
   attackDiscoveriesCount: number;
 }
 
+type ShowUpdateAttacksModalReturn = (
+  props: ShowUpdateAttacksModalProps
+) => Promise<{ updateAlerts: boolean } | null>;
+
 /**
  * Hook that provides a function to show the update attacks confirmation modal if needed.
  * The modal allows users to choose whether to update only attacks or both attacks and related alerts.
@@ -28,7 +32,7 @@ export interface ShowUpdateAttacksModalProps {
  *     - `{ updateAlerts: false }` when user chooses to update only attacks, or when EASE is enabled
  *     - `{ updateAlerts: true }` when user chooses to update both attacks and related alerts
  */
-export const useUpdateAttacksModal = () => {
+export const useUpdateAttacksModal = (): ShowUpdateAttacksModalReturn => {
   const { overlays, services } = useKibana();
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 

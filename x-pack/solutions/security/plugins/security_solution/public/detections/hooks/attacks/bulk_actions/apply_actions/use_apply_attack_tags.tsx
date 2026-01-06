@@ -17,13 +17,15 @@ interface ApplyAttackTagsProps extends BaseApplyAttackProps {
   tags: { tags_to_add: string[]; tags_to_remove: string[] };
 }
 
+interface ApplyAttackTagsReturn {
+  applyTags: (props: ApplyAttackTagsProps) => Promise<void>;
+}
+
 /**
  * Hook that provides a function to apply tags to attacks and optionally related alerts.
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
- *
- * @returns Object containing the applyTags function
  */
-export const useApplyAttackTags = () => {
+export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
   const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
   const showModalIfNeeded = useUpdateAttacksModal();
 
