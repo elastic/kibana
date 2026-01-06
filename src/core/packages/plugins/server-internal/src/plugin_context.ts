@@ -75,6 +75,7 @@ export function createPluginInitializerContext({
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+      airgapped: coreContext.configService.getRawValueSync<boolean>('airgapped') ?? false,
     },
 
     /**

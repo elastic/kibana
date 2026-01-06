@@ -171,6 +171,7 @@ export class RenderingService {
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
+      airgapped: this.coreContext.configService.getRawValueSync<boolean>('airgapped') ?? false,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();

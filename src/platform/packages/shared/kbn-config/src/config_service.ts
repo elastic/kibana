@@ -201,6 +201,17 @@ export class ConfigService {
     return this.validateAtPath(path, configAtPath) as TSchema;
   }
 
+  /**
+   * Reads the raw (unvalidated) config value at the specified path.
+   * This can be called before config validation has completed.
+   * Use with caution as the value has not been validated against its schema.
+   *
+   * @param path - The path to the desired config value.
+   */
+  public getRawValueSync<TSchema>(path: ConfigPath): TSchema | undefined {
+    return this.lastConfig?.get(path) as TSchema | undefined;
+  }
+
   public async isEnabledAtPath(path: ConfigPath) {
     const namespace = pathToString(path);
     const hasSchema = this.schemas.has(namespace);

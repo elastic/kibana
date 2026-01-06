@@ -325,6 +325,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     packageInfo: Readonly<PackageInfo>;
     instanceUuid: string;
     configs: readonly string[];
+    airgapped: boolean;
   };
   /**
    * Access the configuration for this particular Kibana node.
