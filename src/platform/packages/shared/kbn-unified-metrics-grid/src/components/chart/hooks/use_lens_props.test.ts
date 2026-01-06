@@ -37,6 +37,10 @@ describe('useLensProps', () => {
       yAxis: [{ value: 'foo' }],
     },
   ];
+
+  const mockEmptyChartLayers: Array<LensSeriesLayer> = [];
+  const mockError = new Error('Test error');
+
   const fetchParams = getFetchParamsMock();
   let discoverFetch$: UnifiedHistogramFetch$;
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
@@ -235,6 +239,63 @@ describe('useLensProps', () => {
 
     await waitFor(() => {
       expect(result.current).not.toBeUndefined();
+    });
+  });
+
+  it('does not build Lens attributes when chartLayers is empty', async () => {
+    const chartRef = createMockChartRef();
+
+    const { result } = renderHook(() =>
+      useLensProps({
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockEmptyChartLayers,
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).not.toHaveBeenCalled();
+      expect(result.current).toBeUndefined();
+    });
+  });
+
+  it('builds Lens attributes when forcing Lens to build with no datasource on error', async () => {
+    const chartRef = createMockChartRef();
+
+    const { result } = renderHook(() =>
+      useLensProps({
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockEmptyChartLayers,
+        error: mockError,
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        expect.objectContaining({ layers: [] }),
+        expect.anything()
+      );
+
+      expect(result.current).toBeDefined();
+      expect(result.current?.attributes.state).toEqual({});
+      expect(result.current?.attributes.state.datasourceStates).toBeUndefined();
     });
   });
 });

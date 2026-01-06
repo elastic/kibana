@@ -6491,7 +6491,7 @@
             "section": "def-common.Error",
             "text": "Error"
           },
-          "[]; }, ",
+          "[]; agentMarks: Record<string, number>; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}\": ",
           {

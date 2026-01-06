@@ -587,7 +587,7 @@ $$$security-solution-excluded-data-tiers-for-rule-execution$$$`securitySolution:
 :   Specifies data tiers to exclude from searching during rule execution. Excludes events from the specified data tiers, which might help improve rule performance or reduce execution time. For example: `data_frozen,data_cold`. Empty by default.
 
 
-$$$security-solution-enable-privileged-user-monitoring$$$`securitySolution:enablePrivilegedUserMonitoring` {applies_to}`stack: preview` {applies_to}`serverless: unavailable`
+$$$security-solution-enable-privileged-user-monitoring$$$`securitySolution:enablePrivilegedUserMonitoring` {applies_to}`stack: preview 9.1, removed 9.3` {applies_to}`serverless: unavailable`
 :   Enables the privileged user monitoring dashboard and onboarding experience, which are in technical preview. `true` by default.
 
 $$$security-solution-enable-esql-risk-scoring$$$`securitySolution:enableEsqlRiskScoring` {applies_to}`stack: preview 9.0, removed 9.3` {applies_to}`serverless: unavailable`

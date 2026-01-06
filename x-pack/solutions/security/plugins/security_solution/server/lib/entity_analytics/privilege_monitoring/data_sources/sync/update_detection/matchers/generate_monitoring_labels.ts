@@ -52,8 +52,7 @@ const applyValuesMatcher = (
     const fieldValue = _.get(document, field, []);
 
     return []
-      .concat(fieldValue) // coerce to array for uniform processing of single vs multi-valued fields
-      .map((value) => String(value))
+      .concat(fieldValue)
       .filter((value) => matcher.values.includes(value))
       .map((value) => ({
         field,

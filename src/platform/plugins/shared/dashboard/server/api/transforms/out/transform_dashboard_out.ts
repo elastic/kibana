@@ -40,6 +40,14 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
+  let controlGroupOut;
+  if (controlGroupInput) {
+    controlGroupOut = transformControlGroupOut(
+      controlGroupInput,
+      references ?? [],
+      controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
+    );
+  }
   const timeRange =
     timeRestore && timeFrom && timeTo
       ? {
@@ -48,11 +56,11 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(optionsJSON ?? '{}');
+  const options = transformOptionsOut(optionsJSON ?? '{}', controlGroupInput?.showApplySelections);
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
+    ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
     ...(description && { description }),
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),

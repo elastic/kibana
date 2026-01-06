@@ -15,7 +15,6 @@ import {
   FILTER_GROUP_CONTEXT_EDIT_CONTROLS,
   FILTER_GROUP_CONTROL_ACTION_DELETE,
   FILTER_GROUP_CONTROL_ACTION_EDIT,
-  FILTER_GROUP_CONTROL_CONFIRM_BTN,
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   FILTER_GROUP_EDIT_CONTROLS_PANEL,
   FILTER_GROUP_SAVE_CHANGES,
@@ -74,7 +73,6 @@ export const addNewFilterGroupControlValues = (fieldName: string) => {
 export const deleteFilterGroupControl = (idx: number) => {
   cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
   cy.get(FILTER_GROUP_CONTROL_ACTION_DELETE(idx)).click();
-  cy.get(FILTER_GROUP_CONTROL_CONFIRM_BTN).click();
 };
 
 export const editFilterGroupControl = ({ idx, fieldName }: { idx: number; fieldName: string }) => {
