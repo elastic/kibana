@@ -13,7 +13,7 @@ import type { TypeOf } from '../..';
 import { schema } from '../..';
 
 describe('DiscriminatedUnionType', () => {
-  const exampleType = schema.oneOfKind('type', [
+  const exampleType = schema.discriminatedUnion('type', [
     schema.object({ type: schema.literal('str'), string: schema.string() }),
     schema.object({ type: schema.literal('num'), number: schema.number() }),
     schema.object({ type: schema.literal('bool'), boolean: schema.boolean() }),
@@ -35,7 +35,7 @@ describe('DiscriminatedUnionType', () => {
   });
 
   it('should validate with default', () => {
-    const type = schema.oneOfKind(
+    const type = schema.discriminatedUnion(
       'type',
       [
         schema.object({ type: schema.literal('str'), string: schema.string() }),
@@ -95,7 +95,7 @@ describe('DiscriminatedUnionType', () => {
   describe('schema config errors', () => {
     it('should throw on duplicate discriminators', () => {
       expect(() => {
-        schema.oneOfKind('type', [
+        schema.discriminatedUnion('type', [
           schema.object({ type: schema.literal('str'), string: schema.string() }),
           schema.object({ type: schema.literal('num'), number: schema.number() }),
           schema.object({ type: schema.literal('num'), num: schema.number() }),
@@ -107,7 +107,7 @@ describe('DiscriminatedUnionType', () => {
 
     it('should throw if multiple fallback schemas are provided', () => {
       expect(() => {
-        schema.oneOfKind('type', [
+        schema.discriminatedUnion('type', [
           schema.object({ type: schema.literal('str'), string: schema.string() }),
           schema.object({ type: schema.literal('num'), number: schema.number() }),
           schema.object({ type: schema.string(), string: schema.string() }),
@@ -118,7 +118,7 @@ describe('DiscriminatedUnionType', () => {
   });
 
   describe('catch-all case', () => {
-    const catchAllType = schema.oneOfKind('type', [
+    const catchAllType = schema.discriminatedUnion('type', [
       schema.object({ type: schema.literal('str'), string: schema.string() }),
       schema.object({ type: schema.literal('num'), number: schema.number() }),
       schema.object(
