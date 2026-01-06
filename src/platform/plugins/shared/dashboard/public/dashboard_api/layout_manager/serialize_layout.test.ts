@@ -88,7 +88,7 @@ describe('serializeLayout', () => {
       },
     };
 
-    const { panels, controlGroupInput, references } = serializeLayout(layout, childState);
+    const { panels, controlGroupInput } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -150,15 +150,6 @@ describe('serializeLayout', () => {
           },
         ],
       }
-    `);
-    expect(references).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "ref1",
-          "name": "1:myRef",
-          "type": "testRefType",
-        },
-      ]
     `);
   });
 });

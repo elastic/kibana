@@ -32,7 +32,6 @@ import {
   apiHasUniqueId,
   type AppliesFilters,
   type AppliesTimeslice,
-  type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
@@ -43,17 +42,17 @@ export const useChildrenApi = (
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
   const currentChildState$Ref = useRef(
-    new BehaviorSubject<{ [id: string]: SerializedPanelState }>({})
+    new BehaviorSubject<{ [id: string]: object }>({})
   );
   const lastSavedChildState$Ref = useRef(
-    new BehaviorSubject<{ [id: string]: SerializedPanelState }>({}) // derived from lastSavedState$Ref
+    new BehaviorSubject<{ [id: string]: object }>({}) // derived from lastSavedState$Ref
   );
   const cleanupCallbackRef = useRef<() => void | undefined>();
 
   useEffect(() => {
     /** Derive `lastSavedChildState$Ref` from `lastSavedState$Ref` */
     const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
-      const serializedState: { [id: string]: SerializedPanelState } = {};
+      const serializedState: { [id: string]: object } = {};
       Object.entries(lastSavedState).forEach(([id, control]) => {
         serializedState[id] = { rawState: omit(control, ['grow', 'width', 'order']) };
       });
@@ -72,7 +71,7 @@ export const useChildrenApi = (
       .pipe(map((children) => children.some(({ hasUnsavedChanges }) => hasUnsavedChanges)))
       .subscribe((hasUnsavedChanges) => {
         if (hasUnsavedChanges) {
-          const result: { [id: string]: SerializedPanelState } = {};
+          const result: { [id: string]: object } = {};
           Object.values(children$Ref.current.getValue()).forEach((child) => {
             if (apiHasSerializableState(child) && apiHasUniqueId(child)) {
               result[child.uuid] = child.serializeState();
@@ -175,7 +174,7 @@ export const useChildrenApi = (
           currentChildState$Ref.current.next(currentChildState);
         }
       },
-      setSerializedStateForChild: (id: string, childState: SerializedPanelState<object>) => {
+      setSerializedStateForChild: (id: string, childState: object) => {
         currentChildState$Ref.current.getValue()[id] = childState;
       },
       getSerializedStateForChild: (id: string) => currentChildState$Ref.current.getValue()[id],

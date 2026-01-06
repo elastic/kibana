@@ -11,7 +11,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
 import type {
   GetStateType,
   LensRuntimeState,
@@ -52,24 +52,20 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: (): SerializedPanelState<LensSerializedAPIConfig> => {
+      serializeState: (): LensSerializedAPIConfig => {
         const currentState = cleanupSerializedState(getLatestState());
 
         const { savedObjectId, attributes, ...state } = currentState;
         if (savedObjectId) {
           return {
-            rawState: {
-              ...state,
-              savedObjectId,
-            },
-          } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
+            ...state,
+            savedObjectId,
+          } satisfies LensByRefSerializedAPIConfig;
         }
 
         const transformedState = transformToApiConfig(currentState);
 
-        return {
-          rawState: transformedState,
-        } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
+        return transformedState satisfies LensByValueSerializedAPIConfig;
       },
       getLegacySerializedState: (): LensSerializedState => {
         const currentState = cleanupSerializedState(getLatestState());

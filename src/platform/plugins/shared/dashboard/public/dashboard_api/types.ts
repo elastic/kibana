@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
@@ -42,7 +41,6 @@ import type {
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
-  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -131,12 +129,11 @@ export type DashboardApi = CanExpandPanels &
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardState;
-      references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid: GridData;
-      serializedState: SerializedPanelState;
+      serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;

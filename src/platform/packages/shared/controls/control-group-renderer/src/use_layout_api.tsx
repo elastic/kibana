@@ -72,7 +72,7 @@ export const useLayoutApi = (
           rawState: {
             width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
             grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
-            ...serializedState?.rawState,
+            ...serializedState,
           },
         };
         layout$Ref.current.next({

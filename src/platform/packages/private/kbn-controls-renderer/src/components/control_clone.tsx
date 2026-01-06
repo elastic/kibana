@@ -13,7 +13,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 
 import { controlWidthStyles } from './control_panel.styles';
 
@@ -25,15 +24,15 @@ export const ControlClone = ({
   state,
   width,
 }: {
-  state: SerializedPanelState<object> | undefined;
+  state: object | undefined;
   width: number | undefined;
 }) => {
   const styles = useMemoCss(controlCloneStyles);
 
   const cloneTitle = useMemo(() => {
     return (
-      (state?.rawState as { title?: string }).title ||
-      (state?.rawState as { fieldName?: string }).fieldName
+      (state as { title?: string }).title ||
+      (state as { fieldName?: string }).fieldName
     );
   }, [state]);
 

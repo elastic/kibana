@@ -106,7 +106,7 @@ function getEsqlControls(embeddable: LensApi) {
   const state = embeddable.getSerializedStateByValue();
   if (!state) return null;
 
-  const embeddableQuery = state.rawState.query;
+  const embeddableQuery = state.query;
   if (!isOfAggregateQueryType(embeddableQuery)) return null;
 
   const parentApi = embeddable.parentApi;
@@ -129,7 +129,7 @@ function getEsqlControls(embeddable: LensApi) {
         return acc;
       }
 
-      const controlState = api.serializeState().rawState as ESQLControlState;
+      const controlState = api.serializeState() as ESQLControlState;
       const variableName = 'variableName' in controlState && (controlState.variableName as string);
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);

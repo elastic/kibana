@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
-
 export interface HasSerializedChildState<SerializedState extends object = object> {
   getSerializedStateForChild: (
     childId: string
-  ) => SerializedPanelState<SerializedState> | undefined;
+  ) => SerializedState | undefined;
 }
 
 export const apiHasSerializedChildState = <SerializedState extends object = object>(

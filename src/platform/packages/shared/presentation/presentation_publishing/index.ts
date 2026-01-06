@@ -102,7 +102,6 @@ export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api'
 export {
   apiHasSerializableState,
   type HasSerializableState,
-  type SerializedPanelState,
 } from './interfaces/has_serializable_state';
 export {
   apiHasSupportedTriggers,

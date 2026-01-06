@@ -125,7 +125,6 @@ export const useDashboardListingTable = ({
           ...currentState,
           ...updatedState,
         },
-        dashboard.references
       );
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());

@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { PublishesUnifiedSearch, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { Query } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -231,8 +231,8 @@ describe('RangeSliderControlApi', () => {
         uuid,
         parentApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangeSliderControlState>;
-      expect(serializedState.rawState.step).toBe(1);
+      const serializedState = api.serializeState() as RangeSliderControlState;
+      expect(serializedState.step).toBe(1);
     });
 
     test('retains value from initial state', async () => {
@@ -248,8 +248,8 @@ describe('RangeSliderControlApi', () => {
         uuid,
         parentApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangeSliderControlState>;
-      expect(serializedState.rawState.step).toBe(1024);
+      const serializedState = api.serializeState() as RangeSliderControlState;
+      expect(serializedState.step).toBe(1024);
     });
   });
 });
