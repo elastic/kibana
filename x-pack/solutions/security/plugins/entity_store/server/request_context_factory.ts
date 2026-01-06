@@ -35,6 +35,6 @@ export async function createRequestHandlerContext({
     core: coreCtx,
     getLogger: memoize(() => logger),
     getResourcesService: memoize(() => new ResourcesService(logger)),
-    getTaskManager: memoize(() => getTaskManager(core, plugins))
+    getTaskManager: memoize(() => getTaskManager(core, plugins)),
   };
 }

@@ -9,7 +9,7 @@ import { ResourcesService } from './resources_service';
 import { EntityType } from './definitions/entity_type';
 import { ExtractEntityTask } from '../tasks/extract_entity_task';
 import type { TaskManager } from '../types';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 jest.mock('../tasks/extract_entity_task');
 
@@ -82,9 +82,7 @@ describe('ResourcesService', () => {
         register: jest.fn(),
         schedule: jest.fn().mockResolvedValue(undefined),
       };
-      mockExtractEntityTask.mockImplementationOnce(
-        () => mockTask as unknown as ExtractEntityTask
-      );
+      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
 
       await resourcesService.install(types, mockTaskManager);
 
@@ -145,9 +143,7 @@ describe('ResourcesService', () => {
         }),
         schedule: jest.fn(),
       };
-      mockExtractEntityTask.mockImplementationOnce(
-        () => mockTask as unknown as ExtractEntityTask
-      );
+      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
 
       await expect(resourcesService.install(types, mockTaskManager)).rejects.toThrow(
         'Registration failed'
@@ -165,9 +161,7 @@ describe('ResourcesService', () => {
         register: jest.fn(),
         schedule: jest.fn().mockRejectedValue(mockError),
       };
-      mockExtractEntityTask.mockImplementationOnce(
-        () => mockTask as unknown as ExtractEntityTask
-      );
+      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
 
       await expect(resourcesService.install(types, mockTaskManager)).rejects.toThrow(
         'Scheduling failed'

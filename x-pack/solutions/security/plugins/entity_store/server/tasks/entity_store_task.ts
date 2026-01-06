@@ -6,13 +6,17 @@
  */
 
 import type { ConcreteTaskInstance, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import type { RunResult } from '@kbn/task-manager-plugin/server/task';
+import type { Logger } from '@kbn/logging';
 import type { TaskConfig } from './config';
-import { TaskManager } from '../types';
-import { RunResult } from '@kbn/task-manager-plugin/server/task';
-import { Logger } from '@kbn/logging';
+import type { TaskManager } from '../types';
 
 export abstract class EntityStoreTask {
-  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected readonly logger: Logger) {
+  constructor(
+    protected readonly taskManager: TaskManager,
+    protected readonly config: TaskConfig,
+    protected readonly logger: Logger
+  ) {
     this.taskManager = taskManager;
     this.config = config;
     this.logger = logger;
@@ -41,7 +45,7 @@ export abstract class EntityStoreTask {
         this.logger.warn(`Task ${taskName} is already registered`);
         return;
       }
-      
+
       this.logger.error(`Error registering task ${taskName}: ${e}`);
       throw e;
     }
@@ -71,7 +75,7 @@ export abstract class EntityStoreTask {
   private createRunnerFactory(): TaskRunCreatorFunction {
     return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
       run: async () => this.run(taskInstance),
-      cancel: async () => this.cancel()
+      cancel: async () => this.cancel(),
     });
   }
 
@@ -79,4 +83,3 @@ export abstract class EntityStoreTask {
 
   protected abstract cancel(): Promise<RunResult | void>;
 }
-

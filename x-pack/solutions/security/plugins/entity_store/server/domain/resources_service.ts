@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { TaskManager } from '../types';
 import { ExtractEntityTask } from '../tasks/extract_entity_task';
-import type { Logger } from '@kbn/logging';
 import type { EntityType } from './definitions/entity_type';
 import { ALL_ENTITY_TYPES } from './definitions/entity_type';
 
@@ -19,11 +19,17 @@ export class ResourcesService {
     await this.initExtractEntitiesTasks(taskManager, this.logger, types);
   }
 
-  private async initExtractEntitiesTasks(taskManager: TaskManager, logger: Logger, types: EntityType[]) {
-    const tasks = types.map(type => new ExtractEntityTask(taskManager, logger, type));
-    await Promise.all(tasks.map(async task => {
-      task.register();
-      await task.schedule();
-    }));
+  private async initExtractEntitiesTasks(
+    taskManager: TaskManager,
+    logger: Logger,
+    types: EntityType[]
+  ) {
+    const tasks = types.map((type) => new ExtractEntityTask(taskManager, logger, type));
+    await Promise.all(
+      tasks.map(async (task) => {
+        task.register();
+        await task.schedule();
+      })
+    );
   }
 }
