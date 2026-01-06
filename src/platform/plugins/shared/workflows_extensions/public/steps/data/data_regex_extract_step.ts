@@ -36,8 +36,7 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
 **Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
     }),
     examples: [
-      i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.example1', {
-        defaultMessage: `## Extract using named capture groups
+      `## Extract using named capture groups
 \`\`\`yaml
 - name: parse-log-line
   type: ${DataRegexExtractStepTypeId}
@@ -51,9 +50,8 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
 
 # Output: { timestamp: "2024-01-15", level: "ERROR", msg: "Connection failed" }
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.example2', {
-        defaultMessage: `## Extract using numbered capture groups
+
+      `## Extract using numbered capture groups
 \`\`\`yaml
 - name: parse-version
   type: ${DataRegexExtractStepTypeId}
@@ -68,9 +66,8 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
 # Input: "v1.2.3"
 # Output: { major: "1", minor: "2", patch: "3" }
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.example3', {
-        defaultMessage: `## Process array of strings
+
+      `## Process array of strings
 \`\`\`yaml
 - name: parse-multiple-logs
   type: ${DataRegexExtractStepTypeId}
@@ -84,9 +81,8 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
 # Input: ["[INFO] Started", "[ERROR] Failed"]
 # Output: [{ level: "INFO", message: "Started" }, { level: "ERROR", message: "Failed" }]
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.example4', {
-        defaultMessage: `## Handle no match with error
+
+      `## Handle no match with error
 \`\`\`yaml
 - name: parse-strict
   type: ${DataRegexExtractStepTypeId}
@@ -99,9 +95,8 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
 
 # If pattern doesn't match, step returns an error
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.example5', {
-        defaultMessage: `## Case-insensitive extraction
+
+      `## Case-insensitive extraction
 \`\`\`yaml
 - name: parse-flexible
   type: ${DataRegexExtractStepTypeId}
@@ -114,7 +109,6 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
 
 # Matches "Error:", "ERROR:", "error:", etc.
 \`\`\``,
-      }),
     ],
   },
 };
