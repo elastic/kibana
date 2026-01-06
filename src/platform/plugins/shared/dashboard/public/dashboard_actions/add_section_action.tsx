@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { CanAddNewSection } from '@kbn/presentation-containers';
