@@ -130,6 +130,10 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    */
   toolCallId?: string;
   /**
+   * Optional source of the tool invocation
+   */
+  source?: 'agent' | 'user' | 'unknown';
+  /**
    * Optional event handler.
    */
   onEvent?: ToolEventHandlerFn;

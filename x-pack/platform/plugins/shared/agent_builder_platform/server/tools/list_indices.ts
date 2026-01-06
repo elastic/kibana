@@ -27,6 +27,9 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
   return {
     id: platformCoreTools.listIndices,
     type: ToolType.builtin,
+    confirmation: {
+      askUser: 'always',
+    },
     description: `List the indices, aliases and datastreams from the Elasticsearch cluster.
 
 The 'pattern' optional parameter is an index pattern which can be used to filter resources.

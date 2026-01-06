@@ -134,7 +134,12 @@ export const toolToLangchain = async ({
       const input = omit(rawInput, ['_reasoning']);
 
       try {
-        const toolReturn = await tool.execute({ toolParams: input, onEvent, toolCallId });
+        const toolReturn = await tool.execute({
+          toolParams: input,
+          onEvent,
+          toolCallId,
+          source: 'agent',
+        });
         const content = JSON.stringify({ results: toolReturn.results });
         return [content, toolReturn];
       } catch (e) {

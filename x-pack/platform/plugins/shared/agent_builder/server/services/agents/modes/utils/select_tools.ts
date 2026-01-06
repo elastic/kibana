@@ -89,6 +89,7 @@ const createVersionedAttachmentTools = ({
           tags: tool.tags,
           configuration: {},
           readonly: true,
+          confirmation: { askUser: 'never' },
           isAvailable: async () => ({ status: 'available' as const }),
           getSchema: () => tool.schema,
           getHandler: () => tool.handler,

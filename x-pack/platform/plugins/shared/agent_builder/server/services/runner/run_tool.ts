@@ -62,11 +62,16 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn> => {
-  const { tool, toolParams } = toolExecutionParams;
+  const { tool, toolParams, source = 'unknown' } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
   const manager = parentManager.createChild(context);
   const { resultStore } = manager.deps;
+
+  if (tool.confirmation && source === 'agent') {
+    // TODO
+    console.log('*** HELLO')
+  }
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,

@@ -301,6 +301,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         });
       })
     );
+
   // execute a tool
   router.versioned
     .post({
@@ -371,7 +372,12 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           });
         }
 
-        const toolResult = await registry.execute({ toolId: id, toolParams, defaultConnectorId });
+        const toolResult = await registry.execute({
+          toolId: id,
+          toolParams,
+          source: 'user',
+          defaultConnectorId,
+        });
 
         return response.ok({
           body: {
