@@ -111,17 +111,23 @@ export class MaintenanceWindowsPlugin
       return maintenanceWindowClientFactory.createWithAuthorization(request);
     };
 
-    const getMaintenanceWindowClientInternal = (
-      request: KibanaRequest,
-      excludedExtension?: ['spaces']
+    const getMaintenanceWindowClientWithoutAuth = (
+      request: KibanaRequest
     ): MaintenanceWindowClientApi => {
-      return maintenanceWindowClientFactory.create(request, excludedExtension);
+      return maintenanceWindowClientFactory.createWithoutAuthorization(request);
+    };
+
+    const getMaintenanceWindowClientInternal = (
+      request: KibanaRequest
+    ): MaintenanceWindowClientApi => {
+      return maintenanceWindowClientFactory.createInternal(request);
     };
 
     scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
 
     return {
       getMaintenanceWindowClientWithAuth,
+      getMaintenanceWindowClientWithoutAuth,
       getMaintenanceWindowClientInternal,
     };
   }

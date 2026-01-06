@@ -24,6 +24,9 @@ jest.mock('./query_utils', () => ({
     getTTLTMetrics: jest.fn(),
     getLatencyByModel: jest.fn(),
     getLatencyByAgentType: jest.fn(),
+    getTokensByModel: jest.fn(),
+    getQueryToResultTimeByModel: jest.fn(),
+    getToolCallsByModel: jest.fn(),
   })),
   isIndexNotFoundError: jest.fn(),
 }));
@@ -216,6 +219,33 @@ describe('telemetry_collector', () => {
             sample_count: 300,
           },
         ]),
+        getTokensByModel: jest.fn().mockResolvedValue([
+          {
+            model: 'gpt-4',
+            total_tokens: 20000,
+            avg_tokens_per_round: 200,
+            sample_count: 100,
+          },
+        ]),
+        getQueryToResultTimeByModel: jest.fn().mockResolvedValue([
+          {
+            model: 'gpt-4',
+            p50: 900,
+            p75: 1200,
+            p90: 1500,
+            p95: 2000,
+            p99: 2500,
+            mean: 1100,
+            total_samples: 100,
+            sample_count: 100,
+          },
+        ]),
+        getToolCallsByModel: jest.fn().mockResolvedValue([
+          {
+            model: 'gpt-4',
+            count: 15,
+          },
+        ]),
         getCountersByPrefix: jest.fn().mockImplementation((domain, prefix) => {
           if (prefix === `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_`) {
             return Promise.resolve(
@@ -314,6 +344,36 @@ describe('telemetry_collector', () => {
         mean: 1500,
       });
 
+      expect(result.tokens_by_model).toEqual([
+        {
+          model: 'gpt-4',
+          total_tokens: 20000,
+          avg_tokens_per_round: 200,
+          sample_count: 100,
+        },
+      ]);
+
+      expect(result.query_to_result_time_by_model).toEqual([
+        {
+          model: 'gpt-4',
+          p50: 900,
+          p75: 1200,
+          p90: 1500,
+          p95: 2000,
+          p99: 2500,
+          mean: 1100,
+          total_samples: 100,
+          sample_count: 100,
+        },
+      ]);
+
+      expect(result.tool_calls_by_model).toEqual([
+        {
+          model: 'gpt-4',
+          count: 15,
+        },
+      ]);
+
       expect(result.tool_calls).toEqual({
         total: 190, // 100 + 50 + 25 + 10 + 5
         by_source: {
@@ -392,6 +452,9 @@ describe('telemetry_collector', () => {
         },
         latency_by_model: [],
         latency_by_agent_type: [],
+        tokens_by_model: [],
+        query_to_result_time_by_model: [],
+        tool_calls_by_model: [],
         tool_calls: {
           total: 0,
           by_source: {

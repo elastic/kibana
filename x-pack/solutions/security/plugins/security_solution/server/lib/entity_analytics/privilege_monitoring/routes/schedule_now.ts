@@ -12,11 +12,9 @@ import type { ScheduleMonitoringEngineResponse } from '../../../../../common/api
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENGINE_SCHEDULE_NOW_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
@@ -49,11 +47,6 @@ export const scheduleNowMonitoringEngineRoute = (
       ): Promise<IKibanaResponse<ScheduleMonitoringEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
-
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
 
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
         const soClient = dataClient.getScopedSoClient(request, {

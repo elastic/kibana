@@ -10,7 +10,6 @@ import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/com
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils, PlainIndexSyncUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
@@ -19,18 +18,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   // FLAKY: https://github.com/elastic/kibana/issues/237416
   describe.skip('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
-    const kibanaServer = getService('kibanaServer');
     const index1 = 'privmon_index1';
     const indexSyncUtils = PlainIndexSyncUtils(getService, index1);
     const user1 = { name: 'user_1' };
 
-    before(async () => {
-      await enablePrivmonSetting(kibanaServer);
-    });
-
     after(async () => {
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
-      await disablePrivmonSetting(kibanaServer);
     });
 
     beforeEach(async () => {
