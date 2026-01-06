@@ -20,8 +20,7 @@ import type {
   GetDescriptionFieldsFn,
   RuleType,
 } from '../../../../types';
-import { EuiBadge, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
-import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
