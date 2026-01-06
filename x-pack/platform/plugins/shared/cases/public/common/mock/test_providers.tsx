@@ -12,18 +12,18 @@ import React, { useMemo, useCallback } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { FilesClient, ScopedFilesClient } from '@kbn/files-plugin/public';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import type { CasesFeatures, CasesPermissions, CasesSettings } from '../../../common/ui/types';
+import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CasesContextProps } from '../../components/cases_context';
@@ -47,10 +47,9 @@ interface TestProviderProps {
   queryClient?: QueryClient;
   coreStart?: CoreStart;
   filesClient?: BaseFilesClient;
-  settings?: CasesSettings;
 }
 
-window.scrollTo = jest.fn();
+jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
 const getMockedFilesClient = (): BaseFilesClient => {
   const mockedFilesClient = createMockFilesClient();
@@ -93,13 +92,13 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   services,
   queryClient,
   filesClient,
-  settings,
 }) => {
-  const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
-  const finalServices = useMemo(
-    () => ({ ...createStartServicesMock({ license }), ...coreStart, ...services }),
-    [coreStart, license, services]
-  );
+  const finalCoreStart = useMemo(() => {
+    return coreStart ?? coreMock.createStart();
+  }, [coreStart]);
+  const finalServices = useMemo(() => {
+    return { ...createStartServicesMock({ license }), ...coreStart, ...services };
+  }, [coreStart, license, services]);
 
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
@@ -140,9 +139,6 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       permissions: permissions ?? defaultPermissions,
       releasePhase: releasePhase ?? 'ga',
       getFilesClient: getFilesClientFinal,
-      settings: settings ?? {
-        displayIncrementalCaseId: false,
-      },
     }),
     [
       defaultExternalReferenceAttachmentTypeRegistry,
@@ -155,26 +151,27 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       permissions,
       persistableStateAttachmentTypeRegistry,
       releasePhase,
-      settings,
     ]
   );
 
   return (
     <KibanaRenderContextProvider {...finalCoreStart}>
-      <KibanaContextProvider services={finalServices}>
-        <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
-            <FilesContext client={finalFilesClient}>{children}</FilesContext>
-          </CasesProvider>
-        </MemoryRouter>
-      </KibanaContextProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={finalServices}>
+          <MemoryRouter>
+            <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
+              <FilesContext client={finalFilesClient}>{children}</FilesContext>
+            </CasesProvider>
+          </MemoryRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
     </KibanaRenderContextProvider>
   );
 };
 
 TestProvidersComponent.displayName = 'TestProviders';
 
-export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProviders = TestProvidersComponent;
 
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
   wrapperProps?: Omit<TestProviderProps, 'children'>;

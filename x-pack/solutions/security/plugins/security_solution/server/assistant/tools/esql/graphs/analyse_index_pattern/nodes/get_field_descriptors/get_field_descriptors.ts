@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Command } from '@langchain/langgraph';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';
@@ -19,18 +19,26 @@ export const getFieldDescriptors = ({ esClient }: { esClient: ElasticsearchClien
     }
 
     const { indexPattern } = state.input;
-    const { fields: fieldDescriptors } = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: indexPattern,
-      fieldCapsOptions: {
-        allow_no_indices: false,
-        includeUnmapped: false,
-      },
-    });
+    try {
+      const { fields: fieldDescriptors } = await indexPatternsFetcher.getFieldsForWildcard({
+        pattern: indexPattern,
+        fieldCapsOptions: {
+          allow_no_indices: false,
+          includeUnmapped: false,
+        },
+      });
 
-    return new Command({
-      update: {
-        fieldDescriptors,
-      },
-    });
+      return new Command({
+        update: {
+          fieldDescriptors,
+        },
+      });
+    } catch (error) {
+      return new Command({
+        update: {
+          fieldDescriptors: [],
+        },
+      });
+    }
   };
 };

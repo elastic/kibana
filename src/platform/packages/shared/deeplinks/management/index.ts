@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MONITORING_APP_ID } from './constants';
+export { MONITORING_APP_ID, STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from './constants';
 
 export type { AppId, LinkId, DeepLinkId } from './deep_links';

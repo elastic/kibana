@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '../../monaco_imports';
-import { EditorStateService } from './lib';
+import type { EditorStateService } from './lib';
 import type { PainlessCompletionResult, PainlessCompletionKind } from './types';
 import type { PainlessWorker } from './worker';
 

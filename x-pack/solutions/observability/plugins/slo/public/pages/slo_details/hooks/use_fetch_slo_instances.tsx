@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ALL_VALUE, GetSLOGroupingsResponse } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import type { GetSLOGroupingsResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { useQuery } from '@kbn/react-query';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 

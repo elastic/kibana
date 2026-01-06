@@ -7,8 +7,11 @@
 
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
-import {
+import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine, raise } from 'xstate';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { omit } from 'lodash';
+import type {
   Dashboard,
   DataStreamDetails,
   DataStreamSettings,
@@ -20,18 +23,16 @@ import {
   NonAggregatableDatasets,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { indexNameToDataStreamParts } from '../../../common/utils';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { DatasetQualityStartDeps } from '../../types';
+import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
-import {
+import type {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
   DatasetQualityDetailsControllerTypeState,
 } from './types';
 
-import { IntegrationType } from '../../../common/data_stream_details';
+import type { IntegrationType } from '../../../common/data_stream_details';
 import {
   assertBreakdownFieldEcsFailedNotifier,
   fetchDataStreamDetailsFailedNotifier,
@@ -40,6 +41,8 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   rolloverDataStreamFailedNotifier,
   updateFieldLimitFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
 import {
   filterIssues,
@@ -277,6 +280,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target:
                         '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
                       actions: ['toggleCurrentQualityIssues'],
+                    },
+                    UPDATE_SELECTED_ISSUE_TYPES: {
+                      target: 'doneFetchingQualityIssues',
+                      actions: ['updateSelectedIssueTypes'],
+                    },
+                    UPDATE_SELECTED_FIELDS: {
+                      target: 'doneFetchingQualityIssues',
+                      actions: ['updateSelectedFields'],
                     },
                   },
                 },
@@ -530,6 +541,32 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 ],
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                      actions: ['storeDataStreamDetails'],
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreFailed', 'raiseForceTimeRangeRefresh'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         indexNotFound: {
@@ -660,6 +697,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             showCurrentQualityIssues: !context.showCurrentQualityIssues,
           };
         }),
+        updateSelectedIssueTypes: assign((_context, event) => {
+          return {
+            selectedIssueTypes: 'selectedIssueTypes' in event ? event.selectedIssueTypes : [],
+          };
+        }),
+        updateSelectedFields: assign((_context, event) => {
+          return {
+            selectedFields: 'selectedFields' in event ? event.selectedFields : [],
+          };
+        }),
         raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
         storeDataStreamSettings: assign((_context, event: DoneInvokeEvent<DataStreamSettings>) => {
           return 'data' in event
@@ -772,7 +819,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         canReadFailureStore: (context) => {
           return (
             'dataStreamSettings' in context &&
-            Boolean(context.dataStreamSettings.datasetUserPrivileges?.canReadFailureStore)
+            Boolean(
+              context.dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[
+                context.dataStream
+              ].canReadFailureStore
+            )
           );
         },
       },
@@ -783,16 +834,18 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   initialContext: DatasetQualityDetailsControllerContext;
   plugins: DatasetQualityStartDeps;
   toasts: IToasts;
-  dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
+  streamsRepositoryClient?: StreamsRepositoryClient; // Optional streams client for classic/wired views
+  refreshDefinition?: () => void; // Optional callback to refresh stream definition
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
   initialContext,
   plugins,
   toasts,
-  dataStreamStatsClient,
   dataStreamDetailsClient,
+  streamsRepositoryClient,
+  refreshDefinition,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -813,14 +866,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         updateFieldLimitFailedNotifier(toasts, event.data),
       notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
         rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
-        const { type } = indexNameToDataStreamParts(context.dataStream);
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamStatsClient.getNonAggregatableDatasets({
-          types: [type],
+        return dataStreamDetailsClient.getNonAggregatableDatasets({
           start,
           end,
           dataStream: context.dataStream,
@@ -955,6 +1009,56 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return dataStreamDetailsClient.rolloverDataStream({
           dataStream: context.dataStream,
         });
+      },
+      updateFailureStore: async (context) => {
+        if (!('dataStreamDetails' in context) || !context.dataStreamDetails) {
+          return Promise.resolve();
+        }
+
+        if (context.view === 'dataQuality') {
+          const { failureStoreDataQualityConfig } = context.dataStreamDetails;
+          if (!failureStoreDataQualityConfig) {
+            return Promise.resolve();
+          }
+          const { failureStoreEnabled, customRetentionPeriod } = failureStoreDataQualityConfig;
+
+          return dataStreamDetailsClient.updateFailureStore({
+            dataStream: context.dataStream,
+            failureStoreEnabled,
+            customRetentionPeriod,
+          });
+        }
+
+        const { failureStoreStreamConfig } = context.dataStreamDetails;
+        if (!failureStoreStreamConfig || !streamsRepositoryClient || !context.streamDefinition) {
+          return Promise.resolve();
+        }
+
+        // For stream views, failureStoreConfig is of type FailureStore
+        // Use streams API for classic/wired streams
+        const result = await streamsRepositoryClient.fetch(
+          'PUT /api/streams/{name}/_ingest 2023-10-31',
+          {
+            signal: null,
+            params: {
+              path: { name: context.dataStream },
+              body: {
+                ingest: {
+                  ...context.streamDefinition.stream.ingest,
+                  processing: omit(context.streamDefinition.stream.ingest.processing, 'updated_at'),
+                  failure_store: failureStoreStreamConfig,
+                },
+              },
+            },
+          }
+        );
+
+        // Refresh the stream definition to get the latest data
+        if (refreshDefinition) {
+          refreshDefinition();
+        }
+
+        return result;
       },
     },
   });

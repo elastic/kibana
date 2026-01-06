@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ChromeStart,
   DocLinksStart,
   HttpStart,
@@ -17,17 +17,17 @@ import {
   ApplicationStart,
   ThemeServiceStart,
   I18nStart,
+  AppMountParameters,
 } from '@kbn/core/public';
-import { UiCounterMetricType } from '@kbn/analytics';
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { TutorialService } from '../services/tutorials';
-import { AddDataService } from '../services/add_data';
-import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
-import { EnvironmentService } from '../services/environment';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { TutorialService } from '../services/tutorials';
+import type { AddDataService } from '../services/add_data';
+import type { FeatureCatalogueRegistry } from '../services/feature_catalogue';
+import type { EnvironmentService } from '../services/environment';
 import type { ConfigSchema } from '../../server/config';
 import type { WelcomeService } from '../services/welcome';
 
@@ -53,12 +53,12 @@ export interface HomeKibanaServices {
   tutorialService: TutorialService;
   addDataService: AddDataService;
   welcomeService: WelcomeService;
-  guidedOnboardingService?: GuidedOnboardingApi;
   cloud: CloudSetup;
   cloudStart: CloudStart;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
+  history: AppMountParameters['history'];
 }
 
 let services: HomeKibanaServices | null = null;

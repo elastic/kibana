@@ -10,7 +10,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
 import type { ScopedFilesClient, FilesClient } from '../types';
-import { FileKindsRegistryImpl } from '../../common/file_kinds_registry';
+import type { FileKindsRegistryImpl } from '../../common/file_kinds_registry';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,

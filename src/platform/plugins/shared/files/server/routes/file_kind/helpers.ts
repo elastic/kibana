@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
-import type { File } from '../../../common';
-import { errors, FileServiceStart } from '../../file_service';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import mimeTypes from 'mime-types';
+import type { File, FileKind } from '../../../common';
+import type { FileServiceStart } from '../../file_service';
+import { errors } from '../../file_service';
 
 type ResultOrHttpError =
   | { result: File; error?: undefined }
@@ -21,7 +24,7 @@ type ResultOrHttpError =
 export async function getById(
   fileService: FileServiceStart,
   id: string,
-  fileKind: string
+  _fileKind: string
 ): Promise<ResultOrHttpError> {
   let result: undefined | File;
   try {
@@ -37,4 +40,73 @@ export async function getById(
   }
 
   return { result };
+}
+
+/**
+ * Validate file kind restrictions on a provided MIME type
+ * @param mimeType The MIME type to validate
+ * @param fileKind The file kind definition that may contain restrictions
+ * @returns `undefined` if the MIME type is valid or there are no restrictions.
+ */
+export function validateMimeType(
+  mimeType: string | undefined,
+  fileKind: FileKind | undefined
+): undefined | IKibanaResponse {
+  if (!mimeType || !fileKind) {
+    return;
+  }
+
+  const allowedMimeTypes = fileKind.allowedMimeTypes;
+  if (!allowedMimeTypes || allowedMimeTypes.length === 0) {
+    return;
+  }
+
+  if (!allowedMimeTypes.includes(mimeType)) {
+    return kibanaResponseFactory.badRequest({
+      body: {
+        message: `File type is not supported`,
+      },
+    });
+  }
+}
+
+/**
+ * Validate file name extension matches the file's MIME type
+ * @param fileName The file name to validate
+ * @param file
+ * @returns `undefined` if the extension matches the MIME type or if no MIME type is provided.
+ */
+export function validateFileNameExtension(
+  fileName: string | undefined,
+  file: File | undefined
+): undefined | IKibanaResponse {
+  if (!fileName || !file || !file.data.mimeType) {
+    return;
+  }
+
+  const fileMimeType = file.data.mimeType.trim();
+  if (!fileMimeType) {
+    return;
+  }
+
+  // Extract file extension (handle cases with multiple dots)
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex === -1) {
+    // No extension found - this might be intentional for some file types
+    return;
+  }
+
+  const fileExtension = fileName.substring(lastDotIndex + 1).toLowerCase();
+  if (!fileExtension) {
+    return;
+  }
+
+  const expectedExtensions = mimeTypes.extensions[fileMimeType];
+  if (expectedExtensions && !expectedExtensions.includes(fileExtension)) {
+    return kibanaResponseFactory.badRequest({
+      body: {
+        message: `File extension does not match file type`,
+      },
+    });
+  }
 }

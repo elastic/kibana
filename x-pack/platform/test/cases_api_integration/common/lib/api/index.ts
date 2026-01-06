@@ -41,7 +41,6 @@ import type {
 import type {
   AddObservableRequest,
   UpdateObservableRequest,
-  AlertResponse,
   CaseResolveResponse,
   CasesBulkGetResponse,
   CasesFindResponse,
@@ -52,6 +51,7 @@ import type {
   CasesSimilarResponse,
   UserActionFindRequest,
   UserActionInternalFindResponse,
+  DocumentResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
@@ -72,6 +72,7 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
+export * from './observables';
 
 export { getSpaceUrlPrefix } from './helpers';
 
@@ -596,7 +597,7 @@ export const getAlertsAttachedToCase = async ({
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<AlertResponse> => {
+}): Promise<DocumentResponse> => {
   const { body: theCase } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
     .auth(auth.user.username, auth.user.password)
@@ -903,4 +904,66 @@ export const findInternalCaseUserActions = async ({
     .expect(expectedHttpCode);
 
   return userActions;
+};
+
+export const deleteAllCaseAnalyticsItems = async (es: Client) => {
+  try {
+    await Promise.all([
+      deleteCasesAnalytics(es),
+      deleteAttachmentsAnalytics(es),
+      deleteCommentsAnalytics(es),
+      deleteActivityAnalytics(es),
+    ]);
+  } catch (_) {
+    // ignore errors, indexes might not exist yet
+  }
+};
+
+export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ['.internal.cases.securitysolution-default', '.internal.cases.securitysolution-space1'],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [
+      '.internal.cases-attachments.securitysolution-default',
+      '.internal.cases-attachments.securitysolution-space1',
+    ],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [
+      '.internal.cases-comments.securitysolution-default',
+      '.internal.cases-comments.securitysolution-space1',
+    ],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [
+      '.internal.cases-activity.securitysolution-default',
+      '.internal.cases-activity.securitysolution-space1',
+    ],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
 };

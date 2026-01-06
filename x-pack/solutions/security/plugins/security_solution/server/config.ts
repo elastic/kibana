@@ -154,6 +154,23 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+
+  /**
+   * The max file size allowed for files uploaded to the Endpoint (Elastic Defend) Scripts library
+   */
+  maxEndpointScriptFileSize: schema.number({
+    defaultValue: 26214400, // 25MB,
+    max: Number.MAX_SAFE_INTEGER,
+  }),
+
+  /**
+   * Disables the auto-install/enable of the Elastic Defend SIEM rule.
+   * Whenever a Policy is created via Fleet's API, we check if the corresponding Elastic Defend SIEM
+   * rule is installed/enabled in the active space, and if not, we auto-install it. Set this configuration
+   * setting to `false` to disable that behavior
+   */
+  disableEndpointRuleAutoInstall: schema.boolean({ defaultValue: false }),
+
   /**
    * Defines the settings for a specific offering of the Security Solution app.
    * They override the default values.
@@ -185,6 +202,7 @@ export const configSchema = schema.object({
     monitoring: schema.object({
       privileges: schema.object({
         users: schema.object({
+          maxPrivilegedUsersAllowed: schema.number({ defaultValue: 10000 }),
           csvUpload: schema.object({
             errorRetries: schema.number({ defaultValue: 1 }),
             maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
@@ -196,6 +214,22 @@ export const configSchema = schema.object({
   siemRuleMigrations: schema.maybe(
     schema.object({
       elserInferenceId: schema.maybe(schema.string()),
+    })
+  ),
+  cdn: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      // PEM-encoded public key used to verify the global artifact manifest signature.
+      publicKey: schema.maybe(schema.string()),
+    })
+  ),
+  telemetry: schema.maybe(
+    schema.object({
+      queryConfig: schema.object({
+        pageSize: schema.maybe(schema.number()),
+        maxResponseSize: schema.maybe(schema.number()),
+        maxCompressedResponseSize: schema.maybe(schema.number()),
+      }),
     })
   ),
 });

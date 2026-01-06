@@ -198,4 +198,5 @@ export const cases: Cases = mockCases.map((so) => ({
   version: so.version ?? '',
   totalComment: 0,
   totalAlerts: 0,
+  totalEvents: 0,
 }));

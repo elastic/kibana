@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -14,14 +15,13 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiBadge,
-  EuiComboBoxOptionOption,
   EuiText,
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector as BaseConnector } from '@kbn/search-connectors';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 
 import { BETA_LABEL, TECH_PREVIEW_LABEL } from '../../../../common/i18n_string';

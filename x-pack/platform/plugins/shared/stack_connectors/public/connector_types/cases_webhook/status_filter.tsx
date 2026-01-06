@@ -8,13 +8,8 @@
 import React from 'react';
 
 import { CaseStatuses } from '@kbn/cases-components';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -66,6 +61,7 @@ export const StatusFilter: React.FC<Props> = ({ selectedStatus, onStatusChanged 
       onChange={onStatusChanged}
       data-test-subj="case-status-filter"
       fullWidth={true}
+      aria-label={i18n.CASE_STATUS_ARIA_LABEL}
     />
   );
 };

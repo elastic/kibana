@@ -9,6 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -16,7 +17,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
@@ -94,6 +94,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={nameError}
             >
               <EuiFieldText
+                isInvalid={nameError}
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
                 disabled={inputsDisabled}
                 fullWidth
@@ -118,6 +119,7 @@ export const ConfigurePipeline: React.FC = () => {
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelStateChangeError.title',
                     { defaultMessage: 'Error changing model state' }

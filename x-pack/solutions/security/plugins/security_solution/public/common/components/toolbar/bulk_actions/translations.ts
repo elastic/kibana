@@ -142,20 +142,6 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
-export const UPDATE_ALERT_TAGS_FAILED = (conflicts: number) =>
-  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsFailed', {
-    values: { conflicts },
-    defaultMessage:
-      'Failed to update tags for { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const UPDATE_ALERT_TAGS_FAILED_DETAILED = (updated: number, conflicts: number) =>
-  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsFailedDetailed', {
-    values: { updated, conflicts },
-    defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
-         because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
-  });
-
 export const UPDATE_ALERT_TAGS_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsSuccessToastMessage', {
     values: { totalAlerts },
@@ -237,5 +223,59 @@ export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.bulkActions.removeAlertAssignessContextMenuTitle',
   {
     defaultMessage: 'Unassign alert',
+  }
+);
+
+export const ALERT_CLOSING_REASON_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertClosingReason.MenuTitle',
+  {
+    defaultMessage: 'Reason for closing',
+  }
+);
+
+export const ALERT_CLOSING_REASON_BUTTON_MESSAGE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertClosingReason.ButtonMessage',
+  {
+    defaultMessage: 'Close alert',
+  }
+);
+
+export const CLOSING_REASON_DUPLICATE = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.duplicate',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const CLOSING_REASON_FALSE_POSITIVE = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.falsePositive',
+  {
+    defaultMessage: 'False Positive',
+  }
+);
+
+export const CLOSING_REASON_CLOSE_WITHOUT_REASON = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.CloseWithoutReason',
+  {
+    defaultMessage: 'Close without reason',
+  }
+);
+
+export const CLOSING_REASON_TRUE_POSITIVE = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.true_positive',
+  { defaultMessage: 'True positive' }
+);
+export const CLOSING_REASON_BENIGN_POSITIVE = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.benign_positive',
+  { defaultMessage: 'Benign positive' }
+);
+export const CLOSING_REASON_AUTOMATED_CLOSURE = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.automated_closure',
+  { defaultMessage: 'Automated closure' }
+);
+export const CLOSING_REASON_OTHER = i18n.translate(
+  'xpack.securitySolution.defaultAlertClosingReason.other',
+  {
+    defaultMessage: 'Other',
   }
 );

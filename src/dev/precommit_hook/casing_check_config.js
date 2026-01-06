@@ -18,7 +18,6 @@ import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
-  'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
@@ -74,10 +73,6 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/solutions/observability/plugins/profiling/Makefile',
 
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
-
   // Buildkite
   '.buildkite/**/*',
 
@@ -94,7 +89,7 @@ export const IGNORE_FILE_GLOBS = [
   'updatecli-compose.yaml',
 
   // naming convention follow this pattern: kb-product-doc-{{productName}}-{{versionMajor}}.{{versionMinor}}.zip: https://github.com/elastic/kibana/blob/33993b7123bc0d6c85d9c42b15610cc0d5092281/docs/reference/configuration-reference/ai-assistant-settings.md
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/product_docs/**/*',
+  'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/**/*',
 ];
 
 /**
@@ -110,6 +105,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/dev/packages/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
+  'src/platform/packages/private/opentelemetry/*',
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',
@@ -132,14 +128,15 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
  */
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
-  'src/babel-*',
   'packages/*',
-  'x-pack/packages/ai-infra/*',
   'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
-  'x-pack/dev-tools',
+  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/*',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'src/babel-*',
   'typings/*',
   'typings/**/*',
+  'x-pack/dev-tools',
+  'x-pack/packages/ai-infra/*',
 ];
 
 /**

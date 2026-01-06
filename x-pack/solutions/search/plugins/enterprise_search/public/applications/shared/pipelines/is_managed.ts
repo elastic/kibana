@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 interface IngestPipelineWithMetadata extends IngestPipeline {
   _meta: {

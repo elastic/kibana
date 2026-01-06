@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IBasePath } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import {
+import type {
   AlertOverviewStatus,
   StaleDownConfig,
   SyntheticsCommonState,
 } from '../../common/runtime_types/alert_rules/common';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const monitorName = 'test-monitor';
@@ -204,7 +205,7 @@ describe('setRecoveredAlertsContext', () => {
       monitorQueryId: 'stale-config',
       status: 'up',
       locationId: '',
-      ping: {
+      latestPing: {
         '@timestamp': new Date().toISOString(),
         state: {
           ends: {
@@ -219,7 +220,7 @@ describe('setRecoveredAlertsContext', () => {
             name: location,
           },
         },
-      } as StaleDownConfig['ping'],
+      } as StaleDownConfig['latestPing'],
       timestamp: new Date().toISOString(),
       checks: {
         downWithinXChecks: 1,
@@ -247,6 +248,7 @@ describe('setRecoveredAlertsContext', () => {
             'kibana.alert.instance.id': idWithLocation,
             'location.id': location,
             configId,
+            '@timestamp': new Date().toISOString(),
             downThreshold: 1,
           },
         },
@@ -260,7 +262,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: 'location',
-        ping: {
+        latestPing: {
           '@timestamp': new Date().toISOString(),
           state: {
             id: '123456',
@@ -273,7 +275,7 @@ describe('setRecoveredAlertsContext', () => {
               name: location,
             },
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
         checks: {
@@ -315,6 +317,19 @@ describe('setRecoveredAlertsContext', () => {
         idWithLocation,
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        checks: undefined,
+        grouping: undefined,
+        hostName: undefined,
+        labels: undefined,
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        monitorId: undefined,
+        monitorTags: undefined,
+        monitorType: undefined,
+        serviceName: undefined,
+        failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -338,6 +353,7 @@ describe('setRecoveredAlertsContext', () => {
             'kibana.alert.instance.id': idWithLocation,
             'location.id': location,
             configId,
+            '@timestamp': new Date().toISOString(),
           },
         },
       ]),
@@ -350,7 +366,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: 'location',
-        ping: {
+        latestPing: {
           '@timestamp': new Date().toISOString(),
           state: {
             id: '123456',
@@ -363,7 +379,7 @@ describe('setRecoveredAlertsContext', () => {
               name: 'us_west',
             },
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
@@ -405,6 +421,19 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         locationId: location,
         downThreshold: 1,
+        checks: undefined,
+        grouping: undefined,
+        hostName: undefined,
+        labels: undefined,
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        monitorId: undefined,
+        monitorTags: undefined,
+        monitorType: undefined,
+        serviceName: undefined,
+        failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -428,6 +457,7 @@ describe('setRecoveredAlertsContext', () => {
             'kibana.alert.instance.id': idWithLocation,
             'location.id': location,
             configId,
+            '@timestamp': new Date().toISOString(),
           },
         },
       ]),
@@ -440,7 +470,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: location,
-        ping: {
+        latestPing: {
           state: {
             id: '123456',
           },
@@ -448,7 +478,7 @@ describe('setRecoveredAlertsContext', () => {
           monitor: {
             name: 'test-monitor',
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
@@ -491,6 +521,19 @@ describe('setRecoveredAlertsContext', () => {
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
         stateId: '123456',
+        checks: undefined,
+        grouping: undefined,
+        hostName: undefined,
+        labels: undefined,
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        monitorId: undefined,
+        monitorTags: undefined,
+        monitorType: undefined,
+        serviceName: undefined,
+        failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -522,6 +565,7 @@ describe('setRecoveredAlertsContext', () => {
             'monitor.type': 'HTTP',
             'error.message': 'test-error-message',
             configId,
+            [ALERT_GROUPING]: { monitor: { id: monitorId }, location: { id: location } },
           },
         },
       ]),
@@ -565,6 +609,16 @@ describe('setRecoveredAlertsContext', () => {
         lastErrorMessage: 'test-error-message',
         monitorType: 'HTTP',
         hostName: 'test-host',
+        grouping: { monitor: { id: monitorId }, location: { id: location } },
+        checks: undefined,
+        labels: undefined,
+        lastErrorStack: undefined,
+        monitorTags: undefined,
+        serviceName: undefined,
+        stateId: undefined,
+        failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -643,6 +697,13 @@ describe('setRecoveredAlertsContext', () => {
         locationName: 'us-central and us-east',
         monitorType: 'HTTP',
         lastErrorMessage: 'test-error-message',
+        checks: undefined,
+        grouping: undefined,
+        labels: undefined,
+        lastErrorStack: undefined,
+        monitorTags: undefined,
+        serviceName: undefined,
+        failedStepInfo: '',
       },
     });
   });
@@ -721,6 +782,13 @@ describe('setRecoveredAlertsContext', () => {
         locationName: 'us-central and us-east',
         monitorType: 'HTTP',
         lastErrorMessage: 'test-error-message',
+        checks: undefined,
+        grouping: undefined,
+        labels: undefined,
+        lastErrorStack: undefined,
+        monitorTags: undefined,
+        serviceName: undefined,
+        failedStepInfo: '',
       },
     });
   });

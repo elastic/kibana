@@ -9,7 +9,7 @@ import { migrateLegacyPrivateLocations } from './migrate_legacy_private_location
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { type ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 describe('migrateLegacyPrivateLocations', () => {
   let loggerMockVal: Logger;

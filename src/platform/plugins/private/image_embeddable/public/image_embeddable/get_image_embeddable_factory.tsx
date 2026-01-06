@@ -10,29 +10,27 @@
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
+import type { ImageEmbeddableState } from '../../server';
 import { IMAGE_CLICK_TRIGGER } from '../actions';
-import { openImageEditor } from '../components/image_editor/open_image_editor';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
-import { FileImageMetadata } from '../imports';
-import { filesService } from '../services/kibana_services';
-import { IMAGE_EMBEDDABLE_TYPE } from './constants';
-import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
+import type { FileImageMetadata } from '../imports';
+import { coreServices, filesService } from '../services/kibana_services';
+import { IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
 export const getImageEmbeddableFactory = ({
   embeddableEnhanced,
 }: {
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }) => {
-  const imageEmbeddableFactory: EmbeddableFactory<
-    ImageEmbeddableSerializedState,
-    ImageEmbeddableApi
-  > = {
+  const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
@@ -50,25 +48,24 @@ export const getImageEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),
-            ...dynamicActionsState,
+            ...(dynamicActionsManager?.getLatestState() ?? {}),
             imageConfig: imageConfig$.getValue(),
           },
-          references: dynamicActionsReferences ?? [],
+          references: [],
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableState>({
         uuid,
         parentApi,
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          imageConfig$.pipe(map(() => undefined))
+          imageConfig$.pipe(map(() => undefined)),
+          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
         ),
         getComparators: () => {
           return {
@@ -90,16 +87,25 @@ export const getImageEmbeddableFactory = ({
         ...unsavedChangesApi,
         dataLoading$,
         supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
+
         onEdit: async () => {
-          try {
-            const newImageConfig = await openImageEditor({
-              parentApi: embeddable.parentApi as PresentationContainer,
-              initialImageConfig: imageConfig$.getValue(),
-            });
-            imageConfig$.next(newImageConfig);
-          } catch {
-            // swallow the rejection, since this just means the user closed without saving
-          }
+          openLazyFlyout({
+            core: coreServices,
+            parentApi,
+            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              const { getImageEditor } = await import(
+                '../components/image_editor/get_image_editor'
+              );
+              return await getImageEditor({
+                closeFlyout,
+                ariaLabelledBy,
+                initialImageConfig: imageConfig$.getValue(),
+                onSave: (newImageConfig: ImageConfig) => {
+                  imageConfig$.next(newImageConfig);
+                },
+              });
+            },
+          });
         },
         isEditingEnabled: () => true,
         getTypeDisplayName: () =>

@@ -8,14 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { LANDING_PAGE_PATH } from '../../../common/constants';
+import { LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 import { coreServices, urlForwardingService } from '../../services/kibana_services';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
@@ -38,7 +38,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
       bannerId = coreServices.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
+          <EuiCallOut announceOnMount color="warning" iconType="info" title={bannerMessage}>
             <p>
               <FormattedMessage
                 id="dashboard.noMatchRoute.bannerText"

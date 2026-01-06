@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { SyntheticsAppState } from '../root_reducer';
+import type { SyntheticsAppState } from '../root_reducer';
 
 export const selectOverviewStatus = ({ overviewStatus }: SyntheticsAppState) => overviewStatus;

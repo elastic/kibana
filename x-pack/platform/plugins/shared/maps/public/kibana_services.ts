@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
-import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
+import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import {
   EMS_DARKMAP_BOREALIS_ID,
@@ -134,3 +134,4 @@ export const getEmsTileLayerId = () => {
 };
 
 export const getShareService = () => pluginsStart.share;
+export const getCps = () => pluginsStart.cps;

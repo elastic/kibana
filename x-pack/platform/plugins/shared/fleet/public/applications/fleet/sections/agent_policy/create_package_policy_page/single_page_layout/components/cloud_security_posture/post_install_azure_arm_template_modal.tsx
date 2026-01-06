@@ -16,9 +16,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { AzureArmTemplateGuide } from '../../../../../../../../components/cloud_security_posture';
 import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
@@ -33,6 +34,8 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
 }> = ({ onConfirm, onCancel, agentPolicy, packagePolicy }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { data: apyKeysData } = useQuery(
     ['azureArmTemplateApiKeys', { agentPolicyId: agentPolicy.id }],
     () =>
@@ -52,9 +55,16 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
   });
 
   return (
-    <EuiModal data-test-subj="postInstallAzureArmTemplateModal" onClose={onCancel}>
+    <EuiModal
+      data-test-subj="postInstallAzureArmTemplateModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="confirmAzureArmTemplateModalTitleText">
+        <EuiModalHeaderTitle
+          data-test-subj="confirmAzureArmTemplateModalTitleText"
+          id={modalTitleId}
+        >
           <FormattedMessage
             id="xpack.fleet.agentPolicy.postInstallAzureArmTemplateModalModalTitle"
             defaultMessage="ARM Template deployment"
@@ -71,7 +81,7 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
         {error && isError && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
           </>
         )}
       </EuiModalBody>

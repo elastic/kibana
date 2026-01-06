@@ -9,7 +9,7 @@ date: 2023-07-25
 
 ## Description
 
-This package contains a root context provider for Kibana rendering.  It handles operations that should only happen _once_ when the browser loads a page.
+This package contains a root context provider for Kibana rendering. It handles operations that should only happen _once_ when the browser loads a page.
 
 While it would be safer to isolate this in a `core` package, we need to use it in other contexts-- like Storybook and Jest.
 
@@ -36,7 +36,7 @@ const i18n: I18nStart = {
 };
 
 export const KibanaContextDecorator: Decorator (storyFn, { globals }) => {
-  const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
+  const colorMode = globals.euiTheme === 'borealis.dark' ? 'dark' : 'light';
 
   useEffect(() => {
     theme$.next({ darkMode: colorMode === 'dark' });
@@ -49,4 +49,3 @@ export const KibanaContextDecorator: Decorator (storyFn, { globals }) => {
   );
 };
 ```
-

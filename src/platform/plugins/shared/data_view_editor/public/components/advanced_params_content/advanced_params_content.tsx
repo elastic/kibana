@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { UseField, TextField, ToggleField } from '../../shared_imports';
-import { IndexPatternConfig } from '../../types';
+import type { IndexPatternConfig } from '../../types';
 
 import { AdvancedParamsSection } from './advanced_params_section';
 

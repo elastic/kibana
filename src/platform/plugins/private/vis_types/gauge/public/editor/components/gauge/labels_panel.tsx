@@ -12,7 +12,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SwitchOption, TextInputOption } from '@kbn/vis-default-editor-plugin/public';
-import { GaugeOptionsInternalProps } from '.';
+import type { GaugeOptionsInternalProps } from '.';
 
 function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInternalProps) {
   return (

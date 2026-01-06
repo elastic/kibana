@@ -17,7 +17,7 @@ import {
   DOCUMENT_COUNT_TOOLTIP,
   TOTAL_COUNT_LABEL,
 } from './constants';
-import { VectorFieldTypes } from './mappings_convertor';
+import type { VectorFieldTypes } from './mappings_convertor';
 
 export interface StatefulDocumentCountStatProps {
   index: Index;

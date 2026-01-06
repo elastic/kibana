@@ -7,7 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;

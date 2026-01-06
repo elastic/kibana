@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { DataStreamOptions } from '../../../../../common/types/data_streams';
-import { TemplateDeserialized } from '../../../../../common';
+import type { DataStreamOptions } from '../../../../../common/types/data_streams';
+import type { TemplateDeserialized } from '../../../../../common';
 import { Forms } from '../../../../shared_imports';
-import { WizardContent, WizardSection } from '../template_form';
+import type { WizardContent, WizardSection } from '../template_form';
 import { StepReview } from './step_review';
 
 interface Props {

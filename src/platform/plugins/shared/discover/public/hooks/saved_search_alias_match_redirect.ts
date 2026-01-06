@@ -11,24 +11,24 @@ import type { History } from 'history';
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 
 interface SavedSearchAliasMatchRedirectProps {
-  savedSearch?: SavedSearch;
+  discoverSession?: DiscoverSession;
   spaces?: SpacesApi;
   history: History;
 }
 
 export const useSavedSearchAliasMatchRedirect = ({
-  savedSearch,
+  discoverSession,
   spaces,
   history,
 }: SavedSearchAliasMatchRedirectProps) => {
   useEffect(() => {
     async function aliasMatchRedirect() {
-      if (savedSearch) {
-        const sharingSavedObjectProps = savedSearch.sharingSavedObjectProps ?? {};
+      if (discoverSession) {
+        const sharingSavedObjectProps = discoverSession.sharingSavedObjectProps ?? {};
         const { outcome, aliasPurpose, aliasTargetId } = sharingSavedObjectProps;
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
@@ -38,7 +38,7 @@ export const useSavedSearchAliasMatchRedirect = ({
             objectNoun: i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: `''{savedSearch}'' Discover session`,
               values: {
-                savedSearch: savedSearch.title,
+                savedSearch: discoverSession.title,
               },
             }),
           });
@@ -47,5 +47,5 @@ export const useSavedSearchAliasMatchRedirect = ({
     }
 
     aliasMatchRedirect();
-  }, [savedSearch, spaces, history]);
+  }, [discoverSession, spaces, history]);
 };

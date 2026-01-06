@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postAnalyzeApi } from '../../../common/lib/api/analyze_api';
-import { User } from '../../../common/lib/authentication/types';
+import type { User } from '../../../common/lib/authentication/types';
 import { BadRequestError } from '../../../common/lib/error/error';
 
 export default function (providerContext: FtrProviderContext) {
@@ -32,7 +32,9 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
       if (response instanceof BadRequestError) {
-        expect(response.message).to.be('Saved object [action/preconfigured-dummy] not found');
+        expect(response.message).to.be(
+          "No connector found for id 'preconfigured-dummy'\nSaved object [action/preconfigured-dummy] not found"
+        );
       } else {
         expect().fail('Expected BadRequestError');
       }

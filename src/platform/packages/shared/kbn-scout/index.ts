@@ -7,33 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// CLI tools
 export * as cli from './src/cli';
+
+// Test framework
 export {
   expect,
   test,
   spaceTest,
   lighthouseTest,
+  apiTest,
   globalSetupHook,
   tags,
+} from './src/playwright';
+
+// Fixtures & configuration
+export {
   browserAuthFixture,
+  apiServicesFixture,
+  synthtraceFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
+
+// Playwright integration
+export { mergeTests, test as playwrightTest } from 'playwright/test';
+
+// Performance monitoring
+export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+// EUI components
+export * from './src/playwright/eui_components';
+
+// Kibana-wide components
+export * from './src/playwright/ui_components';
+
+// Scout core types
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+} from './src/playwright';
+
+// Fixture types
+export type {
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  RequestAuthFixture,
+  SamlAuth,
   SynthtraceFixture,
 } from './src/playwright';
 
+// Service & configuration types
 export type {
   EsClient,
   KbnClient,
@@ -45,8 +75,12 @@ export type {
   ElasticsearchRoleDescriptor,
 } from './src/types';
 
-// re-export from Playwright
-export type { Locator, CDPSession } from 'playwright/test';
-export { mergeTests, test as playwrightTest } from 'playwright/test';
+// Authentication types
+export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type {
+  RoleSessionCredentials,
+  CookieHeader,
+} from './src/playwright/fixtures/scope/worker/core_fixtures';
 
-export { measurePerformance, measurePerformanceAsync } from './src/common';
+// Re-exported Playwright types
+export type { Locator, CDPSession } from 'playwright/test';

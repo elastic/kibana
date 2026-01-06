@@ -8,6 +8,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
 import type {
   DataTableRecord,
   EsHitRecord,
@@ -16,12 +17,15 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
+import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  euiLineHeightFromBaseline,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 
@@ -52,11 +56,15 @@ export function SourceDocument({
   className?: string;
   isCompressed?: boolean;
 }) {
+  const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
-    ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
-        0,
-        maxEntries
-      )
+    ? getTopLevelObjectPairs(
+        row.raw,
+        columnId,
+        dataView,
+        shouldShowFieldHandler,
+        fieldFormats
+      ).slice(0, maxEntries)
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
   return (
@@ -64,6 +72,7 @@ export function SourceDocument({
       type="inline"
       compressed={isCompressed}
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className)}
+      css={styles.descriptionList}
       data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
@@ -94,7 +103,8 @@ function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+  fieldFormats: FieldFormatsStart
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -106,16 +116,8 @@ function getTopLevelObjectPairs(
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    const formatter = subField
-      ? dataView.getFormatterForField(subField)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     const formatted = values
-      .map((val: unknown) =>
-        formatter.convert(val, 'html', {
-          field: subField,
-          hit: row,
-        })
-      )
+      .map((value: unknown) => formatFieldValue(value, row, fieldFormats, dataView, subField))
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
@@ -131,3 +133,48 @@ function getTopLevelObjectPairs(
 
 // eslint-disable-next-line import/no-default-export
 export default SourceDocument;
+
+const componentStyles = {
+  descriptionList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // force the content truncation when "Body cell lines: 1" row height setting is active
+      '.euiDataGridRowCell__content--defaultHeight &': {
+        WebkitLineClamp: 1,
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        height: '100%',
+        overflow: 'hidden',
+      },
+
+      // Following guidelines for CSS-in-JS - styles for high granularity components should be assigned to a parent and targeting classes of repeating children
+      '.unifiedDataTable__descriptionListTitle': {
+        marginInline: '0 0',
+        paddingInline: 0,
+        background: 'transparent',
+        fontWeight: euiTheme.font.weight.bold,
+        lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
+      },
+
+      '.unifiedDataTable__descriptionListDescription': {
+        marginInline: `${euiTheme.size.s} ${euiTheme.size.s}`,
+        paddingInline: 0,
+        wordBreak: 'break-all',
+        whiteSpace: 'normal',
+        lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
+
+        // Special handling for images coming from the image field formatter
+        '& img': {
+          // Align the images vertically centered with the text
+          verticalAlign: 'middle',
+          // !important is required to overwrite the max-height on the element from the field formatter
+          // historically we used lineHeightFromBaseline(2) here, but the smallest euiLineHeightFromBaseline was too large
+          maxHeight: `${euiLineHeightFromBaseline('xs', euiTheme)} !important`,
+          // An arbitrary amount of width we don't want to go over, to not have very wide images.
+          // For most width-height-ratios that will never be hit, because we'd usually limit
+          // it by the way smaller height. But images with very large width and very small height
+          // might be limited by that.
+          maxWidth: `calc(${euiTheme.size.xxl} * 12.5) !important`,
+        },
+      },
+    }),
+};

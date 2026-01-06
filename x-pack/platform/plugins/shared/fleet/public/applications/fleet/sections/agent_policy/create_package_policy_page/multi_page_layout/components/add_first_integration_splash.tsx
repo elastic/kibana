@@ -59,7 +59,7 @@ const CenteredEuiStepNumber = styled(EuiStepNumber)`
 
 // step numbers are not centered in smaller layouts without this
 const CenteredEuiImage = (props: EuiImageProps) => (
-  <div style={{ margin: '0 auto' }}>
+  <div css={{ margin: '0 auto' }}>
     <EuiImage role="presentation" {...props} />
   </div>
 );
@@ -92,7 +92,7 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiStepNumber status="incomplete" number={1} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <div style={{ margin: '0 auto' }}>
+            <div css={{ margin: '0 auto' }}>
               <CenteredEuiImage alt="" src={assetsBasePath + '1_install_agent.svg'} />
             </div>
           </EuiFlexItem>

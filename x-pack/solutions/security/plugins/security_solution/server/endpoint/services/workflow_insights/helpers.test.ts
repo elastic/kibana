@@ -174,7 +174,7 @@ describe('helpers', () => {
       expect(result).toEqual([
         { terms: { _id: ['id1', 'id2'] } },
         { terms: { categories: ['endpoint'] } },
-        { terms: { types: ['incompatible_antivirus'] } },
+        { terms: { type: ['incompatible_antivirus'] } },
         { nested: { path: 'source', query: { terms: { 'source.type': ['llm-connector'] } } } },
         { nested: { path: 'source', query: { terms: { 'source.id': ['source1'] } } } },
         { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },

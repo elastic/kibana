@@ -10,6 +10,8 @@ import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { BehaviorSubject } from 'rxjs';
+import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
+import { useUnifiedSearchContext } from '../../../pages/metrics/hosts/hooks/use_unified_search';
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
@@ -28,7 +30,8 @@ export function useDatePicker({
     () => new BehaviorSubject<UseDateRangeProviderProps['autoRefresh'] | undefined>(undefined),
     []
   );
-
+  const { searchCriteria } = useUnifiedSearchContext();
+  const { preferredSchema } = useWaffleOptionsContext();
   const autoRefreshEnabled = autoRefresh && !autoRefresh.isPaused;
 
   const [urlState, setUrlState] = useAssetDetailsUrlState();
@@ -45,6 +48,12 @@ export function useDatePicker({
           }
         : undefined),
       ...(!urlState?.autoRefresh ? { autoRefresh } : undefined),
+      // this is needed since both /hosts and /inventory use different URL state
+      preferredSchema:
+        urlState?.preferredSchema ??
+        searchCriteria?.preferredSchema ??
+        preferredSchema ??
+        'semconv',
     });
   });
 

@@ -5,49 +5,41 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core-capabilities-common';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import {
-  AggregateQuery,
-  EsQueryConfig,
-  Filter,
-  Query,
-  TimeRange,
-  isOfQueryType,
-} from '@kbn/es-query';
-import {
-  PublishingSubject,
-  StateComparators,
+  apiPublishesProjectRouting,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import {
+import type {
   DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { partition } from 'lodash';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { TracksOverlays, tracksOverlays } from '@kbn/presentation-containers';
-import React from 'react';
-import { Visualization } from '../..';
-import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
-import { TableInspectorAdapter } from '../../editor_frame_service/types';
-
-import { Datasource, IndexPatternMap } from '../../types';
-import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { isTextBasedLanguage } from '../helper';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type {
+  Datasource,
+  IndexPatternMap,
+  TableInspectorAdapter,
+  Visualization,
   GetStateType,
-  IntegrationCallbacks,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
+
+import { getMergedSearchContext } from '../expressions/merged_search_context';
+import { isTextBasedLanguage } from '../helper';
+import type { LensEmbeddableStartServices } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
-import { mountInlinePanel } from '../mount';
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
@@ -168,12 +160,17 @@ function loadViewUnderlyingDataArgs(
     ? parentApi
     : { filters$: undefined, query$: undefined, timeRange$: undefined };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
       filters: filters$?.getValue(),
       query: query$?.getValue(),
       timeRange: timeRange$?.getValue(),
+      projectRouting: projectRouting$?.getValue(),
     },
     searchContextApi.timeRange$,
     parentApi,
@@ -253,14 +250,12 @@ export function initializeActionApi(
   services: LensEmbeddableStartServices,
   dynamicActionsManager?: EmbeddableDynamicActionsManager
 ): {
-  api: ViewInDiscoverCallbacks &
-    HasDynamicActions &
-    Pick<IntegrationCallbacks, 'mountInlineFlyout'>;
+  api: ViewInDiscoverCallbacks & HasDynamicActions;
   anyStateChange$: Observable<void>;
   getComparators: () => StateComparators<DynamicActionsSerializedState>;
   getLatestState: () => DynamicActionsSerializedState;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 } {
   const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
@@ -274,22 +269,6 @@ export function initializeActionApi(
         parentApi,
         services
       ),
-      mountInlineFlyout: (
-        Component: React.ComponentType,
-        overlayTracker?: TracksOverlays,
-        options: {
-          dataTestSubj?: string;
-          uuid?: string;
-          container?: HTMLElement | null;
-        } = {}
-      ) => {
-        mountInlinePanel(
-          <Component />,
-          services.coreStart,
-          overlayTracker ?? (tracksOverlays(parentApi) ? parentApi : undefined),
-          { uuid, ...options }
-        );
-      },
     },
     anyStateChange$: dynamicActionsManager?.anyStateChange$ ?? new BehaviorSubject(undefined),
     getComparators: () => ({
@@ -301,7 +280,7 @@ export function initializeActionApi(
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       dynamicActionsManager?.reinitializeState(lastSaved ?? {});
     },
   };

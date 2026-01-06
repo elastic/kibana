@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.loadSavedDashboard('few panels');
-      await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       originalPanelCount = await dashboard.getPanelCount();
     });

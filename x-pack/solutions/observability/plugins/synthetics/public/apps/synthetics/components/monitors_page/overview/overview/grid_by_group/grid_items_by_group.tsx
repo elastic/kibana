@@ -6,7 +6,8 @@
  */
 
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useRef, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
@@ -19,12 +20,9 @@ import {
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
-import {
-  OverviewView,
-  selectOverviewState,
-  selectServiceLocationsState,
-} from '../../../../../state';
-import { FlyoutParamProps } from '../types';
+import type { OverviewView } from '../../../../../state';
+import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
+import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 export const GridItemsByGroup = ({

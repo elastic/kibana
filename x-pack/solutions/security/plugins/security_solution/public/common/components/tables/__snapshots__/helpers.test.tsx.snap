@@ -24,6 +24,7 @@ exports[`Table Helpers OverflowField it renders 1`] = `
   This string is exactly fifty-one chars in length!!
   <span
     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    id="generated-id-wrapper"
   >
     <span
       class="css-1mvq9d1-MoreRowItems e1v2bxdw1"

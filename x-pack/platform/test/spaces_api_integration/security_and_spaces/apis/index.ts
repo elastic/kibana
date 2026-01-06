@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');

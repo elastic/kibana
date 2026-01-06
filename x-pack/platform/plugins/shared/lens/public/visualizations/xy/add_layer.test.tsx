@@ -8,9 +8,9 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
-import { XYState } from './types';
+import type { XYState } from './types';
 import { Position } from '@elastic/charts';
-import { LayerTypes } from '@kbn/visualizations-plugin/common';
+import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 

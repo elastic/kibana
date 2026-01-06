@@ -26,7 +26,13 @@ const axeOptions = {
   runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
 };
 
-export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
+/**
+ * Runs accessibility checks using Axe.
+ *
+ * @param options - Configuration options for the accessibility check.
+ * @param options.skipFailures - **@deprecated** Use of this option is discouraged. It may be used temporarily, but please ensure that all identified issues are addressed promptly.
+ */
+export const checkA11y = ({ skipFailures }: { skipFailures?: true } = {}) => {
   // https://github.com/component-driven/cypress-axe#cychecka11y
   cy.injectAxe();
   cy.configureAxe(axeConfig);
@@ -35,5 +41,5 @@ export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
    * We can get rid of the last two params when we don't need to add skipFailures
    * params = (context, options, violationCallback, skipFailures)
    */
-  cy.checkA11y(context, axeOptions, undefined, skipFailures);
+  cy.checkA11y(context, axeOptions, undefined, skipFailures ?? false);
 };

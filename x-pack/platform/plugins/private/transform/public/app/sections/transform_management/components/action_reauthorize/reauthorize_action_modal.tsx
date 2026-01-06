@@ -6,6 +6,7 @@
  */
 
 import React, { type FC } from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
@@ -17,6 +18,7 @@ export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
   reauthorizeAndCloseModal,
 }) => {
   const isBulkAction = items.length > 1;
+  const modalTitleId = useGeneratedHtmlId();
 
   const bulkReauthorizeModalTitle = i18n.translate(
     'xpack.transform.transformList.bulkReauthorizeModalTitle',
@@ -36,7 +38,9 @@ export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
   return (
     <EuiConfirmModal
       data-test-subj="transformReauthorizeModal"
+      aria-labelledby={modalTitleId}
       title={isBulkAction === true ? bulkReauthorizeModalTitle : reauthorizeModalTitle}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeModal}
       onConfirm={reauthorizeAndCloseModal}
       cancelButtonText={i18n.translate(

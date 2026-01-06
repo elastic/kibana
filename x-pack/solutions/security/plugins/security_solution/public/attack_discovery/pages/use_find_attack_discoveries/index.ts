@@ -6,19 +6,21 @@
  */
 
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common';
-import { API_VERSIONS, ATTACK_DISCOVERY_FIND } from '@kbn/elastic-assistant-common';
 import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+  AttackDiscoveryFindResponse,
+  AttackDiscoveryFindInternalResponse,
+} from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ATTACK_DISCOVERY_FIND,
+  transformAttackDiscoveryAlertFromApi,
+} from '@kbn/elastic-assistant-common';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -27,6 +29,7 @@ interface Props {
   ids?: string[];
   connectorNames?: string[];
   http: HttpSetup;
+  includeUniqueAlertIds?: boolean;
   isAssistantEnabled: boolean;
   end?: string;
   search?: string;
@@ -42,12 +45,12 @@ interface Props {
 
 interface UseFindAttackDiscoveries {
   cancelRequest: () => void;
-  data: AttackDiscoveryFindResponse | undefined;
+  data: AttackDiscoveryFindInternalResponse | undefined;
   error: unknown | undefined;
   isLoading: boolean;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<AttackDiscoveryFindResponse, unknown>>;
+  ) => Promise<QueryObserverResult<AttackDiscoveryFindInternalResponse, unknown>>;
   status: 'error' | 'idle' | 'loading' | 'success';
 }
 
@@ -64,6 +67,7 @@ export const useFindAttackDiscoveries = ({
   ids,
   connectorNames,
   http,
+  includeUniqueAlertIds = false,
   isAssistantEnabled,
   end,
   search,
@@ -77,7 +81,7 @@ export const useFindAttackDiscoveries = ({
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -86,32 +90,41 @@ export const useFindAttackDiscoveries = ({
   }, []);
 
   const queryFn = useCallback(
-    async ({ pageParam }: { pageParam?: PageParam }) =>
-      http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
+    async ({ pageParam }: { pageParam?: PageParam }) => {
+      const baseQuery = {
+        alert_ids: alertIds,
+        connector_names: connectorNames,
+        end,
+        include_unique_alert_ids: includeUniqueAlertIds,
+        ids,
+        page: pageParam?.page ?? page,
+        per_page: pageParam?.perPage ?? perPage,
+        search,
+        shared,
+        sort_field: sortField,
+        sort_order: sortOrder,
+        start,
+        status,
+      };
+
+      return http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
         method: 'GET',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         query: {
-          alert_ids: alertIds,
-          connector_names: connectorNames,
-          end,
-          ids,
-          page: pageParam?.page ?? page,
-          per_page: pageParam?.perPage ?? perPage,
-          search,
-          shared,
-          sort_field: sortField,
-          sort_order: sortOrder,
-          start,
-          status,
+          ...baseQuery,
+          enable_field_rendering: true, // always true to enable rendering fields using the `{{ user.name james }}` syntax
+          with_replacements: false, // always false because Attack discoveries rendered in Kibana may be passed as context to a conversation, and to enable the user to see the original alert details via the `Show anonymized values` toggle
         },
         signal: abortController.current.signal,
-      }),
+      });
+    },
     [
       alertIds,
       connectorNames,
       end,
       http,
       ids,
+      includeUniqueAlertIds,
       page,
       perPage,
       search,
@@ -165,8 +178,22 @@ export const useFindAttackDiscoveries = ({
     ],
     queryFn,
     {
-      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
+      enabled: isAssistantEnabled,
       getNextPageParam,
+      // Transform the API response's data items into UI-friendly alerts
+      select: (response: AttackDiscoveryFindResponse): AttackDiscoveryFindInternalResponse => {
+        return {
+          connector_names: response.connector_names,
+          data: ((response as AttackDiscoveryFindResponse).data ?? []).map(
+            transformAttackDiscoveryAlertFromApi // transform each alert from snake_case to camelCase
+          ),
+          page: response.page,
+          per_page: response.per_page,
+          total: response.total,
+          unique_alert_ids_count: response.unique_alert_ids_count,
+          unique_alert_ids: response.unique_alert_ids,
+        };
+      },
       onError: (e: ServerError) => {
         addError(e.body && e.body.message ? new Error(e.body.message) : e, {
           title: i18n.ERROR_FINDING_ATTACK_DISCOVERIES,

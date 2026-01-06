@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   BoundOptions,
   ChatCompleteAPI,
-  MessageRole,
   UnboundChatCompleteOptions,
 } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { bindChatComplete } from './bind_chat_complete';
 
 describe('bindChatComplete', () => {

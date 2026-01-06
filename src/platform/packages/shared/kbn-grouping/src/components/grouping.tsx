@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +23,8 @@ import {
 import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { GroupPanel } from './accordion_panel';
@@ -27,8 +32,14 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
-import { GroupingBucket, OnGroupToggle } from './types';
+import type {
+  ParsedGroupingAggregation,
+  GroupPanelRenderer,
+  GetGroupStats,
+  GetAdditionalActionButtons,
+  GroupChildComponentRenderer,
+} from './types';
+import type { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
@@ -40,16 +51,23 @@ export interface GroupingProps<T> {
   getGroupStats?: GetGroupStats<T>;
   groupingId: string;
   groupingLevel?: number;
-  inspectButton?: JSX.Element;
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
   isLoading: boolean;
   itemsPerPage: number;
   onChangeGroupsItemsPerPage?: (size: number) => void;
   onChangeGroupsPage?: (index: number) => void;
   onGroupToggle?: OnGroupToggle;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  takeActionItems?: (
+    groupFilters: Filter[],
+    groupNumber: number
+  ) => {
+    items: EuiContextMenuPanelItemDescriptor[];
+    panels: EuiContextMenuPanelDescriptor[];
+  };
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -62,6 +80,10 @@ export interface GroupingProps<T> {
   // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
   // when filtering by it
   multiValueFields?: string[];
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
+  /** Optional function to get additional action buttons to display in group stats before the Take actions button */
+  getAdditionalActionButtons?: GetAdditionalActionButtons<T>;
 }
 
 const GroupingComponent = <T,>({
@@ -72,7 +94,7 @@ const GroupingComponent = <T,>({
   groupSelector,
   groupingId,
   groupingLevel = 0,
-  inspectButton,
+  additionalToolbarControls,
   isLoading,
   itemsPerPage,
   onChangeGroupsItemsPerPage,
@@ -86,6 +108,8 @@ const GroupingComponent = <T,>({
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
   multiValueFields,
+  emptyGroupingComponent,
+  getAdditionalActionButtons,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -130,7 +154,7 @@ const GroupingComponent = <T,>({
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
-            <GroupPanel
+            <GroupPanel<T>
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
               onGroupClose={onGroupClose}
@@ -149,6 +173,10 @@ const GroupingComponent = <T,>({
                   groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
                   takeActionItems={takeActionItems}
+                  additionalActionButtons={
+                    getAdditionalActionButtons &&
+                    getAdditionalActionButtons(selectedGroup, groupBucket)
+                  }
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
@@ -201,6 +229,7 @@ const GroupingComponent = <T,>({
       trigger,
       unit,
       multiValueFields,
+      getAdditionalActionButtons,
     ]
   );
 
@@ -208,6 +237,10 @@ const GroupingComponent = <T,>({
     () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
     [groupCount, itemsPerPage]
   );
+
+  const emptyComponent = useMemo(() => {
+    return emptyGroupingComponent ? emptyGroupingComponent : <EmptyGroupingComponent />;
+  }, [emptyGroupingComponent]);
 
   return (
     <>
@@ -235,8 +268,13 @@ const GroupingComponent = <T,>({
             ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              {additionalToolbarControls &&
+                additionalToolbarControls.map((control, index) => (
+                  <EuiFlexItem key={`additional-control-${index}`} grow={false}>
+                    {control}
+                  </EuiFlexItem>
+                ))}
               <EuiFlexItem>{groupSelector}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -278,7 +316,7 @@ const GroupingComponent = <T,>({
             )}
           </span>
         ) : (
-          <EmptyGroupingComponent />
+          emptyComponent
         )}
       </div>
     </>

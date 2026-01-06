@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { NoDataPopover } from './no_data_popover';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 

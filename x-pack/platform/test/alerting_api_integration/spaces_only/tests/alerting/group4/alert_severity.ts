@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getEventLog, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertSeverityTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -26,7 +25,8 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
 
   const alertsAsDataIndex = '.alerts-test.severity.alerts-default';
 
-  describe('improving alert severity', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/232564
+  describe.skip('improving alert severity', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {

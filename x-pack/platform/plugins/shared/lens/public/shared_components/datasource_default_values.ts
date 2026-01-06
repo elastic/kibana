@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasourceLayers } from '../types';
+import type { DatasourceLayers } from '@kbn/lens-common';
 
 type VisState = { layers: Array<{ layerId: string }> } | { layerId: string };
 

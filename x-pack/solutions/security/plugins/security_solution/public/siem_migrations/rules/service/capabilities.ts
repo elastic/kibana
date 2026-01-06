@@ -5,71 +5,38 @@
  * 2.0.
  */
 
-import type { Capabilities } from '@kbn/core/public';
-import {
-  SECURITY_FEATURE_ID_V3,
-  SIEM_MIGRATIONS_FEATURE_ID,
-} from '@kbn/security-solution-features/constants';
 import { i18n } from '@kbn/i18n';
-import { CapabilitiesChecker } from '../../../common/lib/capabilities';
+import {
+  RULES_UI_EDIT_PRIVILEGE,
+  RULES_UI_READ_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import {
+  requiredSiemMigrationCapabilities,
+  type CapabilitiesLevel,
+  type MissingCapability,
+} from '../../common/service/capabilities';
 
-export interface MissingCapability {
-  capability: string;
-  description: string;
-}
-
-const minimumCapabilities: MissingCapability[] = [
+const minimumRuleMigrationCapabilities: MissingCapability[] = [
   {
-    capability: `${SECURITY_FEATURE_ID_V3}.show`,
+    capability: RULES_UI_READ_PRIVILEGE,
     description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: Read' }
-    ),
-  },
-  {
-    capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
+      'xpack.securitySolution.siemMigrations.service.capabilities.rulesRead',
+      { defaultMessage: 'Security > Rules: Read' }
     ),
   },
 ];
 
-const allCapabilities: MissingCapability[] = [
+const allRuleMigrationCapabilities: MissingCapability[] = [
   {
-    capability: `${SECURITY_FEATURE_ID_V3}.crud`,
+    capability: RULES_UI_EDIT_PRIVILEGE,
     description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: All' }
-    ),
-  },
-  {
-    capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
-    ),
-  },
-  {
-    capability: 'actions.execute',
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.connectorsRead',
-      { defaultMessage: 'Management > Actions and Connectors: Read' }
+      'xpack.securitySolution.siemMigrations.service.capabilities.rulesAll',
+      { defaultMessage: 'Security > Rules: All' }
     ),
   },
 ];
 
-export type CapabilitiesLevel = 'minimum' | 'all';
-
-const requiredCapabilities: Record<CapabilitiesLevel, MissingCapability[]> = {
-  minimum: minimumCapabilities,
-  all: allCapabilities,
-};
-
-export const getMissingCapabilities = (
-  capabilities: Capabilities,
-  level: CapabilitiesLevel = 'all'
-): MissingCapability[] => {
-  const checker = new CapabilitiesChecker(capabilities);
-  return requiredCapabilities[level].filter((required) => !checker.has(required.capability));
+export const requiredRuleMigrationCapabilities: Record<CapabilitiesLevel, MissingCapability[]> = {
+  minimum: [...requiredSiemMigrationCapabilities.minimum, ...minimumRuleMigrationCapabilities],
+  all: [...requiredSiemMigrationCapabilities.all, ...allRuleMigrationCapabilities],
 };

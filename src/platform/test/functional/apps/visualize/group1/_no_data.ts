@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('visualize');
       await header.waitUntilLoadingHasFinished();
 
-      const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
+      const addIntegrations = await testSubjects.find('noDataDefaultActionButton');
       await addIntegrations.click();
       await common.waitUntilUrlIncludes('integrations/browse');
     });

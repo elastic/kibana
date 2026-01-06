@@ -280,6 +280,84 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing",
+        "id": "def-server.OTLPSpanProcessor",
+        "type": "Class",
+        "tags": [],
+        "label": "OTLPSpanProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tracing",
+            "scope": "server",
+            "docId": "kibKbnTracingPluginApi",
+            "section": "def-server.OTLPSpanProcessor",
+            "text": "OTLPSpanProcessor"
+          },
+          " extends ",
+          "BatchSpanProcessor"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.OTLPSpanProcessor.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.OTLPSpanProcessor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tracing-config",
+                    "scope": "common",
+                    "docId": "kibKbnTracingConfigPluginApi",
+                    "section": "def-common.OTLPExportConfig",
+                    "text": "OTLPExportConfig"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.OTLPSpanProcessor.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "protocol",
+                "description": [],
+                "signature": [
+                  "\"http\" | \"grpc\""
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -289,9 +367,13 @@
         "type": "Function",
         "tags": [],
         "label": "initTracing",
-        "description": [],
+        "description": [
+          "\nInitialize the OpenTelemetry tracing provider"
+        ],
         "signature": [
-          "({\n  tracingConfig,\n  apmConfig,\n}: { tracingConfig?: ",
+          "({\n  resource,\n  tracingConfig,\n}: { resource: ",
+          "Resource",
+          "; tracingConfig: ",
           {
             "pluginId": "@kbn/tracing-config",
             "scope": "common",
@@ -299,9 +381,7 @@
             "section": "def-common.TracingConfig",
             "text": "TracingConfig"
           },
-          " | undefined; apmConfig?: ",
-          "AgentConfigOptions",
-          " | undefined; }) => void"
+          "; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
         "deprecated": false,
@@ -312,12 +392,26 @@
             "id": "def-server.initTracing.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  tracingConfig,\n  apmConfig,\n}",
+            "label": "{\n  resource,\n  tracingConfig,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.initTracing.$1.resource",
+                "type": "Object",
+                "tags": [],
+                "label": "resource",
+                "description": [],
+                "signature": [
+                  "Resource"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
               {
                 "parentPluginId": "@kbn/tracing",
                 "id": "def-server.initTracing.$1.tracingConfig",
@@ -332,23 +426,7 @@
                     "docId": "kibKbnTracingConfigPluginApi",
                     "section": "def-common.TracingConfig",
                     "text": "TracingConfig"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/tracing",
-                "id": "def-server.initTracing.$1.apmConfig",
-                "type": "Object",
-                "tags": [],
-                "label": "apmConfig",
-                "description": [],
-                "signature": [
-                  "AgentConfigOptions",
-                  " | undefined"
+                  }
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
                 "deprecated": false,

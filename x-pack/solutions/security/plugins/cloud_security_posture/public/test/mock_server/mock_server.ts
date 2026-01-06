@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { setupServer, SetupServerApi } from 'msw/node';
+import type { SetupServerApi } from 'msw/node';
+import { setupServer } from 'msw/node';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
-import { http, HttpResponse, JsonBodyType } from 'msw';
-import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import type { JsonBodyType } from 'msw';
+import { http, HttpResponse } from 'msw';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
 import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mock';
@@ -180,6 +182,12 @@ export const getMockServerDependencies = () => {
     } as unknown as Partial<CspClientPluginStartDeps>,
     core: {
       ...coreMock.createStart(),
+      application: {
+        ...coreMock.createStart().application,
+        getUrlForApp: (appId: string) => {
+          return `/app/${appId}`;
+        },
+      },
       http: {
         ...coreMock.createStart().http,
         get: async (path: string, options: any) => {

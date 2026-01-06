@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, waitFor, cleanup, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { render, waitFor, cleanup } from '@testing-library/react';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
@@ -59,6 +60,13 @@ const kibanaServicesMock = {
   },
   http: {
     fetch: jest.fn(),
+    basePath: {
+      prepend: jest.fn((path) => path),
+      get: jest.fn(),
+      remove: jest.fn(),
+      serverBasePath: '',
+      assetsHrefBase: '',
+    },
   },
 };
 
@@ -75,12 +83,13 @@ describe('MaintenanceWindowCallout', () => {
   it('should be visible if currently there is at least one "running" maintenance window', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
-    const { findAllByText } = render(
+    const { findAllByText, findByTestId } = render(
       <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
       { wrapper: TestProviders }
     );
 
     expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
+    expect(await findByTestId('maintenanceWindowPageLink')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -135,85 +144,6 @@ describe('MaintenanceWindowCallout', () => {
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should be visible if there is a "running" maintenance window that matches the specified category', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      {
-        ...RUNNING_MAINTENANCE_WINDOW_1,
-        categoryIds: ['observability'],
-      },
-    ]);
-
-    const { findByText } = render(
-      <MaintenanceWindowCallout
-        kibanaServices={kibanaServicesMock}
-        categories={['observability']}
-      />,
-      { wrapper: TestProviders }
-    );
-
-    expect(
-      await findByText('A maintenance window is running for Observability rules')
-    ).toBeInTheDocument();
-  });
-
-  it('should NOT be visible if there is a "running" maintenance window that does not match the specified category', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      {
-        ...RUNNING_MAINTENANCE_WINDOW_1,
-        categoryIds: ['observability'],
-      },
-    ]);
-
-    const { container } = render(
-      <MaintenanceWindowCallout
-        kibanaServices={kibanaServicesMock}
-        categories={['securitySolution']}
-      />,
-      { wrapper: TestProviders }
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should be visible if there is a "running" maintenance window with a category, and no categories are specified', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      {
-        ...RUNNING_MAINTENANCE_WINDOW_1,
-        categoryIds: ['observability'],
-      },
-    ]);
-
-    const { findByText } = render(
-      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
-      { wrapper: TestProviders }
-    );
-
-    expect(
-      await findByText('A maintenance window is running for Observability rules')
-    ).toBeInTheDocument();
-  });
-
-  it('should only display the specified categories in the callout title for a maintenance window that matches muliple categories', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      {
-        ...RUNNING_MAINTENANCE_WINDOW_1,
-        categoryIds: ['observability', 'securitySolution', 'management'],
-      },
-    ]);
-
-    const { findByText } = render(
-      <MaintenanceWindowCallout
-        kibanaServices={kibanaServicesMock}
-        categories={['observability', 'management']}
-      />,
-      { wrapper: TestProviders }
-    );
-
-    expect(
-      await findByText('A maintenance window is running for Observability and Stack rules')
-    ).toBeInTheDocument();
-  });
-
   it('should see an error toast if there was an error while fetching maintenance windows', async () => {
     const createReactQueryWrapper = () => {
       const queryClient = new QueryClient({
@@ -249,7 +179,8 @@ describe('MaintenanceWindowCallout', () => {
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance windows are active',
-        toastMessage: 'Rule notifications are stopped while maintenance windows are running.',
+        toastMessage:
+          'Some rule notifications may be stopped while maintenance windows are running.',
       });
     });
   });
@@ -294,57 +225,5 @@ describe('MaintenanceWindowCallout', () => {
     });
 
     expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
-  });
-
-  it('should display the callout if the category ids contains the specified category', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      {
-        ...RUNNING_MAINTENANCE_WINDOW_1,
-        categoryIds: ['observability'],
-      },
-    ]);
-
-    render(
-      <MaintenanceWindowCallout
-        kibanaServices={kibanaServicesMock}
-        categories={['securitySolution']}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('maintenanceWindowCallout')).not.toBeInTheDocument();
-    });
-
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
-      {
-        ...RUNNING_MAINTENANCE_WINDOW_1,
-        categoryIds: ['securitySolution'],
-      },
-    ]);
-
-    render(
-      <MaintenanceWindowCallout
-        kibanaServices={kibanaServicesMock}
-        categories={['securitySolution']}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
-    });
-
-    render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
-      wrapper: TestProviders,
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
-    });
   });
 });

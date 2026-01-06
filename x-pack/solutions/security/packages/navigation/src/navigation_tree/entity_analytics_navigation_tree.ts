@@ -6,12 +6,20 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName, SecurityGroupName } from '../constants';
+import { lazy } from 'react';
+import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
+const LazyIconEntityAnalytics = lazy(() =>
+  import('./custom_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
+    default: iconEntityAnalytics,
+  }))
+);
+
 export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
+  icon: LazyIconEntityAnalytics,
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
   renderAs: 'panelOpener',
   children: [
@@ -22,6 +30,10 @@ export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
     {
       id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
       link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
+    },
+    {
+      id: SecurityPageName.entityAnalyticsThreatHunting,
+      link: securityLink(SecurityPageName.entityAnalyticsThreatHunting),
     },
   ],
 });

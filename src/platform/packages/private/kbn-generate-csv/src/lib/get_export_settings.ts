@@ -19,7 +19,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../constants';
-import { CsvPagingStrategy } from '../../types';
+import type { CsvPagingStrategy } from '../../types';
 
 export interface CsvExportSettings {
   timezone: string;
@@ -40,6 +40,7 @@ export interface CsvExportSettings {
   escapeValue: (value: string) => string;
   includeFrozen: boolean;
   maxConcurrentShardRequests: number;
+  maxRows: number;
 }
 
 export const getExportSettings = async (
@@ -117,5 +118,6 @@ export const getExportSettings = async (
     escapeFormulaValues,
     escapeValue,
     maxConcurrentShardRequests: config.maxConcurrentShardRequests,
+    maxRows: config.maxRows,
   };
 };

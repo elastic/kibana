@@ -23,6 +23,7 @@ export {
   getPackages,
   getInstalledPackages,
   getLimitedPackages,
+  getPackageKnowledgeBase,
 } from './get';
 
 export { getBundledPackages } from './bundled_packages';

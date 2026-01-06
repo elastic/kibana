@@ -8,7 +8,7 @@
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { NotificationService, NotifyArgs } from './types';
-import { ReportingCore } from '../..';
+import type { ReportingCore } from '../..';
 import { getContentStream } from '../../lib';
 
 export interface Attachment {
@@ -63,8 +63,7 @@ export class EmailNotificationService implements NotificationService {
     }
 
     const attachments = await this.getAttachments(reporting, index, id, filename, contentType);
-    const { to, bcc, cc, subject, spaceId } = emailParams;
-    const message = 'Your scheduled report is attached for you to download or share.';
+    const { to, bcc, cc, subject, message, spaceId } = emailParams;
     await this.notifications.getEmailService().sendAttachmentEmail({
       to,
       bcc,

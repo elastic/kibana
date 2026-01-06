@@ -35,8 +35,8 @@ import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-expor
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import { ExportType } from '@kbn/reporting-server';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import type { ExportType } from '@kbn/reporting-server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -48,18 +48,15 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import {
-  RunSingleReportTask,
-  ReportTaskParams,
-  RunScheduledReportTask,
-  ScheduledReportTaskParamsWithoutSpaceId,
-} from './lib/tasks';
+import type { ReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from './lib/tasks';
+import { RunSingleReportTask, RunScheduledReportTask } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
@@ -72,6 +69,7 @@ export interface ReportingInternalSetup {
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
+  licensing: LicensingPluginSetup;
   logger: Logger;
   router: ReportingPluginRouter;
   security?: SecurityPluginSetup;
@@ -112,7 +110,6 @@ export class ReportingCore {
   private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -121,6 +118,7 @@ export class ReportingCore {
   constructor(
     private core: CoreSetup,
     private logger: Logger,
+    private exportTypesRegistry: ExportTypesRegistry,
     private context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.packageInfo = context.env.packageInfo;

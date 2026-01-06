@@ -7,6 +7,7 @@
 
 // @ts-ignore
 import mapSavedObjects from '../../../common/telemetry/test_resources/sample_map_saved_objects.json';
+import { transformMapAttributesOut } from '../../../common/content_management/transform_map_attributes_out';
 import { MapStatsCollector } from './map_stats_collector';
 
 test('returns zeroed telemetry data when there are no saved objects', () => {
@@ -46,7 +47,11 @@ test('returns zeroed telemetry data when there are no saved objects', () => {
 test('returns expected telemetry data from saved objects', () => {
   const statsCollector = new MapStatsCollector();
   mapSavedObjects.forEach((savedObject) => {
-    statsCollector.push(savedObject.attributes);
+    statsCollector.push(
+      transformMapAttributesOut(savedObject.attributes, (targetName: string) =>
+        savedObject.references.find(({ name }) => name === targetName)
+      )
+    );
   });
   const stats = statsCollector.getStats() as any;
   delete stats.timeCaptured;

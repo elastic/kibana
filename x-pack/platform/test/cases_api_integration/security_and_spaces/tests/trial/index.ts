@@ -12,7 +12,6 @@ import {
   activateUserProfiles,
 } from '../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: trial', function () {
     before(async () => {
@@ -47,6 +46,11 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/get_connectors'));
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
+
+    /**
+     * Telemetry
+     */
+    loadTestFile(require.resolve('./telemetry'));
 
     // Connectors
     loadTestFile(require.resolve('./connectors/cases/cases_connector'));

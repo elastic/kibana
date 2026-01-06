@@ -18,9 +18,10 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError } from './utils';
+export { isESClientError, rethrowIfInstanceOrWrap } from './utils';
 export {
   FleetError as FleetError,
+  FleetVersionConflictError,
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
@@ -75,6 +76,7 @@ export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}
+export class PackageRollbackError extends FleetError {}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
@@ -97,6 +99,16 @@ export class AgentlessAgentUpgradeError extends FleetError {
     super(`Error upgrading agentless agent in Fleet, ${message}`);
   }
 }
+export class AgentlessAgentListNotFoundError extends FleetError {
+  constructor(message: string) {
+    super(`Error listing agentless agents API not found in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentListError extends FleetError {
+  constructor(message: string) {
+    super(`Error listing agentless agents in Fleet, ${message}`);
+  }
+}
 export class AgentlessAgentConfigError extends FleetError {
   constructor(message: string) {
     super(`Error validating Agentless API configuration in Fleet, ${message}`);
@@ -106,6 +118,36 @@ export class AgentlessAgentConfigError extends FleetError {
 export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
   constructor(message: string) {
     super(`Unable to create integration. ${message}`);
+  }
+}
+
+export class CloudConnectorCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorGetListError extends FleetError {
+  constructor(message: string) {
+    super(`Error getting cloud connectors in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorInvalidVarsError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating cloud connector vars in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorUpdateError extends FleetError {
+  constructor(message: string) {
+    super(`Error updating cloud connector in Fleet, ${message}`);
   }
 }
 
@@ -207,6 +249,21 @@ export class ArtifactsElasticsearchError extends FleetError {
     } else {
       this.requestDetails = 'unable to determine request details';
     }
+  }
+}
+
+export class FleetElasticsearchError extends FleetErrorWithStatusCode {
+  constructor(esError: Error) {
+    let statusCode: number | undefined;
+    const message = esError.message;
+
+    // Extract the original ES status code and ensure we have meta with statusCode
+    if (isESClientError(esError)) {
+      statusCode = esError.meta.statusCode;
+    }
+
+    // Pass through the ES error message, status code, and original error as meta
+    super(message, statusCode, esError);
   }
 }
 

@@ -42,6 +42,39 @@ export interface FeatureTypeUsage {
   has_exceptions: number;
   response_actions: ResponseActionsUsage;
 }
+export interface ThreatMatchFeatureTypeUsage extends FeatureTypeUsage {
+  has_does_not_match_condition: number;
+}
+
+export interface UpgradeableRulesSummary {
+  total: number;
+  customized: number;
+  enabled: number;
+  disabled: number;
+}
+
+export interface RuleCustomizationCounts {
+  alert_suppression: number;
+  anomaly_threshold: number;
+  data_view_id: number;
+  description: number;
+  filters: number;
+  from: number;
+  index: number;
+  interval: number;
+  investigation_fields: number;
+  name: number;
+  new_terms_fields: number;
+  note: number;
+  query: number;
+  risk_score: number;
+  severity: number;
+  setup: number;
+  tags: number;
+  threat_query: number;
+  threshold: number;
+  timeline_id: number;
+}
 
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
@@ -52,11 +85,13 @@ export interface RulesTypeUsage {
   eql_custom: FeatureTypeUsage;
   machine_learning: FeatureTypeUsage;
   machine_learning_custom: FeatureTypeUsage;
-  threat_match: FeatureTypeUsage;
-  threat_match_custom: FeatureTypeUsage;
+  threat_match: ThreatMatchFeatureTypeUsage;
+  threat_match_custom: ThreatMatchFeatureTypeUsage;
   new_terms: FeatureTypeUsage;
   new_terms_custom: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
+  elastic_customized_total: FeatureTypeUsage;
+  elastic_noncustomized_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
   esql: FeatureTypeUsage;
   esql_custom: FeatureTypeUsage;
@@ -71,6 +106,8 @@ export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
+  elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
+  elastic_detection_rule_customization_status: RuleCustomizationCounts;
   spaces_usage: SpacesUsage;
 }
 
@@ -81,6 +118,7 @@ export interface RuleMetric {
   rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
+  is_customized: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
@@ -96,6 +134,7 @@ export interface RuleMetric {
   has_response_actions: boolean;
   has_response_actions_endpoint: boolean;
   has_response_actions_osquery: boolean;
+  has_does_not_match_condition?: boolean; // Only for threat match rules
 }
 
 /**

@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineConfig, PlaywrightTestConfig, devices } from '@playwright/test';
+import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
+import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
+import { VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   /**
@@ -45,21 +47,21 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
   let scoutProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [];
 
   /**
-   * For parallel tests, we need to add a setup as a project dependency. While Playwright doesn't allow to read 'use'
-   * from the parent project, we have to create a setup project with the explicit 'use' object for each parent project.
+   * When runGlobalSetup is true, we add a setup project as a dependency for each project.
+   * While Playwright doesn't allow to read 'use' from the parent project, we have to create
+   * a setup project with the explicit 'use' object for each parent project.
    * This is a workaround for https://github.com/microsoft/playwright/issues/32547
    */
-  scoutProjects =
-    options.workers && options.workers > 1
-      ? scoutDefaultProjects.flatMap((project) => [
-          {
-            name: `setup-${project?.name}`,
-            use: project?.use ? { ...project.use } : {},
-            testMatch: /global.setup\.ts/,
-          },
-          { ...project, dependencies: [`setup-${project?.name}`] },
-        ])
-      : scoutDefaultProjects;
+  scoutProjects = options.runGlobalSetup
+    ? scoutDefaultProjects.flatMap((project) => [
+        {
+          name: `setup-${project?.name}`,
+          use: project?.use ? { ...project.use } : {},
+          testMatch: /global.setup\.ts/,
+        },
+        { ...project, dependencies: [`setup-${project?.name}`] },
+      ])
+    : scoutDefaultProjects;
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
@@ -73,8 +75,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
-      ['html', { outputFolder: './output/reports', open: 'never' }], // HTML report configuration
-      ['json', { outputFile: './output/reports/test-results.json' }], // JSON report
+      ['html', { outputFolder: './.scout/reports', open: 'never' }], // HTML report configuration
+      ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
     ],
@@ -104,7 +106,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       timeout: 10000,
     },
 
-    outputDir: './output/test-artifacts', // For other test artifacts (screenshots, videos, traces)
+    outputDir: './.scout/test-artifacts', // For other test artifacts (screenshots, videos, traces)
 
     projects: scoutProjects,
   });

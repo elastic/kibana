@@ -21,6 +21,7 @@ import {
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
 import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
+import { DataSchemaFormatRT } from '../../../../../common/http_api/shared';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -36,6 +37,7 @@ const INITIAL_HOSTS_STATE: HostsState = {
   panelFilters: [],
   dateRange: INITIAL_DATE_RANGE,
   limit: DEFAULT_HOST_LIMIT,
+  preferredSchema: null,
 };
 
 export type HostsStateAction =
@@ -43,7 +45,8 @@ export type HostsStateAction =
   | { type: 'SET_LIMIT'; limit: number }
   | { type: 'SET_FILTERS'; filters: HostsState['filters'] }
   | { type: 'SET_QUERY'; query: HostsState['query'] }
-  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] };
+  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] }
+  | { type: 'SET_PREFERRED_SCHEMA'; preferredSchema: HostsState['preferredSchema'] };
 
 const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
   switch (action.type) {
@@ -57,6 +60,8 @@ const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
       return { ...state, query: action.query };
     case 'SET_PANEL_FILTERS':
       return { ...state, panelFilters: action.panelFilters };
+    case 'SET_PREFERRED_SCHEMA':
+      return { ...state, preferredSchema: action.preferredSchema };
     default:
       return state;
   }
@@ -82,6 +87,7 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
   });
 
   const [search, setSearch] = useReducer(reducer, urlState);
+
   if (!deepEqual(search, urlState)) {
     setUrlState(search);
     if (localStorageHostLimit !== search.limit) {
@@ -141,6 +147,7 @@ const HostsStateRT = rt.type({
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   limit: rt.number,
+  preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

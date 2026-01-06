@@ -17,6 +17,8 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
   OWNER_SPACE_ID_TAG_PREFIX,
+  ADVANCED_MODE_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from './constants';
 
 export type TagFilter = (tag: string) => boolean;
@@ -122,12 +124,24 @@ export const getEffectedPolicySelectionByTags = (
   };
 };
 
-export const isFilterProcessDescendantsEnabled = (
+export const isAdvancedModeEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
-): boolean => (item.tags ?? []).includes(FILTER_PROCESS_DESCENDANTS_TAG);
+): boolean => (item.tags ?? []).includes(ADVANCED_MODE_TAG);
 
+export const isAdvancedModeTag: TagFilter = (tag) => tag === ADVANCED_MODE_TAG;
+
+export const isProcessDescendantsEnabled = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+  tag: string = FILTER_PROCESS_DESCENDANTS_TAG
+): boolean => (item.tags ?? []).includes(tag);
+
+/** Checks if the given tag is for filtering process descendants in event filters */
 export const isFilterProcessDescendantsTag: TagFilter = (tag) =>
   tag === FILTER_PROCESS_DESCENDANTS_TAG;
+
+/** Checks if the given tag is for filtering process descendants in trusted apps */
+export const isTrustedProcessDescendantsTag: TagFilter = (tag) =>
+  tag === TRUSTED_PROCESS_DESCENDANTS_TAG;
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
   return {

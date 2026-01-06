@@ -8,7 +8,8 @@
  */
 
 import moment from 'moment-timezone';
-import { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import type { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
 
 export const termsAggFilter = [
   '!top_hits',
@@ -58,7 +59,7 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
     }
 
     if (agg.params.missingBucket && agg.params.field.type === 'string') {
-      output.params.missing = '__missing__';
+      output.params.missing = MISSING_TOKEN;
     }
 
     if (!orderAgg) {

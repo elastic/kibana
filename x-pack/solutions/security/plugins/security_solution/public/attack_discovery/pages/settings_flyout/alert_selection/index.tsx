@@ -6,22 +6,18 @@
  */
 
 import { AssistantSpaceIdProvider, ConnectorSelectorInline } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
 import { css } from '@emotion/react';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getMaxAlerts } from './helpers/get_max_alerts';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
-import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface Props {
@@ -35,7 +31,6 @@ interface Props {
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
   showConnectorSelector: boolean;
   onConnectorIdSelected?: (connectorId: string) => void;
-  stats: AttackDiscoveryStats | null;
 }
 
 const AlertSelectionComponent: React.FC<Props> = ({
@@ -49,9 +44,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
   showConnectorSelector,
   connectorId,
   onConnectorIdSelected,
-  stats,
 }) => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const spaceId = useSpaceId();
 
   const tabs = useMemo(
@@ -94,35 +87,25 @@ const AlertSelectionComponent: React.FC<Props> = ({
     <EuiForm data-test-subj="alertSelection" fullWidth>
       {showConnectorSelector && spaceId && (
         <AssistantSpaceIdProvider spaceId={spaceId}>
-          <EuiSpacer size="s" />
-
           <EuiText data-test-subj="customizeAlerts" size="s">
             <p>{i18n.CUSTOMIZE_THE_CONNECTOR_AND_ALERTS}</p>
           </EuiText>
 
           <EuiSpacer size="m" />
 
-          <ElasticLLMCostAwarenessTour
-            isDisabled={false}
-            wrapper={false}
-            selectedConnectorId={connectorId}
-            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY_FLYOUT}
+          <EuiFormRow
+            label={i18n.CONNECTOR}
+            css={css`
+              flex-grow: 1;
+            `}
           >
-            <EuiFormRow
-              label={i18n.CONNECTOR}
-              css={css`
-                flex-grow: 1;
-              `}
-            >
-              <ConnectorSelectorInline
-                fullWidth={true}
-                onConnectorSelected={noop}
-                onConnectorIdSelected={onConnectorIdSelected}
-                selectedConnectorId={connectorId}
-                stats={attackDiscoveryAlertsEnabled ? undefined : stats}
-              />
-            </EuiFormRow>
-          </ElasticLLMCostAwarenessTour>
+            <ConnectorSelectorInline
+              fullWidth={true}
+              onConnectorSelected={noop}
+              onConnectorIdSelected={onConnectorIdSelected}
+              selectedConnectorId={connectorId}
+            />
+          </EuiFormRow>
           <EuiSpacer size="m" />
         </AssistantSpaceIdProvider>
       )}

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -16,7 +17,8 @@ import {
   ToggleField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, from, to } from './shared';
+import type { FieldsConfig } from './shared';
+import { from, to } from './shared';
 
 const { emptyField } = fieldValidators;
 

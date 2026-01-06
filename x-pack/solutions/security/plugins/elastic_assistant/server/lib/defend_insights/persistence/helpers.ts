@@ -63,6 +63,7 @@ export const transformESSearchToDefendInsights = (
             endpointId: event.endpoint_id,
             value: event.value,
           })),
+          remediation: insight.remediation,
         })),
         replacements: insightSchema.replacements?.reduce((acc: Record<string, string>, r) => {
           acc[r.uuid] = r.value;
@@ -122,6 +123,7 @@ export const transformToCreateScheme = (
         endpoint_id: event.endpointId,
         value: event.value,
       })),
+      remediation: insight.remediation,
     })),
     updated_at: createdAt,
     last_viewed_at: createdAt,
@@ -184,6 +186,7 @@ export const transformToUpdateScheme = (
               endpoint_id: event.endpointId,
               value: event.value,
             })),
+            remediation: insight.remediation,
           })),
         }
       : {}),

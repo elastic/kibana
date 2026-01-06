@@ -12,7 +12,9 @@ xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.4'
+xpack.fleet.internal.registry.spec.max: '3.5'
+xpack.fleet.agentless.backgroundSync.enabled: true
+xpack.fleet.agentless.backgroundSync.interval: '1h'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -36,7 +38,6 @@ xpack.features.overrides:
     subFeatures.privileges:
       download_csv_report.disabled: true
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -60,7 +61,6 @@ xpack.features.overrides:
     subFeatures.privileges:
       download_csv_report.disabled: true
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -69,7 +69,6 @@ xpack.features.overrides:
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -78,7 +77,6 @@ xpack.features.overrides:
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -131,6 +129,8 @@ xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
+xpack.cloud_connect.enabled: false
+xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
 # Disable index actions from the Index Management UI
@@ -151,7 +151,8 @@ xpack.index_management.enableMappingsSourceFieldSection: false
 xpack.index_management.enableTogglingDataRetention: false
 # Disable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: false
-
+# Forbid disabling failure store lifecycle from Index Management UI
+xpack.index_management.enableFailureStoreRetentionDisabling: false
 # Disable Manage Processors UI in Ingest Pipelines
 xpack.ingest_pipelines.enableManageProcessors: false
 
@@ -161,11 +162,11 @@ management.deeplinks.navLinkStatus: visible
 
 # Onboarding team UI configurations
 xpack.cloud_integrations.data_migration.enabled: false
-guided_onboarding.enabled: false
+
 
 # Other disabled plugins
 xpack.canvas.enabled: false
-data.search.sessions.enabled: false
+xpack.reindex_service.enabled: false
 advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
@@ -174,6 +175,24 @@ xpack.security.showInsecureClusterWarning: false
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
+
+xpack.ml.nlp:
+  enabled: false
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        maxThreads: 2
+      medium:
+        min: 0
+        max: 32
+        maxThreads: 4
+      high:
+        min: 0
+        max: 512
+        maxThreads: 8
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
@@ -250,10 +269,12 @@ xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
+xpack.reporting.csv.maxRows: 100000
 
 # Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
+monitoring_collection.enabled: false
 
 ## Enable uiSettings validations
 data.enableUiSettingsValidations: true
@@ -270,3 +291,16 @@ xpack.contentConnectors.enabled: true
 ## Enable Kibana Product Intercept
 xpack.product_intercept.enabled: true
 xpack.product_intercept.interval: '90d'
+
+# Gen AI Settings plugin
+xpack.genAiSettings:
+  showAiBreadcrumb: false
+  showSpacesIntegration: false
+  showAiAssistantsVisibilitySetting: false
+
+# Cross Project Search
+cps.enabled: true
+cps.cpsEnabled: false
+
+# Disable saved objects access control features (write-restricted dashboards)
+savedObjects.enableAccessControl: false

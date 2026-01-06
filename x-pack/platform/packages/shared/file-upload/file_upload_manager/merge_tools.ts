@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { MappingPropertyBase, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
 import type { FileAnalysis, FileWrapper } from './file_wrapper';
@@ -23,6 +23,7 @@ export enum CLASH_ERROR_TYPE {
   NONE,
   ERROR,
   WARNING,
+  INFO,
 }
 
 export interface MappingClash {
@@ -68,19 +69,17 @@ export function createMergedMappings(
 
   const mappings = files.map((file) => file.getMappings() ?? { properties: {} });
 
-  // compare the mappings of all files to see if they are all the same
+  // compare the mappings of all files and the existing index mappings to see if they are all the same
   // if they are, return early
-  if (mappings.every((m) => isEqual(m, mappings[0]))) {
+  const tempMappings = [
+    ...(existingIndexMappings !== null ? [existingIndexMappings] : []),
+    ...mappings,
+  ];
+  if (tempMappings.every((m) => isEqual(m, mappings[0]))) {
     return { mergedMappings: mappings[0] as MappingTypeMapping, mappingClashes: [] };
   }
 
-  const fieldsPerFile = mappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
-
-  if (existingIndexMappings !== null) {
-    // add the existing index mappings to the beginning of the fields array
-    // so the merged mappings contain the existing index mappings
-    fieldsPerFile.splice(0, 0, getFieldsFromMappings(existingIndexMappings as MappingTypeMapping));
-  }
+  const fieldsPerFile = tempMappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
 
   const mappingClashes: MappingClash[] = [];
 
@@ -104,7 +103,7 @@ export function createMergedMappings(
               fieldName: field.name,
               existingType: existingField.type,
               clashingType: {
-                fileName: files[i].getFileName(),
+                fileName: files[i]?.getFileName(),
                 newType: field.value.type as string,
                 fileIndex: i,
               },
@@ -269,14 +268,19 @@ export function getMappingClashInfo(
       }
     }
     if (fileClash.clash !== CLASH_ERROR_TYPE.ERROR) {
-      // if the file contains many new fields but none of them are in the existing index
-      // set the clash to warning
       if (
         fileClash.missingFields &&
         existingIndexChecks?.existingFields &&
         existingIndexChecks?.existingFields.length > 0 &&
         fileClash.missingFields.length > (existingIndexChecks.existingFields.length - 1) / 2
       ) {
+        // if more than half the fields are missing, mark as a warning
+        fileClash.clash = CLASH_ERROR_TYPE.WARNING;
+      } else if (
+        (fileClash.missingFields && fileClash.missingFields.length > 0) ||
+        (fileClash.newFields && fileClash.newFields.length > 0)
+      ) {
+        // if some fields are missing or some new fields, mark as a warning
         fileClash.clash = CLASH_ERROR_TYPE.WARNING;
       }
     }
@@ -353,7 +357,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
   });
 }
 
-export function getFieldsFromMappings(mappings: MappingTypeMapping) {
+export function getFieldsFromMappings(mappings: MappingTypeMapping, allowedTypes: string[] = []) {
   const fields: Array<{ name: string; value: { type: string } }> = [];
 
   function traverseProperties(properties: MappingPropertyBase, parentKey: string = '') {
@@ -363,7 +367,9 @@ export function getFieldsFromMappings(mappings: MappingTypeMapping) {
       if (value.properties) {
         traverseProperties(value.properties, fullKey);
       } else if (value.type) {
-        fields.push({ name: fullKey, value });
+        if (allowedTypes.length === 0 || allowedTypes.includes(value.type)) {
+          fields.push({ name: fullKey, value });
+        }
       }
     }
   }

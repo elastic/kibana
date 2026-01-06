@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -22,7 +21,6 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
-      enabled: false,
       schedule: {
         custom: {
           duration: '1m',
@@ -84,7 +82,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
               expect(response.body.status).to.eql('upcoming');
-              expect(response.body.enabled).to.eql(false);
+              expect(response.body.enabled).to.eql(true);
               expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
               expect(response.body.created_by).to.eql(scenario.user.username);
               expect(response.body.updated_by).to.eql(scenario.user.username);
@@ -100,6 +98,28 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it('should handle create a disabled maintenance window', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix('default')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({ ...createRequestBody, enabled: false });
+
+      if (response.body.id) {
+        objectRemover.add(
+          'default',
+          response.body.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+      }
+
+      expect(response.statusCode).to.eql(200);
+      expect(response.body.title).to.eql('test-maintenance-window');
+      expect(response.body.status).to.eql('disabled');
+      expect(response.body.enabled).to.eql(false);
+    });
 
     it('should throw if creating maintenance window with invalid kql', async () => {
       await supertest

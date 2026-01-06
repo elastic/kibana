@@ -6,11 +6,9 @@
  */
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { isEmpty } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
-  PROCESSOR_EVENT,
   SPAN_ID,
   SPAN_LINKS,
   SPAN_LINKS_TRACE_ID,
@@ -41,7 +39,7 @@ async function fetchLinkedChildrenOfSpan({
     end,
   });
 
-  const requiredFields = asMutableArray([TRACE_ID, PROCESSOR_EVENT] as const);
+  const requiredFields = asMutableArray([TRACE_ID] as const);
   const optionalFields = asMutableArray([
     SPAN_ID,
     TRANSACTION_ID,
@@ -49,70 +47,75 @@ async function fetchLinkedChildrenOfSpan({
     OTEL_SPAN_LINKS_TRACE_ID,
   ] as const);
 
-  const response = await apmEventClient.search('fetch_linked_children_of_span', {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    _source: [SPAN_LINKS],
-    fields: [...requiredFields, ...optionalFields],
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(startWithBuffer, endWithBuffer),
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                ...termQuery(SPAN_LINKS_TRACE_ID, traceId),
-                ...termQuery(OTEL_SPAN_LINKS_TRACE_ID, traceId),
-              ],
+  const response = await apmEventClient.search(
+    'fetch_linked_children_of_span',
+    {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      },
+      _source: [SPAN_LINKS],
+      fields: [...requiredFields, ...optionalFields],
+      track_total_hits: false,
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(startWithBuffer, endWithBuffer),
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  ...termQuery(SPAN_LINKS_TRACE_ID, traceId),
+                  ...termQuery(OTEL_SPAN_LINKS_TRACE_ID, traceId),
+                ],
+              },
             },
-          },
-          ...(spanId
-            ? [
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
-                      ...termQuery(OTEL_SPAN_LINKS_SPAN_ID, spanId),
-                    ],
+            ...(spanId
+              ? [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
+                        ...termQuery(OTEL_SPAN_LINKS_SPAN_ID, spanId),
+                      ],
+                    },
                   },
-                },
-              ]
-            : []),
-        ],
+                ]
+              : []),
+          ],
+        },
       },
     },
-  });
+    { skipProcessorEventFilter: true }
+  );
 
   const linkedChildren = response.hits.hits.map((hit) => {
     const source = 'span' in hit._source ? hit._source : undefined;
-    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+    const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields).build();
 
     return {
       ...event,
-      span: {
-        ...event.span,
-        links: source?.span?.links ?? mapOtelToSpanLink(event.links),
-      },
+      [SPAN_LINKS]:
+        source?.span?.links ??
+        mapOtelToSpanLink({
+          trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
+          span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
+        }),
     };
   });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
-  return linkedChildren.filter((linkedChild) => {
-    const spanLinks = linkedChild?.span?.links?.filter((spanLink) => {
-      return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
-    });
-    return !isEmpty(spanLinks);
-  });
+  return linkedChildren.filter((linkedChild) =>
+    linkedChild[SPAN_LINKS].some(
+      (spanLink) => spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true)
+    )
+  );
 }
 
 function getSpanId(
   linkedChild: Awaited<ReturnType<typeof fetchLinkedChildrenOfSpan>>[number]
 ): string {
-  return (linkedChild.span.id ?? linkedChild.transaction?.id) as string;
+  return (linkedChild[SPAN_ID] ?? linkedChild[TRANSACTION_ID]) as string;
 }
 
 export async function getSpanLinksCountById({
@@ -134,7 +137,7 @@ export async function getSpanLinksCountById({
   });
 
   return linkedChildren.reduce<Record<string, number>>((acc, item) => {
-    item.span?.links?.forEach((link) => {
+    item[SPAN_LINKS].forEach((link) => {
       // Ignores span links that don't belong to this trace
       if (link.trace.id === traceId) {
         acc[link.span.id] = (acc[link.span.id] || 0) + 1;
@@ -165,10 +168,8 @@ export async function getLinkedChildrenOfSpan({
     end,
   });
 
-  return linkedChildren.map((item) => {
-    return {
-      trace: { id: item.trace.id },
-      span: { id: getSpanId(item) },
-    };
-  });
+  return linkedChildren.map((item) => ({
+    trace: { id: item[TRACE_ID] },
+    span: { id: getSpanId(item) },
+  }));
 }

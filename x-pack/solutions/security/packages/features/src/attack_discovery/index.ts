@@ -7,9 +7,18 @@
 
 import { getAttackDiscoveryBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
+import {
+  getAttackDiscoveryBaseKibanaSubFeatureIds,
+  getAttackDiscoverySubFeaturesMap,
+} from './kibana_sub_features';
+import { attackDiscoveryProductFeaturesConfig } from './product_feature_config';
+import type { ProductFeatureAttackDiscoveryKey } from '../product_features_keys';
 
-export const getAttackDiscoveryFeature = (): ProductFeatureParams => ({
+export const getAttackDiscoveryFeature = (
+  experimentalFeatures: Record<string, boolean>
+): ProductFeatureParams<ProductFeatureAttackDiscoveryKey> => ({
   baseKibanaFeature: getAttackDiscoveryBaseKibanaFeature(),
-  baseKibanaSubFeatureIds: [],
-  subFeaturesMap: new Map(),
+  baseKibanaSubFeatureIds: getAttackDiscoveryBaseKibanaSubFeatureIds(),
+  subFeaturesMap: getAttackDiscoverySubFeaturesMap(experimentalFeatures),
+  productFeatureConfig: attackDiscoveryProductFeaturesConfig,
 });

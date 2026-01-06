@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
+  FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   RuleUpgradeSpecifier,
@@ -38,15 +40,20 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
+import type { RuleUpgradeContext } from './update_rule_telemetry';
+import {
+  sendRuleBulkUpgradeTelemetryEvent,
+  sendRuleUpdateTelemetryEvents,
+} from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<undefined, undefined, PerformRuleUpgradeRequestBody>,
-  response: KibanaResponseFactory
+  request: KibanaRequest<unknown, unknown, PerformRuleUpgradeRequestBody>,
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
 
@@ -58,6 +65,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
+    const analyticsService = ctx.securitySolution.getAnalytics();
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -78,6 +86,7 @@ export const performRuleUpgradeHandler = async (
     const updatedRules: RuleResponse[] = [];
     const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
+    const ruleUpgradeContextsMap = new Map<string, RuleUpgradeContext>();
 
     const ruleUpgradeQueue: Array<{
       rule_id: RuleSignatureId;
@@ -164,13 +173,22 @@ export const performRuleUpgradeHandler = async (
               ? request.body.rules.find((x) => x.rule_id === targetRule.rule_id)
               : undefined;
 
-          const conflict = getRuleUpgradeConflictState(ruleVersions, ruleUpgradeSpecifier);
+          const { ruleDiff } = calculateRuleDiff(ruleVersions);
+          const conflict = getRuleUpgradeConflictState(ruleDiff, ruleUpgradeSpecifier);
 
           if (conflict !== ThreeWayDiffConflict.NONE) {
             skippedRules.push({
               rule_id: targetRule.rule_id,
               reason: SkipRuleUpgradeReasonEnum.CONFLICT,
               conflict,
+            });
+
+            ruleUpgradeContextsMap.set(targetRule.rule_id, {
+              ruleId: targetRule.rule_id,
+              ruleName: currentVersion.name,
+              hasBaseVersion: !!baseVersion,
+              isCustomized: isRuleCustomized(currentVersion),
+              fieldsDiff: ruleDiff.fields,
             });
             return;
           }
@@ -184,12 +202,17 @@ export const performRuleUpgradeHandler = async (
         });
       });
 
-      const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets({
-        upgradeableRules,
-        requestBody: request.body,
-        defaultPickVersion,
-      });
+      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpgradeContexts } =
+        createModifiedPrebuiltRuleAssets({
+          upgradeableRules,
+          requestBody: request.body,
+          defaultPickVersion,
+        });
       ruleErrors.push(...processingErrors);
+
+      ruleUpgradeContexts.forEach((ruleUpgradeContext) => {
+        ruleUpgradeContextsMap.set(ruleUpgradeContext.ruleId, ruleUpgradeContext);
+      });
 
       if (isDryRun) {
         updatedRules.push(
@@ -198,7 +221,8 @@ export const performRuleUpgradeHandler = async (
       } else {
         const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(
           detectionRulesClient,
-          modifiedPrebuiltRuleAssets
+          modifiedPrebuiltRuleAssets,
+          logger
         );
         ruleErrors.push(...installationErrors);
         updatedRules.push(...upgradeResults.map(({ result }) => result));
@@ -217,6 +241,26 @@ export const performRuleUpgradeHandler = async (
           message: timelineInstallationError,
           rules: [],
         });
+      }
+
+      sendRuleUpdateTelemetryEvents(
+        analyticsService,
+        ruleUpgradeContextsMap,
+        updatedRules,
+        ruleErrors,
+        skippedRules,
+        logger
+      );
+
+      if (mode === ModeEnum.ALL_RULES) {
+        sendRuleBulkUpgradeTelemetryEvent(
+          analyticsService,
+          ruleUpgradeContextsMap,
+          updatedRules,
+          ruleErrors,
+          skippedRules,
+          logger
+        );
       }
     }
 
@@ -245,11 +289,9 @@ export const performRuleUpgradeHandler = async (
 };
 
 function getRuleUpgradeConflictState(
-  ruleVersions: RuleVersions,
+  ruleDiff: FullThreeWayRuleDiff,
   ruleUpgradeSpecifier?: RuleUpgradeSpecifier
 ): ThreeWayDiffConflict {
-  const { ruleDiff } = calculateRuleDiff(ruleVersions);
-
   if (ruleDiff.num_fields_with_conflicts === 0) {
     return ThreeWayDiffConflict.NONE;
   }

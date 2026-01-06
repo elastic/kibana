@@ -96,7 +96,7 @@ export async function reassignBatch(
   const now = new Date().toISOString();
   const namespaces = spaceId ? [spaceId] : [];
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: agentsToUpdate.map((agent) => agent.id),
     created_at: now,

@@ -15,6 +15,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -35,12 +36,14 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   const defaultAssistantAvailability: AssistantAvailability = {
     hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
+    hasAgentBuilderPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
-    isStarterPromptsEnabled: true,
+    isAssistantVisible: true,
+    isAssistantManagementEnabled: true,
   };
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
@@ -68,6 +71,11 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     userProfileService: mockUserProfileService,
     chrome,
     getUrlForApp: jest.fn(),
+    settings: {
+      client: {
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart,
   });
 
   return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;

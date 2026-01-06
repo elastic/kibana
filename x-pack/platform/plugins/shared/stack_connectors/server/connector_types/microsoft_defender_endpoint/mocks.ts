@@ -17,8 +17,8 @@ import type {
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
   MicrosoftDefenderEndpointSecrets,
-} from '../../../common/microsoft_defender_endpoint/types';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 import type { ConnectorInstanceMock } from '../lib/mocks';
 import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
@@ -96,7 +96,7 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
   const apiUrl = 'https://api.mock__microsoft.com';
   const options: CreateMicrosoftDefenderConnectorMockResponse['options'] = {
     configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: {
       clientId: 'app-1-2-3',
       tenantId: 'tenant_elastic',
@@ -237,7 +237,19 @@ const createMicrosoftMachineAction = (
     creationDateTimeUtc: '2019-01-02T14:39:38.2262283Z',
     lastUpdateDateTimeUtc: '2019-01-02T14:40:44.6596267Z',
     externalID: 'abc',
-    commands: ['RunScript'],
+    commands: [
+      {
+        index: 0,
+        startTime: '2025-07-07T18:50:10.186354Z',
+        endTime: '2025-07-07T18:50:21.811356Z',
+        commandStatus: 'Completed',
+        errors: [],
+        command: {
+          type: 'RunScript',
+          params: [{ key: 'ScriptName', value: 'hello.sh' }],
+        },
+      },
+    ],
     cancellationRequestor: '',
     cancellationComment: '',
     cancellationDateTimeUtc: '',

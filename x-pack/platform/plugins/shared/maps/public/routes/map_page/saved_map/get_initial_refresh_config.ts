@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
-import { ParsedMapStateJSON } from './types';
+import type { MapAttributes } from '../../../../server';
 
 export function getInitialRefreshConfig({
   mapState,
   globalState = {},
 }: {
-  mapState?: ParsedMapStateJSON;
+  mapState?: MapAttributes;
   globalState: GlobalQueryStateFromUrl;
 }) {
   const uiSettings = getUiSettings();
 
-  if (mapState?.refreshConfig) {
-    return mapState.refreshConfig;
+  if (mapState?.refreshInterval) {
+    return mapState.refreshInterval;
   }
 
   const defaultRefreshConfig = uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);
-  const refreshInterval = { ...defaultRefreshConfig, ...globalState.refreshInterval };
-  return {
-    isPaused: refreshInterval.pause,
-    interval: refreshInterval.value,
-  };
+  return { ...defaultRefreshConfig, ...globalState.refreshInterval };
 }

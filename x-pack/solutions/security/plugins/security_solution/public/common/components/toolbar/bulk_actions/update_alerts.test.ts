@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertClosingReasonValues } from '../../../../../common/types';
 import { updateAlertStatus } from './update_alerts';
 
 const mockUpdateAlertStatusByIds = jest.fn().mockReturnValue(new Promise(() => {}));
@@ -39,6 +40,22 @@ describe('updateAlertStatus', () => {
     expect(mockUpdateAlertStatusByIds).toHaveBeenCalledWith({
       status,
       signalIds,
+    });
+    expect(mockUpdateAlertStatusByQuery).not.toHaveBeenCalled();
+  });
+
+  it('should call updateAlertStatusByIds with `reason` if provided', () => {
+    const signalIds = ['1', '2'];
+    const mockReason = AlertClosingReasonValues.benign_positive;
+    updateAlertStatus({
+      status,
+      signalIds,
+      reason: mockReason,
+    });
+    expect(mockUpdateAlertStatusByIds).toHaveBeenCalledWith({
+      status,
+      signalIds,
+      reason: mockReason,
     });
     expect(mockUpdateAlertStatusByQuery).not.toHaveBeenCalled();
   });

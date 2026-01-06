@@ -9,17 +9,18 @@ import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { SetupServerReturn, setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
-import { ReportingCore } from '../../../..';
-import { ReportingStore } from '../../../../lib';
+import type { ReportingCore } from '../../../..';
+import type { ReportingStore } from '../../../../lib';
 import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {
@@ -27,7 +28,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../../types';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
@@ -102,7 +103,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    mockExportTypesRegistry = new ExportTypesRegistry();
+    mockExportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
     mockExportTypesRegistry.register(mockPdfExportType);
 
     store = await reportingCore.getStore();
@@ -181,7 +182,17 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `)
       );
   });
 
@@ -208,7 +219,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       })
@@ -225,7 +236,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
@@ -249,7 +260,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         })
@@ -273,11 +284,16 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       });
 
     expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
+    expect(eventTracker.createReport).toHaveBeenCalledWith({
+      isDeprecated: false,
+      isPublicApi: false,
+      scheduleType: 'single',
+    });
   });
 });

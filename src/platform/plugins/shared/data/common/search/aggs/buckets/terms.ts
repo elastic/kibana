@@ -18,7 +18,7 @@ import {
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
 import { aggTermsFnName } from './terms_fn';
-import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
+import type { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../..';
 
@@ -170,11 +170,6 @@ export const getTermsBucketAgg = () =>
       },
       {
         name: 'missingBucketLabel',
-        default: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel', {
-          defaultMessage: 'Missing',
-          description: `Default label used in charts when documents are missing a field.
-          Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
-        }),
         type: 'string',
         displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
           defaultMessage: 'Label for missing values',

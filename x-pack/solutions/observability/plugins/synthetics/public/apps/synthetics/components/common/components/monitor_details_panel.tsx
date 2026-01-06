@@ -24,13 +24,13 @@ import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useGetUrlParams } from '../../../hooks';
@@ -74,7 +74,13 @@ export const MonitorDetailsPanel = ({
       hasBorder={hasBorder}
     >
       <EuiSpacer size="s" />
-      <EuiDescriptionList type="column" columnWidths={[2, 3]} compressed align="left">
+      <EuiDescriptionList
+        type="responsiveColumn"
+        columnWidths={[2, 3]}
+        compressed
+        align="left"
+        css={{ maxWidth: 550 }}
+      >
         {!hideEnabled && (
           <>
             <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>

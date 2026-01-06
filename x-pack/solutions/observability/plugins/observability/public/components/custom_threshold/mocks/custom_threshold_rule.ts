@@ -6,12 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { CustomThresholdAlertFields } from '../types';
+import type { CustomThresholdAlertFields } from '../types';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 
-import { CustomThresholdAlert, CustomThresholdRule } from '../components/types';
+import type { CustomThresholdAlert, CustomThresholdRule } from '../components/types';
 
 export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}

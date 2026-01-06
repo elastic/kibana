@@ -7,29 +7,46 @@
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { EventOutcome, StatusCode } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { Transaction } from '@kbn/apm-types';
 import type { APMConfig } from '../..';
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   DURATION,
+  EVENT_OUTCOME,
+  KIND,
+  OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
+  SERVICE_NAME,
   SPAN_DURATION,
   SPAN_ID,
+  SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_SYNC,
+  SPAN_TYPE,
   STATUS_CODE,
+  TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
+  TRANSACTION_MARKS_AGENT,
   TRANSACTION_NAME,
-  TIMESTAMP_US,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
+import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
-import type { UnifiedTraceErrors } from './get_unified_trace_errors';
+import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
+import { compactMap } from '../../utils/compact_map';
+import { isRumAgentName } from '../../../common/agent_name';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -45,26 +62,32 @@ const optionalFields = asMutableArray([
   PARENT_ID,
   STATUS_CODE,
   TIMESTAMP_US,
+  EVENT_OUTCOME,
+  STATUS_CODE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  SPAN_SYNC,
+  KIND,
+  OTEL_SPAN_LINKS_TRACE_ID,
+  SPAN_LINKS_TRACE_ID,
+  AGENT_NAME,
 ] as const);
 
-export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
-  const groupedErrorCountByDocId: Record<string, number> = {};
+export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
+  const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
 
-  function incrementErrorCount(id: string) {
-    if (!groupedErrorCountByDocId[id]) {
-      groupedErrorCountByDocId[id] = 0;
+  unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
+    if (errorDoc.span?.id) {
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
     }
-    groupedErrorCountByDocId[id] += 1;
-  }
+  });
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
+    if (errorDoc.span?.id) {
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
+    }
+  });
 
-  unifiedTraceErrors.apmErrors.forEach((doc) =>
-    doc.parent?.id ? incrementErrorCount(doc.parent.id) : undefined
-  );
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((doc) =>
-    doc.id ? incrementErrorCount(doc.id) : undefined
-  );
-
-  return groupedErrorCountByDocId;
+  return groupedErrorsByDocId;
 }
 
 /**
@@ -72,25 +95,31 @@ export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
  */
 export async function getUnifiedTraceItems({
   apmEventClient,
+  logsClient,
   maxTraceItemsFromUrlParam,
   traceId,
   start,
   end,
   config,
-  unifiedTraceErrors,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
+  logsClient: LogsClient;
   maxTraceItemsFromUrlParam?: number;
   traceId: string;
   start: number;
   end: number;
   config: APMConfig;
+  serviceName?: string;
+}): Promise<{
+  traceItems: TraceItem[];
   unifiedTraceErrors: UnifiedTraceErrors;
-}): Promise<TraceItem[]> {
+  agentMarks: Record<string, number>;
+}> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
 
-  const response = await apmEventClient.search(
+  const unifiedTracePromise = apmEventClient.search(
     'get_unified_trace_items',
     {
       apm: {
@@ -103,7 +132,11 @@ export async function getUnifiedTraceItems({
           must: [
             {
               bool: {
-                filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)],
+                filter: [
+                  ...termQuery(TRACE_ID, traceId),
+                  ...rangeQuery(start, end),
+                  ...termQuery(SERVICE_NAME, serviceName),
+                ],
                 should: { exists: { field: PARENT_ID } },
               },
             },
@@ -115,7 +148,9 @@ export async function getUnifiedTraceItems({
           minimum_should_match: 1,
         },
       },
+      collapse: { field: SPAN_ID },
       fields: [...fields, ...optionalFields],
+      _source: [TRANSACTION_MARKS_AGENT],
       sort: [
         { _score: 'asc' },
         {
@@ -135,51 +170,117 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
-  const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
+  const [unifiedTraceErrors, unifiedTraceItems, incomingSpanLinksCountById] = await Promise.all([
+    getUnifiedTraceErrors({
+      apmEventClient,
+      logsClient,
+      traceId,
+      start,
+      end,
+    }),
+    unifiedTracePromise,
+    getSpanLinksCountById({
+      traceId,
+      apmEventClient,
+      start,
+      end,
+    }),
+  ]);
 
-  return response.hits.hits
-    .map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, fields);
-      const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
-      const id = event.span?.id || event.transaction?.id;
-      if (!id) {
-        return undefined;
+  const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
+  const agentMarks: Record<string, number> = {};
+  const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
+    const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+    if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
+      const source = hit._source as {
+        transaction?: Pick<Required<Transaction>['transaction'], 'marks'>;
+      };
+
+      if (source.transaction?.marks?.agent) {
+        Object.assign(agentMarks, source.transaction.marks.agent);
       }
+    }
 
-      const docErrorCount = errorCountByDocId[id] || 0;
-      return {
-        id: event.span?.id ?? event.transaction?.id,
-        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
-        name: event.span?.name ?? event.transaction?.name,
-        traceId: event.trace.id,
-        duration: resolveDuration(apmDuration, event.duration),
-        hasError:
-          docErrorCount > 0 ||
-          (event.status?.code && Array.isArray(event.status.code)
-            ? event.status.code[0] === 'Error'
-            : false),
-        parentId: event.parent?.id,
-        serviceName: event.service.name,
-      } as TraceItem;
-    })
-    .filter((_) => _) as TraceItem[];
+    const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+    const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+    const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
+
+    if (!id || !name) {
+      return undefined;
+    }
+
+    return {
+      id,
+      name,
+      timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+      traceId: event[TRACE_ID],
+      duration: resolveDuration(apmDuration, event[DURATION]),
+      status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
+      errors: errorsByDocId[id] ?? [],
+      parentId: event[PARENT_ID],
+      serviceName: event[SERVICE_NAME],
+      type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
+      sync: event[SPAN_SYNC],
+      agentName: event[AGENT_NAME],
+      spanLinksCount: {
+        incoming: incomingSpanLinksCountById[id] ?? 0,
+        outgoing:
+          event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
+      },
+      icon: getTraceItemIcon({
+        spanType: event[SPAN_TYPE],
+        agentName: event[AGENT_NAME],
+        processorEvent: event[PROCESSOR_EVENT],
+      }),
+    } satisfies TraceItem;
+  });
+
+  return {
+    traceItems,
+    unifiedTraceErrors,
+    agentMarks,
+  };
+}
+
+export function getTraceItemIcon({
+  spanType,
+  agentName,
+  processorEvent,
+}: {
+  spanType?: string;
+  agentName?: string;
+  processorEvent?: ProcessorEvent;
+}) {
+  if (spanType?.startsWith('db')) {
+    return 'database';
+  }
+
+  if (processorEvent !== ProcessorEvent.transaction) {
+    return undefined;
+  }
+
+  return isRumAgentName(agentName) ? 'globe' : 'merge';
 }
 
 /**
  * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
  */
-function resolveDuration(apmDuration?: number, otelDuration?: number[] | string): number {
-  if (apmDuration) {
-    return apmDuration;
-  }
-
-  const duration = Array.isArray(otelDuration)
-    ? otelDuration[0]
-    : otelDuration
-    ? parseFloat(otelDuration)
-    : 0;
-
-  return duration * 0.001;
-}
+const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string): number =>
+  apmDuration ?? parseOtelDuration(otelDuration);
 
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
+
+type EventStatus =
+  | { fieldName: 'event.outcome'; value: EventOutcome }
+  | { fieldName: 'status.code'; value: StatusCode }
+  | undefined;
+
+const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): EventStatus => {
+  if (eventOutcome) {
+    return { fieldName: EVENT_OUTCOME, value: eventOutcome };
+  }
+
+  if (statusCode) {
+    return { fieldName: STATUS_CODE, value: statusCode };
+  }
+};

@@ -15,6 +15,7 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -111,15 +112,18 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
     return errors;
   }, [pipelineNames, formState.pipelineName]);
 
+  const titleId = useGeneratedHtmlId({ prefix: 'mlInferencePipelineFlyoutTitle' });
   return (
     <EuiFlyout
       onClose={onClose.bind(null, true)}
       size="l"
       data-test-subj="mlTrainedModelsFromTestInferencePipelineFlyout"
+      includeFixedHeadersInFocusTrap={false}
+      aria-labelledby={titleId}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={titleId}>
             {i18n.translate(
               'xpack.ml.trainedModels.content.indices.pipelines.createInferencePipeline.title',
               {

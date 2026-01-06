@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Mixed } from 'io-ts';
+import type { Mixed } from 'io-ts';
 import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
 
 const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [

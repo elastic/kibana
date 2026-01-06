@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
+import type { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 
 import { fetchMlInferencePipelineHistory } from './get_ml_inference_pipeline_history';
 

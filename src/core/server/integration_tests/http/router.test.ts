@@ -18,10 +18,11 @@ import { z } from '@kbn/zod';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
-import { HttpService } from '@kbn/core-http-server-internal';
+import type { HttpService } from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
 
 const options = getEnvOptions();
@@ -40,7 +41,10 @@ const setupDeps = {
 beforeEach(async () => {
   logger = loggingSystemMock.create();
   server = createInternalHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {

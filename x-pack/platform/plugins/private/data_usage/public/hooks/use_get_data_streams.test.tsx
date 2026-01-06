@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
 import { renderHook } from '@testing-library/react';
 import { useGetDataUsageDataStreams } from './use_get_data_streams';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../common';
@@ -15,8 +16,8 @@ import { dataUsageTestQueryClientOptions } from '../../common/test_utils';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

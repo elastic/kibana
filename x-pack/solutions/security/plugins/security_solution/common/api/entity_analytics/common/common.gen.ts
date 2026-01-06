@@ -151,16 +151,30 @@ export const EntityRiskScoreRecord = z.object({
   /**
    * The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
    */
-  category_1_count: z.number(),
+  category_1_count: z.number().int(),
   /**
    * A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
    */
   inputs: z.array(RiskScoreInput),
   category_2_score: z.number().optional(),
-  category_2_count: z.number().optional(),
+  category_2_count: z.number().int().optional(),
   notes: z.array(z.string()),
   criticality_modifier: z.number().optional(),
   criticality_level: AssetCriticalityLevel.optional(),
+  /**
+   * A list of modifiers that were applied to the risk score calculation.
+   */
+  modifiers: z
+    .array(
+      z.object({
+        type: z.string(),
+        subtype: z.string().optional(),
+        modifier_value: z.number().optional(),
+        contribution: z.number(),
+        metadata: z.object({}).catchall(z.unknown()).optional(),
+      })
+    )
+    .optional(),
 });
 
 export type RiskScoreEntityIdentifierWeights = z.infer<typeof RiskScoreEntityIdentifierWeights>;

@@ -13,8 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -22,8 +21,8 @@ import chromajs from 'chroma-js';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { KbnPalettes } from '@kbn/palettes';
-import { ColorMapping } from '../../config';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { ColorMapping } from '../../config';
 
 import { hasEnoughContrast } from '../../color/color_math';
 
@@ -156,7 +155,7 @@ export function RGBPicker({
                     top: 6px;
                   `}
                 >
-                  <EuiToolTip
+                  <EuiIconTip
                     position="bottom"
                     content={
                       isColorTextInvalid
@@ -173,19 +172,15 @@ export function RGBPicker({
                           })
                         : undefined
                     }
-                  >
-                    <EuiIcon
-                      tabIndex={0}
-                      type="warning"
-                      color={
-                        isColorTextInvalid
-                          ? euiThemeVars.euiColorDangerText
-                          : colorHasLowContrast
-                          ? euiThemeVars.euiColorWarningText
-                          : euiThemeVars.euiColorPrimary
-                      }
-                    />
-                  </EuiToolTip>
+                    type="warning"
+                    color={
+                      isColorTextInvalid
+                        ? euiThemeVars.euiColorDangerText
+                        : colorHasLowContrast
+                        ? euiThemeVars.euiColorWarningText
+                        : euiThemeVars.euiColorPrimary
+                    }
+                  />
                 </div>
               )}
             </EuiFlexGroup>

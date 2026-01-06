@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LicensingRouter } from '../../types';
+import type { LicensingRouter } from '../../types';
 
 export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
   router.post(
@@ -20,15 +20,15 @@ export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
       },
       validate: {
         body: schema.object({
-          featureName: schema.string(),
+          featureId: schema.string(),
           lastUsed: schema.number(),
         }),
       },
     },
     async (context, request, response) => {
-      const { featureName, lastUsed } = request.body;
+      const { featureId, lastUsed } = request.body;
 
-      (await context.licensing).featureUsage.notifyUsage(featureName, lastUsed);
+      (await context.licensing).featureUsage.notifyUsage(featureId, lastUsed);
 
       return response.ok({
         body: {

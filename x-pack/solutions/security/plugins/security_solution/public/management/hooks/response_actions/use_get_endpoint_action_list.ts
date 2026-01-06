@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
@@ -37,22 +37,40 @@ export const useGetEndpointActionList = (
     ...options,
     keepPreviousData: true,
     queryFn: async () => {
-      return http.get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
-        version: '2023-10-31',
-        query: {
-          agentIds: query.agentIds,
-          agentTypes: query.agentTypes,
-          commands: query.commands,
-          endDate: query.endDate,
-          page: query.page,
-          pageSize: query.pageSize,
-          startDate: query.startDate,
-          statuses: query.statuses,
-          userIds,
-          withOutputs: query.withOutputs,
-          types: query.types,
-        },
-      });
+      return http
+        .get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
+          version: '2023-10-31',
+          query: {
+            agentIds: query.agentIds,
+            agentTypes: query.agentTypes,
+            commands: query.commands,
+            endDate: query.endDate,
+            page: query.page,
+            pageSize: query.pageSize,
+            startDate: query.startDate,
+            statuses: query.statuses,
+            userIds,
+            withOutputs: query.withOutputs,
+            types: query.types,
+          },
+        })
+        .catch((error) => {
+          // if the error is a 404 or index not found exception, return an empty response
+          // this is to handle the case where the endpoint action index does not exist yet
+          // and avoid showing an error to the user in that case
+          if (
+            error.body.statusCode === 404 ||
+            error.body.message.includes('index_not_found_exception')
+          ) {
+            return {
+              page: 1,
+              pageSize: query.pageSize || 10,
+              total: 0,
+              data: [], // empty list of pending actions
+            };
+          }
+          return error;
+        });
     },
   });
 };

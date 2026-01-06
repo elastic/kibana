@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { xor } from 'lodash';
-import { DashboardLayout } from './types';
+import type { DashboardLayout } from './types';
 
 /**
  * Checks whether the layouts have the same keys, and if they do, checks whether every layout item in the
@@ -24,10 +24,16 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
   if (sectionIdDiff.length > 0) return false;
 
   /**
-   * Since section IDs are equal, check for more expensive panel ID equality
+   * Since section IDs are equal, check for more expensive panel + control ID equality
    */
-  const newPanelUuids = Object.keys(newLayout?.panels ?? {});
-  const panelIdDiff = xor(Object.keys(originalLayout?.panels ?? {}), newPanelUuids);
+  const newPanelUuids = [
+    ...Object.keys(newLayout?.panels ?? {}),
+    ...Object.keys(newLayout?.controls ?? {}),
+  ];
+  const panelIdDiff = xor(
+    [...Object.keys(originalLayout?.panels ?? {}), ...Object.keys(originalLayout?.controls ?? {})],
+    newPanelUuids
+  );
   if (panelIdDiff.length > 0) return false;
 
   /**
@@ -39,13 +45,18 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
       return false;
     }
   }
+
+  // then compare control state that layout manages (i.e. order, grow, width, etc.)
+  for (const controlId of Object.keys(newLayout?.controls ?? {})) {
+    if (!deepEqual(originalLayout?.controls[controlId], newLayout?.controls[controlId])) {
+      return false;
+    }
+  }
+
   // then compare panel grid data
-  for (const embeddableId of newPanelUuids) {
+  for (const embeddableId of Object.keys(newLayout?.panels ?? {})) {
     if (
-      !deepEqual(
-        originalLayout?.panels[embeddableId]?.gridData,
-        newLayout?.panels[embeddableId]?.gridData
-      )
+      !deepEqual(originalLayout?.panels[embeddableId]?.grid, newLayout?.panels[embeddableId]?.grid)
     ) {
       return false;
     }

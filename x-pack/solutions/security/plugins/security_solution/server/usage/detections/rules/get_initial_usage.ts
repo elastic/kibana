@@ -15,6 +15,9 @@ import type {
   SpacesUsage,
   FeatureTypeUsage,
   ResponseActionsUsage,
+  UpgradeableRulesSummary,
+  ThreatMatchFeatureTypeUsage,
+  RuleCustomizationCounts,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -60,6 +63,11 @@ export const getInitialFeatureTypeUsage = (): FeatureTypeUsage => ({
   has_exceptions: 0,
 });
 
+export const getInitialThreatMatchFeatureTypeUsage = (): ThreatMatchFeatureTypeUsage => ({
+  ...getInitialFeatureTypeUsage(),
+  has_does_not_match_condition: 0,
+});
+
 /**
  * Default detection rule usage count, split by type + elastic/custom
  */
@@ -72,13 +80,15 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
   eql_custom: getInitialFeatureTypeUsage(),
   machine_learning: getInitialFeatureTypeUsage(),
   machine_learning_custom: getInitialFeatureTypeUsage(),
-  threat_match: getInitialFeatureTypeUsage(),
-  threat_match_custom: getInitialFeatureTypeUsage(),
+  threat_match: getInitialThreatMatchFeatureTypeUsage(),
+  threat_match_custom: getInitialThreatMatchFeatureTypeUsage(),
   new_terms: getInitialFeatureTypeUsage(),
   new_terms_custom: getInitialFeatureTypeUsage(),
   esql: getInitialFeatureTypeUsage(),
   esql_custom: getInitialFeatureTypeUsage(),
   elastic_total: getInitialFeatureTypeUsage(),
+  elastic_customized_total: getInitialFeatureTypeUsage(),
+  elastic_noncustomized_total: getInitialFeatureTypeUsage(),
   custom_total: getInitialFeatureTypeUsage(),
 });
 
@@ -144,4 +154,46 @@ export const getInitialMaxAvgMin = (): MaxAvgMin => ({
   max: 0.0,
   avg: 0.0,
   min: 0.0,
+});
+
+/**
+ * Returns the initial usage statistics for rule upgrade status.
+ *
+ * The returned object contains default values for the total number of upgradeable rules,
+ * the number of customized rules, and the counts of enabled and disabled rules.
+ *
+ * @returns {UpgradeableRulesSummary} An object with initial values for rule upgrade status:
+ * - `total`: The total number of upgradeable rules (default is 0).
+ * - `customized`: The number of customized upgradeable rules (default is 0).
+ * - `enabled`: The number of enabled upgradeable rules (default is 0).
+ * - `disabled`: The number of disabled upgradeable rules (default is 0).
+ */
+export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
+  total: 0,
+  customized: 0,
+  enabled: 0,
+  disabled: 0,
+});
+
+export const getInitialRuleCustomizationStatus = (): RuleCustomizationCounts => ({
+  alert_suppression: 0,
+  anomaly_threshold: 0,
+  data_view_id: 0,
+  description: 0,
+  filters: 0,
+  from: 0,
+  index: 0,
+  interval: 0,
+  investigation_fields: 0,
+  name: 0,
+  new_terms_fields: 0,
+  note: 0,
+  query: 0,
+  risk_score: 0,
+  severity: 0,
+  setup: 0,
+  tags: 0,
+  threat_query: 0,
+  threshold: 0,
+  timeline_id: 0,
 });

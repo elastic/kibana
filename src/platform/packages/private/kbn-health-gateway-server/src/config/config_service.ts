@@ -10,7 +10,8 @@
 import { fromRoot, REPO_ROOT } from '@kbn/repo-info';
 import type { LoggerFactory } from '@kbn/logging';
 import { getPackages } from '@kbn/repo-packages';
-import { ConfigService as KbnConfigService, CliArgs, Env, RawConfigService } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
+import { ConfigService as KbnConfigService, Env, RawConfigService } from '@kbn/config';
 import { getArgValues } from './read_argv';
 
 const CONFIG_CLI_FLAGS = ['-c', '--config'];

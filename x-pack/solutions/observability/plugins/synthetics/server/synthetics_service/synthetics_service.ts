@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
@@ -18,12 +18,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
-import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance_window_client';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { isEmpty } from 'lodash';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -33,11 +31,11 @@ import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_se
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
-import { ServiceConfig } from '../config';
-import { ServiceAPIClient, ServiceData } from './service_api_client';
+import type { ServiceConfig } from '../config';
+import type { ServiceData } from './service_api_client';
+import { ServiceAPIClient } from './service_api_client';
 
-import {
-  ConfigKey,
+import type {
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
@@ -45,11 +43,12 @@ import {
   SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import type { ConfigData } from './formatters/public_formatters/format_configs';
 import {
-  ConfigData,
   formatHeartbeatRequest,
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
@@ -111,8 +110,30 @@ export class SyntheticsService {
   public start(taskManager: TaskManagerStartContract) {
     if (this.config?.manifestUrl) {
       void this.scheduleSyncTask(taskManager);
+    } else {
+      const logLevel = this.shouldLogAsError() ? 'error' : 'debug';
+      const message =
+        'Synthetics sync task is not being scheduled because manifestUrl is not configured.';
+      this.logger[logLevel](message);
     }
     void this.setupIndexTemplates();
+  }
+
+  private shouldLogAsError(): boolean {
+    const cloud = this.server.cloud;
+    if (!cloud) {
+      return false; // Self-managed, use DEBUG
+    }
+    // Serverless deployments should log as ERROR
+    if (cloud.isServerlessEnabled) {
+      return true;
+    }
+    // ECH (stateful) deployments have deploymentId, should log as ERROR
+    if (cloud.isCloudEnabled && cloud.deploymentId) {
+      return true;
+    }
+    // ECE or self-managed, use DEBUG
+    return false;
   }
 
   public async setupIndexTemplates() {
@@ -196,12 +217,10 @@ export class SyntheticsService {
 
                 if (service.isAllowed && service.config.manifestUrl) {
                   void service.setupIndexTemplates();
-                  await service.pushConfigs();
+                  await service.pushConfigs(ALL_SPACES_ID);
                 } else {
                   if (!service.isAllowed) {
-                    service.logger.error(
-                      'User is not allowed to access Synthetics service. Please contact support.'
-                    );
+                    service.logger.debug('User is not allowed to access Synthetics service.');
                   }
                 }
               } catch (e) {
@@ -318,10 +337,12 @@ export class SyntheticsService {
   }
 
   async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+      server: this.server,
+    });
     // do not check for api key validity if inspecting
     if (!isValid && !inspect) {
-      this.server.logger.error(
+      this.server.logger.debug(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;
@@ -409,7 +430,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs() {
+  async pushConfigs(spaceId: string) {
     const license = await this.getLicense();
     const service = this;
 
@@ -419,7 +440,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows();
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -648,19 +669,19 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows() {
-    const { savedObjects } = this.server.coreStart;
-    const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+  async getMaintenanceWindows(spaceId: string) {
+    const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
+      {} as KibanaRequest
+    );
 
-    const maintenanceWindowClient = new MaintenanceWindowClient({
-      savedObjectsClient: soClient,
-      getUserName: async () => '',
-      uiSettings: this.server.coreStart.uiSettings.asScopedToClient(soClient),
-      logger: this.logger,
-    });
+    if (!maintenanceWindowClient) {
+      return [];
+    }
+
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
+      namespaces: [spaceId],
     });
     return mws.data;
   }

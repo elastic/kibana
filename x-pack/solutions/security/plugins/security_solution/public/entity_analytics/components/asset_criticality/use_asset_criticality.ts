@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
@@ -50,15 +50,17 @@ export const useAssetCriticalityPrivileges = (
 export const useAssetCriticalityFetchList = ({
   idField,
   idValues,
+  skip = false,
 }: {
   idField: string;
   idValues: string[];
+  skip?: boolean;
 }) => {
   const { fetchAssetCriticalityList } = useEntityAnalyticsRoutes();
   return useQuery<FindAssetCriticalityRecordsResponse>({
     queryKey: [ASSET_CRITICALITY_LIST_KEY],
     queryFn: () => fetchAssetCriticalityList({ idField, idValues }),
-    enabled: idValues.length > 0,
+    enabled: !skip && idValues.length > 0,
   });
 };
 

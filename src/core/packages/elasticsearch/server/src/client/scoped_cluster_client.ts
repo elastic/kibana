@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from './client';
+import type { ElasticsearchClient } from './client';
 
 /**
  * Serves the same purpose as the normal {@link IClusterClient | cluster client} but exposes

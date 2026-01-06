@@ -14,6 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import {
   CAI_NUMBER_OF_SHARDS,
   CAI_AUTO_EXPAND_REPLICAS,
@@ -21,7 +22,6 @@ import {
   CAI_INDEX_MODE,
   CAI_DEFAULT_TIMEOUT,
 } from './constants';
-import { fullJitterBackoffFactory } from '../common/retry_service/full_jitter_backoff';
 import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 import { CasesAnalyticsRetryService } from './retry_service';
 
@@ -93,6 +93,7 @@ export class AnalyticsIndex {
     this.sourceIndex = sourceIndex;
     this.sourceQuery = sourceQuery;
     this.indexSettings = {
+      hidden: true,
       // settings are not supported on serverless ES
       ...(isServerless
         ? {}
@@ -133,6 +134,16 @@ export class AnalyticsIndex {
         await this.updateIndexMapping();
       }
     } catch (error) {
+      if (error.body?.error?.type === 'resource_already_exists_exception') {
+        this.logDebug('Index already exists. Skipping creation.');
+        return;
+      }
+
+      if (error.body?.error?.type === 'multi_project_pending_exception') {
+        this.logDebug('Multi-project setup. Skipping creation.');
+        return;
+      }
+
       this.handleError('Failed to create the index.', error);
     }
   }

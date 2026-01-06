@@ -21,6 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiModalHeaderTitle,
   EuiModalBody,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -72,6 +73,8 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const [validationResponse, setValidationResponse] = useState<DatafeedValidationResponse | null>(
     null
   );
+
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(function initialPageLoad() {
     setCurrentDataViewTitle(jobCreator.indexPatternTitle);
@@ -125,9 +128,13 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   return (
     <>
-      <EuiModal onClose={onClose} data-test-subj="mlJobMgmtImportJobsFlyout">
+      <EuiModal
+        onClose={onClose}
+        data-test-subj="mlJobMgmtImportJobsFlyout"
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
               defaultMessage="Change data view"
@@ -241,6 +248,7 @@ const ValidationMessage: FC<{
   if (validationResponse === null) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.title',
           {
@@ -260,6 +268,7 @@ const ValidationMessage: FC<{
     if (validationResponse.documentsFound === true) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.title',
             {
@@ -277,6 +286,7 @@ const ValidationMessage: FC<{
     } else {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.title',
             {
@@ -296,6 +306,7 @@ const ValidationMessage: FC<{
   } else {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.title',
           {

@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import type { MutableRefObject } from 'react';
 
-import { Column } from '../reorderable_table/types';
-import { ItemWithAnID } from '../types';
+import type { Column } from '../reorderable_table/types';
+import type { ItemWithAnID } from '../types';
 
 import { ActionColumn } from './action_column';
 import { EditingColumn } from './editing_column';
-import { InlineEditableTableColumn } from './types';
+import type { InlineEditableTableColumn } from './types';
 
 interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
@@ -22,6 +23,7 @@ interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   canRemoveLastItem?: boolean;
   isLoading?: boolean;
   lastItemWarning?: string;
+  prevFocusRef?: MutableRefObject<HTMLElement | null>;
   uneditableItems?: Item[];
 }
 
@@ -34,6 +36,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
   isLoading = false,
   lastItemWarning,
   uneditableItems,
+  prevFocusRef,
 }: GetUpdatedColumnProps<Item>): Array<Column<Item>> => {
   return [
     ...columns.map((column) => {
@@ -61,6 +64,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
           lastItemWarning={lastItemWarning}
           uneditableItems={uneditableItems}
           item={item}
+          prevFocusRef={prevFocusRef}
         />
       ),
     },

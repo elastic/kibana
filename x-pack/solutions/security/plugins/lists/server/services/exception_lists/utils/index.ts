@@ -6,12 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import {
+import type {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
@@ -22,13 +22,12 @@ import {
   FoundExceptionListSchema,
   UpdateCommentsArrayOrUndefined,
   UpdateExceptionListItemSchema,
-  exceptionListItemType,
-  exceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { exceptionListItemType, exceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
-import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
-import {
+import type { ExceptionListSoSchema } from '../../../schemas/saved_objects';
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_list_client_types';
@@ -44,7 +43,6 @@ export const transformSavedObjectToExceptionList = ({
   const {
     version: _version,
     attributes: {
-      /* eslint-disable @typescript-eslint/naming-convention */
       created_at,
       created_by,
       description,
@@ -58,7 +56,6 @@ export const transformSavedObjectToExceptionList = ({
       type,
       updated_by,
       version,
-      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,
@@ -144,7 +141,6 @@ export const transformSavedObjectToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
-      /* eslint-disable @typescript-eslint/naming-convention */
       comments,
       created_at,
       created_by,
@@ -160,7 +156,6 @@ export const transformSavedObjectToExceptionListItem = ({
       tie_breaker_id,
       type,
       updated_by,
-      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,

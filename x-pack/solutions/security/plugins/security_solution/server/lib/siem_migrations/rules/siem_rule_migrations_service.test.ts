@@ -10,10 +10,7 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  SiemRuleMigrationsService,
-  type SiemRuleMigrationsCreateClientParams,
-} from './siem_rule_migrations_service';
+import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
 import {
   MockRuleMigrationsDataService,
@@ -21,13 +18,17 @@ import {
   mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
-import { waitFor } from '@testing-library/dom';
-import type { SiemRuleMigrationsClientDependencies } from './types';
+import { retry } from 'async';
+import type {
+  SiemMigrationsClientDependencies,
+  SiemMigrationsCreateClientParams,
+} from '../common/types';
+import type { KibanaRequest } from '@kbn/core/server';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');
 
-const dependencies = {} as SiemRuleMigrationsClientDependencies;
+const dependencies = {} as SiemMigrationsClientDependencies;
 
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
@@ -63,22 +64,18 @@ describe('SiemRuleMigrationsService', () => {
       mockSetup.mockRejectedValueOnce(error);
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
-      await waitFor(() => {
+      await retry(async (): Promise<void> => {
         expect(logger.error).toHaveBeenCalledWith('Error installing data service.', error);
       });
     });
   });
 
   describe('when createClient is called', () => {
-    let createClientParams: SiemRuleMigrationsCreateClientParams;
-
+    let createClientParams: SiemMigrationsCreateClientParams;
+    let request: KibanaRequest;
     beforeEach(() => {
-      createClientParams = {
-        spaceId: 'default',
-        currentUser,
-        request: httpServerMock.createKibanaRequest(),
-        dependencies,
-      };
+      request = httpServerMock.createKibanaRequest();
+      createClientParams = { spaceId: 'default', currentUser, request, dependencies };
     });
 
     describe('without setup', () => {
@@ -108,6 +105,7 @@ describe('SiemRuleMigrationsService', () => {
         ruleMigrationsService.createClient(createClientParams);
         expect(mockTaskCreateClient).toHaveBeenCalledWith({
           currentUser: createClientParams.currentUser,
+          request,
           dataClient: mockDataCreateClient(),
           dependencies,
         });

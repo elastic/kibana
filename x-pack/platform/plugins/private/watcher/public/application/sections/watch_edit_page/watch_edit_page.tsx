@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { WATCH_TYPES } from '../../../../common/constants';
-import { BaseWatch } from '../../../../common/types/watch_types';
+import type { BaseWatch } from '../../../../common/types/watch_types';
 import { getPageErrorCode, PageError, SectionLoading } from '../../components';
 import { loadWatch } from '../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../lib/breadcrumbs';
@@ -137,6 +137,7 @@ export const WatchEditPage = ({
 
         if (has(watchTypes, type) && isFunction(watchTypes[type])) {
           const WatchType = watchTypes[type];
+          // @ts-expect-error upgrade typescript v5.9.3
           dispatch({ command: 'setWatch', payload: new WatchType() });
         } else {
           dispatch({ command: 'setError', payload: { message: 'Invalid watch type' } });

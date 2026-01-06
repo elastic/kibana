@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common';
 import { PolicyForm } from '../../public/application/components/policy_form';
-import { PolicyFormTestBed } from './helpers/policy_form.helpers';
+import type { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
 import { TIME_UNITS } from '../../common/constants';
 

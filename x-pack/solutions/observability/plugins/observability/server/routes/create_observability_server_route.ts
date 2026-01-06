@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { ObservabilityRouteCreateOptions, ObservabilityRouteHandlerResources } from './types';
+import type { ObservabilityRouteCreateOptions, ObservabilityRouteHandlerResources } from './types';
 
 export const createObservabilityServerRoute = createServerRouteFactory<
   ObservabilityRouteHandlerResources,

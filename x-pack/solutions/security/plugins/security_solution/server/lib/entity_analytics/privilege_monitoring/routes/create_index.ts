@@ -9,9 +9,12 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics/monitoring/create_index.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics';
+import { API_VERSIONS, APP_ID, PRIVMON_INDICES_URL } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { createDataSourcesService } from '../data_sources/data_sources_service';
+import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
+import { monitoringEntitySourceType } from '../saved_objects';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -20,7 +23,7 @@ export const createPrivilegeMonitoringIndicesRoute = (
   router.versioned
     .put({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/privileges/indices',
+      path: PRIVMON_INDICES_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -43,11 +46,19 @@ export const createPrivilegeMonitoringIndicesRoute = (
         const indexName = request.body.name;
         const indexMode = request.body.mode;
 
+        const dataClient = secSol.getPrivilegeMonitoringDataClient();
+        const config = secSol.getConfig();
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+        const soClient = dataClient.getScopedSoClient(request, {
+          includedHiddenTypes: [
+            PrivilegeMonitoringApiKeyType.name,
+            monitoringEntitySourceType.name,
+          ],
+        });
+        const dataSourcesService = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
         try {
-          await secSol
-            .getPrivilegeMonitoringDataClient()
-            .createPrivilegesImportIndex(indexName, indexMode);
-
+          await dataSourcesService.createImportIndex(indexName, indexMode);
           return response.ok();
         } catch (e) {
           const error = transformError(e);

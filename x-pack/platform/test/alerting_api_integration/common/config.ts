@@ -13,9 +13,9 @@ import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
+import { CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID } from '@kbn/connector-schemas/crowdstrike/constants';
+import { CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -30,6 +30,7 @@ interface CreateTestConfigOptions {
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
+  emailRecipientAllowlist?: string[];
   testFiles?: string[];
   reportName?: string;
   useDedicatedTaskRunner: boolean;
@@ -39,6 +40,8 @@ interface CreateTestConfigOptions {
   disabledRuleTypes?: string[];
   enabledRuleTypes?: string[];
   maxAlerts?: number;
+  emailMaximumBodyLength?: number;
+  indexRefreshInterval?: string | false;
 }
 
 // test.not-enabled is specifically not enabled
@@ -56,6 +59,7 @@ const enabledActionTypes = [
   '.servicenow-sir',
   '.servicenow-itom',
   '.jira',
+  '.jira-service-management',
   '.resilient',
   '.gen-ai',
   '.d3security',
@@ -86,6 +90,8 @@ const enabledActionTypes = [
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
   'test.connector-with-hooks',
+  'test.deprecated',
+  'test.single_file_connector',
 ];
 
 export const getPreConfiguredActions = (
@@ -217,6 +223,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
     emailDomainsAllowed = undefined,
+    emailRecipientAllowlist = undefined,
     testFiles = undefined,
     reportName = undefined,
     useDedicatedTaskRunner,
@@ -224,6 +231,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     maxScheduledPerMinute,
     experimentalFeatures = [],
     maxAlerts = 20,
+    indexRefreshInterval,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -288,9 +296,16 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
-    const emailSettings = emailDomainsAllowed
+    let emailSettings = emailDomainsAllowed
       ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
       : [];
+
+    emailSettings = emailRecipientAllowlist
+      ? [
+          ...emailSettings,
+          `--xpack.actions.email.recipient_allowlist=${JSON.stringify(emailRecipientAllowlist)}`,
+        ]
+      : emailSettings;
 
     const maxScheduledPerMinuteSettings =
       typeof maxScheduledPerMinute === 'number'
@@ -306,6 +321,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       options.enabledRuleTypes == null
         ? []
         : [`--xpack.alerting.enabledRuleTypes=${JSON.stringify(options.enabledRuleTypes)}`];
+
+    const emailMaximumBodyLengthSetting =
+      options.emailMaximumBodyLength == null
+        ? []
+        : [`--xpack.actions.email.maximum_body_length=${options.emailMaximumBodyLength}`];
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
@@ -332,6 +352,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
+          '--xpack.alerting.gapAutoFillScheduler.enabled=true',
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
@@ -358,6 +379,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...maxScheduledPerMinuteSettings,
           ...disabledRuleTypesSetting,
           ...enabledRuleTypesSetting,
+          ...emailMaximumBodyLengthSetting,
           '--xpack.eventLog.logEntries=true',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
@@ -385,6 +407,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
+      indexRefreshInterval,
     };
   };
 }

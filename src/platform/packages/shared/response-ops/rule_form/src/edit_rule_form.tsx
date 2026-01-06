@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
@@ -26,7 +27,8 @@ import {
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
-import { DEFAULT_VALID_CONSUMERS, RuleFormStepId, getDefaultFormData } from './constants';
+import type { RuleFormStepId } from './constants';
+import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
 export interface EditRuleFormProps {
   id: string;
@@ -39,6 +41,7 @@ export interface EditRuleFormProps {
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialMetadata?: RuleTypeMetaData;
   initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
@@ -133,6 +136,18 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     return hasAllPrivilege && (canExecuteActions || (!canExecuteActions && !actions.length));
   }, [ruleType, fetchedFormData, application]);
 
+  const computedInitialMetadata = useMemo(() => {
+    // Injecting isEdit only for esquery rules to enable this feature: https://github.com/elastic/kibana/issues/226839
+    // to minimize possible changes to other ruletypes
+    if (ruleType?.id === '.es-query') {
+      return {
+        ...initialMetadata,
+        isEdit: true,
+      };
+    }
+    return initialMetadata;
+  }, [ruleType, initialMetadata]);
+
   if (isInitialLoading) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
@@ -210,7 +225,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           actions: actionsWithFrequency,
         },
         id,
-        metadata: initialMetadata,
+        metadata: computedInitialMetadata,
         plugins,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleType: ruleType,
@@ -232,6 +247,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         onCancel={onCancel}
         onChangeMetaData={onChangeMetaData}
         initialEditStep={initialEditStep}
+        focusTrapProps={props.focusTrapProps}
       />
     </RuleFormStateProvider>
   );

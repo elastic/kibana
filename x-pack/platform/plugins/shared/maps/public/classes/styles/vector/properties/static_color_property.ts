@@ -7,7 +7,7 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
-import { ColorStaticOptions } from '../../../../../common/descriptor_types';
+import type { ColorStaticOptions } from '../../../../../common/descriptor_types';
 
 export class StaticColorProperty extends StaticStyleProperty<ColorStaticOptions> {
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {

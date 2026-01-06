@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import {
-  CancelSyncsApiArgs,
-  CancelSyncsApiLogic,
-} from '../../../api/connector/cancel_syncs_api_logic';
-import {
-  StartAccessControlSyncApiLogic,
-  StartAccessControlSyncArgs,
-} from '../../../api/connector/start_access_control_sync_api_logic';
-import {
-  StartIncrementalSyncApiLogic,
-  StartIncrementalSyncArgs,
-} from '../../../api/connector/start_incremental_sync_api_logic';
-import { StartSyncApiLogic, StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
+import type { CancelSyncsApiArgs } from '../../../api/connector/cancel_syncs_api_logic';
+import { CancelSyncsApiLogic } from '../../../api/connector/cancel_syncs_api_logic';
+import type { StartAccessControlSyncArgs } from '../../../api/connector/start_access_control_sync_api_logic';
+import { StartAccessControlSyncApiLogic } from '../../../api/connector/start_access_control_sync_api_logic';
+import type { StartIncrementalSyncArgs } from '../../../api/connector/start_incremental_sync_api_logic';
+import { StartIncrementalSyncApiLogic } from '../../../api/connector/start_incremental_sync_api_logic';
+import type { StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
+import { StartSyncApiLogic } from '../../../api/connector/start_sync_api_logic';
 import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,

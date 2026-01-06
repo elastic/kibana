@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -17,7 +17,7 @@ import {
   ScopedHistory,
   Capabilities,
 } from '@kbn/core/public';
-import {
+import type {
   ComponentTemplateFlyoutProps,
   DatastreamFlyoutProps,
   IndexManagementPluginSetup,
@@ -26,16 +26,16 @@ import {
   IndexSettingProps,
   IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
-import {
+import type {
   IndexManagementLocator,
   IndexManagementAppMountParams,
 } from '@kbn/index-management-shared-types';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import React from 'react';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
-import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
@@ -57,6 +57,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private apiService?: PublicApiService;
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
@@ -72,8 +73,10 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
   };
   private canUseSyntheticSource: boolean = false;
+  private canUseEis: boolean = false;
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
@@ -94,6 +97,7 @@ export class IndexMgmtUIPlugin
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
+      enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
@@ -109,6 +113,7 @@ export class IndexMgmtUIPlugin
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
       enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
+      enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
   }
 
@@ -116,7 +121,7 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management, cloud } = plugins;
+    const { fleet, usageCollection, management, cloud, reindexService } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -143,6 +148,8 @@ export class IndexMgmtUIPlugin
               config: this.config,
               cloud,
               canUseSyntheticSource: this.canUseSyntheticSource,
+              canUseEis: this.canUseEis,
+              reindexService,
             });
           },
         });
@@ -155,8 +162,10 @@ export class IndexMgmtUIPlugin
       })
     );
 
+    this.apiService = new PublicApiService(coreSetup.http);
+
     return {
-      apiService: new PublicApiService(coreSetup.http),
+      apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
       renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
@@ -170,6 +179,8 @@ export class IndexMgmtUIPlugin
           config: this.config,
           cloud,
           canUseSyntheticSource: this.canUseSyntheticSource,
+          canUseEis: this.canUseEis,
+          reindexService,
         });
       },
       locator: this.locator,
@@ -181,7 +192,8 @@ export class IndexMgmtUIPlugin
     plugins: StartDependencies,
     deps: { history: ScopedHistory<unknown> }
   ) {
-    const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+    const { fleet, usageCollection, cloud, share, console, ml, licensing, reindexService } =
+      plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
     const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -206,6 +218,7 @@ export class IndexMgmtUIPlugin
         console,
         ml,
         licensing,
+        reindexService,
       },
       services: {
         extensionsService: this.extensionsService,
@@ -213,6 +226,7 @@ export class IndexMgmtUIPlugin
       config: this.config,
       history: deps.history,
       canUseSyntheticSource: this.canUseSyntheticSource,
+      canUseEis: this.canUseEis,
       overlays: core.overlays,
       privs: {
         monitor: !!monitor,
@@ -238,8 +252,10 @@ export class IndexMgmtUIPlugin
 
     this.licensingSubscription = licensing?.license$.subscribe((next) => {
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
+      this.canUseEis = next.hasAtLeast('enterprise');
     });
     return {
+      apiService: this.apiService!,
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexMappingProps) => {

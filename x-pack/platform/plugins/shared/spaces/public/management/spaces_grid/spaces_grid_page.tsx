@@ -149,7 +149,10 @@ export class SpacesGridPage extends Component<Props, State> {
       <>
         {!this.state.loading && !this.canCreateSpaces() ? (
           <>
-            <EuiCallOut title="You have reached the maximum number of allowed spaces." />
+            <EuiCallOut
+              announceOnMount
+              title="You have reached the maximum number of allowed spaces."
+            />
             <EuiSpacer />
           </>
         ) : undefined}
@@ -179,7 +182,7 @@ export class SpacesGridPage extends Component<Props, State> {
             },
           }}
           loading={this.state.loading}
-          message={
+          noItemsMessage={
             this.state.loading ? (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.loadingTitle"

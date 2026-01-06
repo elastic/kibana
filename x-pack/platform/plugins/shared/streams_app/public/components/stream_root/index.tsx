@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { StreamDetailContextProvider } from '../../hooks/use_stream_detail';
-import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -17,16 +16,6 @@ export function StreamDetailRoot({ children }: { children: React.ReactNode }) {
   const {
     path: { key },
   } = useStreamsAppParams('/{key}', true);
-
-  useStreamsAppBreadcrumbs(() => {
-    return [
-      {
-        title: key,
-        path: `/{key}`,
-        params: { path: { key } },
-      },
-    ];
-  }, [key]);
 
   return (
     <StreamDetailContextProvider name={key} streamsRepositoryClient={streamsRepositoryClient}>

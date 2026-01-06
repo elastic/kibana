@@ -7,8 +7,8 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { map } from 'lodash';
-import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
@@ -16,7 +16,11 @@ import type {
   GetLiveQueryResultsRequestParamsSchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  OSQUERY_INTEGRATION_NAME,
+} from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
@@ -32,6 +36,8 @@ import {
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -43,7 +49,7 @@ export const getLiveQueryResultsRoute = (
       path: '/api/osquery/live_queries/{id}/results/{actionId}',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
     })
@@ -67,9 +73,62 @@ export const getLiveQueryResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+
+          if (page * pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+            return response.badRequest({
+              body: {
+                message: `Cannot paginate beyond ${DEFAULT_MAX_TABLE_QUERY_SIZE} results. Use Discover for full access.`,
+                attributes: {
+                  code: 'PAGINATION_LIMIT_EXCEEDED',
+                },
+              },
+            });
+          }
+
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
+
+          let integrationNamespaces: Record<string, string[]> = {};
+          let spaceAwareIndexPatterns: string[] = [];
+
+          const logger = osqueryContext.logFactory.get('get_live_query_results');
+
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
+
+            logger.debug(
+              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+            );
+
+            const baseIndexPatterns = [`logs-${OSQUERY_INTEGRATION_NAME}.result*`];
+
+            spaceAwareIndexPatterns = baseIndexPatterns.flatMap((pattern) => {
+              const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+
+              if (osqueryNamespaces && osqueryNamespaces.length > 0) {
+                return osqueryNamespaces.map((namespace) =>
+                  buildIndexNameWithNamespace(pattern, namespace)
+                );
+              }
+
+              return [pattern];
+            });
+
+            logger.debug(
+              `Built space-aware index patterns: ${JSON.stringify(spaceAwareIndexPatterns)}`
+            );
+          }
 
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
@@ -90,20 +149,29 @@ export const getLiveQueryResultsRoute = (
 
           const queries = actionDetails?._source?.queries;
 
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
           await lastValueFrom(
             zip(
               ...map(queries, (query) =>
-                getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+                getActionResponses(
+                  search,
+                  query.action_id,
+                  query.agents?.length ?? 0,
+                  namespacesOrUndefined
+                )
               )
             )
           );
-
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
@@ -114,6 +182,7 @@ export const getLiveQueryResultsRoute = (
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
+                integrationNamespaces: namespacesOrUndefined,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

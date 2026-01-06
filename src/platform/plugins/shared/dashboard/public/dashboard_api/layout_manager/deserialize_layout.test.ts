@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import { deserializeLayout } from './deserialize_layout';
 
 describe('deserializeLayout', () => {
@@ -14,36 +15,51 @@ describe('deserializeLayout', () => {
     const { layout, childState } = deserializeLayout(
       [
         {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: { title: 'panel One' },
-          panelIndex: '1',
+          grid: { x: 0, y: 0, w: 6, h: 6 },
+          config: { title: 'panel One' },
+          uid: '1',
           type: 'testPanelType',
         },
         {
           title: 'Section One',
           collapsed: true,
-          gridData: {
+          grid: {
             y: 6,
-            i: 'section1',
           },
+          uid: 'section1',
           panels: [
             {
-              gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-              panelConfig: { title: 'panel Three' },
-              panelIndex: '3',
+              grid: { x: 0, y: 0, w: 6, h: 6 },
+              config: { title: 'panel Three' },
+              uid: '3',
               type: 'testPanelType',
             },
           ],
         },
       ],
+      {
+        controls: [
+          {
+            uid: 'control1',
+            type: 'someType',
+            width: 'small',
+            grow: true,
+            config: { someValue: 'test' },
+          } as unknown as PinnedControlState,
+          {
+            uid: 'control2',
+            type: 'anotherType',
+            config: { anotherValue: 1 },
+          } as unknown as PinnedControlState,
+        ],
+      },
       () => []
     );
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {
         "1": Object {
-          "gridData": Object {
+          "grid": Object {
             "h": 6,
-            "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
@@ -51,9 +67,8 @@ describe('deserializeLayout', () => {
           "type": "testPanelType",
         },
         "3": Object {
-          "gridData": Object {
+          "grid": Object {
             "h": 6,
-            "i": "3",
             "sectionId": "section1",
             "w": 6,
             "x": 0,
@@ -67,11 +82,26 @@ describe('deserializeLayout', () => {
       Object {
         "section1": Object {
           "collapsed": true,
-          "gridData": Object {
-            "i": "section1",
+          "grid": Object {
             "y": 6,
           },
           "title": "Section One",
+        },
+      }
+    `);
+    expect(layout.controls).toMatchInlineSnapshot(`
+      Object {
+        "control1": Object {
+          "grow": true,
+          "order": 0,
+          "type": "someType",
+          "width": "small",
+        },
+        "control2": Object {
+          "grow": undefined,
+          "order": 1,
+          "type": "anotherType",
+          "width": undefined,
         },
       }
     `);
@@ -88,6 +118,16 @@ describe('deserializeLayout', () => {
             "title": "panel Three",
           },
           "references": Array [],
+        },
+        "control1": Object {
+          "rawState": Object {
+            "someValue": "test",
+          },
+        },
+        "control2": Object {
+          "rawState": Object {
+            "anotherValue": 1,
+          },
         },
       }
     `);

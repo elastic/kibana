@@ -9,7 +9,6 @@
 
 import { useEffect, useRef } from 'react';
 import { useSaveCurrentTextObject } from '../../../hooks';
-import { readLoadFromParam } from './use_set_initial_value';
 
 interface SetupAutosaveParams {
   /** The current input value in the Console editor. */
@@ -41,11 +40,6 @@ export const useSetupAutosave = (params: SetupAutosaveParams) => {
       clearTimeout(timerRef.current);
     }
 
-    const loadFromParam = readLoadFromParam();
-    if (loadFromParam) {
-      // If we pre-loaded content we want to skip saving the state of the editor
-      return;
-    }
     timerRef.current = window.setTimeout(saveCurrentState, saveDelay);
 
     return () => {

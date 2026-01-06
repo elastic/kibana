@@ -12,6 +12,15 @@ import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';
 import { getNonUniqueEntries } from './get_non_unique_entries';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import type {
+  AccessControlImportTransforms,
+  AccessControlImportTransformsFactory,
+  ISavedObjectTypeRegistry,
+  SavedObject,
+} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import { createFilterStream } from '@kbn/utils';
 
 jest.mock('./create_limit_stream');
 jest.mock('./get_non_unique_entries');
@@ -20,6 +29,36 @@ const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameter
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
 
 let limitStreamPush: jest.SpyInstance;
+let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+
+const READ_ONLY_TYPE = 'read-only-type';
+
+// Simple implementation of createAccessControlImportTransforms just so we can test that it is called
+const createAccessControlImportTransforms: AccessControlImportTransformsFactory = (
+  registry: ISavedObjectTypeRegistry,
+  errors: SavedObjectsImportFailure[]
+): AccessControlImportTransforms => {
+  return {
+    filterStream: createFilterStream<SavedObject<{ title: string }>>((obj) => {
+      const typeSupportsAccessControl = registry.supportsAccessControl(obj.type);
+      const { title } = obj.attributes;
+
+      if (typeSupportsAccessControl) {
+        errors.push({
+          id: obj.id,
+          type: obj.type,
+          meta: { title },
+          error: {
+            type: 'unexpected_access_control_metadata',
+          },
+        });
+        return false;
+      }
+
+      return true;
+    }),
+  } as AccessControlImportTransforms;
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -27,6 +66,9 @@ beforeEach(() => {
   limitStreamPush = jest.spyOn(stream, 'push');
   getMockFn(createLimitStream).mockReturnValue(stream);
   getMockFn(getNonUniqueEntries).mockReturnValue([]);
+
+  typeRegistry = typeRegistryMock.create();
+  typeRegistry.supportsAccessControl.mockImplementation((type: string) => type === READ_ONLY_TYPE);
 });
 
 describe('collectSavedObjects()', () => {
@@ -59,11 +101,23 @@ describe('collectSavedObjects()', () => {
     references: [{ type: 'b', id: '2', name: 'b2' }],
     managed: true,
   };
+  const obj4 = {
+    type: READ_ONLY_TYPE,
+    id: 'ro1',
+    attributes: { title: 'my title 4' },
+    references: [],
+    supportsAccessControl: true,
+  };
 
   describe('module calls', () => {
     test('limit stream with empty input stream is called with null', async () => {
       const readStream = createReadStream();
-      await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+      await collectSavedObjects({
+        readStream,
+        supportedTypes: [],
+        objectLimit,
+        typeRegistry,
+      });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
       expect(limitStreamPush).toHaveBeenCalledTimes(1);
@@ -73,7 +127,7 @@ describe('collectSavedObjects()', () => {
     test('limit stream with non-empty input stream is called with all objects', async () => {
       const readStream = createReadStream(obj1, obj2, obj3);
       const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      await collectSavedObjects({ readStream, supportedTypes, objectLimit, typeRegistry });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
       expect(limitStreamPush).toHaveBeenCalledTimes(4);
@@ -85,7 +139,12 @@ describe('collectSavedObjects()', () => {
 
     test('get non-unique entries with empty input stream is called with empty array', async () => {
       const readStream = createReadStream();
-      await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+      await collectSavedObjects({
+        readStream,
+        supportedTypes: [],
+        objectLimit,
+        typeRegistry,
+      });
 
       expect(getNonUniqueEntries).toHaveBeenCalledWith([]);
     });
@@ -93,7 +152,7 @@ describe('collectSavedObjects()', () => {
     test('get non-unique entries with non-empty input stream is called with all entries', async () => {
       const readStream = createReadStream(obj1, obj2, obj3);
       const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      await collectSavedObjects({ readStream, supportedTypes, objectLimit, typeRegistry });
 
       expect(getNonUniqueEntries).toHaveBeenCalledWith([
         { type: obj1.type, id: obj1.id },
@@ -105,7 +164,13 @@ describe('collectSavedObjects()', () => {
     test('filter with empty input stream is not called', async () => {
       const readStream = createReadStream();
       const filter = jest.fn();
-      await collectSavedObjects({ readStream, supportedTypes: [], objectLimit, filter });
+      await collectSavedObjects({
+        readStream,
+        supportedTypes: [],
+        objectLimit,
+        filter,
+        typeRegistry,
+      });
 
       expect(filter).not.toHaveBeenCalled();
     });
@@ -114,10 +179,66 @@ describe('collectSavedObjects()', () => {
       const readStream = createReadStream(obj1, obj2, obj3);
       const filter = jest.fn();
       const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit, filter });
+      await collectSavedObjects({
+        readStream,
+        supportedTypes,
+        objectLimit,
+        filter,
+        typeRegistry,
+      });
 
       expect(filter).toHaveBeenCalledTimes(1);
       expect(filter).toHaveBeenCalledWith(obj2);
+    });
+
+    describe('access control', () => {
+      test('calls access control filter when create transforms function is provided', async () => {
+        const readStream = createReadStream(obj1, obj4);
+        const supportedTypes = [obj1.type, obj4.type];
+        const result = await collectSavedObjects({
+          readStream,
+          supportedTypes,
+          objectLimit,
+          typeRegistry,
+          createAccessControlImportTransforms,
+        });
+
+        const collectedObjects = [{ ...obj1, typeMigrationVersion: '', managed: false }];
+
+        const importStateMap = new Map([
+          [`a:1`, {}],
+          [`b:2`, { isOnlyReference: true }],
+        ]);
+
+        const error = { type: 'unexpected_access_control_metadata' };
+        const { title } = obj4.attributes;
+        const errors = [{ error, type: obj4.type, id: obj4.id, meta: { title } }];
+        expect(result).toEqual({ collectedObjects, errors, importStateMap });
+      });
+
+      test('does not call access control filter when create transforms function is not provided', async () => {
+        const readStream = createReadStream(obj1, obj4);
+        const supportedTypes = [obj1.type, obj4.type];
+        const result = await collectSavedObjects({
+          readStream,
+          supportedTypes,
+          objectLimit,
+          typeRegistry,
+        });
+
+        const collectedObjects = [
+          { ...obj1, typeMigrationVersion: '', managed: false },
+          { ...obj4, typeMigrationVersion: '', managed: false },
+        ];
+
+        const importStateMap = new Map([
+          [`a:1`, {}],
+          [`b:2`, { isOnlyReference: true }],
+          [`${READ_ONLY_TYPE}:ro1`, {}],
+        ]);
+
+        expect(result).toEqual({ collectedObjects, errors: [], importStateMap });
+      });
     });
   });
 
@@ -127,7 +248,12 @@ describe('collectSavedObjects()', () => {
       const readStream = createReadStream();
       expect.assertions(2);
       try {
-        await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+        await collectSavedObjects({
+          readStream,
+          supportedTypes: [],
+          objectLimit,
+          typeRegistry,
+        });
       } catch (e) {
         expect(e).toBeInstanceOf(SavedObjectsImportError);
         expect(e.message).toMatchInlineSnapshot(
@@ -138,7 +264,12 @@ describe('collectSavedObjects()', () => {
 
     test('collects nothing when stream is empty', async () => {
       const readStream = createReadStream();
-      const result = await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+      const result = await collectSavedObjects({
+        readStream,
+        supportedTypes: [],
+        objectLimit,
+        typeRegistry,
+      });
 
       expect(result).toEqual({ collectedObjects: [], errors: [], importStateMap: new Map() });
     });
@@ -146,7 +277,12 @@ describe('collectSavedObjects()', () => {
     test('collects objects from stream', async () => {
       const readStream = createReadStream(obj1, obj2);
       const supportedTypes = [obj1.type, obj2.type];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      const result = await collectSavedObjects({
+        readStream,
+        supportedTypes,
+        objectLimit,
+        typeRegistry,
+      });
 
       const collectedObjects = [
         { ...obj1, typeMigrationVersion: '', managed: false },
@@ -163,7 +299,12 @@ describe('collectSavedObjects()', () => {
     test('unsupported types return as import errors', async () => {
       const readStream = createReadStream(obj1);
       const supportedTypes = ['not-obj1-type'];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      const result = await collectSavedObjects({
+        readStream,
+        supportedTypes,
+        objectLimit,
+        typeRegistry,
+      });
 
       const error = { type: 'unsupported_type' };
       const { title } = obj1.attributes;
@@ -174,7 +315,12 @@ describe('collectSavedObjects()', () => {
     test('returns mixed results', async () => {
       const readStream = createReadStream(obj1, obj2);
       const supportedTypes = [obj1.type];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      const result = await collectSavedObjects({
+        readStream,
+        supportedTypes,
+        objectLimit,
+        typeRegistry,
+      });
 
       const collectedObjects = [{ ...obj1, typeMigrationVersion: '', managed: false }];
       const importStateMap = new Map([
@@ -196,7 +342,12 @@ describe('collectSavedObjects()', () => {
 
       const readStream = createReadStream(...collectedObjects);
       const supportedTypes = [obj1.type, obj2.type];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      const result = await collectSavedObjects({
+        readStream,
+        supportedTypes,
+        objectLimit,
+        typeRegistry,
+      });
 
       expect(result).toEqual(expect.objectContaining({ collectedObjects }));
     });
@@ -211,6 +362,7 @@ describe('collectSavedObjects()', () => {
           supportedTypes,
           objectLimit,
           filter,
+          typeRegistry,
         });
 
         const error = { type: 'unsupported_type' };
@@ -229,6 +381,7 @@ describe('collectSavedObjects()', () => {
           objectLimit,
           filter,
           managed: false,
+          typeRegistry,
         });
 
         const collectedObjects = [{ ...obj2, typeMigrationVersion: '', managed: false }];

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type { HasPanelCapabilities } from '@kbn/presentation-containers';
+import type {
   CanLockHoverActions,
   HasParentApi,
   HasUniqueId,
@@ -16,9 +17,11 @@ import {
   PublishesDisabledActionIds,
   PublishesDescription,
   PublishesTitle,
+  CanOverrideHoverActions,
+  ViewMode,
 } from '@kbn/presentation-publishing';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
-import { MaybePromise } from '@kbn/utility-types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /** ------------------------------------------------------------------------------------------
  * Panel Types
@@ -49,7 +52,7 @@ export interface PresentationPanelInternalProps<
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
-  getActions?: UiActionsService['getTriggerCompatibleActions'];
+  getActions?: UiActionsStart['getTriggerCompatibleActions'];
 
   /**
    * Ordinal number of the embeddable in the container, used as a
@@ -63,6 +66,8 @@ export interface PresentationPanelInternalProps<
    *       logic, then this could be removed.
    */
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
+
+  hidePanelChrome?: boolean;
 }
 
 /**
@@ -78,7 +83,9 @@ export interface DefaultPresentationPanelApi
         PublishesDescription &
         PublishesDisabledActionIds &
         HasParentApi &
-        CanLockHoverActions
+        CanLockHoverActions &
+        CanOverrideHoverActions &
+        HasPanelCapabilities
     > {}
 
 export type PresentationPanelProps<
@@ -86,4 +93,25 @@ export type PresentationPanelProps<
   PropsType extends {} = {}
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component'> & {
   Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
+};
+
+export type QuickActionIds = [
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?
+];
+
+type ActionViewMode = Extract<ViewMode, 'view' | 'edit'>;
+
+/**
+ * Limited sets of 6 action ids that will be promoted to quick actions on the panel header that appear on hover.
+ * Actions in this list only appear if they are deemed compatible. Use PresentationPanelQuickActionContext to customize.
+ */
+export type PresentationPanelQuickActionIds = {
+  [key in ActionViewMode]?: QuickActionIds;
 };

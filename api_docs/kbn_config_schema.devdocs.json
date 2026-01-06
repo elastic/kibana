@@ -884,6 +884,24 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.ObjectType.getPropSchemas",
+            "type": "Function",
+            "tags": [],
+            "label": "getPropSchemas",
+            "description": [
+              "\nReturn the schema for this object's underlying properties"
+            ],
+            "signature": [
+              "() => P"
+            ],
+            "path": "src/platform/packages/shared/kbn-config-schema/src/types/object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
             "id": "def-common.ObjectType.validateKey",
             "type": "Function",
             "tags": [],
@@ -5443,7 +5461,7 @@
           "<Record<K, V>>; stream: (options?: ",
           "TypeOptions",
           "<",
-          "Stream",
+          "stream",
           "> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
@@ -5453,7 +5471,7 @@
             "text": "Type"
           },
           "<",
-          "Stream",
+          "stream",
           ">; siblingRef: <T>(key: string) => ",
           "SiblingReference",
           "<T>; string: (options?: ",
@@ -10043,7 +10061,7 @@
               "(options?: ",
               "TypeOptions",
               "<",
-              "Stream",
+              "stream",
               "> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -10053,7 +10071,7 @@
                 "text": "Type"
               },
               "<",
-              "Stream",
+              "stream",
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
@@ -10071,7 +10089,7 @@
                 "signature": [
                   "TypeOptions",
                   "<",
-                  "Stream",
+                  "stream",
                   "> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-config-schema/index.ts",

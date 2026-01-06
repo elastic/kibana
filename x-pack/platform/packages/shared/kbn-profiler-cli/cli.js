@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-require('.').cli();
+require('./src/run_cli').cli();

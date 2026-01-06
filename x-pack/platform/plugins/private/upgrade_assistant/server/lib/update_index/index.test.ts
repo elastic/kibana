@@ -7,11 +7,14 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndex } from '.';
-import { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getReindexWarnings } from '../reindexing/index_settings';
+import type { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
+import { type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server/src/index_settings';
+
+const versionService = { getMajorVersion: () => 8 } as unknown as Version;
 
 // Mock the getReindexWarnings function
-jest.mock('../reindexing/index_settings', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server/src/index_settings', () => ({
   getReindexWarnings: jest.fn(),
 }));
 
@@ -20,6 +23,8 @@ const ackResponseMock = {
   shards_acknowledged: true,
   indices: [],
 };
+
+// const versionService = getMockVersionInfo();
 
 describe('updateIndex', () => {
   const mockGetReindexWarnings = getReindexWarnings as jest.Mock;
@@ -66,6 +71,7 @@ describe('updateIndex', () => {
         index: 'testIndex',
         operations: ['blockWrite'],
         log: mockLogger,
+        versionService,
       });
 
       expect(mockClient.indices.addBlock).toHaveBeenCalledWith({
@@ -86,6 +92,7 @@ describe('updateIndex', () => {
           index: 'testIndex',
           operations: ['blockWrite'],
           log: mockLogger,
+          versionService,
         })
       ).rejects.toThrow('Could not set apply blockWrite to testIndex.');
     });
@@ -129,6 +136,7 @@ describe('updateIndex', () => {
         index: 'testIndex',
         operations: ['blockWrite'],
         log: mockLogger,
+        versionService,
       });
 
       // Verify indices.addBlock was called
@@ -197,6 +205,7 @@ describe('updateIndex', () => {
         index: 'testIndex',
         operations: ['blockWrite'],
         log: mockLogger,
+        versionService,
       });
 
       // Verify indices.addBlock was called
@@ -234,6 +243,7 @@ describe('updateIndex', () => {
         index: 'testIndex',
         operations: ['blockWrite'],
         log: mockLogger,
+        versionService,
       });
 
       expect(mockClient.indices.addBlock).toHaveBeenCalledWith({

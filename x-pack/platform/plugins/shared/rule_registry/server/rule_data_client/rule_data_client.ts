@@ -12,7 +12,7 @@ import { isLeft } from 'fp-ts/Either';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { sanitizeBulkErrorResponse } from '@kbn/alerting-plugin/server';

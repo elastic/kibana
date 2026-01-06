@@ -6,43 +6,16 @@
  */
 
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { TOUR_STORAGE_CONFIG } from '../../../../constants';
-import { TOUR_STORAGE_KEYS } from '../../../../constants';
-import { useStartServices } from '../../../../hooks';
+import { useDismissableTour } from '../../../../hooks';
 
 export const AgentActivityButton: React.FC<{
   onClickAgentActivity: () => void;
-  showAgentActivityTour: { isOpen: boolean };
-}> = ({ onClickAgentActivity, showAgentActivityTour }) => {
-  const { storage, uiSettings } = useStartServices();
-
-  const [agentActivityTourState, setAgentActivityTourState] = useState(showAgentActivityTour);
-
-  const isTourHidden =
-    uiSettings.get('hideAnnouncements', false) ||
-    (
-      storage.get(TOUR_STORAGE_KEYS.AGENT_ACTIVITY) as
-        | TOUR_STORAGE_CONFIG['AGENT_ACTIVITY']
-        | undefined
-    )?.active === false;
-
-  const setTourAsHidden = () => {
-    storage.set(TOUR_STORAGE_KEYS.AGENT_ACTIVITY, {
-      active: false,
-    } as TOUR_STORAGE_CONFIG['AGENT_ACTIVITY']);
-  };
-
-  useEffect(() => {
-    setAgentActivityTourState(showAgentActivityTour);
-  }, [showAgentActivityTour, setAgentActivityTourState]);
-
-  const onFinish = () => {
-    setAgentActivityTourState({ isOpen: false });
-    setTourAsHidden();
-  };
+  shouldShowTour?: boolean;
+}> = ({ onClickAgentActivity, shouldShowTour = false }) => {
+  const { isOpen, dismiss } = useDismissableTour('AGENT_ACTIVITY', shouldShowTour);
 
   return (
     <>
@@ -55,8 +28,8 @@ export const AgentActivityButton: React.FC<{
             />
           </EuiText>
         }
-        isStepOpen={!isTourHidden && agentActivityTourState.isOpen}
-        onFinish={onFinish}
+        isStepOpen={isOpen}
+        onFinish={dismiss}
         minWidth={360}
         maxWidth={360}
         step={1}
@@ -68,13 +41,19 @@ export const AgentActivityButton: React.FC<{
           />
         }
         anchorPosition="upCenter"
-        footerAction={<EuiButtonEmpty onClick={onFinish}>OK</EuiButtonEmpty>}
+        footerAction={
+          <EuiButtonEmpty onClick={dismiss}>
+            <FormattedMessage
+              id="xpack.fleet.genericTourPopover.dismissButton"
+              defaultMessage="Got it"
+            />
+          </EuiButtonEmpty>
+        }
         anchor="#agentActivityButton"
       />
       <EuiButtonEmpty
         onClick={() => {
           onClickAgentActivity();
-          setAgentActivityTourState({ isOpen: false });
         }}
         data-test-subj="agentActivityButton"
         iconType="clock"

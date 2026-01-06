@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
+import type { ScopedHistory, ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

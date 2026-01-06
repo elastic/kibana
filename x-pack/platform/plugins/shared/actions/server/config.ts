@@ -8,11 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
+import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
 } from '../common';
+
 import { validateDuration } from './lib/parse_date';
 
 export enum AllowedHosts {
@@ -38,35 +42,6 @@ const preconfiguredActionSchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
-
-const customHostSettingsSchema = schema.object({
-  url: schema.string({ minLength: 1 }),
-  smtp: schema.maybe(
-    schema.object({
-      ignoreTLS: schema.maybe(schema.boolean()),
-      requireTLS: schema.maybe(schema.boolean()),
-    })
-  ),
-  ssl: schema.maybe(
-    schema.object({
-      verificationMode: schema.maybe(
-        schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        )
-      ),
-      certificateAuthoritiesFiles: schema.maybe(
-        schema.oneOf([
-          schema.string({ minLength: 1 }),
-          schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-        ])
-      ),
-      certificateAuthoritiesData: schema.maybe(schema.string({ minLength: 1 })),
-    })
-  ),
-});
-
-export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 const connectorTypeSchema = schema.object({
   id: schema.string(),
@@ -141,6 +116,10 @@ export const configSchema = schema.object({
     schema.object(
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        maximum_body_length: schema.maybe(
+          schema.number({ min: 0, defaultValue: DEFAULT_EMAIL_BODY_LENGTH })
+        ),
         services: schema.maybe(
           schema.object(
             {
@@ -178,7 +157,11 @@ export const configSchema = schema.object({
       {
         validate: (obj) => {
           if (obj && Object.keys(obj).length === 0) {
-            return 'email.domain_allowlist or email.services must be defined';
+            return 'email.domain_allowlist, email.recipient_allowlist, or email.services must be defined';
+          }
+
+          if (obj?.domain_allowlist && obj?.recipient_allowlist) {
+            return 'email.domain_allowlist and email.recipient_allowlist can not be used at the same time';
           }
         },
       }
@@ -246,6 +229,21 @@ export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig
     const tmp: Record<string, unknown> = originalConfig;
     delete tmp.proxyOnlyHosts;
     return tmp as ActionsConfig;
+  }
+
+  if (originalConfig.email && originalConfig.email.maximum_body_length != null) {
+    const emailMaximumBodyLength = originalConfig.email.maximum_body_length;
+    if (emailMaximumBodyLength === 0) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length is set to 0 and will result in sending empty emails`
+      );
+    }
+
+    if (emailMaximumBodyLength > MAX_EMAIL_BODY_LENGTH) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length value ${emailMaximumBodyLength} is larger than the maximum setting of ${MAX_EMAIL_BODY_LENGTH} and the maximum value will be used instead`
+      );
+    }
   }
 
   return originalConfig;

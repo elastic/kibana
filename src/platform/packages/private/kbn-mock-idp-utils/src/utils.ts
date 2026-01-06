@@ -8,7 +8,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { X509Certificate } from 'crypto';
+import { createHmac, randomBytes, X509Certificate } from 'crypto';
 import { readFile } from 'fs/promises';
 import { SignedXml } from 'xml-crypto';
 
@@ -19,12 +19,21 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
   MOCK_IDP_ATTRIBUTE_PRINCIPAL,
   MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
+  MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
+import { seedTestUser } from './cosmos_db_seeder';
+import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
+import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -72,7 +81,7 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
  * const samlResponse = await createSAMLResponse({
  *    username: '1234567890',
  *    email: 'mail@elastic.co',
- *    full_nname: 'Test User',
+ *    full_name: 'Test User',
  *    roles: ['t1_analyst', 'editor'],
  *  })
  * ```
@@ -95,9 +104,31 @@ export async function createSAMLResponse(options: {
   full_name?: string;
   email?: string;
   roles: string[];
+  serverless?:
+    | { organizationId: string; projectType: string; uiamEnabled: false }
+    | {
+        organizationId: string;
+        projectType: string;
+        uiamEnabled: true;
+        accessTokenLifetimeSec?: number;
+        refreshTokenLifetimeSec?: number;
+      };
 }) {
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
+
+  const uiamSessionTokens = options.serverless?.uiamEnabled
+    ? await createUiamSessionTokens({
+        username: options.username,
+        organizationId: options.serverless.organizationId,
+        projectType: options.serverless.projectType,
+        roles: options.roles,
+        fullName: options.full_name,
+        email: options.email,
+        accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
+        refreshTokenLifetimeSec: options.serverless.refreshTokenLifetimeSec,
+      })
+    : undefined;
 
   const samlAssertionTemplateXML = `
     <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0" ID="_RPs1WfOkul8lZ72DtJtes0BKyPgaCamg" IssueInstant="${issueInstant}">
@@ -116,10 +147,10 @@ export async function createSAMLResponse(options: {
         </saml:AuthnContext>
       </saml:AuthnStatement>
       <saml:AttributeStatement xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_PRINCIPAL}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+        <saml:Attribute FriendlyName="principal" Name="${MOCK_IDP_ATTRIBUTE_PRINCIPAL}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
           <saml:AttributeValue xsi:type="xs:string">${options.username}</saml:AttributeValue>
         </saml:Attribute>
-        <saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_ROLES}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+        <saml:Attribute FriendlyName="roles" Name="${MOCK_IDP_ATTRIBUTE_ROLES}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
           ${options.roles
             .map(
               (role) => `<saml:AttributeValue xsi:type="xs:string">${role}</saml:AttributeValue>`
@@ -128,16 +159,41 @@ export async function createSAMLResponse(options: {
         </saml:Attribute>
         ${
           options.email
-            ? `<saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_EMAIL}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            ? `<saml:Attribute FriendlyName="email" Name="${MOCK_IDP_ATTRIBUTE_EMAIL}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
         <saml:AttributeValue xsi:type="xs:string">${options.email}</saml:AttributeValue>
       </saml:Attribute>`
             : ''
         }
         ${
           options.full_name
-            ? `<saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_NAME}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            ? `<saml:Attribute FriendlyName="name" Name="${MOCK_IDP_ATTRIBUTE_NAME}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
         <saml:AttributeValue xsi:type="xs:string">${options.full_name}</saml:AttributeValue>
       </saml:Attribute>`
+            : ''
+        }
+        ${
+          uiamSessionTokens
+            ? `
+        <saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+          <saml:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">${
+            uiamSessionTokens.accessToken
+          }</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+          <saml:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">${new Date(
+            uiamSessionTokens.accessTokenExpiresAt
+          ).toISOString()}</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+          <saml:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">${
+            uiamSessionTokens.refreshToken
+          }</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+          <saml:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">${new Date(
+            uiamSessionTokens.refreshTokenExpiresAt
+          ).toISOString()}</saml:AttributeValue>
+        </saml:Attribute>`
             : ''
         }
       </saml:AttributeStatement>
@@ -162,7 +218,7 @@ export async function createSAMLResponse(options: {
     location: { reference: `//*[local-name(.)='Issuer']`, action: 'after' },
   });
 
-  const value = await Buffer.from(
+  return Buffer.from(
     `
     <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="_bdf1d51245ed0f71aa23" Version="2.0" IssueInstant="${issueInstant}" ${
       options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
@@ -174,8 +230,6 @@ export async function createSAMLResponse(options: {
     </samlp:Response>
   `
   ).toString('base64');
-
-  return value;
 }
 
 /**
@@ -204,4 +258,151 @@ export async function ensureSAMLRoleMapping(client: Client) {
       },
     },
   });
+}
+
+export function generateCosmosDBApiRequestHeaders(
+  httpVerb: 'POST' | 'PUT',
+  resourceType: 'dbs' | 'colls' | 'docs',
+  resourceId: string
+) {
+  // Generate date in RFC 1123 format
+  const timestamp = new Date().toUTCString();
+
+  // Cosmos DB expects all inputs in the string-to-sign to be lowercased
+  // Format: Verb\nResourceType\nResourceID\nTimestamp\n\n
+  const stringToSign =
+    `${httpVerb.toLowerCase()}\n` +
+    `${resourceType.toLowerCase()}\n` +
+    `${resourceId}\n` +
+    `${timestamp.toLowerCase()}\n` +
+    `\n`;
+
+  const key = Buffer.from(MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY, 'base64');
+  return {
+    Authorization: encodeURIComponent(
+      `type=master&ver=1.0&sig=${createHmac('sha256', key).update(stringToSign).digest('base64')}`
+    ),
+    'x-ms-date': timestamp,
+    'x-ms-version': '2018-12-31',
+    'Content-Type': 'application/json',
+  };
+}
+
+async function createUiamSessionTokens({
+  username,
+  organizationId,
+  projectType,
+  roles,
+  fullName,
+  email,
+  // 1H
+  accessTokenLifetimeSec = 3600,
+  // 3D
+  refreshTokenLifetimeSec = 3 * 24 * 3600,
+}: {
+  username: string;
+  organizationId: string;
+  projectType: string;
+  roles: string[];
+  fullName?: string;
+  email?: string;
+  accessTokenLifetimeSec?: number;
+  refreshTokenLifetimeSec?: number;
+}) {
+  const iat = Math.floor(Date.now() / 1000);
+
+  const givenName = fullName ? fullName.split(' ')[0] : 'Test';
+  const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
+
+  await seedTestUser({
+    userId: username,
+    organizationId,
+    roleId: 'cloud-role-id',
+    projectType,
+    applicationRoles: roles,
+    email,
+    firstName: givenName,
+    lastName: familyName,
+  });
+
+  const accessTokenBody = Buffer.from(
+    JSON.stringify({
+      typ: 'access-token',
+      iss: 'elastic-cloud',
+      sjt: 'user',
+
+      oid: organizationId,
+      sub: username,
+      given_name: givenName,
+      family_name: familyName,
+      email,
+
+      ras: {
+        platform: [],
+        organization: [],
+        user: [],
+        project: [
+          {
+            role_id: 'cloud-role-id',
+            organization_id: organizationId,
+            project_type: projectType,
+            application_roles: roles,
+            project_scope: { scope: 'all' },
+          },
+        ],
+      },
+
+      nbf: iat,
+      exp: iat + accessTokenLifetimeSec,
+      iat,
+      jti: randomBytes(16).toString('hex'),
+    })
+  ).toString('base64url');
+
+  const refreshTokenBody = Buffer.from(
+    JSON.stringify({
+      typ: 'refresh-token',
+      iss: 'elastic-cloud',
+      sjt: 'user',
+
+      sub: username,
+
+      nbf: iat,
+      exp: iat + refreshTokenLifetimeSec,
+      iat,
+      session_created: iat,
+      jti: randomBytes(16).toString('hex'),
+    })
+  ).toString('base64url');
+
+  const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
+    'base64url'
+  );
+
+  const accessToken = `${tokenHeader}.${accessTokenBody}`;
+
+  const refreshToken = `${tokenHeader}.${refreshTokenBody}`;
+
+  return {
+    accessToken: prepareJwtForUiam(accessToken),
+    accessTokenExpiresAt: (iat + accessTokenLifetimeSec) * 1000,
+    refreshToken: prepareJwtForUiam(refreshToken),
+    refreshTokenExpiresAt: (iat + refreshTokenLifetimeSec) * 1000,
+  };
+}
+
+function prepareJwtForUiam(unsignedJwt: string): string {
+  const signedAccessToken = signJwt(unsignedJwt);
+  return wrapSignedJwt(signedAccessToken);
+}
+
+function signJwt(unsignedJwt: string): string {
+  return `${unsignedJwt}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+    .update(unsignedJwt)
+    .digest('base64url')}`;
+}
+
+function wrapSignedJwt(signedJwt: string): string {
+  const accessTokenEncodedWithChecksum = encodeWithChecksum(signedJwt);
+  return prefixWithEssuDev(accessTokenEncodedWithChecksum);
 }

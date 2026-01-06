@@ -14,7 +14,6 @@ const ES_TEST_DATASTREAM_PREFIX = 'functional-test-connectors-ds';
 const ES_TEST_DATASTREAM_PATTERN_NAME = `${ES_TEST_DATASTREAM_PREFIX}-*`;
 const ES_TEST_DATASTREAM_INDEX_NAME = `${ES_TEST_DATASTREAM_PREFIX}-00001`;
 
-// eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
   const es: Client = getService('es');
   const supertest = getService('supertest');
@@ -61,6 +60,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index connector',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -78,6 +78,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedConnector.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_connector_type_deprecated: false,
         is_missing_secrets: false,
         is_system_action: false,
         name: 'An index connector',
@@ -104,6 +105,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: createdConnectorWithIndex.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_connector_type_deprecated: false,
         is_system_action: false,
         name: 'An index connector with index config',
         connector_type_id: '.index',
@@ -125,6 +127,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedConnectorWithIndex.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_connector_type_deprecated: false,
         is_system_action: false,
         name: 'An index connector with index config',
         connector_type_id: '.index',

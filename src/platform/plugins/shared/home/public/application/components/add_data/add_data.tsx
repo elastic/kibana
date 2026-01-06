@@ -8,8 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,16 +21,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  UseEuiTheme,
   mathWithUnits,
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import type { ApplicationStart } from '@kbn/core/public';
 import { MoveData } from '../move_data';
+import { SetupCloudConnect } from '../setup_cloud_connect';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
@@ -40,7 +41,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric, guidedOnboardingService } = getServices();
+  const { trackUiMetric } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
   const styles = ({ euiTheme }: UseEuiTheme) =>
@@ -57,6 +58,9 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     });
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
+  const hasCloudConnectPermission = Boolean(
+    application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
+  );
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -90,31 +94,23 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <RedirectAppLinks
-                  coreStart={{
-                    application,
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButton
+                  data-test-subj="homeAddData"
+                  fill={!hasCloudConnectPermission}
+                  href={addBasePath('/app/integrations/browse')}
+                  iconType="plusInCircle"
+                  onClick={(event: MouseEvent) => {
+                    trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
+                    createAppNavigationHandler('/app/integrations/browse')(event);
                   }}
+                  fullWidth
                 >
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiButton
-                    data-test-subj="homeAddData"
-                    // when guided onboarding is disabled, this button is primary
-                    // otherwise it's secondary, because there is a "guided onboarding" button
-                    fill={!guidedOnboardingService?.isEnabled}
-                    href={addBasePath('/app/integrations/browse')}
-                    iconType="plusInCircle"
-                    onClick={(event: MouseEvent) => {
-                      trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
-                      createAppNavigationHandler('/app/integrations/browse')(event);
-                    }}
-                    fullWidth
-                  >
-                    <FormattedMessage
-                      id="home.addData.addDataButtonLabel"
-                      defaultMessage="Add integrations"
-                    />
-                  </EuiButton>
-                </RedirectAppLinks>
+                  <FormattedMessage
+                    id="home.addData.addDataButtonLabel"
+                    defaultMessage="Add integrations"
+                  />
+                </EuiButton>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
@@ -147,7 +143,11 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
           <EuiFlexItem>
             {!isCloudEnabled ? (
-              <MoveData addBasePath={addBasePath} />
+              hasCloudConnectPermission ? (
+                <SetupCloudConnect addBasePath={addBasePath} application={application} />
+              ) : (
+                <MoveData addBasePath={addBasePath} />
+              )
             ) : (
               <EuiImage
                 alt={i18n.translate('home.addData.illustration.alt.text', {

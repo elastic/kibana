@@ -143,7 +143,7 @@ Examples:
 
 #### **Scenario: User is NOT notified on the Rule Management page until the package installation is completed**
 
-**Automation**: 1 e2e test with mock rules + unit tests.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given <X> prebuilt rules are installed in Kibana
@@ -222,7 +222,7 @@ Then the Rule Upgrade table should be displayed
 
 Currently, we store the callout's state only in the browser memory. This means that a dismissed callout will show up again after the page refresh.
 
-**Automation**: 1 e2e test with mock rules + unit tests for the callout component.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given some prebuilt rules are installed in Kibana
@@ -274,7 +274,7 @@ Then the Rule Upgrade flyout should be displayed
 
 #### **Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Details page**
 
-**Automation**: unit tests for the callout component.
+**Automation**: 1 e2e test.
 
 ```Gherkin
 Given a prebuilt rule is installed in Kibana
@@ -324,7 +324,7 @@ Then user should be navigated to the Rule Details page
 
 #### **Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Editing page**
 
-**Automation**: unit tests for the callout component.
+**Automation**: 1 e2e test.
 
 ```Gherkin
 Given a prebuilt rule is installed in Kibana

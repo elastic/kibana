@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import dedent from 'dedent';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
 export interface UseRunQueryRulesetProps {
@@ -69,7 +69,7 @@ export const UseRunQueryRuleset = ({
 
     const reducedCriteria = criteriaData.reduce<Record<string, any>>(
       (acc, { metadata, values }) => {
-        if (metadata && values !== undefined) acc[metadata] = values;
+        if (metadata && values !== undefined) acc[metadata] = values ? values[0] : '';
         return acc;
       },
       {}
@@ -95,6 +95,7 @@ export const UseRunQueryRuleset = ({
     {
       "retriever": {
         "rule": {
+          // Update your criteria to test different results
           "match_criteria": ${matchCriteria},
           "ruleset_ids": [
             "${rulesetId}" // An array of one or more unique query ruleset IDs
@@ -113,6 +114,7 @@ export const UseRunQueryRuleset = ({
 
   return (
     <TryInConsoleButton
+      disabled={disabled}
       application={application}
       sharePlugin={share ?? undefined}
       consolePlugin={consolePlugin ?? undefined}

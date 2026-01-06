@@ -11,13 +11,11 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import {
-  EmbeddableStart,
-  EmbeddableFactory,
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableStart, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
+import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -25,6 +23,7 @@ import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiIsOfType,
+  apiPublishesProjectRouting,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
@@ -41,7 +40,8 @@ import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
-import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
@@ -50,13 +50,14 @@ import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
-import { VisualizeApi, VisualizeOutputState, VisualizeSerializedState } from './types';
+import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
+import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
   embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
-}) => EmbeddableFactory<VisualizeSerializedState, VisualizeApi> = ({
+}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({
   embeddableStart,
   embeddableEnhancedStart,
 }) => ({
@@ -158,19 +159,19 @@ export const getVisualizeEmbeddableFactory: (deps: {
       linkedToLibraryArg: boolean
     ) => {
       return serializeState({
-        serializedVis: serializedVis$.value,
+        serializedVis: vis$.getValue().serialize(),
         titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary: linkedToLibraryArg,
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        serializeDynamicActions: dynamicActionsManager?.serializeState,
+        getDynamicActionsState: dynamicActionsManager?.getLatestState,
         ...timeRangeManager.getLatestState(),
       });
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<VisualizeSerializedState>({
+    const unsavedChangesApi = initializeUnsavedChanges<VisualizeEmbeddableState>({
       uuid,
       parentApi,
       serializeState: () => {
@@ -291,22 +292,27 @@ export const getVisualizeEmbeddableFactory: (deps: {
       // Library transforms
       saveToLibrary: (newTitle: string) => {
         titleManager.api.setTitle(newTitle);
-        const { rawState, references } = serializeState({
-          serializedVis: vis$.getValue().serialize(),
-          titles: {
-            ...titleManager.getLatestState(),
-            title: newTitle,
-          },
-        });
         return saveToLibrary({
+          description: titleManager.api.description$.value,
+          serializedVis: vis$.getValue().serialize(),
+          title: newTitle,
           uiState: vis$.getValue().uiState,
-          rawState: rawState as VisualizeOutputState,
-          references,
         });
       },
       canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
       canUnlinkFromLibrary: () => Promise.resolve(linkedToLibrary),
-      checkForDuplicateTitle: () => Promise.resolve(), // Handled by saveToLibrary action
+      checkForDuplicateTitle: async (
+        newTitle: string,
+        isTitleDuplicateConfirmed: boolean,
+        onTitleDuplicate: () => void
+      ) => {
+        await checkForDuplicateTitle(
+          { title: newTitle, lastSavedTitle: '' },
+          false,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate
+        );
+      },
       getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
       getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
     });
@@ -320,6 +326,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 filters: data.filters,
               }
             : {};
+          const projectRouting = apiPublishesProjectRouting(parentApi)
+            ? data.projectRouting
+            : undefined;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -355,6 +364,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           getExpressionParams = async () => {
             return await getExpressionRendererProps({
               unifiedSearch,
+              projectRouting,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

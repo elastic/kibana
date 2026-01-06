@@ -9,16 +9,17 @@
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { History } from 'history';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { DashboardState } from '../../common/types';
-import { DashboardApi, DashboardCreationOptions } from '..';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { DashboardState } from '../../common/types';
+import type { DashboardApi, DashboardCreationOptions } from '..';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
@@ -37,7 +38,8 @@ import {
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
-import { DashboardRedirect, type DashboardEmbedSettings } from './types';
+import type { DashboardRedirect } from './types';
+import { type DashboardEmbedSettings } from './types';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
@@ -49,6 +51,7 @@ import {
   loadAndRemoveDashboardState,
   startSyncingExpandedPanelState,
 } from './url';
+import type { DashboardInternalApi } from '../dashboard_api/types';
 
 export interface DashboardAppProps {
   history: History;
@@ -67,7 +70,7 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
-  const incomingEmbeddable = useMemo(() => {
+  const incomingEmbeddables = useMemo(() => {
     return embeddableService
       .getStateTransfer()
       .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
@@ -76,7 +79,7 @@ export function DashboardApp({
   useEffect(() => {
     let canceled = false;
     // show dashboard when there is an incoming embeddable
-    if (incomingEmbeddable) {
+    if (incomingEmbeddables) {
       return;
     }
 
@@ -93,9 +96,11 @@ export function DashboardApp({
     return () => {
       canceled = true;
     };
-  }, [incomingEmbeddable]);
+  }, [incomingEmbeddables]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
-
+  const [dashboardInternalApi, setDashboardInternalApi] = useState<
+    DashboardInternalApi | undefined
+  >(undefined);
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
@@ -115,7 +120,6 @@ export function DashboardApp({
       createKbnUrlStateStorage({
         history,
         useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(coreServices.notifications.toasts),
       }),
     [history]
   );
@@ -139,6 +143,7 @@ export function DashboardApp({
    */
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
     const getInitialInput = () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
@@ -171,7 +176,7 @@ export function DashboardApp({
     };
 
     return Promise.resolve<DashboardCreationOptions>({
-      getIncomingEmbeddable: () => incomingEmbeddable,
+      getIncomingEmbeddables: () => incomingEmbeddables,
 
       // integrations
       useSessionStorageIntegration: true,
@@ -188,6 +193,9 @@ export function DashboardApp({
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
       getInitialInput,
+      getPassThroughContext: () =>
+        (getScopedHistory().location.state as { passThroughContext?: SerializableRecord })
+          ?.passThroughContext,
       validateLoadedSavedObject: validateOutcome,
       fullScreenMode:
         kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)
@@ -204,7 +212,7 @@ export function DashboardApp({
     validateOutcome,
     getScopedHistory,
     kbnUrlStateStorage,
-    incomingEmbeddable,
+    incomingEmbeddables,
   ]);
 
   useEffect(() => {
@@ -234,13 +242,15 @@ export function DashboardApp({
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
     <>
-      {dashboardApi && (
+      {dashboardApi && dashboardInternalApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
           <DashboardTopNav
+            key={dashboardApi.uuid}
             redirectTo={redirectTo}
             embedSettings={embedSettings}
             dashboardApi={dashboardApi}
+            dashboardInternalApi={dashboardInternalApi}
           />
         </>
       )}
@@ -249,9 +259,10 @@ export function DashboardApp({
       <DashboardRenderer
         key={regenerateId}
         locator={locator}
-        onApiAvailable={(dashboard) => {
-          if (dashboard && !dashboardApi) {
+        onApiAvailable={(dashboard, dashboardInternal) => {
+          if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
+            setDashboardInternalApi(dashboardInternal);
             if (expandedPanelId) {
               dashboard?.expandPanel(expandedPanelId);
             }

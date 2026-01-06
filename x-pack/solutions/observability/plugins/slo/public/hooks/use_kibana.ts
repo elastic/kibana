@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { SLOPublicPluginsStart } from '../types';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SLOPublicPluginsStart } from '../types';
 
 type StartServices<AdditionalServices extends object = {}> = CoreStart &
   SLOPublicPluginsStart &

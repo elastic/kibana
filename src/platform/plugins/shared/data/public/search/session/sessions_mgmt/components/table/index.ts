@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * as columns from './columns';
 export { SearchSessionsMgmtTable } from './table';

@@ -27,7 +27,7 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.infoDescription',
       {
         defaultMessage:
-          'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
+          'Select a data source to be used for the processing simulation or create a new one.',
       }
     ),
     infoTitle: i18n.translate(
@@ -62,6 +62,13 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.deleteDataSourceLabel',
       { defaultMessage: 'Delete data source' }
     ),
+    deleteDataSourceDisabledLabel: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.deleteDataSourceDisabledLabel',
+      {
+        defaultMessage:
+          'Cannot delete data source while it is selected. Switch to another data source first.',
+      }
+    ),
     dataPreviewAccordionLabel: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.label',
       { defaultMessage: 'Data preview' }
@@ -89,26 +96,34 @@ export const DATA_SOURCES_I18N = {
       ),
     },
   },
-  randomSamples: {
-    name: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.name',
-      { defaultMessage: 'Random samples from stream' }
+  latestSamples: {
+    defaultName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.name',
+      { defaultMessage: 'Latest samples' }
+    ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.placeholderName',
+      { defaultMessage: 'Latest samples' }
     ),
     subtitle: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.subtitle',
-      { defaultMessage: 'Automatically samples random data from the stream.' }
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.subtitle',
+      { defaultMessage: 'Sample the last 100 documents.' }
     ),
     callout: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.callout',
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.callout',
       {
         defaultMessage:
-          'The random samples data source cannot be deleted to guarantee available samples for the simulation. You can still disable it if you want to focus on samples from other data sources.',
+          'The latest samples data source cannot be deleted to guarantee available samples for the simulation.',
       }
     ),
   },
   kqlDataSource: {
     defaultName: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.defaultName',
+      { defaultMessage: 'KQL search samples' }
+    ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.placeholderName',
       { defaultMessage: 'KQL search samples' }
     ),
     subtitle: i18n.translate(
@@ -121,14 +136,14 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.defaultName',
       { defaultMessage: 'Custom samples' }
     ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.placeholderName',
+      { defaultMessage: 'Custom samples' }
+    ),
     subtitle: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.subtitle',
       { defaultMessage: 'Manually defined sample documents.' }
     ),
-    callout: i18n.translate('xpack.streams.enrichment.dataSources.customSamples.callout', {
-      defaultMessage:
-        'The custom samples will not be persisted. They will be lost when you leave the processing page.',
-    }),
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.label',
       { defaultMessage: 'Documents' }

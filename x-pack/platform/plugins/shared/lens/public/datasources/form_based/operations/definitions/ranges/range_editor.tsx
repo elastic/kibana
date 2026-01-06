@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
+import type { LENS_RANGE_MODES_TYPES } from '@kbn/lens-common';
+import type { RangeColumnParams, UpdateParamsFnType } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../../../../../shared_components';
@@ -148,7 +149,7 @@ const BaseRangeEditor = ({
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={decreaseButtonLabel} delay="long">
+            <EuiToolTip content={decreaseButtonLabel} delay="long" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="minusInCircle"
                 color="text"
@@ -174,7 +175,7 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={increaseButtonLabel} delay="long">
+            <EuiToolTip content={increaseButtonLabel} delay="long" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 color="text"
@@ -212,7 +213,7 @@ export const RangeEditor = ({
   maxBars: number;
   granularityStep: number;
   setParam: UpdateParamsFnType;
-  onChangeMode: (mode: MODES_TYPES) => void;
+  onChangeMode: (mode: LENS_RANGE_MODES_TYPES) => void;
   rangeFormatter: IFieldFormat;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);

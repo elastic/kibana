@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import { ValueClickContext } from '@kbn/embeddable-plugin/public';
-import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
+import type { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
 
 export const getMultiFilterCells = (
   tooltipSelectedValues: Array<TooltipValue<Record<'key', string | number>, SeriesIdentifier>>,

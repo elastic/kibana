@@ -14,12 +14,13 @@ import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import { DashboardLinkComponent, DashboardLinkProps } from './dashboard_link_component';
+import type { DashboardLinkProps } from './dashboard_link_component';
+import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
 
 function createMockLinksParent({
@@ -109,7 +110,7 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: [],
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -176,7 +177,7 @@ describe('Dashboard link component', () => {
 
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
       query: initialQuery,
     });
@@ -249,7 +250,7 @@ describe('Dashboard link component', () => {
 
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: [],
     });
   });

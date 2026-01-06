@@ -6,9 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { JsonArray, JsonValue } from '@kbn/utility-types';
-import { RouteMethod } from '@kbn/core/server';
-import { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
+import type { JsonArray, JsonValue } from '@kbn/utility-types';
+import type { RouteMethod } from '@kbn/core/server';
+import type { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
 
 export interface CallWithRequestParams extends estypes.RequestBase {
   max_concurrent_shard_requests?: number;

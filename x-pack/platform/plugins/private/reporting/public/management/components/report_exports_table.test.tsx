@@ -14,15 +14,15 @@ import {
 import { ReportExportsTable } from './report_exports_table';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Job, ReportingAPIClient } from '@kbn/reporting-public';
-import { Observable } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { Observable } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-types';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { userEvent } from '@testing-library/user-event';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import React from 'react';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { mockJobs } from '../../../common/test';
-import { RecursivePartial, UseEuiTheme } from '@elastic/eui';
+import type { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
 
 jest.mock('./report_info_flyout', () => ({

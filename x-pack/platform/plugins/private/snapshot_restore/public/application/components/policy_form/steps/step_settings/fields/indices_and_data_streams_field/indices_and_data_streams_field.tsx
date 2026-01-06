@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiDescribedFormGroup,
@@ -18,22 +20,29 @@ import {
   EuiPanel,
   EuiSelectable,
   EuiSpacer,
-  EuiSelectableOption,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../../../../../common/types';
+import type { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { useServices } from '../../../../../../app_context';
-import { PolicyValidation, ValidatePolicyHelperData } from '../../../../../../services/validation';
+import type {
+  PolicyValidation,
+  ValidatePolicyHelperData,
+} from '../../../../../../services/validation';
 
 import { orderDataStreamsAndIndices } from '../../../../../lib';
 import { DataStreamBadge } from '../../../../../data_stream_badge';
+import { indicesFieldWrapperStyle } from '../../../../../styles';
 
 import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
+
+const styles = {
+  indicesFieldWrapper: indicesFieldWrapperStyle,
+};
 
 interface IndicesConfig {
   indices?: string[] | string;
@@ -195,7 +204,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
             <Fragment>
               <EuiSpacer size="m" />
               <EuiFormRow
-                className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"
+                css={styles.indicesFieldWrapper}
                 label={
                   selectIndicesMode === 'list' ? (
                     <EuiFlexGroup justifyContent="spaceBetween">

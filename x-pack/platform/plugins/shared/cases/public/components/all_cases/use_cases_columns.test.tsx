@@ -19,6 +19,7 @@ import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
@@ -45,7 +46,6 @@ describe('useCasesColumns ', () => {
     userProfiles: userProfilesMap,
     isSelectorView: false,
     selectedColumns: DEFAULT_SELECTED_COLUMNS,
-    settings: { displayIncrementalCaseId: true },
   };
 
   beforeEach(() => {
@@ -669,15 +669,11 @@ describe('useCasesColumns ', () => {
           <ExternalServiceColumn
             theCase={useGetCasesMockState.data.cases[2]}
             connectors={[
-              {
+              createMockActionConnector({
                 id: 'none',
                 actionTypeId: '.none',
                 name: 'None',
-                config: {},
-                isPreconfigured: false,
-                isSystemAction: false,
-                isDeprecated: false,
-              },
+              }),
             ]}
           />
         )

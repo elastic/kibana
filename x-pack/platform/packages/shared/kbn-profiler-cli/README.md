@@ -4,6 +4,10 @@ Profile Kibana (or any other Node.js processes) while it's running, and open the
 
 ## Usage
 
+### Running processes
+
+By default, the script looks for Kibana (or any Node process) running at 5603 or 5601. It will then either wait or run a command until completion.
+
 Run a command by either preceding it with the profiler script:
 `node scripts/profile.js -- $command`
 
@@ -38,6 +42,14 @@ You can also already specify a filter:
 
 `node scripts/profile.js --grep myProcess`
 
+### Spawning a new process
+
+You can also spawn a new process, so you can profile start to finish. This is useful for shorter-lived processes. Use the `--spawn` flag for this purpose:
+
+`node scripts/profile.js --spawn -- node scripts/my_expensive_script`
+
+The script will be executed with `NODE_OPTIONS=inspect-wait`, which will pause the script until the profiler script has attached to the debugger.
+
 ## Examples
 
 ### Commands
@@ -57,3 +69,7 @@ You can also use any other command, like `autocannon`, `sleep` or `xargs`.
 ### SigInt
 
 By default, the profiler will run until the process exits:`node scripts/profile.js`. This is useful when you have a long running process running separately and you want to collect the profile over a longer time period. Be aware that this might cause memory issues because the profile will get huge. When you press Cmd+C, the profiler will gracefully exit and first write the profile to disk and open Speedscope.
+
+## Note on tests
+
+The current Jest tests are integration tests - they use real processes. On the lovely black box that is CI, they don't reliably work, so we skip them there. But please run them locally when making changes.

@@ -183,7 +183,7 @@ export function systemRoutes(
         try {
           const body = await mlClient.info();
           const cloudId = cloud?.cloudId;
-          const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
+          const isCloudTrial = cloud?.isInTrial() ?? false;
 
           let isMlAutoscalingEnabled = false;
           try {

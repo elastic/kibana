@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 
 export type ReadProcessorsFunction = () => Pick<Pipeline, 'processors' | 'on_failure'>;
 

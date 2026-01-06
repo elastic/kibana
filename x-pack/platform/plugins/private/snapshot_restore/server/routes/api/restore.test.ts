@@ -7,7 +7,8 @@
 
 import { addBasePath } from '../helpers';
 import { registerRestoreRoutes } from './restore';
-import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
+import type { RequestMock } from '../../test/helpers';
+import { RouterMock, routeDependencies } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Restore', () => {
   const mockEsShard = {
@@ -24,6 +25,10 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       ...routeDependencies,
       router,
     });
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   /**
@@ -102,6 +107,19 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
       });
+    });
+
+    it('should include expand_wildcards parameter when calling indices.recovery', async () => {
+      await router.runRequest({
+        method: 'get',
+        path: addBasePath('restores'),
+      });
+
+      expect(indicesRecoveryFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          expand_wildcards: 'all',
+        })
+      );
     });
 
     it('should return empty array if no repositories returned from ES', async () => {

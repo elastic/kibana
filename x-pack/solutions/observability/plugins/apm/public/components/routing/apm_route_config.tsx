@@ -26,7 +26,10 @@ import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service groups',
+});
+const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.title', {
+  defaultMessage: 'Service inventory',
 });
 
 /**
@@ -96,13 +99,18 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
+          <Breadcrumb
+            title={ServiceGroupsTitle}
+            href={'/service-groups'}
+            parentTitle={ServiceInventoryTitle}
+            parentHref={'/services'}
+            omitOnServerless
+          >
             <ApmMainTemplate
-              pageTitle={ServiceGroupsTitle}
+              pageTitle={ServiceInventoryTitle}
               environmentFilter={false}
               showServiceGroupSaveButton={false}
               showServiceGroupsNav
-              showEnablementCallout
               selectedNavButton="serviceGroups"
             >
               <ServiceGroupsList />

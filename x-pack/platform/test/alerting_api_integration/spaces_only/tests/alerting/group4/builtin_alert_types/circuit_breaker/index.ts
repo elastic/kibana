@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../../../helpers';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingCircuitBreakerTests({
   loadTestFile,
   getService,
@@ -20,10 +19,5 @@ export default function alertingCircuitBreakerTests({
      * This tests the expected behavior for a rule type that hits the alert limit in a single execution.
      */
     loadTestFile(require.resolve('./alert_limit_services'));
-    /**
-     * This tests the expected behavior for the active and recovered alerts generated over
-     * a sequence of rule executions that hit the alert limit.
-     */
-    loadTestFile(require.resolve('./index_threshold_max_alerts'));
   });
 }

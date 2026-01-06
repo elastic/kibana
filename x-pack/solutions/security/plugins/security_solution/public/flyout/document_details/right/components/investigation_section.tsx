@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
@@ -28,10 +27,9 @@ export const InvestigationSection = memo(() => {
   const { dataFormattedForFieldBrowser, getFieldsData, investigationFields, scopeId } =
     useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
-
-  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled('editHighlightedFields');
 
   return (
     <ExpandableSection
@@ -57,7 +55,8 @@ export const InvestigationSection = memo(() => {
         investigationFields={investigationFields}
         scopeId={scopeId}
         showCellActions={true}
-        showEditButton={editHighlightedFieldsEnabled}
+        showEditButton={true}
+        ancestorsIndexName={ancestorIndex}
       />
     </ExpandableSection>
   );

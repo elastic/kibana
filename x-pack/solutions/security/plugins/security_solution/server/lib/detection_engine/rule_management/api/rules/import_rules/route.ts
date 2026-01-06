@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -42,14 +43,18 @@ import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logi
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'public',
       path: DETECTION_ENGINE_RULES_IMPORT_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
       options: {
@@ -151,6 +156,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
+            logger,
           });
 
           const [parsedRules, parsedRuleErrors] = partition(
@@ -214,6 +220,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
+          logger.error(`importRulesRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

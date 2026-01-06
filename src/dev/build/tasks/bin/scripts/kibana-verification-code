@@ -15,11 +15,11 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
-{{#darwin}}
 NODE="${DIR}/node/default/bin/node"
-{{/darwin}}
 {{#linux}}
-NODE="${DIR}/node/glibc-217/bin/node"
+if ! "$NODE" --version >/dev/null 2>&1; then
+  NODE="${DIR}/node/glibc-217/bin/node"
+fi
 {{/linux}}
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
@@ -31,4 +31,4 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production "${NODE}" "${DIR}/src/cli_verification_code/dist" "$@"
+NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production "${NODE}" "${DIR}/src/cli/verification_code/dist" "$@"

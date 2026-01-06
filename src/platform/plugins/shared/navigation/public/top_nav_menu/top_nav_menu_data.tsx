@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
+import type { EuiButtonProps, EuiBetaBadgeProps, IconType } from '@elastic/eui';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { SplitButtonProps } from '@kbn/split-button';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
 export interface TopNavMenuData {
   id?: string;
+  htmlId?: string;
   label: string;
   run: TopNavMenuAction;
   description?: string;
@@ -21,17 +23,21 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
+  tooltipTitle?: string;
   badge?: EuiBetaBadgeProps;
   emphasize?: boolean;
   fill?: boolean;
   color?: string;
   isLoading?: boolean;
-  iconType?: string;
+  iconType?: IconType;
   iconSide?: EuiButtonProps['iconSide'];
   iconOnly?: boolean;
   target?: string;
   href?: string;
   intl?: InjectedIntl;
+  splitButtonProps?: SplitButtonProps & {
+    run: TopNavMenuAction;
+  };
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

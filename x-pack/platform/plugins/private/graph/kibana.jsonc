@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "licensing",
       "data",
+      "dataViews",
       "navigation",
       "unifiedSearch",
       "inspector",

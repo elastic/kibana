@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { PureComponent } from 'react';
 import { isEmpty } from 'lodash';
 import classNames from 'classnames';
 
 import useRafState from 'react-use/lib/useRafState';
-import { UseEuiTheme, euiShadow, euiShadowFlat } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow, euiShadowFlat } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EmotionStyles, useMemoCss } from '../use_memo_css';
-import { QuerySuggestion } from '../autocomplete';
+import type { EmotionStyles } from '../use_memo_css';
+import { useMemoCss } from '../use_memo_css';
+import type { QuerySuggestion } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
   SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
-import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
+import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 import { onRaf, shallowEqual } from '../utils';
 
 interface SuggestionsComponentProps {
@@ -196,12 +199,14 @@ const ResizableSuggestionsListDiv: React.FC<{
         })}
       >
         <div
-          className={classNames('kbnTypeahead__popover', 'eui-scrollBar', {
+          className={classNames('kbnTypeahead__popover', {
             ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
             ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
           })}
         >
-          {props.children(containerRect)}
+          <div className={classNames('kbnTypeahead__popover-content', 'eui-scrollBar')}>
+            {props.children(containerRect)}
+          </div>
         </div>
       </div>
     </div>
@@ -300,10 +305,15 @@ const suggestionsStyles: EmotionStyles = {
         position: 'relative',
         zIndex: context.euiTheme.levels.menu,
         width: '100%',
-        overflowY: 'auto',
+        overflow: 'hidden',
+
+        '.kbnTypeahead__popover-content': {
+          maxHeight: 'inherit',
+          overflowY: 'auto',
+        },
 
         '&.kbnTypeahead__popover--top': css([
-          euiShadowFlat(context),
+          euiShadowFlat(context, { border: 'none' }),
           {
             borderTopLeftRadius: context.euiTheme.border.radius.medium,
             borderTopRightRadius: context.euiTheme.border.radius.medium,
@@ -312,7 +322,7 @@ const suggestionsStyles: EmotionStyles = {
           },
         ]),
         '&.kbnTypeahead__popover--bottom': css([
-          euiShadow(context),
+          euiShadow(context, 'l', { border: 'none' }),
           {
             borderBottomLeftRadius: context.euiTheme.border.radius.medium,
             borderBottomRightRadius: context.euiTheme.border.radius.medium,

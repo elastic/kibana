@@ -14,12 +14,10 @@ import type { DefendInsightsDataClient } from '../../lib/defend_insights/persist
 import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightRequest } from '../../__mocks__/request';
-import {
-  ElasticAssistantRequestHandlerContextMock,
-  requestContextMock,
-} from '../../__mocks__/request_context';
+import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
-import { isDefendInsightsEnabled, updateDefendInsightLastViewedAt } from './helpers';
+import { updateDefendInsightLastViewedAt } from './helpers';
 import { getDefendInsightRoute } from './get_defend_insight';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
@@ -68,7 +66,6 @@ describe('getDefendInsightRoute', () => {
     (updateDefendInsightLastViewedAt as jest.Mock).mockImplementation(
       async ({ defendInsights }) => defendInsights?.[0]
     );
-    (isDefendInsightsEnabled as jest.Mock).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -87,7 +84,8 @@ describe('getDefendInsightRoute', () => {
     );
     expect(response.status).toEqual(403);
     expect(response.body).toEqual({
-      message: 'Your license does not support Defend Workflows. Please upgrade your license.',
+      message:
+        'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
     });
   });
 
@@ -100,15 +98,6 @@ describe('getDefendInsightRoute', () => {
     expect(response.body).toEqual({
       data: mockCurrentInsight,
     });
-  });
-
-  it('should 404 if feature flag disabled', async () => {
-    (isDefendInsightsEnabled as jest.Mock).mockReturnValueOnce(false);
-    const response = await server.inject(
-      getDefendInsightRequest('insight-id1'),
-      requestContextMock.convertContext(context)
-    );
-    expect(response.status).toEqual(404);
   });
 
   it('should handle missing authenticated user', async () => {

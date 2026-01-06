@@ -16,7 +16,7 @@ source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault
 
 echo "--- Running test script $1"
 
-cd x-pack/test/security_solution_api_integration
+cd x-pack/solutions/security/test/security_solution_api_integration
 set +e
 
 TARGET_SCRIPT=$1 node ./scripts/mki_start_api_ftr_execution

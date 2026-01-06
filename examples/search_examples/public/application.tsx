@@ -13,10 +13,11 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { AppPluginStartDependencies } from './types';
-import { SearchExamplePage, ExampleLink } from './common/example_page';
+import type { AppPluginStartDependencies } from './types';
+import type { ExampleLink } from './common/example_page';
+import { SearchExamplePage } from './common/example_page';
 import { SearchExamplesApp } from './search/app';
 import { SearchSessionsExampleApp } from './search_sessions/app';
 import { SqlSearchExampleApp } from './sql_search/app';
@@ -41,7 +42,7 @@ const LINKS: ExampleLink[] = [
 ];
 
 export const renderApp = (
-  { notifications, savedObjects, http, application, ...startServices }: CoreStart,
+  { notifications, http, application, ...startServices }: CoreStart,
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {

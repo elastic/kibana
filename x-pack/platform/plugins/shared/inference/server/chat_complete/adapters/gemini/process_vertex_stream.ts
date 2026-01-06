@@ -6,16 +6,16 @@
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
-  ChatCompletionEventType,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '../../../../common';
 import type { GenerateContentResponseChunk } from './types';
 import { createToolValidationError } from '../../../../common/chat_complete/errors';
 
-export function processVertexStream() {
+export function processVertexStream(model?: string) {
   return (source: Observable<GenerateContentResponseChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext(value: GenerateContentResponseChunk) {
@@ -30,18 +30,24 @@ export function processVertexStream() {
               tokens: {
                 prompt: value.usageMetadata.promptTokenCount,
                 completion: value.usageMetadata.candidatesTokenCount,
+                thinking: value.usageMetadata.thoughtsTokenCount,
                 cached: value.usageMetadata.cachedContentTokenCount,
                 total: value.usageMetadata.totalTokenCount,
               },
+              ...(model ? { model } : {}),
             });
           }
         }
 
-        if (finishReason === 'UNEXPECTED_TOOL_CALL' || finishReason === 'MALFORMED_TOOL_CALL') {
+        if (finishReason === 'UNEXPECTED_TOOL_CALL' || finishReason === 'MALFORMED_FUNCTION_CALL') {
+          const finishMessage = value.candidates?.[0].finishMessage;
+          const validationErrorMessage = finishMessage
+            ? `${finishReason} - ${finishMessage}`
+            : finishReason;
           emitTokenCountIfApplicable();
           subscriber.error(
-            createToolValidationError(finishReason, {
-              errorsText: value.candidates?.[0].finishMessage,
+            createToolValidationError(validationErrorMessage, {
+              errorsText: finishMessage,
               toolCalls: [],
             })
           );

@@ -5,42 +5,35 @@
  * 2.0.
  */
 
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { RenderMode } from '@kbn/expressions-plugin/common';
-import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import {
-  CellValueContext,
-  cellValueTrigger,
-  CELL_VALUE_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import type { DocumentToExpressionReturnType } from '../../async_services';
-import type { LensDocument } from '../../persistence';
-import {
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { cellValueTrigger, CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type {
+  DocumentToExpressionReturnType,
+  LensDocument,
   GetCompatibleCellValueActions,
   IndexPatternMap,
   IndexPatternRef,
   UserMessage,
   VisualizationDisplayOptions,
+  ExpressionWrapperProps,
+  LensRuntimeState,
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
-} from '../../types';
-import type {
-  ExpressionWrapperProps,
-  LensApi,
-  LensEmbeddableStartServices,
-  LensRuntimeState,
-} from '../types';
+} from '../../types_guards';
 import { getVariables } from './variables';
-// import {
-//   getSearchContextIncompatibleMessage,
-//   isSearchContextIncompatibleWithDataViews,
-// } from '../user_messages/checks';
 import { getExecutionSearchContext, type MergedSearchContext } from './merged_search_context';
+import type { LensEmbeddableStartServices } from '../types';
 
 interface GetExpressionRendererPropsParams {
   searchContext: MergedSearchContext;

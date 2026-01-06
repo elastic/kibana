@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import type { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const serviceContractMock = (): jest.Mocked<CustomBrandingService> => {
-  return {
+  return lazyObject({
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-  } as unknown as jest.Mocked<CustomBrandingService>;
+  }) as unknown as jest.Mocked<CustomBrandingService>;
 };

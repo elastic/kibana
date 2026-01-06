@@ -13,6 +13,7 @@ import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/type
 import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
 import { IntegrationsFacets } from '../../../../../configurations/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
+import { CARD_TITLE_LINE_CLAMP } from '../../../integrations/constants';
 
 export interface EnhancedCardOptions {
   showInstallationStatus?: boolean;
@@ -27,6 +28,7 @@ export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:microsoft_sentinel',
   'epr:sentinel_one',
   'epr:crowdstrike',
+  'epr:elastic_security',
 ];
 const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 
@@ -55,6 +57,7 @@ export const applyCategoryBadgeAndStyling = (
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
+    titleLineClamp: CARD_TITLE_LINE_CLAMP,
     url,
     showInstallationStatus: options?.showInstallationStatus,
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
@@ -97,6 +100,9 @@ export const useEnhancedIntegrationCards = (
         applyCategoryBadgeAndStyling(card, {
           ...options,
           hasDataStreams: activeIntegrations.some(({ name }) => name === card.name),
+          returnPath:
+            options?.returnPath ??
+            `${CONFIGURATIONS_PATH}/integrations/${IntegrationsFacets.available}`,
         })
       ),
     [sorted, options, activeIntegrations]

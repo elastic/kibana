@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -16,34 +16,35 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import type { ConfigSchema } from '../server/config';
+import type {
+  EnvironmentServiceSetup,
+  FeatureCatalogueRegistrySetup,
+  TutorialServiceSetup,
+  AddDataServiceSetup,
+  WelcomeServiceSetup,
+} from './services';
 import {
   EnvironmentService,
-  EnvironmentServiceSetup,
   FeatureCatalogueRegistry,
-  FeatureCatalogueRegistrySetup,
   TutorialService,
-  TutorialServiceSetup,
   AddDataService,
-  AddDataServiceSetup,
   WelcomeService,
-  WelcomeServiceSetup,
 } from './services';
 
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  history: AppMountParameters['history'];
 }
 
 export interface HomePluginSetupDependencies {
@@ -84,13 +85,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          {
-            dataViews,
-            urlForwarding: urlForwardingStart,
-            guidedOnboarding,
-            share: shareStart,
-            cloud: cloudStart,
-          },
+          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart },
         ] = await core.getStartServices();
 
         setServices({
@@ -114,13 +109,13 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
           cloudStart,
           overlays: coreStart.overlays,
           theme: core.theme,
           i18nStart: coreStart.i18n,
           shareStart,
+          history: params.history,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

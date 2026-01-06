@@ -6,15 +6,14 @@
  */
 
 import { prefixIndexPatternWithCcs } from './ccs_utils';
+import type { DS_INDEX_PATTERN_LOGS, INDEX_PATTERN_TYPES } from './constants';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_ELASTICSEARCH_ECS,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH_MONITORING,
   INDEX_PATTERN_BEATS,
-  DS_INDEX_PATTERN_LOGS,
   DS_INDEX_PATTERN_METRICS,
-  INDEX_PATTERN_TYPES,
   INDEX_PATTERN_ENTERPRISE_SEARCH,
 } from './constants';
 import type { MonitoringConfig } from '../server/config';

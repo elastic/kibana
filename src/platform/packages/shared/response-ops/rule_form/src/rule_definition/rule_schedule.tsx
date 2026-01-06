@@ -20,9 +20,10 @@ import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,
   INTERVAL_WARNING_TEXT,
+  SCHEDULE_UNIT_LABEL,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { MinimumScheduleInterval } from '../common';
+import type { MinimumScheduleInterval } from '../common';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
@@ -144,6 +145,7 @@ export const RuleSchedule = () => {
             options={getTimeOptions(intervalNumber ?? 1)}
             onChange={onIntervalUnitChange}
             data-test-subj="ruleScheduleUnitInput"
+            aria-label={SCHEDULE_UNIT_LABEL}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

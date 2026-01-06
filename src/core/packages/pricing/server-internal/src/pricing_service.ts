@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { Subject, firstValueFrom } from 'rxjs';
 import type { IConfigService } from '@kbn/config';
@@ -20,6 +20,7 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
+import type { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
 import type { PricingConfigType } from './pricing_config';
 import { registerRoutes } from './routes';
 
@@ -32,7 +33,7 @@ interface SetupDeps {
 }
 
 /** @internal */
-export class PricingService {
+export class PricingService implements CoreService<PricingServiceSetup, PricingServiceStart> {
   private readonly configService: IConfigService;
   private readonly logger: Logger;
   private readonly productFeaturesRegistry: ProductFeaturesRegistry;
@@ -110,7 +111,12 @@ export class PricingService {
     }
 
     return {
-      isFeatureAvailable: this.tiersClient.isFeatureAvailable,
+      isFeatureAvailable: this.tiersClient.isFeatureAvailable.bind(this.tiersClient),
+      getActiveProduct: this.tiersClient.getActiveProduct.bind(this.tiersClient),
     };
+  }
+
+  public stop() {
+    // No-op
   }
 }

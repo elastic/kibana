@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
@@ -14,6 +14,7 @@ export function useGetUserInstructions() {
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
+    networkMode: 'always',
     queryKey: [REACT_QUERY_KEYS.GET_KB_USER_INSTRUCTIONS],
     queryFn: async ({ signal }) => {
       if (!signal) {

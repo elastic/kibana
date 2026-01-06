@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
-import { DataViewBase } from '../../es_query';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import type { Filter, FilterMeta } from './types';
+import { FILTERS } from './types';
+import type { DataViewBase } from '../../es_query';
 
 /**
  * @public

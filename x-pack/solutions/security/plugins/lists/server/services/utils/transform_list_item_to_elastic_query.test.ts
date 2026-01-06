@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsDataTypeUnion } from '../../schemas/common/schemas';
+import type { EsDataTypeUnion } from '../../schemas/common/schemas';
 
 import {
   DEFAULT_DATE_REGEX,

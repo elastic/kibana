@@ -8,7 +8,8 @@
  */
 
 import type { NotificationCoordinator } from '@kbn/core-notifications-browser';
-import { Observable, ObservedValueOf } from 'rxjs';
+import type { ObservedValueOf } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export function createNotificationCoordinatorMock() {
   const notificationCoordinatorMock = jest.fn();

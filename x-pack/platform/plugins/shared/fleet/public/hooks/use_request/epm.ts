@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useState } from 'react';
 
@@ -38,6 +38,9 @@ import type {
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
+  BulkRollbackPackagesRequest,
+  RollbackAvailableCheckResponse,
+  BulkRollbackAvailableCheckResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -72,7 +75,10 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
         query,
         version: API_VERSIONS.public.v1,
       }),
-    { retry: (_, error) => !isRegistryConnectionError(error), refetchOnWindowFocus: false }
+    {
+      retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
+      refetchOnWindowFocus: false,
+    }
   );
 }
 
@@ -108,7 +114,7 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
-    retry: (_, error) => !isRegistryConnectionError(error),
+    retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
     refetchOnWindowFocus: false,
   });
 };
@@ -184,7 +190,7 @@ export const useGetPackageInfoByKeyQuery = (
       suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
-      retry: (_, error) => !isRegistryConnectionError(error),
+      retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
   );
@@ -359,6 +365,49 @@ export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
   });
 };
 
+export const sendBulkRollbackPackagesForRq = (params: BulkRollbackPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendGetBulkRollbackInfoPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackInfoPath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const useGetRollbackAvailableCheck = (pkgName: string) => {
+  const response = useQuery<RollbackAvailableCheckResponse, RequestError>(
+    ['get-rollback-available-check', pkgName],
+    () =>
+      sendRequestForRq<RollbackAvailableCheckResponse>({
+        path: epmRouteService.getRollbackAvailableCheckPath(pkgName),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      })
+  );
+  return response.data ?? { isAvailable: false };
+};
+
+export const useGetBulkRollbackAvailableCheck = () => {
+  const response = useQuery<BulkRollbackAvailableCheckResponse, RequestError>(
+    ['get-bulk-rollback-available-check'],
+    () =>
+      sendRequestForRq<BulkRollbackAvailableCheckResponse>({
+        path: epmRouteService.getBulkRollbackAvailableCheckPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      })
+  );
+  return response.data ?? {};
+};
+
 /**
  * @deprecated use sendRemovePackageForRq instead
  */
@@ -391,11 +440,20 @@ export const sendRequestReauthorizeTransforms = (
   pkgVersion: string,
   transforms: Array<{ transformId: string }>
 ) => {
-  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: { transforms },
+  });
+};
+
+export const sendRequestInstallRuleAssets = (pkgName: string, pkgVersion: string) => {
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getInstallRuleAssetsPath(pkgName, pkgVersion),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {},
   });
 };
 
@@ -499,4 +557,8 @@ export function useGetInputsTemplatesQuery(
 
 function isRegistryConnectionError(error: RequestError) {
   return error.statusCode === 502;
+}
+
+function isUserError(error: RequestError) {
+  return error.statusCode && error.statusCode >= 400 && error.statusCode < 500;
 }

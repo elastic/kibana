@@ -9,10 +9,12 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import type { Error } from '@kbn/apm-types';
+import type { IWaterfallLegend } from '../../../../../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
-import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
+import type { CriticalPathSegment } from '../../../../../../shared/trace_waterfall/critical_path';
 import type {
-  WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
@@ -26,11 +28,6 @@ const ROOT_ID = 'root';
 export interface SpanLinksCount {
   linkedChildren: number;
   linkedParents: number;
-}
-
-export enum WaterfallLegendType {
-  ServiceName = 'serviceName',
-  SpanType = 'spanType',
 }
 
 export interface IWaterfall {
@@ -81,7 +78,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
 }
 
 export type IWaterfallError = Omit<
-  IWaterfallItemBase<WaterfallError, 'error'>,
+  IWaterfallItemBase<Error, 'error'>,
   'duration' | 'legendValues' | 'spanLinksCount'
 >;
 
@@ -91,15 +88,7 @@ export type IWaterfallSpan = IWaterfallItemBase<WaterfallSpan, 'span'>;
 
 export type IWaterfallSpanOrTransaction = IWaterfallTransaction | IWaterfallSpan;
 
-export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;
-
 export type IWaterfallItem = IWaterfallSpanOrTransaction;
-
-export interface IWaterfallLegend {
-  type: WaterfallLegendType;
-  value: string | undefined;
-  color: string;
-}
 
 export interface IWaterfallNode {
   id: string;
@@ -121,7 +110,7 @@ export type IWaterfallNodeFlatten = Omit<IWaterfallNode, 'children'>;
 function getLegendValues(transactionOrSpan: WaterfallTransaction | WaterfallSpan) {
   return {
     [WaterfallLegendType.ServiceName]: transactionOrSpan.service.name,
-    [WaterfallLegendType.SpanType]:
+    [WaterfallLegendType.Type]:
       transactionOrSpan.processor.event === ProcessorEvent.span
         ? (transactionOrSpan as WaterfallSpan).span.subtype ||
           (transactionOrSpan as WaterfallSpan).span.type
@@ -169,7 +158,7 @@ export function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0
 }
 
 function getErrorItem(
-  error: WaterfallError,
+  error: Error,
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
@@ -181,7 +170,7 @@ function getErrorItem(
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
-    id: error.error.id,
+    id: error.error.id ?? error.id,
     parent,
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,
@@ -272,7 +261,7 @@ export function generateLegendsAndAssignColorsToWaterfall(waterfallItems: IWater
     (item) => item.docType === 'span' || item.docType === 'transaction'
   ) as IWaterfallSpanOrTransaction[];
 
-  const legends = [WaterfallLegendType.ServiceName, WaterfallLegendType.SpanType].flatMap(
+  const legends = [WaterfallLegendType.ServiceName, WaterfallLegendType.Type].flatMap(
     (legendType) => {
       const allLegendValues = uniq(onlyBaseSpanItems.map((item) => item.legendValues[legendType]));
 
@@ -291,7 +280,7 @@ export function generateLegendsAndAssignColorsToWaterfall(waterfallItems: IWater
   const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
   // only color by span type if there are only events for one service
   const colorBy =
-    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
+    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.Type;
 
   const serviceColorsMap = serviceLegends.reduce((colorMap, legend) => {
     colorMap[legend.value] = legend.color;
@@ -576,7 +565,7 @@ function getChildren({
   waterfallItemId: string;
   waterfall: IWaterfall;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
   rootId: string;
@@ -598,7 +587,7 @@ function buildTree({
   waterfall: IWaterfall;
   maxLevelOpen: number;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
 }) {
@@ -666,7 +655,7 @@ export function buildTraceTree({
   maxLevelOpen: number;
   isOpen: boolean;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
 }): IWaterfallNode | null {
@@ -722,7 +711,7 @@ export const updateTraceTreeNode = ({
   updatedNode: IWaterfallNodeFlatten;
   waterfall: IWaterfall;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
 }) => {

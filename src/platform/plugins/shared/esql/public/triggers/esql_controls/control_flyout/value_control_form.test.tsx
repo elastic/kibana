@@ -10,14 +10,16 @@
 import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { monaco } from '@kbn/monaco';
-import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { monaco } from '@kbn/monaco';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -37,7 +39,6 @@ jest.mock('@kbn/esql-utils', () => {
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
-    isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
   };
@@ -61,19 +62,30 @@ describe('ValueControlForm', () => {
     data: dataMock,
   };
 
+  services.core.http.get = jest
+    .fn()
+    .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
+
+  const defaultProps = {
+    initialVariableType: ESQLVariableType.TIME_LITERAL,
+    queryString: 'FROM foo | STATS BY BUCKET(@timestamp,)',
+    onSaveControl: jest.fn(),
+    closeFlyout: jest.fn(),
+    onCancelControl: jest.fn(),
+    search: searchMock,
+    esqlVariables: [],
+    ariaLabelledBy: 'esqlControlsFlyoutTitle',
+    telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
+    telemetryService: new ESQLEditorTelemetryService(services.core.analytics),
+  };
+
   describe('Interval type', () => {
     it('should default correctly if no initial state is given for an interval variable type', async () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            initialVariableType={ESQLVariableType.TIME_LITERAL}
-            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-            onSaveControl={jest.fn()}
-            closeFlyout={jest.fn()}
-            onCancelControl={jest.fn()}
-            search={searchMock}
-            esqlVariables={[]}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
@@ -96,33 +108,26 @@ describe('ValueControlForm', () => {
       // variable label input should be rendered and with the default value (empty)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('');
 
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Medium'
+      // control type radio should be rendered and default to 'single'
+      const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
+      expect(selectionTypeContainer).toBeInTheDocument();
+      const singleRadioButton = within(selectionTypeContainer).getByLabelText(
+        'Only allow a single selection'
       );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).not.toBeChecked();
+      expect(singleRadioButton).toBeChecked();
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
       const onCreateControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            initialVariableType={ESQLVariableType.TIME_LITERAL}
-            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-            onSaveControl={onCreateControlSpy}
-            closeFlyout={jest.fn()}
-            onCancelControl={jest.fn()}
-            search={searchMock}
-            esqlVariables={[]}
-            cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              onSaveControl={onCreateControlSpy}
+              cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
 
@@ -141,15 +146,9 @@ describe('ValueControlForm', () => {
       const onCancelControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            initialVariableType={ESQLVariableType.TIME_LITERAL}
-            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-            onSaveControl={jest.fn()}
-            closeFlyout={jest.fn()}
-            onCancelControl={onCancelControlSpy}
-            search={searchMock}
-            esqlVariables={[]}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} onCancelControl={onCancelControlSpy} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // click on the cancel button
@@ -171,18 +170,12 @@ describe('ValueControlForm', () => {
       } as ESQLControlState;
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            initialVariableType={ESQLVariableType.TIME_LITERAL}
-            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-            onSaveControl={jest.fn()}
-            closeFlyout={jest.fn()}
-            onCancelControl={jest.fn()}
-            search={searchMock}
-            initialState={initialState}
-            esqlVariables={[]}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} initialState={initialState} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
+
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('?myInterval');
 
@@ -193,18 +186,6 @@ describe('ValueControlForm', () => {
 
       // variable label input should be rendered and with the default value (my control)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('my control');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Small'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).toBeChecked();
     });
 
     it('should call the onEditControl callback, if initialState is given', async () => {
@@ -222,17 +203,14 @@ describe('ValueControlForm', () => {
       const onEditControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            initialVariableType={ESQLVariableType.TIME_LITERAL}
-            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-            onSaveControl={onEditControlSpy}
-            closeFlyout={jest.fn()}
-            onCancelControl={jest.fn()}
-            search={searchMock}
-            initialState={initialState}
-            esqlVariables={[]}
-            cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              onSaveControl={onEditControlSpy}
+              initialState={initialState}
+              cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // click on the create button
@@ -246,12 +224,9 @@ describe('ValueControlForm', () => {
           <KibanaContextProvider services={services}>
             <IntlProvider locale="en">
               <ESQLControlsFlyout
+                {...defaultProps}
                 initialVariableType={ESQLVariableType.VALUES}
                 queryString="FROM foo | WHERE field =="
-                onSaveControl={jest.fn()}
-                closeFlyout={jest.fn()}
-                onCancelControl={jest.fn()}
-                search={searchMock}
                 esqlVariables={[]}
               />
             </IntlProvider>
@@ -271,15 +246,13 @@ describe('ValueControlForm', () => {
       it('should be able to change in fields type', async () => {
         const { findByTestId } = render(
           <IntlProvider locale="en">
-            <ESQLControlsFlyout
-              initialVariableType={ESQLVariableType.VALUES}
-              queryString="FROM foo | WHERE field =="
-              onSaveControl={jest.fn()}
-              closeFlyout={jest.fn()}
-              onCancelControl={jest.fn()}
-              search={searchMock}
-              esqlVariables={[]}
-            />
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+              />
+            </KibanaContextProvider>
           </IntlProvider>
         );
         // variable name input should be rendered and with the default value
@@ -301,16 +274,14 @@ describe('ValueControlForm', () => {
 
         render(
           <IntlProvider locale="en">
-            <ESQLControlsFlyout
-              initialVariableType={ESQLVariableType.VALUES}
-              queryString="FROM foo | WHERE field =="
-              onSaveControl={jest.fn()}
-              closeFlyout={jest.fn()}
-              onCancelControl={jest.fn()}
-              search={searchMock}
-              esqlVariables={[]}
-              timeRange={mockTimeRange}
-            />
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+                timeRange={mockTimeRange}
+              />
+            </KibanaContextProvider>
           </IntlProvider>
         );
 
@@ -321,6 +292,76 @@ describe('ValueControlForm', () => {
             })
           );
         });
+      });
+
+      it('should preserve custom esqlQuery when editing an existing VALUES_FROM_QUERY control', async () => {
+        const customQuery = 'FROM custom-logs* | STATS BY custom_field';
+        const initialState = {
+          grow: false,
+          width: 'medium',
+          title: 'Custom Query Control',
+          availableOptions: [],
+          selectedOptions: [], // Start with empty to trigger the useEffect
+          variableName: 'customVar',
+          variableType: ESQLVariableType.VALUES,
+          esqlQuery: customQuery,
+          controlType: EsqlControlType.VALUES_FROM_QUERY,
+        } as ESQLControlState;
+
+        const getESQLResultsMock = getESQLResults as jest.Mock;
+        getESQLResultsMock.mockClear();
+
+        render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+                initialState={initialState}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+
+        await waitFor(() => {
+          // Verify that getESQLResults was called with the custom query
+          expect(getESQLResultsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              esqlQuery: customQuery,
+            })
+          );
+        });
+
+        // Custom query is displayed in the query editor
+        const queryEditor = await waitFor(() =>
+          document.querySelector('[data-test-subj*="queryInput"]')
+        );
+        if (queryEditor) {
+          expect(queryEditor.textContent).toContain('custom-logs');
+        }
+      });
+
+      it("should show the 'no results' callout", async () => {
+        (getESQLResults as jest.Mock).mockResolvedValueOnce({
+          response: {
+            columns: [],
+          },
+        });
+
+        const { findByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field.id  == 'lala' | STATS BY field.name"
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
       });
     });
   });

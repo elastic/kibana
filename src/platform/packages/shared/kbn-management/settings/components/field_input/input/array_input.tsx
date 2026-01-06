@@ -8,15 +8,16 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 
 import { getFieldInputValue } from '@kbn/management-settings-utilities';
 import { useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
-import { OnInputChangeFn } from '@kbn/management-settings-types';
+import type { OnInputChangeFn } from '@kbn/management-settings-types';
 import { useServices } from '../services';
-import { InputProps } from '../types';
+import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 /**

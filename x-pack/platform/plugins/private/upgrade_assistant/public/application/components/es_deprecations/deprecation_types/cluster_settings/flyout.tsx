@@ -23,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   ClusterSettingAction,
   ResponseError,
@@ -116,6 +116,7 @@ export const RemoveClusterSettingsFlyout = ({
         {statusType === 'error' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.errorTitle}
               color="danger"
               iconType="warning"

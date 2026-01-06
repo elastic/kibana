@@ -9,31 +9,27 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { Direction, EuiButtonGroupOptionProps, EuiSelectableOption } from '@elastic/eui';
 import {
-  Direction,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
   EuiToolTip,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
+import type { OptionsListSortingType } from '@kbn/controls-schemas';
 
-import {
-  getCompatibleSortingTypes,
-  OptionsListSortBy,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '../../../../../common/options_list/suggestions_sorting';
+import { getCompatibleSortingTypes } from '../../../../../common/options_list/suggestions_sorting';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
 type SortByItem = EuiSelectableOption & {
-  data: { sortBy: OptionsListSortBy };
+  data: { sortBy: OptionsListSortingType['by'] };
 };
 
 const sortOrderOptions: EuiButtonGroupOptionProps[] = [

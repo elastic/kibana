@@ -21,12 +21,12 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { VisParams } from '../../../../types';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import type { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { ChartType } from '../../../../../common';
-import { ValidationVisOptionsProps } from '../../common';
+import type { ValidationVisOptionsProps } from '../../common';
 import { ElasticChartsOptions } from './elastic_charts_options';
 import { getPositions } from '../../../collections';
 

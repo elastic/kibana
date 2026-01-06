@@ -27,7 +27,7 @@ interface Props extends MetricsChartsFields {
 const FRAGMENT_BASE = 'key-metrics';
 
 export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
+  ({ entityId, dataView, dateRange, metric, onShowAll }, ref) => {
     const { charts } = useDockerContainerPageViewMetricsCharts({
       metric,
       metricsDataViewId: dataView?.id,
@@ -101,8 +101,9 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
               id={chart.id}
               key={chart.id}
               lensAttributes={chart}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
+              dataView={dataView}
               queryField={findInventoryFields('container').id}
             />
           ))}

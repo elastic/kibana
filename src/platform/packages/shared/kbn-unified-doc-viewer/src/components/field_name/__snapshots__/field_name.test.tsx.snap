@@ -8,7 +8,7 @@ exports[`FieldName renders a custom description icon 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -38,6 +38,7 @@ exports[`FieldName renders a custom description icon 1`] = `
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             test
@@ -57,7 +58,7 @@ exports[`FieldName renders a geo field 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -87,6 +88,7 @@ exports[`FieldName renders a geo field 1`] = `
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             test.test.test
@@ -106,7 +108,7 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -136,6 +138,7 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             test.test.test
@@ -155,7 +158,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -185,6 +188,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             test
@@ -204,7 +208,7 @@ exports[`FieldName renders unknown field 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -234,6 +238,7 @@ exports[`FieldName renders unknown field 1`] = `
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             test.test.test
@@ -253,7 +258,7 @@ exports[`FieldName renders when mapping is provided 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -283,6 +288,7 @@ exports[`FieldName renders when mapping is provided 1`] = `
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             bytes
@@ -302,7 +308,7 @@ exports[`FieldName renders with a search highlight 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldName_icon emotion-euiFlexGroup-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -332,6 +338,7 @@ exports[`FieldName renders with a search highlight 1`] = `
       >
         <span
           class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span>
             <mark

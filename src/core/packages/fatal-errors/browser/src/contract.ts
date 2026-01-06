@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type { FatalErrorInfo } from './get_error_info';
+import type { ReactNode } from 'react';
+import type { FatalError } from './fatal_error';
+
 /**
  * FatalErrors stop the Kibana Public Core and displays a fatal error screen
  * with details about the Kibana build and the error.
@@ -23,12 +24,27 @@ export interface FatalErrorsSetup {
    * @param error - The error to display
    * @param source - Adds a prefix of the form `${source}: ` to the error message
    */
-  add: (error: string | Error, source?: string) => never;
+  add(error: string | Error, source?: string): never;
 
   /**
-   * An Observable that will emit whenever a fatal error is added with `add()`
+   * Register custom error handler for specific error type.
+   * @param condition - A function that checks if the error is of a specific type.
+   * @param handler
    */
-  get$: () => Observable<FatalErrorInfo>;
+  catch<T extends string | Error>(
+    condition: (error: FatalError) => error is FatalError<T>,
+    handler: (errors: Array<FatalError<T>>) => ReactNode
+  ): void;
+
+  /**
+   * Register custom error handler for specific error type.
+   * @param condition - A function that checks if the error is of a specific type.
+   * @param handler
+   */
+  catch(
+    condition: (error: FatalError) => boolean,
+    handler: (errors: FatalError[]) => ReactNode
+  ): void;
 }
 
 /**

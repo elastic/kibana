@@ -7,20 +7,21 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
-import type { TaskRunnerFactory, ILicenseState, ActionExecutionSourceType } from './lib';
+import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
 import type {
   ActionType,
-  InMemoryConnector,
   ActionTypeConfig,
-  ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeSecrets,
+  InMemoryConnector,
 } from './types';
 
 export interface ActionTypeRegistryOpts {
@@ -30,6 +31,11 @@ export interface ActionTypeRegistryOpts {
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
   inMemoryConnectors: InMemoryConnector[];
+}
+
+interface ListOpts {
+  featureId?: string;
+  exposeValidation?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -244,7 +250,9 @@ export class ActionTypeRegistry {
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
-  public list(featureId?: string): CommonActionType[] {
+  public list(
+    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+  ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
@@ -258,7 +266,17 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
+        source: actionType.source || ACTION_TYPE_SOURCES.stack,
         subFeature: actionType.subFeature,
+        ...(exposeValidation === true
+          ? {
+              validate: {
+                params: actionType.validate.params,
+              },
+            }
+          : {}),
+        isDeprecated: !!actionType.isDeprecated,
+        allowMultipleSystemActions: actionType.allowMultipleSystemActions,
       }));
   }
 
@@ -271,5 +289,9 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
+  }
+
+  isDeprecated(actionTypeId: string): boolean {
+    return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
   }
 }

@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 
 export interface DockerServerSpec {
   enabled: boolean;
   portInContainer: number;
   port: number;
   image: string;
+  preferCached?: boolean;
   waitForLogLine?: RegExp | string;
   waitForLogLineTimeoutMs?: number;
   /** a function that should return an observable that will allow the tests to execute as soon as it emits anything */

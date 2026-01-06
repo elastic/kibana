@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import {
   EuiFlyoutFooter,
@@ -17,9 +16,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export enum SubmittingType {
   savingAsAdHoc = 'savingAsAdHoc',
@@ -29,12 +26,15 @@ export enum SubmittingType {
 interface FooterProps {
   onCancel: () => void;
   onSubmit: (isAdHoc?: boolean) => void;
+  onDuplicate?: () => void;
   submittingType: SubmittingType | undefined;
   submitDisabled: boolean;
-  isEdit: boolean;
+  hasEditData: boolean;
   isPersisted: boolean;
   allowAdHoc: boolean;
   canSave: boolean;
+  isManaged: boolean;
+  isDuplicating: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -48,6 +48,13 @@ const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButt
 const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButtonLabel', {
   defaultMessage: 'Save',
 });
+
+const duplicateButtonLabel = i18n.translate(
+  'indexPatternEditor.editor.flyoutDuplicateButtonLabel',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
 
 const editUnpersistedButtonLabel = i18n.translate(
   'indexPatternEditor.editor.flyoutEditUnpersistedButtonLabel',
@@ -65,13 +72,19 @@ export const Footer = ({
   onSubmit,
   submittingType,
   submitDisabled,
-  isEdit,
+  hasEditData,
   allowAdHoc,
   isPersisted,
   canSave,
+  onDuplicate,
+  isManaged,
+  isDuplicating,
 }: FooterProps) => {
-  const styles = useMemoCss(componentStyles);
-  const isEditingAdHoc = isEdit && !isPersisted;
+  const isEditingAdHoc = hasEditData && !isPersisted;
+
+  const isEditing = (canSave || isEditingAdHoc) && !isManaged;
+  const showDuplicateButton = (canSave || isEditingAdHoc) && onDuplicate;
+
   const submitPersisted = () => {
     onSubmit(false);
   };
@@ -80,7 +93,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter css={styles.footer}>
+    <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -94,7 +107,15 @@ export const Footer = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
+            {showDuplicateButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" onClick={onDuplicate} data-test-subj="duplicateButton">
+                  {duplicateButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -112,7 +133,7 @@ export const Footer = ({
               </EuiFlexItem>
             )}
 
-            {(canSave || isEditingAdHoc) && (
+            {isEditing && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
@@ -125,7 +146,7 @@ export const Footer = ({
                     (submittingType === SubmittingType.savingAsAdHoc && isEditingAdHoc)
                   }
                 >
-                  {isEdit
+                  {hasEditData && !isDuplicating
                     ? isPersisted
                       ? editButtonLabel
                       : editUnpersistedButtonLabel
@@ -138,12 +159,4 @@ export const Footer = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
-};
-
-const componentStyles = {
-  footer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginLeft: -euiTheme.size.l,
-      marginRight: -euiTheme.size.l,
-    }),
 };

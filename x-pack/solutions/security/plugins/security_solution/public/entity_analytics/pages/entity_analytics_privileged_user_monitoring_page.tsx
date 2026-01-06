@@ -16,10 +16,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-
-import { i18n } from '@kbn/i18n';
-import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
-import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import {
+  type InitMonitoringEngineResponse,
+  PrivilegeMonitoringEngineStatusEnum,
+  type PrivMonHealthResponse,
+} from '../../../common/api/entity_analytics';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -35,11 +36,14 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
-import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged_monitoring_engine_status';
+import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
+import { UserLimitCallOut } from '../components/user_limit_callout';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
+import { PageScope } from '../../data_view_manager/constants';
+import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -109,8 +113,8 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataView, status } = useDataView(PageScope.explore);
+  const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -124,6 +128,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataViewSpec;
   const engineStatus = usePrivilegedMonitoringEngineStatus();
+
   const initEngineCallBack = useCallback(
     async (userCount: number) => {
       dispatch({ type: 'INITIALIZING_ENGINE', userCount });
@@ -164,7 +169,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       });
     }
 
-    if (engineStatus.data?.status === 'not_found') {
+    if (engineStatus.data?.status === PrivilegeMonitoringEngineStatusEnum.not_installed) {
       return dispatch({ type: 'SHOW_ONBOARDING' });
     } else {
       return dispatch({ type: 'SHOW_DASHBOARD' });
@@ -176,6 +181,13 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     engineStatus.isError,
     engineStatus.isLoading,
   ]);
+
+  // Hide the timeline bottom bar when the page is in onboarding or initializing state
+  useEffect(() => {
+    const hideTimeline = ['onboarding', 'initializingEngine'].includes(state.type);
+    const cleanup = forceHiddenTimeline(hideTimeline);
+    return cleanup;
+  }, [state.type]);
 
   const fullHeightCSS = css`
     min-height: calc(100vh - 240px);
@@ -193,7 +205,11 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     <>
       {state.type === 'dashboard' && (
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          <SiemSearchBar
+            dataView={dataView}
+            id={InputsModelId.global}
+            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+          />
         </FiltersGlobal>
       )}
 
@@ -219,7 +235,15 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
         {state.type === 'onboarding' && (
           <>
-            <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
+            <EuiFlexGroup alignItems="center" justifyContent="center">
+              <EuiFlexItem
+                style={{
+                  maxWidth: '1144px',
+                }}
+              >
+                <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="l" />
             <PrivilegedUserMonitoringSampleDashboardsPanel />
           </>
@@ -275,7 +299,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                   body={
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.initEngine.description"
-                      defaultMessage="We're currently analyzing your connected data sources to set up a comprehensive Privileged user monitoring. This may take a few moments."
+                      defaultMessage="We're currently analyzing your connected data sources to set up comprehensive privileged user monitoring. This may take a few moments."
                     />
                   }
                 />
@@ -287,15 +311,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
         {state.type === 'dashboard' && (
           <>
             <HeaderPage
-              badgeOptions={{
-                beta: true,
-                text: i18n.translate(
-                  'xpack.securitySolution.privilegedUserMonitoring.dashboards.betaStatus',
-                  {
-                    defaultMessage: 'TECHNICAL PREVIEW',
-                  }
-                ),
-              }}
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboards.pageTitle"
@@ -311,6 +326,11 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                 </EuiButtonEmpty>,
               ]}
             />
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <UserLimitCallOut onManageDataSources={onManageUserClicked} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <PrivilegedUserMonitoring
               callout={state.onboardingCallout}
               error={state.error}
@@ -323,7 +343,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
         {state.type === 'manageDataSources' && (
           <PrivilegedUserMonitoringManageDataSources
             onBackToDashboardClicked={onBackToDashboardClicked}
-            onDone={initEngineCallBack}
           />
         )}
 

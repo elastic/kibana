@@ -45,7 +45,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 {
   readonly #log: Logger;
   readonly #client: SavedObjectsPointInTimeFinderClient;
-  readonly #findOptions: SavedObjectsFindOptions;
+  readonly #findOptions: SavedObjectsFindOptions & { perPage: number };
   readonly #internalOptions: SavedObjectsFindInternalOptions | undefined;
   #open: boolean = false;
   #pitId?: string;
@@ -91,7 +91,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       this.#log.debug(`Collected [${lastResultsCount}] saved objects`);
 
       // Close PIT if this was our last page
-      if (this.#pitId && lastResultsCount < this.#findOptions.perPage!) {
+      if (this.#pitId && lastResultsCount < this.#findOptions.perPage) {
         await this.close();
       }
 
@@ -103,7 +103,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 
       // We've reached the end when there are fewer hits than our perPage size,
       // or when `close()` has been called.
-    } while (this.#open && lastResultsCount >= this.#findOptions.perPage!);
+    } while (this.#open && lastResultsCount >= this.#findOptions.perPage);
 
     return;
   }
@@ -135,7 +135,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       // Since `find` swallows 404s, it is expected that finder will do the same,
       // so we only rethrow non-404 errors here.
       if (e.output?.statusCode !== 404) {
-        this.#log.error(`Failed to open PIT for types [${this.#findOptions.type}]`);
+        this.#log.debug(`Failed to open PIT for types [${this.#findOptions.type}]`);
         throw e;
       }
       this.#log.debug(`Unable to open PIT for types [${this.#findOptions.type}]: 404 ${e}`);

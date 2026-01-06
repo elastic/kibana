@@ -11,7 +11,7 @@ import React from 'react';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TestProviders } from '../../../../../common/mock';
 import { ArgsComponent } from './args';
-import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
+import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -23,21 +23,21 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+jest.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
   return {
-    CellActionsWrapper: jest.fn(),
+    CellActionsRenderer: jest.fn(),
   };
 });
 
-const MockedCellActionsWrapper = jest.fn(({ children }) => {
-  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
 });
 
 describe('Args', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
 
   describe('rendering', () => {
@@ -159,7 +159,7 @@ describe('Args', () => {
         </TestProviders>
       );
 
-      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeId: 'some_scope',
         }),

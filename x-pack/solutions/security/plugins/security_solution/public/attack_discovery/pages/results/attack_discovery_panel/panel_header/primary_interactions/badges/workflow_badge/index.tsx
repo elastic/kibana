@@ -31,6 +31,7 @@ const WorkflowBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
           aria-label={NON_I18N_WORKFLOW_STATUS_FIELD_NAME}
           color="hollow"
           data-test-subj="workflowBadge"
+          tabIndex={0}
         >
           <span
             css={css`

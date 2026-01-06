@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -77,6 +77,11 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/css-utils",
+    "@kbn/visualizations-common",
+    "@kbn/lens-common",
+    "@kbn/cps",
   ],
   "exclude": ["target/**/*"]
 }

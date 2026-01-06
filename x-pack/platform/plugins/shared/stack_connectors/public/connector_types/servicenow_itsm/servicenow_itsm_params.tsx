@@ -18,14 +18,16 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Choice, Fields } from '../lib/servicenow/types';
-import { ServiceNowITSMActionParams, EventAction } from './types';
+import type { Choice, Fields } from '../lib/servicenow/types';
+import type { ServiceNowITSMActionParams } from './types';
+import { EventAction } from './types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 import {
@@ -35,7 +37,7 @@ import {
 } from '../lib/servicenow/helpers';
 
 import * as i18n from '../lib/servicenow/translations';
-import { AdditionalFields } from '../lib/servicenow/additional_fields';
+import { AdditionalFields } from '../../common/components/additional_fields';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -468,6 +470,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
               errors={errors['subActionParams.incident.additional_fields'] as string[]}
               onChange={additionalFieldsOnChange}
               isOptionalField
+              helpText={i18n.ADDITIONAL_FIELDS_HELP_SERVICENOW_TEXT}
             />
           )}
         </>

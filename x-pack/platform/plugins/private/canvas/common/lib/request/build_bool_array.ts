@@ -6,7 +6,7 @@
  */
 
 import { getESFilter } from './get_es_filter';
-import { ExpressionValueFilter } from '../../../types';
+import type { ExpressionValueFilter } from '../../../types';
 
 const compact = <T>(arr: T[]) => (Array.isArray(arr) ? arr.filter((val) => Boolean(val)) : []);
 

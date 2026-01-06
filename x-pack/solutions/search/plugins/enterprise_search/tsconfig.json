@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -27,7 +27,6 @@
     "@kbn/i18n",
     "@kbn/ml-plugin",
     "@kbn/ml-trained-models-utils",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/core-ui-settings-browser-mocks",
@@ -41,7 +40,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/data-views-plugin",
     "@kbn/discover-plugin",
-    "@kbn/guided-onboarding",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
     "@kbn/es-query",
@@ -57,9 +55,6 @@
     "@kbn/search-index-documents",
     "@kbn/search-connectors",
     "@kbn/logs-shared-plugin",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-application-browser",
-    "@kbn/core-capabilities-common",
     "@kbn/code-editor",
     "@kbn/console-plugin",
     "@kbn/core-notifications-browser",
@@ -75,7 +70,6 @@
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
-    "@kbn/security-plugin-types-common",
     "@kbn/core-security-server",
     "@kbn/core-security-server-mocks",
     "@kbn/unsaved-changes-prompt",
@@ -85,8 +79,9 @@
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
-    "@kbn/file-upload-common",
     "@kbn/search-indices",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/licensing-types",
+    "@kbn/deeplinks-management",
   ]
 }

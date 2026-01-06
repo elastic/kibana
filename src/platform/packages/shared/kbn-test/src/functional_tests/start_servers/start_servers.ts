@@ -12,15 +12,15 @@ import Path from 'path';
 import * as Rx from 'rxjs';
 import dedent from 'dedent';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { applyFipsOverrides } from '../lib/fips_overrides';
+import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
-import { StartServerOptions } from './flags';
+import type { StartServerOptions } from './flags';
 
 const FTR_SCRIPT_PATH = Path.resolve(REPO_ROOT, 'scripts/functional_test_runner');
 
@@ -30,10 +30,10 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
   await withProcRunner(log, async (procs) => {
     let config: Config;
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-      config = await readConfigFile(log, options.esVersion, options.config);
-    } else {
+    if (fipsIsEnabled()) {
       config = await readConfigFile(log, options.esVersion, options.config, {}, applyFipsOverrides);
+    } else {
+      config = await readConfigFile(log, options.esVersion, options.config);
     }
 
     const shutdownEs = await runElasticsearch({

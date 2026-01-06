@@ -9,7 +9,7 @@ import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { FindGapsParams, FindGapsSearchAfterParams } from './types';
+import type { FindGapsParams, FindGapsSearchAfterParams } from '../../application/gaps/types';
 import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 import { buildGapsFilter } from './build_gaps_filter';
@@ -60,6 +60,8 @@ export const findGaps = async ({
   }
 };
 
+const FIND_GAPS_SEARCH_AFTER_MAX_RULES = 100;
+
 /**
  * This function is used to find gaps using search after.
  * It's used when to be able process more than 10,000 gaps with stable sorting.
@@ -78,12 +80,39 @@ export const findGapsSearchAfter = async ({
   searchAfter?: SortResults[];
   pitId?: string;
 }> => {
-  const { ruleId, start, end, perPage, statuses, sortField, sortOrder } = params;
+  const {
+    ruleIds,
+    start,
+    end,
+    perPage,
+    statuses,
+    sortField,
+    sortOrder,
+    hasUnfilledIntervals,
+    hasInProgressIntervals,
+    hasFilledIntervals,
+    updatedBefore,
+    failedAutoFillAttemptsLessThan,
+  } = params;
+
+  if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
+    throw new Error(`ruleIds max size must be ${FIND_GAPS_SEARCH_AFTER_MAX_RULES}`);
+  }
+
   try {
-    const filter = buildGapsFilter({ start, end, statuses });
+    const filter = buildGapsFilter({
+      start,
+      end,
+      statuses,
+      hasUnfilledIntervals,
+      hasInProgressIntervals,
+      hasFilledIntervals,
+      failedAutoFillAttemptsLessThan,
+      updatedBefore,
+    });
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIdsSearchAfter(
       RULE_SAVED_OBJECT_TYPE,
-      [ruleId],
+      ruleIds,
       {
         filter,
         sort: [
@@ -105,7 +134,9 @@ export const findGapsSearchAfter = async ({
       pitId: gapsResponse.pit_id,
     };
   } catch (err) {
-    logger.error(`Failed to find gaps with search after for rule ${ruleId}: ${err.message}`);
+    logger.error(
+      `Failed to find gaps with search after for rules ${ruleIds.join(', ')}: ${err.message}`
+    );
     throw err;
   }
 };

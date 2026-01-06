@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 import { registerComponentTemplateRoutes } from './api/component_templates';
 import { registerDataStreamRoutes } from './api/data_streams';

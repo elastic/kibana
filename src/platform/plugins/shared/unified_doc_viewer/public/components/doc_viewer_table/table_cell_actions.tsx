@@ -8,16 +8,18 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps, copyToClipboard } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { IToasts } from '@kbn/core/public';
-import { FieldRow } from './field_row';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { IToasts } from '@kbn/core/public';
+import type { FieldRow } from './field_row';
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
   isEsqlMode: boolean | undefined;
+  columns?: string[];
 }
 
 function isFilterInOutPairDisabled(
@@ -274,11 +276,19 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
   );
 };
 
+// Toggle column
+const toggleColumnLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
+  {
+    defaultMessage: 'Toggle column in table',
+  }
+);
+
 const ToggleColumn: React.FC<
   TableActionsProps & {
     onToggleColumn: ((field: string) => void) | undefined;
   }
-> = ({ Component, row, onToggleColumn }) => {
+> = ({ Component, columns, row, onToggleColumn }) => {
   if (!row) {
     return null;
   }
@@ -289,18 +299,12 @@ const ToggleColumn: React.FC<
     return null;
   }
 
-  // Toggle column
-  const toggleColumnLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
-    {
-      defaultMessage: 'Toggle column in table',
-    }
-  );
+  const isColumnAdded = columns?.includes(name);
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType="listAdd"
+      iconType={isColumnAdded ? 'cross' : 'plusInCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}
@@ -312,11 +316,13 @@ const ToggleColumn: React.FC<
 
 export function getFieldCellActions({
   rows,
+  columns,
   isEsqlMode,
   onFilter,
   onToggleColumn,
 }: {
   rows: FieldRow[];
+  columns?: string[];
   isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
   onToggleColumn: ((field: string) => void) | undefined;
@@ -342,6 +348,7 @@ export function getFieldCellActions({
             return (
               <ToggleColumn
                 row={rows[rowIndex]}
+                columns={columns}
                 Component={Component}
                 isEsqlMode={isEsqlMode}
                 onToggleColumn={onToggleColumn}

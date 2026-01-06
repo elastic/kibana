@@ -8,14 +8,15 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
-import { createIndexPatternsStartMock } from '../data_views/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
-import { SearchService, SearchServiceSetupDependencies } from './search_service';
+import type { SearchServiceSetupDependencies } from './search_service';
+import { SearchService } from './search_service';
 import { lastValueFrom, of } from 'rxjs';
 
 import type {
@@ -246,7 +247,7 @@ describe('Search service', () => {
 
         expect(mockSessionClient.trackId).toBeCalledTimes(1);
 
-        expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
+        expect(mockSessionClient.trackId.mock.calls[0]).toEqual(['my_id', options]);
       });
 
       it('does not call `trackId` if search is already tracked', async () => {

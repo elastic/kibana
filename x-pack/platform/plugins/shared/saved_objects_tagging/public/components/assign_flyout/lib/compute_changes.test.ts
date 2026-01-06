@@ -8,7 +8,7 @@
 import { createAssignableObject } from '../../../../common/test_utils';
 import { getKey } from '../../../../common/assignments';
 import { computeRequiredChanges } from './compute_changes';
-import { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
+import type { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
 
 describe('computeRequiredChanges', () => {
   it('returns objects that need to be assigned', () => {

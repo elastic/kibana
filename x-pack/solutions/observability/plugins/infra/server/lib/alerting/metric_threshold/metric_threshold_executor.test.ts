@@ -30,6 +30,8 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_REASON,
   ALERT_GROUP,
+  ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -115,11 +117,11 @@ describe('The metric threshold rule type', () => {
     jest.setSystemTime();
   });
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+      ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     );
 
     mockMetricsExplorerLocator.getRedirectUrl.mockImplementation(
@@ -374,6 +376,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.75.',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: alertIdA },
       });
       testAlertReported(2, {
         id: alertIdB,
@@ -385,6 +388,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 1 in the last 1 min for b. Alert when above 0.75.',
         tags: [],
         groupByKeys: { something: alertIdB },
+        grouping: { something: alertIdB },
       });
     });
 
@@ -429,6 +433,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when below 1.5.',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: 'a' },
       });
     });
 
@@ -985,6 +990,7 @@ describe('The metric threshold rule type', () => {
         groupByKeys: { host: { name: alertIdA } },
         group: [{ field: 'host.name', value: alertIdA }],
         ecsGroups: { 'host.name': alertIdA },
+        grouping: { host: { name: alertIdA } },
       });
       testAlertReported(2, {
         id: alertIdB,
@@ -998,6 +1004,7 @@ describe('The metric threshold rule type', () => {
         groupByKeys: { host: { name: alertIdB } },
         group: [{ field: 'host.name', value: alertIdB }],
         ecsGroups: { 'host.name': alertIdB },
+        grouping: { host: { name: alertIdB } },
       });
     });
   });
@@ -1235,6 +1242,7 @@ describe('The metric threshold rule type', () => {
           'test.metric.1 is 1 in the last 1 min for a. Alert when above or equal 1.\ntest.metric.2 is 3 in the last 1 min for a. Alert when above or equal 3.',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: alertIdA },
       });
     });
   });
@@ -1401,6 +1409,7 @@ describe('The metric threshold rule type', () => {
           reason: 'count is 0 in the last 1 min for a. Alert when below or equal 0.',
           tags: [],
           groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
         });
         testAlertReported(2, {
           id: alertIdB,
@@ -1410,6 +1419,7 @@ describe('The metric threshold rule type', () => {
           reason: 'count is 0 in the last 1 min for b. Alert when below or equal 0.',
           tags: [],
           groupByKeys: { something: alertIdB },
+          grouping: { something: alertIdB },
         });
       });
     });
@@ -1757,6 +1767,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.3 reported no data in the last 1m',
         tags: [],
         groupByKeys: { something: alertID },
+        grouping: { something: alertID },
       });
 
       setEvaluationResults([
@@ -1787,6 +1798,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.3 reported no data in the last 1m',
         tags: [],
         groupByKeys: { something: alertID },
+        grouping: { something: alertID },
       });
 
       setEvaluationResults([
@@ -1827,6 +1839,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: alertIdA },
       });
       testAlertReported(4, {
         id: alertIdB,
@@ -1836,6 +1849,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdB },
+        grouping: { something: alertIdB },
       });
 
       interTestStateStorage.push(resultState); // Hand off resultState to the next test
@@ -1885,6 +1899,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.3 reported no data in the last 1m for a',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: alertIdA },
       });
       testAlertReported(2, {
         id: alertIdB,
@@ -1896,6 +1911,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.3 reported no data in the last 1m for b',
         tags: [],
         groupByKeys: { something: alertIdB },
+        grouping: { something: alertIdB },
       });
     });
 
@@ -1950,6 +1966,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.2 is 3 in the last 1 min for a. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: alertIdA },
       });
       testAlertReported(2, {
         id: alertIdB,
@@ -1959,6 +1976,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.2 is 1 in the last 1 min for b. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdB },
+        grouping: { something: alertIdB },
       });
       testAlertReported(3, {
         id: alertIdC,
@@ -1968,6 +1986,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.2 is 3 in the last 1 min for c. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdC },
+        grouping: { something: alertIdC },
       });
 
       setEvaluationResults([
@@ -2008,6 +2027,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdA },
+        grouping: { something: alertIdA },
       });
       testAlertReported(5, {
         id: alertIdB,
@@ -2017,6 +2037,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdB },
+        grouping: { something: alertIdB },
       });
     });
 
@@ -2124,6 +2145,7 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.',
           tags: [],
           groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
         });
         testAlertReported(2, {
           id: alertIdB,
@@ -2135,6 +2157,7 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when above 0.',
           tags: [],
           groupByKeys: { something: alertIdB },
+          grouping: { something: alertIdB },
         });
 
         interTestStateStorage.push(resultState); // Hand off resultState to the next test
@@ -2187,6 +2210,7 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.3 reported no data in the last 1m for a',
           tags: [],
           groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
         });
         testAlertReported(2, {
           id: alertIdB,
@@ -2203,6 +2227,7 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.3 reported no data in the last 1m for b',
           tags: [],
           groupByKeys: { something: alertIdB },
+          grouping: { something: alertIdB },
         });
       });
     });
@@ -2361,6 +2386,7 @@ describe('The metric threshold rule type', () => {
       reason,
       tags,
       ecsGroups,
+      grouping,
     }: {
       id: string;
       actionGroup: string;
@@ -2377,6 +2403,7 @@ describe('The metric threshold rule type', () => {
       tags?: string[];
       group?: Group[];
       ecsGroups?: Record<string, string>;
+      grouping?: Record<string, any>;
     }
   ) {
     expect(services.alertsClient.report).toHaveBeenNthCalledWith(index, {
@@ -2421,6 +2448,7 @@ describe('The metric threshold rule type', () => {
               }, {}),
             }
           : {}),
+        ...(grouping ? { grouping } : {}),
       },
       id,
       payload: {
@@ -2443,8 +2471,10 @@ describe('The metric threshold rule type', () => {
             }
           : {}),
         [ALERT_REASON]: reason,
+        [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
+        ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
       },
     });
   }
@@ -2488,6 +2518,7 @@ const mockLibs: any = {
             type: 'index_pattern',
             indexPatternId: 'some-id',
           },
+          metricAlias: 'metrics-*,metricbeat-*',
         },
       });
     },

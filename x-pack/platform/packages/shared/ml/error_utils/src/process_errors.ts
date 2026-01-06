@@ -75,7 +75,8 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
       ) {
         errObj.causedBy =
           error.body.attributes.body.error.caused_by?.caused_by?.reason ||
-          error.body.attributes.body.error.caused_by?.reason;
+          error.body.attributes.body.error.caused_by?.reason ||
+          undefined; // Remove 'null' option from the types
       }
       if (
         Array.isArray(error.body.attributes.body.error.root_cause) &&

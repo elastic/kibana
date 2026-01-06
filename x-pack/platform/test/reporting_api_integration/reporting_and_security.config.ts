@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import path from 'path';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+import { findTestPluginPaths } from '@kbn/test';
 import { ReportingAPIProvider } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -38,6 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.reporting.csv.maxSizeBytes=6000`,
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

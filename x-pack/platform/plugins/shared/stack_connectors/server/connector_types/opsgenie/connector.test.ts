@@ -13,10 +13,10 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
-import { OpsgenieConnectorTypeId } from '../../../common';
 import { OpsgenieConnector } from './connector';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/opsgenie';
 
 jest.mock('axios');
 
@@ -73,7 +73,7 @@ describe('OpsgenieConnector', () => {
     connector = new OpsgenieConnector({
       configurationUtilities: mockedActionsConfig,
       config: { apiUrl: 'https://example.com' },
-      connector: { id: '1', type: OpsgenieConnectorTypeId },
+      connector: { id: '1', type: CONNECTOR_ID },
       secrets: { apiKey: '123' },
       logger,
       services,

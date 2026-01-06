@@ -256,6 +256,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
             <EuiSpacer size="m" />
 
             <EuiCallOut
+              announceOnMount
               size="s"
               title={
                 <FormattedMessage

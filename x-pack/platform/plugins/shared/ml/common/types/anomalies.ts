@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import type { severityThresholdSchema } from '../../server/embeddable/schemas';
 
-export interface SeverityThreshold {
-  min: number;
-  max?: number;
-}
+export type SeverityThreshold = TypeOf<typeof severityThresholdSchema>;

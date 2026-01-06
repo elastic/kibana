@@ -31,6 +31,7 @@
       "fieldsMetadata",
       "logsDataAccess",
       "embeddable",
+      "savedSearch",
       "spaces"
     ],
     "optionalPlugins": [
@@ -42,8 +43,9 @@
       "telemetry",
       "discover",
       "ingestPipelines",
-      "guidedOnboarding",
-      "automaticImport"
+      "automaticImport",
+      "alerting",
+      "sloShared"
     ],
     "requiredBundles": [
       "kibanaReact",

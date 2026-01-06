@@ -7,7 +7,7 @@
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
-import { APIKeyResponse } from '../generate_api_key/generate_api_key_logic';
+import type { APIKeyResponse } from '../generate_api_key/generate_api_key_logic';
 
 export const getApiKeyById = async (id: string) => {
   const route = `/internal/enterprise_search/api_keys/${id}`;

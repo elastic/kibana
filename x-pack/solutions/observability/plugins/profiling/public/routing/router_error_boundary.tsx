@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { NotFoundRouteException } from '@kbn/typed-react-router-config';
-import { EuiErrorBoundary } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { ProfilingPluginPublicStartDeps } from '../types';
 
 export function RouterErrorBoundary({ children }: { children?: React.ReactNode }) {
@@ -58,14 +58,13 @@ function ErrorWithTemplate({ error }: { error: Error }) {
 
   return (
     <ObservabilityPageTemplate pageHeader={pageHeader}>
-      <EuiErrorBoundary>
+      <KibanaErrorBoundary>
         <DummyComponent error={error} />
-      </EuiErrorBoundary>
+      </KibanaErrorBoundary>
     </ObservabilityPageTemplate>
   );
 }
 
-function DummyComponent({ error }: { error: Error }) {
+function DummyComponent({ error }: { error: Error }): any {
   throw error;
-  return <div />;
 }

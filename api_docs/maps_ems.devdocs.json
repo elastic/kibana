@@ -783,7 +783,7 @@
         "label": "DEFAULT_EMS_DARKMAP_ID",
         "description": [],
         "signature": [
-          "\"dark_map\""
+          "\"dark_map_v9\""
         ],
         "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
         "deprecated": false,
@@ -858,7 +858,7 @@
         "label": "DEFAULT_EMS_ROADMAP_DESATURATED_ID",
         "description": [],
         "signature": [
-          "\"road_map_desaturated\""
+          "\"road_map_desaturated_v9\""
         ],
         "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
         "deprecated": false,

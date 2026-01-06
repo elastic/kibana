@@ -13,6 +13,8 @@ import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
 import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
+import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
+import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -48,4 +50,6 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await scheduleAssetCriticalityEcsCompliancyMigration(paramsWithScopedLogger);
   await renameRiskScoreComponentTemplate(paramsWithScopedLogger);
   await updateRiskScoreMappings(paramsWithScopedLogger);
+  await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
+  await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
 };

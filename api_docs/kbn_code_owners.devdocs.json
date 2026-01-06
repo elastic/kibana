@@ -29,7 +29,7 @@
           "\nFind what area a code owner belongs to\n"
         ],
         "signature": [
-          "(owner: string) => \"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\" | undefined"
+          "(owner: string) => \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
@@ -299,7 +299,7 @@
             "label": "areas",
             "description": [],
             "signature": [
-              "(\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\")[]"
+              "(\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\")[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
@@ -333,7 +333,7 @@
         "label": "CodeOwnerArea",
         "description": [],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
@@ -415,13 +415,13 @@
           },
           {
             "parentPluginId": "@kbn/code-owners",
-            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.chat",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.workplaceai",
             "type": "Array",
             "tags": [],
-            "label": "chat",
+            "label": "workplaceai",
             "description": [],
             "signature": [
-              "never[]"
+              "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
             "deprecated": false,
@@ -440,7 +440,7 @@
           "\nCode owner area names"
         ],
         "signature": [
-          "readonly [\"platform\", \"search\", \"observability\", \"security\", \"chat\"]"
+          "readonly [\"platform\", \"search\", \"observability\", \"security\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,

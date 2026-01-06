@@ -8,7 +8,8 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import { UiSettingsClientCommon, UiSettingsClientParams } from './ui_settings_client_common';
+import type { UiSettingsClientParams } from './ui_settings_client_common';
+import { UiSettingsClientCommon } from './ui_settings_client_common';
 
 export class UiSettingsGlobalClient extends UiSettingsClientCommon {
   constructor(params: UiSettingsClientParams) {

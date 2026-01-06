@@ -58,7 +58,7 @@ Array [
   Object {
     "context": Object {
       "loggingOptions": Object {
-        "loggerName": "synthetics",
+        "loggerName": "uptime",
       },
     },
     "meta": true,
@@ -112,7 +112,7 @@ Array [
   Object {
     "context": Object {
       "loggingOptions": Object {
-        "loggerName": "synthetics",
+        "loggerName": "uptime",
       },
     },
     "meta": true,

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { PublishingSubject } from '../publishing_subject';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { PublishingSubject } from '../publishing_subject';
 
 /**
- * This API publishes a list of data views that it uses. Note that this should not contain any
- * ad-hoc data views.
+ * This API publishes a list of data views that it uses.
  */
 export interface PublishesDataViews {
   dataViews$: PublishingSubject<DataView[] | undefined>;

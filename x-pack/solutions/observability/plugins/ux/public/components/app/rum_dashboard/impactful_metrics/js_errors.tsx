@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactText, useContext, useState } from 'react';
+import type { ReactText } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   EuiBasicTable,
   EuiFlexItem,
@@ -100,7 +101,7 @@ export function JSErrors() {
                 totalErrors
               ) : (
                 <EuiToolTip content={totalErrors}>
-                  <>{numeral(totalErrors).format('0 a')}</>
+                  <span tabIndex={0}>{numeral(totalErrors).format('0 a')}</span>
                 </EuiToolTip>
               )
             }

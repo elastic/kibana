@@ -24,12 +24,16 @@ export function FieldFinalSideHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (
-    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
+    <EuiButtonIcon
+      iconType="question"
+      onClick={togglePopover}
+      aria-label={i18n.FINAL_UPDATE_HELP_ARIA_LABEL}
+    />
   );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
           defaultMessage="The {finalUpdateSectionLabel} section lets you preview and edit the final value of a field. This value is fully applied when you update the rule."

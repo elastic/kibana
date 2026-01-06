@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
@@ -43,7 +44,7 @@ describe('toMountPoint', () => {
   };
 
   it('exposes the euiTheme when `theme$` is provided', async () => {
-    const theme = { theme$: of<CoreTheme>({ darkMode: true, name: 'amsterdam' }) };
+    const theme = { theme$: of<CoreTheme>({ darkMode: true, name: 'borealis' }) };
     const mount = toMountPoint(<InnerComponent />, { theme, i18n, analytics, userProfile });
 
     const targetEl = document.createElement('div');
@@ -55,7 +56,7 @@ describe('toMountPoint', () => {
   });
 
   it('propagates changes of the theme$ observable', async () => {
-    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
+    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'borealis' });
 
     const mount = toMountPoint(<InnerComponent />, {
       theme: { theme$ },
@@ -72,7 +73,7 @@ describe('toMountPoint', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      theme$.next({ darkMode: false, name: 'amsterdam' });
+      theme$.next({ darkMode: false, name: 'borealis' });
     });
     await flushPromises();
 

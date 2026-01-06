@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { AlertStatus } from './alert_status';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -29,8 +29,7 @@ const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1', full_name: 'User 1' }, data: {} },
 ];
 
-// Failing: See https://github.com/elastic/kibana/issues/216474
-describe.skip('<AlertStatus />', () => {
+describe('<AlertStatus />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -51,17 +50,13 @@ describe.skip('<AlertStatus />', () => {
 
     const { getByTestId } = renderAlertStatus(contextValue);
 
-    await act(async () => {
-      expect(getByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(WORKFLOW_STATUS_DETAILS_TEST_ID)).toBeInTheDocument();
-    });
+    expect(getByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(WORKFLOW_STATUS_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render empty component if missing workflow_user value', async () => {
     const { container } = renderAlertStatus(mockContextValue);
 
-    await act(async () => {
-      expect(container).toBeEmptyDOMElement();
-    });
+    expect(container).toBeEmptyDOMElement();
   });
 });

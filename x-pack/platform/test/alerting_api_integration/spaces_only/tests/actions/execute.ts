@@ -15,7 +15,6 @@ import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es: Client = getService('es');
@@ -263,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
       } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
       expect(features).to.be.an(Array);
       const noopFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+        (feature: { id: string }) => feature.id === 'Connector: Test: Noop'
       );
       expect(noopFeature).to.be.ok();
       expect(noopFeature.last_used).to.be.a('string');

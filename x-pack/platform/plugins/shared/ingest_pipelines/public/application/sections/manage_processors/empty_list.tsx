@@ -6,9 +6,16 @@
  */
 
 import { EuiPageTemplate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { css } from '@emotion/react';
+
+const styles = {
+  emptyPrompt: css`
+    width: 450px;
+    padding: 0 20px 0 20px;
+  `,
+};
 
 export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Element }) => {
   return (
@@ -32,10 +39,7 @@ export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Elemen
         </p>
       }
       actions={addDatabaseButton}
-      css={css`
-        width: 450px;
-        padding: 0 20px 0 20px;
-      `}
+      css={styles.emptyPrompt}
     />
   );
 };

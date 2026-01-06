@@ -6,7 +6,8 @@
  */
 
 import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
-import { SendRequestResponse } from '../types';
+import type { SendRequestResponse } from '../types';
+import type { GetIndexTemplatesResponse } from '../index_templates';
 
 export interface SerializedEnrichPolicy {
   type: EnrichPolicyType;
@@ -19,4 +20,9 @@ export interface SerializedEnrichPolicy {
 
 export interface PublicApiServiceSetup {
   getAllEnrichPolicies(): Promise<SendRequestResponse<SerializedEnrichPolicy[]>>;
+  /**
+   * Fetches composable and legacy index templates as returned by Index Management's
+   * `GET /api/index_management/index_templates` endpoint.
+   */
+  getIndexTemplates(options?: { signal?: AbortSignal }): Promise<GetIndexTemplatesResponse>;
 }

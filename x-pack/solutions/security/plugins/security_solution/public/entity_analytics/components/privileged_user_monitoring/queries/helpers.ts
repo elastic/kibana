@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-ast';
-import { Walker, BasicPrettyPrinter, isFunctionExpression, isColumn, mutate } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLForkParens } from '@kbn/esql-language';
+import {
+  Walker,
+  BasicPrettyPrinter,
+  isFunctionExpression,
+  isColumn,
+  mutate,
+  Parser,
+} from '@kbn/esql-language';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { partition } from 'lodash/fp';
-import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
-import { Parser } from '@kbn/esql-ast/src/parser/parser';
-import { isAsExpression, isFieldExpression } from '@kbn/esql-ast/src/ast/is';
-import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
+import type { ESQLProperNode } from '@kbn/esql-language/src/types';
+import { isAsExpression, isFieldExpression } from '@kbn/esql-language/src/ast/is';
+import * as E from 'fp-ts/Either';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 export const getPrivilegedMonitorUsersJoin = (
   namespace: string
@@ -21,10 +28,22 @@ export const getPrivilegedMonitorUsersJoin = (
   | RENAME event_timestamp AS @timestamp
   | WHERE user.is_privileged == true`;
 
+export type EsqlQueryOrInvalidFields = E.Either<
+  { invalidFields: string[]; error?: undefined } | { error: string; invalidFields?: undefined },
+  string
+>;
+export const getPrivilegeMonitrUsersJoinNoTimestamp = (
+  namespace: string
+) => `| LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
+  | WHERE user.is_privileged == true`;
+
 /**
  * Rewrites que query to remove FORK branches that contain columns not available.
  */
-export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql: string) {
+export function removeInvalidForkBranchesFromESQL(
+  fields: DataViewFieldMap,
+  esql: string
+): EsqlQueryOrInvalidFields {
   const { root } = Parser.parse(esql);
   const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<
     ESQLCommand<'fork'>
@@ -32,7 +51,7 @@ export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql
 
   // The query has no FORK command, so we can return the original ESQL query
   if (forkCommands.length === 0) {
-    return esql;
+    return E.right(esql);
   }
 
   // There is no technical limitation preventing us from having multiple FORK commands in the query,
@@ -42,10 +61,9 @@ export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql
   }
 
   const forkCommand = forkCommands[0];
+  const forkParens = forkCommand?.args as ESQLForkParens[];
 
-  const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
-
-  if (!forkArguments || forkArguments.length < 2) {
+  if (!forkParens || forkParens.length < 2) {
     throw new Error('Invalid ESQL query: FORK command must have at least two arguments');
   }
 
@@ -56,30 +74,37 @@ export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql
     isColumn(node) && !createdColumns.includes(node.name) && !fields[node.name]; // Check if the column was created or exists in the fields map
 
   const [invalidBranches, validBranches] = partition(
-    (forkArgument) => Walker.find(forkArgument, isInvalidColumn),
-    forkArguments
+    (parens) => Walker.find(parens.child, isInvalidColumn),
+    forkParens
   );
 
   // When all branches are valid we can return the original ESQL query
   if (invalidBranches.length === 0) {
-    return esql;
+    return E.right(esql);
   }
 
   // No valid FORK branches found
   if (validBranches.length === 0) {
-    return undefined; // TODO can we throw an error here? or return an empty query?
+    const invalidFields = new Set<string>();
+    invalidBranches.forEach((branch) => {
+      Walker.findAll(branch.child, isInvalidColumn).forEach((node) => {
+        invalidFields.add(node.name);
+      });
+    });
+
+    return E.left({ invalidFields: Array.from(invalidFields) });
   }
 
   // When FORK has only one valid branch we need to remove the fork command from query and add the valid branch back to the root
   if (validBranches.length === 1) {
-    return moveForkBranchToToplevel(root, forkCommand, validBranches[0]);
+    return E.right(moveForkBranchToToplevel(root, forkCommand, validBranches[0].child));
   }
 
   // Remove the invalid branches
   invalidBranches.forEach((branch) => {
     mutate.generic.commands.args.remove(root, branch);
   });
-  return BasicPrettyPrinter.multiline(root);
+  return E.right(BasicPrettyPrinter.multiline(root));
 }
 
 function moveForkBranchToToplevel(

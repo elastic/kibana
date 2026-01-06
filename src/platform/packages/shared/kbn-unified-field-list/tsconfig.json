@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -35,7 +35,9 @@
     "@kbn/search-types",
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-utils",
-    "@kbn/restorable-state"
+    "@kbn/restorable-state",
+    "@kbn/css-utils",
+    "@kbn/field-formats-common",
   ],
   "exclude": ["target/**/*"]
 }

@@ -7,7 +7,8 @@
 
 import { registerTemplateRoutes } from '.';
 import { addBasePath } from '..';
-import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
+import type { RequestMock } from '../../../test/helpers';
+import { RouterMock, routeDependencies, getTransportRequest } from '../../../test/helpers';
 
 describe('Component templates API', () => {
   const router = new RouterMock();
@@ -26,6 +27,7 @@ describe('Component templates API', () => {
   describe('Update index template - PUT /api/index_management/index_templates/{name}', () => {
     const indexTemplateExists = router.getMockESApiFn('indices.existsIndexTemplate');
     const updateIndexTemplate = router.getMockESApiFn('indices.putIndexTemplate');
+    const transportRequest = getTransportRequest(router);
 
     const mockRequest: RequestMock = {
       method: 'put',
@@ -45,10 +47,7 @@ describe('Component templates API', () => {
       },
     };
     it('updates a component template with data_stream_options successfully', async () => {
-      (
-        router.contextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as unknown as jest.Mock
-      ).mockResolvedValue({
+      transportRequest.mockResolvedValue({
         index_templates: [
           {
             name: 'test-template',
@@ -99,10 +98,7 @@ describe('Component templates API', () => {
       });
     });
     it('updates a component template without data_stream_options successfully', async () => {
-      (
-        router.contextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as unknown as jest.Mock
-      ).mockResolvedValue({
+      transportRequest.mockResolvedValue({
         index_templates: [
           {
             name: 'test-template',

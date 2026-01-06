@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseService } from '../../hooks/use_license';
 import type { AppAction } from '../../store/actions';
 

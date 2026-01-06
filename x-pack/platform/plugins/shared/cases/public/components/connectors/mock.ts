@@ -5,19 +5,16 @@
  * 2.0.
  */
 
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import { SwimlaneConnectorType } from '../../../common/types/domain';
 
-export const connector = {
+export const connector = createMockActionConnector({
   id: '123',
   name: 'My connector',
   actionTypeId: '.jira',
-  config: {},
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-};
+});
 
-export const swimlaneConnector = {
+export const swimlaneConnector = createMockActionConnector({
   id: '123',
   name: 'My connector',
   actionTypeId: '.swimlane',
@@ -30,20 +27,14 @@ export const swimlaneConnector = {
       commentsConfig: {},
     },
   },
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-};
+});
 
-export const theHiveConnector = {
+export const theHiveConnector = createMockActionConnector({
   id: '123',
   name: 'My connector',
   actionTypeId: '.thehive',
   config: {},
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-};
+});
 
 export const issues = [
   { id: 'personId', title: 'Person Task', key: 'personKey' },
@@ -136,50 +127,4 @@ export const choices = [
       },
     ])
     .flat(),
-];
-
-export const severity = [
-  {
-    id: 4,
-    name: 'Low',
-  },
-  {
-    id: 5,
-    name: 'Medium',
-  },
-  {
-    id: 6,
-    name: 'High',
-  },
-];
-
-export const incidentTypes = [
-  { id: 17, name: 'Communication error (fax; email)' },
-  { id: 1001, name: 'Custom type' },
-];
-
-export const resilientIncidentTypes = [
-  {
-    id: 19,
-    name: 'Malware',
-  },
-  {
-    id: 21,
-    name: 'Denial of Service',
-  },
-];
-
-export const resilientSeverity = [
-  {
-    id: 4,
-    name: 'Low',
-  },
-  {
-    id: 5,
-    name: 'Medium',
-  },
-  {
-    id: 6,
-    name: 'High',
-  },
 ];

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFileHash, GlobalTask } from '../../lib';
+import type { GlobalTask } from '../../lib';
+import { getFileHash } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 import { getNodeShasums } from './node_shasums';
 

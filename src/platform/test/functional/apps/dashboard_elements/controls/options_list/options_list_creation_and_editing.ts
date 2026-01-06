@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
+      await dashboardControls.deleteAllPinnedControls();
       await dashboard.clickQuickSave();
     });
 
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
           'animals-*'
         );
-        await dashboardControls.deleteAllControls();
+        await dashboardControls.deleteAllPinnedControls();
       });
     });
 
@@ -133,7 +133,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newTitle = 'wow! Animal sounds?';
         await dashboardControls.editExistingControl(secondId);
         await dashboardControls.controlEditorSetTitle(newTitle);
-        await dashboardControls.controlEditorSetWidth('small');
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
 

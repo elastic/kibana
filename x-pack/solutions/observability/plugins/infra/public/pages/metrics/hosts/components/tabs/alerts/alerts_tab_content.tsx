@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { BrushEndListener } from '@elastic/charts';
@@ -19,6 +19,7 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 import type { HostsState } from '../../../hooks/use_unified_search_url_state';
 import type { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
+import { createFocusTrapProps } from '../../../../../../utils/create_focus_trap_props';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
@@ -39,10 +40,13 @@ export const AlertsTabContent = () => {
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
+  const createAlertRuleButtonRef = useRef<HTMLButtonElement>(null);
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
   const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
+
+  const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 
   return (
     <HeightRetainer>
@@ -55,6 +59,7 @@ export const AlertsTabContent = () => {
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
+                  buttonRef={createAlertRuleButtonRef}
                   onClick={toggleAlertFlyout}
                   data-test-subj="infraHostAlertsTabCreateAlertsRuleButton"
                 />
@@ -82,7 +87,7 @@ export const AlertsTabContent = () => {
               id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              initialPageSize={ALERTS_PER_PAGE}
+              pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
               services={{
                 data,
@@ -103,6 +108,8 @@ export const AlertsTabContent = () => {
           nodeType="host"
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
+          schema={searchCriteria.preferredSchema}
+          focusTrapProps={focusTrapProps}
         />
       )}
     </HeightRetainer>

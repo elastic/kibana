@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
+  HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
@@ -175,5 +176,36 @@ describe('<HighlightedFieldsCell />', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should truncate content if too large', () => {
+    const values = new Array(5).fill(null).map((_, i) => i.toString());
+    const { container } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={values} field={'field'} scopeId={SCOPE_ID} />
+      </TestProviders>
+    );
+
+    function getDisplayedValues() {
+      return container.querySelectorAll(`[data-test-subj$=${HIGHLIGHTED_FIELDS_CELL_TEST_ID}]`);
+    }
+
+    function getToggleButton() {
+      return container.querySelector('[data-test-subj="toggle-show-more-button"]');
+    }
+
+    //  Only the first 2 values should be displayed by default
+    expect(getDisplayedValues().length).toBe(2);
+
+    //  The toggle button to see all the values should be visible
+    expect(getToggleButton()).toBeVisible();
+
+    //  Click the toggle button and check that the rest of the elements are visible
+    fireEvent.click(getToggleButton()!);
+    expect(getDisplayedValues().length).toBe(values.length);
+
+    //  Click the toggle button again and check that the rest of the elements has been hidden
+    fireEvent.click(getToggleButton()!);
+    expect(getDisplayedValues().length).toBe(2);
   });
 });

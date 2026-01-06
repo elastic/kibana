@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface RawDoc {
   _id: string;
@@ -49,11 +49,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('not registered task types', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_removed_types');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/task_manager_removed_types');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/task_manager_removed_types'
+      );
     });
 
     afterEach(async () => {

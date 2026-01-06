@@ -10,22 +10,7 @@ import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { SpatialJoinExpression } from './spatial_join_expression';
-import { TermJoinExpression } from './term_join_expression';
-import { MetricsExpression } from './metrics_expression';
-import { WhereExpression } from './where_expression';
-import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
-import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
-import {
-  AbstractESJoinSourceDescriptor,
-  AggDescriptor,
-  ESDistanceSourceDescriptor,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
-  JoinSourceDescriptor,
-} from '../../../../../common/descriptor_types';
-
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
@@ -35,6 +20,20 @@ import {
   isSpatialSourceComplete,
   isTermSourceComplete,
 } from '../../../../classes/sources/join_sources';
+import { SpatialJoinExpression } from './spatial_join_expression';
+import { TermJoinExpression } from './term_join_expression';
+import { MetricsExpression } from './metrics_expression';
+import { WhereExpression } from './where_expression';
+import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
+import type {
+  AbstractESJoinSourceDescriptor,
+  AggDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
+  JoinDescriptor,
+  JoinSourceDescriptor,
+} from '../../../../../common/descriptor_types';
 
 interface Props {
   join: Partial<JoinDescriptor>;
@@ -92,7 +91,7 @@ export class Join extends Component<Props, State> {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      rightFields: indexPattern.fields.filter((field) => !isNestedField(field)),
       indexPattern,
     });
   }

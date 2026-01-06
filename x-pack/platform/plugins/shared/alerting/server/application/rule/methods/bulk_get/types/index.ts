@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './bulk_get_rules_params';
-export * from './bulk_get_rules_response';
+export type * from './bulk_get_rules_params';
+export type * from './bulk_get_rules_response';

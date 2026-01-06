@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import {
   EuiCard,
   EuiIcon,
@@ -16,8 +16,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const LockedPolicyDiv = styled.div`
@@ -33,12 +33,22 @@ const LockedPolicyDiv = styled.div`
 
 export interface SettingLockedCardProps {
   title: string;
+  licenseType?: 'platinum' | 'enterprise';
   'data-test-subj'?: string;
 }
 
-export const SettingLockedCard = memo(
-  ({ title, 'data-test-subj': dataTestSubj }: SettingLockedCardProps) => {
+export const SettingLockedCard = React.memo<SettingLockedCardProps>(
+  ({ title, licenseType = 'platinum', 'data-test-subj': dataTestSubj }: SettingLockedCardProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const licenseDisplayName =
+      licenseType === 'enterprise'
+        ? i18n.translate('xpack.securitySolution.endpoint.policy.details.enterprise', {
+            defaultMessage: 'Enterprise',
+          })
+        : i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
+            defaultMessage: 'Platinum',
+          });
 
     return (
       <LockedPolicyDiv>
@@ -46,9 +56,7 @@ export const SettingLockedCard = memo(
           data-test-subj={getTestId()}
           betaBadgeProps={{
             'data-test-subj': getTestId('badge'),
-            label: i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
-              defaultMessage: 'Platinum',
-            }),
+            label: licenseDisplayName,
           }}
           isDisabled={true}
           icon={<EuiIcon size="xl" type="lock" />}
@@ -65,8 +73,11 @@ export const SettingLockedCard = memo(
                 <h4>
                   <EuiTextColor color="subdued">
                     <FormattedMessage
-                      id="xpack.securitySolution.endpoint.policy.details.upgradeToPlatinum"
-                      defaultMessage="Upgrade to Elastic Platinum"
+                      id="xpack.securitySolution.endpoint.policy.details.upgradeToLicense"
+                      defaultMessage="Upgrade to Elastic {licenseType}"
+                      values={{
+                        licenseType: licenseDisplayName,
+                      }}
                     />
                   </EuiTextColor>
                 </h4>
@@ -75,9 +86,9 @@ export const SettingLockedCard = memo(
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.policy.details.lockedCardUpgradeMessage"
-                    defaultMessage="To turn on this protection, you must upgrade your license to Platinum, start a
-              free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
+                    defaultMessage="To turn on this protection, you must upgrade your license to {licenseType}, start a free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                     values={{
+                      licenseType: licenseDisplayName,
                       cloudDeploymentLink: (
                         <EuiLink
                           href="https://www.elastic.co/cloud/"

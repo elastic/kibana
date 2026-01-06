@@ -17,7 +17,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
 
@@ -35,12 +35,8 @@ describe('migration with waitForCompletion=true', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('waits for another instance to complete the migration', async () => {
@@ -127,6 +123,7 @@ function createRoot() {
     {
       migrations: {
         skip: false,
+        useCumulativeLogger: false,
       },
       node: {
         roles: ['background_tasks'],

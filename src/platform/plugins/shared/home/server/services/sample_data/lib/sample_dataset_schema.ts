@@ -8,7 +8,8 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 const idRegExp = /^[a-zA-Z0-9-]+$/;
 const dataIndexSchema = schema.object({

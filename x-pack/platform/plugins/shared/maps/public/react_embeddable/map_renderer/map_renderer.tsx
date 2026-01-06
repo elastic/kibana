@@ -15,9 +15,10 @@ import type {
   MapSettings,
 } from '../../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializedState } from '../types';
+import type { MapApi } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { MapEmbeddableState } from '../../../common';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MAP_RENDERER_TYPE } from './types';
 
 function getLayers(layerList: LayerDescriptor[]) {
@@ -63,7 +64,7 @@ export function MapRenderer(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <EmbeddableRenderer<MapSerializedState, MapApi>
+      <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           type: MAP_RENDERER_TYPE,
@@ -75,7 +76,7 @@ export function MapRenderer(props: Props) {
               rawState: {
                 attributes: {
                   title: props.title ?? '',
-                  layerListJSON: JSON.stringify(getLayers(props.layerList)),
+                  layers: getLayers(props.layerList),
                 },
                 hidePanelTitles: !Boolean(props.title),
                 isLayerTOCOpen:

@@ -7,11 +7,12 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 import { HeaderMenu } from '../../header_menu';
 import * as i18n from '../../translations';
-import { Rule } from '../../types';
+import type { Rule } from '../../types';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 
 const noLinkedRulesCss = css`
@@ -79,6 +80,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             iconType="arrowDown"
             iconSide="right"
             panelPaddingSize="none"
+            ariaLabel={i18n.LINKED_RULES_ARIA_LABEL}
           />
         ) : (
           <EuiTextColor data-test-subj="noLinkedRules" css={noLinkedRulesCss} color="subdued">
@@ -87,7 +89,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
         )}
       </EuiFlexItem>
 
-      {canUserEditList && (
+      {canUserEditList && !isReadonly && (
         <EuiFlexItem>
           <EuiButton
             data-test-subj={`${dataTestSubj || ''}LinkRulesButton`}
@@ -134,6 +136,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
           ]}
           disableActions={isReadonly}
           anchorPosition="downCenter"
+          ariaLabel={i18n.EXCEPTION_LIST_ACTIONS_ARIA_LABEL}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

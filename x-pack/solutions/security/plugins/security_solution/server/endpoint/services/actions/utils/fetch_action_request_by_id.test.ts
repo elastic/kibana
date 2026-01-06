@@ -25,6 +25,10 @@ describe('fetchActionRequestById() utility', () => {
   });
 
   it('should search the actions index with expected query', async () => {
+    (
+      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+
     await fetchActionRequestById(endpointServiceMock, 'default', '123');
   });
 
@@ -40,20 +44,7 @@ describe('fetchActionRequestById() utility', () => {
     );
   });
 
-  it('should not validate space access to the action when feature is disabled', async () => {
-    await fetchActionRequestById(endpointServiceMock, 'default', '123');
-
-    expect(
-      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace
-    ).not.toHaveBeenCalled();
-  });
-
   describe('and space awareness feature is enabled', () => {
-    beforeEach(() => {
-      // @ts-expect-error
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-    });
-
     it('should validate that action is accessible in active space', async () => {
       (
         endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock

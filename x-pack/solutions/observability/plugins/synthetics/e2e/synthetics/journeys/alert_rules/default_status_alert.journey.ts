@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
@@ -200,7 +200,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('queryInput').fill(recoveredFilter);
     await page.click(byTestId('querySubmitButton'));
     await page.getByTestId('optionsList-control-0').hover();
-    await page.getByTestId('control-action-0-erase').click();
+    await page.click(
+      '[data-test-subj="hover-actions-0"] [data-test-subj="embeddablePanelAction-clearControl"]'
+    );
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
 

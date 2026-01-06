@@ -278,8 +278,8 @@ function getInputComponent({
         <EuiFieldPassword
           type="dual"
           isInvalid={isInvalid}
-          value={value === undefined ? '' : value}
-          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value ? e.target.value : undefined)}
           onBlur={() => setIsDirty(true)}
           disabled={frozen}
           data-test-subj={`passwordInput-${fieldTestSelector}`}
@@ -314,8 +314,8 @@ function getInputComponent({
       return (
         <EuiFieldText
           isInvalid={isInvalid}
-          value={value === undefined ? '' : value}
-          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value ? e.target.value : undefined)}
           onBlur={() => setIsDirty(true)}
           disabled={frozen}
           data-test-subj={`textInput-${fieldTestSelector}`}
@@ -477,7 +477,7 @@ function SecretInputField({
     );
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
           {inputComponent}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>

@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import type { USER_SETTINGS_TEMPLATE_SUFFIX, PACKAGE_TEMPLATE_SUFFIX } from '../constants';
+import {
+  type USER_SETTINGS_TEMPLATE_SUFFIX,
+  type PACKAGE_TEMPLATE_SUFFIX,
+  OTEL_TEMPLATE_SUFFIX,
+} from '../constants';
 
 /**
  * Creates the base name for Elasticsearch assets in the form of
  * {type}-{dataset}
  */
-export function getRegistryDataStreamAssetBaseName(dataStream: {
-  dataset: string;
-  type: string;
-  hidden?: boolean;
-}): string {
+export function getRegistryDataStreamAssetBaseName(
+  dataStream: {
+    dataset: string;
+    type: string;
+    hidden?: boolean;
+  },
+  isOtelInputType?: boolean
+): string {
   const baseName = `${dataStream.type}-${dataStream.dataset.toLowerCase()}`;
+  if (isOtelInputType) return `${baseName}.${OTEL_TEMPLATE_SUFFIX}`;
   return dataStream.hidden ? `.${baseName}` : baseName;
 }
 

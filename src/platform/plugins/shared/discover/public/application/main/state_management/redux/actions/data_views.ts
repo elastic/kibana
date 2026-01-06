@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
 import {
   internalStateSlice,
@@ -27,13 +27,12 @@ export const setDataView: InternalStateThunkActionCreator<
 > =
   ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager }) => {
-    dispatch(
-      internalStateSlice.actions.setDataViewId({
-        tabId,
-        dataViewId: dataView.id,
-      })
-    );
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    if (dataView.id !== currentDataView$.getValue()?.id) {
+      dispatch(internalStateSlice.actions.setExpandedDoc({ expandedDoc: undefined }));
+    }
+
     currentDataView$.next(dataView);
   };
 

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import { EuiGlobalToastList } from '@elastic/eui';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
-import { deduplicateToasts, ToastWithRichTitle } from './deduplicate_toasts';
-import { ToastsTelemetry } from './telemetry';
+import type { ToastWithRichTitle } from './deduplicate_toasts';
+import { deduplicateToasts } from './deduplicate_toasts';
+import type { ToastsTelemetry } from './telemetry';
 
 interface Props {
   toasts$: Observable<Toast[]>;

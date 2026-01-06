@@ -111,10 +111,10 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `is_managed`
     :   If `true`, this policy is not editable by the user and can only be changed by updating the {{kib}} config.
 
-    `is_default`
+    `is_default` {applies_to}`stack: deprecated 8.1.0`
     :   If `true`, this policy is the default agent policy.
 
-    `is_default_fleet_server`
+    `is_default_fleet_server` {applies_to}`stack: deprecated 8.1.0`
     :   If `true`, this policy is the default {{fleet-server}} agent policy.
 
     `data_output_id`
@@ -324,16 +324,34 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     :   The certificate key used to authenticate the proxy.
 
 
-`xpack.fleet.enableExperimental` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.fleet.enableExperimental` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: deprecated 9.3.0`
 :   List of experimental feature flag to enable in Fleet.
     It is available in {{ecloud}} 8.6.0 and later versions.
+    From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features.
+
+`xpack.fleet.experimentalFeatures` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3.0`
+:   Set experimental feature flags to `true` or `false` to enable or disable them, respectively.
+
+    Example configuration:
+
+    ```yaml
+    xpack.fleet.experimentalFeatures:
+      useSpaceAwareness: false
+      enableAgentPrivilegeLevelChange: true
+    ```
 
     ::::{note}
     Experimental features should not be enabled in production environments. The features in this section are experimental and may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features.
     ::::
 
-
-`xpack.fleet.enableManagedLogsAndMetricsDataviews`
+`xpack.fleet.enableManagedLogsAndMetricsDataviews` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `true` (default), to enable the automatic creation of global `logs-*` and `metrics-*` data views.
 
+`xpack.fleet.autoUpgrades.taskInterval` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+:   Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
 
+`xpack.fleet.autoUpgrades.retryDelays` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+:   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
+
+`xpack.fleet.integrationRollbackTTL` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
+:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).

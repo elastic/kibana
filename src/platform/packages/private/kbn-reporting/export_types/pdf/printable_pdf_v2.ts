@@ -19,14 +19,11 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
-import { REPORTING_TRANSACTION_TYPE, RunTaskOpts } from '@kbn/reporting-server';
+import type { RunTaskOpts } from '@kbn/reporting-server';
+import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
-import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import {
-  JobParamsPDFV2,
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
-} from '@kbn/reporting-export-types-pdf-common';
+import type { TaskPayloadPDFV2, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_JOB_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { ExportType, getFullRedirectAppUrl } from '@kbn/reporting-server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
@@ -81,7 +78,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadPDFV2>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -170,7 +167,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
         warnings,
       })),
       catchError((err) => {
-        logger.error(err);
+        logger.debug(err, { tags: ['execute-job', jobId] });
         return Rx.throwError(() => err);
       })
     );

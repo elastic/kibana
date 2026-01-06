@@ -8,27 +8,30 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { useQuery } from '@kbn/react-query';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
 
-import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../../types';
+import type { AgentPolicy } from '../../../../types';
 import {
-  usePagination,
   useGetAgentPolicies,
-  sendGetAgents,
   sendGetAgentStatus,
   useUrlParams,
   useStartServices,
-  sendGetAgentTags,
   sendGetAgentPolicies,
   useAuthz,
   sendGetActionStatus,
-  sendBulkGetAgentPolicies,
+  sendGetAgentsForRq,
+  sendGetAgentTagsForRq,
+  sendBulkGetAgentPoliciesForRq,
+  useAgentlessResources,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
+
+import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
@@ -49,19 +52,15 @@ function useFullAgentPolicyFetcher() {
       }, [] as string[]);
 
       if (policiesToFetchIds.length) {
-        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPolicies(policiesToFetchIds, {
-          full: authz.fleet.readAgentPolicies,
-          ignoreMissing: true,
-        });
+        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPoliciesForRq(
+          policiesToFetchIds,
+          {
+            full: authz.fleet.readAgentPolicies,
+            ignoreMissing: true,
+          }
+        );
 
-        if (bulkGetAgentPoliciesResponse.error) {
-          throw bulkGetAgentPoliciesResponse.error;
-        }
-
-        if (!bulkGetAgentPoliciesResponse.data) {
-          throw new Error('Invalid bulk GET agent policies response');
-        }
-        bulkGetAgentPoliciesResponse.data.items.forEach((agentPolicy) => {
+        bulkGetAgentPoliciesResponse.items.forEach((agentPolicy) => {
           fetchedAgentPoliciesRef.current[agentPolicy.id] = agentPolicy;
         });
       }
@@ -101,34 +100,94 @@ export function useFetchAgentsData() {
 
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
-  const showAgentless = urlParams.showAgentless === 'true';
+  const { showAgentless } = useAgentlessResources();
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
+  const isUsingParams = defaultKuery || urlHasInactive;
 
-  // Agent data states
-  const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
+  // Extract state from session storage hook
+  const sessionState = useSessionAgentListState();
+  const {
+    search,
+    selectedAgentPolicies,
+    selectedStatus,
+    selectedTags,
+    showUpgradeable,
+    sort,
+    page,
+    updateTableState,
+  } = sessionState;
 
-  // Table and search states
-  const [draftKuery, setDraftKuery] = useState<string>(defaultKuery);
-  const [search, setSearchState] = useState<string>(defaultKuery);
-  const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  // If URL params are used, reset the table state to defaults with the param options
+  useEffect(() => {
+    if (isUsingParams) {
+      updateTableState({
+        ...defaultAgentListState,
+        search: defaultKuery,
+        selectedStatus: [...new Set([...selectedStatus, ...(urlHasInactive ? ['inactive'] : [])])],
+      });
+    }
+    // Empty array so that this only runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Policies state for filtering
-  const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
+  // Sync URL kuery param with session storage search to maintain shareable state
+  useEffect(() => {
+    const currentUrlKuery = (urlParams.kuery as string) || '';
+    // If search is empty and URL has kuery, or search differs from URL, update URL
+    if ((search === '' && currentUrlKuery !== '') || (search && search !== currentUrlKuery)) {
+      const { kuery: _, ...restParams } = urlParams;
+      const newParams = search === '' ? restParams : { ...restParams, kuery: search };
+      history.replace({
+        search: toUrlParams(newParams),
+      });
+    }
+  }, [search, urlParams, history, toUrlParams]);
 
-  // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([
-    'healthy',
-    'unhealthy',
-    'orphaned',
-    'updating',
-    'offline',
-    ...(urlHasInactive ? ['inactive'] : []),
-  ]);
+  // Flag to indicate if filters differ from default state
+  const isUsingFilter = useMemo(() => {
+    return (
+      search !== defaultAgentListState.search ||
+      !isEqual(selectedAgentPolicies, defaultAgentListState.selectedAgentPolicies) ||
+      !isEqual(selectedStatus, defaultAgentListState.selectedStatus) ||
+      !isEqual(selectedTags, defaultAgentListState.selectedTags) ||
+      showUpgradeable !== defaultAgentListState.showUpgradeable
+    );
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags, showUpgradeable]);
 
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  // Create individual setters using updateTableState
+  const setSearchState = useCallback(
+    (value: string) => updateTableState({ search: value }),
+    [updateTableState]
+  );
+
+  const setSelectedAgentPolicies = useCallback(
+    (value: string[]) => updateTableState({ selectedAgentPolicies: value }),
+    [updateTableState]
+  );
+
+  const setSelectedStatus = useCallback(
+    (value: string[]) => updateTableState({ selectedStatus: value }),
+    [updateTableState]
+  );
+
+  const setSelectedTags = useCallback(
+    (value: string[]) => updateTableState({ selectedTags: value }),
+    [updateTableState]
+  );
+
+  const setShowUpgradeable = useCallback(
+    (value: boolean) => updateTableState({ showUpgradeable: value }),
+    [updateTableState]
+  );
+
+  const pageSizeOptions = [5, 20, 50];
+
+  // Sync draftKuery with session storage search
+  const [draftKuery, setDraftKuery] = useState<string>(search);
+  useEffect(() => {
+    setDraftKuery(search);
+  }, [search]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
@@ -146,13 +205,14 @@ export function useFetchAgentsData() {
       }
 
       if (urlParams.kuery !== newVal) {
+        const { kuery: _, ...restParams } = urlParams;
+        const newParams = newVal === '' ? restParams : { ...restParams, kuery: newVal };
         history.replace({
-          // @ts-expect-error - kuery can't be undefined
-          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
+          search: toUrlParams(newParams),
         });
       }
     },
-    [urlParams, history, toUrlParams]
+    [setSearchState, urlParams, history, toUrlParams]
   );
 
   // filters kuery
@@ -168,220 +228,196 @@ export function useFetchAgentsData() {
   kuery =
     includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
 
-  const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
-  const [agentsStatus, setAgentsStatus] = useState<
-    { [key in SimplifiedAgentStatus]: number } | undefined
-  >();
   const [allTags, setAllTags] = useState<string[]>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [nAgentsInTable, setNAgentsInTable] = useState(0);
-  const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
-  const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
-  const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
-  const [agentPoliciesIndexedById, setAgentPoliciesIndexedByIds] = useState<{
-    [k: string]: AgentPolicy;
-  }>({});
-
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
-  const isLoadingVar = useRef<boolean>(false);
+  const { data: actionErrors } = useQuery({
+    refetchInterval: REFRESH_INTERVAL_MS,
+    queryKey: ['get-action-statuses'],
+    initialData: [] as string[],
+    queryFn: async () => {
+      const actionStatusResponse = await sendGetActionStatus({
+        latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
+        perPage: MAX_AGENT_ACTIONS,
+      });
 
-  // Request to fetch agents and agent status
-  const currentRequestRef = useRef<number>(0);
-  const fetchData = useCallback(
-    ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
-      async function fetchDataAsync() {
-        // skipping refresh if previous request is in progress
-        if (isLoadingVar.current) {
-          return;
-        }
-        currentRequestRef.current++;
-        const currentRequest = currentRequestRef.current;
-        isLoadingVar.current = true;
-
-        try {
-          setIsLoading(true);
-          const [
-            agentsResponse,
-            totalInactiveAgentsResponse,
-            managedAgentPoliciesResponse,
-            agentTagsResponse,
-            actionStatusResponse,
-          ] = await Promise.all([
-            sendGetAgents({
-              page: pagination.currentPage,
-              perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              sortField: getSortFieldForAPI(sortField),
-              sortOrder,
-              showAgentless,
-              showInactive,
-              showUpgradeable,
-              getStatusSummary: true,
-              withMetrics: true,
-            }),
-            sendGetAgentStatus({
-              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-            }),
-            sendGetAgentPolicies({
-              kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-              perPage: SO_SEARCH_LIMIT,
-              full: false,
-            }),
-            sendGetAgentTags({
-              showInactive,
-            }),
-            sendGetActionStatus({
-              latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
-              perPage: MAX_AGENT_ACTIONS,
-            }),
-          ]);
-          // Return if a newer request has been triggered
-          if (currentRequestRef.current !== currentRequest) {
-            return;
-          }
-          if (agentsResponse.error) {
-            throw agentsResponse.error;
-          }
-          if (!agentsResponse.data) {
-            throw new Error('Invalid GET /agents response');
-          }
-          if (!totalInactiveAgentsResponse.data) {
-            throw new Error('Invalid GET /agents_status response');
-          }
-          if (managedAgentPoliciesResponse.error) {
-            throw new Error(managedAgentPoliciesResponse.error.message);
-          }
-          if (agentTagsResponse.error) {
-            throw agentTagsResponse.error;
-          }
-          if (!agentTagsResponse.data) {
-            throw new Error('Invalid GET /agent/tags response');
-          }
-          if (actionStatusResponse.error) {
-            throw new Error('Invalid GET /agents/action_status response');
-          }
-
-          const statusSummary = agentsResponse.data.statusSummary;
-
-          if (!statusSummary) {
-            throw new Error('Invalid GET /agents response - no status summary');
-          }
-          // Fetch agent policies, use a local cache
-          const policyIds = agentsResponse.data.items.map((agent) => agent.policy_id as string);
-
-          const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
-
-          isLoadingVar.current = false;
-          // Return if a newe request has been triggerd
-          if (currentRequestRef.current !== currentRequest) {
-            return;
-          }
-
-          setAgentPoliciesIndexedByIds(
-            policies.reduce((acc, agentPolicy) => {
-              acc[agentPolicy.id] = agentPolicy;
-
-              return acc;
-            }, {} as { [k: string]: AgentPolicy })
-          );
-
-          setAgentsStatus(agentStatusesToSummary(statusSummary));
-
-          const newAllTags = [...agentTagsResponse.data.items];
-          // We only want to update the list of available tags if
-          // - We haven't set any tags yet
-          // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
-          // - Tags are modified (add, remove, edit)
-          if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
-            setAllTags(newAllTags);
-          }
-
-          setAgentsOnCurrentPage(agentsResponse.data.items);
-          setNAgentsInTable(agentsResponse.data.total);
-          setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
-
-          const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
-
-          if (managedAgentPolicies.length === 0) {
-            setTotalManagedAgentIds([]);
-            setManagedAgentsOnCurrentPage(0);
-          } else {
-            // Find all the agents that have managed policies
-            // to the correct ids we need to build the kuery applying the same filters as the global ones
-            const managedPoliciesKuery = getKuery({
-              search,
-              selectedAgentPolicies: managedAgentPolicies.map((policy) => policy.id),
-              selectedTags,
-              selectedStatus,
-            });
-            const response = await sendGetAgents({
-              kuery: `${managedPoliciesKuery}`,
-              perPage: SO_SEARCH_LIMIT,
-              showInactive,
-            });
-            if (response.error) {
-              throw new Error(response.error.message);
-            }
-            const allManagedAgents = response.data?.items ?? [];
-            const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
-            setTotalManagedAgentIds(allManagedAgentIds);
-
-            setManagedAgentsOnCurrentPage(
-              agentsResponse.data.items
-                .map((agent) => agent.id)
-                .filter((agentId) => allManagedAgentIds.includes(agentId)).length
-            );
-          }
-
-          const actionErrors =
-            actionStatusResponse.data?.items
-              .filter((action) => action.latestErrors?.length ?? 0 > 1)
-              .map((action) => action.actionId) || [];
-          const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...actionErrors])];
-          if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
-            setLatestAgentActionErrors(allRecentActionErrors);
-          }
-        } catch (error) {
-          isLoadingVar.current = false;
-          notifications.toasts.addError(error, {
-            title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
-              defaultMessage: 'Error fetching agents',
-            }),
-          });
-        }
-        setIsLoading(false);
-      }
-      fetchDataAsync();
+      return (
+        actionStatusResponse.data?.items
+          .filter((action) => action.latestErrors?.length ?? 0 > 1)
+          .map((action) => action.actionId) || []
+      );
     },
-    [
-      pagination.currentPage,
-      pagination.pageSize,
-      kuery,
-      sortField,
-      sortOrder,
-      showAgentless,
-      showInactive,
-      showUpgradeable,
-      fullAgentPolicyFecher,
-      allTags,
-      latestAgentActionErrors,
-      search,
-      selectedTags,
-      selectedStatus,
-      notifications.toasts,
-    ]
+  });
+
+  useEffect(() => {
+    const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...actionErrors])];
+    if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
+      setLatestAgentActionErrors(allRecentActionErrors);
+    }
+  }, [latestAgentActionErrors, actionErrors]);
+
+  // Use session storage state for pagination and sort
+  const queryKeyPagination = JSON.stringify({
+    pagination: { currentPage: page.index + 1, pageSize: page.size },
+    sortField: sort.field,
+    sortOrder: sort.direction,
+  });
+  const queryKeyFilters = JSON.stringify({
+    kuery,
+    showAgentless,
+    showInactive,
+    showUpgradeable,
+    search,
+    selectedTags,
+    selectedStatus,
+  });
+
+  const {
+    isInitialLoading,
+    isFetching: isLoading,
+    data,
+    refetch,
+  } = useQuery({
+    queryKey: ['get-agents-list', queryKeyFilters, queryKeyPagination],
+    keepPreviousData: true, // Keep previous data to avoid flashing when going through pages
+    queryFn: async () => {
+      try {
+        const [
+          agentsResponse,
+          totalInactiveAgentsResponse,
+          managedAgentPoliciesResponse,
+          agentTagsResponse,
+        ] = await Promise.all([
+          sendGetAgentsForRq({
+            page: page.index + 1,
+            perPage: page.size,
+            kuery: kuery && kuery !== '' ? kuery : undefined,
+            sortField: getSortFieldForAPI(sort.field),
+            sortOrder: sort.direction,
+            showAgentless,
+            showInactive,
+            showUpgradeable,
+            getStatusSummary: true,
+            withMetrics: true,
+          }),
+          sendGetAgentStatus({
+            kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
+          }),
+          sendGetAgentPolicies({
+            kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+            perPage: SO_SEARCH_LIMIT,
+            full: false,
+          }),
+          sendGetAgentTagsForRq({
+            showInactive,
+          }),
+        ]);
+
+        if (!totalInactiveAgentsResponse.data) {
+          throw new Error('Invalid GET /agents_status response');
+        }
+        if (managedAgentPoliciesResponse.error) {
+          throw new Error(managedAgentPoliciesResponse.error.message);
+        }
+
+        const statusSummary = agentsResponse.statusSummary;
+
+        if (!statusSummary) {
+          throw new Error('Invalid GET /agents response - no status summary');
+        }
+        // Fetch agent policies, use a local cache
+        const policyIds = agentsResponse.items.map((agent) => agent.policy_id as string);
+
+        const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
+
+        const agentPoliciesIndexedById = policies.reduce((acc, agentPolicy) => {
+          acc[agentPolicy.id] = agentPolicy;
+
+          return acc;
+        }, {} as { [k: string]: AgentPolicy });
+        const agentsStatus = agentStatusesToSummary(statusSummary);
+
+        const newAllTags = [...agentTagsResponse.items];
+
+        const agentsOnCurrentPage = agentsResponse.items;
+        const nAgentsInTable = agentsResponse.total;
+        const totalInactiveAgents = totalInactiveAgentsResponse.data.results.inactive || 0;
+
+        const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
+
+        let totalManagedAgentIds: string[] = [];
+        let managedAgentsOnCurrentPage = 0;
+        if (managedAgentPolicies.length !== 0) {
+          // Find all the agents that have managed policies
+          // to the correct ids we need to build the kuery applying the same filters as the global ones
+          const managedPoliciesKuery = getKuery({
+            search,
+            selectedAgentPolicies: managedAgentPolicies.map((policy) => policy.id),
+            selectedTags,
+            selectedStatus,
+          });
+          const response = await sendGetAgentsForRq({
+            kuery: `${managedPoliciesKuery}`,
+            perPage: SO_SEARCH_LIMIT,
+            showInactive,
+          });
+
+          const allManagedAgents = response?.items ?? [];
+          const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
+          totalManagedAgentIds = allManagedAgentIds;
+          managedAgentsOnCurrentPage = agentsResponse.items
+            .map((agent) => agent.id)
+            .filter((agentId) => allManagedAgentIds.includes(agentId)).length;
+        }
+
+        return {
+          agentPoliciesIndexedById,
+          agentsStatus,
+          agentsOnCurrentPage,
+          nAgentsInTable,
+          totalInactiveAgents,
+          newAllTags,
+          totalManagedAgentIds,
+          managedAgentsOnCurrentPage,
+          queryKeyFilters,
+        };
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
+            defaultMessage: 'Error fetching agents',
+          }),
+        });
+        throw error;
+      }
+    },
+    refetchInterval: REFRESH_INTERVAL_MS,
+  });
+
+  const agentsStatus = data?.agentsStatus;
+  const agentsOnCurrentPage = useMemo(() => data?.agentsOnCurrentPage || [], [data]);
+  const nAgentsInTable = data?.nAgentsInTable || 0;
+  const totalInactiveAgents = data?.totalInactiveAgents || 0;
+  const agentPoliciesIndexedById = data?.agentPoliciesIndexedById || {};
+  const totalManagedAgentIds = data?.totalManagedAgentIds || [];
+  const managedAgentsOnCurrentPage = data?.managedAgentsOnCurrentPage || 0;
+
+  const newAllTags = useMemo(() => data?.newAllTags || [], [data]);
+  useEffect(() => {
+    if (newAllTags.length && !isEqual(newAllTags, allTags)) {
+      setAllTags(newAllTags);
+    }
+  }, [newAllTags, allTags]);
+
+  const fetchData = useCallback(
+    async ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+      return refetch();
+    },
+    [refetch]
   );
 
-  // Send request to get agent list and status
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [fetchData]);
+  const queryHasChanged = useMemo(() => {
+    return !isEqual(queryKeyFilters, data?.queryKeyFilters);
+  }, [queryKeyFilters, data?.queryKeyFilters]);
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
@@ -399,6 +435,7 @@ export function useFetchAgentsData() {
     agentsOnCurrentPage,
     agentsStatus,
     isLoading,
+    isInitialLoading,
     nAgentsInTable,
     totalInactiveAgents,
     totalManagedAgentIds,
@@ -409,10 +446,7 @@ export function useFetchAgentsData() {
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
-    sortField,
-    setSortField,
-    sortOrder,
-    setSortOrder,
+    sort,
     selectedStatus,
     setSelectedStatus,
     selectedTags,
@@ -420,15 +454,17 @@ export function useFetchAgentsData() {
     allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
-    pagination,
+    page,
     pageSizeOptions,
-    setPagination,
     kuery,
     draftKuery,
     setDraftKuery,
     fetchData,
-    currentRequestRef,
+    queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    isUsingFilter,
+    clearFilters: sessionState.clearFilters,
+    onTableChange: sessionState.onTableChange,
   };
 }

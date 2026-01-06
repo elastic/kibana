@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import { useInventoryViews } from '../../../../hooks/use_inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { Layout } from './layout';
 
 interface Props {
-  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;
 }
 
 export const LayoutView = (props: Props) => {
-  const { currentView } = useInventoryViews();
-  return <Layout currentView={currentView} {...props} />;
+  return <Layout {...props} />;
 };

@@ -95,6 +95,22 @@
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-ui-actions",
+            "id": "def-common.CategorizeFieldContext.focusTrapProps",
+            "type": "Object",
+            "tags": [],
+            "label": "focusTrapProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "EuiFocusTrapProps",
+              ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

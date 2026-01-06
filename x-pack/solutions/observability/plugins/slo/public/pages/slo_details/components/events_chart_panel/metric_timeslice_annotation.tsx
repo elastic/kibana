@@ -7,7 +7,7 @@
 
 import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { COMPARATOR_MAPPING } from '../../../slo_edit/constants';
 

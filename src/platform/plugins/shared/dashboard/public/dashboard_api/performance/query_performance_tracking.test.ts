@@ -9,12 +9,15 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { PhaseEvent, PhaseEventType, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+import type { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
+import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { PerformanceState, startQueryPerformanceTracking } from './query_performance_tracking';
+import type { PerformanceState } from './query_performance_tracking';
+import { startQueryPerformanceTracking } from './query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
 
 const mockMetricEvent = jest.fn();
 jest.mock('@kbn/ebt-tools', () => ({
@@ -49,6 +52,7 @@ const mockDashboard = (
 describe('startQueryPerformanceTracking', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    window.performance.clearMarks = jest.fn();
   });
 
   const setChildrenStatus = (children: {}, status: PhaseEventType) => {
@@ -180,6 +184,9 @@ describe('startQueryPerformanceTracking', () => {
       );
     });
 
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
+    expect(window.performance.clearMarks).toHaveBeenLastCalledWith(DASHBOARD_DURATION_START_MARK);
+
     setChildrenStatus(children, 'loading');
     await new Promise((r) => setTimeout(r, 1));
     setChildrenStatus(children, 'rendered');
@@ -189,6 +196,9 @@ describe('startQueryPerformanceTracking', () => {
         value4: 2, // dashboard subsequent load
       })
     );
+
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(2);
+    expect(window.performance.clearMarks).toHaveBeenLastCalledWith(DASHBOARD_DURATION_START_MARK);
   });
 
   it('subscribes to newly added panels', async () => {

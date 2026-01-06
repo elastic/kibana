@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { Index } from '@kbn/index-management-shared-types';
+import type { Index } from '@kbn/index-management-shared-types';
 import React from 'react';
 import { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -36,7 +36,6 @@ export const SearchIndexDetailsMappings = ({
       <EuiSpacer />
       <IndexMappingComponent
         index={index}
-        showAboutMappings={false}
         hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
       />
     </>

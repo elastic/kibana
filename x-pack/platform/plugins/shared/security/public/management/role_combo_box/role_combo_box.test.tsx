@@ -55,6 +55,7 @@ describe('RoleComboBox', () => {
 
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiComboBox
+        aria-label="Select roles"
         async={false}
         compressed={false}
         data-test-subj="rolesDropdown"

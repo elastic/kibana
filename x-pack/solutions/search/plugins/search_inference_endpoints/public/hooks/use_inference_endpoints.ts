@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { useQuery } from '@kbn/react-query';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { APIRoutes } from '../types';
 import { useKibana } from './use_kibana';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';

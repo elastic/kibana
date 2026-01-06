@@ -17,10 +17,6 @@ export const HOST_RISK_SCORE = i18n.translate(
   }
 );
 
-export const HOST_RISK = i18n.translate('xpack.securitySolution.hostsRiskTable.riskTitle', {
-  defaultMessage: 'Host risk level',
-});
-
 export const HOST_RISK_TITLE = i18n.translate(
   'xpack.securitySolution.hostsRiskTable.hostRiskTitle',
   {

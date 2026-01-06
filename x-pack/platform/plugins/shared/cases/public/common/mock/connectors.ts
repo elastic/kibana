@@ -6,23 +6,22 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import type { ActionConnector, ActionTypeConnector } from '../../../common/types/domain';
 import { basicPush } from '../../containers/mock';
 import type { CaseConnectors } from '../../containers/types';
 
 export const connectorsMock: ActionConnector[] = [
-  {
+  createMockActionConnector({
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
     name: 'My SN connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
     },
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-  },
-  {
+  }),
+  createMockActionConnector({
     id: 'resilient-2',
     actionTypeId: '.resilient',
     name: 'My Resilient connector',
@@ -30,33 +29,24 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://test/',
       orgId: '201',
     },
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-  },
-  {
+  }),
+  createMockActionConnector({
     id: 'jira-1',
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
     },
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-  },
-  {
+  }),
+  createMockActionConnector({
     id: 'servicenow-sir',
     actionTypeId: '.servicenow-sir',
     name: 'My Connector SIR',
     config: {
       apiUrl: 'https://instance1.service-now.com',
     },
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-  },
-  {
+  }),
+  createMockActionConnector({
     id: 'servicenow-uses-table-api',
     actionTypeId: '.servicenow',
     name: 'My deprecated SN connector',
@@ -64,73 +54,49 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
       usesTableApi: true,
     },
-    isPreconfigured: false,
-    isSystemAction: false,
     isDeprecated: true,
-  },
+  }),
 ];
 
 export const actionTypesMock: ActionTypeConnector[] = [
-  {
+  createMockConnectorType({
     id: '.email',
     name: 'Email',
     minimumLicenseRequired: 'gold',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
     supportedFeatureIds: ['alerting'],
-    isSystemActionType: false,
-  },
-  {
+  }),
+  createMockConnectorType({
     id: '.index',
     name: 'Index',
-    minimumLicenseRequired: 'basic',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
     supportedFeatureIds: ['alerting'],
-    isSystemActionType: false,
-  },
-  {
+  }),
+  createMockConnectorType({
     id: '.servicenow',
     name: 'ServiceNow',
     minimumLicenseRequired: 'platinum',
     enabled: false,
-    enabledInConfig: true,
-    enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
-    isSystemActionType: false,
-  },
-  {
+  }),
+  createMockConnectorType({
     id: '.jira',
     name: 'Jira',
     minimumLicenseRequired: 'gold',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
-    isSystemActionType: false,
-  },
-  {
+  }),
+  createMockConnectorType({
     id: '.resilient',
     name: 'IBM Resilient',
     minimumLicenseRequired: 'platinum',
     enabled: false,
-    enabledInConfig: true,
-    enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
-    isSystemActionType: false,
-  },
-  {
+  }),
+  createMockConnectorType({
     id: '.servicenow-sir',
     name: 'ServiceNow SIR',
     minimumLicenseRequired: 'platinum',
     enabled: false,
-    enabledInConfig: true,
-    enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
-    isSystemActionType: false,
-  },
+  }),
 ];
 
 /**

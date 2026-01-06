@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Filter } from '@kbn/es-query';
+import type React from 'react';
+import { useCallback } from 'react';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
 import type { NodeProps } from '../../..';
@@ -15,7 +16,7 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
 } from '../test_ids';
-import {
+import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from './list_group_graph_popover';
@@ -68,8 +69,7 @@ export const useLabelNodeExpandPopover = (
 
       const shouldShowEventDetailsListItem =
         onShowEventDetailsClick &&
-        (getNodeDocumentMode(node.data) === 'single-alert' ||
-          getNodeDocumentMode(node.data) === 'single-event');
+        ['single-alert', 'single-event', 'grouped-events'].includes(getNodeDocumentMode(node.data));
 
       return [
         {

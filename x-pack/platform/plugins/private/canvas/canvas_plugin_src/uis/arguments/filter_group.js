@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 
@@ -81,6 +82,9 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
         value={argValue || ''}
         options={choices}
         onChange={handleSelectGroup}
+        aria-label={i18n.translate('xpack.canvas.filterGroup.select.ariaLabel', {
+          defaultMessage: 'Filter group',
+        })}
       />
       <EuiSpacer size="s" />
       <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)} flush="left">

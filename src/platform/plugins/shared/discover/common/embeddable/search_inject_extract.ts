@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WithRequiredProperty } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/common';
+
+type EmbeddableStateWithTypeAndAttributes = EmbeddableStateWithType & {
+  attributes?: SavedSearchByValueAttributes;
+};
 
 export const inject = (
   state: EmbeddableStateWithType,
   injectedReferences: SavedObjectReference[]
-): EmbeddableStateWithType & { attributes?: SavedSearchByValueAttributes } => {
+): EmbeddableStateWithTypeAndAttributes => {
   if (hasAttributes(state)) {
     // Filter out references that are not in the state
     // https://github.com/elastic/kibana/pull/119079
@@ -30,15 +35,18 @@ export const inject = (
         ...state.attributes,
         references,
       },
-    } as EmbeddableStateWithType;
+    } as EmbeddableStateWithTypeAndAttributes;
   }
 
   return state;
 };
 
 export const extract = (
-  state: EmbeddableStateWithType & { attributes?: SavedSearchByValueAttributes }
-): { state: EmbeddableStateWithType; references: SavedObjectReference[] } => {
+  state: EmbeddableStateWithTypeAndAttributes
+): {
+  state: EmbeddableStateWithTypeAndAttributes;
+  references: SavedObjectReference[];
+} => {
   let references: SavedObjectReference[] = [];
 
   if (hasAttributes(state)) {
@@ -50,5 +58,5 @@ export const extract = (
 
 const hasAttributes = (
   state: EmbeddableStateWithType
-): state is EmbeddableStateWithType & { attributes: SavedSearchByValueAttributes } =>
+): state is WithRequiredProperty<EmbeddableStateWithTypeAndAttributes, 'attributes'> =>
   'attributes' in state;

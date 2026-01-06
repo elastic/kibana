@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
@@ -24,6 +24,7 @@ import { AllRulesTabs } from '../../../../../components/rules_table/rules_table_
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { MlCapabilitiesProvider } from '../../../../../../../common/components/ml/permissions/ml_capabilities_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
+import { MockAssistantProviderComponent } from '../../../../../../../common/mock/mock_assistant_provider';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
@@ -80,9 +81,11 @@ export function RuleUpgradeTestProviders({ children }: PropsWithChildren<{}>): J
                   <ReduxStoreProvider store={store}>
                     <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
                       <QueryClientProvider client={queryClient}>
-                        <MockDiscoverInTimelineContext>
-                          <EuiProvider highContrastMode={false}>{children}</EuiProvider>
-                        </MockDiscoverInTimelineContext>
+                        <MockAssistantProviderComponent>
+                          <MockDiscoverInTimelineContext>
+                            <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+                          </MockDiscoverInTimelineContext>
+                        </MockAssistantProviderComponent>
                       </QueryClientProvider>
                     </ThemeProvider>
                   </ReduxStoreProvider>

@@ -6,7 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
+import type { SetupResult } from './processor.helpers';
+import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const GROK_TYPE = 'grok';
 

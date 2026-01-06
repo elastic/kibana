@@ -19,8 +19,9 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,6 +60,8 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   const [isUninstallModalVisible, setIsUninstallModalVisible] = useState(false);
 
   const integrations = useQuery(['debug-integrations'], fetchInstalledIntegrations);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const uninstallMutation = useMutation(async (integration: PackageListItem) => {
     const response = await sendRemovePackage(
@@ -151,7 +154,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
   if (integrations.status === 'error') {
     return (
-      <EuiCallOut title="Error" color="danger">
+      <EuiCallOut announceOnMount title="Error" color="danger">
         <FormattedMessage
           id="xpack.fleet.debug.integrationDebugger.fetchError"
           defaultMessage="Error fetching installed Integrations"
@@ -255,7 +258,9 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
             {isReinstallModalVisible && (
               <EuiConfirmModal
+                aria-labelledby={modalTitleId}
                 title={`Reinstall ${selectedIntegration.title}`}
+                titleProps={{ id: modalTitleId }}
                 onCancel={() => setIsReinstallModalVisible(false)}
                 onConfirm={() => reinstallMutation.mutate(selectedIntegration)}
                 isLoading={reinstallMutation.isLoading}
@@ -278,7 +283,9 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
             {isUninstallModalVisible && (
               <EuiConfirmModal
+                aria-labelledby={modalTitleId}
                 title={`Uninstall ${selectedIntegration.title}`}
+                titleProps={{ id: modalTitleId }}
                 onCancel={() => setIsUninstallModalVisible(false)}
                 onConfirm={() => uninstallMutation.mutate(selectedIntegration)}
                 isLoading={uninstallMutation.isLoading}

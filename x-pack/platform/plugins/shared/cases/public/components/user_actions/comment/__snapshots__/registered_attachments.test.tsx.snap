@@ -279,6 +279,7 @@ exports[`createRegisteredAttachmentUserActionBuilder returns an unknown user act
 Array [
   Object {
     "children": <EuiCallOut
+      announceOnMount={false}
       color="danger"
       iconType="warning"
       title="Attachment type is not registered"

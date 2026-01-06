@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse, rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
@@ -17,15 +18,15 @@ import { ErrorBudgetActions } from './error_budget_actions';
 interface Props {
   slo: SLOWithSummaryResponse;
   hideTitle?: boolean;
+  hideHeaderDurationLabel?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
-  hideMetadata?: boolean;
 }
 
 export function ErrorBudgetHeader({
   slo,
   hideTitle = false,
-  hideMetadata = false,
+  hideHeaderDurationLabel = false,
   isMouseOver,
   setDashboardAttachmentReady,
 }: Props) {
@@ -59,7 +60,7 @@ export function ErrorBudgetHeader({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!hideMetadata && (
+      {!hideHeaderDurationLabel && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)

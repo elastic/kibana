@@ -7,14 +7,14 @@
 
 import { isDate } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
-import { LicenseType } from '../../common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 /** @public */
 export interface FeatureUsageServiceSetup {
   /**
    * Register a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}.
    */
-  register(featureName: string, licenseType: LicenseType): void;
+  register(featureId: string, licenseType: LicenseType): void;
 }
 
 /** @public */
@@ -22,10 +22,10 @@ export interface FeatureUsageServiceStart {
   /**
    * Notify of a registered feature usage at given time.
    *
-   * @param featureName - the name of the feature to notify usage of
+   * @param featureId - the identifier of the feature to notify usage of
    * @param usedAt - Either a `Date` or an unix timestamp with ms. If not specified, it will be set to the current time.
    */
-  notifyUsage(featureName: string, usedAt?: Date | number): Promise<void>;
+  notifyUsage(featureId: string, usedAt?: Date | number): Promise<void>;
 }
 
 interface StartDeps {
@@ -36,12 +36,12 @@ interface StartDeps {
  * @internal
  */
 export class FeatureUsageService {
-  private readonly registrations: Array<{ featureName: string; licenseType: LicenseType }> = [];
+  private readonly registrations: Array<{ featureId: string; licenseType: LicenseType }> = [];
 
   public setup(): FeatureUsageServiceSetup {
     return {
-      register: async (featureName, licenseType) => {
-        this.registrations.push({ featureName, licenseType });
+      register: async (featureId, licenseType) => {
+        this.registrations.push({ featureId, licenseType });
       },
     };
   }
@@ -58,7 +58,7 @@ export class FeatureUsageService {
           });
 
     return {
-      notifyUsage: async (featureName, usedAt = Date.now()) => {
+      notifyUsage: async (featureId, usedAt = Date.now()) => {
         // Skip notification if on logged-out page
         if (http.anonymousPaths.isAnonymous(window.location.pathname)) return;
         // Wait for registrations to complete
@@ -67,7 +67,7 @@ export class FeatureUsageService {
         const lastUsed = isDate(usedAt) ? usedAt.getTime() : usedAt;
         await http.post('/internal/licensing/feature_usage/notify', {
           body: JSON.stringify({
-            featureName,
+            featureId,
             lastUsed,
           }),
         });

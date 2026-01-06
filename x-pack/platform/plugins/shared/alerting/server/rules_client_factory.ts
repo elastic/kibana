@@ -30,7 +30,9 @@ import type { BackfillClient } from './backfill_client/backfill_client';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 export interface RulesClientFactoryOpts {
@@ -137,8 +139,10 @@ export class RulesClientFactory {
         excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: [
           RULE_SAVED_OBJECT_TYPE,
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
           API_KEY_PENDING_INVALIDATION_TYPE,
           AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
         ],
       }),
       authorization,
@@ -166,7 +170,11 @@ export class RulesClientFactory {
         // privileges
         const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
           request,
-          { name, role_descriptors: {}, metadata: { managed: true } }
+          {
+            name,
+            role_descriptors: {},
+            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+          }
         );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };

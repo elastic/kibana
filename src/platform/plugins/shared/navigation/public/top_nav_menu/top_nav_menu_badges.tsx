@@ -8,16 +8,11 @@
  */
 
 import { css } from '@emotion/react';
-import React, { Fragment, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Fragment } from 'react';
 
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiToolTip,
-  EuiBadgeProps,
-  EuiToolTipProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;
@@ -25,6 +20,9 @@ export type TopNavMenuBadgeProps = EuiBadgeProps & {
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 
+/**
+ * @deprecated Badges will be moved to use BreadcrumbsWithExtension API.
+ */
 export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | undefined }) => {
   const { euiTheme } = useEuiTheme();
   if (!badges || badges.length === 0) return null;

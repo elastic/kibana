@@ -8,19 +8,16 @@
  */
 
 import moment from 'moment';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 import path from 'path';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, header, savedObjects } = getPageObjects([
-    'dashboard',
-    'header',
-    'savedObjects',
-  ]);
+  const { dashboard, savedObjects } = getPageObjects(['dashboard', 'savedObjects']);
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().add(30, 'minutes').valueOf();
@@ -30,8 +27,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const importFilePath = path.join(__dirname, 'exports', importFileName);
 
   describe('dashboards with log stream embeddable', () => {
+    let synthEsLogsClient: LogsSynthtraceEsClient;
     before(async () => {
-      await synthtrace.index([
+      const { logsEsClient } = synthtrace.getClients(['logsEsClient']);
+
+      synthEsLogsClient = logsEsClient;
+
+      await synthEsLogsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(5)
@@ -54,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await synthtrace.clean();
+      await synthEsLogsClient.clean();
     });
 
     it('should load the old log stream but with saved search embeddable', async () => {
@@ -63,8 +65,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Load saved dashboard with log stream embeddable
       await dashboard.loadSavedDashboard('Logs stream dashboard test with Saves Search Embeddable');
-
-      await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
       // Expect things from saved search embeddable to load

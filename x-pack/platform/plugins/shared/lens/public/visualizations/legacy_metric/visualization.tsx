@@ -6,35 +6,36 @@
  */ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { Ast } from '@kbn/interpreter';
-import {
-  PaletteOutput,
-  PaletteRegistry,
-  CUSTOM_PALETTE,
-  shiftPalette,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { Ast } from '@kbn/interpreter';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { CUSTOM_PALETTE, shiftPalette, getOverridePaletteStops } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { ColorMode } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import {
-  buildExpression,
-  buildExpressionFunction,
+import type {
   ExpressionFunctionFont,
   FontWeight,
   TextAlignment,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
+import type {
+  Visualization,
+  OperationMetadata,
+  DatasourceLayers,
+  FramePublicAPI,
+  LegacyMetricState,
+} from '@kbn/lens-common';
 import { getSuggestions } from './metric_suggestions';
-import { Visualization, OperationMetadata, DatasourceLayers, FramePublicAPI } from '../../types';
-import type { LegacyMetricState } from '../../../common/types';
 import { MetricDimensionEditor } from './dimension_editor';
-import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { LegacyMetricTitlesAndTextSettings } from './metric_config_panel';
 
 interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -297,8 +298,8 @@ export const getLegacyMetricVisualization = ({
     return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
   },
 
-  ToolbarComponent(props) {
-    return <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: LegacyMetricTitlesAndTextSettings }} />;
   },
 
   DimensionEditorComponent(props) {

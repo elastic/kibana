@@ -6,10 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
 import { createIsNarrowSchema } from '../shared/type_guards';
+import { featureTypeSchema, type FeatureType } from '../feature';
 
 interface StreamQueryBase {
   id: string;
@@ -17,22 +20,20 @@ interface StreamQueryBase {
 }
 
 export interface StreamQueryKql extends StreamQueryBase {
+  feature?: {
+    name: string;
+    filter: Condition;
+    type: FeatureType;
+  };
   kql: {
     query: string;
   };
+  // from 0 to 100. aligned with anomaly detection scoring
+  severity_score?: number;
+  evidence?: string[];
 }
 
 export type StreamQuery = StreamQueryKql;
-
-export interface StreamGetResponseBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
-
-export interface StreamUpsertRequestBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
 
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   id: NonEmptyString,
@@ -42,9 +43,18 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
 export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   streamQueryBaseSchema,
   z.object({
+    feature: z
+      .object({
+        name: NonEmptyString,
+        filter: conditionSchema,
+        type: featureTypeSchema,
+      })
+      .optional(),
     kql: z.object({
-      query: NonEmptyString,
+      query: z.string(),
     }),
+    severity_score: z.number().optional(),
+    evidence: z.array(z.string()).optional(),
   })
 );
 
@@ -56,9 +66,18 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
+  feature: z
+    .object({
+      name: NonEmptyString,
+      filter: conditionSchema,
+      type: featureTypeSchema,
+    })
+    .optional(),
   kql: z.object({
-    query: NonEmptyString,
+    query: z.string(),
   }),
+  severity_score: z.number().optional(),
+  evidence: z.array(z.string()).optional(),
 });
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);

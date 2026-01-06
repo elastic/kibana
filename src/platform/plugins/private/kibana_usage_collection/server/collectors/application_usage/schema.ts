@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { ApplicationUsageTelemetryReport } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
@@ -115,7 +115,7 @@ const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   },
 };
 
-// There is a test in x-pack/test/usage_collection that validates that the keys in here match all the registered apps
+// There is a test in x-pack/platform/test/usage_collection that validates that the keys in here match all the registered apps
 export const applicationUsageSchema = {
   // OSS
   dashboards: commonSchema,
@@ -132,24 +132,22 @@ export const applicationUsageSchema = {
   r: commonSchema,
 
   // X-Pack
+  agent_builder: commonSchema,
   apm: commonSchema,
   canvas: commonSchema,
+  cloud_connect: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
   searchInferenceEndpoints: commonSchema,
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
+  searchQueryRules: commonSchema,
   elasticsearchIndices: commonSchema,
-  elasticsearchStart: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
-  enterpriseSearchAISearch: commonSchema,
   enterpriseSearchRedirect: commonSchema,
-  enterpriseSearchSemanticSearch: commonSchema,
-  enterpriseSearchVectorSearch: commonSchema,
-  enterpriseSearchElasticsearch: commonSchema,
-  searchExperiences: commonSchema,
+  searchGettingStarted: commonSchema,
   searchHomepage: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
@@ -178,6 +176,8 @@ export const applicationUsageSchema = {
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
+  security_reset_session: commonSchema,
+  security_unauthenticated: commonSchema,
   securitySolutionUI: commonSchema,
   /**
    * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement

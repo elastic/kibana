@@ -15,21 +15,37 @@ export interface EsqlDocEntry {
   data: string;
 }
 
+export interface EsqlPrompts {
+  syntax: string;
+  instructions: string;
+  examples: string;
+}
+
 export interface EsqlDocData {
-  systemMessage: string;
+  prompts: EsqlPrompts;
   docs: Record<string, EsqlDocEntry>;
 }
 
 export const loadData = async (): Promise<EsqlDocData> => {
-  const [systemMessage, docs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
+  const [prompts, docs] = await Promise.all([loadPrompts(), loadEsqlDocs()]);
   return {
-    systemMessage,
+    prompts,
     docs,
   };
 };
 
-const loadSystemMessage = async () => {
-  return (await readFile(Path.join(__dirname, '../system_message.txt'))).toString('utf-8');
+const loadPrompt = async (fileName: string) => {
+  return (await readFile(Path.join(__dirname, `../prompts/${fileName}`))).toString('utf-8');
+};
+
+const loadPrompts = async () => {
+  return Promise.all([
+    loadPrompt('examples.txt'),
+    loadPrompt('instructions.txt'),
+    loadPrompt('syntax.txt'),
+  ]).then(([examples, instructions, syntax]) => {
+    return { examples, instructions, syntax };
+  });
 };
 
 const loadEsqlDocs = async (): Promise<Record<string, EsqlDocEntry>> => {

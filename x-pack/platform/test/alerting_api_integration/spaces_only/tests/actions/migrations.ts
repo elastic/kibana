@@ -10,18 +10,17 @@ import { asyncForEach } from '@kbn/std';
 import { getUrlPrefix } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/actions');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/actions');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/actions');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/actions');
     });
 
     it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`, then 7.11.0 removes `incidentConfiguration`', async () => {
@@ -127,7 +126,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         connector_id: '0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d',
         status: 'error',
         errorSource: 'framework',
-        message: `error validating action type connector: secrets must be defined`,
+        message: `error validating connector type secrets: Required`,
         retry: false,
       });
     });

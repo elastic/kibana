@@ -7,40 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   AreaSeriesProps,
   AreaSeriesStyle,
   BarSeriesProps,
-  ColorVariant,
   LineSeriesProps,
-  ScaleType,
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
 } from '@elastic/charts';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import { ColorVariant, ScaleType } from '@elastic/charts';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { PersistedState } from '@kbn/visualizations-common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalettes } from '@kbn/palettes';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
-import {
+import type {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   XScaleType,
   PointVisibility,
 } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
-import { FormatFactory } from '../types';
+import type { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
-import { ColorAssignments } from './color_assignment';
-import { GroupsConfiguration } from './axes_configuration';
-import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
+import type { ColorAssignments } from './color_assignment';
+import type { GroupsConfiguration } from './axes_configuration';
+import type { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
 
@@ -127,28 +126,22 @@ export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
 
 export type FormattedDatatables = Record<string, Datatable>;
 
-const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
 export const getFormattedRow = (
   row: Datatable['rows'][number],
   columns: Datatable['columns'],
   columnsFormatters: Record<string, IFieldFormat>,
   xAccessor: string | undefined,
-  splitColumnAccessor: string | undefined,
-  splitRowAccessor: string | undefined,
+  categoricalAccessors: string[],
   xScaleType: XScaleType,
   invertedRawValueMap: InvertedRawValueMap
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
     (formattedInfo, { id }) => {
       const record = formattedInfo.row[id];
+      // format only values used as categorical: ordinal X accessor or any other accessor used to split the data
       if (
-        record != null &&
-        // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) ||
-          (id === xAccessor && xScaleType === 'ordinal') ||
-          id === splitColumnAccessor ||
-          id === splitRowAccessor)
+        (id === xAccessor && xScaleType === 'ordinal') ||
+        (id !== xAccessor && categoricalAccessors.includes(id))
       ) {
         const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
         invertedRawValueMap.get(id)?.set(formattedValue, record);
@@ -166,8 +159,6 @@ export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
   xAccessor: string | ExpressionValueVisDimension | undefined,
-  splitColumnAccessor: string | ExpressionValueVisDimension | undefined,
-  splitRowAccessor: string | ExpressionValueVisDimension | undefined,
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): DatatableWithFormatInfo => {
@@ -201,8 +192,7 @@ export const getFormattedTable = (
       table.columns,
       columnsFormatters,
       xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-      splitColumnAccessor ? getAccessorByDimension(splitColumnAccessor, table.columns) : undefined,
-      splitRowAccessor ? getAccessorByDimension(splitRowAccessor, table.columns) : undefined,
+      accessors.map((a) => getAccessorByDimension(a, table.columns)),
       xScaleType,
       invertedRawValueMap
     );
@@ -227,18 +217,13 @@ export const getFormattedTablesByLayers = (
   splitRowAccessor?: string | ExpressionValueVisDimension
 ): DatatablesWithFormatInfo =>
   layers.reduce(
-    (
-      formattedDatatables,
-      { layerId, table, xAccessor, splitAccessors = [], accessors, xScaleType }
-    ) => ({
+    (formattedDatatables, { layerId, table, xAccessor, splitAccessors = [], xScaleType }) => ({
       ...formattedDatatables,
       [layerId]: getFormattedTable(
         table,
         formatFactory,
         xAccessor,
-        splitColumnAccessor,
-        splitRowAccessor,
-        [xAccessor, ...splitAccessors, ...accessors, splitColumnAccessor, splitRowAccessor].filter<
+        [xAccessor, ...splitAccessors, splitColumnAccessor, splitRowAccessor].filter<
           string | ExpressionValueVisDimension
         >((a): a is string | ExpressionValueVisDimension => a !== undefined),
         xScaleType
@@ -320,7 +305,7 @@ const getPointConfig: GetPointConfigFn = ({
   pointsRadius,
 }) => {
   return {
-    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'auto'),
+    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'never'),
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };

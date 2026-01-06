@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CreateIndexLocatorDefinition } from './create_index_locator';
 import { SearchIndicesLocatorDefinition } from './search_indices_locator';
 

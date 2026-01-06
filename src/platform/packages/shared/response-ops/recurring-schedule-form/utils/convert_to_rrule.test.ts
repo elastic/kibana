@@ -14,20 +14,38 @@ import { convertToRRule } from './convert_to_rrule';
 describe('convertToRRule', () => {
   const timezone = 'UTC';
   const today = '2023-03-22';
-  const startDate = moment(today);
+  const startDate = moment(today).toISOString();
 
-  test('should convert a maintenance window that is not recurring', () => {
+  test('should convert a recurring schedule that is not recurring', () => {
     const rRule = convertToRRule({ startDate, timezone });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.YEARLY,
       count: 1,
     });
   });
 
-  test('should convert a maintenance window that is recurring on a daily schedule', () => {
+  test('should convert a recurring schedule that is recurring on a hourly schedule', () => {
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.HOURLY,
+      },
+    });
+
+    expect(rRule).toEqual({
+      dtstart: startDate,
+      tzid: 'UTC',
+      freq: Frequency.HOURLY,
+      interval: 1,
+    });
+  });
+
+  test('should convert a recurring schedule that is recurring on a daily schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -39,7 +57,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -47,7 +65,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a daily schedule until', () => {
+  test('should convert a recurring schedule that is recurring on a daily schedule until', () => {
     const until = moment(today).add(1, 'month').toISOString();
     const rRule = convertToRRule({
       startDate,
@@ -61,7 +79,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -70,7 +88,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a daily schedule after x', () => {
+  test('should convert a recurring schedule that is recurring on a daily schedule after x', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -83,7 +101,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -92,7 +110,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a weekly schedule', () => {
+  test('should convert a recurring schedule that is recurring on a weekly schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -103,7 +121,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.WEEKLY,
       interval: 1,
@@ -111,7 +129,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a monthly schedule', () => {
+  test('should convert a recurring schedule that is recurring on a monthly schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -122,7 +140,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.MONTHLY,
       interval: 1,
@@ -130,7 +148,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a yearly schedule', () => {
+  test('should convert a recurring schedule that is recurring on a yearly schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -141,7 +159,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.YEARLY,
       interval: 1,
@@ -150,7 +168,27 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom daily schedule', () => {
+  test('should convert a recurring schedule that is recurring on a custom hourly schedule', () => {
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        customFrequency: Frequency.HOURLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 3,
+      },
+    });
+
+    expect(rRule).toEqual({
+      dtstart: startDate,
+      tzid: 'UTC',
+      freq: Frequency.HOURLY,
+      interval: 3,
+    });
+  });
+
+  test('should convert a recurring schedule that is recurring on a custom daily schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -163,14 +201,14 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom weekly schedule', () => {
+  test('should convert a recurring schedule that is recurring on a custom weekly schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -184,7 +222,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.WEEKLY,
       interval: 1,
@@ -192,7 +230,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom monthly by day schedule', () => {
+  test('should convert a recurring schedule that is recurring on a custom monthly by day schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -206,7 +244,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.MONTHLY,
       interval: 1,
@@ -214,7 +252,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom monthly by weekday schedule', () => {
+  test('should convert a recurring schedule that is recurring on a custom monthly by weekday schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -228,7 +266,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.MONTHLY,
       interval: 1,
@@ -236,7 +274,7 @@ describe('convertToRRule', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom yearly schedule', () => {
+  test('should convert a recurring schedule that is recurring on a custom yearly schedule', () => {
     const rRule = convertToRRule({
       startDate,
       timezone,
@@ -249,7 +287,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.YEARLY,
       interval: 3,
@@ -257,4 +295,43 @@ describe('convertToRRule', () => {
       bymonthday: [22],
     });
   });
+
+  test('should convert a recurring schedule that is recurring on a custom hourly schedule with includeTime', () => {
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      includeTime: true,
+      recurringSchedule: {
+        customFrequency: Frequency.HOURLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 3,
+      },
+    });
+
+    expect(rRule).toEqual({
+      dtstart: startDate,
+      tzid: 'UTC',
+      freq: Frequency.HOURLY,
+      interval: 3,
+      byminute: [0],
+    });
+  });
+
+  test.each(['frequency', 'customFrequency'])(
+    'should parse %s as string to number',
+    (frequencyKey) => {
+      const rRule = convertToRRule({
+        startDate,
+        timezone,
+        // @ts-expect-error Testing string to number parsing
+        recurringSchedule: {
+          [frequencyKey]: '1',
+          ends: 'never',
+        },
+      });
+      expect(typeof rRule.freq).toBe('number');
+      expect(rRule.freq).toBe(1);
+    }
+  );
 });

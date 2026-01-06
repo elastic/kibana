@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -89,6 +90,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     if (!hasPrivilegeToRead) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="telemetry.callout.errorUnprivilegedUserTitle"
@@ -109,6 +111,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     if (data === null) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="telemetry.callout.errorLoadingClusterStatisticsTitle"
@@ -136,12 +139,18 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
   }
 
   render() {
+    const modalTitleId = htmlIdGenerator()('flyoutTitle');
     return (
       <EuiPortal>
-        <EuiFlyout ownFocus onClose={this.props.onClose} maxWidth={true}>
+        <EuiFlyout
+          aria-labelledby={modalTitleId}
+          ownFocus
+          onClose={this.props.onClose}
+          maxWidth={true}
+        >
           <EuiFlyoutHeader>
             <EuiTitle>
-              <h2>
+              <h2 id={modalTitleId}>
                 <FormattedMessage
                   id="telemetry.callout.clusterStatisticsTitle"
                   defaultMessage="Cluster statistics"

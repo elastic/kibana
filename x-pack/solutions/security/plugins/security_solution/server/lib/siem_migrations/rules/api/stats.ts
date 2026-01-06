@@ -14,8 +14,8 @@ import {
 import { SIEM_RULE_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
-import { withExistingMigration } from './util/with_existing_migration_id';
+import { withLicense } from '../../common/api/util/with_license';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -40,11 +40,11 @@ export const registerSiemRuleMigrationsStatsRoute = (
             const migrationId = req.params.migration_id;
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
               const stats = await ruleMigrationsClient.task.getStats(migrationId);
 
-              if (stats.rules.total === 0) {
+              if (stats.items.total === 0) {
                 return res.noContent();
               }
               return res.ok({ body: stats });

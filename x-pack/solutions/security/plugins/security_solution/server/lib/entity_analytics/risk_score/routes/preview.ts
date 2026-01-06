@@ -68,6 +68,7 @@ export const riskScorePreviewRoute = (
           weights,
           exclude_alert_statuses: excludedStatuses,
           exclude_alert_tags: excludedTags,
+          filters: customFilters,
         } = request.body;
 
         const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -88,6 +89,7 @@ export const riskScorePreviewRoute = (
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
           const excludeAlertStatuses = excludedStatuses || ['closed'];
           const excludeAlertTags = excludedTags || [];
+          const filters = customFilters || [];
 
           const result = await riskScoreService.calculateScores({
             afterKeys,
@@ -102,6 +104,7 @@ export const riskScorePreviewRoute = (
             alertSampleSizePerShard,
             excludeAlertStatuses,
             excludeAlertTags,
+            filters,
           });
 
           securityContext.getAuditLogger()?.log({
@@ -116,6 +119,20 @@ export const riskScorePreviewRoute = (
 
           return response.ok({ body: result });
         } catch (e) {
+          // If the error is related to a non-existent index, return empty scores instead of an error
+          if (e instanceof Error && e.message && e.message.includes('index_not_found_exception')) {
+            return response.ok({
+              body: {
+                after_keys: {},
+                scores: {
+                  host: [],
+                  user: [],
+                  service: [],
+                },
+              },
+            });
+          }
+
           const error = transformError(e);
 
           return siemResponse.error({

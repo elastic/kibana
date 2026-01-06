@@ -8,6 +8,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedHistogramTopPanelHeightContext } from '../types';
 
 export const CHART_HIDDEN_KEY = 'chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'histogramHeight';
@@ -30,7 +31,7 @@ export const getChartHidden = (
 export const getTopPanelHeight = (
   storage: Storage,
   localStorageKeyPrefix: string
-): number | undefined =>
+): UnifiedHistogramTopPanelHeightContext | undefined =>
   storage.get(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_HEIGHT_KEY)) ?? undefined;
 
 /**
@@ -58,7 +59,7 @@ export const setChartHidden = (
 export const setTopPanelHeight = (
   storage: Storage,
   localStorageKeyPrefix: string,
-  topPanelHeight: number | undefined
+  topPanelHeight: UnifiedHistogramTopPanelHeightContext
 ) => storage.set(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_HEIGHT_KEY), topPanelHeight);
 
 /**

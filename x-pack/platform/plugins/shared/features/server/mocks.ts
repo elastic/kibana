@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
+import { lazyObject } from '@kbn/lazy-object';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
 } from './feature_privilege_iterator';
 
 const createSetup = (): jest.Mocked<FeaturesPluginSetup> => {
-  return {
+  return lazyObject({
     getKibanaFeatures: jest.fn(),
     getElasticsearchFeatures: jest.fn(),
     registerKibanaFeature: jest.fn(),
@@ -20,14 +21,14 @@ const createSetup = (): jest.Mocked<FeaturesPluginSetup> => {
     enableReportingUiCapabilities: jest.fn(),
     featurePrivilegeIterator: jest.fn().mockImplementation(featurePrivilegeIterator),
     subFeaturePrivilegeIterator: jest.fn().mockImplementation(subFeaturePrivilegeIterator),
-  };
+  });
 };
 
 const createStart = (): jest.Mocked<FeaturesPluginStart> => {
-  return {
+  return lazyObject({
     getKibanaFeatures: jest.fn().mockReturnValue([]),
     getElasticsearchFeatures: jest.fn().mockReturnValue([]),
-  };
+  });
 };
 
 export const featuresPluginMock = {

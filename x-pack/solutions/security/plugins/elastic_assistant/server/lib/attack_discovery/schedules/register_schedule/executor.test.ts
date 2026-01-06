@@ -8,7 +8,8 @@
 import { EcsVersion } from '@elastic/ecs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 
@@ -26,6 +27,7 @@ import {
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
 
 jest.mock('../../../../ai_assistant_data_clients/find', () => ({
   ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
@@ -115,6 +117,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
     spaceId,
     state: {},
   };
+  const mockReplacements = {
+    ...mockAnonymizedAlertsReplacements,
+    'e1cb3cf0-30f3-4f99-a9c8-518b955c6f90': 'Test-Host-1',
+    '039c15c5-3964-43e7-a891-42fe2ceeb9ff': 'Test-User-1',
+  };
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -133,11 +140,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
       attackDiscoveries: mockAttackDiscoveries,
-      replacements: {
-        ...mockAnonymizedAlertsReplacements,
-        'e1cb3cf0-30f3-4f99-a9c8-518b955c6f90': 'Test-Host-1',
-        '039c15c5-3964-43e7-a891-42fe2ceeb9ff': 'Test-User-1',
-      },
+      replacements: mockReplacements,
     });
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
@@ -347,6 +350,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
           'Critical Malware and Phishing Alerts on host e1cb3cf0-30f3-4f99-a9c8-518b955c6f90',
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
+        'kibana.alert.attack_ids': ['fake-alert'],
       },
       context: {
         attack: {
@@ -418,7 +422,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
       esClient: services.scopedClusterClient.asCurrentUser,
       indexPattern: '.alerts-security.attack.discovery.alerts-test-space',
       logger: mockLogger,
-      ownerId: executorOptions.rule.id,
+      ownerInfo: {
+        id: executorOptions.rule.id,
+        isSchedule: true,
+      },
+      replacements: mockReplacements,
       spaceId,
     });
   });
@@ -496,5 +504,43 @@ describe('attackDiscoveryScheduleExecutor', () => {
         context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { withReplacements?: boolean };
+    };
+    expect(firstCallArg.alertsParams.withReplacements).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { enableFieldRendering?: boolean };
+    };
+    expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
+
+    spy.mockRestore();
   });
 });

@@ -24,7 +24,7 @@ const deprecatedPolicyTooltips = {
 export const DeprecatedPolicyBadge = () => {
   return (
     <EuiToolTip content={deprecatedPolicyTooltips.badgeTooltip}>
-      <EuiBadge color="warning" data-test-subj="deprecatedPolicyBadge">
+      <EuiBadge tabIndex={0} color="warning" data-test-subj="deprecatedPolicyBadge">
         {deprecatedPolicyTooltips.badge}
       </EuiBadge>
     </EuiToolTip>

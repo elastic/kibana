@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { EdgeViewModel } from '../types';
 
-export const EdgeLabelHeight = 24;
+export const EdgeLabelHeight = 20;
 export const EdgeLabelWidth = 100;
 
 export interface EdgeLabelContainerProps {
@@ -100,6 +100,6 @@ export const useEdgeColor = (edgeColor: EdgeViewModel['color']) => {
       return euiTheme.colors.primary;
     case 'subdued':
     default:
-      return euiTheme.colors.borderBaseFormsControl;
+      return euiTheme.colors.borderBaseProminent;
   }
 };

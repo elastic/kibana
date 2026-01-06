@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { indexTemplates } from '../data_sources';
-import { Config } from '../types';
+import type { Config } from '../types';
 
 export async function deleteIndexTemplate(config: Config, client: Client, logger: ToolingLog) {
   const dataset = config.indexing.dataset;

@@ -18,7 +18,8 @@ import {
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { tableMock, tableQueryMock } from '../__mocks__/table';
-import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
+import type { UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('external_vis_context', () => {
   const dataView: DataView = dataViewWithTimefieldMock;

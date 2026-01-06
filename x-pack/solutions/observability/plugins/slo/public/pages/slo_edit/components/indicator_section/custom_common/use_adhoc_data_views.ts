@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../../hooks/use_kibana';
 

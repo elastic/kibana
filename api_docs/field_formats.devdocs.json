@@ -378,7 +378,7 @@
           "section": "def-common.FieldFormatsRegistry",
           "text": "FieldFormatsRegistry"
         },
-        ", \"init\" | \"register\"> & { deserialize: ",
+        ", \"register\" | \"init\"> & { deserialize: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -4567,7 +4567,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: string | number, options: ",
+              "(val: any, options: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -4584,12 +4584,12 @@
               {
                 "parentPluginId": "fieldFormats",
                 "id": "def-common.StringFormat.textConvert.$1",
-                "type": "CompoundType",
+                "type": "Any",
                 "tags": [],
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "string | number"
+                  "any"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/converters/string.ts",
                 "deprecated": false,
@@ -6062,7 +6062,15 @@
         "label": "IFieldFormatsRegistry",
         "description": [],
         "signature": [
-          "{ init: (getConfig: ",
+          "{ register: (fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatInstanceType",
+            "text": "FieldFormatInstanceType"
+          },
+          "[]) => void; init: (getConfig: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6087,14 +6095,6 @@
             "text": "FieldFormatMetaParams"
           },
           ", defaultFieldConverters?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
-          "[]) => void; register: (fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",

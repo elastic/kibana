@@ -7,23 +7,24 @@
 
 import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
-import { QueueTimeoutError, ReportingError } from '@kbn/reporting-common';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
-import { REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
-import {
-  isExecutionError,
-  mapToReportingError,
-} from '../../../common/errors/map_to_reporting_error';
+import { ScheduleType } from '@kbn/reporting-server';
+import { EXPORT_TYPE_SINGLE } from '@kbn/reporting-common';
+import type { ReportTaskParams } from '.';
+import { REPORTING_EXECUTE_TYPE } from '.';
 import { SavedReport } from '../store';
 import type { ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
-import { PrepareJobResults, RunReportTask } from './run_report';
+import type { PrepareJobResults } from './run_report';
+import { RunReportTask } from './run_report';
 
 type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: ReportTaskParams;
 };
 export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
+  public readonly exportType = EXPORT_TYPE_SINGLE;
+
   public get TYPE() {
     return REPORTING_EXECUTE_TYPE;
   }
@@ -31,36 +32,12 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   private async claimJob(task: ReportTaskParams): Promise<SavedReport> {
     const store = await this.opts.reporting.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
-    const logger = this.logger.get(report._id);
 
     if (report.status === 'completed') {
       throw new Error(`Can not claim the report job: it is already completed!`);
     }
 
     const m = moment();
-
-    // check if job has exceeded the configured maxAttempts
-    const maxAttempts = this.getMaxAttempts();
-    if (report.attempts >= maxAttempts) {
-      let err: ReportingError;
-      if (report.error && isExecutionError(report.error)) {
-        // We have an error stored from a previous attempts, so we'll use that
-        // error to fail the job and return it to the user.
-        const { error } = report;
-        err = mapToReportingError(error);
-        err.stack = error.stack;
-      } else {
-        if (report.error && report.error instanceof Error) {
-          errorLogger(logger, 'Error executing report', report.error);
-        }
-        err = new QueueTimeoutError(
-          `Max attempts reached (${maxAttempts}). Queue timeout reached.`
-        );
-      }
-      await this.failJob(report, err);
-      throw err;
-    }
-
     const startTime = m.toISOString();
     const expirationTime = m.add(this.queueTimeout).toISOString();
 
@@ -68,7 +45,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
       attempts: report.attempts + 1,
-      max_attempts: maxAttempts,
+      max_attempts: this.getMaxAttempts().maxTaskAttempts,
       started_at: startTime,
       timeout: this.queueTimeout,
       process_expiration: expirationTime,
@@ -76,31 +53,32 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
 
     const claimedReport = new SavedReport({ ...report, ...doc });
 
-    logger.info(
+    this.logger.info(
       `Claiming ${claimedReport.jobtype} ${report._id} ` +
         `[_index: ${report._index}] ` +
         `[_seq_no: ${report._seq_no}] ` +
         `[_primary_term: ${report._primary_term}] ` +
-        `[attempts: ${report.attempts}] ` +
-        `[process_expiration: ${expirationTime}]`
+        `[attempts: ${report.attempts + 1}] ` +
+        `[process_expiration: ${expirationTime}]`,
+      { tags: [report._id] }
     );
 
     // event tracking of claimed job
     const eventTracker = this.getEventTracker(report);
     const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
-    eventTracker?.claimJob({ timeSinceCreation });
+    eventTracker?.claimJob({ timeSinceCreation, scheduleType: ScheduleType.SINGLE });
 
     const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no!;
     claimedReport._primary_term = resp._primary_term!;
+
     return claimedReport;
   }
 
   protected async prepareJob(taskInstance: ConcreteTaskInstance): Promise<PrepareJobResults> {
-    const { attempts: taskAttempts, params: reportTaskParams } = taskInstance;
+    const { params: reportTaskParams } = taskInstance;
 
     let report: SavedReport | undefined;
-    const isLastAttempt = taskAttempts >= this.getMaxAttempts();
 
     // find the job in the store and set status to processing
     const task = reportTaskParams as ReportTaskParams;
@@ -113,31 +91,37 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
 
       // Update job status to claimed
       report = await this.claimJob(task);
+
+      // Track report in UI
+      this.opts.reporting.trackReport(jobId);
     } catch (failedToClaim) {
       // error claiming report - log the error
       // could be version conflict, or too many attempts or no longer connected to ES
       errorLogger(this.logger, `Error in claiming ${jobId}`, failedToClaim);
     }
 
-    return { isLastAttempt, jobId, report, task };
+    return { jobId, report, task };
   }
 
   protected getMaxAttempts() {
-    return this.opts.config.capture.maxAttempts ?? 1;
+    return {
+      maxTaskAttempts: this.opts.config.capture.maxAttempts ?? 1,
+      maxRetries: 0, // no retries within a single task run
+    };
   }
 
   protected async notify(): Promise<void> {}
 
   public getTaskDefinition() {
-    const queueTimeout = this.getQueueTimeout();
+    const queueTimeout = this.getQueueTimeoutAsInterval();
     const maxConcurrency = this.getMaxConcurrency();
-    const maxAttempts = this.getMaxAttempts();
+    const maxAttempts = this.getMaxAttempts().maxTaskAttempts;
 
     return {
       type: REPORTING_EXECUTE_TYPE,
       title: 'Reporting: execute job',
       createTaskRunner: this.getTaskRunner(),
-      maxAttempts: maxAttempts + 1, // Add 1 so we get an extra attempt in case of failure during a Kibana restart
+      maxAttempts,
       timeout: queueTimeout,
       maxConcurrency,
     };

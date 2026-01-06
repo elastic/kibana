@@ -22,6 +22,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enableExperimental: true,
     prebuiltRulesPackageVersion: true,
     offeringSettings: true,
+    entityAnalytics: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [

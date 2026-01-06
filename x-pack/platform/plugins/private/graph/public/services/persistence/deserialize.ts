@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import type { DataViewListItem } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import type {
   SerializedNode,
   UrlTemplate,
   SerializedUrlTemplate,
@@ -99,9 +100,7 @@ export function mapFields(indexPattern: DataView): WorkspaceField[] {
     .filter(
       (field) =>
         // Make sure to only include mapped fields, e.g. no index pattern runtime fields
-        field.isMapped &&
-        !blockedFieldNames.includes(field.name) &&
-        !indexPatternsUtils.isNestedField(field)
+        field.isMapped && !blockedFieldNames.includes(field.name) && !isNestedField(field)
     )
     .map((field, index) => ({
       name: field.name,

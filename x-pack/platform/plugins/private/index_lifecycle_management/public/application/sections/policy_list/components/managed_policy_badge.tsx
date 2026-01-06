@@ -25,7 +25,7 @@ const managedPolicyTooltips = {
 export const ManagedPolicyBadge = () => {
   return (
     <EuiToolTip content={managedPolicyTooltips.badgeTooltip}>
-      <EuiBadge color="hollow" data-test-subj="managedPolicyBadge">
+      <EuiBadge color="hollow" data-test-subj="managedPolicyBadge" tabIndex={0}>
         {managedPolicyTooltips.badge}
       </EuiBadge>
     </EuiToolTip>

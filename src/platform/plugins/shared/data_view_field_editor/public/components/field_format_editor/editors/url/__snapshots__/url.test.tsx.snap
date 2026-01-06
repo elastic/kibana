@@ -264,7 +264,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id"
       >
         <table
-          class="euiTable emotion-euiTable-fixed-compressed-desktop"
+          class="euiTable emotion-euiTable-fixed-compressed-hasBackground-desktop"
           id="__table_generated-id"
           tabindex="-1"
         >

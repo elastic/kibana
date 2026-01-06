@@ -16,19 +16,20 @@ import type {
   InternalPluginsServiceStart,
 } from '@kbn/core-plugins-browser-internal';
 import type { BuildFlavor } from '@kbn/config/src/types';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createInternalSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalPluginsServiceSetup> = {
+  const setupContract: jest.Mocked<InternalPluginsServiceSetup> = lazyObject({
     contracts: new Map(),
-  };
+  });
   // we have to suppress type errors until decide how to mock es6 class
   return setupContract as InternalPluginsServiceSetup;
 };
 
 const createInternalStartContractMock = () => {
-  const startContract: jest.Mocked<InternalPluginsServiceStart> = {
+  const startContract: jest.Mocked<InternalPluginsServiceStart> = lazyObject({
     contracts: new Map(),
-  };
+  });
   // we have to suppress type errors until decide how to mock es6 class
   return startContract as InternalPluginsServiceSetup;
 };
@@ -37,7 +38,7 @@ const createPluginInitializerContextMock = (
   config: unknown = {},
   { buildFlavor = 'serverless' }: { buildFlavor?: BuildFlavor } = {}
 ) => {
-  const mock: PluginInitializerContext = {
+  const mock: PluginInitializerContext = lazyObject({
     opaqueId: Symbol(),
     env: {
       mode: {
@@ -60,22 +61,20 @@ const createPluginInitializerContextMock = (
     config: {
       get: <T>() => config as T,
     },
-  };
+  });
 
   return mock;
 };
 
 type PluginsServiceContract = PublicMethodsOf<PluginsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<PluginsServiceContract> = {
+  const mocked: jest.Mocked<PluginsServiceContract> = lazyObject({
     getOpaqueIds: jest.fn(),
-    setup: jest.fn(),
-    start: jest.fn(),
+    setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
+    start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
     stop: jest.fn(),
-  };
+  });
 
-  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
-  mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };
 

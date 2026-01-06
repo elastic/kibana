@@ -3,7 +3,7 @@
  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.
  */
 
-import { kHelper, kAmbiguous, kSimple } from './symbols';
+import type { kHelper, kAmbiguous, kSimple } from './symbols';
 
 // Unexported `CompileOptions` lifted from node_modules/handlebars/types/index.d.ts
 // While it could also be extracted using `NonNullable<Parameters<typeof Handlebars.compile>[1]>`, this isn't possible since we declare the handlebars module below

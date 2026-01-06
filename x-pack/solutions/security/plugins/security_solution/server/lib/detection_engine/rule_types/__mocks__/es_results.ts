@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { EqlHitsEvent } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import type { SignalSourceHit, SignalSearchResponse, SignalHit, AlertSourceHit } from '../types';
+import type {
+  SignalSourceHit,
+  SignalSearchResponse,
+  SignalHit,
+  AlertSourceHit,
+  SignalSource,
+} from '../types';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
@@ -721,3 +728,15 @@ export const sampleDocSearchResultsWithSortId = (
 
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
+
+/**
+ *
+ * @returns The object structure that EQL sequence searches return for "missing" events in the sequence:
+ * see the NOT operator https://www.elastic.co/docs/reference/query-languages/eql/eql-syntax
+ */
+export const sampleMissingEQLDoc = (): EqlHitsEvent<SignalSource> => ({
+  _index: '',
+  _id: '',
+  _source: {},
+  missing: true,
+});

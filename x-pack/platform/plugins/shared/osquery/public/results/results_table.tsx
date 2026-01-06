@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -33,18 +34,43 @@ import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../common/constants';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage } from './translations';
+import { generateEmptyDataMessage, PAGINATION_LIMIT_TITLE } from './translations';
 import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
-import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
+
+const PaginationLimitToastContent = () => (
+  <>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitDescription"
+        defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
+        }}
+      />
+    </p>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitIndexAccess"
+        defaultMessage="Read access to {indexName} index is required."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
+        }}
+      />
+    </p>
+  </>
+);
 
 const euiDataGridCss = {
   ':not(.euiDataGrid--fullScreen)': {
@@ -85,12 +111,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   error,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
 
-  const {
-    // @ts-expect-error update types
-    data: { aggregations },
-  } = useActionResults({
+  const { data } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -99,15 +121,16 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
-    skip: !hasActionResultsPrivileges,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
     application: { getUrlForApp },
     appName,
     timelines,
+    notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
-
   const getFleetAppUrl = useCallback(
     (agentId: any) =>
       getUrlForApp('fleet', {
@@ -116,19 +139,35 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [getUrlForApp]
   );
 
+  const showPaginationLimitToast = useCallback(() => {
+    toasts.addWarning({
+      title: PAGINATION_LIMIT_TITLE,
+      text: toMountPoint(<PaginationLimitToastContent />, { i18n: i18nStart, theme }),
+    });
+  }, [i18nStart, theme, toasts]);
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
-    (pageSize: any) =>
+    (pageSize: any) => {
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
         pageIndex: 0,
-      })),
+      }));
+    },
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
-    [setPagination]
+    (pageIndex: any) => {
+      if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        showPaginationLimitToast();
+
+        return;
+      }
+
+      setPagination((currentPagination) => ({ ...currentPagination, pageIndex }));
+    },
+    [pagination.pageSize, setPagination, showPaginationLimitToast]
   );
 
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
@@ -141,6 +180,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
+    liveQueryActionId,
     startDate,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -149,7 +189,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
-    skip: !hasActionResultsPrivileges,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -165,20 +204,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       // eslint-disable-next-line react/display-name
       ({ rowIndex, columnId }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const data = useContext(DataContext);
+        const gridData = useContext(DataContext);
 
         // @ts-expect-error update types
-        const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
+        const value = gridData[rowIndex % pagination.pageSize]?.fields[columnId];
 
         if (columnId === 'agent.name') {
           // @ts-expect-error update types
-          const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
+          const agentIdValue = gridData[rowIndex % pagination.pageSize]?.fields['agent.id'];
 
           return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
         }
 
         if (ecsMappingColumns.includes(columnId)) {
-          const ecsFieldValue = get(columnId, data[rowIndex % pagination.pageSize]?._source);
+          const ecsFieldValue = get(columnId, gridData[rowIndex % pagination.pageSize]?._source);
 
           if (isArray(ecsFieldValue) || isObject(ecsFieldValue)) {
             try {
@@ -266,10 +305,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
-        const { data, seen } = acc;
+        const { data: accData, seen } = acc;
         if (fieldName === 'agent.name') {
           if (!seen.has(fieldName)) {
-            data.push({
+            accData.push({
               id: fieldName,
               displayAsText: i18n.translate(
                 'xpack.osquery.liveQueryResults.table.agentColumnTitle',
@@ -287,7 +326,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         if (ecsMappingColumns.includes(fieldName)) {
           if (!seen.has(fieldName)) {
-            data.push({
+            accData.push({
               id: fieldName,
               displayAsText: fieldName,
               defaultSortDirection: Direction.asc,
@@ -303,7 +342,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           const hasNumberType = fields.includes(`${fieldName}.number`);
           if (!seen.has(displayAsText)) {
             const id = hasNumberType ? fieldName + '.number' : fieldName;
-            data.push({
+            accData.push({
               id,
               displayAsText,
               display: getHeaderDisplay(displayAsText),
@@ -329,8 +368,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const data = allResultsData?.edges;
-    if (timelines && data) {
+    const edges = allResultsData?.edges;
+    if (timelines && edges) {
       return [
         {
           id: 'timeline',
@@ -340,9 +379,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
               visibleRowIndex: number;
             };
-            const eventId = data[visibleRowIndex]?._id;
+            const eventId = edges[visibleRowIndex]?._id;
 
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             return <AddToTimelineButton field="_id" value={eventId!} isIcon={true} />;
           },
         },
@@ -386,15 +424,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         if (!agentIds?.length || expired || error) return false;
 
         return !!(
-          aggregations.totalResponded !== agentIds?.length ||
-          allResultsData?.total !== aggregations?.totalRowCount ||
+          data.aggregations.totalResponded !== agentIds?.length ||
+          allResultsData?.total !== data.aggregations?.totalRowCount ||
           (allResultsData?.total && !allResultsData?.edges.length)
         );
       }),
     [
       agentIds?.length,
-      aggregations.totalResponded,
-      aggregations?.totalRowCount,
+      data.aggregations,
       allResultsData?.edges.length,
       allResultsData?.total,
       error,
@@ -406,40 +443,16 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     return <EuiSkeletonText lines={5} />;
   }
 
-  if (!hasActionResultsPrivileges) {
-    return (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
-            defaultMessage="Permission denied"
-          />
-        }
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
-            defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            values={{
-              read: <EuiCode>read</EuiCode>,
-              logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
-            }}
-          />
-        </p>
-      </EuiCallOut>
-    );
-  }
-
   return (
     <>
       {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
-          <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
+          <EuiCallOut
+            announceOnMount
+            title={generateEmptyDataMessage(data?.aggregations.totalResponded ?? 0)}
+          />
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>

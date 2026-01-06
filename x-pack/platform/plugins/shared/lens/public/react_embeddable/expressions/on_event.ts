@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
+import type { GetStateType, LensPublicCallbacks } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
   isLensAlertRule,
   isLensBrushEvent,
@@ -15,16 +16,11 @@ import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
-} from '../../types';
+} from '../../types_guards';
 import { inferTimeField } from '../../utils';
-import type {
-  GetStateType,
-  LensApi,
-  LensEmbeddableStartServices,
-  LensPublicCallbacks,
-} from '../types';
-import { isTextBasedLanguage } from '../helper';
+
 import { addLog } from '../logger';
+import type { LensEmbeddableStartServices } from '../types';
 
 export const prepareEventHandler =
   (
@@ -56,7 +52,7 @@ export const prepareEventHandler =
       // TODO: here is where we run the uiActions on the embeddable for the alert rule
       eventHandler = callbacks.onAlertRule;
       if (shouldExecuteDefaultTriggers) {
-        // this runs the function that we define in addTriggerAction in the plugin.ts file in alertRulesDefinition
+        // this runs the function that we define in addTriggerActionAsync in the plugin.ts file in alertRulesDefinition
         uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
           {
             data: event.data,
@@ -77,19 +73,12 @@ export const prepareEventHandler =
 
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
-        // if the embeddable is located in an app where there is the Unified search bar with the ES|QL editor, then use this query
-        // otherwise use the query from the saved object
-        let esqlQuery: AggregateQuery | Query | undefined;
-        if (isTextBasedLanguage(currentState)) {
-          const query = data.query.queryString.getQuery();
-          esqlQuery = isOfAggregateQueryType(query) ? query : currentState.attributes.state.query;
-        }
         uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
             timeFieldName:
               event.data.timeFieldName || inferTimeField(data.datatableUtilities, event),
-            query: esqlQuery,
+            query: data.query.queryString.getQuery(),
           },
           embeddable: api,
         });

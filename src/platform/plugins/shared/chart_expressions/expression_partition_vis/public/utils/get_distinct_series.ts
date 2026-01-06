@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableRow } from '@kbn/expressions-plugin/public';
-import { BucketColumns } from '../../common/types';
+import type { DatatableRow } from '@kbn/expressions-plugin/public';
+import type { BucketColumns } from '../../common/types';
 
 /**
  * All the available categories of a datatable.

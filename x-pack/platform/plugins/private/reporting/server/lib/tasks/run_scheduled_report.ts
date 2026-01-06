@@ -10,17 +10,22 @@ import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { ScheduleType } from '@kbn/reporting-server';
+import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { EXPORT_TYPE_SCHEDULED } from '@kbn/reporting-common';
 import {
-  SCHEDULED_REPORTING_EXECUTE_TYPE,
-  ScheduledReportTaskParams,
-  ScheduledReportTaskParamsWithoutSpaceId,
-} from '.';
+  SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
+  SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+} from '../../../common/translations';
+import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
+import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
 import { errorLogger } from './error_logger';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { PrepareJobResults, RunReportTask } from './run_report';
+import type { PrepareJobResults } from './run_report';
+import { RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
-import { ScheduledReportType } from '../../types';
+import type { ScheduledReportTemplateVariables, ScheduledReportType } from '../../types';
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10mb
 
@@ -28,6 +33,8 @@ type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
 };
 export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskParams> {
+  public readonly exportType = EXPORT_TYPE_SCHEDULED;
+
   public get TYPE() {
     return SCHEDULED_REPORTING_EXECUTE_TYPE;
   }
@@ -64,7 +71,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           runAt,
           kibanaId: this.kibanaId!,
           kibanaName: this.kibanaName!,
-          queueTimeout: this.queueTimeout,
+          queueTimeout: this.getQueueTimeout().asMilliseconds(),
           scheduledReport,
           spaceId: reportSpaceId,
         })
@@ -74,6 +81,15 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       if (!jobId) {
         throw new Error(`Unable to store report document in ReportingStore`);
       }
+
+      // event tracking of claimed job
+      const eventTracker = this.getEventTracker(report);
+      const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      eventTracker?.claimJob({
+        timeSinceCreation,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+      });
     } catch (failedToClaim) {
       // error claiming report - log the error
       errorLogger(
@@ -84,7 +100,6 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     }
 
     return {
-      isLastAttempt: false,
       jobId: jobId!,
       report,
       task: report?.toReportTaskJSON(),
@@ -93,7 +108,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   protected getMaxAttempts() {
-    return undefined;
+    const maxAttempts = this.opts.config.capture.maxAttempts ?? 1;
+    return {
+      maxTaskAttempts: 1,
+      maxRetries: maxAttempts - 1,
+    };
   }
 
   protected async notify(
@@ -128,12 +147,31 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         const email = notification.email;
         const title = scheduledReport.attributes.title;
         const extension = this.getJobContentExtension(report.jobtype);
+        const filename = `${title}-${runAt.toISOString()}.${extension}`;
+        const templateVariables = {
+          title,
+          filename,
+          objectType: scheduledReport.attributes.meta.objectType,
+          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+        } satisfies ScheduledReportTemplateVariables;
+        const subject = renderMustacheString(
+          this.logger,
+          email.subject ?? SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+          templateVariables,
+          'none'
+        );
+        const message = renderMustacheString(
+          this.logger,
+          email.message ?? SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
+          templateVariables,
+          'markdown'
+        );
 
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          filename: `${title}-${runAt.toISOString()}.${extension}`,
+          filename,
           contentType: output.content_type,
           relatedObject: {
             id: scheduledReport.id,
@@ -144,13 +182,30 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             to: email.to,
             cc: email.cc,
             bcc: email.bcc,
-            subject: `${title}-${runAt.toISOString()} scheduled report`,
+            subject,
+            message,
             spaceId,
           },
+        });
+
+        // event tracking of successful notification
+        const eventTracker = this.getEventTracker(report);
+        eventTracker?.completeNotification({
+          byteSize,
+          scheduledTaskId: report.scheduled_report_id,
+          scheduleType: ScheduleType.SCHEDULED,
         });
       }
     } catch (error) {
       const message = `Error sending notification for scheduled report: ${error.message}`;
+      // event tracking of successful notification
+      const eventTracker = this.getEventTracker(report);
+      eventTracker?.failedNotification({
+        byteSize,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+        errorMessage: message,
+      });
       this.saveExecutionWarning(
         report,
         {
@@ -162,14 +217,15 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         errorLogger(
           this.logger,
           `Error in saving execution warning ${report._id}`,
-          failedToSaveWarning
+          failedToSaveWarning,
+          [report._id]
         );
       });
     }
   }
 
   public getTaskDefinition() {
-    const queueTimeout = this.getQueueTimeout();
+    const queueTimeout = this.getQueueTimeoutAsInterval();
     const maxConcurrency = this.getMaxConcurrency();
 
     return {

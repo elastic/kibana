@@ -32,6 +32,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
@@ -41,7 +42,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
@@ -80,7 +80,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
   onCancel,
   onSuccess,
 }) => {
-  const { http } = useKibana();
+  const { http, docLinks } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
@@ -222,6 +222,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       ) : (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={i18n.translate(
@@ -238,12 +239,16 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               defaultMessage="Anyone with the address can access your data."
             />
             <EuiSpacer size="xs" />
-            <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+            <EuiLink
+              href={docLinks.links.security.enableElasticSearchSecurityFeatures}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
                 defaultMessage="Learn how to enable security features."
               />
-            </DocLink>
+            </EuiLink>
           </EuiCallOut>
           <EuiSpacer />
         </>
@@ -414,6 +419,7 @@ export interface CertificateChainProps {
 }
 const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificateChain }) => {
   const [showModal, setShowModal] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -423,9 +429,13 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
         compressed
       />
       {showModal && (
-        <EuiModal onClose={() => setShowModal(false)} maxWidth={euiThemeVars.euiBreakpoints.s}>
+        <EuiModal
+          aria-labelledby={modalTitleId}
+          onClose={() => setShowModal(false)}
+          maxWidth={euiThemeVars.euiBreakpoints.s}
+        >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               <FormattedMessage
                 id="interactiveSetup.certificateChain.title"
                 defaultMessage="Certificate chain"

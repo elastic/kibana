@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 export const I18nProviderMock: FC<PropsWithChildren<unknown>> = ({ children }) => {

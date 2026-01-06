@@ -12,9 +12,9 @@ import { isVisSeriesData } from '@kbn/vis-type-timeseries-plugin/server';
 import { metrics, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type {
   TSVBMetricModelCreator,
-  InventoryMetric,
+  InventoryTsvbType,
 } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryMetricRT } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryTsvbTypeKeysRT } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import type { KibanaFramework } from '../framework/kibana_framework_adapter';
@@ -67,7 +67,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           );
 
           return metricIds.map((id: string) => {
-            if (!InventoryMetricRT.is(id)) {
+            if (!InventoryTsvbTypeKeysRT.is(id)) {
               throw new Error(
                 i18n.translate('xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage', {
                   defaultMessage: '{id} is not a valid InfraMetric',
@@ -100,7 +100,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   }
 
   async makeTSVBRequest(
-    metricId: InventoryMetric,
+    metricId: InventoryTsvbType,
     options: InfraMetricsRequestOptions,
     nodeField: string,
     requestContext: InfraPluginRequestHandlerContext,

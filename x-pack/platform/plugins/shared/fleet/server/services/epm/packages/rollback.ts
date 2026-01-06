@@ -1,0 +1,300 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { uniq } from 'lodash';
+import type { unitOfTime } from 'moment';
+import moment from 'moment';
+import pMap from 'p-map';
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../common';
+
+import type {
+  BulkRollbackAvailableCheckResponse,
+  Installation,
+  RollbackAvailableCheckResponse,
+} from '../../../../common/types';
+
+import { PackageRollbackError } from '../../../errors';
+import { agentPolicyService, appContextService, packagePolicyService } from '../..';
+
+import type { PackageUpdateEvent } from '../../upgrade_sender';
+import { UpdateEventType, sendTelemetryEvents } from '../../upgrade_sender';
+
+import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../../constants/max_concurrency_constants';
+
+import { getPackageSavedObjects } from './get';
+import { installPackage } from './install';
+
+const DEFAULT_INTEGRATION_ROLLBACK_TTL = '7d';
+
+export const isIntegrationRollbackTTLExpired = (installStartedAt: string): boolean => {
+  let { integrationRollbackTTL } = appContextService.getConfig() ?? {};
+  if (!integrationRollbackTTL) {
+    integrationRollbackTTL = DEFAULT_INTEGRATION_ROLLBACK_TTL;
+  }
+  const numberPart = integrationRollbackTTL.slice(0, -1);
+  const unitPart = integrationRollbackTTL.slice(-1) as unitOfTime.DurationConstructor;
+  const ttlDuration = moment.duration(Number(numberPart), unitPart).asMilliseconds();
+  return Date.parse(installStartedAt) < Date.now() - ttlDuration;
+};
+
+export async function rollbackAvailableCheck(
+  pkgName: string
+): Promise<RollbackAvailableCheckResponse> {
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const packageSORes = await getPackageSavedObjects(savedObjectsClient, {
+    searchFields: ['name'],
+    search: pkgName,
+  });
+  const packageSO = packageSORes.saved_objects[0];
+  const packageVersion = packageSO?.attributes.version;
+
+  const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(
+    savedObjectsClient,
+    {
+      searchFields: ['package.name'],
+      search: pkgName,
+      spaceIds: ['*'],
+      fields: ['package.version'],
+    }
+  );
+  const packagePolicySOs = packagePolicySORes.saved_objects;
+
+  if (
+    packagePolicySOs
+      .filter((so) => !so.id.endsWith(':prev'))
+      .some((so) => so.attributes.package?.version !== packageVersion)
+  ) {
+    return {
+      isAvailable: false,
+      reason: `Rollback not available because some integration policies are not upgraded to version ${packageVersion}`,
+    };
+  }
+
+  return {
+    isAvailable: true,
+  };
+}
+
+export async function bulkRollbackAvailableCheck(): Promise<BulkRollbackAvailableCheckResponse> {
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const result = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    fields: ['name'],
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed`,
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const installedPackageNames = result.saved_objects.map((so) => so.attributes.name);
+  const items: Record<string, RollbackAvailableCheckResponse> = {};
+
+  await pMap(
+    installedPackageNames,
+    async (pkgName) => {
+      const { isAvailable } = await rollbackAvailableCheck(pkgName);
+      items[pkgName] = { isAvailable };
+    },
+    {
+      concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
+    }
+  );
+  return items;
+}
+
+export async function rollbackInstallation(options: {
+  esClient: ElasticsearchClient;
+  currentUserPolicyIds: string[];
+  pkgName: string;
+  spaceId: string;
+}): Promise<{
+  version: string;
+  success: boolean;
+}> {
+  const { esClient, currentUserPolicyIds, pkgName, spaceId } = options;
+  const logger = appContextService.getLogger();
+  logger.info(`Starting installation rollback for package: ${pkgName}`);
+
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  // Retrieve the package saved object, throw if it doesn't exist or doesn't have a previous version.
+  const packageSORes = await getPackageSavedObjects(savedObjectsClient, {
+    searchFields: ['name'],
+    search: pkgName,
+  });
+  if (packageSORes.saved_objects.length === 0) {
+    throw new PackageRollbackError(`Package ${pkgName} not found`);
+  } else if (packageSORes.saved_objects.length > 1) {
+    // This should not happen.
+    throw new PackageRollbackError('Expected exactly one package saved object');
+  }
+  const packageSO = packageSORes.saved_objects[0];
+  if (!packageSO.attributes.previous_version) {
+    throw new PackageRollbackError(`No previous version found for package ${pkgName}`);
+  }
+  if (isIntegrationRollbackTTLExpired(packageSO.attributes.install_started_at)) {
+    throw new PackageRollbackError(`Rollback not allowed as TTL expired`);
+  }
+  const previousVersion = packageSO.attributes.previous_version;
+  if (packageSO.attributes.install_source !== 'registry') {
+    throw new PackageRollbackError(
+      `${pkgName} was not installed from the registry (install source: ${packageSO.attributes.install_source})`
+    );
+  }
+
+  logger.info(`Rolling back ${pkgName} from ${packageSO.attributes.version} to ${previousVersion}`);
+
+  // Retrieve package policy saved objects, throw if any of them doesn't have a previous version or has a different one.
+  const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(
+    savedObjectsClient,
+    {
+      searchFields: ['package.name'],
+      search: pkgName,
+      spaceIds: ['*'],
+    }
+  );
+  const packagePolicySOs = packagePolicySORes.saved_objects;
+  const policyIds = packagePolicySOs.map((so) => so.id);
+
+  const managedRollbackError = new PackageRollbackError(
+    `Cannot rollback integration with managed package policies`
+  );
+  if (packagePolicySOs.some((so) => so.attributes.is_managed)) {
+    throw managedRollbackError;
+  }
+  // checking is_managed flag on agent policy, it is not always set on package policy
+  const agentPolicyIds = uniq(packagePolicySOs.flatMap((so) => so.attributes.policy_ids ?? []));
+  const agentPolicies = await agentPolicyService.getByIds(
+    savedObjectsClient,
+    agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
+  );
+  if (agentPolicies.some((agentPolicy) => agentPolicy.is_managed)) {
+    throw managedRollbackError;
+  }
+
+  if (packagePolicySOs.length > 0) {
+    const policyIdsWithNoPreviousVersion = policyIds.filter((soId) => {
+      if (!soId.endsWith(':prev')) {
+        return !policyIds.includes(`${soId}:prev`);
+      }
+      return false;
+    });
+    if (policyIdsWithNoPreviousVersion.length > 0) {
+      throw new PackageRollbackError(
+        `No previous version found for package policies: ${policyIdsWithNoPreviousVersion.join(
+          ', '
+        )}`
+      );
+    }
+
+    const policiesOnWrongPreviousVersion = packagePolicySOs.filter((so) => {
+      if (so.id.endsWith(':prev')) {
+        return so.attributes.package?.version !== previousVersion;
+      }
+      return false;
+    });
+    if (policiesOnWrongPreviousVersion.length > 0) {
+      const report = policiesOnWrongPreviousVersion.map((so) => {
+        return `${so.id.replace(':prev', '')} (version: ${
+          so.attributes.package?.version
+        }, expected: ${previousVersion})`;
+      });
+      throw new PackageRollbackError(
+        `Wrong previous version for package policies: ${report.join(', ')}`
+      );
+    }
+  }
+
+  if (currentUserPolicyIds.length < policyIds.length) {
+    throw new PackageRollbackError(`Not authorized to rollback integration policies in all spaces`);
+  }
+
+  try {
+    // Roll back package policies.
+    const rollbackResult = await packagePolicyService.rollback(
+      savedObjectsClient,
+      packagePolicySOs
+    );
+
+    // Roll back package.
+    const res = await installPackage({
+      esClient,
+      savedObjectsClient,
+      installSource: 'registry', // Can only rollback from the registry.
+      pkgkey: `${pkgName}-${previousVersion}`,
+      spaceId,
+      force: true,
+    });
+    if (res.error) {
+      await packagePolicyService.restoreRollback(savedObjectsClient, rollbackResult);
+      throw new PackageRollbackError(
+        `Failed to rollback package ${pkgName} to version ${previousVersion}: ${res.error.message}`
+      );
+    }
+
+    // Clean up package policies previous revisions and package policies that were copied during rollback.
+    await packagePolicyService.cleanupRollbackSavedObjects(savedObjectsClient, rollbackResult);
+    // Bump agent policy revision for all package policies that were rolled back.
+    await packagePolicyService.bumpAgentPolicyRevisionAfterRollback(
+      savedObjectsClient,
+      rollbackResult
+    );
+  } catch (error) {
+    sendRollbackTelemetry({
+      packageName: pkgName,
+      currentVersion: packageSO.attributes.version,
+      previousVersion,
+      success: false,
+      errorMessage: error.message,
+    });
+    throw error;
+  }
+
+  sendRollbackTelemetry({
+    packageName: pkgName,
+    currentVersion: packageSO.attributes.version,
+    previousVersion,
+    success: true,
+  });
+
+  logger.info(`Package: ${pkgName} successfully rolled back to version: ${previousVersion}`);
+  return { version: previousVersion, success: true };
+}
+
+function sendRollbackTelemetry({
+  packageName,
+  currentVersion,
+  previousVersion,
+  success,
+  errorMessage,
+}: {
+  packageName: string;
+  currentVersion: string;
+  previousVersion: string;
+  success: boolean;
+  errorMessage?: string;
+}) {
+  const upgradeTelemetry: PackageUpdateEvent = {
+    packageName,
+    currentVersion,
+    newVersion: previousVersion,
+    status: success ? 'success' : 'failure',
+    eventType: UpdateEventType.PACKAGE_ROLLBACK,
+    errorMessage,
+  };
+  sendTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    upgradeTelemetry
+  );
+  appContextService
+    .getLogger()
+    .debug(`Send rollback telemetry: ${JSON.stringify(upgradeTelemetry)}`);
+}

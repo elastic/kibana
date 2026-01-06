@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AssistantCallToAction as Component } from '../call_to_action';

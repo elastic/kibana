@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './saved_object_store';
-export { checkForDuplicateTitle } from './saved_objects_utils';
+export * from './lens_document_service';

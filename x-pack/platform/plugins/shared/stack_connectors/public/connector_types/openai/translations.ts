@@ -39,13 +39,6 @@ export const PROJECT_ID_LABEL = i18n.translate(
   }
 );
 
-export const OPTIONAL_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.optionalLabel',
-  {
-    defaultMessage: 'Optional',
-  }
-);
-
 export const API_PROVIDER_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.apiProviderLabel',
   {
@@ -195,5 +188,20 @@ export const CA_DATA_DESC = i18n.translate(
   'xpack.stackConnectors.components.genAi.caDataDocumentation',
   {
     defaultMessage: 'Raw CA certificate content (PEM) used to verify the server certificate.',
+  }
+);
+
+export const USE_NATIVE_FUNCTION_CALLING_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.enableNativeFunctionCallingLabel',
+  {
+    defaultMessage: 'Enable native function calling',
+  }
+);
+
+export const USE_NATIVE_FUNCTION_CALLING_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.enableNativeFunctionCallingDescription',
+  {
+    defaultMessage:
+      'Enable when the model supports native function calling in the chat completions API.',
   }
 );

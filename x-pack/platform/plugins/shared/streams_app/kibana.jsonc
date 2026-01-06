@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -14,8 +14,8 @@
       "data",
       "datasetQuality",
       "dataViews",
-      "discover",
       "discoverShared",
+      "console",
       "fieldFormats",
       "fieldsMetadata",
       "licensing",
@@ -25,9 +25,18 @@
       "savedObjectsTagging",
       "share",
       "streams",
-      "unifiedSearch"
+      "unifiedSearch",
+      "unifiedDocViewer",
+      "dashboard",
     ],
-    "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
+    "optionalPlugins": ["cloud", "spaces"],
+    "requiredBundles": [
+      "discover",
+      "kibanaReact",
+      "kibanaUtils",
+      "observabilityAIAssistant",
+      "esUiShared"
+    ],
+    "extraPublicDirs": ["common"]
   }
 }

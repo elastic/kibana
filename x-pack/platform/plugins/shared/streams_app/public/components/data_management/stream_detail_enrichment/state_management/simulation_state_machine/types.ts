@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
-import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { IToasts } from '@kbn/core/public';
-import { Query } from '@kbn/es-query';
-import { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { IToasts } from '@kbn/core/public';
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { SampleDocument } from '@kbn/streams-schema';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 export type DetectedField = Simulation['detected_fields'][number];
@@ -31,32 +31,37 @@ export interface SimulationSearchParams extends Required<QueryState> {
 }
 
 export interface SimulationInput {
-  processors: ProcessorDefinitionWithUIAttributes[];
+  steps: StreamlangStepWithUIAttributes[];
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
+}
+
+export interface SampleDocumentWithUIAttributes {
+  dataSourceId: string;
+  document: SampleDocument;
 }
 
 export type SimulationEvent =
-  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
-  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
-  | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
-  | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
-  | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'simulation.filterByCondition'; conditionId: string }
+  | { type: 'simulation.clearConditionFilter' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
+  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
+  | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.reset' }
-  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
-  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
-  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
-  | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'simulation.receive_samples'; samples: SampleDocument[] };
+  | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
   previewDocsFilter: PreviewDocsFilterOption;
-  previewDocuments: FlattenRecord[];
   explicitlyEnabledPreviewColumns: string[];
   explicitlyDisabledPreviewColumns: string[];
   previewColumnsOrder: string[];
@@ -64,8 +69,11 @@ export interface SimulationContext {
     fieldName?: string;
     direction: 'asc' | 'desc';
   };
-  processors: ProcessorDefinitionWithUIAttributes[];
-  samples: SampleDocument[];
+  steps: StreamlangStepWithUIAttributes[];
+  samples: SampleDocumentWithUIAttributes[];
+  selectedConditionId?: string;
   simulation?: Simulation;
+  baseSimulation?: Simulation;
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
 }

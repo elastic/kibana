@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import type { ActionConnector, ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import { ActionType } from '@kbn/actions-types';
+import type { ActionType } from '@kbn/actions-types';
 import {
   getActionType,
   getActionTypeModel,
@@ -137,7 +137,9 @@ describe('ruleActionsConnectorsModal', () => {
   test('should not render connector if hideInUi is true', () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
-    actionTypeRegistry.register(getActionTypeModel('2', { id: 'actionType-2', hideInUi: true }));
+    actionTypeRegistry.register(
+      getActionTypeModel('2', { id: 'actionType-2', getHideInUi: () => true })
+    );
 
     useRuleFormState.mockReturnValue({
       plugins: {
@@ -169,7 +171,7 @@ describe('ruleActionsConnectorsModal', () => {
     actionTypeRegistry.register(
       getActionTypeModel('2', {
         id: 'actionType-2',
-        hideInUi: true,
+        getHideInUi: () => true,
         subtype: [
           { id: 'actionType-1', name: 'connector-1' },
           { id: 'actionType-2', name: 'connector-2' },
@@ -210,7 +212,7 @@ describe('ruleActionsConnectorsModal', () => {
     actionTypeRegistry.register(
       getActionTypeModel('2', {
         id: 'actionType-2',
-        hideInUi: true,
+        getHideInUi: () => true,
         subtype: [
           { id: 'actionType-1', name: 'connector-1' },
           { id: 'actionType-2', name: 'connector-2' },
@@ -235,6 +237,51 @@ describe('ruleActionsConnectorsModal', () => {
     expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(2);
     expect(screen.getByText('connector-1')).toBeInTheDocument();
     expect(screen.getByText('connector-2')).toBeInTheDocument();
+  });
+
+  test('should display only subtype connector when only one of the subtype is enabled in config', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('1', {
+        id: 'actionType-1',
+        getHideInUi: () => false,
+        subtype: [
+          { id: 'actionType-1', name: 'connector-1' },
+          { id: 'actionType-2', name: 'connector-2' },
+        ],
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('2', {
+        id: 'actionType-2',
+        getHideInUi: () => true,
+        subtype: [
+          { id: 'actionType-1', name: 'connector-1' },
+          { id: 'actionType-2', name: 'connector-2' },
+        ],
+      })
+    );
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: mockConnectors,
+      connectorTypes: [
+        getActionType('1', { enabledInConfig: true }),
+        getActionType('2', { enabledInConfig: false }),
+      ],
+    });
+
+    render(<RuleActionsConnectorsModal />);
+    const filterButtonGroup = screen.getByTestId('ruleActionsConnectorsModalFilterButtonGroup');
+
+    await userEvent.click(within(filterButtonGroup).getByText('actionType: 1'));
+    expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(1);
+    expect(screen.getByText('connector-1')).toBeInTheDocument();
+    expect(screen.queryByText('connector-2')).not.toBeInTheDocument();
   });
 
   test('should not render connector if actionsParamsField doesnt exist', () => {

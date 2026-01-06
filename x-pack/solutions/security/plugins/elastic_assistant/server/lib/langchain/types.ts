@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
 
 export type ResponseBody = ExecuteConnectorResponse;

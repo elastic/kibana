@@ -188,4 +188,28 @@ describe('createConversations', () => {
     expect(createdConversations[0].apiConfig.actionTypeId).toEqual('.bedrock');
     expect(createdConversations[1].apiConfig.actionTypeId).toEqual('.gen-ai');
   });
+
+  it('should add missing user to each message', async () => {
+    renderHook(() =>
+      createConversations(
+        coreMock.createStart().notifications,
+        http,
+        mockStorage as unknown as Storage,
+        { name: 'elastic' }
+      )
+    );
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(http.fetch.mock.calls[0][0]).toBe(
+      '/internal/elastic_assistant/current_user/conversations/_bulk_action'
+    );
+    const createdConversations =
+      http.fetch.mock.calls[0].length > 1
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body)?.create
+        : [];
+    expect(createdConversations[0].messages[0].user).toEqual({ name: 'elastic' });
+    expect(createdConversations[0].messages[1].user).toBeUndefined();
+    expect(createdConversations[1].messages[0].user).toEqual({ name: 'elastic' });
+    expect(createdConversations[1].messages[1].user).toBeUndefined();
+  });
 });

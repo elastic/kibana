@@ -109,6 +109,8 @@ export {
   SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
   /** The start of the date range of alerts, sent as context to the LLM */
   START_LOCAL_STORAGE_KEY,
+  /** The local storage key that controls visibility of the callout about moving Attack discovery to Attacks page */
+  MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export type { AIConnector } from './impl/connectorland/connector_selector';
@@ -191,6 +193,10 @@ export interface UseAssistantAvailability {
   hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
+  isAssistantVisible: boolean;
+  // When true, user has `All` privilege for `Management > AI Assistant`
+  isAssistantManagementEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -201,6 +207,10 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
-  // remove once product has signed off on prompt text
-  isStarterPromptsEnabled: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
+  // When true, AI Agents feature is enabled via feature flag
+  isAiAgentsEnabled?: boolean;
 }

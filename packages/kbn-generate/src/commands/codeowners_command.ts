@@ -10,7 +10,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 
 import type { GenerateCommand } from '../generate_command';
@@ -34,11 +34,22 @@ const GENERATED_END = `
 ####
 `;
 
-const ULTIMATE_PRIORITY_RULES = `
+const ULTIMATE_PRIORITY_RULES_COMMENT = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
 `;
+
+const ULTIMATE_PRIORITY_KIBANAMACHINE = `
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
+`;
+
+const ULTIMATE_PRIORITY_RULES =
+  kibanaPackageJson.branch === 'main'
+    ? ULTIMATE_PRIORITY_RULES_COMMENT
+    : ULTIMATE_PRIORITY_RULES_COMMENT + ULTIMATE_PRIORITY_KIBANAMACHINE;
 
 export const CodeownersCommand: GenerateCommand = {
   name: 'codeowners',
@@ -57,7 +68,7 @@ export const CodeownersCommand: GenerateCommand = {
     }
 
     // strip the old ultimate rules
-    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES);
+    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
     if (ultStart !== -1) {
       content = content.slice(0, ultStart);
     }

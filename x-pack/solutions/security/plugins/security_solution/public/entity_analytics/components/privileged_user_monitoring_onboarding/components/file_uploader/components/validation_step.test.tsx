@@ -54,7 +54,7 @@ describe('PrivilegedUserMonitoringValidationStep', () => {
       wrapper: TestProviders,
     });
 
-    expect(container).toHaveTextContent('10 users will be assigned');
+    expect(container).toHaveTextContent('10 users will be added');
     expect(container).toHaveTextContent(`5 rows are invalid`);
     expect(container).toHaveTextContent('test.csv preview');
   });

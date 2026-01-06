@@ -12,7 +12,6 @@ import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetActionErrorLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -21,7 +20,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  // Failing: See https://github.com/elastic/kibana/issues/209913
+  // FLAKY: https://github.com/elastic/kibana/issues/229751
   describe.skip('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
@@ -30,7 +29,9 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       await esTestIndexTool.setup();
     });
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     it(`handles non-existent rule`, async () => {
       await supertest

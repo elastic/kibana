@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
 import { SPACES } from '../../../common/lib/spaces';
 import { createTestSuiteFactory } from '../../../common/suites/create.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -18,7 +19,17 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
     expectSolutionSpecifiedResult,
   } = createTestSuiteFactory(context);
 
+  const spacesService = context.getService('spaces');
+  const isServerless = context.getService('config').get('serverless');
+
   describe('create', () => {
+    before(async () => {
+      await createSpaces(spacesService, isServerless);
+    });
+    after(async () => {
+      await deleteSpaces(spacesService);
+    });
+
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

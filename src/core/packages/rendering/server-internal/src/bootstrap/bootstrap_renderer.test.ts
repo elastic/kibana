@@ -14,14 +14,16 @@ import {
 } from './bootstrap_renderer.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { PackageInfo } from '@kbn/config';
-import { AuthStatus } from '@kbn/core-http-server';
+import type { PackageInfo } from '@kbn/config';
+import type { AuthStatus } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
+import type { BootstrapRenderer } from './bootstrap_renderer';
+import { bootstrapRendererFactory } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
-import { DEFAULT_THEME_NAME, ThemeName } from '@kbn/core-ui-settings-common';
+import type { ThemeName } from '@kbn/core-ui-settings-common';
+import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
@@ -393,7 +395,7 @@ describe('bootstrapRenderer', () => {
       })
     );
 
-    themeName$.next('amsterdam');
+    themeName$.next('borealis');
     await renderer({
       request,
       uiSettingsClient,
@@ -401,7 +403,7 @@ describe('bootstrapRenderer', () => {
 
     expect(renderTemplateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        themeTagName: 'v8',
+        themeTagName: 'borealis',
       })
     );
   });

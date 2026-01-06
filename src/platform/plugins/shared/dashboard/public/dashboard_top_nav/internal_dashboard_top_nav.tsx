@@ -7,31 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
+import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBreadcrumb,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPopover,
-  EuiToolTipProps,
-  UseEuiTheme,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MountPoint } from '@kbn/core/public';
+import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
+import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
-import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
   dashboardManagedBadge,
@@ -41,11 +43,10 @@ import {
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
-import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
+import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
-import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
@@ -56,6 +57,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -86,26 +88,47 @@ export function InternalDashboardTopNav({
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
   const [
     allDataViews,
-    focusedPanelId,
     fullScreenMode,
     hasUnsavedChanges,
     lastSavedId,
     query,
     title,
     viewMode,
+    publishedChildFilters,
+    unpublishedChildFilters,
+    publishedTimeslice,
+    unpublishedTimeslice,
+    publishedEsqlVariables,
+    unpublishedEsqlVariables,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
-    dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId$,
     dashboardApi.query$,
     dashboardApi.title$,
-    dashboardApi.viewMode$
+    dashboardApi.viewMode$,
+    dashboardApi.publishedChildFilters$,
+    dashboardApi.unpublishedChildFilters$,
+    dashboardApi.publishedTimeslice$,
+    dashboardApi.unpublishedTimeslice$,
+    dashboardInternalApi.publishedEsqlVariables$,
+    dashboardInternalApi.unpublishedEsqlVariables$
   );
+
+  const hasUnpublishedFilters = useMemo(() => {
+    return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
+  }, [publishedChildFilters, unpublishedChildFilters]);
+  const hasUnpublishedTimeslice = useMemo(() => {
+    return !deepEqual(publishedTimeslice, unpublishedTimeslice);
+  }, [publishedTimeslice, unpublishedTimeslice]);
+  const hasUnpublishedVariables = useMemo(() => {
+    return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
+  }, [publishedEsqlVariables, unpublishedEsqlVariables]);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -169,6 +192,7 @@ export function InternalDashboardTopNav({
           ) : (
             dashboardTitle
           ),
+        'aria-label': dashboardTitle,
       },
     ];
 
@@ -236,8 +260,7 @@ export function InternalDashboardTopNav({
       ? false
       : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
-    const showSearchBar = showQueryBar || showFilterBar;
+    const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
       showTopNavMenu,
       showSearchBar,
@@ -352,12 +375,12 @@ export function InternalDashboardTopNav({
 
   return (
     <div css={styles.container}>
-      <h1
-        id="dashboardTitle"
-        className="euiScreenReaderOnly"
-        ref={dashboardTitleRef}
-        tabIndex={-1}
-      >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      <EuiScreenReaderOnly>
+        <h1
+          id="dashboardTitle"
+          ref={dashboardTitleRef}
+        >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      </EuiScreenReaderOnly>
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
@@ -385,13 +408,29 @@ export function InternalDashboardTopNav({
           if (isUpdate === false) {
             dashboardApi.forceRefresh();
           }
+          if (hasUnpublishedFilters) dashboardApi.publishFilters();
+          if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
+          if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
         }}
         onSavedQueryIdChange={setSavedQueryId}
+        hasDirtyState={hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables}
+        useBackgroundSearchButton={
+          dataService.search.isBackgroundSearchEnabled &&
+          getDashboardCapabilities().storeSearchSession
+        }
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
+
+      {viewMode !== 'print' ? (
+        <ControlsRenderer
+          parentApi={
+            dashboardApi as unknown as ControlsRendererParentApi // casting allows `DashboardLayout` to satisfy the expected `ControlsLayout`
+          }
+        />
+      ) : null}
+
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
@@ -407,8 +446,16 @@ const topNavStyles = {
         width: '100%',
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
-        top: `var(--euiFixedHeadersOffset, ${euiTheme.size.base})`,
+        top: `var(--kbn-application--sticky-headers-offset, 0px)`,
         background: euiTheme.colors.backgroundBasePlain,
+
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          position: 'unset', // on smaller screens, the top nav should not be sticky
+        },
+      },
+      '.controlGroup': {
+        padding: euiTheme.size.s,
+        paddingTop: 0,
       },
     }),
   updateIcon: ({ euiTheme }: UseEuiTheme) =>

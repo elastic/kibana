@@ -10,18 +10,29 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import moment from 'moment';
+import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
   useGeneratedHtmlId,
-  EuiSelectableOption,
   EuiSelectable,
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiSelectableOptionsListProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
+
+interface OptionData {
+  closedAt?: moment.Moment;
+}
+
+type RecentlyClosedTabOption = EuiSelectableOption<OptionData>;
 
 const getOpenedTabsList = (
   tabItems: TabItem[],
@@ -34,11 +45,20 @@ const getOpenedTabsList = (
   }));
 };
 
-const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] => {
-  return tabItems.map((tab) => ({
-    label: tab.label,
-    key: tab.id,
-  }));
+const getRecentlyClosedTabsList = (tabItems: TabItem[]): RecentlyClosedTabOption[] => {
+  return tabItems.map((tab) => {
+    const closedAt = 'closedAt' in tab && tab.closedAt ? moment(tab.closedAt) : undefined;
+    const option = {
+      label: tab.label,
+      title: `${tab.label}${closedAt?.isValid() ? ` (${closedAt.format('LL LT')})` : ''}`,
+      key: tab.id,
+      'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
+      data: {
+        closedAt,
+      },
+    };
+    return option;
+  });
 };
 
 export interface TabsBarMenuProps {
@@ -47,10 +67,20 @@ export interface TabsBarMenuProps {
   recentlyClosedItems: TabItem[];
   onSelect: (item: TabItem) => Promise<void>;
   onSelectRecentlyClosed: (item: TabItem) => Promise<void>;
+  onClearRecentlyClosed: () => void;
 }
 
 export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
-  ({ items, selectedItem, recentlyClosedItems, onSelect, onSelectRecentlyClosed }) => {
+  ({
+    items,
+    selectedItem,
+    recentlyClosedItems,
+    onSelect,
+    onSelectRecentlyClosed,
+    onClearRecentlyClosed,
+  }) => {
+    const { euiTheme } = useEuiTheme();
+
     const openedTabsList = useMemo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
@@ -64,7 +94,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     const contextMenuPopoverId = useGeneratedHtmlId();
 
     const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
-      defaultMessage: 'Tabs bar menu',
+      defaultMessage: 'Tabs menu',
     });
 
     const closePopover = useCallback(() => {
@@ -78,6 +108,22 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       },
     } as Partial<EuiSelectableOptionsListProps>;
 
+    const renderRecentlyClosedOption = useCallback((option: EuiSelectableOption<OptionData>) => {
+      const closedAt = option?.closedAt;
+      const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
+
+      return (
+        <>
+          {option.label}
+          {formattedTime && (
+            <EuiText size="xs" color="subdued" className="eui-displayBlock">
+              {formattedTime}
+            </EuiText>
+          )}
+        </>
+      );
+    }, []);
+
     return (
       <EuiPopover
         data-test-subj="unifiedTabs_tabsBarMenu"
@@ -87,16 +133,18 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         panelPaddingSize="none"
         anchorPosition="downRight"
         hasArrow={false}
+        buffer={0}
         panelProps={{
           css: popoverCss,
+          ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
         }}
         button={
-          <EuiToolTip content={menuButtonLabel}>
+          <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={menuButtonLabel}
               color="text"
               data-test-subj="unifiedTabs_tabsBarMenuButton"
-              iconType="boxesVertical"
+              iconType="arrowDown"
               onClick={() => setPopover((prev) => !prev)}
             />
           </EuiToolTip>
@@ -138,7 +186,11 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               })}
               options={recentlyClosedTabsList}
               singleSelection={true}
-              listProps={selectableListProps}
+              listProps={{
+                ...selectableListProps,
+                rowHeight: parseInt(euiTheme.size.xxxl, 10),
+              }}
+              renderOption={renderRecentlyClosedOption}
               onChange={(newOptions) => {
                 const clickedTabId = newOptions.find((option) => option.checked)?.key;
                 const tabToNavigate = recentlyClosedItems.find((tab) => tab.id === clickedTabId);
@@ -151,9 +203,36 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               {(tabs) => (
                 <>
                   <EuiPopoverTitle paddingSize="s">
-                    {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
-                      defaultMessage: 'Recently closed',
-                    })}
+                    <EuiFlexGroup
+                      responsive={false}
+                      alignItems="center"
+                      gutterSize="s"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem grow>
+                        {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
+                          defaultMessage: 'Recently closed',
+                        })}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          flush="both"
+                          data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
+                          aria-label={i18n.translate(
+                            'unifiedTabs.tabsBarMenu.clearRecentlyClosed',
+                            {
+                              defaultMessage: 'Clear',
+                            }
+                          )}
+                          onClick={onClearRecentlyClosed}
+                        >
+                          {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
+                            defaultMessage: 'Clear',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiPopoverTitle>
                   {tabs}
                 </>

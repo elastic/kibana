@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ListNodesRouteResponse,
   PhaseWithAllocation,
 } from '../../../../../../../../../common/types';

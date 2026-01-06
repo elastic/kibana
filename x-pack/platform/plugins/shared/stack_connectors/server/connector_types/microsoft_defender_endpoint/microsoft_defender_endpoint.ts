@@ -11,9 +11,8 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Stream } from 'stream';
-import { OAuthTokenManager } from './o_auth_token_manager';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
+  SUB_ACTION,
   IsolateHostParamsSchema,
   ReleaseHostParamsSchema,
   TestConnectorParamsSchema,
@@ -25,7 +24,8 @@ import {
   MicrosoftDefenderEndpointEmptyParamsSchema,
   GetActionResultsParamsSchema,
   DownloadActionResultsResponseSchema,
-} from '../../../common/microsoft_defender_endpoint/schema';
+  CancelParamsSchema,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
   MicrosoftDefenderEndpointIsolateHostParams,
@@ -44,7 +44,9 @@ import type {
   MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointGetActionResultsResponse,
-} from '../../../common/microsoft_defender_endpoint/types';
+  MicrosoftDefenderEndpointCancelParams,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { OAuthTokenManager } from './o_auth_token_manager';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointConfig,
@@ -79,53 +81,58 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
   private registerSubActions() {
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS,
+      name: SUB_ACTION.GET_AGENT_DETAILS,
       method: 'getAgentDetails',
       schema: AgentDetailsParamsSchema,
     });
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
+      name: SUB_ACTION.GET_AGENT_LIST,
       method: 'getAgentList',
       schema: AgentListParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST,
+      name: SUB_ACTION.ISOLATE_HOST,
       method: 'isolateHost',
       schema: IsolateHostParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST,
+      name: SUB_ACTION.RELEASE_HOST,
       method: 'releaseHost',
       schema: ReleaseHostParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR,
+      name: SUB_ACTION.TEST_CONNECTOR,
       method: 'testConnector',
       schema: TestConnectorParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+      name: SUB_ACTION.GET_ACTIONS,
       method: 'getActions',
       schema: GetActionsParamsSchema,
     });
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+      name: SUB_ACTION.GET_LIBRARY_FILES,
       method: 'getLibraryFiles',
       schema: MicrosoftDefenderEndpointEmptyParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+      name: SUB_ACTION.RUN_SCRIPT,
       method: 'runScript',
       schema: RunScriptParamsSchema,
     });
+    this.registerSubAction({
+      name: SUB_ACTION.CANCEL_ACTION,
+      method: 'cancelAction',
+      schema: CancelParamsSchema,
+    });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+      name: SUB_ACTION.GET_ACTION_RESULTS,
       method: 'getActionResults',
       schema: GetActionResultsParamsSchema,
     });
@@ -180,7 +187,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     return response.data;
   }
 
-  protected getResponseErrorMessage(error: AxiosError): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{ error: { code: string; message: string; target: string } }>
+  ): string {
     const appendResponseBody = (message: string): string => {
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
@@ -193,6 +202,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     if (!error.response?.status) {
       return appendResponseBody(error.message ?? 'Unknown API Error');
+    }
+    const mdeError = error.response.data?.error;
+    if (mdeError.code === 'ActiveRequestAlreadyExists') {
+      return `${mdeError.message}. Please wait or force clear with 'cancel' response action`;
     }
 
     if (error.response.status === 401) {
@@ -406,13 +419,35 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
                   key: 'ScriptName',
                   value: payload.parameters.scriptName,
                 },
-                {
-                  key: 'Args',
-                  value: payload.parameters.args || '--noargs',
-                },
+                ...(payload.parameters.args
+                  ? [
+                      {
+                        key: 'Args',
+                        value: payload.parameters.args,
+                      },
+                    ]
+                  : []),
               ],
             },
           ],
+        },
+      },
+      connectorUsageCollector
+    );
+  }
+
+  public async cancelAction(
+    payload: MicrosoftDefenderEndpointCancelParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/cancel-machine-action
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machineActions}/${payload.actionId}/cancel`,
+        method: 'POST',
+        data: {
+          Comment: payload.comment,
         },
       },
       connectorUsageCollector
@@ -458,7 +493,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     const resultDownloadLink =
       await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
         {
-          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
+          // index 0 is used to fetch the response for the first element in the list of commands in live response request
+          // live response API request doc https://learn.microsoft.com/en-us/defender-endpoint/api/run-live-response#example
+          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`,
           method: 'GET',
         },
         connectorUsageCollector

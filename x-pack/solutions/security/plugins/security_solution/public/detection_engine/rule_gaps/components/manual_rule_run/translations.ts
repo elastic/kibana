@@ -20,20 +20,6 @@ export const MANUAL_RULE_RUN_TIME_RANGE_TITLE = i18n.translate(
   }
 );
 
-export const MANUAL_RULE_RUN_START_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.manualRuleRun.startAtTitle',
-  {
-    defaultMessage: 'Start at',
-  }
-);
-
-export const MANUAL_RULE_RUN_END_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.manualRuleRun.endAtTitle',
-  {
-    defaultMessage: 'Finish at',
-  }
-);
-
 export const MANUAL_RULE_RUN_CONFIRM_BUTTON = i18n.translate(
   'xpack.securitySolution.manualRuleRun.confirmButton',
   {

@@ -10,8 +10,8 @@ import moment from 'moment';
 
 import { ALERT_END, ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { AlertTypeInitializer } from '.';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { DurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';

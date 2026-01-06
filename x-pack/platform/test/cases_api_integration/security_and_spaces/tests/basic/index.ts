@@ -12,7 +12,6 @@ import {
   activateUserProfiles,
 } from '../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: basic', function () {
     this.tags('skipFIPS');
@@ -33,6 +32,11 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./configure/get_connectors'));
     loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_basic'));
+
+    /**
+     * Telemetry
+     */
+    loadTestFile(require.resolve('./telemetry'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));

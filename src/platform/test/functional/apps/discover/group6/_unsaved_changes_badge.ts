@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVED_SEARCH_NAME = 'test saved search';
 const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
@@ -92,6 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not show a badge after loading a saved search, only after changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await discover.waitUntilTabIsLoaded();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
@@ -104,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow to revert changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await discover.waitUntilTabIsLoaded();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       // test changes to columns

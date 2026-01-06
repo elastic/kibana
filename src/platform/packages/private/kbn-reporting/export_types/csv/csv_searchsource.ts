@@ -18,20 +18,15 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { CsvPagingStrategy } from '@kbn/reporting-common/types';
-import {
-  CSV_JOB_TYPE,
-  CSV_REPORT_TYPE,
-  JobParamsCSV,
-  TaskPayloadCSV,
-} from '@kbn/reporting-export-types-csv-common';
-import {
+import type { CsvPagingStrategy } from '@kbn/reporting-common/types';
+import type { JobParamsCSV, TaskPayloadCSV } from '@kbn/reporting-export-types-csv-common';
+import { CSV_JOB_TYPE, CSV_REPORT_TYPE } from '@kbn/reporting-export-types-csv-common';
+import type {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
-  ExportType,
   RunTaskOpts,
-  getFieldFormats,
 } from '@kbn/reporting-server';
+import { ExportType, getFieldFormats } from '@kbn/reporting-server';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -77,7 +72,7 @@ export class CsvSearchSourceExportType extends ExportType<
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadCSV>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
 
     const { csv: csvConfig } = this.config;
 
@@ -106,7 +101,9 @@ export class CsvSearchSourceExportType extends ExportType<
       dependencies,
       cancellationToken,
       logger,
-      stream
+      stream,
+      this.isServerless,
+      jobId
     );
     return await csv.generateData();
   };

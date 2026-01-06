@@ -1,2 +1,2 @@
 type: boolean
-description: Allows the data view saved object to exist before the data is available.
+description: Allows the data view saved object to exist before the data is available. Defaults to `false`.

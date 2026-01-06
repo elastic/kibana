@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import type { Stackframe } from '@kbn/apm-types';
 
 export interface FrameHeadingRendererProps {

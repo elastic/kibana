@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import chroma from 'chroma-js';
 
@@ -34,6 +35,7 @@ export const ColorDot: FC<Props> = ({ value, children }) => {
 };
 
 ColorDot.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   children: PropTypes.node,
   value: PropTypes.string,
 };

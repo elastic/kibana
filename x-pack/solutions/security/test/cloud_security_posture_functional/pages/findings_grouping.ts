@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { asyncForEach } from '@kbn/std';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -148,8 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return requestedBenchmarkRules.map((item) => item.attributes);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220357
-  describe.skip('Findings Page - Grouping', function () {
+  describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 

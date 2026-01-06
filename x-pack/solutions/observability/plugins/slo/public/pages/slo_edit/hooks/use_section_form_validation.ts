@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import type { MetricCustomIndicator, TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   metricCustomBasicMetric,
   metricCustomDocCountMetric,
-  MetricCustomIndicator,
   timesliceMetricBasicMetricWithField,
-  TimesliceMetricIndicator,
   timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
-import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
-import { isObject } from 'lodash';
-import { CreateSLOForm } from '../types';
+import type {
+  FormState,
+  UseFormGetFieldState,
+  UseFormGetValues,
+  UseFormWatch,
+} from 'react-hook-form';
+import { isEmpty, isObject } from 'lodash';
+import type { CreateSLOForm } from '../types';
 
 interface Props {
   getFieldState: UseFormGetFieldState<CreateSLOForm>;
@@ -38,7 +42,8 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             if (metricCustomDocCountMetric.is(metric)) {
               return true;
             }
-            if (metricCustomBasicMetric.is(metric) && metric.field != null) {
+
+            if (metricCustomBasicMetric.is(metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -57,7 +62,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             if (metricCustomDocCountMetric.is(metric)) {
               return true;
             }
-            if (metricCustomBasicMetric.is(metric) && metric.field != null) {
+            if (metricCustomBasicMetric.is(metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;

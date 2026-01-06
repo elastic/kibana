@@ -12,14 +12,14 @@ import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishin
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimlaneEmbeddableCustomInput,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables';
+import type { TypeOf } from '@kbn/config-schema';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from '../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
+import type { anomalySwimlanePropsSchema } from '../../server/embeddable/schemas';
 
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
+type AnomalySwimlaneEmbeddableCustomInputProps = TypeOf<typeof anomalySwimlanePropsSchema>;
+
+export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInputProps {
   id?: string;
   executionContext: KibanaExecutionContext;
 }
@@ -39,11 +39,19 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
   const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+    if (swimlaneType === 'viewBy' && viewBy) {
+      return {
+        jobIds,
+        swimlaneType: 'viewBy',
+        refreshConfig,
+        viewBy,
+      };
+    }
+
     return {
       jobIds,
-      swimlaneType,
+      swimlaneType: 'overall',
       refreshConfig,
-      viewBy,
     };
   }, [jobIds, refreshConfig, swimlaneType, viewBy]);
 

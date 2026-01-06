@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../helpers';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', () => {
     before(async () => await buildUp(getService));
@@ -29,6 +28,5 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./get_rule_tags'));
     loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./rule_types_internal'));
-    loadTestFile(require.resolve('./event_log'));
   });
 }

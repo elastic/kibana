@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import {
   getTraceWaterfall,
-  getServiceColors,
   getTraceParentChildrenMap,
   getTraceWaterfallDuration,
   getClockSkew,
-  getServiceLegends,
+  getLegends,
+  getColorByType,
+  createColorLookupMap,
+  getRootItemOrFallback,
+  TraceDataState,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -30,6 +33,8 @@ const root: TraceItem = {
   traceId: 't1',
   duration: 1000,
   serviceName: 'svcA',
+  errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 const child1: TraceItem = {
   id: '2',
@@ -39,6 +44,8 @@ const child1: TraceItem = {
   traceId: 't1',
   duration: 400,
   serviceName: 'svcB',
+  errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 const child2: TraceItem = {
   id: '3',
@@ -48,6 +55,8 @@ const child2: TraceItem = {
   traceId: 't1',
   duration: 100,
   serviceName: 'svcC',
+  errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 const grandchild: TraceItem = {
   id: '4',
@@ -57,6 +66,8 @@ const grandchild: TraceItem = {
   traceId: 't1',
   duration: 50,
   serviceName: 'svcD',
+  errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 
 describe('getFlattenedTraceWaterfall', () => {
@@ -70,15 +81,21 @@ describe('getFlattenedTraceWaterfall', () => {
     '2': [grandchild],
   };
 
-  const serviceColorsMap = {
-    svcA: 'red',
-    svcB: 'blue',
-    svcC: 'green',
-    svcD: 'yellow',
-  };
+  const serviceColorsMap = new Map<string, string>([
+    ['serviceName:svcA', 'red'],
+    ['serviceName:svcB', 'blue'],
+    ['serviceName:svcC', 'green'],
+    ['serviceName:svcD', 'yellow'],
+  ]);
 
   it('returns a flattened waterfall with correct depth, offset, skew, and color', () => {
-    const result = getTraceWaterfall(root, parentChildMap, serviceColorsMap);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap,
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
 
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
 
@@ -114,7 +131,13 @@ describe('getFlattenedTraceWaterfall', () => {
   });
 
   it('returns only the root if there are no children', () => {
-    const result = getTraceWaterfall(root, {}, serviceColorsMap);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
     expect(result[0].depth).toBe(0);
@@ -126,50 +149,259 @@ describe('getFlattenedTraceWaterfall', () => {
       '1': [child2, child1], // child2 timestamp is after child1
       '2': [grandchild],
     };
-    const result = getTraceWaterfall(root, unorderedMap, serviceColorsMap);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: unorderedMap,
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
+  });
+
+  it('reparents orphan spans', () => {
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [grandchild],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('1');
+    expect(result[0].depth).toBe(0);
+    expect(result[1].id).toBe('4');
+    expect(result[1].depth).toBe(1);
+  });
+
+  it('errors when it encounters invalid trace documents', () => {
+    // We have a duplicate span id, that is both a root span and a child span
+    // This indicates an instrumentation error. We should never be hitting this
+    // particular case in normal/correctly configured tracing.
+    const invalidSpans: TraceItem[] = [
+      {
+        id: 'b5',
+        timestampUs: 1761915724030561,
+        name: 'GET /a/{b}',
+        traceId: 'dd31',
+        duration: 22750,
+        status: { fieldName: 'event.outcome', value: 'success' },
+        errors: [],
+        serviceName: 'svcA',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: 'd8',
+        timestampUs: 1761915725590821,
+        name: 'a/2',
+        traceId: 'dd31',
+        duration: 140000,
+        status: { fieldName: 'event.outcome', value: 'unknown' },
+        errors: [],
+        serviceName: 'svcb',
+        parentId: 'b5',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '9d',
+        timestampUs: 1761915725590821,
+        name: 'Redirect',
+        traceId: 'dd31',
+        duration: 54000,
+        status: { fieldName: 'event.outcome', value: 'unknown' },
+        errors: [],
+        parentId: 'd8',
+        serviceName: 'svcb',
+        type: 'browser-timing',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: 'b5',
+        timestampUs: 1761915725645821,
+        name: 'Request',
+        traceId: 'dd31',
+        duration: 24000,
+        status: { fieldName: 'event.outcome', value: 'unknown' },
+        errors: [],
+        parentId: 'd8',
+        serviceName: 'svcb',
+        type: 'browser-timing',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+    ];
+
+    const invalidMap = getTraceParentChildrenMap(invalidSpans, false);
+
+    const { orphans, rootItem } = getRootItemOrFallback(invalidMap, invalidSpans);
+
+    expect(() =>
+      getTraceWaterfall({
+        rootItem: rootItem!,
+        parentChildMap: invalidMap,
+        orphans: orphans!,
+        colorMap: serviceColorsMap,
+        colorBy: WaterfallLegendType.ServiceName,
+      })
+    ).toThrowError('Duplicate span id detected');
   });
 });
 
-describe('getServiceColors', () => {
+describe('getLegends', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
-  it('assigns a unique color to each serviceName', () => {
+  it('assigns a unique color to each resource', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
-      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcC' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '3',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcC',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '4',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcC',
+        type: 'db',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '5',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcC',
+        type: 'http',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '6',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcC',
+        type: 'cache',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
     ];
 
-    const result = getServiceColors(traceItems);
-
-    expect(Object.keys(result)).toEqual(expect.arrayContaining(['svcA', 'svcB', 'svcC']));
-    expect(result.svcA).toBe('color0');
-    expect(result.svcB).toBe('color1');
-    expect(result.svcC).toBe('color2');
+    const result = getLegends(traceItems);
+    expect(result).toEqual([
+      { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
+      { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
+      { type: WaterfallLegendType.ServiceName, value: 'svcC', color: 'color2' },
+      { type: WaterfallLegendType.Type, value: '', color: 'color3' }, // needed in the legends component to display the service name when colorBy is Type
+      { type: WaterfallLegendType.Type, value: 'db', color: 'color4' },
+      { type: WaterfallLegendType.Type, value: 'http', color: 'color5' },
+      { type: WaterfallLegendType.Type, value: 'cache', color: 'color6' },
+    ]);
   });
 
-  it('handles duplicate service names gracefully', () => {
+  it('handles duplicate resource names gracefully', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '3',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '5',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        type: 'http',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '6',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        type: 'http',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
     ];
 
-    const result = getServiceColors(traceItems);
+    const result = getLegends(traceItems);
 
-    expect(Object.keys(result)).toEqual(expect.arrayContaining(['svcA', 'svcB']));
-    expect(result.svcA).toBe('color0');
-    expect(result.svcB).toBe('color1');
+    expect(result).toEqual([
+      { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
+      { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
+      { type: WaterfallLegendType.Type, value: '', color: 'color2' }, // needed in the legends component to display the service name when colorBy is Type
+      { type: WaterfallLegendType.Type, value: 'http', color: 'color3' },
+    ]);
   });
 
   it('returns an empty object if no traceItems are provided', () => {
-    const result = getServiceColors([]);
-    expect(result).toEqual({});
+    const result = getLegends([]);
+    expect(result).toEqual([]);
   });
 
-  it('rotates the palette if there are more than 10 unique services', () => {
+  it('rotates the palette if there are more than 10 unique resources', () => {
     const traceItems: TraceItem[] = Array.from({ length: 15 }, (_, i) => ({
       id: `${i}`,
       timestampUs: 0,
@@ -177,24 +409,142 @@ describe('getServiceColors', () => {
       traceId: '',
       duration: 1,
       serviceName: `svc${i}`,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     }));
 
-    const result = getServiceColors(traceItems);
+    const result = getLegends(traceItems);
 
-    expect(Object.keys(result)).toHaveLength(15);
-    expect(result.svc0).toBe('color0');
-    expect(result.svc10).toBe('color10');
-    expect(result.svc14).toBe('color14');
+    expect(Object.keys(result)).toHaveLength(16); // 15+1 for legends component to display the service name when colorBy is Type
+
+    expect(result[0].color).toBe('color0');
+    expect(result[10].color).toBe('color10');
+    expect(result[14].color).toBe('color14');
   });
 });
 
-describe('getTraceMap', () => {
+describe('getColorByType', () => {
+  const traceItems: TraceItem[] = [
+    {
+      id: '1',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcA',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+    },
+    {
+      id: '2',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcB',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+    },
+    {
+      id: '3',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+    },
+    {
+      id: '4',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'db',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+    },
+    {
+      id: '5',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'http',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+    },
+    {
+      id: '6',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'cache',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+    },
+  ];
+
+  it('returns color by service name if more than one different service is present', () => {
+    const legends = getLegends(traceItems);
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
+  });
+
+  it('returns color by type if only one service is present', () => {
+    const legends = getLegends(traceItems.slice(3));
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
+  });
+
+  it('defaults to color by type if no legends provided', () => {
+    const legends = getLegends([]);
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
+  });
+});
+
+describe('createColorLookupMap', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  it('create map of colors', () => {
+    const legends = [
+      { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'red' },
+      { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'blue' },
+      { type: WaterfallLegendType.Type, value: 'db', color: 'green' },
+    ];
+
+    const result = createColorLookupMap(legends);
+
+    expect(result.get('serviceName:svcA')).toBe('red');
+    expect(result.get('serviceName:svcB')).toBe('blue');
+    expect(result.get('type:db')).toBe('green');
+  });
+});
+
+describe('getTraceParentChildrenMap', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
   it('maps root and children correctly', () => {
     const items: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'root',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
       {
         id: '2',
         timestampUs: 0,
@@ -203,6 +553,8 @@ describe('getTraceMap', () => {
         duration: 50,
         serviceName: 'svcB',
         parentId: '1',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -212,6 +564,8 @@ describe('getTraceMap', () => {
         duration: 30,
         serviceName: 'svcC',
         parentId: '1',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '4',
@@ -221,10 +575,12 @@ describe('getTraceMap', () => {
         duration: 10,
         serviceName: 'svcD',
         parentId: '2',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
-    const result = getTraceParentChildrenMap(items);
+    const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
     expect(result['1']).toEqual([
@@ -236,10 +592,19 @@ describe('getTraceMap', () => {
 
   it('returns only root if there are no children', () => {
     const items: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'root',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
     ];
 
-    const result = getTraceParentChildrenMap(items);
+    const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
     expect(Object.keys(result)).toHaveLength(1);
@@ -247,18 +612,119 @@ describe('getTraceMap', () => {
 
   it('handles multiple roots (should only keep the last as root)', () => {
     const items: TraceItem[] = [
-      { id: '1', timestampUs: 0, name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
-      { id: '2', timestampUs: 0, name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'root1',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: 'root2',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcB',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
     ];
 
-    const result = getTraceParentChildrenMap(items);
+    const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '2' })]);
   });
 
+  it("elects a root if there isn't one for a filtered trace", () => {
+    const items: TraceItem[] = [
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'span1',
+        parentId: '0',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: 'span2',
+        parentId: '1',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcB',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+    ];
+
+    const result = getTraceParentChildrenMap(items, true);
+
+    expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
+  });
+
   it('returns an empty object for empty input', () => {
-    const result = getTraceParentChildrenMap([]);
+    const result = getTraceParentChildrenMap([], false);
     expect(result).toEqual({});
+  });
+});
+
+describe('getRootItemOrFallback', () => {
+  it('should return a FULL state and a rootItem for a complete trace', () => {
+    const traceData = [root, child1, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, false), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Full);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return an EMPTY state for an empty trace', () => {
+    const result = getRootItemOrFallback({}, []);
+
+    expect(result.rootItem).toBeUndefined();
+    expect(result.traceState).toBe(TraceDataState.Empty);
+    expect(result.orphans).toBeUndefined();
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with no root span', () => {
+    const traceData = [child1, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, false), traceData);
+
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with orphan child spans', () => {
+    const traceData = [root, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, false), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([grandchild]);
+  });
+
+  it('should return a FULL state for a filtered service trace with no orphan child spans', () => {
+    const serviceChild = { ...grandchild, serviceName: 'svcB' };
+
+    const traceData = [child1, serviceChild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, true), traceData);
+
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.Full);
+    expect(result.orphans).toEqual([]);
   });
 });
 
@@ -279,6 +745,9 @@ describe('getTraceWaterfallDuration', () => {
         offset: 0,
         skew: 0,
         color: 'red',
+        errors: [],
+        isOrphan: false,
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -291,6 +760,9 @@ describe('getTraceWaterfallDuration', () => {
         offset: 80,
         skew: 10,
         color: 'blue',
+        errors: [],
+        isOrphan: false,
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -303,6 +775,9 @@ describe('getTraceWaterfallDuration', () => {
         offset: 120,
         skew: 5,
         color: 'green',
+        errors: [],
+        isOrphan: false,
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);
@@ -374,36 +849,5 @@ describe('getclockSkew', () => {
       parent: parentWithSkew,
     });
     expect(result).toBe(1000350);
-  });
-});
-
-describe('getWaterfallLegends', () => {
-  it('should generate waterfall legends without duplicates', () => {
-    const traceItems: TraceItem[] = [root, root, child1, child2, grandchild];
-
-    const waterfallLegends = getServiceLegends(traceItems);
-
-    expect(waterfallLegends).toEqual([
-      {
-        type: WaterfallLegendType.ServiceName,
-        value: traceItems[0].serviceName,
-        color: 'color0',
-      },
-      {
-        type: WaterfallLegendType.ServiceName,
-        value: traceItems[2].serviceName,
-        color: 'color1',
-      },
-      {
-        type: WaterfallLegendType.ServiceName,
-        value: traceItems[3].serviceName,
-        color: 'color2',
-      },
-      {
-        type: WaterfallLegendType.ServiceName,
-        value: traceItems[4].serviceName,
-        color: 'color3',
-      },
-    ]);
   });
 });

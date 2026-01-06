@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -202,14 +202,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(response).to.contain('# 2: PUT test-index [200 OK]');
           expect(response).to.contain('# 3: DELETE test-index [200 OK]');
         });
-      });
-
-      // not implemented for monaco yet https://github.com/elastic/kibana/issues/184010
-      it.skip('should display status badges', async () => {
-        await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await PageObjects.console.hasWarningBadge()).to.be(true);
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
     });
 

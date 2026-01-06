@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 
 export function normalizeTable(data: Datatable, xAccessor?: string | ExpressionValueVisDimension) {
   const xColumn = xAccessor && getColumnByAccessor(xAccessor, data.columns);

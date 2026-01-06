@@ -8,14 +8,20 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchSessionSavedObjectAttributes } from '../../../common';
+import { SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
-import { SearchSessionsConfigSchema } from '../../config';
+import type { SearchSessionsConfigSchema } from '../../config';
 import { getSearchStatus } from './get_search_status';
 
+// A session should is considered "new" for the first 30 seconds after creation. We need some arbitrary value here
+// because if a sessions stays for too long with no searches assigned to it something happened and we should mark it as error.
+// Some examples of possible issues: the browser is closed or in another tab the search requests are canceled.
+const NEW_SESSION_THRESHOLD_SECONDS = 30;
+
 export async function getSessionStatus(
-  deps: { internalClient: ElasticsearchClient },
+  deps: { esClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
 ): Promise<{ status: SearchSessionStatus; errors?: string[] }> {
@@ -30,9 +36,20 @@ export async function getSessionStatus(
   }
 
   const searches = Object.values(session.idMapping);
+
+  const secondsSinceCreated = moment().diff(moment(session.created), 'seconds');
+  const isOldSession = secondsSinceCreated > NEW_SESSION_THRESHOLD_SECONDS;
+  if (searches.length === 0 && isOldSession) {
+    return { status: SearchSessionStatus.ERROR };
+  }
+
   const searchStatuses = await Promise.all(
     searches.map(async (s) => {
-      const status = await getSearchStatus(deps.internalClient, s.id);
+      const status = await getSearchStatus({
+        asyncId: s.id,
+        session: s,
+        esClient: deps.esClient,
+      });
       return {
         ...s,
         ...status,

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -15,7 +15,8 @@
     "@kbn/utility-types",
     "@kbn/utility-types-jest",
     "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-internal"
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

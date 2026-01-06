@@ -12,8 +12,8 @@ import {
   EuiSkeletonText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';

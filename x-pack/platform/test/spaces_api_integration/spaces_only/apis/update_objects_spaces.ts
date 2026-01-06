@@ -163,7 +163,6 @@ const createMultiPartTestCases = () => {
   return [...group1, ...group2, ...group3];
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

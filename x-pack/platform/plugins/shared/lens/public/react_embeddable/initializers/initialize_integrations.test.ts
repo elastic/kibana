@@ -7,18 +7,13 @@
 
 import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
-import { makeEmbeddableServices, getLensRuntimeStateMock } from '../mocks';
-import { LensRuntimeState } from '../types';
+import { getLensRuntimeStateMock } from '../mocks';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { initializeIntegrations } from './initialize_integrations';
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
-  const services = makeEmbeddableServices(undefined, undefined, {
-    visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'formBased' },
-  });
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
-  const serializeDynamicActions = undefined;
-  const { api } = initializeIntegrations(() => runtimeState, serializeDynamicActions, services);
+  const { api } = initializeIntegrations(() => runtimeState);
   return api;
 }
 
@@ -41,9 +36,9 @@ describe('Dashboard services API', () => {
       // * savedObjectId is cleaned up
       expect(rawState).not.toHaveProperty('savedObjectId');
       // * references should be at root level
-      expect(references).toEqual(attributes.references);
+      expect(references).toBeUndefined();
     });
-    it('should remove all the attributes for a by-reference state panel', async () => {
+    it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({
         savedObjectId: '123',
@@ -51,11 +46,8 @@ describe('Dashboard services API', () => {
       });
       const { rawState, references } = api.serializeState();
       // check the same 3 things as above
-      expect(rawState).toEqual(
-        expect.objectContaining({ attributes: undefined, savedObjectId: '123' })
-      );
-      // * references should be at root level
-      expect(references).toEqual(attributes.references);
+      expect(rawState).not.toEqual(expect.objectContaining({ attributes: expect.anything() }));
+      expect(references).toBeUndefined();
     });
 
     it('should remove the searchSessionId from the serializedState', async () => {

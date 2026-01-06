@@ -8,7 +8,8 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointComponentApi, ChangePointEmbeddableState } from './types';
+import type { ChangePointComponentApi } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 type ChangePointEmbeddableCustomState = Omit<
   ChangePointEmbeddableState,

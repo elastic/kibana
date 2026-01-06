@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   Message as InferenceMessage,
   MessageContent as InferenceMessageContent,
-  MessageRole,
   ToolCall as ToolCallInference,
-  generateFakeToolCallId,
 } from '@kbn/inference-common';
+import { MessageRole, generateFakeToolCallId } from '@kbn/inference-common';
+import type { MessageContent } from '@langchain/core/messages';
 import {
   type BaseMessage,
   type AIMessage,
@@ -21,7 +21,6 @@ import {
   isHumanMessage,
   isSystemMessage,
   isToolMessage,
-  MessageContent,
 } from '@langchain/core/messages';
 import { isMessageContentText, isMessageContentImageUrl } from '../utils/langchain';
 

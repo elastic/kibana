@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionPushParamsSIR } from '../../../server/connector_types/lib/servicenow/types';
+import type { ExecutorSubActionPushParamsSIR } from '@kbn/connector-schemas/servicenow_sir';
 
 export interface ServiceNowSIRActionParams {
   subAction: string;

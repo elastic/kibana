@@ -23,20 +23,23 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EnrichedDeprecationInfo,
+import type {
   IndexWarning,
   IndexWarningType,
-  ReindexAction,
-  ReindexStatus,
   ReindexStatusResponse,
+} from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type {
+  EnrichedDeprecationInfo,
+  ReindexAction,
 } from '../../../../../../../../../common/types';
+
 import { useAppContext } from '../../../../../../../app_context';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
 import {
   DeprecatedSettingWarningCheckbox,
   ReplaceIndexWithAliasWarningCheckbox,
   MakeIndexReadonlyWarningCheckbox,
-  WarningCheckboxProps,
 } from './warning_step_checkbox';
 import {
   FollowerIndexCallout,
@@ -45,7 +48,7 @@ import {
   FetchFailedCallOut,
 } from '../callouts';
 import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
-import { ReindexState } from '../../../use_reindex';
+import type { ReindexState } from '../../../use_reindex';
 
 const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
@@ -225,6 +228,7 @@ const WarningReadOnlyModalStep: React.FunctionComponent<WarningModalStepProps> =
         {warnings.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutTitle"

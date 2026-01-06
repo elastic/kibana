@@ -9,8 +9,6 @@ import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogCategorization } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
@@ -20,6 +18,7 @@ import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
+import { PageTitle } from '../components/page_title';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
@@ -30,14 +29,14 @@ export const LogCategorizationPage: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
-          <EuiFlexItem grow={false}>
+        <PageTitle
+          title={
             <FormattedMessage
               id="xpack.ml.logCategorization.pageHeader"
               defaultMessage="Log pattern analysis"
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+        />
       </MlPageHeader>
       {dataView && (
         <LogCategorization

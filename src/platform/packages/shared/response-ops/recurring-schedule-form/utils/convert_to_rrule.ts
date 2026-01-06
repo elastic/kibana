@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Moment } from 'moment';
+import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getPresets } from './get_presets';
@@ -21,24 +21,33 @@ export const convertToRRule = ({
   recurringSchedule,
   includeTime = false,
 }: {
-  startDate: Moment;
+  startDate: string;
   timezone: string;
   recurringSchedule?: RecurringSchedule;
   includeTime?: boolean;
 }): RRuleParams => {
-  const presets = getPresets(startDate);
+  const startDateMoment = moment(startDate);
+  const presets = getPresets(startDateMoment);
 
   const parsedSchedule = parseSchedule(recurringSchedule);
 
   const rRule: RRuleParams = {
-    dtstart: startDate.toISOString(),
+    dtstart: startDateMoment.toISOString(),
     tzid: timezone,
-    ...(Boolean(includeTime)
-      ? { byhour: [startDate.get('hour')], byminute: [startDate.get('minute')] }
-      : {}),
   };
 
-  if (!parsedSchedule)
+  if (Boolean(includeTime)) {
+    // Do not include the byhour field if the frequency is hourly as we do not support the byhourly field for this frequency
+    if (
+      parsedSchedule?.frequency !== Frequency.HOURLY &&
+      parsedSchedule?.customFrequency !== Frequency.HOURLY
+    ) {
+      rRule.byhour = [startDateMoment.get('hour')];
+    }
+    rRule.byminute = [startDateMoment.get('minute')];
+  }
+
+  if (!parsedSchedule) {
     return {
       ...rRule,
       // default to yearly and a count of 1
@@ -46,6 +55,7 @@ export const convertToRRule = ({
       freq: Frequency.YEARLY,
       count: 1,
     };
+  }
 
   let form = parsedSchedule;
   if (parsedSchedule.frequency !== 'CUSTOM') {
@@ -74,16 +84,16 @@ export const convertToRRule = ({
 
   if (form.bymonth) {
     if (form.bymonth === 'day') {
-      rRule.bymonthday = [startDate.date()];
+      rRule.bymonthday = [startDateMoment.date()];
     } else if (form.bymonth === 'weekday') {
-      rRule.byweekday = [getNthByWeekday(startDate)];
+      rRule.byweekday = [getNthByWeekday(startDateMoment)];
     }
   }
 
   if (frequency === Frequency.YEARLY) {
     // rRule expects 1 based indexing for months
-    rRule.bymonth = [startDate.month() + 1];
-    rRule.bymonthday = [startDate.date()];
+    rRule.bymonth = [startDateMoment.month() + 1];
+    rRule.bymonthday = [startDateMoment.date()];
   }
 
   return rRule;

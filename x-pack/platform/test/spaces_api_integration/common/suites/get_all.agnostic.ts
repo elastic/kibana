@@ -79,22 +79,16 @@ const ALL_SPACE_RESULTS: Space[] = [
       'apm',
       'infrastructure',
       'logs',
-      'observabilityCases',
-      'observabilityCasesV2',
       'observabilityCasesV3',
       'securitySolutionAssistant',
       'securitySolutionAttackDiscovery',
-      'securitySolutionCases',
-      'securitySolutionCasesV2',
       'securitySolutionCasesV3',
       'securitySolutionNotes',
+      'securitySolutionRulesV1',
       'securitySolutionSiemMigrations',
       'securitySolutionTimeline',
-      'siem',
-      'siemV2',
-      'siemV3',
+      'siemV5',
       'slo',
-      'streams',
       'uptime',
     ],
     solution: 'es',
@@ -102,9 +96,27 @@ const ALL_SPACE_RESULTS: Space[] = [
 ];
 
 export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = context.getService('esArchiver');
   const config = context.getService('config');
   const isServerless = config.get('serverless');
+  const kbnClient = context.getService('kibanaServer');
+
+  const loadSavedObjects = async () => {
+    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
+      await kbnClient.importExport.load(
+        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
+        { space }
+      );
+    }
+  };
+
+  const unloadSavedObjects = async () => {
+    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
+      await kbnClient.importExport.unload(
+        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
+        { space }
+      );
+    }
+  };
 
   const maybeNormalizeSpace = (space: Space) => {
     if (isServerless && space.solution) {
@@ -170,19 +182,16 @@ export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: GetAllTestDefinition) => {
       describeFn(description, () => {
-        const roleScopedSupertest = context.getService('roleScopedSupertest');
+        const spacesSupertest = context.getService('spacesSupertest');
         let supertest: SupertestWithRoleScopeType;
-        before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
-        });
-        after(async () => {
-          await esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
 
+        before(async () => {
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
+          await loadSavedObjects();
+        });
+
+        after(async () => {
+          await unloadSavedObjects();
           await supertest.destroy();
         });
 

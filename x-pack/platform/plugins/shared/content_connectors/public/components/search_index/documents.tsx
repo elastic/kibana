@@ -27,10 +27,8 @@ import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
-import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
-} from './access_control_index_selector/access_control_index_selector';
+import type { AccessControlSelectorOption } from './access_control_index_selector/access_control_index_selector';
+import { AccessControlIndexSelector } from './access_control_index_selector/access_control_index_selector';
 import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
 const DEFAULT_PAGINATION = {
@@ -97,6 +95,7 @@ export const SearchIndexDocuments: React.FC = () => {
         <>
           {isAccessControlIndexNotFound && (
             <EuiCallOut
+              announceOnMount
               size="m"
               title={i18n.translate(
                 'xpack.contentConnectors.content.searchIndex.documents.noIndex.title',

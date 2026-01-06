@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import {
-  SyntheticsMonitorStatusRuleParams,
-  syntheticsMonitorStatusRuleParamsSchema,
-} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { StatusRuleExecutorOptions } from '../../alert_rules/status_rule/types';
+import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { StatusRuleExecutorOptions } from '../../alert_rules/status_rule/types';
 import { StatusRuleExecutor } from '../../alert_rules/status_rule/status_rule_executor';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = () => ({

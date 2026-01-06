@@ -9,7 +9,7 @@
 
 import { urlField } from '.';
 import type { ValidationError } from '../../hook_form_lib';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 describe('urlField', () => {
   const message = 'test error message';

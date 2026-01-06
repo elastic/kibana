@@ -513,6 +513,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -625,6 +626,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -652,10 +654,32 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
         expect(err.message).toBe('Saved object [index-pattern/abc] not found');
+      }
+    });
+
+    it('should throw user error if data view does not have a timefield', async () => {
+      try {
+        const dataView = createDataView();
+        dataView.timeFieldName = undefined;
+        const searchSourceInstance = createSearchSourceMock({ index: dataView });
+
+        await updateSearchSource(
+          searchSourceInstance,
+          dataView,
+          defaultParams,
+          '2020-01-09T22:12:41.941Z',
+          new Date().toISOString(),
+          new Date().toISOString(),
+          logger
+        );
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe('Data view with ID test-id no longer contains a time field.');
       }
     });
 
@@ -676,6 +700,7 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).not.toBeDefined();
@@ -818,6 +843,7 @@ describe('fetchSearchSourceQuery', () => {
           title: 'title',
           type: 'index-pattern',
           version: undefined,
+          managed: false,
         },
         true // skipFetchFields flag
       );

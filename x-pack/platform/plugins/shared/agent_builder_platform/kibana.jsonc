@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-builder-platform-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "agentBuilderPlatform",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "agentBuilderPlatform"],
+    "requiredPlugins": ["agentBuilder"],
+    "requiredBundles": [],
+    "optionalPlugins": ["cases", "llmTasks", "workflowsManagement"],
+    "extraPublicDirs": []
+  }
+}

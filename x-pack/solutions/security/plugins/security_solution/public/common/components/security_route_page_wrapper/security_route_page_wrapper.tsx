@@ -8,7 +8,7 @@
 import React, { type PropsWithChildren } from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { SecurityPageName } from '../../../../common';
+import { SecurityPageName } from '../../../../common';
 import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
@@ -25,6 +25,8 @@ interface SecurityRoutePageWrapperOptionProps {
 type SecurityRoutePageWrapperProps = {
   pageName: SecurityPageName;
 } & SecurityRoutePageWrapperOptionProps;
+
+const deprectedPagesWithRedirect = [SecurityPageName.detections];
 
 /**
  * This component is created to wrap all the pages in the security solution app.
@@ -61,12 +63,13 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
 
     // Redirect to the home page if the link does not exist in the application links (has been filtered out).
     // or if the link is unavailable (payment plan not met, if it had upselling page associated it would have been rendered above).
-    if (link == null || link.unavailable) {
+    // Some pages handle their own redirect logic, so we need to exclude them from this check.
+    if (!deprectedPagesWithRedirect.includes(pageName) && (link == null || link.unavailable)) {
       return <Redirect to="" />;
     }
 
     // Show the no privileges page if the link is unauthorized.
-    if (link.unauthorized) {
+    if (link && link.unauthorized) {
       return (
         <>
           <SpyRoute pageName={pageName} />

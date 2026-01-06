@@ -9,15 +9,15 @@ import { pick } from 'lodash';
 import type { ZodSchema } from '@kbn/zod';
 import { zodToJsonSchema, type JsonSchema7Type } from 'zod-to-json-schema';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
-import { ToolDefinition } from '@langchain/core/language_models/base';
+import type { ToolDefinition } from '@langchain/core/language_models/base';
 import { isLangChainTool } from '@langchain/core/utils/function_calling';
 import { isZodSchema } from '@langchain/core/utils/types';
-import {
+import type {
   ToolDefinition as ToolDefinitionInference,
   ToolChoice as ToolChoiceInference,
-  ToolChoiceType,
   ToolSchema,
 } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolChoice } from '../types';
 
 export const toolDefinitionToInference = (

@@ -14,12 +14,12 @@ import {
   type RangeSelectDataContext,
 } from './create_filters_from_range_select';
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
-import { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { DateFormat } from '@kbn/field-formats-plugin/public';
-import { RangeFilter } from '@kbn/es-query';
+import type { RangeFilter } from '@kbn/es-query';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -54,11 +54,10 @@ describe('brushEvent', () => {
 
   beforeEach(() => {
     const dataStart = dataPluginMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.get = jest.fn().mockResolvedValue(indexPattern);
     setSearchService(dataStart.search);
-    setIndexPatterns({
-      ...dataStart.indexPatterns,
-      get: async () => indexPattern,
-    } as unknown as DataViewsContract);
+    setIndexPatterns(dataViews);
 
     baseEvent = {
       column: 0,

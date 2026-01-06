@@ -5,12 +5,12 @@
 * Check if ES setup is done
 
       curl -H "content-type: application/json" -u <user:pass> \
-        -XGET "http://localhost:5601/internal/profiling/setup/es_resources"
+        -XGET "http://localhost:5601/api/profiling/setup/es_resources"
 
 * Apply the ES setup (mappings + Fleet policy)
 
       curl -H "content-type: application/json" -u <user:pass> -H "kbn-xsrf: reporting" \
-        -XPOST "http://localhost:5601/internal/profiling/setup/es_resources"
+        -XPOST "http://localhost:5601/api/profiling/setup/es_resources"
 
 * check data has been ingested
 

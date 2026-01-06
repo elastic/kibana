@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiPopoverProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiLink,
   EuiPanel,
@@ -17,10 +18,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIconTip,
-  EuiPopoverProps,
   euiTextBreakWord,
   useEuiFontSize,
-  UseEuiTheme,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { css } from '@emotion/react';
@@ -79,6 +78,14 @@ export function FilterQueryInput({
     dataView
   );
 
+  const emptyFilterQueryText = i18n.translate(
+    'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
+    {
+      defaultMessage: '(empty)',
+    }
+  );
+  const filterQueryText = (inputFilter?.query as string) || emptyFilterQueryText;
+
   return (
     <EuiFormRow
       display="rowCompressed"
@@ -136,14 +143,9 @@ export function FilterQueryInput({
                           defaultMessage: 'Click to edit',
                         }
                       )}
+                      aria-label={`${filterByLabel} ${filterQueryText}`}
                     >
-                      {(inputFilter?.query as string) ||
-                        i18n.translate(
-                          'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
-                          {
-                            defaultMessage: '(empty)',
-                          }
-                        )}
+                      {filterQueryText}
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>

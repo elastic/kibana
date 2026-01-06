@@ -13,6 +13,7 @@ export {
   type LogsOverviewErrorContentProps,
   type LogsOverviewProps,
 } from './src/components/logs_overview';
+export type { LogsOverviewFeatureFlags } from './src/types';
 export type {
   DataViewLogsSourceConfiguration,
   IndexNameLogsSourceConfiguration,

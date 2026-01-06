@@ -9,11 +9,11 @@
 
 import * as React from 'react';
 import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { Walker } from '@kbn/esql-ast';
+import { Walker } from '@kbn/esql-language';
 import { EsqlEditor } from '../../../esql_editor/esql_editor';
 import { useEsqlInspector } from '../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
-import { Annotation } from '../../../annotations';
+import type { Annotation } from '../../../annotations';
 
 export const Editor: React.FC = () => {
   const state = useEsqlInspector();

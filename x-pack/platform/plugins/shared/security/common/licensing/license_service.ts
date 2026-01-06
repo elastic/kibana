@@ -8,7 +8,7 @@
 import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs';
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 interface SetupDeps {
   license$: Observable<ILicense>;

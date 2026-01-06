@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,6 +18,7 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiSuperSelect,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,10 +28,21 @@ import type {
   GetAvailableVersionsResponse,
 } from '../../../../../../../common/types';
 
-import type { AgentPolicy } from '../../../../../../../common';
-import { useGetAgentsAvailableVersionsQuery, useStartServices } from '../../../../../../hooks';
-import { checkTargetVersionsValidity } from '../../../../../../../common/services';
+import type { Agent, AgentPolicy } from '../../../../../../../common';
+import {
+  useGetAgentsAvailableVersionsQuery,
+  useStartServices,
+  sendGetAllFleetServerAgents,
+} from '../../../../../../hooks';
+import {
+  checkTargetVersionsValidity,
+  getFleetServerVersionMessage,
+  getMaxVersion,
+  isAgentVersionLessThanFleetServer,
+} from '../../../../../../../common/services';
 import { sendUpdateAgentPolicyForRq } from '../../../../../../hooks/use_request/agent_policy';
+
+import { UpgradeModalWarningCallout } from '../agent_upgrade_modal';
 
 import { StatusColumn } from './status_column';
 
@@ -43,6 +55,7 @@ export interface ManageAutoUpgradeAgentsModalProps {
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   ManageAutoUpgradeAgentsModalProps
 > = ({ onClose, agentPolicy, agentCount }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { notifications } = useStartServices();
   const [targetVersions, setTargetVersions] = useState(agentPolicy.required_versions || []);
@@ -51,10 +64,64 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   });
   const latestVersion = agentsAvailableVersions?.items[0];
   const [errors, setErrors] = useState<string[]>([]);
+  const [fleetServerAgents, setFleetServerAgents] = useState<Agent[]>([]);
+
+  // Fetch fleet server agents on mount
+  useEffect(() => {
+    async function fetchFleetServerAgents() {
+      try {
+        const { allFleetServerAgents } = await sendGetAllFleetServerAgents();
+        setFleetServerAgents(allFleetServerAgents || []);
+      } catch (err) {
+        // If we can't fetch fleet servers, continue without validation
+        // (e.g., in serverless where there are no fleet server agents)
+      }
+    }
+    fetchFleetServerAgents();
+  }, []);
 
   const targetVersionsChanged = useMemo(() => {
     return isEqual(targetVersions, agentPolicy.required_versions || []) === false;
   }, [targetVersions, agentPolicy.required_versions]);
+
+  // Check if any target version is higher than fleet server version
+  const fleetServerVersionWarning = useMemo(() => {
+    const invalidVersions: Set<string> = new Set();
+
+    for (const targetVersion of targetVersions) {
+      if (targetVersion.version) {
+        const isValid = isAgentVersionLessThanFleetServer(targetVersion.version, fleetServerAgents);
+
+        if (!isValid) {
+          invalidVersions.add(targetVersion.version);
+        }
+      }
+    }
+
+    const uniqueInvalidVersions = Array.from(invalidVersions);
+
+    if (uniqueInvalidVersions.length > 0) {
+      // Get the message for the first invalid version to get the Fleet Server version
+      const baseMessage = getFleetServerVersionMessage(uniqueInvalidVersions[0], fleetServerAgents);
+
+      // If multiple invalid versions, customize the message and return a more detailed message
+      if (uniqueInvalidVersions.length > 1) {
+        const fleetServerVersions = fleetServerAgents.map(
+          (agent) => agent.local_metadata.elastic.agent.version
+        ) as string[];
+        const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
+
+        const message = `Cannot upgrade to versions ${uniqueInvalidVersions.join(
+          ', '
+        )} because they are higher than the latest fleet server version ${maxFleetServerVersion}.`;
+        return message;
+      }
+
+      return baseMessage;
+    }
+
+    return null;
+  }, [targetVersions, fleetServerAgents]);
 
   const submitUpdateAgentPolicy = async () => {
     setIsLoading(true);
@@ -105,9 +172,13 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
           defaultMessage="Manage auto-upgrade agents"
         />
       }
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => onClose(false)}
       onConfirm={onSubmit}
-      confirmButtonDisabled={isLoading || errors.length > 0 || !targetVersionsChanged}
+      confirmButtonDisabled={
+        isLoading || errors.length > 0 || !targetVersionsChanged || !!fleetServerVersionWarning
+      }
       cancelButtonText={
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.cancelButtonLabel"
@@ -129,6 +200,11 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
             defaultMessage="Add the target agent version for automatic upgrades."
           />
         </EuiFlexItem>
+        {fleetServerVersionWarning && (
+          <EuiFlexItem>
+            <UpgradeModalWarningCallout warningMessage={fleetServerVersionWarning} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <TargetVersionsForm
             targetVersions={targetVersions}
@@ -298,7 +374,7 @@ const TargetVersionsRow: React.FunctionComponent<{
               onPercentageChange(newValue);
               onUpdate(version, newValue);
             }}
-            min={0}
+            min={1}
             step={1}
             max={100}
             required

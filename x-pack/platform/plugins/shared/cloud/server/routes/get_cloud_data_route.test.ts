@@ -6,15 +6,11 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import {
-  RequestHandlerContext,
-  RouteValidatorConfig,
-  SavedObjectsErrorHelpers,
-  kibanaResponseFactory,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, RouteValidatorConfig } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
-import { RouteOptions } from '.';
+import type { RouteOptions } from '.';
 import { setGetCloudSolutionDataRoute } from './get_cloud_data_route';
 
 const mockSavedObjectsClientGet = jest.fn();

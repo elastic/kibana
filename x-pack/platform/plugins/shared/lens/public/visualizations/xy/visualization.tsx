@@ -15,24 +15,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type {
+  Visualization,
+  FramePublicAPI,
+  Suggestion,
+  UserMessage,
+  AnnotationGroups,
+  FormBasedPersistedState,
+} from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -43,7 +52,6 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar, updateLayer } from './xy_config_panel';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -54,30 +62,22 @@ import {
   LayerHeaderContent,
 } from './xy_config_panel/layer_header';
 import type {
-  Visualization,
-  FramePublicAPI,
-  Suggestion,
-  UserMessage,
-  AnnotationGroups,
-} from '../../types';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import {
-  type State,
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type SeriesType,
-  visualizationSubtypes,
-  visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
+  XYByValueAnnotationLayerConfig,
+  XYState,
 } from './types';
+import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
+  getColumnToLabelMap,
 } from './state_helpers';
-import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
-import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
   getReferenceConfiguration,
@@ -90,6 +90,7 @@ import {
   setAnnotationsDimension,
   getUniqueLabels,
   onAnnotationDrop,
+  defaultAnnotationLabel,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -114,9 +115,6 @@ import {
   isTimeChart,
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
-import type { XYByValueAnnotationLayerConfig, XYState } from './types';
-import { defaultSeriesType } from './types';
-import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
@@ -124,8 +122,9 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import { XYPersistedState, convertPersistedState, convertToPersistable } from './persistence';
-import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
+import type { XYPersistedState } from './persistence';
+import { convertPersistedState, convertToPersistable } from './persistence';
+import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
   LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
@@ -138,6 +137,8 @@ import {
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { XyStyleSettings, XyLegendSettings, updateLayer } from './toolbar';
 
 const XY_ID = 'lnsXY';
 
@@ -165,7 +166,7 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<XYState, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   getVisualizationTypeId(state, layerId) {
     const type = getVisualizationType(state, layerId);
@@ -265,7 +266,7 @@ export const getXyVisualization = ({
 
   getDescription,
 
-  switchVisualizationType(seriesType: string, state: State, layerId?: string) {
+  switchVisualizationType(seriesType: string, state: XYState, layerId?: string) {
     const dataLayer = layerId
       ? state.layers.find((l) => l.layerId === layerId)
       : state.layers.at(0);
@@ -304,7 +305,7 @@ export const getXyVisualization = ({
     mainPalette?,
     datasourceStates?,
     annotationGroups?: AnnotationGroups,
-    references?: SavedObjectReference[]
+    references?: Reference[]
   ) {
     if (persistedState) {
       const convertedState = convertPersistedState(persistedState, annotationGroups, references);
@@ -703,6 +704,10 @@ export const getXyVisualization = ({
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
     );
   },
+
+  isSubtypeSupported(subtype) {
+    return visualizationSubtypes.some(({ id }) => id === subtype);
+  },
   getSubtypeSwitch({ state, setState, layerId }) {
     const index = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[index];
@@ -740,8 +745,16 @@ export const getXyVisualization = ({
     return undefined;
   },
 
-  ToolbarComponent(props) {
-    return <XyToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return (
+      <FlyoutToolbar
+        {...props}
+        contentMap={{
+          style: XyStyleSettings,
+          legend: XyLegendSettings,
+        }}
+      />
+    );
   },
 
   DimensionEditorComponent(props) {

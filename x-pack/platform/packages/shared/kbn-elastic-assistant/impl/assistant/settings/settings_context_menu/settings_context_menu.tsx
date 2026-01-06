@@ -11,68 +11,45 @@ import {
   EuiFlexItem,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiConfirmModal,
   EuiNotificationBadge,
   EuiPopover,
   EuiButtonIcon,
-  useEuiTheme,
-  EuiSwitch,
-  EuiPanel,
-  EuiTitle,
-  EuiHorizontalRule,
   EuiToolTip,
-  EuiSwitchEvent,
-  EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
+import { TryAIAgentContextMenuItem } from './try_ai_agent_context_menu_item';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
-import { Conversation, useAssistantContext } from '../../../..';
-import * as i18n from '../../assistant_header/translations';
+import { useAssistantContext } from '../../../..';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
-import { AI_ASSISTANT_MENU } from './translations';
-import {
-  conversationContainsAnonymizedValues,
-  conversationContainsContentReferences,
-} from '../../conversations/utils';
+import * as i18n from './translations';
+import { AgentBuilderTourStep } from '../../../tour/agent_builder';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../tour/const';
 
 interface Params {
   isDisabled?: boolean;
-  onChatCleared?: () => void;
-  selectedConversation?: Conversation;
 }
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-const ConditionalWrap = ({
-  condition,
-  wrap,
-  children,
-}: {
-  condition: boolean;
-  wrap: (children: React.ReactElement) => React.ReactElement;
-  children: React.ReactElement;
-}) => (condition ? wrap(children) : children);
-
-export const SettingsContextMenu: React.FC<Params> = React.memo(
-  ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
-    const { euiTheme } = useEuiTheme();
+export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
+  ({ isDisabled = false }: Params) => {
     const {
       assistantAvailability,
       navigateToApp,
       knowledgeBase,
-      setContentReferencesVisible,
-      contentReferencesVisible,
-      showAnonymizedValues,
-      setShowAnonymizedValues,
       showAssistantOverlay,
+      settings,
+      toasts,
+      docLinks,
     } = useAssistantContext();
 
+    const { analytics } = useKibana().services;
     const [isPopoverOpen, setPopover] = useState(false);
-
-    const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
 
     const [isAlertsSettingsModalVisible, setIsAlertsSettingsModalVisible] = useState(false);
     const closeAlertSettingsModal = useCallback(() => setIsAlertsSettingsModalVisible(false), []);
@@ -81,8 +58,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
     const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
     const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
-
-    const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
+    const [isAIAgentModalVisible, setIsAIAgentModalVisible] = useState(false);
 
     const onButtonClick = useCallback(() => {
       setPopover(!isPopoverOpen);
@@ -92,10 +68,51 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       setPopover(false);
     }, []);
 
-    const showDestroyModal = useCallback(() => {
-      closePopover?.();
-      setIsResetConversationModalVisible(true);
-    }, [closePopover]);
+    const [telemetrySource, setTelemetrySource] = useState<string | undefined>();
+
+    const handleOpenAIAgentModal = useCallback(
+      (source: 'security_ab_tour' | 'security_settings_menu') => {
+        setTelemetrySource(source);
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'confirmation_shown',
+          source,
+        });
+        setIsAIAgentModalVisible(true);
+        closePopover();
+      },
+      [analytics, closePopover]
+    );
+
+    const handleCancelAIAgent = useCallback(() => {
+      setIsAIAgentModalVisible(false);
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'canceled',
+        source: telemetrySource,
+      });
+      setTelemetrySource(undefined);
+    }, [analytics, telemetrySource]);
+    const handleConfirmAIAgent = useCallback(async () => {
+      try {
+        await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'confirmed',
+          source: telemetrySource,
+        });
+        setTelemetrySource(undefined);
+        setIsAIAgentModalVisible(false);
+        window.location.reload();
+      } catch (error) {
+        if (toasts) {
+          toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+            title: i18n.AI_AGENT_SWITCH_ERROR,
+          });
+        }
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'error',
+          source: telemetrySource,
+        });
+      }
+    }, [settings.client, analytics, telemetrySource, toasts]);
 
     const handleNavigateToSettings = useCallback(() => {
       if (assistantAvailability.hasSearchAILakeConfigurations) {
@@ -105,7 +122,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -124,7 +141,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+          path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -133,30 +150,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       showAlertSettingsModal();
       closePopover();
     }, [closePopover, showAlertSettingsModal]);
-
-    const onChangeContentReferencesVisible = useCallback(
-      (e: EuiSwitchEvent) => {
-        setContentReferencesVisible(e.target.checked);
-      },
-      [setContentReferencesVisible]
-    );
-
-    const onChangeShowAnonymizedValues = useCallback(
-      (e: EuiSwitchEvent) => {
-        setShowAnonymizedValues(e.target.checked);
-      },
-      [setShowAnonymizedValues]
-    );
-
-    const selectedConversationHasCitations = useMemo(
-      () => conversationContainsContentReferences(selectedConversation),
-      [selectedConversation]
-    );
-
-    const selectedConversationHasAnonymizedValues = useMemo(
-      () => conversationContainsAnonymizedValues(selectedConversation),
-      [selectedConversation]
-    );
 
     const items = useMemo(
       () => [
@@ -203,214 +196,89 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        <EuiPanel color="transparent" paddingSize="none" key={'chat-options-panel'}>
-          <EuiTitle
-            size="xxxs"
-            key={'chat-options-title'}
-            css={css`
-              padding-left: ${euiTheme.size.m};
-              padding-bottom: ${euiTheme.size.xs};
-            `}
-          >
-            <h3>{i18n.CHAT_OPTIONS}</h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'anonymize-values'}
-            key={'anonymize-values'}
-            data-test-subj={'anonymize-values'}
-          >
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <ConditionalWrap
-                  condition={!selectedConversationHasAnonymizedValues}
-                  wrap={(children) => (
-                    <EuiToolTip
-                      position="top"
-                      key={'disabled-anonymize-values-tooltip'}
-                      data-test-subj={'disabled-anonymize-values-tooltip'}
-                      content={
-                        <FormattedMessage
-                          id="xpack.elasticAssistant.assistant.settings.anonymizeValues.disabled.tooltip"
-                          defaultMessage="This conversation does not contain anonymized fields."
-                        />
-                      }
-                    >
-                      {children}
-                    </EuiToolTip>
-                  )}
-                >
-                  <EuiSwitch
-                    data-test-subj={'anonymize-switch'}
-                    label={i18n.ANONYMIZE_VALUES}
-                    checked={showAnonymizedValues}
-                    onChange={onChangeShowAnonymizedValues}
-                    compressed
-                    disabled={!selectedConversationHasAnonymizedValues}
-                  />
-                </ConditionalWrap>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  key={'anonymize-values-tooltip'}
-                  content={
-                    <FormattedMessage
-                      id="xpack.elasticAssistant.assistant.settings.anonymizeValues.tooltip"
-                      defaultMessage="Toggle to reveal or obfuscate field values in your chat stream. The data sent to the LLM is still anonymized based on settings in the Anonymization panel. Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
-                      values={{
-                        keyboardShortcut: isMac ? '⌥ + a' : 'Alt + a',
-                        bold: (str) => <strong>{str}</strong>,
-                      }}
-                    />
-                  }
-                >
-                  <EuiIcon tabIndex={0} type="info" />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiContextMenuItem>
-          <EuiContextMenuItem
-            aria-label={'show-citations'}
-            key={'show-citations'}
-            data-test-subj={'show-citations'}
-          >
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <ConditionalWrap
-                  condition={!selectedConversationHasCitations}
-                  wrap={(children) => (
-                    <EuiToolTip
-                      position="top"
-                      key={'disabled-citations-values-tooltip'}
-                      data-test-subj={'disabled-citations-values-tooltip'}
-                      content={
-                        <FormattedMessage
-                          id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
-                          defaultMessage="This conversation does not contain citations."
-                        />
-                      }
-                    >
-                      {children}
-                    </EuiToolTip>
-                  )}
-                >
-                  <EuiSwitch
-                    data-test-subj={'citations-switch'}
-                    label={i18n.SHOW_CITATIONS}
-                    checked={contentReferencesVisible}
-                    onChange={onChangeContentReferencesVisible}
-                    compressed
-                    disabled={!selectedConversationHasCitations}
-                  />
-                </ConditionalWrap>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  key={'show-citations-tooltip'}
-                  content={
-                    <FormattedMessage
-                      id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
-                      defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
-                      values={{
-                        keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
-                        bold: (str) => <strong>{str}</strong>,
-                      }}
-                    />
-                  }
-                >
-                  <EuiIcon tabIndex={0} type="info" />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiContextMenuItem>
-
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
-          >
-            {i18n.RESET_CONVERSATION}
-          </EuiContextMenuItem>
-        </EuiPanel>,
+        ...(assistantAvailability.isAiAgentsEnabled
+          ? [
+              <TryAIAgentContextMenuItem
+                analytics={analytics}
+                handleOpenAIAgentModal={handleOpenAIAgentModal}
+                hasAgentBuilderManagePrivilege={
+                  assistantAvailability.hasAgentBuilderManagePrivilege
+                }
+              />,
+            ]
+          : []),
       ],
       [
-        contentReferencesVisible,
-        onChangeContentReferencesVisible,
-        showAnonymizedValues,
-        onChangeShowAnonymizedValues,
-        euiTheme.colors.textDanger,
-        handleNavigateToAnonymization,
-        handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
-        showDestroyModal,
-        euiTheme.size.m,
-        euiTheme.size.xs,
-        selectedConversationHasCitations,
-        selectedConversationHasAnonymizedValues,
+        assistantAvailability.isAiAgentsEnabled,
+        assistantAvailability.hasAgentBuilderManagePrivilege,
+        analytics,
+        handleOpenAIAgentModal,
       ]
     );
+    const isAgentUpgradeDisabled = useMemo(() => {
+      return (
+        isDisabled ||
+        !assistantAvailability.hasAgentBuilderManagePrivilege ||
+        !assistantAvailability.isAiAgentsEnabled
+      );
+    }, [assistantAvailability, isDisabled]);
 
-    const handleReset = useCallback(() => {
-      onChatCleared?.();
-      closeDestroyModal();
-      closePopover?.();
-    }, [onChatCleared, closeDestroyModal, closePopover]);
+    const onContinueTour = useCallback(() => {
+      handleOpenAIAgentModal('security_ab_tour');
+    }, [handleOpenAIAgentModal]);
 
     return (
       <>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              aria-label={AI_ASSISTANT_MENU}
-              isDisabled={isDisabled}
-              iconType="boxesVertical"
-              onClick={onButtonClick}
-              data-test-subj="chat-context-menu"
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="leftUp"
-        >
-          <EuiContextMenuPanel
-            items={items}
-            css={css`
-              width: 280px;
-            `}
-          />
-        </EuiPopover>
+        <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
+          <AgentBuilderTourStep
+            analytics={analytics}
+            isDisabled={isAgentUpgradeDisabled}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+            onContinue={onContinueTour}
+          >
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.AI_ASSISTANT_MENU}
+                  isDisabled={isDisabled}
+                  iconType="controls"
+                  onClick={onButtonClick}
+                  data-test-subj="chat-context-menu"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="leftUp"
+            >
+              <EuiContextMenuPanel
+                items={items}
+                css={css`
+                  width: 280px;
+                `}
+              />
+            </EuiPopover>
+          </AgentBuilderTourStep>
+        </EuiToolTip>
         {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
         {isAnonymizationModalVisible && (
           <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
         )}
-        {isResetConversationModalVisible && (
-          <EuiConfirmModal
-            title={i18n.RESET_CONVERSATION}
-            onCancel={closeDestroyModal}
-            onConfirm={handleReset}
-            cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
-            confirmButtonText={i18n.RESET_BUTTON_TEXT}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-            data-test-subj="reset-conversation-modal"
-          >
-            <p>{i18n.CLEAR_CHAT_CONFIRMATION}</p>
-          </EuiConfirmModal>
+        {isAIAgentModalVisible && (
+          <AIAgentConfirmationModal
+            onConfirm={handleConfirmAIAgent}
+            onCancel={handleCancelAIAgent}
+            docLinks={docLinks.links}
+          />
         )}
       </>
     );
   }
 );
 
-SettingsContextMenu.displayName = 'SettingsContextMenu';
+AssistantSettingsContextMenu.displayName = 'AssistantSettingsContextMenu';

@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.stackConnectors.casesWebhook.title', {
-  defaultMessage: 'Webhook - Case Management',
-});
-
 export const INVALID_URL = (err: string, url: string) =>
   i18n.translate('xpack.stackConnectors.casesWebhook.configurationErrorNoHostname', {
     defaultMessage: 'error configuring cases webhook action: unable to parse {url}: {err}',
@@ -39,3 +35,10 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
+
+export const OAUTH2_NOT_SUPPORTED = i18n.translate(
+  'xpack.stackConnectors.casesWebhook.oauth2NotSupported',
+  {
+    defaultMessage: 'OAuth2 authentication is not supported for cases webhook connector',
+  }
+);

@@ -13,14 +13,13 @@ import { useLocation } from 'react-router-dom';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import type { MonitorStatusPanelProps, MonitorStatusTimeBin } from './monitor_status_data';
 import {
   dateToMilli,
   createTimeBuckets,
   CHART_CELL_WIDTH,
   indexBinsByEndTime,
-  MonitorStatusPanelProps,
   createStatusTimeBins,
-  MonitorStatusTimeBin,
 } from './monitor_status_data';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import {

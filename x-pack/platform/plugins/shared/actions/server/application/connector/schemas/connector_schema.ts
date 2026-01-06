@@ -16,6 +16,7 @@ export const connectorSchema = schema.object({
   isPreconfigured: schema.boolean(),
   isDeprecated: schema.boolean(),
   isSystemAction: schema.boolean(),
+  isConnectorTypeDeprecated: schema.boolean({ defaultValue: false }),
 });
 
 export const connectorWithExtraFindDataSchema = connectorSchema.extends({

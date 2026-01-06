@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PropsWithChildren, SetStateAction, Dispatch } from 'react';
 import React, {
   useContext,
   useState,
   useRef,
   createContext,
-  PropsWithChildren,
   forwardRef,
   useImperativeHandle,
-  SetStateAction,
-  Dispatch,
   useMemo,
   useEffect,
   type ComponentProps,
@@ -25,6 +23,9 @@ import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject, Subject, map } from 'rxjs';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
+const storage = new Storage(localStorage);
 
 export interface RestorableStateProviderProps<TState extends object> {
   initialState?: Partial<TState>;
@@ -101,18 +102,41 @@ export const createRestorableStateProvider = <TState extends object>() => {
   ) => {
     const ComponentMemoized = React.memo(Component);
     type TProps = ComponentProps<typeof ComponentMemoized>;
+    type TRef = React.ElementRef<TComponent>;
 
     return forwardRef<
-      RestorableStateProviderApi,
+      TRef & RestorableStateProviderApi,
       TProps & Pick<RestorableStateProviderProps<TState>, 'initialState' | 'onInitialStateChange'>
     >(function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
+      const restorableStateProviderRef = useRef<RestorableStateProviderApi>(null);
+      const componentRef = useRef<TRef>(null);
+
+      useImperativeHandle(
+        ref,
+        () =>
+          ({
+            ...(componentRef.current || {}),
+            ...(restorableStateProviderRef.current || {}),
+          } as TRef & RestorableStateProviderApi)
+      );
+
+      // Function components cannot forward refs and show a warning if you try to do so.
+      // When a component is a class component or a forwardRef component, we can safely forward the ref.
+      const canForwardRef =
+        typeof Component !== 'function' || Component.prototype?.isReactComponent;
+
+      const componentProps = {
+        ...props,
+        ...(canForwardRef ? { ref: componentRef } : {}),
+      } as TProps;
+
       return (
         <RestorableStateProvider
-          ref={ref}
+          ref={restorableStateProviderRef}
           initialState={initialState}
           onInitialStateChange={onInitialStateChange}
         >
-          <ComponentMemoized {...(props as TProps)} />
+          <ComponentMemoized {...componentProps} />
         </RestorableStateProvider>
       );
     });
@@ -245,7 +269,36 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return valueRef;
   };
 
-  return { withRestorableState, useRestorableState, useRestorableRef };
+  const useRestorableLocalStorage = <TKey extends keyof TState>(
+    key: TKey,
+    localStorageKey: string,
+    initialValue: TState[TKey]
+  ) => {
+    const [value, _setValue] = useRestorableState(
+      key,
+      storage.get(localStorageKey) ?? initialValue,
+      {
+        shouldStoreDefaultValueRightAway: true,
+      }
+    );
+
+    const setValue = useStableFunction<typeof _setValue>((newValue) => {
+      _setValue((prevValue) => {
+        const nextValue =
+          typeof newValue === 'function'
+            ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(prevValue)
+            : newValue;
+
+        storage.set(localStorageKey, nextValue);
+
+        return nextValue;
+      });
+    });
+
+    return [value, setValue] as const;
+  };
+
+  return { withRestorableState, useRestorableState, useRestorableRef, useRestorableLocalStorage };
 };
 
 const useStableFunction = <T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T) => {

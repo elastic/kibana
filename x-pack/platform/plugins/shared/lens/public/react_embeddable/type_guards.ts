@@ -11,12 +11,12 @@ import {
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
-import {
+import type {
   LensApiCallbacks,
-  LensApi,
-  LensComponentForwardedProps,
   LensPublicCallbacks,
-} from './types';
+  LensComponentForwardedProps,
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [

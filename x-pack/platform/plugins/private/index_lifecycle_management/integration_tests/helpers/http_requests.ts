@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../common/constants';
-import {
+import type {
   ListNodesRouteResponse,
   ListSnapshotReposResponse,
   NodesDetailsResponse,

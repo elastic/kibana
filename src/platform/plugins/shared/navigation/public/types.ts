@@ -13,24 +13,32 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
-
-import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
+import type { TopNavMenuConfigBeta } from './top_nav_menu_beta';
+import type {
+  TopNavMenuProps,
+  TopNavMenuExtensionsRegistrySetup,
+  createTopNav,
+} from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export interface NavigationPublicSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
-export type SolutionNavigation = Omit<SolutionNavigationDefinition, 'sideNavComponentGetter'>;
-export type AddSolutionNavigationArg = Omit<SolutionNavigation, 'sideNavComponent'> & {
-  /** Data test subj for the side navigation */
-  dataTestSubj?: string;
-};
+export type SolutionNavigation = SolutionNavigationDefinition;
+export type AddSolutionNavigationArg = SolutionNavigation;
 
 export interface NavigationPublicStart {
   ui: {
     TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
     AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
+    TopNavMenuBeta: ({
+      config,
+      visible,
+    }: {
+      config: TopNavMenuConfigBeta;
+      visible?: boolean;
+    }) => React.ReactElement;
     createTopNavWithCustomContext: (
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,
       customExtensions?: RegisteredTopNavMenuData[]

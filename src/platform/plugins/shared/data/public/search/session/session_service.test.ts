@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISessionService, SessionService } from './session_service';
+import type { ISessionService } from './session_service';
+import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
-import { getSessionsClientMock } from './mocks';
+import { getSearchSessionEBTManagerMock, getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
-import { CoreStart } from '@kbn/core/public';
-import { SearchUsageCollector } from '../..';
-import { createSearchUsageCollectorMock } from '../collectors/mocks';
+import type { CoreStart } from '@kbn/core/public';
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
@@ -45,16 +44,9 @@ describe('Session service', () => {
   let currentAppId$: BehaviorSubject<string>;
   let toastService: jest.Mocked<CoreStart['notifications']['toasts']>;
   let sessionsClient: jest.Mocked<ISessionsClient>;
-  let usageCollector: jest.Mocked<SearchUsageCollector>;
 
   beforeEach(() => {
-    const initializerContext = coreMock.createPluginInitializerContext({
-      search: {
-        sessions: {
-          notTouchedTimeout: 5 * 60 * 1000,
-        },
-      },
-    });
+    const initializerContext = coreMock.createPluginInitializerContext();
     const startService = coreMock.createSetup().getStartServices;
     const startServicesMock = coreMock.createStart();
     toastService = startServicesMock.notifications.toasts;
@@ -66,7 +58,6 @@ describe('Session service', () => {
       id,
       attributes: { ...mockSavedObject.attributes, sessionId: id },
     }));
-    usageCollector = createSearchUsageCollectorMock();
     sessionService = new SessionService(
       initializerContext,
       () =>
@@ -88,9 +79,9 @@ describe('Session service', () => {
           },
           ...rest,
         ]),
+      getSearchSessionEBTManagerMock(),
       sessionsClient,
       nowProvider,
-      usageCollector,
       { freezeState: false } // needed to use mocks inside state container
     );
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
@@ -174,50 +165,109 @@ describe('Session service', () => {
       const complete = sessionService.trackSearch({ abort, poll }).complete;
       complete();
 
-      await sessionService.cancel();
+      await sessionService.cancel({ source: 'test' });
 
       expect(abort).toBeCalledTimes(3);
     });
+  });
 
-    describe('Keeping searches alive', () => {
-      let dateNowSpy: jest.SpyInstance;
-      let now = Date.now();
-      const advanceTimersBy = (by: number) => {
-        now = now + by;
-        jest.advanceTimersByTime(by);
-      };
-      beforeEach(() => {
-        dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
-        now = Date.now();
-        jest.useFakeTimers();
+  describe('Keeping searches alive', () => {
+    let dateNowSpy: jest.SpyInstance;
+    let now = Date.now();
+    const advanceTimersBy = (by: number) => {
+      now = now + by;
+      jest.advanceTimersByTime(by);
+    };
+    beforeEach(() => {
+      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      now = Date.now();
+
+      sessionService.enableStorage({
+        getName: async () => 'Name',
+        getLocatorData: async () => ({
+          id: 'id',
+          initialState: {},
+          restoreState: {},
+        }),
       });
-      afterEach(() => {
-        dateNowSpy.mockRestore();
-        jest.useRealTimers();
-      });
 
-      it('Polls all completed searches to keep them alive', async () => {
-        const abort = jest.fn();
-        const poll = jest.fn(() => Promise.resolve());
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      dateNowSpy.mockRestore();
+      jest.useRealTimers();
+    });
 
-        sessionService.enableStorage({
-          getName: async () => 'Name',
-          getLocatorData: async () => ({
-            id: 'id',
-            initialState: {},
-            restoreState: {},
-          }),
+    describe('when there is only 1 search', () => {
+      describe('when it finishes', () => {
+        it('should NOT poll the search', () => {
+          const abort = jest.fn();
+          const poll = jest.fn(() => Promise.resolve());
+
+          sessionService.start();
+
+          const searchTracker = sessionService.trackSearch({ abort, poll });
+          searchTracker.complete();
+
+          expect(poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(poll).toHaveBeenCalledTimes(0);
         });
-        sessionService.start();
+      });
+    });
 
-        const searchTracker = sessionService.trackSearch({ abort, poll });
-        searchTracker.complete();
+    describe('when there are multiple searches', () => {
+      describe('when not all of them are is finished', () => {
+        it('should poll the finished searches', () => {
+          const search1 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+          const search2 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
 
-        expect(poll).toHaveBeenCalledTimes(0);
+          sessionService.start();
 
-        advanceTimersBy(30000);
+          const searchTracker1 = sessionService.trackSearch(search1);
+          sessionService.trackSearch(search2);
 
-        expect(poll).toHaveBeenCalledTimes(1);
+          searchTracker1.complete();
+
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(search1.poll).toHaveBeenCalledTimes(1);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+        });
+      });
+
+      describe('when all of them are is finished', () => {
+        it('should not poll anything', () => {
+          const search1 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+          const search2 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+
+          sessionService.start();
+
+          const searchTracker1 = sessionService.trackSearch(search1);
+          const searchTracker2 = sessionService.trackSearch(search2);
+
+          searchTracker1.complete();
+          searchTracker2.complete();
+
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+        });
       });
     });
   });
@@ -312,7 +362,7 @@ describe('Session service', () => {
         restoreState: {},
       }),
     });
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
 
     expect(sessionService.getSearchOptions(someOtherId)).toEqual({
       isStored: false,
@@ -352,9 +402,9 @@ describe('Session service', () => {
 
   test('enableStorage() enables storage capabilities', async () => {
     sessionService.start();
-    await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"No info provider for current session"`
-    );
+    await expect(() =>
+      sessionService.save({ entryPoint: 'test' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"No info provider for current session"`);
 
     expect(sessionService.isSessionStorageReady()).toBe(false);
 
@@ -369,7 +419,7 @@ describe('Session service', () => {
 
     expect(sessionService.isSessionStorageReady()).toBe(true);
 
-    await expect(() => sessionService.save()).resolves;
+    await expect(() => sessionService.save({ entryPoint: 'test' })).resolves;
 
     sessionService.clear();
     expect(sessionService.isSessionStorageReady()).toBe(false);
@@ -405,7 +455,9 @@ describe('Session service', () => {
       },
     });
     sessionService.start();
-    await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
+    await expect(() => sessionService.save({ entryPoint: 'test' })).rejects.toMatchInlineSnapshot(
+      `[Error: Haha]`
+    );
   });
 
   test('save() triggers search polling to extend searches', async () => {
@@ -426,13 +478,13 @@ describe('Session service', () => {
     search1.complete();
 
     const search2 = sessionService.trackSearch({ poll, abort });
-    search2.error();
+    search2.error(new Error());
 
     sessionService.trackSearch({ poll, abort });
 
     expect(poll).toHaveBeenCalledTimes(0);
 
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
 
     expect(poll).toHaveBeenCalledTimes(2); // for completed and in-progress
   });
@@ -456,9 +508,35 @@ describe('Session service', () => {
 
     expect(onSavingSession).toHaveBeenCalledTimes(0);
 
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
 
     expect(onSavingSession).toHaveBeenCalledTimes(1);
+  });
+
+  test('save() return a search session', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+      appendSessionStartTimeToName: false,
+    });
+    sessionsClient.create.mockResolvedValue(mockSavedObject);
+
+    sessionService.start();
+    const abort = jest.fn();
+    const poll = jest.fn(() => Promise.resolve());
+    const onSavingSession = jest.fn(() => Promise.resolve());
+
+    sessionService.trackSearch({ poll, abort, onSavingSession });
+
+    expect(onSavingSession).toHaveBeenCalledTimes(0);
+
+    const searchSession = await sessionService.save({ entryPoint: 'test' });
+
+    expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
   });
 
   describe("user doesn't have access to search session", () => {
@@ -476,9 +554,9 @@ describe('Session service', () => {
 
     test('save() throws', async () => {
       sessionService.start();
-      await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"No access to search sessions"`
-      );
+      await expect(() =>
+        sessionService.save({ entryPoint: 'test' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"No access to search sessions"`);
     });
   });
 
@@ -494,105 +572,69 @@ describe('Session service', () => {
       }),
     });
     sessionService.start();
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
     await expect(sessionService.renameCurrentSession('New name')).resolves.toBeUndefined();
     expect(toastService.addError).toHaveBeenCalledWith(
       renameError,
       expect.objectContaining({
-        title: expect.stringContaining('Failed to edit name of the search session'),
+        title: expect.stringContaining('Failed to edit name of the background search'),
       })
     );
   });
 
-  describe('disableSaveAfterSearchesExpire$', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-    afterEach(() => {
-      jest.useRealTimers();
-    });
+  it('can continue an old session', () => {
+    const firstSessionId = sessionService.start();
 
-    test('disables save after session completes on timeout', async () => {
-      const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
-        emitResult.push(result);
+    for (let i = 0; i < 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).toBe(firstSessionId);
+  });
+
+  it('holds a maximum of 30 sessions', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i <= 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).not.toBe(firstSessionId);
+  });
+
+  describe('when a search session in stored', () => {
+    describe('when a search gets updated', () => {
+      it('should update the stored search session', async () => {
+        // Given
+        sessionService.enableStorage({
+          getName: async () => 'Name',
+          getLocatorData: async () => ({
+            id: 'id',
+            initialState: {},
+            restoreState: {},
+          }),
+        });
+
+        const firstSessionId = sessionService.start();
+        // We need to store the search so poll gets called when the search is completed and we can assert on it
+        await sessionService.save({ entryPoint: 'test' });
+
+        const poll = jest.fn().mockResolvedValue(undefined);
+        const { complete } = sessionService.trackSearch({
+          abort: jest.fn(),
+          poll,
+        });
+        sessionService.start();
+
+        // When
+        complete();
+
+        // Then
+        expect(sessionService.isCurrentSession(firstSessionId)).toBe(false);
+        expect(poll).toHaveBeenCalledTimes(1);
       });
-
-      sessionService.start();
-      const complete = sessionService.trackSearch({
-        abort: () => {},
-        poll: async () => {},
-      }).complete;
-
-      complete();
-
-      expect(emitResult).toEqual([false]);
-
-      jest.advanceTimersByTime(2 * 60 * 1000); // 2 minutes
-
-      expect(emitResult).toEqual([false]);
-
-      jest.advanceTimersByTime(3 * 60 * 1000); // 3 minutes
-
-      expect(emitResult).toEqual([false, true]);
-
-      sessionService.start();
-
-      expect(emitResult).toEqual([false, true, false]);
-    });
-
-    test('disables save for continued from different app sessions', async () => {
-      const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
-        emitResult.push(result);
-      });
-
-      const sessionId = sessionService.start();
-
-      const complete = sessionService.trackSearch({
-        abort: () => {},
-        poll: async () => {},
-      }).complete;
-
-      complete();
-
-      expect(emitResult).toEqual([false]);
-
-      sessionService.clear();
-
-      sessionService.continue(sessionId);
-
-      expect(emitResult).toEqual([false, true]);
-
-      sessionService.start();
-
-      expect(emitResult).toEqual([false, true, false]);
-    });
-
-    test('emits usage once', async () => {
-      const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
-        emitResult.push(result);
-      });
-      sessionService.disableSaveAfterSearchesExpire$.subscribe(); // testing that source is shared
-
-      sessionService.start();
-      const complete = sessionService.trackSearch({
-        abort: () => {},
-        poll: async () => {},
-      }).complete;
-
-      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
-
-      complete();
-
-      jest.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
-
-      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
-
-      sessionService.start();
-
-      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
     });
   });
 });

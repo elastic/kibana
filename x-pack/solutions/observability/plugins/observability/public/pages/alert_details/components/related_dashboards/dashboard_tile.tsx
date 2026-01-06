@@ -7,23 +7,21 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
+import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
-export interface DashboardMetadata {
-  id: string;
-  title: string;
-  description: string;
-}
 
 export interface ActionButtonProps {
-  onClick: (dashboard: DashboardMetadata) => void;
+  onClick: (dashboard: RelatedDashboard) => void;
   label: string;
   isLoading: boolean;
   isDisabled: boolean;
@@ -33,48 +31,68 @@ export interface ActionButtonProps {
 export function DashboardTile({
   dashboard,
   actionButtonProps,
+  timeRange,
 }: {
-  dashboard: DashboardMetadata;
+  dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }) {
   const {
     services: {
+      telemetryClient,
       share: { url: urlService },
+      savedObjectsTagging: { ui: savedObjectsTaggingUi },
     },
   } = useKibana();
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
+  const tagsReferences: SavedObjectsReference[] = (dashboard.tags || []).flatMap((tag) => {
+    const ref = savedObjectsTaggingUi.convertNameToReference(tag);
+    return ref ? [{ ...ref, name: tag }] : [];
+  });
+
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
-        <EuiFlexItem key={dashboard.id}>
-          <EuiText size="s">
-            <a
-              href="#"
-              onClick={async (e) => {
-                e.preventDefault();
-                if (dashboardLocator) {
-                  const url = await dashboardLocator.getUrl({
-                    dashboardId: dashboard.id,
-                  });
-                  window.open(url, '_blank');
-                } else {
-                  console.error('Dashboard locator is not available');
-                }
-              }}
-            >
-              {dashboard.title}
-            </a>
-          </EuiText>
+      <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
+        <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
+          {/* Allowing both href and onClick to allow telemetry to be reported */}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiLink
+            data-test-subj={`alertDetails_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
+            href={dashboardLocator?.getRedirectUrl({
+              dashboardId: dashboard.id,
+              time_range: timeRange,
+            })}
+            target="_blank"
+            onClick={() => {
+              if (telemetryClient) {
+                telemetryClient.reportLinkedDashboardViewed(
+                  actionButtonProps?.ruleType || 'unknown'
+                );
+              }
+            }}
+          >
+            {dashboard.title}
+          </EuiLink>
           <EuiText color={'subdued'} size="s">
             {dashboard.description}
           </EuiText>
-        </EuiFlexItem>
+          {tagsReferences.length ? (
+            <savedObjectsTaggingUi.components.TagList
+              object={{
+                references: tagsReferences,
+              }}
+            />
+          ) : null}
+        </EuiFlexGroup>
         {actionButtonProps ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj={`addSuggestedDashboard_alertDetailsPage_${actionButtonProps.ruleType}`}
-              onClick={() => actionButtonProps.onClick(dashboard)}
+              onClick={() => {
+                actionButtonProps.onClick(dashboard);
+                telemetryClient.reportSuggestedDashboardAdded(actionButtonProps.ruleType);
+              }}
               isLoading={actionButtonProps.isLoading}
               isDisabled={actionButtonProps.isDisabled}
               iconType="plus"

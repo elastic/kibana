@@ -8,11 +8,12 @@ import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SystemActionTypeForm } from './system_action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, GenericValidationResult, ActionParamsProps } from '../../../types';
+import type { ActionType, GenericValidationResult, ActionParamsProps } from '../../../types';
 import { EuiButton } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -33,16 +34,12 @@ jest.mock('../../hooks/use_rule_alert_fields', () => ({
   }),
 }));
 
-const actionConnector = {
+const actionConnector = createMockActionConnector({
   actionTypeId: '.test-system-action',
-  config: {},
   id: 'test',
-  isPreconfigured: false as const,
-  isDeprecated: false,
   isSystemAction: true,
   name: 'test name',
-  secrets: {},
-};
+});
 
 const actionItem = {
   id: '123',
@@ -62,6 +59,7 @@ const actionTypeIndexDefault: Record<string, ActionType> = {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
+    isDeprecated: false,
   },
 };
 

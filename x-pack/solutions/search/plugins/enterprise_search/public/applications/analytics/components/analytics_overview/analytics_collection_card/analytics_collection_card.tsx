@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 
 import { parsePath } from 'history';
 import { useValues } from 'kea';
@@ -21,15 +22,18 @@ import {
   EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { i18n } from '@kbn/i18n';
 
-import { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type {
+  DateHistogramIndexPatternColumn,
+  FormulaIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
@@ -37,7 +41,8 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { withLensData } from '../../../hoc/with_lens_data';
 import { COLLECTION_OVERVIEW_PATH } from '../../../routes';
 
-import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
+import type { FilterBy } from '../../../utils/get_formula_by_filter';
+import { getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionCardStyles } from './analytics_collection_card.styles';
 
@@ -254,29 +259,7 @@ export const AnalyticsCollectionCardWithLens = withLensData<
               LENS_LAYERS.metrics.percentage
             ] ?? null,
         },
-  getAttributes: (dataView, formulaApi, { filterBy }) => {
-    let metric = formulaApi.insertOrReplaceFormulaColumn(
-      LENS_LAYERS.metrics.percentage,
-      {
-        formula: `round(((${getFormulaByFilter(filterBy)}/${getFormulaByFilter(
-          filterBy,
-          'previous'
-        )})-1) * 100)`,
-        label: ' ',
-      },
-      {
-        columnOrder: [],
-        columns: {},
-      },
-      dataView
-    )!;
-    metric = formulaApi.insertOrReplaceFormulaColumn(
-      LENS_LAYERS.metrics.hitsTotal,
-      { formula: getFormulaByFilter(filterBy), label: ' ' },
-      metric,
-      dataView
-    )!;
-
+  getAttributes: (dataView, { filterBy }) => {
     return {
       references: [
         {
@@ -299,28 +282,60 @@ export const AnalyticsCollectionCardWithLens = withLensData<
         datasourceStates: {
           formBased: {
             layers: {
-              [LENS_LAYERS.trend.id]: formulaApi.insertOrReplaceFormulaColumn(
-                LENS_LAYERS.trend.y,
-                {
-                  formula: getFormulaByFilter(filterBy),
+              [LENS_LAYERS.trend.id]: {
+                columnOrder: [LENS_LAYERS.trend.x, LENS_LAYERS.trend.y],
+                columns: {
+                  [LENS_LAYERS.trend.y]: {
+                    customLabel: false,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: '',
+                    operationType: 'formula',
+                    params: {
+                      formula: getFormulaByFilter(filterBy),
+                    },
+                    references: [],
+                  } satisfies FormulaIndexPatternColumn,
+                  [LENS_LAYERS.trend.x]: {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: 'Timestamp',
+                    operationType: 'date_histogram',
+                    params: { includeEmptyRows: true, interval: 'auto' },
+                    scale: 'ordinal',
+                    sourceField: dataView?.timeFieldName!,
+                  } as DateHistogramIndexPatternColumn,
                 },
-                {
-                  columnOrder: [],
-                  columns: {
-                    [LENS_LAYERS.trend.x]: {
-                      dataType: 'date',
-                      isBucketed: false,
-                      label: 'Timestamp',
-                      operationType: 'date_histogram',
-                      params: { includeEmptyRows: true, interval: 'auto' },
-                      scale: 'ordinal',
-                      sourceField: dataView?.timeFieldName!,
-                    } as DateHistogramIndexPatternColumn,
-                  },
+              },
+              [LENS_LAYERS.metrics.id]: {
+                columnOrder: [LENS_LAYERS.metrics.percentage, LENS_LAYERS.metrics.hitsTotal],
+                columns: {
+                  [LENS_LAYERS.metrics.percentage]: {
+                    customLabel: false,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: '',
+                    operationType: 'formula',
+                    params: {
+                      formula: `round(((${getFormulaByFilter(filterBy)}/${getFormulaByFilter(
+                        filterBy,
+                        'previous'
+                      )})-1) * 100)`,
+                      isFormulaBroken: false,
+                    },
+                    references: [],
+                  } satisfies FormulaIndexPatternColumn,
+                  [LENS_LAYERS.metrics.hitsTotal]: {
+                    customLabel: false,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: '',
+                    operationType: 'formula',
+                    params: { formula: getFormulaByFilter(filterBy), isFormulaBroken: false },
+                    references: [],
+                  } satisfies FormulaIndexPatternColumn,
                 },
-                dataView!
-              )!,
-              [LENS_LAYERS.metrics.id]: metric,
+              },
             },
           },
         },

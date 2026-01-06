@@ -89,6 +89,17 @@ var IGNORE_WARNINGS = [
     code: 'DEP0060',
     message: 'The `util._extend` API is deprecated. Please use Object.assign() instead.',
   },
+  // EBT is currently referencing a non-existing entry file https://github.com/elastic/ebt/blob/main/package.json#L7
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0128',
+    messageContains: '@elastic/ebt/package.json',
+  },
+  // YAML parser warning when testing invalid YAML with collection values as keys
+  {
+    messageContains:
+      'Keys with collection values will be stringified due to JS Object restrictions',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

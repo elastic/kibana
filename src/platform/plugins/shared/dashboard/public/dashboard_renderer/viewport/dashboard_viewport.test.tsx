@@ -16,8 +16,15 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { buildMockDashboardApi, getMockPanels } from '../../mocks';
 import { DashboardViewport } from './dashboard_viewport';
+import type { DashboardInternalApi } from '../../dashboard_api/types';
 
-const createAndMountDashboardViewport = async () => {
+jest.mock('../grid', () => {
+  return {
+    DashboardGrid: () => <div data-test-subj="mockDashboardGrid" />,
+  };
+});
+
+const renderDashboardViewport = async (internalApiOverrides?: Partial<DashboardInternalApi>) => {
   const panels = getMockPanels();
   const { api, internalApi } = buildMockDashboardApi({
     overrides: {
@@ -27,7 +34,12 @@ const createAndMountDashboardViewport = async () => {
   const component = render(
     <EuiThemeProvider>
       <DashboardContext.Provider value={api}>
-        <DashboardInternalContext.Provider value={internalApi}>
+        <DashboardInternalContext.Provider
+          value={{
+            ...internalApi,
+            ...internalApiOverrides,
+          }}
+        >
           <DashboardViewport />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
@@ -36,19 +48,22 @@ const createAndMountDashboardViewport = async () => {
 
   // wait for first render
   await waitFor(() => {
-    expect(component.queryAllByTestId('dashboardPanel').length).toBe(Object.keys(panels).length);
+    component.getByTestId('dshDashboardViewport');
   });
 
   return { dashboardApi: api, internalApi, component };
 };
 
 describe('DashboardViewport', () => {
-  test('renders', async () => {
-    await createAndMountDashboardViewport();
+  test('should render DashboardGrid when dashboard has panels', async () => {
+    const { component } = await renderDashboardViewport();
+    await waitFor(() => {
+      component.getByTestId('mockDashboardGrid');
+    });
   });
 
   test('renders print mode styles', async () => {
-    const { component, dashboardApi } = await createAndMountDashboardViewport();
+    const { component, dashboardApi } = await renderDashboardViewport();
     dashboardApi.setViewMode('print');
 
     await waitFor(() => {

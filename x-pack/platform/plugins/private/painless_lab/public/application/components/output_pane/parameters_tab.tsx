@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiIcon, EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 
@@ -30,7 +31,7 @@ export const ParametersTab: FunctionComponent = () => {
               defaultMessage: 'These variables are assigned to the "params" object in your script',
             })}
           >
-            <span>
+            <span tabIndex={0}>
               <FormattedMessage
                 id="xpack.painlessLab.parametersFieldLabel"
                 defaultMessage="Parameters (JSON)"

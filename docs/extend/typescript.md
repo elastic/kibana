@@ -47,7 +47,7 @@ Additionally, in order to migrate into project refs, you also need to make sure 
 
 ```
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
@@ -69,8 +69,7 @@ If your plugin imports a file not listed in `include`, the build will fail with 
 * Build you plugin `./node_modules/.bin/tsc -b src/plugins/my_plugin`. Fix errors if `tsc` cannot generate type declarations for your project.
 * Add your project reference to `references` property of `tsconfig.refs.json`
 * Add your plugin to `references` property and plugin folder to `exclude` property of the `tsconfig.json` it used to belong to (for example, for `src/plugins/**` it’s `tsconfig.json`; for `x-pack/plugins/**` it’s `x-pack/tsconfig.json`).
-* List the reference to your newly created project in all the Kibana `tsconfig.json` files that could import your project: `tsconfig.json`, `test/tsconfig.json`, `x-pack/tsconfig.json`, `x-pack/test/tsconfig.json`. And in all the plugin-specific `tsconfig.refs.json` for dependent plugins.
+* List the reference to your newly created project in all the Kibana `tsconfig.json` files that could import your project: `tsconfig.json`, `test/tsconfig.json`, `x-pack/tsconfig.json`, `x-pack/platform/test/tsconfig.json`. And in all the plugin-specific `tsconfig.refs.json` for dependent plugins.
 * You can measure how your changes affect `tsc` compiler performance with `node --max-old-space-size=4096 ./node_modules/.bin/tsc -p tsconfig.json --extendedDiagnostics --noEmit`. Compare with `master` branch.
 
 You can use [https://github.com/elastic/kibana/pull/79446](https://github.com/elastic/kibana/pull/79446) as an example.
-

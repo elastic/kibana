@@ -8,21 +8,30 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import { isActionBlock } from '@kbn/streamlang/types/streamlang';
+import type {
+  StreamlangProcessorDefinition,
+  StreamlangStepWithUIAttributes,
+  StreamlangDSL,
+  StreamlangConditionBlock,
+} from '@kbn/streamlang';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorActorRef } from '../processor_state_machine';
-import {
+import type { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
+import type {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,
   SimulationContext,
 } from '../simulation_state_machine';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
+import type { StepActorRef } from '../steps_state_machine';
+import type { InteractiveModeSnapshot } from '../interactive_mode_machine';
+import type { YamlModeSnapshot } from '../yaml_mode_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -42,11 +51,39 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor: ProcessorDefinitionWithUIAttributes) => {
-        service.send({ type: 'processors.add', processor });
+      service, // Expose service for direct access when needed
+      resetSteps: (steps: StreamlangDSL['steps']) => {
+        service.send({ type: 'step.resetSteps', steps });
       },
-      reorderProcessors: (processorsRefs: ProcessorActorRef[]) => {
-        service.send({ type: 'processors.reorder', processorsRefs });
+      addProcessor: (
+        step?: StreamlangProcessorDefinition,
+        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+      ) => {
+        service.send({ type: 'step.addProcessor', step, options });
+      },
+      duplicateProcessor: (id: string) => {
+        service.send({ type: 'step.duplicateProcessor', processorStepId: id });
+      },
+      addCondition: (
+        step?: StreamlangConditionBlock,
+        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+      ) => {
+        service.send({ type: 'step.addCondition', step, options });
+      },
+      switchToInteractiveMode: () => {
+        service.send({ type: 'mode.switchToInteractive' });
+      },
+      switchToYamlMode: () => {
+        service.send({ type: 'mode.switchToYAML' });
+      },
+      sendYAMLUpdates: (streamlangDSL: StreamlangDSL, yaml: string) => {
+        service.send({ type: 'yaml.contentChanged', streamlangDSL, yaml });
+      },
+      runSimulation: (stepIdBreakpoint?: string) => {
+        service.send({ type: 'yaml.runSimulation', stepIdBreakpoint });
+      },
+      reorderStep: (stepId: string, direction: 'up' | 'down') => {
+        service.send({ type: 'step.reorder', stepId, direction });
       },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
@@ -56,6 +93,12 @@ export const useStreamEnrichmentEvents = () => {
       },
       refreshSimulation: () => {
         service.send({ type: 'simulation.refresh' });
+      },
+      filterSimulationByCondition: (conditionId: string) => {
+        service.send({ type: 'simulation.filterByCondition', conditionId });
+      },
+      clearSimulationConditionFilter: () => {
+        service.send({ type: 'simulation.clearConditionFilter' });
       },
       viewSimulationPreviewData: () => {
         service.send({ type: 'simulation.viewDataPreview' });
@@ -81,6 +124,9 @@ export const useStreamEnrichmentEvents = () => {
       addDataSource: (dataSource: EnrichmentDataSource) => {
         service.send({ type: 'dataSources.add', dataSource });
       },
+      selectDataSource: (id: string) => {
+        service.send({ type: 'dataSources.select', id });
+      },
       setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
         service.send({
           type: 'previewColumns.updateExplicitlyEnabledColumns',
@@ -101,6 +147,19 @@ export const useStreamEnrichmentEvents = () => {
       },
       setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
         service.send({ type: 'previewColumns.setSorting', sorting });
+      },
+      // Pipeline suggestion actions
+      suggestPipeline: (params: { connectorId: string; streamName: string }) => {
+        service.send({ type: 'suggestion.generate', connectorId: params.connectorId });
+      },
+      clearSuggestedSteps: () => {
+        service.send({ type: 'suggestion.dismiss' });
+      },
+      cancelSuggestion: () => {
+        service.send({ type: 'suggestion.cancel' });
+      },
+      acceptSuggestion: () => {
+        service.send({ type: 'suggestion.accept' });
       },
     }),
     [service]
@@ -135,16 +194,31 @@ const StreamEnrichmentCleanupOnUnmount = () => {
 
   useEffect(() => {
     return () => {
-      const context = service.getSnapshot().context;
-      context.processorsRefs.forEach((procRef) => {
-        const procContext = procRef.getSnapshot().context;
-        if (isGrokProcessor(procContext.processor)) {
-          const draftGrokExpressions = procContext.resources?.grokExpressions ?? [];
-          draftGrokExpressions.forEach((expression) => {
-            expression.destroy();
+      const snapshot = service.getSnapshot();
+      const context = snapshot.context;
+
+      // Only clean up stepRefs if we're in interactive mode
+      const isInteractiveMode = snapshot.matches({
+        ready: { enrichment: { managingProcessors: 'interactive' } },
+      });
+
+      if (isInteractiveMode && context.interactiveModeRef) {
+        const modeSnapshot = context.interactiveModeRef.getSnapshot();
+        const stepRefs: StepActorRef[] = modeSnapshot.context.stepRefs;
+
+        if (stepRefs) {
+          stepRefs.forEach((procRef: StepActorRef) => {
+            const procContext = procRef.getSnapshot().context;
+            if (isActionBlock(procContext.step) && isGrokProcessor(procContext.step)) {
+              const draftGrokExpressions: DraftGrokExpression[] =
+                procContext.resources?.grokExpressions ?? [];
+              draftGrokExpressions.forEach((expression: DraftGrokExpression) => {
+                expression.destroy();
+              });
+            }
           });
         }
-      });
+      }
     };
   }, [service]);
 
@@ -171,9 +245,48 @@ export const useSimulatorRef = () => {
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
   const simulationRef = useSimulatorRef();
 
-  if (!simulationRef) {
-    throw new Error('useSimulatorSelector must be used within a StreamEnrichmentContextProvider');
+  return useSelector(simulationRef, selector);
+};
+
+export const useInteractiveModeSelector = <T,>(
+  selector: (state: InteractiveModeSnapshot) => T
+): T => {
+  const interactiveModeRef = useStreamEnrichmentSelector(
+    (state) => state.context.interactiveModeRef
+  );
+
+  if (!interactiveModeRef) {
+    throw new Error('useInteractiveModeSelector must be used within interactive mode');
   }
 
-  return useSelector(simulationRef, selector);
+  return useSelector(interactiveModeRef, selector);
+};
+
+/**
+ * Safe version of useInteractiveModeSelector that returns a fallback value
+ * when not in interactive mode instead of throwing.
+ */
+export const useOptionalInteractiveModeSelector = <T,>(
+  selector: (state: InteractiveModeSnapshot) => T,
+  fallback: T
+): T => {
+  const interactiveModeRef = useStreamEnrichmentSelector(
+    (state) => state.context.interactiveModeRef
+  );
+
+  const selectedValue = useSelector(interactiveModeRef, (state) =>
+    state ? selector(state) : fallback
+  );
+
+  return interactiveModeRef ? selectedValue : fallback;
+};
+
+export const useYamlModeSelector = <T,>(selector: (state: YamlModeSnapshot) => T): T => {
+  const yamlModeRef = useStreamEnrichmentSelector((state) => state.context.yamlModeRef);
+
+  if (!yamlModeRef) {
+    throw new Error('useYamlModeSelector must be used within YAML mode');
+  }
+
+  return useSelector(yamlModeRef, selector);
 };

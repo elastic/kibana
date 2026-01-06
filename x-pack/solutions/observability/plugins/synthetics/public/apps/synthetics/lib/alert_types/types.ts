@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../../plugin';
 
 export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependencies: {

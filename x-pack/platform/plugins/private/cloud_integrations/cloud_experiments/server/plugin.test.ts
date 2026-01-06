@@ -12,7 +12,7 @@ import {
   createIndexPatternsStartMock,
   dataViewsService,
 } from '@kbn/data-views-plugin/server/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { config } from './config';
 import { CloudExperimentsPlugin } from './plugin';
 

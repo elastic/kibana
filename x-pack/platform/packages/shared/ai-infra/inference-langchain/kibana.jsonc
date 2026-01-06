@@ -1,5 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/inference-langchain",
-  "owner": "@elastic/appex-ai-infra"
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "private"
 }

@@ -6,7 +6,7 @@
  */
 
 import { mapKeys } from 'lodash';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';

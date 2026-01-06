@@ -8,14 +8,14 @@
 import { uniq, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import {
-  parse,
+import type {
   TinymathLocation,
   TinymathAST,
   TinymathFunction,
   TinymathVariable,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
+import { parse } from '@kbn/tinymath';
 import type {
   UnifiedSearchPublicPluginStart,
   QuerySuggestion,
@@ -24,10 +24,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import moment from 'moment';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DateRange, IndexPattern } from '@kbn/lens-common';
 import { getAbsoluteDateRange, nonNullable } from '../../../../../../utils';
-import { DateRange } from '../../../../../../../common/types';
-import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';

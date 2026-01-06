@@ -31,7 +31,6 @@ import {
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -94,6 +93,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
             params: ruleParameters,
             actions: [],
             notify_when: RuleNotifyWhen.CHANGE,
+            alert_delay: {
+              active: 1,
+            },
           })
         );
 
@@ -124,6 +126,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // active, recovered, recovered, active, recovered
       expect(alertDocs.length).to.equal(2);
 
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
       expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
@@ -152,6 +157,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // Should be 3 alert docs now because alert became active again
       expect(alertDocs.length).to.equal(3);
 
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
+
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
       expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
@@ -179,6 +188,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Should still be 3 alert docs
       expect(alertDocs.length).to.equal(3);
+
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -224,6 +237,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
             params: ruleParameters,
             actions: [],
             notify_when: RuleNotifyWhen.CHANGE,
+            alert_delay: {
+              active: 1,
+            },
           })
         );
 
@@ -252,6 +268,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // Should be 2 alert docs because alert pattern was:
       // active, recovered, recovered, active, recovered
       expect(alertDocs.length).to.equal(2);
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -280,6 +298,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Should be 3 alert docs now because alert became active again
       expect(alertDocs.length).to.equal(3);
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -300,24 +321,29 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        // Query for alerts
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Get rule state from task document
+        state = await getRuleState(ruleId);
 
-      // Should still be 3 alert docs
-      expect(alertDocs.length).to.equal(3);
+        // Should still be 3 alert docs
+        expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertRecoveredInstances.alertA.meta.flappingHistory
-      );
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
 
-      // Flapping value for alert doc and task state should be true because alert recovered while flapping
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+        // Flapping value for alert doc and task state should be true because alert recovered while flapping
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      });
     });
 
     it('should increase and persist pendingRecoveredCount in the alert doc', async () => {
@@ -716,7 +742,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       expect(runWhichItFlapped).eql(6);
     });
 
-    it('should ignore rule flapping if the space flapping is disabled', async () => {
+    it('should not ignore rule flapping if the space flapping is disabled', async () => {
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
         .set('kbn-xsrf', 'foo')
@@ -799,8 +825,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         }
       }
 
-      // Never flapped, since globl flapping is off
-      expect(runWhichItFlapped).eql(0);
+      expect(runWhichItFlapped).eql(6);
     });
 
     it('should drop tracked alerts early after hitting the alert limit', async () => {

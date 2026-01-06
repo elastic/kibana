@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { FieldDefinition, UiSettingMetadata } from '@kbn/management-settings-types';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { FieldDefinition, UiSettingMetadata } from '@kbn/management-settings-types';
 import { getFieldDefinition } from './get_definition';
 
 type SettingsClient = Pick<IUiSettingsClient, 'isCustom' | 'isOverridden'>;

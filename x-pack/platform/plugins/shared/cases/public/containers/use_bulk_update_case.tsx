@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@kbn/react-query';
 import * as i18n from './translations';
 import { updateCases } from './api';
 import type { CaseUpdateRequest } from './types';

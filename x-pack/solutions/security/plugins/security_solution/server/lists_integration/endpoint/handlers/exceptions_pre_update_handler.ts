@@ -19,6 +19,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 import {
   hasArtifactOwnerSpaceId,
@@ -61,6 +62,17 @@ export const getExceptionsPreUpdateItemHandler = (
       trustedAppValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'TRUSTED_APP_BY_POLICY'
+      );
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      isEndpointArtifact = true;
+      const trustedDeviceValidator = new TrustedDeviceValidator(endpointAppContextService, request);
+      validatedItem = await trustedDeviceValidator.validatePreUpdateItem(data, currentSavedItem);
+      trustedDeviceValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'TRUSTED_DEVICE_BY_POLICY'
       );
     }
 
@@ -119,11 +131,15 @@ export const getExceptionsPreUpdateItemHandler = (
         currentSavedItem
       );
 
-      // If artifact does not have an assignment tag, then add it now. This is in preparation for
-      // adding per-policy support to Endpoint Exceptions as well as to support space awareness
-      if (!hasGlobalOrPerPolicyTag(validatedItem)) {
-        validatedItem.tags = validatedItem.tags ?? [];
-        validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
+      if (!endpointAppContextService.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+        // If artifact does not have an assignment tag, then add it now. This is in preparation for
+        // adding per-policy support to Endpoint Exceptions as well as to support space awareness
+        //
+        // Only added when the FF is disabled, as its enabled state indicates per-policy support.
+        if (!hasGlobalOrPerPolicyTag(validatedItem)) {
+          validatedItem.tags = validatedItem.tags ?? [];
+          validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
+        }
       }
 
       endpointExceptionValidator.notifyFeatureUsage(
@@ -132,10 +148,7 @@ export const getExceptionsPreUpdateItemHandler = (
       );
     }
 
-    if (
-      isEndpointArtifact &&
-      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!hasArtifactOwnerSpaceId(validatedItem)) {
         if (!request) {
           throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);

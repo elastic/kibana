@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { AnalyticsIndex } from './analytics_index';
@@ -17,10 +18,10 @@ import type {
   QueryDslQueryContainer,
   StoredScript,
 } from '@elastic/elasticsearch/lib/api/types';
-import { fullJitterBackoffFactory } from '../common/retry_service/full_jitter_backoff';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 
-jest.mock('../common/retry_service/full_jitter_backoff');
+jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 jest.mock('./tasks/backfill_task');
 
 const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
@@ -118,6 +119,7 @@ describe('AnalyticsIndex', () => {
       },
       settings: {
         index: {
+          hidden: true,
           auto_expand_replicas: '0-1',
           mode: 'lookup',
           number_of_shards: 1,
@@ -295,7 +297,7 @@ describe('AnalyticsIndex', () => {
       });
     });
 
-    it('does not retry if the eexecution throws a non-retryable error', async () => {
+    it('does not retry if the execution throws a non-retryable error', async () => {
       esClient.indices.exists.mockRejectedValue(new Error('My terrible error'));
 
       await expect(index.upsertIndex()).resolves.not.toThrow();
@@ -303,6 +305,51 @@ describe('AnalyticsIndex', () => {
       expect(nextBackOff).toBeCalledTimes(0);
       // Paths in the algorithm after the error are not called.
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+    });
+
+    it('logs resource_already_exists_exception errors as info', async () => {
+      esClient.indices.exists.mockResolvedValueOnce(false);
+      esClient.indices.create.mockRejectedValueOnce(
+        new esErrors.ResponseError({
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
+          },
+          statusCode: 404,
+        } as unknown as DiagnosticResult)
+      );
+
+      await index.upsertIndex();
+
+      expect(logger.debug).toBeCalledWith(
+        `[${indexName}] Index already exists. Skipping creation.`,
+        { tags: ['cai-index-creation', `${indexName}`] }
+      );
+      expect(logger.error).not.toBeCalled();
+    });
+
+    it('logs multi_project_pending_exception errors as info', async () => {
+      esClient.indices.exists.mockResolvedValueOnce(false);
+      esClient.indices.create.mockRejectedValueOnce(
+        new esErrors.ResponseError({
+          body: {
+            error: {
+              type: 'multi_project_pending_exception',
+            },
+          },
+          statusCode: 404,
+        } as unknown as DiagnosticResult)
+      );
+
+      await index.upsertIndex();
+
+      expect(logger.debug).toBeCalledWith(
+        `[${indexName}] Multi-project setup. Skipping creation.`,
+        { tags: ['cai-index-creation', `${indexName}`] }
+      );
+      expect(logger.error).not.toBeCalled();
+      expect(nextBackOff).toBeCalledTimes(0);
     });
   });
 });

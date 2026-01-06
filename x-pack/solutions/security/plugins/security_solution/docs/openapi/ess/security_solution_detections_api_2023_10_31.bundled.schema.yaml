@@ -423,10 +423,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -570,10 +569,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1415,10 +1413,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1632,11 +1629,10 @@ paths:
 
         > warn
 
-        > When used with  [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        > When used with [API
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -2905,8 +2901,8 @@ paths:
               properties:
                 objects:
                   description: >-
-                    Array of `rule_id` fields. Exports all rules when
-                    unspecified.
+                    Array of objects with a rule's `rule_id` field. Do not use
+                    rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -3037,6 +3033,14 @@ paths:
           required: false
           schema:
             type: string
+        - description: Gap fill statuses
+          in: query
+          name: gap_fill_statuses
+          required: false
+          schema:
+            items:
+              $ref: '#/components/schemas/GapFillStatus'
+            type: array
       responses:
         '200':
           content:
@@ -3132,6 +3136,10 @@ paths:
                     type: integer
                   total:
                     type: integer
+                  warnings:
+                    items:
+                      $ref: '#/components/schemas/WarningSchema'
+                    type: array
                 required:
                   - page
                   - perPage
@@ -3167,10 +3175,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -3602,16 +3609,7 @@ paths:
                     - >-
                       681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
             schema:
-              type: object
-              properties:
-                assignees:
-                  $ref: '#/components/schemas/AlertAssignees'
-                  description: Details about the assignees to assign and unassign.
-                ids:
-                  $ref: '#/components/schemas/AlertIds'
-              required:
-                - assignees
-                - ids
+              $ref: '#/components/schemas/SetAlertAssigneesBody'
         required: true
       responses:
         '200':
@@ -4003,36 +4001,8 @@ paths:
                   runtime_mappings: {}
                   size: 0
             schema:
+              $ref: '#/components/schemas/QueryAlertsBodyParams'
               description: Elasticsearch query and aggregation request
-              type: object
-              properties:
-                _source:
-                  oneOf:
-                    - type: boolean
-                    - type: string
-                    - items:
-                        type: string
-                      type: array
-                aggs:
-                  additionalProperties: true
-                  type: object
-                fields:
-                  items:
-                    type: string
-                  type: array
-                query:
-                  additionalProperties: true
-                  type: object
-                runtime_mappings:
-                  additionalProperties: true
-                  type: object
-                size:
-                  minimum: 0
-                  type: integer
-                sort:
-                  $ref: '#/components/schemas/AlertsSort'
-                track_total_hits:
-                  type: boolean
         description: Search and/or aggregation query
         required: true
       responses:
@@ -4244,15 +4214,7 @@ paths:
                     tags_to_remove:
                       - Duplicate
             schema:
-              type: object
-              properties:
-                ids:
-                  $ref: '#/components/schemas/AlertIds'
-                tags:
-                  $ref: '#/components/schemas/SetAlertTags'
-              required:
-                - ids
-                - tags
+              $ref: '#/components/schemas/SetAlertTagsBody'
         description: >-
           An object containing tags to add or remove and alert ids the changes
           will be applied
@@ -4341,14 +4303,18 @@ components:
       properties:
         add:
           items:
-            description: A list of users ids to assign.
+            description: >-
+              A list of user profile `uid`s to assign. Users need to activate
+              their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
           type: array
         remove:
           items:
-            description: A list of users ids to unassign.
+            description: >-
+              A list of user profile `uid`s to unassign. Users need to activate
+              their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
@@ -4434,13 +4400,12 @@ components:
         - type: string
         - additionalProperties: true
           type: object
-    AlertStatus:
+    AlertStatusExceptClosed:
       description: >-
         The status of an alert, which can be `open`, `acknowledged`,
         `in-progress`, or `closed`.
       enum:
         - open
-        - closed
         - acknowledged
         - in-progress
       type: string
@@ -4805,6 +4770,13 @@ components:
           enum:
             - delete
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4812,9 +4784,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4831,6 +4805,13 @@ components:
           enum:
             - disable
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4838,9 +4819,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4870,6 +4853,13 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4877,9 +4867,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4976,6 +4968,13 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4983,9 +4982,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5007,6 +5008,13 @@ components:
           enum:
             - enable
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5014,9 +5022,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5035,6 +5045,13 @@ components:
           enum:
             - export
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5042,9 +5059,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5080,6 +5099,13 @@ components:
           required:
             - start_date
             - end_date
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5087,9 +5113,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5107,6 +5135,13 @@ components:
           enum:
             - run
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5114,9 +5149,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5140,6 +5177,49 @@ components:
       required:
         - action
         - run
+    CloseAlertsByIds:
+      type: object
+      properties:
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        signal_ids:
+          description: >-
+            List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+          items:
+            format: nonempty
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        status:
+          enum:
+            - closed
+          type: string
+      required:
+        - signal_ids
+        - status
+    CloseAlertsByQuery:
+      type: object
+      properties:
+        conflicts:
+          default: abort
+          enum:
+            - abort
+            - proceed
+          type: string
+        query:
+          additionalProperties: true
+          type: object
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        status:
+          enum:
+            - closed
+          type: string
+      required:
+        - query
+        - status
     ConcurrentSearches:
       minimum: 1
       type: integer
@@ -6253,16 +6333,41 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
       type: string
+    ExternalRuleCustomizedFields:
+      description: >-
+        An array of customized field names — that is, fields that the user has
+        modified from their base value. Defaults to an empty array.
+      items:
+        type: object
+        properties:
+          field_name:
+            description: Name of a user-modified field in the rule object.
+            type: string
+        required:
+          - field_name
+      type: array
+    ExternalRuleHasBaseVersion:
+      description: >-
+        Determines whether an external/prebuilt rule has its original,
+        unmodified version present when the calculation of its customization
+        status is performed (`rule_source.is_customized` and
+        `rule_source.customized_fields`).
+      type: boolean
     ExternalRuleSource:
       description: >-
         Type of rule source for externally sourced rules, i.e. rules that have
         an external source, such as the Elastic Prebuilt rules repo.
       type: object
       properties:
+        customized_fields:
+          $ref: '#/components/schemas/ExternalRuleCustomizedFields'
+        has_base_version:
+          $ref: '#/components/schemas/ExternalRuleHasBaseVersion'
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
         type:
@@ -6272,6 +6377,8 @@ components:
       required:
         - type
         - is_customized
+        - has_base_version
+        - customized_fields
     FindRulesSortField:
       enum:
         - created_at
@@ -6288,6 +6395,12 @@ components:
         - severity
         - updated_at
         - updatedAt
+      type: string
+    GapFillStatus:
+      enum:
+        - unfilled
+        - in_progress
+        - filled
       type: string
     HistoryWindowStart:
       description: >-
@@ -7709,6 +7822,36 @@ components:
       required:
         - command
         - config
+    QueryAlertsBodyParams:
+      type: object
+      properties:
+        _source:
+          oneOf:
+            - type: boolean
+            - type: string
+            - items:
+                type: string
+              type: array
+        aggs:
+          additionalProperties: true
+          type: object
+        fields:
+          items:
+            type: string
+          type: array
+        query:
+          additionalProperties: true
+          type: object
+        runtime_mappings:
+          additionalProperties: true
+          type: object
+        size:
+          minimum: 0
+          type: integer
+        sort:
+          $ref: '#/components/schemas/AlertsSort'
+        track_total_hits:
+          type: boolean
     QueryRule:
       allOf:
         - type: object
@@ -8232,6 +8375,16 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/QueryRuleCreateFields'
+    ReasonEnum:
+      description: The reason for closing the alerts
+      enum:
+        - false_positive
+        - duplicate
+        - true_positive
+        - benign_positive
+        - automated_closure
+        - other
+      type: string
     RelatedIntegration:
       description: >
         Related integration is a potential dependency of a rule. It's assumed
@@ -8507,7 +8660,6 @@ components:
         gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-              
       type: object
     RuleActionFrequency:
       description: >-
@@ -9532,11 +9684,49 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+    SetAlertAssigneesBody:
+      examples:
+        add:
+          value:
+            assignees:
+              add:
+                - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+              remove: []
+            ids:
+              - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+        remove:
+          value:
+            assignees:
+              add: []
+              remove:
+                - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+            ids:
+              - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/AlertAssignees'
+          description: Details about the assignees to assign and unassign.
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+      required:
+        - assignees
+        - ids
     SetAlertsStatusByIds:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/CloseAlertsByIds'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/CloseAlertsByIds'
+        - $ref: '#/components/schemas/SetAlertsStatusByIdsBase'
+    SetAlertsStatusByIdsBase:
       type: object
       properties:
         signal_ids:
-          description: List of alert `id`s.
+          description: >-
+            List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
           items:
             format: nonempty
             minLength: 1
@@ -9544,11 +9734,19 @@ components:
           minItems: 1
           type: array
         status:
-          $ref: '#/components/schemas/AlertStatus'
+          $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
         - signal_ids
         - status
     SetAlertsStatusByQuery:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/CloseAlertsByQuery'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/CloseAlertsByQuery'
+        - $ref: '#/components/schemas/SetAlertsStatusByQueryBase'
+    SetAlertsStatusByQueryBase:
       type: object
       properties:
         conflicts:
@@ -9561,7 +9759,7 @@ components:
           additionalProperties: true
           type: object
         status:
-          $ref: '#/components/schemas/AlertStatus'
+          $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
         - query
         - status
@@ -9576,6 +9774,33 @@ components:
       required:
         - tags_to_add
         - tags_to_remove
+    SetAlertTagsBody:
+      examples:
+        add:
+          value:
+            ids:
+              - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+            tags:
+              tags_to_add:
+                - Duplicate
+              tags_to_remove: []
+        remove:
+          value:
+            ids:
+              - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+            tags:
+              tags_to_add: []
+              tags_to_remove:
+                - Duplicate
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+        tags:
+          $ref: '#/components/schemas/SetAlertTags'
+      required:
+        - ids
+        - tags
     SetupGuide:
       description: >-
         Populates the rule’s setup guide with instructions on rule prerequisites
@@ -9710,25 +9935,29 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/NonEmptyString'
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     ThreatMatchRule:
       allOf:
         - type: object
@@ -10385,6 +10614,8 @@ components:
         - type: string
         - items:
             type: string
+          maxItems: 5
+          minItems: 0
           type: array
     ThresholdRule:
       allOf:

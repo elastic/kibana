@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@kbn/react-query';
 import { SYNONYMS_RULE_FETCH_QUERY_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 

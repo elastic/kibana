@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import {
+import type {
   EntryExists,
   EntryList,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ALL_OPERATORS,
+import type {
   BuilderEntry,
-  DETECTION_ENGINE_EXCEPTION_OPERATORS,
-  EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
+} from '@kbn/securitysolution-list-utils';
+import {
   doesNotExistOperator,
-  doesNotMatchOperator,
   existsOperator,
   filterExceptionItems,
   getCorrespondingKeywordField,
@@ -41,7 +41,6 @@ import {
   getFormattedBuilderEntries,
   getFormattedBuilderEntry,
   getNewExceptionItem,
-  getOperatorOptions,
   getOperatorType,
   getUpdatedEntriesOnDelete,
   isEntryNested,
@@ -51,9 +50,8 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-  matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
@@ -492,148 +490,6 @@ describe('Exception builder helpers', () => {
         operator: OperatorEnum.INCLUDED,
         type: 'list',
       };
-      expect(output).toEqual(expected);
-    });
-  });
-
-  describe('#getOperatorOptions', () => {
-    test('it returns "isOperator" when field type is nested but field itself has not yet been selected', () => {
-      const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator];
-      expect(output).toEqual(expected);
-    });
-
-    test('it returns "isOperator" if no field selected', () => {
-      const payloadItem: FormattedBuilderEntry = { ...getMockBuilderEntry(), field: undefined };
-      const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator];
-      expect(output).toEqual(expected);
-    });
-
-    describe('"endpoint" list type', () => {
-      test('it returns operators "is", "isOneOf", "matches" and "doesNotMatch" if item is nested and field supports "matches"', () => {
-        const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-        const output = getOperatorOptions(payloadItem, 'endpoint', false);
-        const expected: OperatorOption[] = [
-          isOperator,
-          isOneOfOperator,
-          matchesOperator,
-          doesNotMatchOperator,
-        ];
-        expect(output).toEqual(expected);
-      });
-
-      test('it returns operators "is" and "isOneOf" if item is nested and field does not support "matches"', () => {
-        const payloadItem: FormattedBuilderEntry = {
-          ...getMockNestedBuilderEntry(),
-          field: getField('ip'),
-        };
-        const output = getOperatorOptions(payloadItem, 'endpoint', false);
-        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
-        expect(output).toEqual(expected);
-      });
-
-      test('it returns operators "is", "isOneOf", "matches" and "doesNotMatch" if field supports "matches"', () => {
-        const payloadItem: FormattedBuilderEntry = {
-          ...getMockBuilderEntry(),
-          field: getField('@tags'),
-        };
-        const output = getOperatorOptions(payloadItem, 'endpoint', false);
-        const expected: OperatorOption[] = [
-          isOperator,
-          isOneOfOperator,
-          matchesOperator,
-          doesNotMatchOperator,
-        ];
-        expect(output).toEqual(expected);
-      });
-
-      test('it returns "isOperator" and "isOneOfOperator" if field does not support "matches"', () => {
-        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getOperatorOptions(payloadItem, 'endpoint', false);
-        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
-        expect(output).toEqual(expected);
-      });
-
-      test('it returns "isOperator" and field type is boolean', () => {
-        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getOperatorOptions(payloadItem, 'endpoint', true);
-        const expected: OperatorOption[] = [isOperator];
-        expect(output).toEqual(expected);
-      });
-    });
-
-    test('it returns "isOperator", "isOneOfOperator", and "existsOperator" if item is nested and "listType" is "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', false);
-      const expected: OperatorOption[] = [isOperator, isOneOfOperator, existsOperator];
-      expect(output).toEqual(expected);
-    });
-
-    test('it returns "isOperator" and "existsOperator" if item is nested, "listType" is "detection", and field type is boolean', () => {
-      const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', true);
-      const expected: OperatorOption[] = [isOperator, existsOperator];
-      expect(output).toEqual(expected);
-    });
-
-    test('it returns "isOperator", "isNotOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', true);
-      const expected: OperatorOption[] = [
-        isOperator,
-        isNotOperator,
-        existsOperator,
-        doesNotExistOperator,
-      ];
-      expect(output).toEqual(expected);
-    });
-
-    test('it returns list operators if specified to', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', false, true);
-      expect(output.some((operator) => operator.value === 'is_not_in_list')).toBeTruthy();
-      expect(output.some((operator) => operator.value === 'is_in_list')).toBeTruthy();
-    });
-
-    test('it does not return list operators if specified not to', () => {
-      const payloadItem: FormattedBuilderEntry = {
-        ...getMockBuilderEntry(),
-        field: getField('@tags'),
-      };
-      const output = getOperatorOptions(payloadItem, 'detection', false, false);
-      expect(output).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
-    });
-
-    test('it returns all possible operators if list type is not "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint_events', false, true);
-      expect(output).toEqual(ALL_OPERATORS);
-    });
-
-    test('it returns all operators supported by detection engine if list type is "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = {
-        ...getMockBuilderEntry(),
-        field: getField('@tags'),
-      };
-      const output = getOperatorOptions(payloadItem, 'detection', false, true);
-      expect(output).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
-    });
-
-    test('it excludes wildcard operators if list type is "detection" and field is not a string', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', false, true);
-      const expected: OperatorOption[] = [
-        isOperator,
-        isNotOperator,
-        isOneOfOperator,
-        isNotOneOfOperator,
-        existsOperator,
-        doesNotExistOperator,
-        isInListOperator,
-        isNotInListOperator,
-      ];
       expect(output).toEqual(expected);
     });
   });

@@ -12,9 +12,9 @@ import styled from '@emotion/styled';
 import { FilterValueLabel } from '@kbn/exploratory-view-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FiltersUIHook } from '../hooks/use_local_uifilters';
+import type { FiltersUIHook } from '../hooks/use_local_uifilters';
 import { SelectedWildcards } from './selected_wildcards';
-import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 
 interface Props {
   indexPattern?: DataView;

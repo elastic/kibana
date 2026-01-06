@@ -32,6 +32,11 @@ export const Subfield = ({
     {shouldDisplaySubfieldLabelForField(fieldName) && (
       <SubfieldHeader subfieldName={subfieldName} />
     )}
-    <DiffView oldSource={oldSubfieldValue} newSource={newSubfieldValue} viewType="unified" />
+    <DiffView
+      oldSource={oldSubfieldValue}
+      newSource={newSubfieldValue}
+      viewType="unified"
+      data-test-subj="prebuilt-rule-upgrade-diff-view"
+    />
   </>
 );

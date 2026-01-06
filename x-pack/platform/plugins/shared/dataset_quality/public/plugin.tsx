@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
@@ -14,7 +14,7 @@ import { createDatasetQualityDetailsControllerLazyFactory } from './controller/d
 import { registerRuleTypes } from './rule_types';
 import { DataStreamDetailsService } from './services/data_stream_details';
 import { DataStreamsStatsService } from './services/data_streams_stats';
-import {
+import type {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
   DatasetQualitySetupDeps,
@@ -41,10 +41,12 @@ export class DatasetQualityPlugin
 
     const dataStreamStatsService = new DataStreamsStatsService().start({
       http: core.http,
+      telemetryClient,
     });
 
     const dataStreamDetailsService = new DataStreamDetailsService().start({
       http: core.http,
+      telemetryClient,
     });
 
     const DatasetQuality = createDatasetQuality({

@@ -26,8 +26,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('@tanstack/react-query', () => {
-  const originalModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const originalModule = jest.requireActual('@kbn/react-query');
   return {
     ...originalModule,
     useMutation: jest.fn((...args) => originalModule.useMutation(...args)),

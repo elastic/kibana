@@ -17,6 +17,7 @@ import React, {
   useEffect,
   type ComponentProps,
 } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -32,13 +33,18 @@ import {
   EuiPortal,
   EuiShowFor,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { prepareDataViewForEditing } from '@kbn/discover-utils';
 import {
   useExistingFieldsFetcher,
+  type ExistingFieldsFetcherParams,
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
-import { getSidebarVisibility, SidebarVisibility } from './get_sidebar_visibility';
+import type { SidebarVisibility } from './get_sidebar_visibility';
+import { getSidebarVisibility } from './get_sidebar_visibility';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
@@ -141,13 +147,20 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   /**
    * Callback to execute after editing/deleting a runtime field
    */
-  onFieldEdited?: (options?: {
+  onFieldEdited?: (options: {
+    editedDataView: UnifiedFieldListSidebarContainerProps['dataView'];
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;
 
   initialState?: UnifiedFieldListSidebarContainerPropsWithRestorableState['initialState'];
   onInitialStateChange?: UnifiedFieldListSidebarContainerPropsWithRestorableState['onInitialStateChange'];
+
+  /**
+   * Custom container for existing fields info map
+   */
+  initialExistingFieldsInfo?: ExistingFieldsFetcherParams['initialExistingFieldsInfo'];
+  onInitialExistingFieldsInfoChange?: ExistingFieldsFetcherParams['onInitialExistingFieldsInfoChange'];
 };
 
 /**
@@ -171,10 +184,14 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     variant = 'responsive',
     onFieldEdited,
     additionalFilters,
+    initialExistingFieldsInfo,
+    onInitialExistingFieldsInfoChange,
   } = props;
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
+  const shouldKeepAdHocDataViewImmutable =
+    stateService.creationOptions.shouldKeepAdHocDataViewImmutable ?? false;
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const [sidebarVisibility] = useState(() =>
@@ -222,20 +239,28 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     fromDate: querySubscriberResult.fromDate,
     toDate: querySubscriberResult.toDate,
     services,
+    initialExistingFieldsInfo,
+    onInitialExistingFieldsInfoChange,
   });
 
   const editField = useMemo(
     () =>
       dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
         ? async (fieldName?: string) => {
+            const editedDataView = shouldKeepAdHocDataViewImmutable
+              ? await prepareDataViewForEditing(dataView, data.dataViews)
+              : dataView;
             const ref = await dataViewFieldEditor.openEditor({
               ctx: {
-                dataView,
+                dataView: editedDataView,
               },
               fieldName,
               onSave: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ editedFieldName: fieldName });
+                  await onFieldEdited({
+                    editedDataView,
+                    editedFieldName: fieldName,
+                  });
                 }
               },
             });
@@ -244,10 +269,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
           }
         : undefined,
     [
+      dataView,
+      dataViewFieldEditor,
       searchMode,
       canEditDataView,
-      dataViewFieldEditor,
-      dataView,
+      shouldKeepAdHocDataViewImmutable,
+      data.dataViews,
       setFieldEditorRef,
       closeFieldListFlyout,
       onFieldEdited,
@@ -258,14 +285,20 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && editField
         ? async (fieldName: string) => {
+            const editedDataView = shouldKeepAdHocDataViewImmutable
+              ? await prepareDataViewForEditing(dataView, data.dataViews)
+              : dataView;
             const ref = await dataViewFieldEditor.openDeleteModal({
               ctx: {
-                dataView,
+                dataView: editedDataView,
               },
               fieldName,
               onDelete: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ removedFieldName: fieldName });
+                  await onFieldEdited({
+                    editedDataView,
+                    removedFieldName: fieldName,
+                  });
                 }
               },
             });
@@ -275,10 +308,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
         : undefined,
     [
       dataView,
-      setFieldEditorRef,
-      editField,
-      closeFieldListFlyout,
       dataViewFieldEditor,
+      editField,
+      shouldKeepAdHocDataViewImmutable,
+      data.dataViews,
+      setFieldEditorRef,
+      closeFieldListFlyout,
       onFieldEdited,
     ]
   );
@@ -375,10 +410,11 @@ function ButtonVariant({
   workspaceSelectedFieldNames,
 }: InternalUnifiedFieldListSidebarContainerProps) {
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
+  const styles = useMemoCss(componentStyles);
 
   return (
     <>
-      <div className="unifiedFieldListSidebar__mobile">
+      <div className="unifiedFieldListSidebar__mobile" css={styles.sidebarMobile}>
         <EuiButton
           {...buttonPropsToTriggerFlyout}
           contentProps={{
@@ -394,6 +430,7 @@ function ButtonVariant({
           />
           <EuiBadge
             className="unifiedFieldListSidebar__mobileBadge"
+            css={styles.sidebarMobileBadge}
             color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
           >
             {!workspaceSelectedFieldNames?.length || workspaceSelectedFieldNames[0] === '_source'
@@ -446,6 +483,19 @@ function ButtonVariant({
     </>
   );
 }
+
+const componentStyles = {
+  sidebarMobile: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+    }),
+  sidebarMobileBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
+      verticalAlign: 'text-bottom',
+    }),
+};
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export

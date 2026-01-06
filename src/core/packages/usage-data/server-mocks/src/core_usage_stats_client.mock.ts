@@ -8,9 +8,10 @@
  */
 
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createUsageStatsClientMock = () =>
-  ({
+  lazyObject({
     getUsageStats: jest.fn().mockResolvedValue({}),
     getDeprecatedApiUsageStats: jest.fn().mockResolvedValue([]),
     incrementSavedObjectsBulkCreate: jest.fn().mockResolvedValue(null),

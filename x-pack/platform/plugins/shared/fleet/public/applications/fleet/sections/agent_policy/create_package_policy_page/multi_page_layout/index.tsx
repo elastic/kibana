@@ -104,6 +104,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     useMultiPageLayout: false,
     ...(integration ? { integration } : {}),
     ...(agentPolicyId ? { agentPolicyId } : {}),
+    ...(prerelease ? { prerelease: 'true' } : {}),
   });
 
   if (onSplash || !packageInfo) {

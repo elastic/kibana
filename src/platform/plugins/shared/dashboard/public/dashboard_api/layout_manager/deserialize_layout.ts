@@ -15,45 +15,50 @@ import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
+  controls: DashboardState['controlGroupInput'],
   getReferences: (id: string) => Reference[]
 ) {
+  const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
+    controls: Object.values((controls ?? { controls: {} }).controls).reduce(
+      (prev, control, index) => {
+        const controlId = control.uid ?? v4();
+        const { width, grow, type, config } = control;
+        childState[controlId] = { rawState: config }; // push to child state
+        return { ...prev, [controlId]: { type, width, grow, order: index } };
+      },
+      {}
+    ),
   };
-  const childState: DashboardChildState = {};
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
-    const panelId = panel.panelIndex ?? v4();
+    const panelId = panel.uid ?? v4();
     layout.panels[panelId] = {
       type: panel.type,
-      gridData: {
-        ...panel.gridData,
+      grid: {
+        ...panel.grid,
         ...(sectionId && { sectionId }),
-        i: panelId,
       },
     };
     childState[panelId] = {
       rawState: {
-        ...panel.panelConfig,
+        ...panel.config,
       },
       references: getReferences(panelId),
     };
   }
 
-  panels.forEach((widget) => {
+  panels?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const sectionId = widget.gridData.i ?? v4();
-      const { panels: sectionPanels, ...restOfSection } = widget;
+      const { panels: sectionPanels, uid, ...restOfSection } = widget;
+      const sectionId = uid ?? v4();
       layout.sections[sectionId] = {
         collapsed: false,
         ...restOfSection,
-        gridData: {
-          ...widget.gridData,
-          i: sectionId,
-        },
       };
-      (sectionPanels as DashboardPanel[]).forEach((panel) => {
+      sectionPanels.forEach((panel) => {
         pushPanel(panel, sectionId);
       });
     } else {

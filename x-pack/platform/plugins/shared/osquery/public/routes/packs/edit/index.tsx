@@ -15,6 +15,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -29,6 +30,8 @@ import { useDeletePack } from '../../../packs/use_delete_pack';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const EditPackPageComponent = () => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { packId } = useParams<{ packId: string }>();
   const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -105,7 +108,7 @@ const EditPackPageComponent = () => {
       isReadOnly ? (
         <>
           <EuiSpacer />
-          <EuiCallOut>
+          <EuiCallOut announceOnMount>
             <FormattedMessage
               id="xpack.osquery.editPack.prebuiltPackModeDescription"
               defaultMessage="This is a prebuilt Elastic pack. You can modify the scheduled agent policies, but you cannot edit queries in the pack."
@@ -115,6 +118,8 @@ const EditPackPageComponent = () => {
       ) : null,
     [isReadOnly]
   );
+
+  const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
 
   if (isLoading) return null;
 
@@ -128,10 +133,12 @@ const EditPackPageComponent = () => {
       {!data ? (
         <EuiSkeletonText lines={10} />
       ) : (
-        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} />
+        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} packId={packId} />
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={titleProps}
           title={
             <FormattedMessage
               id="xpack.osquery.deletePack.confirmationModal.title"

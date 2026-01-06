@@ -1,0 +1,7 @@
+version: 1.0.0
+entries:
+  - version: 1.0.0
+    changes:
+      - description: Initial version
+        type: enhancement
+        link: https://github.com/elastic/kibana/pull/123456

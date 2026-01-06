@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '../../queries';
+import type { Observable } from 'rxjs';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Condition } from '@kbn/streamlang';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { StreamQueryKql } from '../../queries';
+import type { FeatureType } from '../../feature';
 
 /**
  * SignificantEvents Get Response
@@ -26,13 +31,51 @@ type ChangePointsValue = Partial<{
   trend: string;
 }>;
 
+interface SignificantEventOccurrence {
+  date: string;
+  count: number;
+}
+
 type SignificantEventsResponse = StreamQueryKql & {
-  occurrences: Array<{ date: string; count: number }>;
+  occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
 };
 
-type SignificantEventsGetResponse = SignificantEventsResponse[];
+interface SignificantEventsGetResponse {
+  significant_events: SignificantEventsResponse[];
+  aggregated_occurrences: SignificantEventOccurrence[];
+}
 
-export type { SignificantEventsResponse, SignificantEventsGetResponse };
+type SignificantEventsPreviewResponse = Pick<
+  SignificantEventsResponse,
+  'occurrences' | 'change_points' | 'kql'
+>;
+
+interface GeneratedSignificantEventQuery {
+  title: string;
+  kql: string;
+  feature?: {
+    name: string;
+    filter: Condition;
+    type: FeatureType;
+  };
+  severity_score: number;
+  evidence?: string[];
+}
+
+type SignificantEventsGenerateResponse = Observable<
+  ServerSentEventBase<
+    'generated_queries',
+    { queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }
+  >
+>;
+
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+  GeneratedSignificantEventQuery,
+  SignificantEventsGenerateResponse,
+};

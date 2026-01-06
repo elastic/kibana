@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UnionToIntersection, ValuesType } from 'utility-types';
+import type { UnionToIntersection, ValuesType } from 'utility-types';
 import { isEqual, pull, merge, castArray } from 'lodash';
 
 /**

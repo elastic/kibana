@@ -8,12 +8,13 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { UnifiedHistogramSuggestionType } from '../types';
+import { UnifiedHistogramSuggestionType, type UnifiedHistogramVisContext } from '../types';
+import { ChartType } from '@kbn/visualization-utils';
 
 describe('LensVisService suggestions', () => {
   const dataViewMock = buildDataViewMock({
@@ -125,7 +126,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -163,7 +164,45 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
+    };
+
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+  });
+
+  test('should return histogramSuggestion with FROM for a timeseries user query', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics*' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.histogramForESQL
+    );
+    expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
+
+    const histogramQuery = {
+      esql: `FROM metrics*
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -248,7 +287,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`var0\` | sort \`var0\` asc`,
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 30 minute) | sort \`var0\` asc`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -329,9 +368,92 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`coordinates\``,
+| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+  });
+
+  test('should use ChartType.Line as preferred chart type when query has timeseries bucket aggregation and no preferred vis attributes', async () => {
+    let capturedPreferredChartType: ChartType | undefined;
+
+    await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'BUCKET(@timestamp, 1h)',
+          name: 'BUCKET(@timestamp, 1h)',
+          meta: { type: 'date', esType: 'date' },
+        },
+        {
+          id: 'COUNT()',
+          name: 'COUNT()',
+          meta: { type: 'number', esType: 'long' },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: allSuggestionsMock,
+      onLensSuggestionsApiCall: (preferredChartType) => {
+        capturedPreferredChartType = preferredChartType;
+      },
+    });
+
+    expect(capturedPreferredChartType).toBe(ChartType.Line);
+  });
+
+  test('should use preferred vis attributes chart type instead of Line for timeseries bucket aggregation queries when externalVisContext is provided', async () => {
+    let capturedPreferredChartType: ChartType | undefined;
+
+    const externalVisContext = {
+      attributes: {
+        visualizationType: 'lnsHeatmap',
+        state: {
+          query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
+          datasourceStates: { formBased: { layers: {} } },
+        },
+      },
+      requestData: {},
+      suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+    } as UnifiedHistogramVisContext;
+
+    await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'BUCKET(@timestamp, 1h)',
+          name: 'BUCKET(@timestamp, 1h)',
+          meta: { type: 'date', esType: 'date' },
+        },
+        {
+          id: 'COUNT()',
+          name: 'COUNT()',
+          meta: { type: 'number', esType: 'long' },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: allSuggestionsMock,
+      externalVisContext,
+      onLensSuggestionsApiCall: (preferredChartType) => {
+        capturedPreferredChartType = preferredChartType;
+      },
+    });
+
+    expect(capturedPreferredChartType).toBe(ChartType.Heatmap);
   });
 });

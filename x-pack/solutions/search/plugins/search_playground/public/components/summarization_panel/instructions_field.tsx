@@ -53,6 +53,14 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
         </span>
       }
       fullWidth
+      isInvalid={isEmpty(value)}
+      error={
+        isEmpty(value)
+          ? i18n.translate('xpack.searchPlayground.sidebar.instructionsField.errorMessage', {
+              defaultMessage: 'Instructions cannot be empty',
+            })
+          : undefined
+      }
     >
       <EuiTextArea
         data-test-subj="instructionsPrompt"

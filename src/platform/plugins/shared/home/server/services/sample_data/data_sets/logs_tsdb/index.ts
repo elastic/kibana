@@ -11,7 +11,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
+import type { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const logsName = i18n.translate('home.sampleData.logsTsdbSpecTitle', {
   defaultMessage: 'Sample web logs (TSDB)',

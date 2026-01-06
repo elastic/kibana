@@ -48,15 +48,12 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   incrementalId,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { releasePhase, settings } = useCasesContext();
+  const { releasePhase } = useCasesContext();
   const { euiTheme } = useEuiTheme();
 
   return (
     <header css={getHeaderCss(euiTheme, border)} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        {settings.displayIncrementalCaseId && incrementalId && (
-          <IncrementalIdText incrementalId={incrementalId} />
-        )}
         <EuiFlexItem
           css={css`
             overflow: hidden;
@@ -67,7 +64,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
 
           {border && isLoading && <EuiProgress size="xs" color="accent" />}
         </EuiFlexItem>
-
         {children && (
           <EuiFlexItem
             data-test-subj="header-page-supplements"
@@ -77,6 +73,13 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             grow={false}
           >
             {children}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        {typeof incrementalId === 'number' && (
+          <EuiFlexItem>
+            <IncrementalIdText incrementalId={incrementalId} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { XSOARSeverity } from '@kbn/connector-schemas/xsoar/constants';
 import { i18n } from '@kbn/i18n';
-import { XSOARSeverity } from '../../../common/xsoar/constants';
 
 export const severityOptions = [
   {

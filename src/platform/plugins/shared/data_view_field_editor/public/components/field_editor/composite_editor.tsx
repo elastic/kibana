@@ -26,19 +26,24 @@ import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
+import type { RuntimePrimitiveTypes } from '../../shared_imports';
 
 export interface CompositeEditorProps {
   onReset: () => void;
+  isDisabled?: boolean;
 }
 
-export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
+export const CompositeEditor = ({ onReset, isDisabled }: CompositeEditorProps) => {
   const { links, subfields$ } = useFieldEditorContext();
   const subfields = useObservable(subfields$) || {};
 
   return (
     <div data-test-subj="compositeEditor">
-      <ScriptField links={links} placeholder={"emit('field_name', 'hello world');"} />
+      <ScriptField
+        links={links}
+        placeholder={"emit('field_name', 'hello world');"}
+        disabled={isDisabled}
+      />
       <EuiSpacer size="xl" />
       <>
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
@@ -85,6 +90,7 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
                       singleSelection={{ asPlainText: true }}
                       options={RUNTIME_FIELD_OPTIONS_PRIMITIVE}
                       selectedOptions={[valueToComboBoxOption(itemValue.type)!]}
+                      isDisabled={isDisabled}
                       onChange={(newValue) => {
                         if (newValue.length === 0) {
                           // Don't allow clearing the type. One must always be selected

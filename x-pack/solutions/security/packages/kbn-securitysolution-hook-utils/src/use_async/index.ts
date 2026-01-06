@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 
-import { Task } from '../types';
+import type { Task } from '../types';
 import { useIsMounted } from '../use_is_mounted';
 
 /**

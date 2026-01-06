@@ -23,7 +23,6 @@ const EXCLUDED_TYPES = ['constant_keyword'];
 // https://github.com/elastic/ecs/blob/main/rfcs/text/0027-faas-fields.md
 // https://github.com/elastic/ecs/blob/main/rfcs/text/0035-tty-output.md
 // https://github.com/elastic/ecs/blob/main/rfcs/text/0037-host-metrics.md
-// https://github.com/elastic/ecs/blob/main/rfcs/text/0040-volume-device.md
 
 // Fields from these RFCs that are not already in the ECS component template
 // as of 8.11 are manually identified as experimental below.
@@ -47,22 +46,6 @@ const EXPERIMENTAL_FIELDS = [
   'host.memory.actual.used.pct',
   'host.memory.total',
   'process.io.bytes',
-  'volume.bus_type',
-  'volume.default_access',
-  'volume.device_name',
-  'volume.device_type',
-  'volume.dos_name',
-  'volume.file_system_type',
-  'volume.mount_name',
-  'volume.nt_name',
-  'volume.product_id',
-  'volume.product_name',
-  'volume.removable',
-  'volume.serial_number',
-  'volume.size',
-  'volume.vendor_id',
-  'volume.vendor_name',
-  'volume.writable',
 ];
 
 export const ecsFieldMap: FieldMap = Object.fromEntries(

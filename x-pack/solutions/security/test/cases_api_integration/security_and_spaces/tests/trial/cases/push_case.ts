@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type http from 'http';
 
 import expect from '@kbn/expect';
@@ -625,19 +623,25 @@ export default ({ getService }: FtrProviderContext): void => {
         const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/signals/default');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/cases/signals/default'
+          );
           await deleteAllCaseItems(es);
         });
 
         const attachAlertsAndPush = async ({
           syncAlerts = true,
-        }: { syncAlerts?: boolean } = {}) => {
+          extractObservables = true,
+        }: { syncAlerts?: boolean; extractObservables?: boolean } = {}) => {
           const { postedCase, connector } = await createCaseWithConnector({
-            createCaseReq: { ...getPostCaseRequest(), settings: { syncAlerts } },
+            createCaseReq: {
+              ...getPostCaseRequest(),
+              settings: { syncAlerts, extractObservables },
+            },
             configureReq: {
               closure_type: 'close-by-pushing',
             },

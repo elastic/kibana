@@ -11,8 +11,8 @@ import { ElasticsearchMetric } from '../../metrics';
 import { createQuery } from '../../create_query';
 import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
-import { ElasticsearchResponse } from '../../../../common/types/es';
-import { LegacyRequest } from '../../../types';
+import type { ElasticsearchResponse } from '../../../../common/types/es';
+import type { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 

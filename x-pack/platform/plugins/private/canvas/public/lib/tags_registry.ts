@@ -6,7 +6,8 @@
  */
 
 import { Registry } from '@kbn/interpreter';
-import { Tag, TagSpec } from './tag';
+import type { TagSpec } from './tag';
+import { Tag } from './tag';
 
 class TagRegistry extends Registry<TagSpec, Tag> {
   public wrapper(obj: TagSpec) {

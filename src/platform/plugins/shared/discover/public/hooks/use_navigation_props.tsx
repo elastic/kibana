@@ -13,8 +13,11 @@ import type { AggregateQuery, Query, TimeRange, Filter } from '@kbn/es-query';
 import { disableFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useHistory } from 'react-router-dom';
+import { isObject } from 'lodash';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
+import { TAB_STATE_URL_KEY } from '../../common/constants';
 
 export interface UseNavigationProps {
   dataView: DataView;
@@ -54,12 +57,22 @@ const getStateParams = ({
     appliedFilters = filters;
   }
 
+  const tabState = !isEmbeddableView
+    ? getStatesFromKbnUrl(window?.location?.href)?.[TAB_STATE_URL_KEY]
+    : undefined;
+
   return {
     columns,
     query,
     timeRange,
     filters: appliedFilters,
     savedSearchId,
+    tab:
+      tabState && isObject(tabState) && 'tabId' in tabState && typeof tabState.tabId === 'string'
+        ? {
+            id: tabState.tabId,
+          }
+        : undefined,
   };
 };
 

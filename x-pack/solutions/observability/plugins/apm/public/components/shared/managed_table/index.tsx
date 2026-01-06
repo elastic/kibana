@@ -103,6 +103,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
   tableLayout?: 'auto' | 'fixed';
   tableSearchBar?: TableSearchBar<T>;
   saveTableOptionsToUrl?: boolean;
+
+  tableCaption?: string;
+
+  'data-test-subj'?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -175,10 +179,13 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => {
     // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
-    if (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) {
+    if (
+      (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) &&
+      saveTableOptionsToUrl
+    ) {
       setTableOptions(getStateFromUrl());
     }
-  }, [getStateFromUrl, progressiveLoadingQuality, isLoading]);
+  }, [getStateFromUrl, progressiveLoadingQuality, isLoading, saveTableOptionsToUrl]);
 
   // Clean up searchQuery when fast filter is toggled off
   useEffect(() => {
@@ -295,7 +302,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      responsive={false}
+      data-test-subj={props['data-test-subj']}
+    >
       {tableSearchBar.isEnabled ? (
         <EuiFlexItem>
           <TableSearchBar
@@ -303,6 +315,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
             searchQuery={searchQuery}
             onChangeSearchQuery={onChangeSearchQuery}
             techPreview={tableSearchBar.techPreview}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       ) : null}
@@ -329,6 +342,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
+          tableCaption={props.tableCaption}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>

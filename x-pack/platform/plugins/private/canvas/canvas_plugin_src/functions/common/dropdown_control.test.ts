@@ -8,8 +8,8 @@
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);

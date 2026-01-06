@@ -8,9 +8,10 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
-import { AttackDiscoveryScheduleDataClient, AttackDiscoveryScheduleDataClientParams } from '.';
+import type { AttackDiscoveryScheduleDataClientParams } from '.';
+import { AttackDiscoveryScheduleDataClient } from '.';
 import {
   getAttackDiscoveryCreateScheduleMock,
   getAttackDiscoveryUpdateScheduleMock,

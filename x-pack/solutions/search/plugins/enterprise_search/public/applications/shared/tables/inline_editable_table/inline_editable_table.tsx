@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import classNames from 'classnames';
 
 import { useActions, useValues, BindLogic } from 'kea';
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, useUpdateEffect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PageIntroduction } from '../../page_introduction/page_introduction';
 
 import { ReorderableTable } from '../reorderable_table';
 
-import { ItemWithAnID } from '../types';
+import type { ItemWithAnID } from '../types';
 
 import { getUpdatedColumns } from './get_updated_columns';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
-import { FormErrors, InlineEditableTableColumn } from './types';
-
-import './inline_editable_tables.scss';
+import type { FormErrors, InlineEditableTableColumn } from './types';
 
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
+  ariaLabel?: string;
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
   defaultItem?: Partial<Item>;
@@ -107,6 +106,21 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
     useValues(InlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
 
+  // A11y - restore focus when editing ends
+  const prevFocusRef = useRef<HTMLElement | null>(null);
+
+  useUpdateEffect(() => {
+    if (!isEditing && prevFocusRef.current) {
+      prevFocusRef.current.focus();
+      prevFocusRef.current = null;
+    }
+  }, [isEditing]);
+
+  const handleEditNewItem = () => {
+    prevFocusRef.current = document.activeElement as HTMLElement;
+    editNewItem();
+  };
+
   // TODO These two things shoud just be selectors
   const isEditingItem = (item: Item) => item.id === editingItemId;
   const isActivelyEditing = (item: Item) => isEditing && isEditingItem(item);
@@ -126,6 +140,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
     canRemoveLastItem,
     isLoading,
     lastItemWarning,
+    prevFocusRef,
     uneditableItems,
   });
 
@@ -139,7 +154,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             size="s"
             iconType="plusInCircle"
             disabled={isEditing}
-            onClick={editNewItem}
+            onClick={handleEditNewItem}
             color="primary"
             data-test-subj="inlineEditableTableActionButton"
           >
@@ -162,7 +177,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
           }),
         })}
         rowErrors={(item) => (isActivelyEditing(item) ? rowErrors : undefined)}
-        noItemsMessage={noItemsMessage(editNewItem)}
+        noItemsMessage={noItemsMessage(handleEditNewItem)}
         onReorder={reorderItems}
         disableDragging={isEditing}
         {...rest}

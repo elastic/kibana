@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { EuiIconProps, EuiTextProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
 
 interface Props {
   label: string;
@@ -25,9 +25,7 @@ export function LabelWithHint({ label, hint, iconSize, labelSize, labelStyle }: 
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={hint}>
-          <EuiIcon type="question" size={iconSize} />
-        </EuiToolTip>
+        <EuiIconTip content={hint} type="question" size={iconSize} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

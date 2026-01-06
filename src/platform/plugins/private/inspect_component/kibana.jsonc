@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inspect-component-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "description": "A plugin which lets you inspect React components in devlopment environment.",
+  "visibility": "private",
+  "plugin": {
+    "id": "inspectComponent",
+    "browser": true,
+    "server": true,
+    "configPath": "inspect_component",
+    "requiredPlugins": [],
+    "requiredBundles": [],
+    "optionalPlugins": ["developerToolbar"]
+  }
+}

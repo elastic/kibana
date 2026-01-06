@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTourStep, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { calculateDataQuality } from '../../../util/calculate_data_quality';
+import { FeedbackButton } from '../../feedback_button';
+import {
+  ClassicStreamBadge,
+  DiscoverBadgeButton,
+  LifecycleBadge,
+  WiredStreamBadge,
+} from '../../stream_badges';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
+import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../streams_tour';
+import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
   string,
@@ -35,6 +48,37 @@ export function Wrapper({
 }) {
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
+  const { services } = useKibana();
+  const {
+    features: { groupStreams },
+  } = useStreamsPrivileges();
+  const { getStepPropsByStepId } = useStreamsTour();
+
+  const lastTrackedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // only track for ingest streams (wired and classic) which have privileges
+    if (!definition || !Streams.ingest.all.GetResponse.is(definition)) {
+      return;
+    }
+
+    // avoid duplicate tracking for the same stream and tab
+    const trackingKey = `${definition.stream.name}-${tab}`;
+    if (lastTrackedRef.current === trackingKey) {
+      return;
+    }
+
+    lastTrackedRef.current = trackingKey;
+
+    const streamType = Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic';
+
+    services.telemetryClient.trackTabVisited({
+      stream_name: definition.stream.name,
+      stream_type: streamType,
+      tab_name: tab,
+      privileges: definition.privileges,
+    });
+  }, [definition, tab, services.telemetryClient]);
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -51,47 +95,120 @@ export function Wrapper({
     })
   );
 
+  const { getStreamDocCounts } = useStreamDocCountsFetch({
+    groupTotalCountByTimestamp: false,
+    canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
+      ? definition.privileges.read_failure_store
+      : true,
+    numDataPoints: 25,
+  });
+  const docCountsFetch = getStreamDocCounts(streamId);
+
+  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
+  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
+  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
+
+  const docCount = countResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
+  const degradedDocCount =
+    degradedDocsResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
+  const failedDocCount =
+    failedDocsResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
+
+  const quality = calculateDataQuality({
+    totalDocs: docCount,
+    degradedDocs: degradedDocCount,
+    failedDocs: failedDocCount,
+  });
+  const isQualityLoading =
+    countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
+
   const { euiTheme } = useEuiTheme();
   return (
     <>
       <EuiPageHeader
         paddingSize="l"
         bottomBorder="extended"
-        breadcrumbs={[
-          {
-            href: router.link('/'),
-            text: (
-              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
-                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
-                  defaultMessage: 'Streams',
-                })}
-              </EuiButtonEmpty>
-            ),
-          },
-        ]}
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="baseline">
-            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
-              defaultMessage: 'Manage stream {streamId}',
-              values: { streamId },
-            })}
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <DiscoverBadgeButton definition={definition} />
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="baseline"
+            justifyContent="spaceBetween"
+            wrap
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
+              {streamId}
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+                <EuiFlexItem grow={true}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    {Streams.ingest.all.GetResponse.is(definition) && (
+                      <DiscoverBadgeButton
+                        definition={definition}
+                        isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
+                      />
+                    )}
+                    {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                    {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                    {Streams.ingest.all.GetResponse.is(definition) && (
+                      <LifecycleBadge
+                        lifecycle={definition.effective_lifecycle}
+                        dataTestSubj={`lifecycleBadge-${streamId}`}
+                      />
+                    )}
+                    <DatasetQualityIndicator
+                      quality={quality}
+                      isLoading={isQualityLoading}
+                      verbose={true}
+                      showTooltip={true}
+                    />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
+                {groupStreams.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                  <GroupStreamControls />
+                )}
+              </EuiFlexGroup>
             </EuiFlexGroup>
+            <FeedbackButton />
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
-          label,
-          href,
-          isSelected: tab === tabKey,
-        }))}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+          const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
+          const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
+
+          const wrappedLabel = stepProps ? (
+            <EuiTourStep
+              step={stepProps.step}
+              stepsTotal={stepProps.stepsTotal}
+              title={stepProps.title}
+              subtitle={stepProps.subtitle}
+              content={stepProps.content}
+              anchorPosition={stepProps.anchorPosition}
+              offset={stepProps.offset}
+              maxWidth={stepProps.maxWidth}
+              isStepOpen={stepProps.isStepOpen}
+              footerAction={stepProps.footerAction}
+              onFinish={stepProps.onFinish}
+            >
+              <span>{label}</span>
+            </EuiTourStep>
+          ) : (
+            label
+          );
+
+          return {
+            label: wrappedLabel,
+            href,
+            isSelected: tab === tabKey,
+          };
+        })}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {tabs[tab]?.content}
+      </StreamsAppPageTemplate.Body>
     </>
   );
 }

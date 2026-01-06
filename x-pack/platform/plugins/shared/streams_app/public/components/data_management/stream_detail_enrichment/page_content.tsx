@@ -5,39 +5,46 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  DragDropContextProps,
-  EuiAccordion,
-  EuiCode,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiResizableContainer,
-  EuiSplitPanel,
-  EuiText,
-  EuiTitle,
-  euiDragDropReorder,
-  useEuiTheme,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { EuiSplitPanel, EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isEmpty } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Streams } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DraggableProcessorListItem } from './processors_list';
-import { SortableList } from './sortable_list';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { ManagementBottomBar } from '../management_bottom_bar';
-import { AddProcessorPanel } from './processors';
+import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import type { SchemaEditorField } from '../schema_editor/types';
+import { isFieldUncommitted } from '../schema_editor/utils';
+import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
+import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
+import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
   StreamEnrichmentContextProvider,
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
+  useGetStreamEnrichmentState,
+  useStreamEnrichmentEvents,
+  useSimulatorSelector,
+  useOptionalInteractiveModeSelector,
 } from './state_management/stream_enrichment_state_machine';
+import {
+  selectIsInteractiveMode,
+  selectStreamType,
+  selectHasAnyErrors,
+} from './state_management/stream_enrichment_state_machine/selectors';
+import { StepsEditor } from './steps/steps_editor';
+import { RunSimulationButton } from './yaml_mode/run_simulation_button';
+import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
+import { buildUpsertStreamRequestPayload } from './utils';
+import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -47,7 +54,11 @@ interface StreamDetailEnrichmentContentProps {
 }
 
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
-  const { core, dependencies } = useKibana();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     data,
     streams: { streamsRepositoryClient },
@@ -63,6 +74,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
       urlStateStorageContainer={urlStateStorageContainer}
+      telemetryClient={telemetryClient}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -70,18 +82,149 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
 }
 
 export function StreamDetailEnrichmentContentImpl() {
-  const { appParams, core } = useKibana();
+  const context = useKibana();
+  const isInteractiveMode = useStreamEnrichmentSelector(selectIsInteractiveMode);
+  const isYamlMode = !isInteractiveMode;
+  const interactiveModeWithStepUnderEdit = useOptionalInteractiveModeSelector(
+    (state) => Boolean(stepUnderEditSelector(state.context)),
+    false
+  );
+  const { appParams, core } = context;
+  const { onPageReady } = usePerformanceContext();
 
+  const getStreamEnrichmentState = useGetStreamEnrichmentState();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
-  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
+  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
+
+  // Calculate schemaEditorFields with result property
+  const schemaEditorFields = React.useMemo(() => {
+    // Create lookup maps for efficient comparison
+    const definitionFieldsMap = new Map(definitionFields.map((field) => [field.name, field]));
+
+    // Convert definitionFields to SchemaEditorField[] for uncommitted comparison
+    const storedFields: SchemaEditorField[] = Array.from(definitionFieldsMap.values());
+
+    const result: SchemaEditorField[] = [];
+
+    // Create a set of field names in samples for quick lookup
+    const fieldsInSamplesSet = new Set(fieldsInSamples);
+
+    // Process only detected fields
+    detectedFields.forEach((detectedField) => {
+      const definitionField = definitionFieldsMap.get(detectedField.name);
+      const isInSamples = fieldsInSamplesSet.has(detectedField.name);
+      let fieldResult: SchemaEditorField['result'];
+
+      if (isInSamples) {
+        // Field exists in samples AND in detected fields - modified by the simulated processing steps
+        fieldResult = 'modified';
+      } else {
+        // Field not in samples - newly created by the processing steps
+        fieldResult = 'created';
+      }
+
+      let editorField: SchemaEditorField;
+
+      // If the detected field matches an inherited field, preserve the inherited properties
+      if (definitionField) {
+        // Merge with definition field to preserve any additional properties
+        editorField = {
+          ...definitionField,
+          ...detectedField,
+          result: fieldResult,
+        };
+      } else {
+        editorField = {
+          ...detectedField,
+          result: fieldResult,
+        };
+      }
+
+      // Mark field as uncommitted if it's new or modified from stored state
+      editorField.uncommitted = isFieldUncommitted(editorField, storedFields);
+
+      result.push(editorField);
+    });
+
+    return result;
+  }, [detectedFields, fieldsInSamples, definitionFields]);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (isReady && definition) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'schemaEditorFields',
+          value1: schemaEditorFields.length,
+        },
+      });
+    }
+  }, [isReady, definition, onPageReady, schemaEditorFields.length]);
+
+  const hasDefinitionError = useSimulatorSelector((snapshot) =>
+    Boolean(snapshot.context.simulation?.definition_error)
+  );
+
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
   );
   const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
+
+  const hasAnyErrors = useStreamEnrichmentSelector((state) => selectHasAnyErrors(state.context));
+
+  const nextDSL = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
+
+  const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
+  // Pipeline suggestion state from interactive mode machine (defaults to false when not in interactive mode)
+  const isLoadingSuggestion = useOptionalInteractiveModeSelector(
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }),
+    false
+  );
+  const isViewingSuggestion = useOptionalInteractiveModeSelector(
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }),
+    false
+  );
+  const isSuggestionVisible = isLoadingSuggestion || isViewingSuggestion;
+
+  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit && !isSuggestionVisible;
+
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
+
+  const onBottomBarViewCodeClick = () => {
+    const { context: enrichmentContext } = getStreamEnrichmentState();
+    const body = buildUpsertStreamRequestPayload(
+      enrichmentContext.definition,
+      nextDSL,
+      getUpsertFields(enrichmentContext)
+    );
+
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${enrichmentContext.definition.stream.name}/_ingest`,
+      body,
+    });
+  };
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -96,8 +239,29 @@ export function StreamDetailEnrichmentContentImpl() {
     return null;
   }
 
+  const openConfirmationModal = () => {
+    const overlay = core.overlays.openModal(
+      toMountPoint(
+        <StreamsAppContextProvider context={context}>
+          <SchemaChangesReviewModal
+            fields={schemaEditorFields}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
+            definition={definition}
+            storedFields={definitionFields}
+            submitChanges={async () => saveChanges()}
+            onClose={() => overlay.close()}
+          />
+        </StreamsAppContextProvider>,
+        core
+      ),
+      {
+        maxWidth: 500,
+      }
+    );
+  };
+
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer grow hasShadow={false}>
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`
@@ -112,237 +276,82 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
-                <ProcessorsEditor />
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="m"
+                  css={css`
+                    padding-bottom: ${showManagementBar ? '65px' : undefined};
+                    height: 100%;
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EditModeToggle />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow />
+                      {isYamlMode && (
+                        <EuiFlexItem grow={false}>
+                          <RunSimulationButton />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow style={{ minHeight: 0, overflow: 'auto' }}>
+                    {isYamlMode ? <YamlEditorWrapper /> : <StepsEditor />}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiResizablePanel>
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+              <EuiResizableButton indicator="border" />
               <EuiResizablePanel
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="s"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
-                <MemoSimulationPlayground />
+                <MemoSimulationPlayground schemaEditorFields={schemaEditorFields} />
               </EuiResizablePanel>
             </>
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
+      {showManagementBar && (
         <ManagementBottomBar
           onCancel={resetChanges}
-          onConfirm={saveChanges}
+          onConfirm={
+            schemaEditorFields.length > 0 &&
+            getChanges(schemaEditorFields, definitionFields).length > 0
+              ? openConfirmationModal
+              : saveChanges
+          }
           isLoading={isSavingChanges}
-          disabled={!hasChanges}
+          disabled={!canUpdate || isSimulating || interactiveModeWithStepUnderEdit}
           insufficientPrivileges={!canManage}
+          isInvalid={hasDefinitionError || hasAnyErrors}
+          onViewCodeClick={onBottomBarViewCodeClick}
+          streamType={streamType}
         />
-      </EuiSplitPanel.Inner>
+      )}
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewFlyoutCodeContent}
+          onClose={closeRequestPreviewFlyout}
+        />
+      )}
     </EuiSplitPanel.Outer>
   );
 }
 
-const ProcessorsEditor = React.memo(() => {
-  const { euiTheme } = useEuiTheme();
-
-  const { reorderProcessors } = useStreamEnrichmentEvents();
-  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-
-  const processorsRefs = useStreamEnrichmentSelector((state) =>
-    state.context.processorsRefs.filter((processorRef) =>
-      processorRef.getSnapshot().matches('configured')
-    )
-  );
-
-  const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
-
-  const errors = useMemo(() => {
-    if (!simulation) {
-      return { ignoredFields: [], mappingFailures: [] };
-    }
-
-    const ignoredFieldsSet = new Set<string>();
-    const mappingFailuresSet = new Set<string>();
-
-    simulation.documents.forEach((doc) => {
-      doc.errors.forEach((error) => {
-        if (error.type === 'ignored_fields_failure') {
-          error.ignored_fields.forEach((ignored) => {
-            ignoredFieldsSet.add(ignored.field);
-          });
-        }
-
-        if (error.type === 'field_mapping_failure' && mappingFailuresSet.size < 2) {
-          mappingFailuresSet.add(error.message);
-        }
-      });
-    });
-
-    return {
-      ignoredFields: Array.from(ignoredFieldsSet),
-      mappingFailures: Array.from(mappingFailuresSet),
-    };
-  }, [simulation]);
-
-  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      const items = euiDragDropReorder(processorsRefs, source.index, destination.index);
-      reorderProcessors(items);
-    }
-  };
-
-  const hasProcessors = !isEmpty(processorsRefs);
-
-  return (
-    <>
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        borderRadius="none"
-        grow={false}
-        css={css`
-          border-bottom: ${euiTheme.border.thin};
-        `}
-      >
-        <EuiTitle size="xxs">
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
-              {
-                defaultMessage: 'Processors for field extraction',
-              }
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiText component="p" size="xs">
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
-            {
-              defaultMessage: 'Drag and drop existing processors to update their execution order.',
-            }
-          )}
-        </EuiText>
-      </EuiPanel>
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        borderRadius="none"
-        css={css`
-          overflow: auto;
-        `}
-      >
-        {hasProcessors && (
-          <SortableList onDragItem={handlerItemDrag}>
-            {processorsRefs.map((processorRef, idx) => (
-              <DraggableProcessorListItem
-                disableDrag={!definition.privileges.simulate}
-                key={processorRef.id}
-                idx={idx}
-                processorRef={processorRef}
-                processorMetrics={simulation?.processors_metrics[processorRef.id]}
-              />
-            ))}
-          </SortableList>
-        )}
-        {definition.privileges.simulate && <AddProcessorPanel />}
-      </EuiPanel>
-      <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
-        {!isEmpty(errors.ignoredFields) && (
-          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-            <EuiAccordion
-              id="ignored-fields-failures-accordion"
-              initialIsOpen
-              buttonContent={
-                <strong>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                    { defaultMessage: 'Some fields were ignored during the simulation.' }
-                  )}
-                </strong>
-              }
-            >
-              <EuiText component="p" size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
-                    {
-                      defaultMessage:
-                        'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
-                    }
-                  )}
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                    defaultMessage="The ignored fields are: {fields}"
-                    values={{
-                      fields: (
-                        <EuiFlexGroup
-                          gutterSize="s"
-                          css={css`
-                            margin-top: ${euiTheme.size.s};
-                          `}
-                        >
-                          {errors.ignoredFields.map((field) => (
-                            <EuiCode>{field}</EuiCode>
-                          ))}
-                        </EuiFlexGroup>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiAccordion>
-          </EuiPanel>
-        )}
-        {!isEmpty(errors.mappingFailures) && (
-          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-            <EuiAccordion
-              id="mapping-failures-accordion"
-              initialIsOpen
-              buttonContent={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
-                {
-                  defaultMessage: 'Field conflicts during simulation',
-                }
-              )}
-            >
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                    defaultMessage="These are some mapping failures that occurred during the simulation:"
-                  />
-                </p>
-                <ul>
-                  {errors.mappingFailures.map((failureMessage, id) => (
-                    <li key={id}>
-                      <EuiText css={clampTwoLines} size="s">
-                        {failureMessage}
-                      </EuiText>
-                    </li>
-                  ))}
-                </ul>
-              </EuiText>
-            </EuiAccordion>
-          </EuiPanel>
-        )}
-      </EuiPanel>
-    </>
-  );
-});
-
 const verticalFlexCss = css`
   display: flex;
   flex-direction: column;
-`;
-
-const clampTwoLines = css`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;

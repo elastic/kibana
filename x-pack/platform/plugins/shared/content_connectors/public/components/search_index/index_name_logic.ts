@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 export interface IndexNameProps {
   indexName: string;
@@ -27,7 +28,6 @@ export const IndexNameLogic = kea<MakeLogicType<IndexNameValues, IndexNameAction
       // Short-circuiting this to empty string is necessary to enable testing logics relying on this
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setIndexName: (_, { indexName }) => indexName,
       },
     ],

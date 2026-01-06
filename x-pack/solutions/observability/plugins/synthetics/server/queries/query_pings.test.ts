@@ -6,7 +6,7 @@
  */
 
 import { queryPings } from './query_pings';
-import { SyntheticsEsClient } from '../lib';
+import type { SyntheticsEsClient } from '../lib';
 
 jest.mock('../lib'); // Mock the ES client module
 

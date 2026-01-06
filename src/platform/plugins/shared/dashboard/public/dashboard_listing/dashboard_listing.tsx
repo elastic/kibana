@@ -14,10 +14,10 @@ import { TableListView } from '@kbn/content-management-table-list-view';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 
-import { DASHBOARD_APP_ID } from '../../common/constants';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import {
   coreServices,
   savedObjectsTaggingService,
@@ -27,7 +27,7 @@ import {
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
 
 export const DashboardListing = ({
   children,
@@ -54,7 +54,7 @@ export const DashboardListing = ({
   });
 
   const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
       http: coreServices.http,
       usageCollection: usageCollectionService,
       userProfile: coreServices.userProfile,

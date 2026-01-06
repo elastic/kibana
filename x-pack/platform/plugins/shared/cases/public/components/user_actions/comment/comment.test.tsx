@@ -15,8 +15,10 @@ import { UserActionActions } from '../../../../common/types/domain';
 import {
   alertComment,
   basicCase,
+  eventComment,
   externalReferenceAttachment,
   getAlertUserAction,
+  getEventUserAction,
   getExternalReferenceAttachment,
   getExternalReferenceUserAction,
   getHostIsolationUserAction,
@@ -512,6 +514,77 @@ describe('createCommentUserActionBuilder', () => {
 
       await waitFor(() => {
         expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: '1234', tabId: 'alerts' });
+      });
+    });
+  });
+
+  describe('Single event', () => {
+    it('renders correctly a single event', async () => {
+      const userAction = getEventUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+    });
+
+    it('deletes a single event correctly', async () => {
+      const userAction = getEventUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+        },
+        attachments: [eventComment],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('single-event-user-action-event-action-id')).toHaveTextContent(
+        'added an event'
+      );
+
+      await deleteAttachment('minusInCircle', 'Remove');
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'event-comment-id',
+          'Deleted one event'
+        );
+      });
+    });
+
+    it('views an event correctly', async () => {
+      const userAction = getEventUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+        },
+        attachments: [eventComment],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('comment-action-show-event-event-action-id')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('comment-action-show-event-event-action-id'));
+
+      await waitFor(() => {
+        expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('event-id-1', 'event-index-1');
       });
     });
   });

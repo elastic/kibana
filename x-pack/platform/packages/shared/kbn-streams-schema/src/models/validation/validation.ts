@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { DeepStrict } from '@kbn/zod-helpers';
 
 type Is<TLeft, TRight extends TLeft> = (value: TLeft) => value is TRight;

@@ -74,9 +74,6 @@ export const X509Type = t.intersection([
 export type X509 = t.TypeOf<typeof X509Type>;
 
 export const TlsType = t.partial({
-  // deprecated in favor of server.x509.not_after/not_before
-  certificate_not_valid_after: t.string,
-  certificate_not_valid_before: t.string,
   cipher: t.string,
   established: t.boolean,
   server: t.partial({

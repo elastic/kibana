@@ -8,12 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiCallOut,
   EuiCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
@@ -23,21 +25,38 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '@kbn/doc-links';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
-  const { capabilities, setBreadcrumbs, navigateToApp, buildFlavor, kibanaBranch } =
-    useAppContext();
-  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
-  const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
+  const {
+    capabilities,
+    setBreadcrumbs,
+    navigateToApp,
+    buildFlavor,
+    kibanaBranch,
+    securityAIAssistantEnabled,
+    chatExperience$,
+  } = useAppContext();
+
+  const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
+
+  const observabilityAIAssistantEnabled =
+    capabilities.observabilityAIAssistant?.show && chatExperience !== AIChatExperience.Agent;
+
+  const securityAIAssistantVisibility = Boolean(
+    capabilities.securitySolutionAssistant['ai-assistant']
+  );
+  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && securityAIAssistantVisibility;
+
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
-  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant.home;
 
   useEffect(() => {
     setBreadcrumbs([
       {
         text: i18n.translate('aiAssistantManagementSelection.breadcrumb.index', {
-          defaultMessage: 'AI Assistant',
+          defaultMessage: 'AI Assistants',
         }),
       },
     ]);
@@ -50,7 +69,7 @@ export function AiAssistantSelectionPage() {
           {i18n.translate(
             'aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel',
             {
-              defaultMessage: 'AI Assistant',
+              defaultMessage: 'AI Assistants',
             }
           )}
         </h2>
@@ -80,6 +99,7 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
+                      announceOnMount
                       iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
@@ -121,7 +141,7 @@ export function AiAssistantSelectionPage() {
                     data-test-subj="pluginsAiAssistantSelectionPageButton"
                     onClick={() =>
                       navigateToApp('management', {
-                        path: 'kibana/observabilityAiAssistantManagement',
+                        path: 'ai/observabilityAiAssistantManagement',
                       })
                     }
                   >
@@ -135,7 +155,22 @@ export function AiAssistantSelectionPage() {
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoObservability" />}
+            icon={
+              <EuiFlexGroup
+                gutterSize="m"
+                alignItems="center"
+                responsive={false}
+                direction="row"
+                justifyContent="center"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoObservability" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isDisabled={!observabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
@@ -148,17 +183,17 @@ export function AiAssistantSelectionPage() {
           <EuiCard
             description={
               <div>
-                {!securityAIAssistantEnabled ? (
+                {!isSecurityAIAssistantEnabled ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
+                      announceOnMount
                       iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
                         {
-                          defaultMessage:
-                            'This feature is disabled. You can enable it from from Spaces > Features.',
+                          defaultMessage: 'This feature is disabled.',
                         }
                       )}
                       size="s"
@@ -188,12 +223,12 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                {securityAIAssistantEnabled && (
+                {isSecurityAIAssistantEnabled && (
                   <EuiButton
                     data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
                     iconType="gear"
                     onClick={() =>
-                      navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
+                      navigateToApp('management', { path: 'ai/securityAiAssistantManagement' })
                     }
                   >
                     {i18n.translate(
@@ -207,7 +242,7 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={<EuiIcon size="xxl" type="logoSecurity" />}
-            isDisabled={!securityAIAssistantEnabled}
+            isDisabled={!isSecurityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',
               { defaultMessage: 'Elastic AI Assistant for Security' }

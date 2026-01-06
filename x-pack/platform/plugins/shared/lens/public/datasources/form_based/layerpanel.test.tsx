@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { FormBasedPrivateState } from './types';
-import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
+import type { FormBasedPrivateState, TermsIndexPatternColumn } from '@kbn/lens-common';
+import type { FormBasedLayerPanelProps } from './layerpanel';
+import { LayerPanel } from './layerpanel';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { getFieldByNameFactory } from './pure_helpers';
-import { TermsIndexPatternColumn } from './operations';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../test_utils/test_utils';
 

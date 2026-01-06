@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 import {
   EuiCallOut,
@@ -18,10 +19,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { CancelLoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
-import { StepProgress, StepProgressStep } from '../../../../../common/step_progress';
+import type { StepProgressStep } from '../../../../../common/step_progress';
+import { StepProgress } from '../../../../../common/step_progress';
 import { getReindexProgressLabel } from '../../../../../../../lib/utils';
 
 const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({

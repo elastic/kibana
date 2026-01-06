@@ -4,11 +4,17 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "url_components": {
       "task_type": [
         "completion",
+        "rerank",
         "text_embedding"
       ]
     },

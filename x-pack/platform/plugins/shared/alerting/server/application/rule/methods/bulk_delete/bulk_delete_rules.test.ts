@@ -41,11 +41,18 @@ import {
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+
+jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+const softDeleteGapsMock = softDeleteGaps as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -56,6 +63,8 @@ const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
+const eventLogClient = eventLogClientMock.create();
+const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -86,6 +95,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  eventLogger,
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
@@ -100,8 +110,8 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
 });
 
 beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   jest.clearAllMocks();
+  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
 });
 
 setGlobalDate();
@@ -170,6 +180,13 @@ describe('bulkDelete', () => {
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
   });
 
   test('should successfully delete two rule and return right actions', async () => {
@@ -193,15 +210,23 @@ describe('bulkDelete', () => {
       })),
       undefined
     );
-
+    const ruleIds = ['id1', 'id2'];
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(ruleIds);
     expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
     expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
-      ruleIds: ['id1', 'id2'],
+      ruleIds,
       namespace: 'default',
       unsecuredSavedObjectsClient,
     });
+
+    expect(softDeleteGapsMock).toHaveBeenCalledWith({
+      ruleIds,
+      eventLogClient,
+      logger,
+      eventLogger,
+    });
+
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
@@ -214,6 +239,25 @@ describe('bulkDelete', () => {
       total: 2,
       taskIdsFailedToBeDeleted: [],
     });
+  });
+
+  test('swallows errors when soft deleting gaps fails', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    softDeleteGapsMock.mockRejectedValue(new Error('Boom!'));
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to soft delete gaps for rules: id1,id2: Boom!'
+    );
   });
 
   test('should try to delete rules, two successful and one with 500 error', async () => {
@@ -314,6 +358,14 @@ describe('bulkDelete', () => {
       namespace: 'default',
       unsecuredSavedObjectsClient,
     });
+
+    expect(softDeleteGapsMock).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id2'],
+      eventLogClient,
+      logger,
+      eventLogger,
+    });
+
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -392,7 +444,7 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should thow an error if number of matched rules greater than 10,000', async () => {
+  test('should throw an error if number of matched rules greater than 10,000', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {
@@ -581,6 +633,70 @@ describe('bulkDelete', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(
+        // @ts-expect-error: not all args are required for this test
+        new Map([
+          ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          [
+            'test.internal-rule-type-2',
+            { id: 'test.internal-rule-type-2', internallyManaged: true },
+          ],
+        ])
+      );
+
+      // @ts-expect-error: not all args are required for this test
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter: nodeBuilder.and([
+          nodeBuilder.is('alert.attributes.alertTypeId', 'foo'),
+          nodeBuilder.is('alert.attributes.consumer', 'bar'),
+        ]),
+      });
+    });
+
+    it('should ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await rulesClient.bulkDeleteRules({
+        filter: 'alert.attributes.tags: "APM"',
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+    });
+
+    it('should not ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await rulesClient.bulkDeleteRules({
+        filter: 'alert.attributes.tags: "APM"',
+        ignoreInternalRuleTypes: false,
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
     });
   });
 });

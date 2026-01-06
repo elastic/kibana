@@ -18,6 +18,7 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const element = document.createElement('button');
 document.body.appendChild(element);

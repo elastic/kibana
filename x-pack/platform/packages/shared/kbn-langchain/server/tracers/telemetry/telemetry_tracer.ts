@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
-import { Run } from 'langsmith/schemas';
+import type { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
+import type { Run } from 'langsmith/schemas';
 import { BaseTracer } from '@langchain/core/tracers/base';
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { BaseMessage } from '@langchain/core/messages';
+import { containsToolCalls } from '../../utils/tools';
 
 export interface TelemetryParams {
   assistantStreamingEnabled: boolean;
@@ -22,11 +24,7 @@ export interface LangChainTracerFields extends BaseCallbackHandlerInput {
   telemetry: AnalyticsServiceSetup;
   telemetryParams: TelemetryParams;
 }
-interface ToolRunStep {
-  action: {
-    tool: string;
-  };
-}
+
 /**
  * TelemetryTracer is a tracer that uses event based telemetry to track LangChain events.
  */
@@ -44,36 +42,61 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
     this.telemetryParams = fields.telemetryParams;
   }
 
+  async onToolError(run: Run) {
+    const eventType = 'invoke_assistant_error';
+    const telemetryValue = {
+      actionTypeId: this.telemetryParams.actionTypeId,
+      model: this.telemetryParams.model,
+      errorMessage: run.error,
+      assistantStreamingEnabled: this.telemetryParams.assistantStreamingEnabled,
+      isEnabledKnowledgeBase: this.telemetryParams.isEnabledKnowledgeBase,
+      errorLocation: `executeTools-${run.name}`,
+    };
+
+    this.logger.debug(
+      () => `Invoke ${eventType} telemetry:\n${JSON.stringify(telemetryValue, null, 2)}`
+    );
+    this.telemetry.reportEvent(eventType, telemetryValue);
+  }
+
   async onChainEnd(run: Run): Promise<void> {
     if (!run.parent_run_id) {
       const { eventType, ...telemetryParams } = this.telemetryParams;
+
       const toolsInvoked =
-        run?.outputs && run?.outputs.steps.length
-          ? run.outputs.steps.reduce((acc: { [k: string]: number }, event: ToolRunStep | never) => {
-              if ('action' in event && event?.action?.tool) {
-                if (this.elasticTools.includes(event.action.tool)) {
-                  return {
-                    ...acc,
-                    ...(event.action.tool in acc
-                      ? { [event.action.tool]: acc[event.action.tool] + 1 }
-                      : { [event.action.tool]: 1 }),
-                  };
-                } else {
-                  // Custom tool names are user data, so we strip them out
-                  return {
-                    ...acc,
-                    ...('CustomTool' in acc
-                      ? { CustomTool: acc.CustomTool + 1 }
-                      : { CustomTool: 1 }),
-                  };
-                }
+        run?.outputs && run?.outputs.messages.length
+          ? run.outputs.messages.reduce((acc: { [k: string]: number }, message: BaseMessage) => {
+              if (containsToolCalls(message)) {
+                // Calculate counts for each tool call for the message
+                const toolCountForMessage = message.tool_calls.reduce(
+                  (messageToolUseCount, toolCall) => {
+                    const toolName = this.elasticTools.includes(toolCall.name)
+                      ? toolCall.name
+                      : 'CustomTool';
+
+                    if (!(toolName in messageToolUseCount)) {
+                      messageToolUseCount[toolName] = 0;
+                    }
+                    messageToolUseCount[toolName] += 1;
+                    return messageToolUseCount;
+                  },
+                  {} as Record<string, number>
+                );
+
+                // Merge the counts into the accumulator
+                Object.entries(toolCountForMessage).forEach(([toolName, count]) => {
+                  if (!(toolName in acc)) {
+                    acc[toolName] = 0;
+                  }
+                  acc[toolName] += count;
+                });
               }
               return acc;
             }, {})
           : {};
       const telemetryValue = {
         ...telemetryParams,
-        durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
+        durationMs: (Number(run.end_time) || 0) - (Number(run.start_time) || 0),
         toolsInvoked,
         ...(telemetryParams.actionTypeId === '.gen-ai'
           ? { isOssModel: run.inputs.isOssModel }

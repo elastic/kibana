@@ -7,7 +7,8 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSteps, EuiStepStatus, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiSteps, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useAppContext } from '../../app_context';
@@ -133,6 +134,7 @@ export const CreatePolicyWizard = () => {
       {createError && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
               defaultMessage: 'Unable to create your policy',
             })}

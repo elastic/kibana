@@ -8,17 +8,10 @@
  */
 
 import React, { lazy, Suspense, useState } from 'react';
-import {
-  EuiButton,
-  EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToken,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiDescribedFormGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import * as i18n from '../translations';
@@ -50,11 +43,6 @@ export const AlertDeleteDescriptiveFormGroup = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <h3>{i18n.RULE_SETTINGS_TITLE}</h3>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION}>
-                <EuiToken className="eui-alignBottom" iconType="flask" size="m" shape="circle" />
-              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

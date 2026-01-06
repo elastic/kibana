@@ -7,8 +7,9 @@
 
 import type { Subscription } from 'rxjs';
 import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import pRetry from 'p-retry';
 
 import type { AgentPolicySOAttributes } from '../types';
 import type { LicenseService } from '../../common/services/license';
@@ -17,8 +18,10 @@ import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from '../../common/services/agent_policy_config';
+
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { appContextService } from './app_context';
+import { getSpaceForAgentPolicy } from './spaces/helpers';
 
 export class PolicyWatcher {
   private subscription: Subscription | undefined;
@@ -26,7 +29,22 @@ export class PolicyWatcher {
   constructor(private logger: Logger) {}
 
   public start(licenseService: LicenseService) {
-    this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
+    this.subscription = licenseService
+      .getLicenseInformation$()
+      ?.subscribe(async (license: ILicense) => {
+        await pRetry(this.watch.bind(this, license), {
+          retries: 3,
+          minTimeout: 1000,
+          maxTimeout: 5000,
+          onFailedAttempt: (error) => {
+            this.logger.warn(
+              `Failed to process agent policy license compliance (attempt ${error.attemptNumber}/${
+                error.retriesLeft + error.attemptNumber
+              }): ${error.message}`
+            );
+          },
+        });
+      });
   }
 
   public stop() {
@@ -48,38 +66,45 @@ export class PolicyWatcher {
 
     const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
 
-    for await (const agentPolicyPageResults of agentPolicyFetcher) {
-      const policiesToUpdate = agentPolicyPageResults.reduce((acc: AgentPolicy[], policy) => {
-        if (!isAgentPolicyValidForLicense(policy, license)) {
-          acc.push(unsetAgentPolicyAccordingToLicenseLevel(policy, license) as AgentPolicy);
+    try {
+      for await (const agentPolicyPageResults of agentPolicyFetcher) {
+        const policiesToUpdate = agentPolicyPageResults.reduce((acc: AgentPolicy[], policy) => {
+          if (!isAgentPolicyValidForLicense(policy, license)) {
+            acc.push(unsetAgentPolicyAccordingToLicenseLevel(policy, license) as AgentPolicy);
+          }
+          return acc;
+        }, []);
+
+        if (policiesToUpdate.length === 0) {
+          break;
         }
-        return acc;
-      }, []);
+        const savedObjectType = await getAgentPolicySavedObjectType();
 
-      if (policiesToUpdate.length === 0) {
-        break;
+        const { saved_objects: bulkUpdateSavedObjects } =
+          await soClient.bulkUpdate<AgentPolicySOAttributes>(
+            policiesToUpdate.map((policy) => {
+              const { id, revision, ...policyContent } = policy;
+              const updatedPolicy = {
+                type: savedObjectType,
+                id,
+                attributes: {
+                  ...policyContent,
+                  revision: revision + 1,
+                  updated_at: new Date().toISOString(),
+                  updated_by: 'system',
+                },
+                ...(policyContent.space_ids?.length
+                  ? { namespace: getSpaceForAgentPolicy(policyContent) }
+                  : {}),
+              };
+              return updatedPolicy;
+            })
+          );
+        updatedAgentPolicies.push(...bulkUpdateSavedObjects);
       }
-      const savedObjectType = await getAgentPolicySavedObjectType();
-
-      const { saved_objects: bulkUpdateSavedObjects } =
-        await soClient.bulkUpdate<AgentPolicySOAttributes>(
-          policiesToUpdate.map((policy) => {
-            const { id, revision, ...policyContent } = policy;
-            const updatedPolicy = {
-              type: savedObjectType,
-              id,
-              attributes: {
-                ...policyContent,
-                revision: revision + 1,
-                updated_at: new Date().toISOString(),
-                updated_by: 'system',
-              },
-              ...(policyContent.space_ids?.length ? { namespace: policyContent.space_ids[0] } : {}),
-            };
-            return updatedPolicy;
-          })
-        );
-      updatedAgentPolicies.push(...bulkUpdateSavedObjects);
+    } catch (error) {
+      log.error(`Unable to process agent policy license compliance: ${error.message}`);
+      return;
     }
 
     const failedPolicies: Array<{
@@ -102,23 +127,25 @@ export class PolicyWatcher {
       log.info(`All agent policies are compliant, nothing to do!`);
     } else if (updatedPoliciesSuccess.length && failedPolicies.length) {
       const totalPolicies = updatedPoliciesSuccess.length + failedPolicies.length;
-      log.error(
-        `Done - ${
-          failedPolicies.length
-        } out of ${totalPolicies} were unsuccessful. Errors encountered:\n${failedPolicies
-          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
-          .join('\n')}`
-      );
+      const message = `Done - ${
+        failedPolicies.length
+      } out of ${totalPolicies} were unsuccessful. Errors encountered:\n${failedPolicies
+        .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
+        .join('\n')}`;
+      log.error(message);
+      throw new Error(message);
     } else if (updatedPoliciesSuccess.length) {
       log.info(
         `Done - ${updatedPoliciesSuccess.length} out of ${updatedPoliciesSuccess.length} were successful. No errors encountered.`
       );
     } else {
-      log.error(
-        `Done - all ${failedPolicies.length} failed to update. Errors encountered:\n${failedPolicies
-          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
-          .join('\n')}`
-      );
+      const message = `Done - all ${
+        failedPolicies.length
+      } failed to update. Errors encountered:\n${failedPolicies
+        .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
+        .join('\n')}`;
+      log.error(message);
+      throw new Error(message);
     }
   }
 }

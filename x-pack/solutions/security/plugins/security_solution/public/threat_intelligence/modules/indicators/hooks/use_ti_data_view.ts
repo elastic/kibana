@@ -6,9 +6,15 @@
  */
 
 import { useMemo } from 'react';
+import type { SelectedDataView } from '../../../../sourcerer/store/model';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { DESCRIPTION } from './translations';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import type { BrowserFields } from '../../../types';
 
 /**
  * Inline definition for a runtime field "threat.indicator.name" we are adding for indicators grid
@@ -23,29 +29,57 @@ const indicatorNameField = {
   esTypes: ['keyword'],
 } as const;
 
-export const useTIDataView = () => {
-  const sourcererDataView = useSourcererDataView();
+export const useTIDataView = (): SelectedDataView => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const oldDataView = useSourcererDataView();
+  const { dataView, status } = useDataView();
+
+  const experimentalBrowserFields = useBrowserFields();
+  const experimentalSelectedPatterns = useSelectedPatterns();
 
   const browserFields = useMemo(() => {
-    const { threat = { fields: {} } } = sourcererDataView.browserFields;
+    const { threat = { fields: {} } } = newDataViewPickerEnabled
+      ? experimentalBrowserFields
+      : oldDataView.browserFields;
 
     return {
-      ...sourcererDataView.browserFields,
+      ...(newDataViewPickerEnabled ? experimentalBrowserFields : oldDataView.browserFields),
       threat: {
         fields: {
           ...threat.fields,
           [indicatorNameField.name]: indicatorNameField,
         },
       },
-    };
-  }, [sourcererDataView.browserFields]);
+    } as BrowserFields;
+  }, [experimentalBrowserFields, newDataViewPickerEnabled, oldDataView.browserFields]);
 
   return useMemo(
-    () => ({
-      ...sourcererDataView,
+    () =>
+      ({
+        ...(newDataViewPickerEnabled
+          ? {
+              sourcererDataView: {
+                fields: dataView.fields.toSpec(),
+                title: dataView.title,
+                id: dataView.id,
+              },
+              loading: status !== 'ready',
+              dataViewId: dataView.id,
+              indicesExist: dataView.hasMatchedIndices(),
+            }
+          : oldDataView),
+        browserFields,
+        selectedPatterns: newDataViewPickerEnabled
+          ? experimentalSelectedPatterns
+          : oldDataView.selectedPatterns,
+      } as SelectedDataView),
+    [
       browserFields,
-      patternList: sourcererDataView.selectedPatterns,
-    }),
-    [browserFields, sourcererDataView]
+      dataView,
+      experimentalSelectedPatterns,
+      newDataViewPickerEnabled,
+      oldDataView,
+      status,
+    ]
   );
 };

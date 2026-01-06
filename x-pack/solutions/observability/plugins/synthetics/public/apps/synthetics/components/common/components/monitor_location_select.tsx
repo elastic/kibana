@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
 
-import {
+import type {
   EncryptedSyntheticsSavedMonitor,
   ServiceLocation,
 } from '../../../../../../common/runtime_types';

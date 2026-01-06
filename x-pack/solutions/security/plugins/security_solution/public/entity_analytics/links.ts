@@ -12,6 +12,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -19,12 +20,6 @@ import privilegedUserMonitoringPageImg from '../common/images/privileged_user_mo
 import eaOverviewPageImg from '../common/images/ea_overview_page.png';
 
 const privMonLinks: LinkItem = {
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.navigation.privilegedUserMonitoring.betaStatus', {
-      defaultMessage: 'TECHNICAL PREVIEW',
-    }),
-  },
   id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
   title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
   description: i18n.translate(
@@ -41,7 +36,6 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
@@ -71,22 +65,48 @@ const eaOverviewLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  // Hide overview when threat hunting is enabled
+  hideWhenExperimentalKey: 'entityThreatHuntingEnabled',
+};
+
+const threatHuntingLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsThreatHunting,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting', {
+    defaultMessage: 'Entity Threat Hunting',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.threatHunting.description',
+    {
+      defaultMessage:
+        'Threat hunting interface for analyzing entity risk scores, anomalies, and investigating potential security threats across users, hosts, and services.',
+    }
+  ),
+  path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting.keywords', {
+      defaultMessage: 'threat hunting',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+  experimentalKey: 'entityThreatHuntingEnabled',
 };
 
 export const entityAnalyticsLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsLanding,
   title: ENTITY_ANALYTICS,
   path: ENTITY_ANALYTICS_LANDING_PATH,
-  globalNavPosition: 10,
+  globalNavPosition: 7,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks],
+  links: [eaOverviewLinks, privMonLinks, threatHuntingLinks],
   hideTimeline: true,
   skipUrlState: true,
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

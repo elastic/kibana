@@ -10,10 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
-import type { ProxySettings } from '@kbn/actions-plugin/server/types';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
@@ -246,7 +245,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -343,7 +342,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -381,7 +380,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -415,7 +414,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -804,7 +803,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -851,7 +850,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -901,6 +900,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
+            "rejectUnauthorized": true,
           },
         },
       ]

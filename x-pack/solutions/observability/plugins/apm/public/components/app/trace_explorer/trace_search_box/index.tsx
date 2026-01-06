@@ -104,6 +104,12 @@ export function TraceSearchBox({ query, onQueryChange, onQueryCommit, loading }:
                     });
                   }}
                   options={options}
+                  aria-label={i18n.translate(
+                    'xpack.apm.traceSearchBox.queryLanguageSelectAriaLabel',
+                    {
+                      defaultMessage: 'Query language',
+                    }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

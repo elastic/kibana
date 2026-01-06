@@ -19,6 +19,7 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import {
+  GapFillStatus,
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
@@ -117,9 +118,11 @@ export const BulkActionBase = z.object({
    * Query to filter rules.
    */
   query: z.string().optional(),
-  /**
-   * Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
-   */
+  /** 
+      * Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+Only valid when query property is undefined.
+ 
+      */
   ids: z.array(z.string()).min(1).optional(),
   /**
    * Gaps range start, valid only when query is provided
@@ -129,6 +132,10 @@ export const BulkActionBase = z.object({
    * Gaps range end, valid only when query is provided
    */
   gaps_range_end: z.string().optional(),
+  /**
+   * Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
+   */
+  gap_fill_statuses: z.array(GapFillStatus).optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;

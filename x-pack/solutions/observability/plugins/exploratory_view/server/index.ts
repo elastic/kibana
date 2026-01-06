@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import { type PluginConfigDescriptor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {

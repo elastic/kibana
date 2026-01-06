@@ -38,8 +38,7 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = context.getService('esArchiver');
-  const roleScopedSupertest = context.getService('roleScopedSupertest');
+  const spacesSupertest = context.getService('spacesSupertest');
 
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
@@ -84,16 +83,11 @@ export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
       describeFn(description, () => {
         let supertest: SupertestWithRoleScopeType;
         before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
         });
+
         after(async () => {
           await supertest.destroy();
-          await esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
         });
 
         describe('space_1', () => {

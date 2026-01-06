@@ -18,11 +18,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { FormHook } from '../../../../../shared_imports';
-import { Document } from '../../types';
+import type { FormHook } from '../../../../../shared_imports';
+import type { Document } from '../../types';
 
-import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
-import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import { Tabs, OutputTab, DocumentsTab } from './test_pipeline_tabs';
+import type { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
 
 export interface Props {
   onClose: () => void;
@@ -126,6 +127,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         {testingError ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"

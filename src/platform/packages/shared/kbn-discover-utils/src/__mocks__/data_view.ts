@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 export const shallowMockedFields = [
   {
@@ -82,6 +83,7 @@ export const buildDataViewMock = ({
   id,
   title,
   name = 'data-view-mock',
+  type = 'default',
   fields: definedFields = [] as unknown as DataView['fields'],
   timeFieldName,
   isPersisted = true,
@@ -89,6 +91,7 @@ export const buildDataViewMock = ({
   id?: string;
   title?: string;
   name?: string;
+  type?: string;
   fields?: DataView['fields'];
   timeFieldName?: string;
   isPersisted?: boolean;
@@ -99,8 +102,8 @@ export const buildDataViewMock = ({
     return dataViewFields.find((field) => field.name === fieldName);
   };
 
-  dataViewFields.getByType = (type: string) => {
-    return dataViewFields.filter((field) => field.type === type);
+  dataViewFields.getByType = (fieldType: string) => {
+    return dataViewFields.filter((field) => field.type === fieldType);
   };
 
   dataViewFields.getAll = () => {
@@ -120,7 +123,7 @@ export const buildDataViewMock = ({
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
-    type: 'default',
+    type,
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, runtimeFields: {} }),
     getSourceFiltering: () => ({}),
@@ -133,7 +136,7 @@ export const buildDataViewMock = ({
     isTimeNanosBased: () => false,
     isPersisted: () => isPersisted,
     toSpec: () => ({ id, title, name }),
-    toMinimalSpec: () => ({}),
+    toMinimalSpec: () => ({ id, title, name }),
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
@@ -142,6 +145,8 @@ export const buildDataViewMock = ({
     },
     getRuntimeField: () => null,
     getAllowHidden: () => false,
+    isTSDBMode: () =>
+      dataViewFields.some((field) => field.timeSeriesMetric || field.timeSeriesDimension),
     setFieldCount: jest.fn(),
   } as unknown as DataView;
 

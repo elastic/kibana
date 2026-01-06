@@ -69,7 +69,7 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
-import { TaskCompletedWithRetriableError } from '../actions/wait_for_task';
+import type { TaskCompletedWithRetriableError } from '../actions/wait_for_task';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {

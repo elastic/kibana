@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from '@kbn/usage-collection-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
+import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
-import { CspmUsage, type CloudSecurityUsageCollectorType } from './types';
+import type { CspmUsage } from './types';
+import { type CloudSecurityUsageCollectorType } from './types';
 import { getAccountsStats } from './accounts_stats_collector';
 import { getRulesStats } from './rules_stats_collector';
 import { getInstallationStats } from './installation_stats_collector';
 import { getAlertsStats } from './alert_stats_collector';
 import { getAllCloudAccountsStats } from './cloud_accounts_stats_collector';
 import { getMutedRulesStats } from './muted_rules_stats_collector';
+import { getCspmCloudConnectorUsageStats } from './cspm_cloud_connector_usage_stats_collector';
 import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 export function registerCspmUsageCollector(
@@ -68,6 +73,7 @@ export function registerCspmUsageCollector(
         alertsStats,
         cloudAccountStats,
         mutedRulesStats,
+        cspmCloudConnectorUsageStats,
       ] = await Promise.all([
         awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger)),
         awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger)),
@@ -83,6 +89,10 @@ export function registerCspmUsageCollector(
           getAllCloudAccountsStats(esClient, encryptedSoClient, logger)
         ),
         awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger)),
+        awaitPromiseSafe(
+          'CSPM Cloud Connector Usage',
+          getCspmCloudConnectorUsageStats(soClient, coreServices, logger)
+        ),
       ]);
       return {
         indices: indicesStats,
@@ -93,6 +103,7 @@ export function registerCspmUsageCollector(
         alerts_stats: alertsStats,
         cloud_account_stats: cloudAccountStats,
         muted_rules_stats: mutedRulesStats,
+        cspm_cloud_connector_usage_stats: cspmCloudConnectorUsageStats,
       };
     },
     schema: cspmUsageSchema,

@@ -7,68 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  Observable,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import {
+import { fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
+import type {
   OptionsListSearchTechnique,
+  OptionsListSelection,
   OptionsListSortingType,
-} from '../../../../common/options_list';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
+} from '@kbn/controls-schemas';
+
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
+import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
+  allowExpensiveQueries$,
   requestSize$,
   runPastTimeout$,
   selectedOptions$,
   searchTechnique$,
   sort$,
-  controlFetch$,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: DataControlStateManager['api'] &
+    Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
+  allowExpensiveQueries$: PublishingSubject<boolean>;
   requestSize$: PublishingSubject<number>;
   runPastTimeout$: PublishingSubject<boolean | undefined>;
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
   searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
   sort$: PublishingSubject<OptionsListSortingType | undefined>;
-  controlFetch$: (onReload: () => void) => Observable<ControlFetchContext>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
 
-  return combineLatest([
-    api.dataViews$,
-    api.field$,
-    controlFetch$(requestCache.clearCache),
-    api.parentApi.allowExpensiveQueries$,
-    api.parentApi.ignoreParentSettings$,
-    api.debouncedSearchString,
-    sort$,
-    searchTechnique$,
+  return combineLatest({
+    dataViews: api.dataViews$,
+    field: api.field$,
+    fetchContext: fetch$(api),
+    useGlobalFilters: api.useGlobalFilters$,
+    searchString: api.debouncedSearchString,
+    ignoreValidations: api.ignoreValidations$,
+    sort: sort$,
+    searchTechnique: searchTechnique$,
+    allowExpensiveQueries: allowExpensiveQueries$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
-    api.loadMoreSubject.pipe(
+    loadMore: api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
       debounceTime(100) // debounce load more so "loading" state briefly shows
     ),
-  ]).pipe(
+  }).pipe(
     tap(() => {
       // abort any in progress requests
       if (abortController) {
@@ -79,16 +75,17 @@ export function fetchAndValidate$({
     withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        [
+        {
+          allowExpensiveQueries,
           dataViews,
           field,
-          controlFetchContext,
-          allowExpensiveQueries,
-          ignoreParentSettings,
+          fetchContext,
+          useGlobalFilters,
+          ignoreValidations,
           searchString,
           sort,
           searchTechnique,
-        ],
+        },
         requestSize,
         runPastTimeout,
         selectedOptions,
@@ -114,9 +111,12 @@ export function fetchAndValidate$({
           selectedOptions,
           field: field.toSpec(),
           size: requestSize,
+
+          ignoreValidations,
+          ...fetchContext,
+          timeRange: getFetchContextTimeRange(fetchContext, useGlobalFilters),
+          filters: getFetchContextFilters(fetchContext, useGlobalFilters),
           allowExpensiveQueries,
-          ignoreValidations: ignoreParentSettings?.ignoreValidations,
-          ...controlFetchContext,
         };
 
         const newAbortController = new AbortController();

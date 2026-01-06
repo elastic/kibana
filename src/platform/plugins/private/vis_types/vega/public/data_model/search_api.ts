@@ -11,14 +11,12 @@ import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs';
 import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import type { IEsSearchResponse } from '@kbn/search-types';
-import {
-  getSearchParamsFromRequest,
-  SearchRequest,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import type { SearchRequest, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
 import type { RequestResponder } from '@kbn/inspector-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
 /** @internal **/
@@ -58,7 +56,8 @@ export class SearchAPI {
     private readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
-    private readonly executionContext?: KibanaExecutionContext
+    private readonly executionContext?: KibanaExecutionContext,
+    private readonly projectRouting?: ProjectRouting
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -86,14 +85,15 @@ export class SearchAPI {
               requestResponders[requestId].json(params);
             }
           }),
-          switchMap((params) =>
-            search
+          switchMap((params) => {
+            return search
               .search(
                 { params },
                 {
                   abortSignal: this.abortSignal,
                   sessionId: this.searchSessionId,
                   executionContext: this.executionContext,
+                  projectRouting: this.projectRouting,
                 }
               )
               .pipe(
@@ -111,8 +111,8 @@ export class SearchAPI {
                   name: requestId,
                   rawResponse: structuredClone(data.rawResponse),
                 }))
-              )
-          )
+              );
+          })
         );
       })
     );

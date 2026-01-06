@@ -29,6 +29,7 @@ export interface Props {
   setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
   selectedSubCategory?: string;
   setSelectedSubCategory?: (c: string | undefined) => void;
+  onlyAgentlessFilter?: boolean;
 }
 
 export const SearchBox: FunctionComponent<Props> = ({
@@ -41,6 +42,7 @@ export const SearchBox: FunctionComponent<Props> = ({
   setSelectedSubCategory,
   selectedSubCategory,
   setUrlandReplaceHistory,
+  onlyAgentlessFilter = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -51,6 +53,7 @@ export const SearchBox: FunctionComponent<Props> = ({
       searchString: queryText,
       categoryId: selectedCategory,
       subCategoryId: selectedSubCategory,
+      onlyAgentless: onlyAgentlessFilter,
     });
   };
 
@@ -60,6 +63,7 @@ export const SearchBox: FunctionComponent<Props> = ({
       setUrlandReplaceHistory({
         categoryId: selectedCategory,
         subCategoryId: '',
+        onlyAgentless: onlyAgentlessFilter,
       });
     } else {
       setCategory('');
@@ -68,6 +72,7 @@ export const SearchBox: FunctionComponent<Props> = ({
         searchString: '',
         categoryId: '',
         subCategoryId: '',
+        onlyAgentless: onlyAgentlessFilter,
       });
     }
   };

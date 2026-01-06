@@ -8,8 +8,8 @@
 import { cargoQueue } from 'async';
 import moment from 'moment';
 import { omit } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 import type { Config, Doc } from '../types';
 import { indices } from './indices';
 import { INDEX_PREFIX } from '../constants';

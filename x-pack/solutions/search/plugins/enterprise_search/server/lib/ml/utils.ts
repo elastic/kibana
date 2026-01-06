@@ -15,7 +15,8 @@ import {
   ELSER_MODEL_ID,
 } from '@kbn/ml-trained-models-utils';
 
-import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
+import type { MlModel } from '../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../common/types/ml';
 
 export const MODEL_TITLES_BY_TYPE: Record<string, string | undefined> = {
   fill_mask: i18n.translate('xpack.enterpriseSearch.content.ml_inference.fill_mask', {

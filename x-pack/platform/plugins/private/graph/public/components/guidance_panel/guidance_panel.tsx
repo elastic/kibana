@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -21,17 +22,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { css } from '@emotion/react';
+import type { GraphState } from '../../state_management';
 import {
-  GraphState,
   hasDatasourceSelector,
   hasFieldsSelector,
   requestDatasource,
   fillWorkspace,
 } from '../../state_management';
-import { IndexPatternSavedObject } from '../../types';
+import type { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
 
 export interface GuidancePanelProps {
@@ -155,6 +156,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     content = (
       <EuiPanel paddingSize="none">
         <EuiCallOut
+          announceOnMount={false}
           color="warning"
           iconType="question"
           title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {

@@ -7,8 +7,8 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewManagerScopeName } from '../constants';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { PageScope } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 import type {
   ScopedDataViewSelectionState,
@@ -59,7 +59,13 @@ export const sharedDataViewManagerSlice = createSlice({
 
         state.dataViews.push(dataViewSpec);
       } else {
-        if (state.adhocDataViews.find((dv) => dv.title === dataViewSpec.title)) {
+        if (
+          // NOTE: user is allowed to duplicate a managed data view and
+          // we want both to show up in the list
+          state.adhocDataViews.find(
+            (dv) => dv.title === dataViewSpec.title && dv.managed === dataViewSpec.managed
+          )
+        ) {
           return;
         }
 
@@ -75,7 +81,7 @@ export const sharedDataViewManagerSlice = createSlice({
   },
 });
 
-export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>(scopeName: T) =>
+export const createDataViewSelectionSlice = <T extends PageScope>(scopeName: T) =>
   createSlice({
     name: `${SLICE_PREFIX}/${scopeName}`,
     initialState: initialScopeState,

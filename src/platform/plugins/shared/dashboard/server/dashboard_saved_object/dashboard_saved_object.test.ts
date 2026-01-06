@@ -22,7 +22,9 @@ describe('dashboard saved object model version transformations', () => {
 
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({
-      type: createDashboardSavedObjectType({ migrationDeps: { embeddable: embeddableSetupMock } }),
+      type: createDashboardSavedObjectType({
+        migrationDeps: { embeddable: embeddableSetupMock },
+      }),
     });
   });
 

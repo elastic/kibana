@@ -53,7 +53,7 @@ export interface NLPCleanupTaskStartContract {
  * Task Details: after discussion with ResponseOps, it is preferred for the task to always be registered regardless of
  * the productTier, and to only schedule it if the productTier is `complete` or `searchAiLake`.
  *
- * See `x-pack/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task` for API integration tests.
+ * See `x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task` for API integration tests.
  */
 export class NLPCleanupTask {
   private logger: Logger;

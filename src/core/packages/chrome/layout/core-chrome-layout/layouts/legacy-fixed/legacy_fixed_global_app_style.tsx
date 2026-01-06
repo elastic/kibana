@@ -10,6 +10,7 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { APP_FIXED_VIEWPORT_ID, layoutVar, layoutVarName } from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
@@ -33,7 +34,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   // Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
-  #app-fixed-viewport {
+  #${APP_FIXED_VIEWPORT_ID} {
     pointer-events: none;
     visibility: hidden;
     position: fixed;
@@ -54,12 +55,41 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   .kbnBody {
-    padding-top: var(--euiFixedHeadersOffset, 0);
+    padding-top: var(--euiFixedHeadersOffset, 0px);
+
+    // total height of all fixed headers + the sticky action menu toolbar, dynamically updated depending on the presence of the elements
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0px);
 
     // forward compatibility with new grid layout variables,
-    --kbn-application--content-height: calc(
-      100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
+    // this current height of project header app action menu, 0 or the height of the top bar when it is present
+    ${layoutVarName('application.topBar.height')}: 0px;
+
+    // for forward compatibility with grid layout,
+    // this variable can be used for sticky headers offset relative to the top of the application area
+    --kbn-application--sticky-headers-offset: calc(
+      var(--euiFixedHeadersOffset, 0px) + ${layoutVar('application.topBar.height', '0px')}
     );
+
+    // for forward compatibility with grid layout,
+    // --kbn-layout--application includes everything except chrome's fixed headers
+    // for solution navigation, it also includes the top bar height (action menu)
+    ${layoutVarName('application.top')}: var(--euiFixedHeadersOffset, 0px);
+    ${layoutVarName('application.left')}: 0px;
+    ${layoutVarName('application.bottom')}: 0px;
+    ${layoutVarName('application.right')}: 0px;
+    ${layoutVarName('application.height')}: calc(100vh - ${layoutVar('application.top', '0px')});
+
+    // --kbn-application--content also excludes the top bar height (action menu)
+    ${layoutVarName(
+      'application.content.top'
+    )}: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px));
+    ${layoutVarName('application.content.left')}: 0px;
+    ${layoutVarName('application.content.bottom')}: 0px;
+    ${layoutVarName('application.content.right')}: 0px;
+    ${layoutVarName('application.content.height')}: calc(100vh - ${layoutVar(
+      'application.content.top',
+      '0px'
+    )});
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
@@ -91,6 +121,9 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
         var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight)
       );
     }
+
+    // forward compatibility with new grid layout variables,
+    ${layoutVarName('application.topBar.height')}: var(--kbnProjectHeaderAppActionMenuHeight);
   }
 
   .kbnBody--chromeHidden {

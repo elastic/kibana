@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: no_public_base_url', function () {
     before(async () => {

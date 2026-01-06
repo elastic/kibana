@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import {
   createExtract,
   createInject,
 } from './migrate_extract_panel_references/dashboard_container_references';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_saved_object_migrations';
-import { DashboardDoc730ToLatest } from './migrate_to_730/types';
+import type { DashboardDoc730ToLatest } from './migrate_to_730/types';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
 const extract = createExtract(embeddableSetupMock);

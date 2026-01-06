@@ -10,7 +10,8 @@
 import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
-import { FieldFormatParams, TextContextTypeOptions } from './types';
+import type { FieldFormatParams, TextContextTypeOptions } from './types';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 const getTestFormat = (
   _params?: FieldFormatParams,
@@ -137,10 +138,10 @@ describe('FieldFormat class', () => {
         expect(f.convert('val', 'html')).toBe('html');
       });
 
-      test('formats a value as " - " when no value is specified', () => {
+      test('formats a value as NULL_LABEL when no value is specified', () => {
         const f = getTestFormat();
 
-        expect(f.convert(undefined)).toBe(' - ');
+        expect(f.convert(undefined)).toBe(NULL_LABEL);
       });
 
       test('formats a list of values as text', () => {

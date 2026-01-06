@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
+import type { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
 
 export type Protocol = 'http' | 'https';
 
@@ -26,4 +26,9 @@ export interface ScoutTestOptions extends PlaywrightTestOptions {
 export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
   testDir: string;
   workers?: 1 | 2 | 3; // to keep performance consistent within test suites
+  /**
+   * When true, runs global.setup.ts as a pre-step before running tests.
+   * Defaults to false.
+   */
+  runGlobalSetup?: boolean;
 }

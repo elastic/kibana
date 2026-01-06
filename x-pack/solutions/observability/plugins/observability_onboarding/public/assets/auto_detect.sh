@@ -13,6 +13,11 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl is required to run this script"
 fi
 
+if ! command -v tar >/dev/null 2>&1; then
+  fail "tar is required to run this script"
+fi
+
+
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then
@@ -26,6 +31,7 @@ ingest_api_key_encoded=""
 kibana_api_endpoint=""
 onboarding_flow_id=""
 elastic_agent_version=""
+metrics_enabled=true
 
 help() {
   echo "Usage: sudo ./auto-detect.sh <arguments>"
@@ -68,6 +74,14 @@ for i in "$@"; do
   --ea-version=*)
     shift
     elastic_agent_version="${i#*=}"
+    ;;
+  --metrics-enabled=*)
+    val="${1#*=}"
+    case "$val" in
+      true) metrics_enabled=true ;;
+      *) metrics_enabled=false ;;
+    esac
+    shift
     ;;
   --help)
     help
@@ -282,7 +296,11 @@ install_integrations() {
 
     case "$item" in
     "system")
-      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      local host_name=$(hostname 2>/dev/null | tr '[:upper:]' '[:lower:]')
+      if [ -z "$host_name" ]; then
+        host_name="unknown-host"
+      fi
+      metadata="\t$host_name"
       ;;
     esac
 
@@ -296,7 +314,7 @@ install_integrations() {
   done
 
   install_integrations_result=$(curl --request POST \
-    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
+    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install?metricsEnabled=$metrics_enabled" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
     --header "Accept: application/x-tar" \

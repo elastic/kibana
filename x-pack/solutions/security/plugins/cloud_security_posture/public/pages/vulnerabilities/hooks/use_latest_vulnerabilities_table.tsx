@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
-import { FindingsBaseURLQuery } from '../../../common/types';
+import type { FindingsBaseURLQuery } from '../../../common/types';
 import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
 import { useLatestVulnerabilities } from './use_latest_vulnerabilities';
 

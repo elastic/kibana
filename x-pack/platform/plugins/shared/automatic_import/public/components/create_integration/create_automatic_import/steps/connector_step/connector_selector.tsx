@@ -75,6 +75,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
                 <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
                   <EuiFlexItem>
                     <EuiRadio
+                      name="connectorSelector"
                       label={connector.name}
                       id={connector.id}
                       value={connector.id}

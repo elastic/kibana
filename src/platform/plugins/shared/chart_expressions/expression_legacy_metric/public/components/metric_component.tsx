@@ -13,12 +13,12 @@ import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+} from '@kbn/chart-expressions-common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getFormatService, getPaletteService } from '../services';
-import { VisParams, MetricOptions } from '../../common/types';
+import type { VisParams, MetricOptions } from '../../common/types';
 import { MetricVisValue } from './metric_value';
 import { formatValue, shouldApplyColor } from '../utils';
 import { needsLightText } from '../utils/palette';

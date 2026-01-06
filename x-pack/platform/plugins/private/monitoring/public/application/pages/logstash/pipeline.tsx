@@ -12,7 +12,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { List } from '../../../components/logstash/pipeline_viewer/models/list';
 import { PipelineViewer } from '../../../components/logstash/pipeline_viewer';
 import { Pipeline } from '../../../components/logstash/pipeline_viewer/models/pipeline';

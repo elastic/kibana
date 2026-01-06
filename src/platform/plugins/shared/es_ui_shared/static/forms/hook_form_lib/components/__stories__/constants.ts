@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldConfig } from '../../types';
+import type { FieldConfig } from '../../types';
 
 /**
  * The "title" field base configuration

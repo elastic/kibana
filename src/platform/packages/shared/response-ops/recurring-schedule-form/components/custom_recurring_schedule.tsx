@@ -23,7 +23,7 @@ import { RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY, WEEKDAY_OPTIONS } from '../co
 import { getInitialByWeekday } from '../utils/get_initial_by_weekday';
 import { parseSchedule } from '../utils/parse_schedule';
 import { getWeekdayInfo } from '../utils/get_weekday_info';
-import { RecurringSchedule } from '../types';
+import type { RecurringSchedule } from '../types';
 import {
   RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY,
   RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT,
@@ -163,12 +163,12 @@ export const CustomRecurringSchedule = memo(
             }}
             componentProps={{
               'data-test-subj': 'byweekday-field',
-              compressed,
               euiFieldProps: {
                 'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
                 legend: 'Repeat on weekday',
                 options: WEEKDAY_OPTIONS,
                 isDisabled: readOnly,
+                ...(compressed ? { buttonSize: 'compressed' } : {}),
               },
             }}
           />
@@ -179,11 +179,11 @@ export const CustomRecurringSchedule = memo(
             path="recurringSchedule.bymonth"
             componentProps={{
               'data-test-subj': 'bymonth-field',
-              compressed,
               euiFieldProps: {
                 legend: 'Repeat on weekday or month day',
                 options: bymonthOptions,
-                readOnly,
+                isDisabled: readOnly,
+                ...(compressed ? { buttonSize: 'compressed' } : {}),
               },
             }}
           />

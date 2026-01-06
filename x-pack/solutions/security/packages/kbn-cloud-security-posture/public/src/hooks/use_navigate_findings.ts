@@ -12,8 +12,9 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { findingsNavigation } from '../constants/navigation';
 import { useDataView } from './use_data_view';
-import { CspClientPluginStartDeps } from '../..';
-import { NavFilter, encodeQueryUrl, composeQueryFilters } from '../utils/query_utils';
+import type { CspClientPluginStartDeps } from '../..';
+import type { NavFilter } from '../utils/query_utils';
+import { encodeQueryUrl, composeQueryFilters } from '../utils/query_utils';
 
 const useNavigate = (pathname: string, dataViewId?: string) => {
   const history = useHistory();

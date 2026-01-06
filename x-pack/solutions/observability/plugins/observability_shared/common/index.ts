@@ -4,15 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  OBSERVABILITY_RULE_TYPE_IDS,
+  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+} from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
+
+/**
+ * Combined list of all observability rule type IDs including stack rules
+ * supported by observability.
+ */
+export const OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES = [
+  ...OBSERVABILITY_RULE_TYPE_IDS,
+  ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+];
 export const observabilityAppId = 'observability-overview';
 export const casesFeatureId = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page
 export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+export const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
+
 // Emebeddable SLO alerts table
 export const SLO_ALERTS_TABLE_CONFIG_ID = `${AlertConsumers.SLO}-embeddable-alerts-table`;
 
@@ -154,7 +169,7 @@ export {
 
 export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
-export { getInspectResponse } from './utils/get_inspect_response';
+export { getInspectResponse, type InspectResponse } from './utils/get_inspect_response';
 export {
   type DataTier,
   indexLifeCyclePhaseToDataTier,
@@ -197,7 +212,7 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
-  SupportedAssetTypes,
+  SupportedEntityTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,

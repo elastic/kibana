@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ServerlessPluginStart } from './types';
+import type { ServerlessPluginStart } from './types';
 
 const startMock = (): ServerlessPluginStart => ({
   initNavigation: jest.fn(),
   setBreadcrumbs: jest.fn(),
   setProjectHome: jest.fn(),
-  setSideNavComponentDeprecated: jest.fn(),
   getNavigationCards: jest.fn(),
 });
 

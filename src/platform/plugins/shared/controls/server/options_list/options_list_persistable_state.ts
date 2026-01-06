@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/server';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { DefaultDataControlState } from '../../common';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { Writable } from '@kbn/utility-types';
 
 const dataViewReferenceName = 'optionsListDataView';
 
@@ -22,7 +23,7 @@ export const createOptionsListInject = (): EmbeddablePersistableStateService['in
     const workingState = { ...state } as EmbeddableStateWithType;
     references.forEach((reference) => {
       if (reference.name === dataViewReferenceName) {
-        (workingState as Partial<DefaultDataControlState>).dataViewId = reference.id;
+        (workingState as Writable<Partial<OptionsListDSLControlState>>).dataViewId = reference.id;
       }
     });
     return workingState as EmbeddableStateWithType;
@@ -38,7 +39,7 @@ export const createOptionsListExtract = (): EmbeddablePersistableStateService['e
       references.push({
         name: dataViewReferenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: (workingState as Partial<DefaultDataControlState>).dataViewId!,
+        id: (workingState as Partial<OptionsListDSLControlState>).dataViewId!,
       });
       delete workingState.dataViewId;
     }

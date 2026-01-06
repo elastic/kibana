@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContentReference, ContentReferences } from '../schemas';
+import type { ContentReference, ContentReferences } from '../schemas';
 
 export type ContentReferenceId = string;
 export type ContentReferenceTypes = ContentReference['type'];

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
+import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -28,7 +31,11 @@ import type {
   KillProcessRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
-import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import {
+  ResponseActionsClientImpl,
+  type ResponseActionsClientValidateRequestResponse,
+  type ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+} from '../lib/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,
@@ -47,10 +54,13 @@ import type {
   UploadedFileInfo,
   ResponseActionScanParameters,
   ResponseActionScanOutputContent,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
@@ -106,6 +116,44 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       allValid: invalidIds.length === 0,
       hosts: foundEndpointHosts,
     };
+  }
+
+  protected async validateRequest(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Memory Dump: ensure that agents/Endpoint support this command
+    if (actionRequest.command === 'memory-dump') {
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const memDumpType = actionRequest.parameters.type;
+      const unsupportedAgents: string[] = [];
+
+      for (const endpointMeta of endpointMetadata) {
+        if (
+          (memDumpType === 'kernel' &&
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
+          (memDumpType === 'process' &&
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
+        ) {
+          unsupportedAgents.push(
+            `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`
+          );
+        }
+      }
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+          ),
+        };
+      }
+    }
+
+    return super.validateRequest(actionRequest);
   }
 
   private async handleResponseAction<
@@ -175,7 +223,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       actionId,
       command,
       comment,
-    });
+    } as ResponseActionsClientWriteActionRequestToEndpointIndexOptions);
 
     // Update cases
     await this.updateCases({
@@ -406,6 +454,22 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
       throw err;
     }
+  }
+
+  async memoryDump(
+    actionRequest: OmitUnsupportedAttributes<MemoryDumpActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+  > {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump) {
+      throw new ResponseActionsClientError('Memory dump operation is not enabled', 400);
+    }
+
+    return this.handleResponseAction<
+      MemoryDumpActionRequestBody,
+      ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+    >('memory-dump', actionRequest, options);
   }
 
   async getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse> {

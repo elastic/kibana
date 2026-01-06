@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
-import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
+import type { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 interface RuleTypeListProps {
   ruleTypes: RuleTypeWithDescription[];
@@ -73,6 +73,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         .sort(([, aCount], [, bCount]) => bCount - aCount)
         .map(([producer, count]) => (
           <EuiFacetButton
+            data-test-subj={`${producer}-LeftSidebarSelectOption`}
             key={producer}
             fullWidth
             quantity={count}
@@ -126,6 +127,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         >
           <EuiFacetGroup>
             <EuiFacetButton
+              data-test-subj="allRuleTypesButton"
               fullWidth
               quantity={ruleTypeCountsByProducer.total}
               onClick={onClickAll}

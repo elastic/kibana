@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { isEmpty } from 'lodash/fp';
 
 import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields/field_names';
@@ -57,7 +57,7 @@ export const getUserFilter = ({
 };
 
 export const getAdditionalFilter = (filter?: string): string =>
-  filter != null ? ` AND ${filter}` : '';
+  filter != null && filter.trim().length > 0 ? ` AND ${filter}` : '';
 
 export const getCombinedFilter = ({
   authenticatedUser,

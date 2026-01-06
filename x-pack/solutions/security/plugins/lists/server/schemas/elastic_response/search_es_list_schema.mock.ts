@@ -22,7 +22,7 @@ import {
 } from '../../../common/constants.mock';
 import { getShardMock } from '../common/get_shard.mock';
 
-import { SearchEsListSchema } from './search_es_list_schema';
+import type { SearchEsListSchema } from './search_es_list_schema';
 
 export const getSearchEsListMock = (): SearchEsListSchema => ({
   '@timestamp': DATE_NOW,

@@ -8,12 +8,8 @@
  */
 
 import { get } from 'lodash';
-import {
-  RESTRICTIONS_KEYS,
-  DEFAULT_UI_RESTRICTION,
-  UIRestrictions,
-  TimeseriesUIRestrictions,
-} from './ui_restrictions';
+import type { UIRestrictions, TimeseriesUIRestrictions } from './ui_restrictions';
+import { RESTRICTIONS_KEYS, DEFAULT_UI_RESTRICTION } from './ui_restrictions';
 
 /**
  * Generic method for checking all types of the UI Restrictions

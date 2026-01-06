@@ -9,15 +9,16 @@ jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
 import rison from '@kbn/rison';
 
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
-import { ReportingCore } from '../../..';
-import { Report, ReportingStore } from '../../../lib/store';
+import type { ReportingCore } from '../../..';
+import type { ReportingStore } from '../../../lib/store';
+import { Report } from '../../../lib/store';
 import { createMockReportingCore } from '../../../test_helpers';
-import {
+import type {
   ReportingJobResponse,
   ReportingRequestHandlerContext,
   ReportingSetup,
@@ -109,7 +110,7 @@ describe('Handle request to generate', () => {
         jobParams: mockJobParams,
       });
 
-      const { _id, created_at: _created_at, payload, ...snapObj } = report;
+      const { _id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "_index": ".reporting-foo-index-234",
@@ -167,7 +168,7 @@ describe('Handle request to generate', () => {
         jobParams: mockJobParams,
       });
 
-      const { _id, created_at: _created_at, ...snapObj } = report;
+      const { _id, created_at, ...snapObj } = report;
       expect(snapObj.payload.version).toBe('7.14.0');
     });
   });
@@ -249,19 +250,36 @@ describe('Handle request to generate', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      expect(
-        await requestHandler.handleRequest({
-          exportTypeId: 'csv_searchsource',
-          jobParams: {
-            ...mockJobParams,
-            browserTimezone: 'America/Amsterdam',
+      const handler = new GenerateRequestHandler({
+        reporting: reportingCore,
+        user: { username: 'testymcgee' },
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: {
+          ...mockRequest,
+          body: {
+            jobParams: rison.encode({ ...mockJobParams, browserTimezone: 'America/Amsterdam' }),
           },
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "body": "Invalid timezone \\"America/Amsterdam\\".",
-        }
-    `);
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      try {
+        await handler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+        expect(err.body).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `);
+      }
     });
 
     test('generates the download path', async () => {

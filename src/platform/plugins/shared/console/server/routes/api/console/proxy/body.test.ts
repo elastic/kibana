@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { createHandler } from './create_handler';

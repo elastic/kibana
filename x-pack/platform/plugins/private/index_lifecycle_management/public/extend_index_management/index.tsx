@@ -9,9 +9,9 @@ import React from 'react';
 import { get, every, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
-import { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 
 import { retryLifecycleForIndex } from '../application/services/api';
 import { indexLifecycleTab } from './components/index_lifecycle_summary';
@@ -22,19 +22,19 @@ import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle
 const stepPath = 'ilm.step';
 
 export const retryLifecycleActionExtension = ({ indices }: { indices: Index[] }) => {
-  const allHaveErrors = every(indices, (index) => {
+  const indicesWithFailedStep = indices.filter((index) => {
     return index.ilm?.managed && index.ilm.failed_step;
   });
-  if (!allHaveErrors) {
+  if (!indicesWithFailedStep.length) {
     return null;
   }
-  const indexNames = indices.map(({ name }: Index) => name);
+  const indexNames = indicesWithFailedStep.map(({ name }: Index) => name);
   return {
     requestMethod: retryLifecycleForIndex,
     icon: 'play',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.retryIndexLifecycleActionButtonLabel', {
-      defaultMessage: 'Retry lifecycle step',
+      defaultMessage: 'Retry failed lifecycle step',
     }),
     successMessage: i18n.translate(
       'xpack.indexLifecycleMgmt.retryIndexLifecycleAction.retriedLifecycleMessage',
@@ -128,20 +128,24 @@ export const ilmBannerExtension = (indices: Index[]) => {
   if (!numIndicesWithLifecycleErrors) {
     return null;
   }
-  const { requestMethod, successMessage, indexNames, buttonLabel } =
-    retryLifecycleActionExtension({ indices: indicesWithLifecycleErrors }) ?? {};
+
+  const retryAction = retryLifecycleActionExtension({ indices: indicesWithLifecycleErrors });
+
   return {
     type: 'warning',
     filter: Query.parse(`${stepPath}:ERROR`),
     filterLabel: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.filterLabel', {
       defaultMessage: 'Show errors',
     }),
-    action: {
-      buttonLabel,
-      indexNames: indexNames?.[0] ?? [],
-      requestMethod,
-      successMessage,
-    },
+    // retryAction can be set to null if the retry action is not applicable to all the indices with lifecycle errors
+    ...(retryAction && {
+      action: {
+        buttonLabel: retryAction.buttonLabel,
+        indexNames: retryAction.indexNames?.[0] ?? [],
+        requestMethod: retryAction.requestMethod,
+        successMessage: retryAction.successMessage,
+      },
+    }),
     title: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.errorMessage', {
       defaultMessage: `{ numIndicesWithLifecycleErrors, number}
           {numIndicesWithLifecycleErrors, plural, one {index has} other {indices have} }

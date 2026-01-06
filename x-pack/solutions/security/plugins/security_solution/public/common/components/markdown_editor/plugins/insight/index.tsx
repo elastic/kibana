@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
+import { isEmpty, pickBy } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
-import React, { useContext, useMemo, useCallback, useState } from 'react';
-import type { RemarkTokenizer, EuiSelectProps } from '@elastic/eui';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import type { EuiSelectProps, RemarkTokenizer } from '@elastic/eui';
 import {
-  EuiLoadingSpinner,
-  EuiIcon,
-  EuiSpacer,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiFieldText,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSelect,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -36,32 +36,31 @@ import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/comp
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { useForm, FormProvider, useController } from 'react-hook-form';
+import { FormProvider, useController, useForm } from 'react-hook-form';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
-import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
+import { type Provider, useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
-  getTimeRangeSettings,
-  parseDateWithDefault,
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
+  getTimeRangeSettings,
+  parseDateWithDefault,
 } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
 import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 
 interface InsightComponentProps {
   label?: string;
@@ -285,14 +284,14 @@ const InsightEditorComponent = ({
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.default
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.default);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec();
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(PageScope.default);
+  const dataViewName = newDataViewPickerEnabled
+    ? experimentalDataView.name
+    : oldSourcererDataView.name;
 
   const {
     unifiedSearch: {
@@ -302,10 +301,8 @@ const InsightEditorComponent = ({
   } = useKibana().services;
 
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
+    sourcererScope: PageScope.default,
   });
-
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
@@ -416,7 +413,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = sourcererDataView.name ?? '*';
+    const index = dataViewName ?? '*';
     return [
       {
         $state: {
@@ -430,7 +427,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [sourcererDataView]);
+  }, [dataViewName]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (
@@ -460,6 +457,7 @@ const InsightEditorComponent = ({
       </EuiModalHeader>
       {isPlatinum === false && (
         <EuiCallOut
+          announceOnMount={false}
           title="To add suggested queries to an investigation guide, please upgrade to platinum"
           iconType="timeline"
         />
@@ -480,6 +478,10 @@ const InsightEditorComponent = ({
               fullWidth
             >
               <EuiFieldText
+                isInvalid={
+                  labelController.field.value !== undefined &&
+                  labelController.field.value.trim().length === 0
+                }
                 {...{
                   ...formMethods.register('label'),
                   ref: null,
@@ -496,11 +498,11 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
-              {oldDataView ? (
+              {dataView ? (
                 <FiltersBuilderLazy
                   filters={filtersStub}
                   onChange={onChange}
-                  dataView={oldDataView}
+                  dataView={dataView}
                   maxDepth={1}
                 />
               ) : (

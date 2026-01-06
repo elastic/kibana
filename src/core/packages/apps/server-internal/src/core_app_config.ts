@@ -16,6 +16,10 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
  */
 export const configSchema = schema.object({
   allowDynamicConfigOverrides: schema.boolean({ defaultValue: false }),
+  /**
+   * Do not register unused bundle routes if the CDN configuration is enabled.
+   */
+  skipBundleRoutesIfCdnEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export type CoreAppConfigType = TypeOf<typeof configSchema>;
@@ -43,7 +47,14 @@ export class CoreAppConfig implements CoreAppConfigType {
    */
   public readonly allowDynamicConfigOverrides: boolean;
 
+  /**
+   * @internal
+   * When true, the registration of the bundle routes are skipped if CDN is enabled.
+   */
+  public readonly skipBundleRoutesIfCdnEnabled: boolean;
+
   constructor(rawConfig: CoreAppConfig) {
     this.allowDynamicConfigOverrides = rawConfig.allowDynamicConfigOverrides;
+    this.skipBundleRoutesIfCdnEnabled = rawConfig.skipBundleRoutesIfCdnEnabled;
   }
 }

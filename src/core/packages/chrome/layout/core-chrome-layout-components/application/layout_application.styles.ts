@@ -8,21 +8,50 @@
  */
 
 import { css } from '@emotion/react';
-import { EmotionFn } from '../types';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import { euiOverflowScroll, euiShadow } from '@elastic/eui';
+import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
+import type { EmotionFn } from '../types';
 
-const root: EmotionFn = ({ euiTheme }) =>
+const root: EmotionFn = (useEuiTheme) =>
   css`
     grid-area: application;
-    height: 100%;
-    position: relative;
-    width: 100%;
-    z-index: ${euiTheme.levels.content};
 
+    height: calc(100% - ${layoutVar('application.marginBottom')});
+    width: calc(100% - ${layoutVar('application.marginRight')});
+    margin-bottom: ${layoutVar('application.marginBottom')};
+    margin-right: ${layoutVar('application.marginRight')};
+
+    z-index: ${layoutLevels.content};
+
+    position: relative;
     display: flex;
     flex-direction: column;
+
+    background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
+    border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
+    border: ${getHighContrastBorder(useEuiTheme)};
+    ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+
+    &:focus-visible {
+      border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};
+    }
+
+    // only restrict overflow scroll on screen (not print) to allow for full page printing
+    @media screen {
+      ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
+      // reset the height back to respect the margin bottom
+      height: calc(100% - ${layoutVar('application.marginBottom')});
+
+      // Hide scrollbar
+      scrollbar-width: none; /* Firefox */
+      &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Edge */
+      }
+    }
   `;
 
-const content: EmotionFn = ({ euiTheme }) => css`
+const content: EmotionFn = () => css`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -31,16 +60,16 @@ const content: EmotionFn = ({ euiTheme }) => css`
 const topBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   top: 0;
-  z-index: ${euiTheme.levels.header};
-  height: var(--kbn-application--top-bar-height);
+  z-index: ${layoutLevels.applicationTopBar};
+  height: ${layoutVar('application.topBar.height')};
   flex-shrink: 0;
 `;
 
 const bottomBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   bottom: 0;
-  z-index: ${euiTheme.levels.header};
-  height: var(--kbn-application--bottom-bar-height);
+  z-index: ${layoutLevels.applicationBottomBar};
+  height: ${layoutVar('application.bottomBar.height')};
   flex-shrink: 0;
 `;
 

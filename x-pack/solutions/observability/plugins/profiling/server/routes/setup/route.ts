@@ -32,6 +32,12 @@ export function registerSetupRoute({
           requiredPrivileges: ['profiling'],
         },
       },
+      options: {
+        access: 'public',
+        summary: 'Get Universal Profiling setup status',
+        description: 'Check if Universal Profiling has been set up and configured properly',
+        tags: ['Universal Profiling'],
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -70,6 +76,12 @@ export function registerSetupRoute({
         authz: {
           requiredPrivileges: ['profiling'],
         },
+      },
+      options: {
+        access: 'public',
+        summary: 'Initialize Universal Profiling setup',
+        description: 'Set up Universal Profiling resources and configuration',
+        tags: ['Universal Profiling'],
       },
       validate: false,
     },

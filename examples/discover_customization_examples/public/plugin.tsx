@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover, IconType } from '@elastic/eui';
-import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
+import type { IconType } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
   CustomizationCallback,
@@ -18,14 +19,17 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlPanelsState,
+  type ControlGroupRendererApi,
+} from '@kbn/control-group-renderer';
 import { css } from '@emotion/react';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import image from './discover_customization_examples.png';
@@ -171,72 +175,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             </EuiFlexItem>
           );
         },
-      });
-
-      customizations.set({
-        id: 'search_bar',
-        CustomDataViewPicker: () => {
-          const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-          const togglePopover = () => setIsPopoverOpen((open) => !open);
-          const closePopover = () => setIsPopoverOpen(false);
-          const [savedSearches, setSavedSearches] = useState<
-            Array<SimpleSavedObject<{ title: string }>>
-          >([]);
-
-          useEffect(() => {
-            core.savedObjects.client
-              .find<{ title: string }>({ type: 'search' })
-              .then((response) => {
-                setSavedSearches(response.savedObjects);
-              });
-          }, []);
-
-          const currentSavedSearch = useObservable(
-            stateContainer.savedSearchState.getCurrent$(),
-            stateContainer.savedSearchState.getState()
-          );
-
-          return (
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={
-                  <EuiButton
-                    iconType="arrowDown"
-                    iconSide="right"
-                    fullWidth
-                    onClick={togglePopover}
-                    data-test-subj="logsViewSelectorButton"
-                  >
-                    {currentSavedSearch.title ?? 'None selected'}
-                  </EuiButton>
-                }
-                isOpen={isPopoverOpen}
-                panelPaddingSize="none"
-                closePopover={closePopover}
-              >
-                <EuiContextMenu
-                  size="s"
-                  initialPanelId={0}
-                  panels={[
-                    {
-                      id: 0,
-                      title: 'Saved logs views',
-                      items: savedSearches.map((savedSearch) => ({
-                        name: savedSearch.get('title'),
-                        onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
-                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
-                        'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
-                          /[^a-zA-Z0-9]/g,
-                          ''
-                        )}`,
-                      })),
-                    },
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
-          );
-        },
         PrependFilterBar: () => {
           const [controlGroupAPI, setControlGroupAPI] = useState<
             ControlGroupRendererApi | undefined
@@ -264,9 +202,11 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 stateStorage.set('controlPanels', input.initialChildControlState);
             });
 
-            const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.actions.fetchData();
-            });
+            const filterSubscription = controlGroupAPI.appliedFilters$.subscribe(
+              (newFilters = []) => {
+                stateContainer.actions.fetchData();
+              }
+            );
 
             return () => {
               stateSubscription.unsubscribe();
@@ -325,7 +265,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     },
                   };
                 }}
-                filters={stateContainer.appState.get().filters ?? []}
+                filters={stateContainer.getCurrentTab().appState.filters ?? []}
               />
             </EuiFlexItem>
           );

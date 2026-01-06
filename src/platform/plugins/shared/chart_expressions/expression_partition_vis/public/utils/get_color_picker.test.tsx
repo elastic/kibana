@@ -8,17 +8,14 @@
  */
 
 import React from 'react';
-import { LegendColorPickerProps } from '@elastic/charts';
+import type { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import {
-  LegendColorPickerWrapper,
-  LegendColorPickerWrapperContext,
-  LegendColorPickerWrapperContextType,
-} from './get_color_picker';
+import type { ReactWrapper } from 'enzyme';
+import type { LegendColorPickerWrapperContextType } from './get_color_picker';
+import { LegendColorPickerWrapper, LegendColorPickerWrapperContext } from './get_color_picker';
 import { ColorPicker } from '@kbn/charts-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 
 const bucketColumns = createMockBucketColumns();

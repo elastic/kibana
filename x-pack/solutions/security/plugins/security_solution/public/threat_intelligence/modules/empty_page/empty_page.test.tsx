@@ -14,7 +14,6 @@ import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link'
 
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');
-jest.mock('../../containers/security_solution_plugin_template_wrapper');
 
 const INTEGRATION_HREF = 'INTEGRATION_HREF';
 const DOCUMENTATION_HREF = 'DOCUMENTATION_HREF';

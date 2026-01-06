@@ -15,6 +15,7 @@ export interface State {
   currentStatus?: string;
   onPreTransition?: any;
   onPostTransition?: any;
+  isAsync?: boolean; // When true, the step will not block the state machine
 }
 
 export type StatusName = 'success' | 'failed' | 'pending';
@@ -73,7 +74,9 @@ export async function handleState(
 
   if (typeof currentState.onTransition === 'function') {
     logger.debug(
-      `Current state ${currentStateName}: running transition ${currentState.onTransition.name}`
+      `Current state ${currentStateName}: running transition ${currentState.onTransition.name}${
+        currentState.isAsync ? ' (async)' : ''
+      }`
     );
     try {
       // inject information about the state into context
@@ -82,19 +85,69 @@ export async function handleState(
         name: currentStateName,
         started_at: startedAt,
       };
-      stateResult = await currentState.onTransition.call(undefined, updatedContext);
-      // check if is a function/promise
-      if (typeof stateResult === 'function') {
-        const promiseName = `${currentStateName}Result`;
-        updatedContext[promiseName] = stateResult;
-        updatedContext = { ...updatedContext, latestExecutedState };
-      } else {
+
+      if (currentState.isAsync) {
+        // For async steps, start the operation but don't wait for completion
+        const asyncOperation = currentState.onTransition.call(undefined, updatedContext);
+
+        // Store the promise for potential later monitoring
+        const asyncKey = `${currentStateName}AsyncOperation`;
+        updatedContext[asyncKey] = asyncOperation;
+
+        // Store error/result keys for later access
+        const asyncResultKey = `${currentStateName}AsyncResult`;
+        const asyncErrorKey = `${currentStateName}AsyncError`;
+
+        // Handle completion/errors in background without blocking state machine
+        asyncOperation
+          .then((result: any) => {
+            logger.debug(`Async step ${currentStateName} completed successfully`);
+            // Store result for later use - note: this won't be in the returned context
+            // but could be accessed via the promise or separate monitoring
+            if (result) {
+              // For testing/monitoring purposes, we can try to update the context
+              // but this won't affect the main state machine flow
+              try {
+                (updatedContext as any)[asyncResultKey] = result;
+              } catch (e) {
+                // Context might be immutable at this point
+              }
+            }
+          })
+          .catch((error: Error) => {
+            logger.error(`Async step ${currentStateName} failed: ${error.message}`);
+            // Store error for later use
+            try {
+              (updatedContext as any)[asyncErrorKey] = error;
+            } catch (e) {
+              // Context might be immutable at this point
+            }
+          });
+
+        // Continue immediately with async operation info
+        stateResult = { [asyncKey]: asyncOperation };
         updatedContext = {
           ...updatedContext,
           ...stateResult,
           latestExecutedState,
         };
+      } else {
+        // Original synchronous behavior
+        stateResult = await currentState.onTransition.call(undefined, updatedContext);
+        // check if is a function/promise
+        if (typeof stateResult === 'function') {
+          const promiseName = `${currentStateName}Result`;
+          updatedContext[promiseName] = stateResult;
+          updatedContext = { ...updatedContext, latestExecutedState };
+        } else {
+          updatedContext = {
+            ...updatedContext,
+            ...stateResult,
+            latestExecutedState,
+          };
+        }
       }
+
       currentStatus = 'success';
       logger.debug(
         `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`

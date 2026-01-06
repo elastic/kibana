@@ -6,11 +6,6 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "active_only": "__flag__",
       "bytes": [
         "b",
         "kb",
@@ -19,10 +14,6 @@
         "tb",
         "pb"
       ],
-      "detailed": "__flag__",
-      "index": [],
-      "h": [],
-      "s": [],
       "time": [
         "nanos",
         "micros",
@@ -31,7 +22,43 @@
         "m",
         "h",
         "d"
-      ]
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "active_only": "__flag__",
+      "detailed": "__flag__",
+      "index": [],
+      "h": [
+        "index",
+        "shard",
+        "start_time",
+        "start_time_millis",
+        "stop_time",
+        "stop_time_millis",
+        "time",
+        "type",
+        "stage",
+        "source_host",
+        "source_node",
+        "target_host",
+        "target_node",
+        "repository",
+        "snapshot",
+        "files",
+        "files_recovered",
+        "files_percent",
+        "files_total",
+        "bytes",
+        "bytes_recovered",
+        "bytes_percent",
+        "bytes_total",
+        "translog_ops",
+        "translog_ops_recovered",
+        "translog_ops_percent"
+      ],
+      "s": []
     },
     "methods": [
       "GET"

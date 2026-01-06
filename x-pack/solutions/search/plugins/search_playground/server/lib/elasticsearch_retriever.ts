@@ -6,15 +6,15 @@
  */
 
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
-import { Document } from '@langchain/core/documents';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
+import type { Document } from '@langchain/core/documents';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   AggregationsAggregate,
   SearchHit,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { contextDocumentHitMapper } from '../utils/context_document_mapper';
-import { ElasticsearchRetrieverContentField } from '../types';
+import type { ElasticsearchRetrieverContentField } from '../types';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**

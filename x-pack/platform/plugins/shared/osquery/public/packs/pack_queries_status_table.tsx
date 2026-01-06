@@ -224,7 +224,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   }
 
   return (
-    <EuiToolTip content={VIEW_IN_LENS}>
+    <EuiToolTip content={VIEW_IN_LENS} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="lensApp"
         isDisabled={!logsDataView}
@@ -313,7 +313,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   }
 
   return (
-    <EuiToolTip content={VIEW_IN_DISCOVER}>
+    <EuiToolTip content={VIEW_IN_DISCOVER} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="discoverApp"
         aria-label={VIEW_IN_DISCOVER}
@@ -395,7 +395,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               </>
             }
           >
-            <div data-test-subj="last-results-date">
+            <div data-test-subj="last-results-date" tabIndex={0}>
               <FormattedRelative value={timestamp} />
             </div>
           </EuiToolTip>
@@ -494,6 +494,9 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
             isDisabled={!errorsData?.total}
             onClick={handleErrorsToggle}
             iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
+              defaultMessage: 'Error details',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

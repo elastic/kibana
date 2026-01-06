@@ -55,6 +55,7 @@ export function Uploader({ onUpload }: Props) {
   return (
     <EuiFormRow isInvalid={Boolean(error)} error={error} aria-label={FORM_ROW_LABEL} fullWidth>
       <EuiFilePicker
+        isInvalid={Boolean(error)}
         id="syntheticsFleetScriptRecorderUploader"
         aria-label={TESTING_SCRIPT_LABEL}
         data-test-subj="syntheticsFleetScriptRecorderUploader"

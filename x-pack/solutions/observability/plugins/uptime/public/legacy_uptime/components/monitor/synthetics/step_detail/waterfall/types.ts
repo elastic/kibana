@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
+import type { NetworkEvent } from '../../../../../../../common/runtime_types';
 
 export enum Timings {
   Blocked = 'blocked',

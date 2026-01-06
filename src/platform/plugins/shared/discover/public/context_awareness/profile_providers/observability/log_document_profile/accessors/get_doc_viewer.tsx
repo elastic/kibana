@@ -27,7 +27,19 @@ export const createGetDocViewer =
       'observability-logs-ai-assistant'
     );
 
+    const logsAIInsightFeature = services.discoverShared.features.registry.getById(
+      'observability-logs-ai-insight'
+    );
+
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
+
+    const indexes = {
+      apm: {
+        errors: services.apmContextService.errorsService.getErrorsIndexPattern(),
+        traces: services.apmContextService.tracesService.getAllTracesIndexPattern(),
+      },
+      logs: services.logsContextService.getAllLogsIndexPattern(),
+    };
 
     return {
       ...prevDocViewer,
@@ -46,11 +58,11 @@ export const createGetDocViewer =
             );
 
             useEffect(() => {
-              context.logOverviewContext$.next(undefined);
-
               if (!logsOverviewApi) {
                 return;
               }
+
+              context.logOverviewContext$.next(undefined);
 
               if (initialAccordionSection.current) {
                 logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);
@@ -84,7 +96,10 @@ export const createGetDocViewer =
                 {...props}
                 ref={setLogsOverviewApi}
                 renderAIAssistant={logsAIAssistantFeature?.render}
-                renderStreamsField={streamsFeature?.renderStreamsField}
+                renderAIInsight={logsAIInsightFeature?.render}
+                renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
+                renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+                indexes={indexes}
               />
             );
           },

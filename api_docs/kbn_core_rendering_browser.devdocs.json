@@ -77,11 +77,13 @@
         "type": "string",
         "tags": [],
         "label": "APP_FIXED_VIEWPORT_ID",
-        "description": [],
+        "description": [
+          "\nThe ID of the fixed viewport container in the application.\nThis div is rendered by the `AppFixedViewport` component on the top of the application area and can be used to render fixed elements that should not scroll with the main content."
+        ],
         "signature": [
           "\"app-fixed-viewport\""
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout/app_fixed_viewport.ts",
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

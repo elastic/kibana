@@ -140,6 +140,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           size="m"
           color="primary"
           iconType={EuiLoadingSpinner}

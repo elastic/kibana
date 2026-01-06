@@ -24,6 +24,7 @@ export interface GroupedNode {
   data: {
     id: string;
     'span.type': string;
+    'span.subtype'?: string;
     label: string;
     groupedConnections: GroupedConnection[];
   };
@@ -57,8 +58,7 @@ export interface ServiceMapRawResponse {
   anomalies: ServiceAnomaliesResponse;
 }
 
-export type ServiceMapResponse =
-  | Pick<ServiceMapTelemetry, 'tracesCount'> & (ServiceMapRawResponse | GroupResourceNodesResponse);
+export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
 
 export interface ServicesResponse {
   [SERVICE_NAME]: string;

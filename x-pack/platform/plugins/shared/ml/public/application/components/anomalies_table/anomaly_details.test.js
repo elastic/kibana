@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {
@@ -68,9 +69,11 @@ describe('AnomalyDetails', () => {
       ...props,
       tabIndex: 1,
     };
-    const wrapper = mountWithIntl(<AnomalyDetails {...categoryTabProps} />);
-    expect(wrapper.containsMatchingElement(<span>Details</span>)).toBe(true);
-    expect(wrapper.containsMatchingElement(<span>Category examples</span>)).toBe(true);
+    renderWithI18n(<AnomalyDetails {...categoryTabProps} />);
+
+    // Verify both tabs are displayed
+    expect(screen.getByText('Details')).toBeInTheDocument();
+    expect(screen.getByText('Category examples')).toBeInTheDocument();
   });
 
   test('Renders with terms and regex when definition prop is not undefined', () => {
@@ -83,11 +86,12 @@ describe('AnomalyDetails', () => {
       },
     };
 
-    const wrapper = mountWithIntl(<AnomalyDetails {...categoryTabProps} />);
+    renderWithI18n(<AnomalyDetails {...categoryTabProps} />);
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+    // Verify all headings are displayed
+    expect(screen.getByRole('heading', { name: 'Regex' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Terms' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Examples' })).toBeInTheDocument();
   });
 
   test('Renders only with examples when definition prop is undefined', () => {
@@ -97,11 +101,12 @@ describe('AnomalyDetails', () => {
       definition: undefined,
     };
 
-    const wrapper = mountWithIntl(<AnomalyDetails {...categoryTabProps} />);
+    renderWithI18n(<AnomalyDetails {...categoryTabProps} />);
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(false);
+    // Verify that none of the headings are displayed
+    expect(screen.queryByRole('heading', { name: 'Regex' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Terms' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Examples' })).not.toBeInTheDocument();
   });
 
   test('Renders only with terms when definition.regex is undefined', () => {
@@ -113,11 +118,12 @@ describe('AnomalyDetails', () => {
       },
     };
 
-    const wrapper = mountWithIntl(<AnomalyDetails {...categoryTabProps} />);
+    renderWithI18n(<AnomalyDetails {...categoryTabProps} />);
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+    // Verify the correct headings are displayed
+    expect(screen.queryByRole('heading', { name: 'Regex' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Terms' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Examples' })).toBeInTheDocument();
   });
 
   test('Renders only with regex when definition.terms is undefined', () => {
@@ -129,10 +135,11 @@ describe('AnomalyDetails', () => {
       },
     };
 
-    const wrapper = mountWithIntl(<AnomalyDetails {...categoryTabProps} />);
+    renderWithI18n(<AnomalyDetails {...categoryTabProps} />);
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+    // Verify the correct headings are displayed
+    expect(screen.getByRole('heading', { name: 'Regex' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Terms' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Examples' })).toBeInTheDocument();
   });
 });

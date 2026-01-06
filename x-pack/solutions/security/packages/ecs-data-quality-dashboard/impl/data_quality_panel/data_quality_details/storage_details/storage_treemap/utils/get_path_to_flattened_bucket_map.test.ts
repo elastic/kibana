@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatternRollup } from '../../../../types';
+import type { PatternRollup } from '../../../../types';
 import { getFlattenedBuckets } from '../../utils/get_flattened_buckets';
 import { getPathToFlattenedBucketMap } from './get_path_to_flattened_bucket_map';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';

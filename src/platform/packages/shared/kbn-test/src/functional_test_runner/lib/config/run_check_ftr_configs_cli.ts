@@ -19,6 +19,8 @@ import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 const THIS_PATH =
   'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts';
 
+const IGNORED_FOLDERS = ['.buildkite/'];
+
 const IGNORED_PATHS = [
   THIS_PATH,
   'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts',
@@ -68,6 +70,10 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
+        if (IGNORED_FOLDERS.some((folder) => file.startsWith(Path.resolve(REPO_ROOT, folder)))) {
+          return false;
+        }
+
         // playwright config files
         if (file.match(/\/*playwright*.config.ts$/)) {
           return false;
@@ -89,7 +95,7 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/(jest(\.integration)?)\.config\.(t|j)s$/)) {
+        if (file.match(/jest(\.integration)?\.config(\.\w+)?\.(t|j)s$/)) {
           return false;
         }
 

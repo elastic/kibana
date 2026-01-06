@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from '@kbn/presentation-publishing';
-import { getRegistryItem } from './panel_placement_registry';
-import { PanelPlacementSettings } from './types';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PanelSettings } from '@kbn/presentation-util-plugin/public';
+import { presentationUtilService } from '../services/kibana_services';
 
-export async function getPanelPlacementSetting(
+export async function getPanelSettings(
   embeddableType: string,
   serializedState?: SerializedPanelState<object>
-): Promise<undefined | PanelPlacementSettings> {
-  const registryItem = getRegistryItem(embeddableType);
-  if (!registryItem) return;
-
+): Promise<undefined | PanelSettings> {
   try {
-    return await registryItem(serializedState);
+    return await presentationUtilService.getPanelPlacementSettings(embeddableType, serializedState);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn(

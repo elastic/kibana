@@ -15,15 +15,11 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
-import { getTimeFieldFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
+import { getTimeFieldFromESQLQuery, getStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
-import {
-  AuthenticationExpiredError,
-  CancellationToken,
-  ReportingError,
-  byteSizeValueToNumber,
-} from '@kbn/reporting-common';
+import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
+import { AuthenticationExpiredError, byteSizeValueToNumber } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { type TaskInstanceFields } from '@kbn/reporting-common/types';
@@ -59,7 +55,8 @@ export class CsvESQLGenerator {
     private clients: Clients,
     private cancellationToken: CancellationToken,
     private logger: Logger,
-    private stream: Writable
+    private stream: Writable,
+    private jobId: string
   ) {}
 
   public async generateData(): Promise<TaskRunResult> {
@@ -74,7 +71,7 @@ export class CsvESQLGenerator {
     let reportingError: undefined | ReportingError;
     const warnings: string[] = [];
 
-    const { maxSizeBytes, bom, escapeFormulaValues } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
     // it will return undefined if there are no _tstart, _tend named params in the query
@@ -97,9 +94,13 @@ export class CsvESQLGenerator {
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 
+    let query = this.job.query.esql;
+    if (query && maxRows) {
+      query = appendLimitToQuery(this.job.query.esql, maxRows);
+    }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {
-        query: this.job.query.esql,
+        query,
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),
@@ -145,7 +146,7 @@ export class CsvESQLGenerator {
 
       await this.generateRows(visibleColumns, rows, builder, settings);
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(err, { tags: [this.jobId] });
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
           reportingError = new AuthenticationExpiredError();
@@ -179,7 +180,7 @@ export class CsvESQLGenerator {
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building ${rows.length} CSV data rows`);
+    this.logger.debug(`Building ${rows.length} CSV data rows`, { tags: [this.jobId] });
     for (const dataTableRow of rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
@@ -219,7 +220,9 @@ export class CsvESQLGenerator {
       }
 
       if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
-        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
+        this.logger.warn(`ES|QL CSV report: Max Size Reached after ${this.csvRowCount} rows.`, {
+          tags: [this.jobId],
+        });
         this.maxSizeReached = true;
         if (this.cancellationToken) {
           this.cancellationToken.cancel();

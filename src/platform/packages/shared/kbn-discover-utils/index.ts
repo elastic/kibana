@@ -31,8 +31,7 @@ export {
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
-  createTracesContextService,
-  createApmErrorsContextService,
+  createApmContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -40,10 +39,14 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
-  getTransactionDocumentOverview,
-  getSpanDocumentOverview,
+  getTraceDocumentOverview,
+  getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getAvailableResourceFields,
+  getLogLevelFieldWithFallback,
+  getLogEventTypeFieldWithFallback,
+  getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
@@ -59,11 +62,32 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  prepareDataViewForEditing,
   LogLevelBadge,
+  getDefaultSort,
+  getSort,
+  getSortArray,
+  getSortForSearchSource,
+  getEsQuerySort,
+  getTieBreakerFieldName,
+  severityOrder,
 } from './src';
 
-export type { LogsContextService, TracesContextService, ApmErrorsContextService } from './src';
+export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
 
 export * from './src/types';
 
 export * from './src/data_types/logs/constants';
+
+export {
+  ALL_RECOMMENDED_FIELDS_FOR_ESQL,
+  APACHE_ERROR_LOGS_PROFILE,
+  DEFAULT_LOGS_PROFILE,
+  KUBERNETES_CONTAINER_LOGS_PROFILE,
+} from './src/data_types/logs';
+
+export type {
+  ApacheErrorLogsProfile,
+  DefaultLogsProfile,
+  KubernetesContainerLogsProfile,
+} from './src/data_types/logs';

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import {
+import type {
   CodeLanguage,
   CodeSnippetParameters,
   IngestCodeSnippetFunction,
@@ -16,7 +16,7 @@ import {
   SearchCodeSnippetFunction,
 } from '../types';
 
-import { CreateIndexLanguageExamples } from './types';
+import type { CreateIndexLanguageExamples } from './types';
 
 export const PYTHON_INFO: CodeLanguage = {
   id: 'python',

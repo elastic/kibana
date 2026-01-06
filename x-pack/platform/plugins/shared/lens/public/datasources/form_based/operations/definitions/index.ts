@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
@@ -14,7 +14,23 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
+import type {
+  BaseIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  IncompleteColumn,
+  LensLayerType,
+  OperationMetadata,
+  ReferenceBasedIndexPatternColumn,
+  FramePublicAPI,
+  IndexPattern,
+  IndexPatternField,
+  ParamEditorCustomProps,
+  UserMessage,
+} from '@kbn/lens-common';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -50,70 +66,11 @@ import {
 } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-import type {
-  FramePublicAPI,
-  IndexPattern,
-  IndexPatternField,
-  OperationMetadata,
-  ParamEditorCustomProps,
-  UserMessage,
-} from '../../../../types';
-import type {
-  BaseIndexPatternColumn,
-  IncompleteColumn,
-  GenericIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from './column_types';
-import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
-import { DateRange, LayerType } from '../../../../../common/types';
+import type { DataViewDragDropOperation } from '../../types';
 import { rangeOperation } from './ranges';
-import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
+import type { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
-import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
-
-export type {
-  IncompleteColumn,
-  BaseIndexPatternColumn,
-  GenericIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-} from './column_types';
-
-export type { TermsIndexPatternColumn } from './terms';
-export type { FiltersIndexPatternColumn, Filter } from './filters';
-export type { CardinalityIndexPatternColumn } from './cardinality';
-export type { PercentileIndexPatternColumn } from './percentile';
-export type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
-export type {
-  MinIndexPatternColumn,
-  AvgIndexPatternColumn,
-  SumIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MedianIndexPatternColumn,
-  StandardDeviationIndexPatternColumn,
-} from './metrics';
-export type { DateHistogramIndexPatternColumn } from './date_histogram';
-export type {
-  CumulativeSumIndexPatternColumn,
-  CounterRateIndexPatternColumn,
-  DerivativeIndexPatternColumn,
-  MovingAverageIndexPatternColumn,
-  OverallSumIndexPatternColumn,
-  OverallMinIndexPatternColumn,
-  OverallMaxIndexPatternColumn,
-  OverallAverageIndexPatternColumn,
-  TimeScaleIndexPatternColumn,
-} from './calculations';
-export type { CountIndexPatternColumn } from './count';
-export type { LastValueIndexPatternColumn } from './last_value';
-export type { RangeIndexPatternColumn } from './ranges';
-export type {
-  FormulaIndexPatternColumn,
-  MathIndexPatternColumn,
-  TimeRangeIndexPatternColumn,
-  NowIndexPatternColumn,
-  IntervalIndexPatternColumn,
-} from './formula';
-export type { StaticValueIndexPatternColumn } from './static_value';
+import type { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -294,7 +251,9 @@ interface BaseOperationDefinitionProps<
   paramEditor?: React.ComponentType<
     AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
   >;
-  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
+  getAdvancedOptions?: (
+    params: ParamEditorProps<C> & { euiTheme: EuiThemeComputed }
+  ) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -319,7 +278,7 @@ interface BaseOperationDefinitionProps<
   getDisabledStatus?: (
     indexPattern: IndexPattern,
     layer: FormBasedLayer,
-    layerType?: LayerType
+    layerType?: LensLayerType
   ) => string | undefined;
   /**
    * Validate that the operation has the right preconditions in the state. For example:

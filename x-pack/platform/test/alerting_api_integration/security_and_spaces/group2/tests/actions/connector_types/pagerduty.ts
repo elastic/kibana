@@ -17,7 +17,6 @@ import {
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -72,6 +71,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -91,6 +91,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -111,8 +112,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]',
+            message: `error validating connector type secrets: Field \"routingKey\": Required`,
           });
         });
     });
@@ -132,7 +132,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
+              'error validating connector type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });

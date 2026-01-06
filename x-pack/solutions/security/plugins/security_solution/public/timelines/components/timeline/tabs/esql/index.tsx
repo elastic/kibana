@@ -12,20 +12,20 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public/customiz
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import { from, type Subscription } from 'rxjs';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 import { EmbeddedDiscoverContainer, TimelineESQLGlobalStyles } from './styles';
 import { timelineSelectors } from '../../../../store';
@@ -63,16 +63,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const { status: dataViewStatus } = useDataView(PageScope.alerts);
 
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const { dataViewId } = useSourcererDataView(PageScope.alerts);
 
   const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
-
-  const dataViewSpec: DataViewSpec | undefined = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldDataViewSpec),
-    [experimentalDataViewSpec, newDataViewPickerEnabled, oldDataViewSpec]
-  );
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 
@@ -83,9 +78,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
   useEffect(() => {
-    if (!dataViewId) return;
+    if (!dataViewId || newDataViewPickerEnabled) return;
     dataViewService.get(dataViewId).then((dv) => setDataViewSpec(dv?.toSpec?.()));
-  }, [dataViewId, dataViewService]);
+  }, [dataViewId, dataViewService, newDataViewPickerEnabled]);
 
   const {
     discoverStateContainer,
@@ -126,9 +121,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     return {
       ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
-      refreshInterval: discoverStateContainer.current?.globalState.get()?.refreshInterval,
-      breakdownField: discoverStateContainer.current?.appState.getState().breakdownField,
-      rowsPerPage: discoverStateContainer.current?.appState.getState().rowsPerPage,
+      refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
+      breakdownField: discoverStateContainer.current?.getCurrentTab().appState.breakdownField,
+      rowsPerPage: discoverStateContainer.current?.getCurrentTab().appState.rowsPerPage,
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
@@ -215,20 +210,34 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      const hasESQLUrlState = (stateContainer.appState.getState()?.query as { esql: string })?.esql;
+      const hasESQLUrlState = (stateContainer.getCurrentTab().appState.query as { esql: string })
+        ?.esql;
 
       if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
-          stateContainer.globalState.set({
-            ...stateContainer.globalState.get(),
-            time: savedSearchAppState?.savedSearch.timeRange,
-          });
+          stateContainer.internalState.dispatch(
+            stateContainer.injectCurrentTab(stateContainer.internalStateActions.updateGlobalState)({
+              globalState: {
+                timeRange: savedSearchAppState.savedSearch.timeRange,
+              },
+            })
+          );
         }
-        stateContainer.appState.set(finalAppState);
-        await stateContainer.appState.replaceUrlState(finalAppState);
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(stateContainer.internalStateActions.setAppState)({
+            appState: finalAppState,
+          })
+        );
+        await stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(
+            stateContainer.internalStateActions.updateAppStateAndReplaceUrl
+          )({
+            appState: finalAppState,
+          })
+        );
       }
 
-      const unsubscribeState = stateContainer.appState.state$.subscribe({
+      const unsubscribeState = stateContainer.appState$.subscribe({
         next: setDiscoverAppState,
       });
 
@@ -236,12 +245,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getHasChanged$().subscribe({
-        next: (hasChanged) => {
-          if (hasChanged) {
-            const latestSavedSearchState = stateContainer.savedSearchState.getState();
-            setDiscoverSavedSearchState(latestSavedSearchState);
-          }
+      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
+        next: (latestSavedSearchState) => {
+          setDiscoverSavedSearchState(latestSavedSearchState);
         },
       });
 
@@ -290,8 +296,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  // TODO: (DV_PICKER) this should not work like that
-  const isLoading = !dataViewSpec;
+  const isLoading = newDataViewPickerEnabled
+    ? dataViewStatus === 'loading' || dataViewStatus === 'pristine'
+    : !oldDataViewSpec; // TODO: (DV_PICKER) this should not work like that
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">

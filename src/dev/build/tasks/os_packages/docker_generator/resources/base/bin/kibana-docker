@@ -1,7 +1,4 @@
 #!/bin/bash
-#
-# ** THIS IS AN AUTO-GENERATED FILE **
-#
 
 # Run Kibana, using environment variables to set longopts defining Kibana's
 # configuration.
@@ -36,6 +33,7 @@ kibana_vars=(
     csp.font_src
     csp.frame_src
     csp.img_src
+    csp.object_src
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
@@ -114,6 +112,7 @@ kibana_vars=(
     migrations.retryAttempts
     migrations.scrollDuration
     migrations.skip
+    migrations.useCumulativeLogger
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
@@ -202,16 +201,26 @@ kibana_vars=(
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
+    telemetry.metrics.enabled
+    telemetry.metrics.interval
+    telemetry.metrics.exporters # Allow specifying the array here or..
+    telemetry.metrics.exporters.grpc.url # ... or a single exporter by specifying these 2.
+    telemetry.metrics.exporters.grpc.headers
+    telemetry.metrics.exporters.grpc.exportIntervalMillis
+    telemetry.metrics.exporters.grpc.temporalityPreference
     tilemap.options.attribution
     tilemap.options.maxZoom
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
+    usageCollection.maxCollectorConcurrency
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
+    xpack.actions.email.recipient_allowlist
+    xpack.actions.email.maximum_body_length
     xpack.actions.email.services.ses.host
     xpack.actions.email.services.ses.port
     xpack.actions.email.services.enabled
@@ -261,8 +270,14 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.enabled
+    xpack.cases.analytics.index.enabled
+    xpack.cases.incrementalId.enabled
+    xpack.cases.incrementalId.taskIntervalMinutes
+    xpack.cases.incrementalId.taskStartDelayMinutes
     xpack.cases.files.allowedMimeTypes
     xpack.cases.files.maxSize
+    xpack.cases.stack.enabled
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
@@ -347,6 +362,7 @@ kibana_vars=(
     xpack.reporting.csv.scroll.size
     xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
+    xpack.reporting.csv.maxRows
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.kibanaApp
@@ -414,11 +430,14 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.spaces.defaultSolution
     xpack.task_manager.capacity
     xpack.task_manager.claim_strategy
     xpack.task_manager.auto_calculate_default_ech_capacity
     xpack.task_manager.discovery.active_nodes_lookback
     xpack.task_manager.discovery.interval
+    xpack.task_manager.invalidate_api_key_task.interval
+    xpack.task_manager.invalidate_api_key_task.removalDelay
     xpack.task_manager.kibanas_per_partition
     xpack.task_manager.max_attempts
     xpack.task_manager.max_workers

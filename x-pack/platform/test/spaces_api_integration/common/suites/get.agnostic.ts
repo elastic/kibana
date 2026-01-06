@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import expect from '@kbn/expect';
 
 import type {
@@ -33,7 +32,6 @@ interface GetTestDefinition {
 const nonExistantSpaceId = 'not-a-space';
 
 export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = context.getService('esArchiver');
   const config = context.getService('config');
   const isServerless = config.get('serverless');
 
@@ -91,22 +89,16 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             'apm',
             'infrastructure',
             'logs',
-            'observabilityCases',
-            'observabilityCasesV2',
             'observabilityCasesV3',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
-            'securitySolutionCases',
-            'securitySolutionCasesV2',
             'securitySolutionCasesV3',
             'securitySolutionNotes',
+            'securitySolutionRulesV1',
             'securitySolutionSiemMigrations',
             'securitySolutionTimeline',
-            'siem',
-            'siemV2',
-            'siemV3',
+            'siemV5',
             'slo',
-            'streams',
             'uptime',
           ],
         }),
@@ -127,20 +119,15 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
     (describeFn: DescribeFn) =>
     (description: string, { user, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
       describeFn(description, () => {
-        const roleScopedSupertest = context.getService('roleScopedSupertest');
+        const spacesSupertest = context.getService('spacesSupertest');
         let supertest: SupertestWithRoleScopeType;
 
         before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
         });
+
         after(async () => {
           await supertest.destroy();
-          await esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
         });
 
         getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {

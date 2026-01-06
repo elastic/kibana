@@ -23,6 +23,7 @@ describe('transformConnectorsResponse', () => {
         referenced_by_count: 0,
         secrets: {},
         config: {},
+        is_connector_type_deprecated: false,
       },
       {
         id: 'test-connector-2',
@@ -35,6 +36,7 @@ describe('transformConnectorsResponse', () => {
         referenced_by_count: 0,
         secrets: {},
         config: {},
+        is_connector_type_deprecated: true,
       },
     ]);
 
@@ -50,6 +52,7 @@ describe('transformConnectorsResponse', () => {
         name: 'Test-1',
         referencedByCount: 0,
         secrets: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         actionTypeId: 'test-2',
@@ -62,6 +65,7 @@ describe('transformConnectorsResponse', () => {
         name: 'Test-2',
         referencedByCount: 0,
         secrets: {},
+        isConnectorTypeDeprecated: true,
       },
     ]);
   });

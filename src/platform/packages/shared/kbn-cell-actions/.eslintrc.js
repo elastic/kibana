@@ -70,19 +70,25 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 const path = require('path');
+// eslint-disable-next-line import/no-nodejs-modules
+const { execSync } = require('child_process');
+
 const minimatch = require('minimatch');
 
 /** @type {Array.<RestrictedImportPath>} */
-const RESTRICTED_IMPORTS = [
+const RESTRICTED_IMPORTS_PATHS = [
   {
     name: 'enzyme',
     message: 'Please use @testing-library/react instead',
   },
 ];
 
-// root directory of the project dynamically calculated
-const ROOT_DIR = process.cwd();
-const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // e.g. ../../../../..
+const ROOT_DIR = execSync('git rev-parse --show-toplevel', {
+  encoding: 'utf8',
+  cwd: __dirname,
+}).trim();
+
+const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'
 
 /** @type {import('eslint').Linter.Config} */
 const rootConfig = require(`${ROOT_CLIMB_STRING}/.eslintrc`); // eslint-disable-line import/no-dynamic-require
@@ -116,7 +122,7 @@ for (const override of overridesWithNoRestrictedImportRule) {
     // Dynamic duplicates removal for all restricted imports
     const existingPaths = modernConfig.paths.filter(
       (existing) =>
-        !RESTRICTED_IMPORTS.some((restriction) =>
+        !RESTRICTED_IMPORTS_PATHS.some((restriction) =>
           typeof existing === 'string'
             ? existing === restriction.name
             : existing.name === restriction.name
@@ -127,7 +133,7 @@ for (const override of overridesWithNoRestrictedImportRule) {
     const newRuleConfig = [
       severity,
       {
-        paths: [...existingPaths, ...RESTRICTED_IMPORTS],
+        paths: [...existingPaths, ...RESTRICTED_IMPORTS_PATHS],
         patterns: modernConfig.patterns,
       },
     ];

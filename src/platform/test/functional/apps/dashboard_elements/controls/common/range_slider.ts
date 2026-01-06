@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -85,7 +85,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
-          width: 'small',
           additionalSettings: { step: 10 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
@@ -106,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
-          width: 'medium',
           additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
@@ -124,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      it('edits title and size of an existing control and retains existing range selection', async () => {
+      it('edits title of an existing control and retains existing range selection', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         const newTitle = 'Average ticket price';
         await dashboardControls.editExistingControl(secondId);
@@ -133,7 +131,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           selectedType: RANGE_SLIDER_CONTROL,
         });
         await dashboardControls.controlEditorSetTitle(newTitle);
-        await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
         await dashboardControls.validateRange('value', secondId, '200', '1000');
@@ -196,17 +193,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can select a range on a defined step interval using arrow keys', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
 
+        // clear out the lower bound selection
+        await dashboardControls.clearControlSelections(secondId);
+
         await testSubjects.click(
           `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
         );
 
         // use arrow key to set lower bound to the next step up
-        await browser.pressKeys(browser.keys.ARROW_UP);
-        await dashboardControls.validateRange('value', secondId, '300', '');
+        await browser.pressKeys(browser.keys.ARROW_UP, browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '200', '');
 
         // use arrow key to set lower bound to the next step up
         await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await dashboardControls.validateRange('value', secondId, '200', '');
+        await dashboardControls.validateRange('value', secondId, '100', '');
 
         await dashboardControls.rangeSliderSetUpperBound(secondId, '800');
 
@@ -216,11 +216,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // use arrow key to set upper bound to the next step up
         await browser.pressKeys(browser.keys.ARROW_UP);
-        await dashboardControls.validateRange('value', secondId, '200', '900');
+        await dashboardControls.validateRange('value', secondId, '100', '900');
 
         // use arrow key to set upper bound to the next step up
         await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await dashboardControls.validateRange('value', secondId, '200', '800');
+        await dashboardControls.validateRange('value', secondId, '100', '800');
 
         await dashboard.clearUnsavedChanges();
       });
@@ -251,7 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.switchToEditMode();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await retry.try(async () => {
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        });
       });
 
       it('deletes an existing control', async () => {
@@ -274,7 +276,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
-          width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await testSubjects.click(
@@ -289,14 +290,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('AvgTicketPrice <= 300 error');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('control-frame-error');
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.checkForControlErrorStatus(firstId, true);
       });
 
       it('Can recover from malformed query error', async () => {
         await queryBar.setQuery('AvgTicketPrice <= 300');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('control-frame-error');
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.checkForControlErrorStatus(firstId, false);
       });
 
       it('Applies dashboard query to range slider control', async () => {

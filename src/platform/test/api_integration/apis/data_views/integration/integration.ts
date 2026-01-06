@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * Test usage of different index patterns APIs in combination

@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
-import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import {
+  defer,
+  EMPTY,
+  expand,
+  from,
+  fromEvent,
+  switchMap,
+  takeUntil,
+  takeWhile,
+  tap,
+  throwError,
+  timer,
+} from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '..';
@@ -53,15 +65,13 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     }
 
     const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
-      map(() => {
-        throw new AbortError();
-      })
+      switchMap((e) => throwError(() => new AbortError((e.target as AbortSignal)?.reason)))
     );
 
     return from(search()).pipe(
       expand(() => {
         const elapsedTime = Date.now() - startTime;
-        return timer(getPollInterval(elapsedTime)).pipe(switchMap(search));
+        return timer(getPollInterval(elapsedTime)).pipe(switchMap(() => search()));
       }),
       tap((response) => {
         if (isAbortResponse(response)) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import d3 from 'd3';
-import type { PartialTheme } from '@elastic/charts';
+import type { Theme } from '@elastic/charts';
 import type { PointerEvent } from '@elastic/charts';
 import { CHART_HEIGHT } from '../constants';
 interface ChartScales {
@@ -18,7 +18,7 @@ export function drawCursor(
   chartId: string,
   config: { plotEarliest: number; plotLatest: number },
   chartScales: ChartScales,
-  chartTheme: PartialTheme
+  chartTheme: Theme
 ) {
   if (!chartScales) return;
   const { lineChartXScale, margin: updatedMargin } = chartScales;
@@ -28,12 +28,7 @@ export function drawCursor(
   if (!chartElement || !lineChartXScale) return;
   chartElement.select('.ml-anomaly-chart-cursor-line').remove();
 
-  const crosshairLine = chartTheme?.crosshair?.line ?? {
-    visible: true,
-    stroke: '#69707D',
-    strokeWidth: 1,
-    dash: [4, 4],
-  };
+  const crosshairLine = chartTheme.crosshair.line;
   const cursorData =
     cursor &&
     cursor.type === 'Over' &&
@@ -49,7 +44,6 @@ export function drawCursor(
     .selectAll('.ml-anomaly-chart-cursor-line')
     .data(cursorData);
 
-  // @ts-expect-error d3 types are not up to date
   cursorMouseLine
     .enter()
     .append('path')
@@ -58,7 +52,6 @@ export function drawCursor(
       const xPosition = lineChartXScale(ts);
       return `M${xPosition},${CHART_HEIGHT} ${xPosition},0`;
     })
-    // Use elastic chart's cursor line style if possible
     .style('stroke', crosshairLine.stroke)
     .style('stroke-width', `${crosshairLine.strokeWidth}px`)
     .style('stroke-dasharray', crosshairLine.dash?.join(',') ?? '4,4')

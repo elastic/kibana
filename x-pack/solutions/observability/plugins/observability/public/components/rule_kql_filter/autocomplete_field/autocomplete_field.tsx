@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel, EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
 import { SuggestionItem } from './suggestion_item';
 

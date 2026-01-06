@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 export const JobWizardStepAction = (props: EuiFlexItemProps) => (

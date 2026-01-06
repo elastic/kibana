@@ -22,14 +22,15 @@ import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { setFieldFormats } from '@kbn/reporting-server';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
-import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 const fakeRawRequest: FakeRawRequest = {
   headers: {
@@ -84,6 +85,7 @@ beforeAll(async () => {
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    licensing: licensingMock.createStart(),
   });
 });
 
@@ -135,5 +137,5 @@ test('uses the provided logger', async () => {
     stream,
   });
 
-  expect(logSpy).toHaveBeenCalledWith('execute-job:cool-job-id');
+  expect(logSpy).toHaveBeenCalledWith('execute-job');
 });

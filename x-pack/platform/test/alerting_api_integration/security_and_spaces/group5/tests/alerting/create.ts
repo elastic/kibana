@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+} from '@kbn/connector-schemas/sentinelone/constants';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
+  AlertUtils,
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
@@ -23,7 +24,6 @@ import {
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -71,6 +71,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -135,6 +136,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 0,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -675,5 +677,66 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('workflows subfeature', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should handle create alert request appropriately with workflows-only actions', async () => {
+        let response = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My single file workflows connector',
+            connector_type_id: 'test.single_file_connector',
+            config: { apiUrl: 'https://some.non.existent.com' },
+            secrets: { authType: 'none' },
+          })
+          .expect(200);
+        const connectorId = response.body.id;
+
+        response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  id: connectorId,
+                  group: 'default',
+                  params: {
+                    subAction: 'testHandlerParams',
+                    subActionParams: {
+                      message: 'not relevant',
+                    },
+                  },
+                },
+              ],
+            })
+          );
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body).to.eql({
+          error: 'Bad Request',
+          message:
+            'Failed to validate actions due to the following error: This type of connector cannot be used as alerting actions',
+          statusCode: 400,
+        });
+      });
+    });
+
+    describe('internally managed rule types', () => {
+      const alertUtils = new AlertUtils({
+        user: SuperuserAtSpace1.user,
+        space: SuperuserAtSpace1.space,
+        supertestWithoutAuth,
+      });
+
+      it('should throw 400 error when trying to create an internally managed rule type', async () => {
+        const response = await alertUtils.createInternallyManagedRule(objectRemover);
+
+        expect(response.statusCode).to.eql(400);
+      });
+    });
   });
 }

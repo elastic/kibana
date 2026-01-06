@@ -51,11 +51,11 @@ interface Props {
   readonly activeSpace: Space | null;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
+  isLoading: boolean;
 }
 class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
-    const { euiTheme } = this.props.theme;
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -97,9 +97,6 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
             defaultMessage: 'Spaces',
           })}
           id={this.props.id}
-          css={css`
-            max-width: calc(${euiTheme.size.l} * 10);
-          `}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
             defaultMessage: 'Change current space',
           })}
@@ -107,13 +104,19 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
           singleSelection={'always'}
-          style={{ minWidth: 300, maxWidth: 320 }}
+          css={css`
+            width: 400px;
+          `}
           onChange={this.spaceSelectionChange}
           listProps={{
             rowHeight: 40,
             showIcons: true,
             onFocusBadge: false,
           }}
+          isLoading={this.props.isLoading}
+          loadingMessage={i18n.translate('xpack.spaces.navControl.loadingMessage', {
+            defaultMessage: 'Loading...',
+          })}
         >
           {(list, search) => (
             <Fragment>

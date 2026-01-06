@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -27,6 +27,7 @@ export function UnlinkDashboard({
     core: { notifications },
   } = useApmPluginContext();
   const history = useHistory();
+  const modalTitleId = useGeneratedHtmlId();
 
   const onConfirm = useCallback(
     async function () {
@@ -88,12 +89,14 @@ export function UnlinkDashboard({
       </EuiButtonEmpty>
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.apm.serviceDashboards.unlinkEmptyButtonLabel.confirm.title',
             {
               defaultMessage: 'Unlink Dashboard',
             }
           )}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsModalVisible(false)}
           onConfirm={onConfirm}
           confirmButtonText={i18n.translate(

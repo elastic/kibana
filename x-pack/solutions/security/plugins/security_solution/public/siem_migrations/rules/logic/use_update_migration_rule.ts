@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type {
   RuleMigrationRule,
@@ -30,7 +30,7 @@ export const useUpdateMigrationRule = (migrationRule: RuleMigrationRule) => {
 
   const reportTelemetry = useCallback(
     (error?: Error) => {
-      telemetry.reportTranslatedRuleUpdate({ migrationRule, error });
+      telemetry.reportTranslatedItemUpdate({ migrationItem: migrationRule, error });
     },
     [telemetry, migrationRule]
   );

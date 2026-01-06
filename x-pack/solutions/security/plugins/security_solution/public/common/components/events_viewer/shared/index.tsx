@@ -54,7 +54,7 @@ export const EmptyTable: React.FC = () => {
     <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
       <EuiFlexGroup alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={true} style={panelStyle}>
+          <EuiPanel hasBorder={true} css={panelStyle}>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiText size="s">

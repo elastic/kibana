@@ -7,13 +7,14 @@
 
 import PropTypes from 'prop-types';
 import { withHandlers, compose } from 'react-recompose';
-import { WorkpadShortcuts as Component, Props as WorkpadShortcutsProps } from './workpad_shortcuts';
+import type { Props as WorkpadShortcutsProps } from './workpad_shortcuts';
+import { WorkpadShortcuts as Component } from './workpad_shortcuts';
+import type { Props as HandlerCreatorProps } from '../../lib/element_handler_creators';
 import {
   groupHandlerCreators,
   layerHandlerCreators,
   basicHandlerCreators,
   clipboardHandlerCreators,
-  Props as HandlerCreatorProps,
   positionHandlerCreators,
 } from '../../lib/element_handler_creators';
 
@@ -27,6 +28,7 @@ export const WorkpadShortcuts = compose<WorkpadShortcutsProps, HandlerCreatorPro
 
 WorkpadShortcuts.propTypes = {
   pageId: PropTypes.string.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   selectedNodes: PropTypes.arrayOf(PropTypes.object),
   elementLayer: PropTypes.func.isRequired,
   insertNodes: PropTypes.func.isRequired,

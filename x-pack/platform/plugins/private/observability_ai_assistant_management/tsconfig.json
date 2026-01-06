@@ -1,13 +1,9 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
@@ -31,9 +27,15 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/spaces-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/inference-common",
+    "@kbn/licensing-plugin",
+    "@kbn/react-query",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function getConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -66,6 +65,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_system_action: false,
                 connector_type_id: 'test.index-record',
                 is_deprecated: false,
+                is_connector_type_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My Connector',
                 config: {
@@ -154,6 +154,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_preconfigured: true,
                 is_system_action: false,
                 is_deprecated: false,
+                is_connector_type_deprecated: false,
               });
               break;
             default:

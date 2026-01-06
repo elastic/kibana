@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from '@kbn/grid-layout';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import classNames from 'classnames';
-import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import type { GridData } from '../../../server/content_management';
+import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
+import { GridLayout } from '@kbn/grid-layout';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
+import type { GridData } from '../../../server';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -28,11 +31,7 @@ import {
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
 
-export const DashboardGrid = ({
-  dashboardContainerRef,
-}: {
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
-}) => {
+export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
@@ -41,84 +40,46 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId$,
-    dashboardInternalApi.layout$,
-    dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode$
-  );
+  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef] =
+    useBatchedPublishingSubjects(
+      dashboardApi.expandedPanelId$,
+      dashboardApi.settings.useMargins$,
+      dashboardApi.viewMode$,
+      dashboardInternalApi.gridLayout$,
+      dashboardInternalApi.dashboardContainerRef$
+    );
 
   useEffect(() => {
-    setTopOffset(
-      dashboardContainerRef?.current?.getBoundingClientRect().top ??
-        DEFAULT_DASHBOARD_DRAG_TOP_OFFSET
-    );
-  }, [dashboardContainerRef]);
+    const newTopOffset =
+      dashboardContainerRef?.getBoundingClientRect().top ?? DEFAULT_DASHBOARD_DRAG_TOP_OFFSET;
+    if (newTopOffset !== topOffset) setTopOffset(newTopOffset);
+  }, [dashboardContainerRef, topOffset]);
 
   const appFixedViewport = useAppFixedViewport();
-
-  const currentLayout: GridLayoutData = useMemo(() => {
-    const newLayout: GridLayoutData = {};
-    Object.keys(layout.sections).forEach((sectionId) => {
-      const section = layout.sections[sectionId];
-      newLayout[sectionId] = {
-        id: sectionId,
-        type: 'section',
-        row: section.gridData.y,
-        isCollapsed: Boolean(section.collapsed),
-        title: section.title,
-        panels: {},
-      };
-    });
-    Object.keys(layout.panels).forEach((panelId) => {
-      const gridData = layout.panels[panelId].gridData;
-      const basePanel = {
-        id: panelId,
-        row: gridData.y,
-        column: gridData.x,
-        width: gridData.w,
-        height: gridData.h,
-      } as GridPanelData;
-      if (gridData.sectionId) {
-        (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
-      } else {
-        newLayout[panelId] = {
-          ...basePanel,
-          type: 'panel',
-        };
-      }
-      // update `data-grid-row` attribute for all panels because it is used for some styling
-      const panelRef = panelRefs.current[panelId];
-      if (typeof panelRef !== 'function' && panelRef?.current) {
-        panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
-      }
-    });
-    return newLayout;
-  }, [layout]);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
-      const currLayout = dashboardInternalApi.layout$.getValue();
+      const currLayout = dashboardApi.layout$.getValue();
       const updatedLayout: DashboardLayout = {
         sections: {},
         panels: {},
+        controls: currLayout.controls,
       };
       Object.values(newLayout).forEach((widget) => {
         if (widget.type === 'section') {
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
-            gridData: {
-              i: widget.id,
+            grid: {
               y: widget.row,
             },
           };
           Object.values(widget.panels).forEach((panel) => {
             updatedLayout.panels[panel.id] = {
               ...currLayout.panels[panel.id],
-              gridData: {
+              grid: {
                 ...convertGridPanelToDashboardGridData(panel),
                 sectionId: widget.id,
               },
@@ -128,20 +89,20 @@ export const DashboardGrid = ({
           // widget is a panel
           updatedLayout.panels[widget.id] = {
             ...currLayout.panels[widget.id],
-            gridData: convertGridPanelToDashboardGridData(widget),
+            grid: convertGridPanelToDashboardGridData(widget),
           };
         }
       });
       if (!areLayoutsEqual(currLayout, updatedLayout)) {
-        dashboardInternalApi.layout$.next(updatedLayout);
+        dashboardApi.layout$.next(updatedLayout);
       }
     },
-    [dashboardInternalApi.layout$, viewMode]
+    [dashboardApi.layout$, viewMode]
   );
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      const panels = dashboardInternalApi.layout$.getValue().panels;
+      const panels = dashboardApi.layout$.getValue().panels;
       if (!panels[id]) return;
 
       if (!panelRefs.current[id]) {
@@ -157,12 +118,11 @@ export const DashboardGrid = ({
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
-          dashboardContainerRef={dashboardContainerRef}
-          data-grid-row={panels[id].gridData.y} // initialize data-grid-row
+          data-grid-row={panels[id].grid.y} // initialize data-grid-row
         />
       );
     },
-    [appFixedViewport, dashboardContainerRef, dashboardInternalApi.layout$]
+    [appFixedViewport, dashboardApi.layout$]
   );
 
   const styles = useMemoCss(dashboardGridStyles);
@@ -204,7 +164,7 @@ export const DashboardGrid = ({
     return (
       <GridLayout
         css={layoutStyles}
-        layout={currentLayout}
+        layout={layout}
         gridSettings={{
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
@@ -220,7 +180,7 @@ export const DashboardGrid = ({
     );
   }, [
     layoutStyles,
-    currentLayout,
+    layout,
     useMargins,
     renderPanelContents,
     onLayoutChange,
@@ -228,6 +188,18 @@ export const DashboardGrid = ({
     viewMode,
     topOffset,
   ]);
+
+  useEffect(() => {
+    // update `data-grid-row` attribute for all panels because it is used for some styling
+    Object.values(layout).forEach((widget) => {
+      if (widget.type === 'panel') {
+        const panelRef = panelRefs.current[widget.id];
+        if (typeof panelRef !== 'function' && panelRef?.current) {
+          panelRef.current.setAttribute('data-grid-row', `${widget.row}`);
+        }
+      }
+    });
+  }, [layout]);
 
   return (
     <div
@@ -245,7 +217,6 @@ export const DashboardGrid = ({
 
 const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => {
   return {
-    i: panel.id,
     y: panel.row,
     x: panel.column,
     w: panel.width,
@@ -275,6 +246,11 @@ const dashboardGridStyles = {
           position: 'absolute',
           width: '100%',
         },
+
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          // on smaller screens, the maximized panel should take the full height of the screen minus the sticky top nav
+          minHeight: 'calc(100vh - var(--kbn-application--sticky-headers-offset, 0px))',
+        },
       },
       // LAYOUT MODES
       // Adjust borders/etc... for non-spaced out and expanded panels
@@ -290,7 +266,7 @@ const dashboardGridStyles = {
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
       '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
         {
-          '.embPanel--dragHandle': {
+          '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',
           },
         },

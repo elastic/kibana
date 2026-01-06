@@ -22,10 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useInferenceEndpoints } from '../hooks/use_inference_endpoints';
-import {
-  ModelOptionsData,
-  getModelOptionsForInferenceEndpoints,
-} from '../utils/get_model_options_for_inference_endpoints';
+import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
+import { getModelOptionsForInferenceEndpoints } from '../utils/get_model_options_for_inference_endpoints';
 import { fadeInAnimation } from '../chat/welcome_message_connectors';
 
 interface SelectModelAndInstallKnowledgeBaseProps {
@@ -139,7 +137,7 @@ export function SelectModelAndInstallKnowledgeBase({
         </EuiLink>
       </EuiText>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} css={{ width: 320 }}>
@@ -152,15 +150,19 @@ export function SelectModelAndInstallKnowledgeBase({
             onChange={(value) => setSelectedInferenceId(value)}
             disabled={isInstalling}
             data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
+            aria-label={i18n.translate('xpack.aiAssistant.knowledgeBase.modelSelectAriaLabel', {
+              defaultMessage: 'Default language model',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiButton
+            size="s"
             color="primary"
             fill
             isLoading={isInstalling}
@@ -174,6 +176,8 @@ export function SelectModelAndInstallKnowledgeBase({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
     </>
   );
 }

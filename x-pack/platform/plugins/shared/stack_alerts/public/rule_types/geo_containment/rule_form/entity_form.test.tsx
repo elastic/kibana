@@ -34,7 +34,7 @@ test('should not call prop callbacks on render', async () => {
   };
   const props = {
     data: {
-      indexPatterns: {
+      dataViews: {
         get: async () => mockDataView,
       },
     } as unknown as DataPublicPluginStart,

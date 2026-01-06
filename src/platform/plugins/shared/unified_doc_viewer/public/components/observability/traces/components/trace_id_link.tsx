@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
@@ -16,9 +16,14 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 interface TraceIdLinkProps {
   traceId: string;
   formattedTraceId: React.ReactNode;
+  'data-test-subj': string;
 }
 
-export function TraceIdLink({ traceId, formattedTraceId }: TraceIdLinkProps) {
+export function TraceIdLink({
+  traceId,
+  formattedTraceId,
+  'data-test-subj': dataTestSubj,
+}: TraceIdLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -56,14 +61,11 @@ export function TraceIdLink({ traceId, formattedTraceId }: TraceIdLinkProps) {
   return (
     <>
       {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          data-test-subj="unifiedDocViewerObservabilityTracesTraceIdLink"
-        >
+        <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
           {formattedTraceId}
         </EuiLink>
       ) : (
-        traceId
+        <EuiText size="xs">{traceId}</EuiText>
       )}
     </>
   );

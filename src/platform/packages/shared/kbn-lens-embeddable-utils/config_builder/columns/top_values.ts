@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { TopValuesColumnParams } from '../../attribute_builder/utils';
+import type { TermsIndexPatternColumn } from '@kbn/lens-common';
+
+type TopValuesColumnParams = Pick<
+  TermsIndexPatternColumn['params'],
+  'size' | 'orderDirection' | 'orderBy' | 'secondaryFields' | 'accuracyMode' | 'orderAgg'
+>;
 
 const DEFAULT_BREAKDOWN_SIZE = 10;
 

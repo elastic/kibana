@@ -25,11 +25,12 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
   const fieldAndError = field ? getFieldValidityAndErrorMessage(field) : undefined;
   const isInvalid = fieldAndError?.isInvalid;
   const errorMessage = fieldAndError?.errorMessage;
-  const comboBoxOptions = useMemo(
+  const comboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       dataViews.map(({ id, title, name }) => ({
         id,
         label: name ?? title,
+        toolTipContent: title,
       })),
     [dataViews]
   );
@@ -48,6 +49,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
       {!areDataViewsFetching && isDataViewIdValid(field.value) && !selectedOption && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.DATA_VIEW_NOT_FOUND_WARNING_LABEL}
             color="warning"
             iconType="question"
@@ -61,6 +63,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
       {field.value === SECURITY_DEFAULT_DATA_VIEW_ID && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.DATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL}
             color="warning"
             iconType="question"
@@ -79,6 +82,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
         data-test-subj="pick-rule-data-source"
       >
         <EuiComboBox
+          isInvalid={isInvalid}
           isDisabled={areDataViewsFetching}
           isClearable
           singleSelection={{ asPlainText: true }}

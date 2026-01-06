@@ -27,6 +27,8 @@ export const INSIGHTS_CHANNEL = 'security-insights-v1';
 
 export const TASK_METRICS_CHANNEL = 'task-metrics';
 
+export const DETECTION_RULE_TYPE_ESQL = 'esql';
+
 export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {
     advanced: {

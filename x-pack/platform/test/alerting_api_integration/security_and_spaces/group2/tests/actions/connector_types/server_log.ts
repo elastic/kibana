@@ -11,7 +11,6 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -39,6 +38,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         name: 'A server.log action',
         connector_type_id: '.server-log',
         config: {},
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -56,6 +56,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         connector_type_id: '.server-log',
         is_missing_secrets: false,
         config: {},
+        is_connector_type_deprecated: false,
       });
     });
 

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -10,7 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../../../typings/**/*",
-    "ui_tests/**/*"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -22,7 +22,6 @@
     "@kbn/share-plugin",
     "@kbn/data-plugin",
     "@kbn/alerting-comparators",
-    "@kbn/guided-onboarding",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
     "@kbn/spaces-plugin",
@@ -90,7 +89,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/home-plugin",
     "@kbn/data-view-field-editor-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/license-management-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/security-plugin",
@@ -123,12 +121,30 @@
     "@kbn/object-utils",
     "@kbn/task-manager-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-analytics-browser",
     "@kbn/core-pricing-common",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
+    "@kbn/licensing-types",
+    "@kbn/deeplinks-management",
+    "@kbn/content-management-content-editor",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/discover-utils",
+    "@kbn/deeplinks-management",
+    "@kbn/observability-nav-icons",
+    "@kbn/react-query",
+    "@kbn/content-management-utils",
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/agent-builder-plugin",    
+    "@kbn/synthtrace",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
+    "@kbn/observability-agent-builder-plugin",
   ],
   "exclude": ["target/**/*"]
 }

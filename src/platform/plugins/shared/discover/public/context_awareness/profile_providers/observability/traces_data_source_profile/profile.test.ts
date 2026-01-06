@@ -16,11 +16,11 @@ import {
 } from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('tracesDataSourceProfileProvider', () => {
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(mockServices);
@@ -106,5 +106,28 @@ describe('tracesDataSourceProfileProvider', () => {
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  describe('getColumnsConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnsConfiguration =
+        tracesDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
+          context: {
+            category: DataSourceCategory.Traces,
+          },
+        });
+
+      const columnConfiguration = getColumnsConfiguration?.();
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
+    });
   });
 });

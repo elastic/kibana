@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelPackage } from './presentation_container';
+import type { PanelPackage } from './presentation_container';
 
 /**
  * This API can add a new panel as a child.
@@ -15,7 +15,11 @@ import { PanelPackage } from './presentation_container';
 export interface CanAddNewPanel {
   addNewPanel: <StateType extends object, ApiType extends unknown = unknown>(
     panel: PanelPackage<StateType>,
-    displaySuccessMessage?: boolean
+    options?: {
+      displaySuccessMessage?: boolean;
+      scrollToPanel?: boolean;
+      beside?: string; // ID of an existing panel to place the new panel beside
+    }
   ) => Promise<ApiType | undefined>;
 }
 

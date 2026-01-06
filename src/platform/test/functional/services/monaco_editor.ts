@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class MonacoEditorService extends FtrService {
@@ -16,9 +17,14 @@ export class MonacoEditorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly findService = this.ctx.getService('find');
 
-  public async waitCodeEditorReady(containerTestSubjId: string) {
+  public async waitCodeEditorReady(containerTestSubjId: string): Promise<WebElementWrapper> {
     const editorContainer = await this.testSubjects.find(containerTestSubjId);
-    await editorContainer.findByCssSelector('textarea');
+    const editor = await editorContainer.findByCssSelector('textarea');
+    // Wait for the editor to be enabled
+    await this.retry.waitFor('editor enabled', async () => {
+      return (await editor.isDisplayed()) && (await editor.isEnabled());
+    });
+    return editor;
   }
 
   public async getCodeEditorValue(nthIndex: number = 0) {
@@ -29,7 +35,7 @@ export class MonacoEditorService extends FtrService {
         () =>
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
           window
-            .MonacoEnvironment!.monaco!.editor.getModels()
+            .MonacoEnvironment!.monaco.editor.getModels()
             .map((model: any) => model.getValue()) as string[]
       );
     });
@@ -48,10 +54,10 @@ export class MonacoEditorService extends FtrService {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-          const editor = window.MonacoEnvironment!.monaco!.editor;
+          const editor = window.MonacoEnvironment!.monaco.editor;
           const textModels = editor.getModels();
 
-          if (editorIndex) {
+          if (editorIndex !== undefined && textModels[editorIndex]) {
             textModels[editorIndex].setValue(codeEditorValue);
           } else {
             // when specific model instance is unknown, update all models returned
@@ -72,6 +78,12 @@ export class MonacoEditorService extends FtrService {
   public async getCurrentMarkers(testSubjId: string) {
     return this.findService.allByCssSelector(
       `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`
+    );
+  }
+
+  public getCodeEditorSuggestWidget() {
+    return this.findService.byCssSelector(
+      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
     );
   }
 }

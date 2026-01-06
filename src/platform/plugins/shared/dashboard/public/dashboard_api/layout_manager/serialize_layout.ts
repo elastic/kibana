@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+
+import { omit } from 'lodash';
 import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
@@ -14,37 +17,24 @@ import type { DashboardSection } from '../../../server';
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState
-): Pick<DashboardState, 'panels' | 'references'> {
+): Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
-    sections[sectionId] = { ...sectionState, panels: [] };
+    sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
   });
 
   const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
-  Object.entries(layout.panels).forEach(([panelId, { gridData, type }]) => {
-    const panelConfig = childState[panelId]?.rawState ?? {};
+  Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
+    const config = childState[panelId]?.rawState ?? {};
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
-    // TODO move savedObjectRef extraction into embeddable implemenations
-    const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
-    let panelRefName: string | undefined;
-    if (savedObjectId) {
-      panelRefName = `panel_${panelId}`;
 
-      references.push({
-        name: `${panelId}:panel_${panelId}`,
-        type,
-        id: savedObjectId,
-      });
-    }
-
-    const { sectionId, ...restOfGridData } = gridData; // drop section ID
+    const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
       type,
-      gridData: restOfGridData,
-      panelIndex: panelId,
-      panelConfig,
-      ...(panelRefName !== undefined && { panelRefName }),
+      grid: restOfGridData,
+      uid: panelId,
+      config,
     };
 
     if (sectionId) {
@@ -56,6 +46,17 @@ export function serializeLayout(
 
   return {
     panels: [...panels, ...Object.values(sections)],
+    controlGroupInput: {
+      controls: Object.entries(layout.controls)
+        .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
+        .map(([id, control]) => {
+          return {
+            uid: id,
+            ...omit(control, 'order'),
+            config: childState[id].rawState,
+          } as ControlsGroupState['controls'][number];
+        }),
+    },
     references,
   };
 }

@@ -51,9 +51,10 @@ const renderDefaultAdHocDataViewsHook = () => {
     internalStateActions.setDefaultProfileAdHocDataViews(previousDataViews)
   );
   const { result, unmount } = renderHook(useDefaultAdHocDataViews, {
-    initialProps: { internalState: stateContainer.internalState },
     wrapper: ({ children }) => (
-      <DiscoverTestProvider services={discoverServiceMock}>{children}</DiscoverTestProvider>
+      <DiscoverTestProvider services={discoverServiceMock} stateContainer={stateContainer}>
+        {children}
+      </DiscoverTestProvider>
     ),
   });
   return {
@@ -81,7 +82,9 @@ describe('useDefaultAdHocDataViews', () => {
     );
     await result.current.initializeProfileDataViews(rootProfileState);
     expect(clearInstanceCache.mock.calls).toEqual(previousDataViews.map((dv) => [dv.id]));
-    expect(createDataView.mock.calls).toEqual(newDataViews.map((dv) => [dv.toSpec(), true]));
+    expect(createDataView.mock.calls).toEqual(
+      newDataViews.map((dv) => [{ ...dv.toSpec(), managed: true }, true])
+    );
     expect(
       stateContainer.runtimeStateManager.adHocDataViews$.getValue().map((dv) => dv.id)
     ).toEqual([existingAdHocDataVew.id, ...newDataViews.map((dv) => dv.id)]);

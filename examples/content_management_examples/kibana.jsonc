@@ -3,6 +3,8 @@
   "id": "@kbn/content-management-examples-plugin",
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin integrating with content management plugin",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "contentManagementExamples",
     "server": true,
@@ -13,6 +15,8 @@
       "kibanaReact",
       "savedObjectsTaggingOss"
     ],
-    "requiredBundles": ["savedObjectsFinder"]
+    "requiredBundles": [
+      "savedObjectsFinder"
+    ]
   }
 }

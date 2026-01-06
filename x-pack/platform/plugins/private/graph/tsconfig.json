@@ -1,6 +1,6 @@
 
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "allowJs": true
@@ -51,6 +51,8 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/visualization-utils",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

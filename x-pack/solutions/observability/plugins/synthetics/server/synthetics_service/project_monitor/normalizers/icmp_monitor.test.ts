@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
+import type { Locations } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('icmp normalizers', () => {
   const testHash = 'ljlkj';

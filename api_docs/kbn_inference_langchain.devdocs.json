@@ -269,15 +269,9 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; temperature?: number | undefined; tools?: Record<string, ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolDefinition",
-                "text": "ToolDefinition"
-              },
-              "> | undefined; toolChoice?: ",
+              " | undefined; temperature?: number | undefined; tools?: ",
+              "ToolDefinitions",
+              " | undefined; toolChoice?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -325,15 +319,9 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; temperature?: number | undefined; tools?: Record<string, ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolDefinition",
-                "text": "ToolDefinition"
-              },
-              "> | undefined; toolChoice?: ",
+              " | undefined; temperature?: number | undefined; tools?: ",
+              "ToolDefinitions",
+              " | undefined; toolChoice?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -558,7 +546,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }) => Promise<",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -610,7 +608,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }, ",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }, ",
               "Diff",
               "<",
               "DefaultChatCompleteOptions",
@@ -654,7 +662,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }> & ",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }> & ",
               "Intersection",
               "<{ connectorId: string; system?: string | undefined; messages: ",
               {
@@ -696,7 +714,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }, ",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }, ",
               "DefaultChatCompleteOptions",
               ">>> | Awaited<true extends (boolean & TStream) | undefined ? ",
               {
@@ -750,7 +778,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }, ",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }, ",
               "Diff",
               "<",
               "DefaultChatCompleteOptions",
@@ -794,7 +832,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }> & ",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }> & ",
               "Intersection",
               "<{ connectorId: string; system?: string | undefined; messages: ",
               {
@@ -836,7 +884,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string> & { stream?: TStream | undefined; }, ",
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>> & { stream?: TStream | undefined; }, ",
               "DefaultChatCompleteOptions",
               ">>> : never>>"
             ],
@@ -892,7 +950,17 @@
                     "section": "def-common.ToolOptions",
                     "text": "ToolOptions"
                   },
-                  "<string> & { stream?: TStream | undefined; }"
+                  "<",
+                  "ToolDefinitions",
+                  ", ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ToolChoice",
+                    "text": "ToolChoice"
+                  },
+                  "<string>> & { stream?: TStream | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
                 "deprecated": false,
@@ -1050,7 +1118,9 @@
             "label": "withStructuredOutput",
             "description": [],
             "signature": [
-              "{ <RunOutput extends Record<string, any> = Record<string, any>>(outputSchema: Record<string, any> | Zod.ZodType<RunOutput, Zod.ZodTypeDef, RunOutput>, config?: ",
+              "{ <RunOutput extends Record<string, any> = Record<string, any>>(outputSchema: Record<string, any> | ",
+              "InteropZodType",
+              "<RunOutput, RunOutput>, config?: ",
               "StructuredOutputMethodOptions",
               "<false> | undefined): ",
               "Runnable",
@@ -1058,7 +1128,9 @@
               "BaseLanguageModelInput",
               ", RunOutput, ",
               "RunnableConfig",
-              "<Record<string, any>>>; <RunOutput extends Record<string, any> = Record<string, any>>(outputSchema: Record<string, any> | Zod.ZodType<RunOutput, Zod.ZodTypeDef, RunOutput>, config?: ",
+              "<Record<string, any>>>; <RunOutput extends Record<string, any> = Record<string, any>>(outputSchema: Record<string, any> | ",
+              "InteropZodType",
+              "<RunOutput, RunOutput>, config?: ",
               "StructuredOutputMethodOptions",
               "<true> | undefined): ",
               "Runnable",
@@ -1082,7 +1154,9 @@
                 "label": "outputSchema",
                 "description": [],
                 "signature": [
-                  "Record<string, any> | Zod.ZodType<RunOutput, Zod.ZodTypeDef, RunOutput>"
+                  "Record<string, any> | ",
+                  "InteropZodType",
+                  "<RunOutput, RunOutput>"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
                 "deprecated": false,

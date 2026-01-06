@@ -13,7 +13,7 @@ import type {
   IntervalHistogram,
   OpsProcessMetrics,
 } from '@kbn/core-metrics-server';
-import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 // internal duplicate of metricsCollectorMock
 const createCollector = <T = any>(
@@ -89,6 +89,7 @@ function createMockRawNsDataHistogram(
     percentiles: {
       '50': 12607487,
       '75': 12615679,
+      '90': 12648447,
       '95': 12648447,
       '99': 12713983,
     },
@@ -113,6 +114,7 @@ function createMockMonitorDataMsHistogram(
     percentiles: {
       '50': 12.607487,
       '75': 12.615679,
+      '90': 12.648447,
       '95': 12.648447,
       '99': 12.713983,
     },

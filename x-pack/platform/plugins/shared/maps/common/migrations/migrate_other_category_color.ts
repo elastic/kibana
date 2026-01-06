@@ -6,13 +6,14 @@
  */
 
 import _ from 'lodash';
+import type { Writable } from '@kbn/utility-types';
 import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
-import {
+import type {
   ColorStylePropertyDescriptor,
   LayerDescriptor,
   VectorStyleDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 
 const COLOR_STYLES = [
   VECTOR_STYLES.FILL_COLOR,
@@ -53,8 +54,8 @@ function migrateColorProperty(
 export function migrateOtherCategoryColor({
   attributes,
 }: {
-  attributes: MapAttributes;
-}): MapAttributes {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }
@@ -77,7 +78,7 @@ export function migrateOtherCategoryColor({
         return;
       }
 
-      (layerDescriptor.style as VectorStyleDescriptor)!.properties = {
+      (layerDescriptor.style as Writable<VectorStyleDescriptor>)!.properties = {
         ...(layerDescriptor.style as VectorStyleDescriptor)!.properties,
         [styleName]: migrateColorProperty(
           (layerDescriptor.style as VectorStyleDescriptor)!.properties[

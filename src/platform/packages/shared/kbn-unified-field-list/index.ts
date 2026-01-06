@@ -57,16 +57,15 @@ export type {
   GetCustomFieldType,
   RenderFieldItemParams,
   SearchMode,
-  AdditionalFieldGroups,
+  ExistingFieldsInfo,
 } from './src/types';
-export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
+export { ExistenceFetchStatus, FieldsGroupNames, type AdditionalFieldGroups } from './src/types';
 export type { UnifiedFieldListRestorableState } from './src/restorable_state';
 
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
   resetExistingFieldsCache,
-  type ExistingFieldsInfo,
   type ExistingFieldsFetcherParams,
   type ExistingFieldsFetcher,
   type ExistingFieldsReader,
@@ -97,6 +96,3 @@ export {
   type UnifiedFieldListSidebarContainerApi,
   type UnifiedFieldListSidebarContainerProps,
 } from './src/containers/unified_field_list_sidebar';
-
-export * from './src/utils/fallback_fields';
-export { SmartFieldFallbackTooltip } from './src/components/fallback_fields';

@@ -8,7 +8,14 @@
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import { TestTrainedModelContent } from './test_trained_model_content';
 
@@ -16,24 +23,33 @@ interface Props {
   model: TrainedModelItem;
   onClose: () => void;
 }
-export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => (
-  <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
-            defaultMessage="Test trained model"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h4>{model.model_id}</h4>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      <TestTrainedModelContent model={model} />
-    </EuiFlyoutBody>
-  </EuiFlyout>
-);
+export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiFlyout
+      aria-labelledby={flyoutTitleId}
+      maxWidth={600}
+      onClose={onClose}
+      data-test-subj="mlTestModelsFlyout"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={flyoutTitleId}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
+              defaultMessage="Test trained model"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiTitle size="xs">
+          <h4>{model.model_id}</h4>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <TestTrainedModelContent model={model} />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};

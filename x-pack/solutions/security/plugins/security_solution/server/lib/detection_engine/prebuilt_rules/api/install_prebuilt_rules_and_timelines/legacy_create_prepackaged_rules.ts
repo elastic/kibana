@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -35,6 +36,7 @@ export class PrepackagedRulesError extends Error {
 export const legacyCreatePrepackagedRules = async (
   context: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
+  logger: Logger,
   exceptionsClient?: ExceptionListClient
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
   const savedObjectsClient = context.core.savedObjects.client;
@@ -52,20 +54,31 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(ruleAssetsClient, context);
+  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
+    ruleAssetsClient,
+    context,
+    logger
+  );
 
-  const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
+  const installedPrebuiltRules = rulesToMap(
+    await getExistingPrepackagedRules({ rulesClient, logger })
+  );
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
   const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-  const result = await createPrebuiltRules(detectionRulesClient, rulesToInstall);
-  if (result.errors.length > 0) {
-    throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
+  const ruleCreationResult = await createPrebuiltRules(
+    detectionRulesClient,
+    rulesToInstall,
+    logger
+  );
+
+  if (ruleCreationResult.errors.length > 0) {
+    throw new AggregateError(ruleCreationResult.errors, 'Error installing new prebuilt rules');
   }
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate);
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, logger);
 
   return {
     rules_installed: rulesToInstall.length,

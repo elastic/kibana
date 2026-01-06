@@ -36,16 +36,6 @@ export class ConsolePageObject extends FtrService {
     return await editorViewDiv[line].getVisibleText();
   }
 
-  public async getCurrentLineNumber() {
-    const textArea = await this.getTextArea();
-    const styleAttribute = (await textArea.getAttribute('style')) ?? '';
-    const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
-    const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
-    // calculate the line number by dividing the top position by the line height
-    // and adding 1 because line numbers start at 1
-    return Math.ceil(top / height) + 1;
-  }
-
   public async clearEditorText() {
     const textArea = await this.getTextArea();
     await textArea.clickMouseButton();
@@ -64,6 +54,20 @@ export class ConsolePageObject extends FtrService {
     // Simply clicking on the output editor doesn't focus it, so we need to click
     // on the margin view overlays
     await (await outputEditor.findByClassName('margin-view-overlays')).click();
+  }
+
+  public async scrollOutputToTop() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, Key.HOME]);
+  }
+
+  public async selectAllOutputText() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, 'a']);
   }
 
   public async getOutputText() {
@@ -85,18 +89,25 @@ export class ConsolePageObject extends FtrService {
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.getTextArea();
     await textArea.type(letter);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
+    await this.retry.waitFor(
+      'autocomplete to be visible',
+      async () => await this.isAutocompleteVisible()
+    );
   }
 
   public async isAutocompleteVisible() {
     const element = await this.find.byClassName('suggest-widget').catch(() => null);
     if (!element) return false;
 
-    const attribute = await element.getAttribute('style');
-    return !attribute?.includes('display: none;');
+    return await element.isDisplayed();
   }
 
   public async getAutocompleteSuggestion(index: number) {
+    await this.retry.waitFor(
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
+    );
+
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const suggestion = suggestions[index];
@@ -311,8 +322,8 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleCompleteTourButton');
   }
 
-  public async clickRerunTour() {
-    await this.testSubjects.click('consoleRerunTourButton');
+  public async clickRunTour() {
+    await this.testSubjects.click('consoleRunTourButton');
   }
 
   public async openConsole() {
@@ -346,16 +357,9 @@ export class ConsolePageObject extends FtrService {
     return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
-  public async openSettings() {
-    await this.testSubjects.click('consoleConfigButton');
-  }
-
-  public async toggleA11yOverlaySetting() {
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableA11yOverlay');
-      await toggle.click();
-    });
+  public async toggleA11yOverlaySetting(enabled: boolean) {
+    await this.testSubjects.waitForEnabled('enableA11yOverlay');
+    await this.testSubjects.setEuiSwitch('enableA11yOverlay', enabled ? 'check' : 'uncheck');
   }
 
   public async addNewVariable({ name, value }: { name: string; value: string }) {
@@ -421,13 +425,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async toggleKeyboardShortcuts(enabled: boolean) {
-    await this.openSettings();
+    await this.testSubjects.waitForEnabled('enableKeyboardShortcuts');
+    await this.testSubjects.setEuiSwitch('enableKeyboardShortcuts', enabled ? 'check' : 'uncheck');
+  }
 
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
-      await toggle.click();
-    });
+  public async setKeyboardShortcutsEnabled(enabled: boolean) {
+    await this.openConfig();
+    await this.toggleKeyboardShortcuts(enabled);
+    // The sleep is necessary to allow the switch state to be propagated
+    await this.common.sleep(500);
+    await this.openConsole();
   }
 
   public async hasSuccessBadge() {
@@ -474,8 +481,12 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
-  public async isCopyAsButtonVisible() {
+  public async isCopyToLanguageButtonVisible() {
     return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
+  public async isSelectLanguageButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuSelectLanguage');
   }
 
   public async clickCopyAsCurlButton() {
@@ -484,30 +495,41 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Click "Select language" menu item to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
-    await changeLangButton.click();
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Copy code" button to copy with the selected language
+    await this.testSubjects.click('copyAsLanguageSubmit');
   }
 
   public async changeDefaultLanguage(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Click "Select language" menu item to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    const changeDefaultLangButton = await this.testSubjects.find(
-      `changeDefaultLanguageTo-${language}`
-    );
-    await changeDefaultLangButton.click();
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Set as default" button (moves the badge)
+    await this.testSubjects.click('setAsDefaultLanguage');
+
+    // Click "Cancel" to close modal and save the default
+    await this.testSubjects.click('closeCopyAsModal');
   }
 
-  public async clickCopyAsButton() {
+  public async clickCopyToLanguageButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }

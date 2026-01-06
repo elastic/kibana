@@ -26,7 +26,7 @@ import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
 import { ImagePreviewModal } from '../image_preview_modal';
 import type { DocumentField } from './field_list';
-import { PreviewState } from '../types';
+import type { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
 import { ITEM_HEIGHT } from './constants';
 

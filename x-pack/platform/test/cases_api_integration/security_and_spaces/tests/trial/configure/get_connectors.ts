@@ -22,7 +22,6 @@ import {
 } from '../../../../common/lib/api';
 import { noCasesConnectors } from '../../../../common/lib/authentication/users';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -90,6 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: jiraConnector.id,
@@ -104,6 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
         /**
          * Preconfigured connectors are being registered here:
@@ -117,6 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: resilientConnector.id,
@@ -131,6 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: snConnector.id,
@@ -149,6 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: snOAuthConnector.id,
@@ -167,6 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: sir.id,
@@ -185,6 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          isConnectorTypeDeprecated: false,
         },
       ]);
     });

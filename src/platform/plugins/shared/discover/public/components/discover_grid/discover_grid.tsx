@@ -15,7 +15,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
-import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
@@ -31,6 +31,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  onFullScreenChange,
   ...props
 }) => {
   const { dataView, setExpandedDoc, renderDocumentView } = props;
@@ -44,11 +45,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   );
   const rowAdditionalLeadingControls = useMemo(() => {
     return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
+      actions: {
+        updateESQLQuery: onUpdateESQLQuery,
+        setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
+      },
       dataView,
       query,
-      updateESQLQuery: onUpdateESQLQuery,
-      setExpandedDoc,
-      isDocViewerEnabled: !!renderDocumentView,
     });
   }, [
     customRowAdditionalLeadingControls,
@@ -67,6 +69,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     }))();
   }, [getPaginationConfigAccessor]);
 
+  const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
+  const customGridColumnsConfiguration = useMemo(() => {
+    return getColumnsConfigurationAccessor(() => ({}))();
+  }, [getColumnsConfigurationAccessor]);
+
   return (
     <UnifiedDataTable
       showColumnTokens
@@ -78,6 +85,9 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
       paginationMode={paginationModeConfig.paginationMode}
+      customGridColumnsConfiguration={customGridColumnsConfiguration}
+      shouldKeepAdHocDataViewImmutable
+      onFullScreenChange={onFullScreenChange}
       {...props}
     />
   );

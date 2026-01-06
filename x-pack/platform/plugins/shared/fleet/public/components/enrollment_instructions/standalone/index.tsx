@@ -62,7 +62,7 @@ cd elastic-agent-${agentVersion}-windows-x86_64
 
   const windowsMSICommand = `$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-x86_64.msi -OutFile elastic-agent-${agentVersion}-windows-x86_64.msi ${windowsDownloadSourceProxyArgs}
-.\\elastic-agent.msi install`;
+.\\elastic-agent-${agentVersion}-windows-x86_64.msi install`;
 
   const k8sCommand = 'kubectl apply -f elastic-agent-standalone-kubernetes.yml';
 

@@ -26,7 +26,7 @@ import { AGENTS_INDEX } from '../../common/constants';
 import { settingsService } from '../services';
 
 export const TYPE = 'fleet:delete-unenrolled-agents-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Delete Unenrolled Agents Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '1h';
@@ -45,7 +45,6 @@ interface DeleteUnenrolledAgentsTaskStartContract {
 export class DeleteUnenrolledAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
 
   constructor(setupContract: DeleteUnenrolledAgentsTaskSetupContract) {
     const { core, taskManager, logFactory } = setupContract;
@@ -55,14 +54,18 @@ export class DeleteUnenrolledAgentsTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask({ taskInstance, core, abortController });
             },
-            cancel: async () => {
-              this.abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -99,10 +102,16 @@ export class DeleteUnenrolledAgentsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[DeleteUnenrolledAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[DeleteUnenrolledAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public async deleteUnenrolledAgents(esClient: ElasticsearchClient) {
+  public async deleteUnenrolledAgents({
+    esClient,
+    abortController,
+  }: {
+    esClient: ElasticsearchClient;
+    abortController: AbortController;
+  }) {
     this.logger.debug(`[DeleteUnenrolledAgentsTask] Fetching unenrolled agents`);
 
     const response = await esClient.deleteByQuery(
@@ -120,7 +129,7 @@ export class DeleteUnenrolledAgentsTask {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: abortController.signal }
     );
 
     this.logger.debug(
@@ -135,7 +144,15 @@ export class DeleteUnenrolledAgentsTask {
     return settings?.delete_unenrolled_agents?.enabled ?? false;
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async ({
+    taskInstance,
+    core,
+    abortController,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    core: CoreSetup;
+    abortController: AbortController;
+  }) => {
     if (!this.wasStarted) {
       this.logger.debug('[DeleteUnenrolledAgentsTask] runTask Aborted. Task not started yet');
       return;
@@ -148,7 +165,7 @@ export class DeleteUnenrolledAgentsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -162,7 +179,7 @@ export class DeleteUnenrolledAgentsTask {
         this.endRun('Delete unenrolled agents is disabled');
         return;
       }
-      await this.deleteUnenrolledAgents(esClient);
+      await this.deleteUnenrolledAgents({ esClient, abortController });
 
       this.endRun('success');
     } catch (err) {

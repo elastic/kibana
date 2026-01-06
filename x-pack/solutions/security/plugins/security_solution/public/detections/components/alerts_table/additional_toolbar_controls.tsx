@@ -6,23 +6,20 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  TableId,
 } from '@kbn/securitysolution-data-table';
-import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { SummaryViewSelector } from '../../../common/components/events_viewer/summary_view_select';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,31 +27,31 @@ import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/teleme
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { changeViewMode } = dataTableActions;
 
 const AdditionalToolbarControlsComponent = ({
   tableType,
+  pageScope,
 }: Pick<
   ComponentProps<GetSecurityAlertsTableProp<'renderAdditionalToolbarControls'>>,
-  'tableType'
+  'tableType' | 'pageScope'
 >) => {
   const dispatch = useDispatch();
   const {
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(pageScope);
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView } = useDataView(pageScope);
 
   const groupId = useMemo(() => groupIdSelector(), []);
-  const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
+  const { options, settings } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
     options: [],
   };
 
@@ -80,9 +77,13 @@ const AdditionalToolbarControlsComponent = ({
     [dispatch, tableType, trackGroupChange]
   );
 
-  const fields = useMemo(() => {
-    return Object.values(sourcererDataView.fields || {});
-  }, [sourcererDataView.fields]);
+  const fields = useMemo(
+    () =>
+      isNewDataViewPickerEnabled
+        ? experimentalDataView.fields.map((field) => field.spec)
+        : Object.values(oldSourcererDataView.fields || {}),
+    [experimentalDataView.fields, isNewDataViewPickerEnabled, oldSourcererDataView.fields]
+  );
 
   const groupSelector = useGetGroupSelectorStateless({
     groupingId: tableType,
@@ -90,6 +91,7 @@ const AdditionalToolbarControlsComponent = ({
     fields,
     defaultGroupingOptions: options,
     maxGroupingLevels: 3,
+    settings,
   });
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -137,7 +139,7 @@ const AdditionalToolbarControlsComponent = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
-      {[TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableType) && (
+      {DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType) && (
         <EuiFlexItem grow={false} data-test-subj="summary-view-selector">
           <SummaryViewSelector viewSelected={tableView} onViewChange={handleChangeTableView} />
         </EuiFlexItem>

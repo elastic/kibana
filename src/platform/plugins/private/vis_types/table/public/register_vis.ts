@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { TablePluginSetupDependencies, TablePluginStartDependencies } from './plugin';
+import type { CoreSetup } from '@kbn/core/public';
+import type { TablePluginSetupDependencies, TablePluginStartDependencies } from './plugin';
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisRenderer } from './table_vis_renderer';
 import { tableVisTypeDefinition } from './table_vis_type';

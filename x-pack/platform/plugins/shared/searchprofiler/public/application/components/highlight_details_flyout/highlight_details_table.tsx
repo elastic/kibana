@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable, EuiToolTip, EuiBadge } from '@elastic/eui';
 
-import { BreakdownItem } from '../../types';
+import type { BreakdownItem } from '../../types';
 import { nsToPretty } from '../../lib';
 import { PercentageBadge } from '../percentage_badge';
 
@@ -22,14 +22,14 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
       name: 'Description',
       render: (item: BreakdownItem) => (
         <EuiToolTip position="left" content={item.tip}>
-          <span>{item.key}</span>
+          <span tabIndex={0}>{item.key}</span>
         </EuiToolTip>
       ),
     },
     {
       name: 'Time',
       render: (item: BreakdownItem) => (
-        <EuiBadge style={{ backgroundColor: item.color }}>
+        <EuiBadge color={item.color}>
           <span>{item.key.endsWith('_count') ? item.time : nsToPretty(item.time, 1)}</span>
         </EuiBadge>
       ),

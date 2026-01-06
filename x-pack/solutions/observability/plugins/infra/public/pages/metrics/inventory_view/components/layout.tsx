@@ -10,6 +10,7 @@ import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -26,13 +27,13 @@ import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
-import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
+import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
+import { useKubernetesDashboardPromotion } from '../../../../hooks/use_kubernetes_dashboard_promotion';
 
 interface Props {
   currentView?: InventoryView | null;
-  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;
@@ -44,7 +45,9 @@ interface LegendControlOptions {
   legend: WaffleLegendOptions;
 }
 
-export const Layout = React.memo(({ currentView, reload, interval, nodes, loading }: Props) => {
+const DEFAULT_DISMISSED_CARDS = { semconv: false, ecs: false };
+
+export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const [showLoading, setShowLoading] = useState(true);
   const {
     metric,
@@ -65,8 +68,18 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
   const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
-
   const AUTO_REFRESH_INTERVAL = 5 * 1000;
+
+  const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
+    useKubernetesDashboardPromotion(nodeType);
+
+  const [dismissedCards, setDismissedCards] = useLocalStorage(
+    'infra.inventory.k8sCardDismissed',
+    DEFAULT_DISMISSED_CARDS
+  );
+
+  const showEcsK8sDashboardCard = hasEcsSchema && !dismissedCards?.ecs;
+  const showSemconvK8sDashboardCard = hasSemconvSchema && !dismissedCards?.semconv;
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -93,20 +106,18 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
     (val: string | number) => createInventoryMetricFormatter(options.metric)(val),
     [options.metric]
   );
-  const { onViewChange } = useWaffleViewState();
 
-  useEffect(() => {
-    if (currentView) {
-      onViewChange(currentView);
-    }
-  }, [currentView, onViewChange]);
-
-  useEffect(() => {
-    // load snapshot data after default view loaded, unless we're not loading a view
-    if (currentView != null) {
-      reload();
-    }
-  }, [currentView, reload]);
+  const onDrilldown = useCallback(
+    (expression: string) => {
+      applyFilterQuery({
+        query: {
+          language: 'kuery',
+          query: expression,
+        },
+      });
+    },
+    [applyFilterQuery]
+  );
 
   useEffect(() => {
     setShowLoading(true);
@@ -159,6 +170,40 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
               </EuiFlexGroup>
             </EuiFlexGroup>
           </TopActionContainer>
+          {nodeType === 'pod' &&
+            (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) &&
+            !loading && (
+              <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
+                {showEcsK8sDashboardCard && (
+                  <EuiFlexItem>
+                    <KubernetesDashboardCard
+                      integrationType="ecs"
+                      onClose={() =>
+                        setDismissedCards({
+                          ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
+                          ecs: true,
+                        })
+                      }
+                      hasIntegrationInstalled={hasEcsK8sIntegration}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showSemconvK8sDashboardCard && (
+                  <EuiFlexItem>
+                    <KubernetesDashboardCard
+                      integrationType="semconv"
+                      onClose={() =>
+                        setDismissedCards({
+                          ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
+                          semconv: true,
+                        })
+                      }
+                      hasIntegrationInstalled={hasSemconvK8sIntegration}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            )}
           <EuiFlexItem
             grow={false}
             css={css`
@@ -174,8 +219,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
                   nodeType={nodeType}
                   loading={loading}
                   showLoading={showLoading}
-                  reload={reload}
-                  onDrilldown={applyFilterQuery}
+                  onDrilldown={onDrilldown}
                   currentTime={currentTime}
                   view={view}
                   autoBounds={autoBounds}
@@ -190,7 +234,13 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
           </EuiFlexItem>
         </EuiFlexGroup>
       </PageContent>
-      <BottomDrawer interval={interval} formatter={formatter} view={view} nodeType={nodeType} />
+      <BottomDrawer
+        interval={interval}
+        formatter={formatter}
+        view={view}
+        nodeType={nodeType}
+        loading={loading}
+      />
     </>
   );
 });

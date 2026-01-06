@@ -12,9 +12,10 @@ import type {
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository-utils';
-import { FetchOptions } from '..';
+import type { FetchOptions } from '..';
 import type { APIEndpoint, DatasetQualityServerRouteRepository } from '../../server/routes';
-import { CallApi, callApi } from './call_api';
+import type { CallApi } from './call_api';
+import { callApi } from './call_api';
 
 export type DatasetQualityClientOptions = Omit<
   FetchOptions,

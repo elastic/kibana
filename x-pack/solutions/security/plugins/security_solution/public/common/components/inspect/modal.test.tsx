@@ -13,6 +13,8 @@ import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -23,9 +25,9 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const getRequest = (
-  indices: string[] = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*']
-) =>
+const defaultIndices = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+
+const getRequest = (indices: string[] = defaultIndices) =>
   `{"index": ${JSON.stringify(
     indices
   )},"allowNoIndices": true, "ignoreUnavailable": true, "body": { "aggregations": {"hosts": {"cardinality": {"field": "host.name" } }, "hosts_histogram": {"auto_date_histogram": {"field": "@timestamp","buckets": "6"},"aggs": { "count": {"cardinality": {"field": "host.name" }}}}}, "query": {"bool": {"filter": [{"range": { "@timestamp": {"gte": 1562290224506,"lte": 1562376624506 }}}]}}, "size": 0, "track_total_hits": false}}`;
@@ -180,6 +182,30 @@ describe('Modal Inspect', () => {
 
       expect(requestTextContent).toMatch(esqlQuery);
     });
+
+    test('should request Tab content without body correctly', () => {
+      const requestWithoutBody = {
+        index: ['tets-index*'],
+        query: {
+          bool: {
+            filter: [{ range: { '@timestamp': { gte: 1562290224506, lte: 1562376624506 } } }],
+          },
+        },
+        size: 0,
+      };
+      const requestString = JSON.stringify(requestWithoutBody, null, 2);
+      renderModal({ ...defaultProps, request: requestString });
+
+      fireEvent.click(screen.getByTestId('modal-inspect-request-tab'));
+      expect(screen.getByTestId('modal-inspect-request-tab')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      const requestTextContent = screen.getByRole('tabpanel').textContent ?? '';
+
+      expect(requestTextContent).toMatch(requestString);
+    });
   });
 
   describe('events', () => {
@@ -220,6 +246,8 @@ describe('Modal Inspect', () => {
 
   describe('index pattern messaging', () => {
     test('should show no messaging when all patterns match sourcerer selection', () => {
+      jest.mocked(useDataView).mockReturnValue(withIndices(defaultIndices));
+
       renderModal();
 
       expect(screen.queryByTestId('not-sourcerer-msg')).toBeNull();

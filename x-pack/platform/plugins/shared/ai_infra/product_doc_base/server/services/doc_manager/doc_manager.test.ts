@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { securityServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -54,6 +55,12 @@ describe('DocumentationManager', () => {
 
     docInstallClient = {
       getInstallationStatus: jest.fn(),
+      getPreviouslyInstalledInferenceIds: jest
+        .fn()
+        .mockResolvedValue([
+          defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+          defaultInferenceEndpoints.ELSER,
+        ]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
     docManager = new DocumentationManager({
@@ -202,6 +209,35 @@ describe('DocumentationManager', () => {
           outcome: 'unknown',
         },
       });
+    });
+  });
+
+  describe('#updateAll', () => {
+    beforeEach(() => {
+      getTaskStatusMock.mockResolvedValue('not_scheduled');
+
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+    });
+
+    it('calls `scheduleEnsureUpToDateTask` for each inferenceId', async () => {
+      await docManager.updateAll();
+
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
     });
   });
 

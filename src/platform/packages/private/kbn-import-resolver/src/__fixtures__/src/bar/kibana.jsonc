@@ -4,4 +4,6 @@
   "description": "test fixture",
   "devOnly": false,
   "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "private"
 }

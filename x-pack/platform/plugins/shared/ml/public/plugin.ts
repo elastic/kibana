@@ -53,6 +53,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSections } from './application/management';
@@ -106,6 +107,7 @@ export interface MlStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   telemetry: ITelemetryClient;
   fieldsMetadata: FieldsMetadataPublicStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -145,25 +147,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: false,
   };
-  private nlpSettings: NLPSettings = {
-    modelDeployment: {
-      allowStaticAllocations: true,
-      vCPURange: {
-        low: {
-          min: 0,
-          max: 2,
-        },
-        medium: {
-          min: 1,
-          max: 16,
-        },
-        high: {
-          min: 1,
-          max: 32,
-        },
-      },
-    },
-  };
+  private nlpSettings: NLPSettings = {};
 
   private telemetry = new TelemetryService();
 
@@ -234,6 +218,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             telemetry: telemetryClient,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            fileUpload: pluginsStart.fileUpload,
             ...deps,
           },
           params,

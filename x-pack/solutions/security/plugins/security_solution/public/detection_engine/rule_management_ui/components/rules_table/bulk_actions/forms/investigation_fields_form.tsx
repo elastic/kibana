@@ -158,6 +158,7 @@ const InvestigationFieldsFormComponent = ({
       {overwrite && (
         <EuiFormRow fullWidth>
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             data-test-subj="bulkEditRulesInvestigationFieldsWarning"

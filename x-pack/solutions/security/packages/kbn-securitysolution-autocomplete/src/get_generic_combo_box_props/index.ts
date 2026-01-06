@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 export interface GetGenericComboBoxPropsReturn {
   comboOptions: EuiComboBoxOptionOption[];

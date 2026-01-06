@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import type {
   ScopedHistory,
   Capabilities,
   ThemeServiceStart,
@@ -19,7 +19,7 @@ import {
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import type { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
@@ -35,6 +35,7 @@ export interface DefinedSections {
   security: ManagementSection;
   kibana: ManagementSection;
   stack: ManagementSection;
+  ai: ManagementSection;
 }
 
 export interface ManagementStart {
@@ -70,6 +71,7 @@ export enum ManagementSectionId {
   Security = 'security',
   Kibana = 'kibana',
   Stack = 'stack',
+  AI = 'ai',
 }
 
 export type Unmount = () => Promise<void> | void;
@@ -93,6 +95,7 @@ export interface CreateManagementItemArgs {
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
   hideFromSidebar?: boolean;
+  hideFromGlobalSearch?: boolean; // Hide from global search results
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
 }
@@ -109,6 +112,8 @@ export interface AppDependencies {
   cardsNavigationConfig?: NavigationCardsSubject;
   chromeStyle?: ChromeStyle;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  hasEnterpriseLicense: boolean;
 }
 
 export interface ConfigSchema {

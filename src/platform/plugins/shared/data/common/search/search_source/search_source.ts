@@ -76,28 +76,21 @@ import {
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  buildEsQuery,
-  Filter,
-  isOfQueryType,
-  isPhraseFilter,
-  isPhrasesFilter,
-} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
-import {
-  ExpressionAstExpression,
-  buildExpression,
-  buildExpressionFunction,
-} from '@kbn/expressions-plugin/common';
+import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 import { queryToFields } from './query_to_fields';
 
-import { AggConfigs, EsQuerySortValue } from '../..';
+import type { EsQuerySortValue } from '../..';
+import { AggConfigs } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -110,14 +103,13 @@ import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
-import { AggsStart } from '../aggs';
+import type { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
-import {
+import type {
   EsdslExpressionFunctionDefinition,
   ExpressionFunctionKibanaContext,
-  filtersToAst,
-  queryToAst,
 } from '../expressions';
+import { filtersToAst, queryToAst } from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -653,10 +645,12 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters || []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
         );
+      case 'nonHighlightingFilters':
+        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
       case 'query':
-        return addToRoot(key, (data.query || []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -799,6 +793,7 @@ export class SearchSource {
     const bodyParams = omit(searchRequest, [
       'index',
       'filters',
+      'nonHighlightingFilters',
       'highlightAll',
       'fieldsFromSource',
       'body',
@@ -887,13 +882,38 @@ export class SearchSource {
       });
     }
 
+    // Evaluate filters if they are functions
+    const filters =
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters;
+
+    const nonHighlightingFilters = searchRequest.nonHighlightingFilters ?? [];
+
+    // Merge filters and nonHighlightingFilters for the main query
+    const allFilters = [
+      ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
+      ...nonHighlightingFilters,
+    ];
+
     const builtQuery = this.getBuiltEsQuery({
       index: searchRequest.index,
       query: searchRequest.query,
-      filters: searchRequest.filters,
+      filters: allFilters,
       getConfig,
       sort: body.sort,
     });
+
+    // Build highlight query using only filters (not nonHighlightingFilters)
+    const filterArray = Array.isArray(filters) ? filters : filters ? [filters] : [];
+    const highlightQuery =
+      searchRequest.highlightAll && filterArray.length > 0
+        ? this.getBuiltEsQuery({
+            index: searchRequest.index,
+            query: searchRequest.query,
+            filters: filterArray,
+            getConfig,
+            sort: body.sort,
+          })
+        : undefined;
 
     const bodyToReturn = {
       ...body,
@@ -901,7 +921,12 @@ export class SearchSource {
       query: builtQuery,
       highlight:
         searchRequest.highlightAll && builtQuery
-          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+          ? highlightQuery
+            ? {
+                ...getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT)),
+                highlight_query: highlightQuery,
+              }
+            : getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
       _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
@@ -922,7 +947,7 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...omit(searchRequest, ['query', 'filters', 'fieldsFromSource']),
+      ...omit(searchRequest, ['query', 'filters', 'nonHighlightingFilters', 'fieldsFromSource']),
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(searchRequest.index),
       highlightAll:
@@ -1099,6 +1124,7 @@ export class SearchSource {
   public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
+      nonHighlightingFilters: originalNonHighlightingFilters,
       aggs: searchSourceAggs,
       parent,
       size: _size, // omit it
@@ -1121,6 +1147,12 @@ export class SearchSource {
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
+      };
+    }
+    if (originalNonHighlightingFilters) {
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        nonHighlightingFilters: originalNonHighlightingFilters,
       };
     }
     if (searchSourceAggs) {

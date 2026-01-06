@@ -7,86 +7,107 @@
 
 import { createSelector } from 'reselect';
 
-import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
-import { isPlainObject, uniq } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { SimulationContext } from './types';
-import { filterSimulationDocuments } from './utils';
-
-const EMPTY_ARRAY: [] = [];
+import type { FlattenRecord } from '@kbn/streams-schema';
+import type { SimulationContext } from './types';
+import {
+  collectActiveDocumentsForSelectedCondition,
+  getFilterSimulationDocumentsFn,
+} from './utils';
 
 /**
- * Selects the documents used for the data preview table.
+ * Selects the simulated documents with applied filtering by
+ * the selected condition and preview table filter (Parsed, Skipped, etc.).
  */
-export const selectPreviewDocuments = createSelector(
+export const selectPreviewRecords = createSelector(
   [
-    (context: SimulationContext | undefined) => context?.samples,
-    (context: SimulationContext | undefined) => context?.previewDocsFilter,
-    (context: SimulationContext | undefined) => context?.simulation?.documents,
+    (context: Pick<SimulationContext, 'samples'>) => context.samples,
+    (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
+    (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
   ],
   (samples, previewDocsFilter, documents) => {
-    return (
-      ((previewDocsFilter && documents
-        ? filterSimulationDocuments(documents, previewDocsFilter)
-        : samples?.map(flattenObjectNestedLast)) as FlattenRecord[]) || EMPTY_ARRAY
-    );
+    if (!previewDocsFilter || !documents) {
+      return samples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[];
+    }
+    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
+    return documents.filter(filterFn).map((doc) => doc.value);
   }
 );
 
 /**
- * Selects the set of dotted fields that are not supported by the current simulation.
+ * Selects the original samples with applied filtering by
+ * the selected condition and preview table filter (Parsed, Skipped, etc.).
  */
-export const selectUnsupportedDottedFields = createSelector(
-  [(context: SimulationContext) => context.samples],
-  (samples) => {
-    const properties = samples.flatMap(getDottedFieldPrefixes);
-
-    return uniq(properties);
+export const selectOriginalPreviewRecords = createSelector(
+  [
+    (context: SimulationContext) => context.samples,
+    (context: SimulationContext) => context.previewDocsFilter,
+    (context: SimulationContext) => context.simulation?.documents,
+  ],
+  (samples, previewDocsFilter, documents) => {
+    if (!previewDocsFilter || !documents) {
+      return samples;
+    }
+    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
+    // return the samples where the filterFn matches the documents at the same index
+    return samples.filter((_, index) => {
+      const doc = documents[index];
+      return doc ? filterFn(doc) : false;
+    });
   }
 );
 
-const isPlainObj = isPlainObject as (value: unknown) => value is Record<string, unknown>;
-
 /**
- * Returns a list of all dotted properties prefixes in the given object.
+ * Selects an subset of samples be sent
+ * for a simulation taking into account the currently
+ * selected condition filter.
+ *
+ * If no condition is selected, all samples are returned.
+ *
+ * If a condition is selected, samples are filtered to include
+ * only those that correspond to documents processed by
+ * the processors which are direct descendants of the selected
+ * condition.
  */
-function getDottedFieldPrefixes(obj: SampleDocument): string[] {
-  const result: string[] = [];
-
-  function traverse(currentObj: SampleDocument, path: string[]): boolean {
-    let foundDot = false;
-
-    for (const key in currentObj) {
-      if (Object.hasOwn(currentObj, key)) {
-        const value = currentObj[key];
-        const newPath = [...path, key];
-
-        // Check if current key contains a dot
-        if (key.includes('.')) {
-          const newKey = newPath.join('.');
-          // For objects with dotted keys, add trailing dot
-          if (isPlainObj(value)) {
-            result.push(newKey.concat('.'));
-          } else {
-            result.push(newKey);
-          }
-          foundDot = true;
-          continue; // Skip further traversal for this key
-        }
-
-        // If it's an object, traverse deeper
-        if (isPlainObj(value) && traverse(value, newPath)) {
-          // If traversal found a dot, don't continue with siblings
-          foundDot = true;
-          continue;
-        }
-      }
+export const selectSamplesForSimulation = createSelector(
+  [
+    (context: SimulationContext) => context.samples,
+    (context: SimulationContext) => context.baseSimulation?.documents,
+    (context: SimulationContext) => context.steps,
+    (context: SimulationContext) => context.selectedConditionId,
+  ],
+  (samples, baseSimulationDocuments = [], steps, selectedConditionId) => {
+    if (!selectedConditionId || baseSimulationDocuments.length === 0) {
+      return samples;
     }
 
-    return foundDot;
+    const docIndexes = collectActiveDocumentsForSelectedCondition(
+      baseSimulationDocuments,
+      steps,
+      selectedConditionId
+    ).map((doc) => baseSimulationDocuments.indexOf(doc));
+
+    return docIndexes
+      .filter((docIndex) => samples.at(docIndex) !== undefined)
+      .map((index) => samples[index]);
   }
+);
 
-  traverse(obj, []);
+export const selectHasSimulatedRecords = createSelector(
+  [(context: SimulationContext) => context.simulation?.documents],
+  (documents) => {
+    return Boolean(documents && documents.length > 0);
+  }
+);
 
-  return result;
-}
+export const selectFieldsInSamples = createSelector(
+  [(context: SimulationContext) => context.samples],
+  (samples) => {
+    const fieldSet = new Set<string>();
+    samples.forEach((sample) => {
+      const flattened = flattenObjectNestedLast(sample.document);
+      Object.keys(flattened).forEach((key) => fieldSet.add(key));
+    });
+    return Array.from(fieldSet).sort();
+  }
+);

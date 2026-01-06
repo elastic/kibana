@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 
 import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
+import type { Pagination } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -21,7 +22,6 @@ import {
   EuiPopover,
   EuiText,
   EuiSpacer,
-  Pagination,
   EuiBadge,
 } from '@elastic/eui';
 
@@ -124,7 +124,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             aria-label={i18n.translate(
               'xpack.searchIndexDocuments.documentList.paginationAriaLabel',
               {
-                defaultMessage: 'Pagination for document list',
+                defaultMessage: 'Document lists pagination',
               }
             )}
             pageCount={pageCount}
@@ -226,6 +226,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <EuiSpacer />
       {meta.totalItemCount > 9999 && (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={
             <FormattedMessage

@@ -6,7 +6,7 @@
  */
 
 import { isNativeFunctionCallingSupportedMock } from './openai_adapter.test.mocks';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { pick } from 'lodash';
@@ -19,7 +19,7 @@ import {
   MessageRole,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { InferenceExecutor } from '../../utils/inference_executor';
+import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
 
 function createOpenAIChunk({
@@ -613,6 +613,7 @@ describe('openAIAdapter', () => {
             completion: 100,
             total: 150,
           },
+          model: 'gpt-4o', // Model from createOpenAIChunk helper
         },
       ]);
     });
@@ -646,21 +647,22 @@ describe('openAIAdapter', () => {
 
       const allChunks = await lastValueFrom(response$.pipe(toArray()));
 
-      expect(allChunks).toEqual([
-        {
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          content: 'chunk',
-          tool_calls: [],
+      expect(allChunks).toHaveLength(2);
+      expect(allChunks[0]).toEqual({
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'chunk',
+        tool_calls: [],
+      });
+      expect(allChunks[1]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionTokenCount,
+        tokens: {
+          completion: expect.any(Number),
+          prompt: expect.any(Number),
+          total: expect.any(Number),
         },
-        {
-          type: ChatCompletionEventType.ChatCompletionTokenCount,
-          tokens: {
-            completion: expect.any(Number),
-            prompt: expect.any(Number),
-            total: expect.any(Number),
-          },
-        },
-      ]);
+      });
+      // Model field is optional - only present if request.model is set
+      // Since no modelName is provided, model should be undefined/not present
     });
   });
 });

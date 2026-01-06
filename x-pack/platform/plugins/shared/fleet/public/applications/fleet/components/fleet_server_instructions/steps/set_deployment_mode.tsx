@@ -110,7 +110,7 @@ const DeploymentModeStepContent = ({
         ]}
         idSelected={`${deploymentMode}_${radioSuffix}`}
         onChange={onChangeCallback}
-        name={`radio group ${radioSuffix}`}
+        name={`deploymentMode${radioSuffix}`}
       />
     </>
   );

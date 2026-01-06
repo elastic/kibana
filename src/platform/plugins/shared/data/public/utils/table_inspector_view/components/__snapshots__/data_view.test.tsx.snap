@@ -207,11 +207,11 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-e89sgl-table"
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -229,6 +229,7 @@ Array [
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -491,11 +492,11 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-e89sgl-table"
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -513,6 +514,7 @@ Array [
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"

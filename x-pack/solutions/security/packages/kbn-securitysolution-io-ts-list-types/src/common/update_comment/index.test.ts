@@ -8,14 +8,8 @@
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
 import { getUpdateCommentMock, getUpdateCommentsArrayMock } from './index.mock';
-import {
-  UpdateComment,
-  updateComment,
-  UpdateCommentsArray,
-  updateCommentsArray,
-  UpdateCommentsArrayOrUndefined,
-  updateCommentsArrayOrUndefined,
-} from '.';
+import type { UpdateComment, UpdateCommentsArray, UpdateCommentsArrayOrUndefined } from '.';
+import { updateComment, updateCommentsArray, updateCommentsArrayOrUndefined } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('UpdateComment', () => {

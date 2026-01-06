@@ -18,6 +18,7 @@ import {
   buildTypesMappings,
 } from '@kbn/core-saved-objects-migration-server-internal';
 import { createDocumentMigratorMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
@@ -40,11 +41,11 @@ const createMigrator = (
     types: SavedObjectsType[];
   } = { types: defaultSavedObjectTypes }
 ) => {
-  const mockMigrator: jest.Mocked<IKibanaMigrator> = {
+  const mockMigrator: jest.Mocked<IKibanaMigrator> = lazyObject({
     kibanaVersion: '8.0.0-testing',
     runMigrations: jest.fn(),
-    getActiveMappings: jest.fn(),
-    migrateDocument: jest.fn(),
+    getActiveMappings: jest.fn().mockReturnValue(buildActiveMappings(buildTypesMappings(types))),
+    migrateDocument: jest.fn().mockImplementation((doc) => doc),
     prepareMigrations: jest.fn(),
     getStatus$: jest.fn(
       () =>
@@ -60,13 +61,8 @@ const createMigrator = (
           ],
         })
     ),
-    getDocumentMigrator: jest.fn(),
-  };
-
-  mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(buildTypesMappings(types)));
-  mockMigrator.migrateDocument.mockImplementation((doc) => doc);
-  mockMigrator.getDocumentMigrator.mockReturnValue(createDocumentMigratorMock());
-
+    getDocumentMigrator: jest.fn().mockReturnValue(createDocumentMigratorMock()),
+  });
   return mockMigrator;
 };
 

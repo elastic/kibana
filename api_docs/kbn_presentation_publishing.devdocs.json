@@ -792,6 +792,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiPublishesPauseFetch",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesPauseFetch",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesPauseFetch",
+            "text": "PublishesPauseFetch"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiPublishesPauseFetch.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.apiPublishesPhaseEvents",
         "type": "Function",
         "tags": [],
@@ -822,6 +862,86 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiPublishesProjectRouting",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesProjectRouting",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesProjectRouting",
+            "text": "PublishesProjectRouting"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiPublishesProjectRouting.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiPublishesProjectRoutingOverrides",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesProjectRoutingOverrides",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesProjectRoutingOverrides",
+            "text": "PublishesProjectRoutingOverrides"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiPublishesProjectRoutingOverrides.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1499,6 +1619,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.canOverrideHoverActions",
+        "type": "Function",
+        "tags": [],
+        "label": "canOverrideHoverActions",
+        "description": [
+          "\nA type guard which determines whether or not a given API overrides the hover actions."
+        ],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.CanOverrideHoverActions",
+            "text": "CanOverrideHoverActions"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.canOverrideHoverActions.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.diffComparators",
         "type": "Function",
         "tags": [],
@@ -1515,7 +1677,7 @@
             "section": "def-public.StateComparators",
             "text": "StateComparators"
           },
-          "<StateType>, lastSavedState?: StateType | undefined, latestState?: StateType | undefined) => Partial<StateType>"
+          "<StateType>, lastSavedState?: Partial<StateType> | undefined, latestState?: Partial<StateType> | undefined, defaultState?: Partial<StateType> | undefined) => Partial<StateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
         "deprecated": false,
@@ -1546,12 +1708,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.diffComparators.$2",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "lastSavedState",
             "description": [],
             "signature": [
-              "StateType | undefined"
+              "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -1561,12 +1723,27 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.diffComparators.$3",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "latestState",
             "description": [],
             "signature": [
-              "StateType | undefined"
+              "Partial<StateType> | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.diffComparators.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultState",
+            "description": [],
+            "signature": [
+              "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -1615,6 +1792,77 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.findSavedObjectRef",
+        "type": "Function",
+        "tags": [],
+        "label": "findSavedObjectRef",
+        "description": [],
+        "signature": [
+          "(savedObjectType: string, references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined) => ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.findSavedObjectRef.$1",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.findSavedObjectRef.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1937,7 +2185,7 @@
           "\nInitializes a composable state manager instance for a given state type."
         ],
         "signature": [
-          "<StateType extends object>(initialState: StateType, defaultState: ",
+          "<StateType extends object>(initialState: Partial<StateType>, defaultState: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1964,14 +2212,14 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.initializeStateManager.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "initialState",
             "description": [
               "- The initial state of the state manager."
             ],
             "signature": [
-              "StateType"
+              "Partial<StateType>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
             "deprecated": false,
@@ -2097,23 +2345,23 @@
         "signature": [
           "(initialTitlesState: ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          ") => ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>) => ",
           "StateManager",
           "<",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          "> & { api: { hideTitle$: ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>> & { api: { hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2136,12 +2384,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedTitles",
-                "text": "SerializedTitles"
-              }
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
+              },
+              "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
             "deprecated": false,
@@ -2392,12 +2641,13 @@
         "signature": [
           "(state: unknown) => state is ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
-          }
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
         "deprecated": false,
@@ -2449,6 +2699,14 @@
           {
             "plugin": "presentationPanel",
             "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions.tsx"
+          },
+          {
+            "plugin": "presentationPanel",
+            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions_wrapper.tsx"
+          },
+          {
+            "plugin": "presentationPanel",
+            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions_wrapper.tsx"
           },
           {
             "plugin": "presentationPanel",
@@ -2867,7 +3125,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
               "Observable",
               "<boolean>; <A>(op1: ",
               "OperatorFunction",
@@ -3007,9 +3267,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<boolean>; operator: ",
-              "Operator",
-              "<any, boolean> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<boolean>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean>> | ((value: boolean) => void) | undefined): ",
               "Subscription",
@@ -3052,6 +3310,200 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.CanOverrideHoverActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanOverrideHoverActions",
+        "description": [
+          "\nAn interface which determines whether the hover actions are overridden by the embeddable"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.CanOverrideHoverActions.overrideHoverActions$",
+            "type": "Object",
+            "tags": [],
+            "label": "overrideHoverActions$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "Observable",
+              "<boolean>; <A>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<boolean>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "Operator",
+              "<boolean, R>) => ",
+              "Observable",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean>; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<boolean>> | ((value: boolean) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.CanOverrideHoverActions.OverriddenHoverActionsComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "OverriddenHoverActionsComponent",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3136,7 +3588,7 @@
         "tags": [],
         "label": "FetchContext",
         "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3147,7 +3599,7 @@
             "tags": [],
             "label": "isReload",
             "description": [],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3168,7 +3620,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3197,7 +3649,7 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3211,7 +3663,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3232,7 +3684,7 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3246,7 +3698,21 @@
             "signature": [
               "[number, number] | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.FetchContext.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3353,12 +3819,40 @@
             "label": "onEdit",
             "description": [],
             "signature": [
-              "() => Promise<void>"
+              "({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-public.HasEditCapabilities.onEdit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ isNewPanel }",
+                "description": [],
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/presentation-publishing",
+                    "id": "def-public.HasEditCapabilities.onEdit.$1.isNewPanel",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "isNewPanel",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
@@ -3415,7 +3909,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
+              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly space?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
               "KibanaExecutionContext",
               " | undefined; }"
             ],
@@ -4046,7 +4540,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => Error | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, Error | undefined> | undefined; complete: () => void; getValue: () => Error | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<Error | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4186,9 +4682,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<Error | undefined>; operator: ",
-              "Operator",
-              "<any, Error | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<Error | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<Error | undefined>> | ((value: Error | undefined) => void) | undefined): ",
               "Subscription",
@@ -4224,7 +4718,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, boolean | undefined> | undefined; complete: () => void; getValue: () => boolean | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4364,9 +4860,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<boolean | undefined>; operator: ",
-              "Operator",
-              "<any, boolean | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<boolean | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean | undefined>> | ((value: boolean | undefined) => void) | undefined): ",
               "Subscription",
@@ -4388,7 +4882,7 @@
         "tags": [],
         "label": "PublishesDataViews",
         "description": [
-          "\nThis API publishes a list of data views that it uses. Note that this should not contain any\nad-hoc data views."
+          "\nThis API publishes a list of data views that it uses."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
@@ -4428,7 +4922,17 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4688,17 +5192,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "[] | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -4782,7 +5276,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4922,9 +5418,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<string | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
@@ -4981,7 +5475,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string[] | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, string[] | undefined> | undefined; complete: () => void; getValue: () => string[] | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<string[] | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5121,9 +5617,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<string[] | undefined>; operator: ",
-              "Operator",
-              "<any, string[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<string[] | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string[] | undefined>> | ((value: string[] | undefined) => void) | undefined): ",
               "Subscription",
@@ -5231,7 +5725,17 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5491,17 +5995,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "[] | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -5566,6 +6060,35 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesPauseFetch",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesPauseFetch",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesPauseFetch.isFetchPaused$",
+            "type": "Object",
+            "tags": [],
+            "label": "isFetchPaused$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.PublishesPhaseEvents",
         "type": "Interface",
         "tags": [],
@@ -5609,7 +6132,17 @@
                 "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PhaseEvent",
+                "text": "PhaseEvent"
+              },
+              " | undefined> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -5869,17 +6402,7 @@
                 "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PhaseEvent",
-                "text": "PhaseEvent"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              " | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -5944,40 +6467,114 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-public.PublishesReload",
+        "id": "def-public.PublishesProjectRouting",
         "type": "Interface",
         "tags": [],
-        "label": "PublishesReload",
+        "label": "PublishesProjectRouting",
         "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.PublishesReload.reload$",
+            "id": "def-public.PublishesProjectRouting.projectRouting$",
             "type": "Object",
             "tags": [],
-            "label": "reload$",
+            "label": "projectRouting$",
             "description": [],
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; forEach: { (next: (value: void) => void): Promise<void>; (next: (value: void) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; pipe: { (): ",
+              "<any> | undefined; readonly value: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; error: (err: any) => void; forEach: { (next: (value: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void): Promise<void>; (next: (value: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "> | undefined; complete: () => void; getValue: () => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; closed: boolean; pipe: { (): ",
               "Observable",
-              "<void>; <A>(op1: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">; <A>(op1: ",
               "OperatorFunction",
-              "<void, A>): ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>): ",
               "Observable",
               "<A>; <A, B>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>): ",
               "Observable",
               "<B>; <A, B, C>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -5985,7 +6582,15 @@
               "Observable",
               "<C>; <A, B, C, D>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -5995,7 +6600,15 @@
               "Observable",
               "<D>; <A, B, C, D, E>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6007,7 +6620,15 @@
               "Observable",
               "<E>; <A, B, C, D, E, F>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6021,7 +6642,15 @@
               "Observable",
               "<F>; <A, B, C, D, E, F, G>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6037,7 +6666,15 @@
               "Observable",
               "<G>; <A, B, C, D, E, F, G, H>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6055,7 +6692,15 @@
               "Observable",
               "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6075,7 +6720,15 @@
               "Observable",
               "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
               "OperatorFunction",
-              "<void, A>, op2: ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6095,19 +6748,500 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; lift: <R>(operator?: ",
-              "Operator",
-              "<void, R> | undefined) => ",
-              "Observable",
-              "<R>; operator: ",
-              "Operator",
-              "<any, void> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<unknown>; }; observers: ",
               "Observer",
-              "<void>> | ((value: void) => void) | undefined): ",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "Operator",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ", R>) => ",
+              "Observable",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">> | ((value: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void) | undefined): ",
               "Subscription",
-              "; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "; (next?: ((value: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<void | undefined>; (PromiseCtor: PromiseConstructor): Promise<void | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<void | undefined>; }; }"
+              "; }; toPromise: { (): Promise<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">; (PromiseCtor: PromiseConstructor): Promise<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">; (PromiseCtor: PromiseConstructorLike): Promise<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">; }; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesProjectRoutingOverrides",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesProjectRoutingOverrides",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesProjectRoutingOverrides.projectRoutingOverrides$",
+            "type": "Object",
+            "tags": [],
+            "label": "projectRoutingOverrides$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              "; error: (err: any) => void; forEach: { (next: (value: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ") => void): Promise<void>; (next: (value: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              "> | undefined; complete: () => void; getValue: () => ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              "; closed: boolean; pipe: { (): ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">; <A>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "Operator",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ", R>) => ",
+              "Observable",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">> | ((value: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ") => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ") => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">; (PromiseCtor: PromiseConstructor): Promise<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">; (PromiseCtor: PromiseConstructorLike): Promise<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ProjectRoutingOverrides",
+                "text": "ProjectRoutingOverrides"
+              },
+              ">; }; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesReload",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesReload",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesReload.reload$",
+            "type": "Object",
+            "tags": [],
+            "label": "reload$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
             "deprecated": false,
@@ -6137,7 +7271,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
               "Observable",
               "<boolean>; <A>(op1: ",
               "OperatorFunction",
@@ -6277,9 +7413,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<boolean>; operator: ",
-              "Operator",
-              "<any, boolean> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<boolean>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean>> | ((value: boolean) => void) | undefined): ",
               "Subscription",
@@ -6317,7 +7451,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -6457,9 +7593,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<string | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
@@ -6537,7 +7671,17 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -6797,17 +7941,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              " | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -6912,7 +8046,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: [number, number] | undefined; error: (err: any) => void; forEach: { (next: (value: [number, number] | undefined) => void): Promise<void>; (next: (value: [number, number] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => [number, number] | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: [number, number] | undefined; error: (err: any) => void; forEach: { (next: (value: [number, number] | undefined) => void): Promise<void>; (next: (value: [number, number] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, [number, number] | undefined> | undefined; complete: () => void; getValue: () => [number, number] | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<[number, number] | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -7052,9 +8188,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<[number, number] | undefined>; operator: ",
-              "Operator",
-              "<any, [number, number] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<[number, number] | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<[number, number] | undefined>> | ((value: [number, number] | undefined) => void) | undefined): ",
               "Subscription",
@@ -7090,7 +8224,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -7230,9 +8366,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<string | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
@@ -7254,7 +8388,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, boolean | undefined> | undefined; complete: () => void; getValue: () => boolean | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -7394,9 +8530,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<boolean | undefined>; operator: ",
-              "Operator",
-              "<any, boolean | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<boolean | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean | undefined>> | ((value: boolean | undefined) => void) | undefined): ",
               "Subscription",
@@ -7532,7 +8666,17 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ViewMode",
+                "text": "ViewMode"
+              },
+              "> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -7792,17 +8936,7 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              ">; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
-                "text": "ViewMode"
-              },
-              "> | undefined; subscribe: { (observerOrNext?: Partial<",
+              ">; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -7955,62 +9089,6 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-public.SerializedTitles",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedTitles",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.hidePanelTitles",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidePanelTitles",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8186,6 +9264,21 @@
           "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.ProjectRoutingOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectRoutingOverrides",
+        "description": [],
+        "signature": [
+          "{ name?: string | undefined; value: string; }[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8440,7 +9533,9 @@
         "signature": [
           "{ source: ",
           "Observable",
-          "<any> | undefined; readonly value: T; error: (err: any) => void; forEach: { (next: (value: T) => void): Promise<void>; (next: (value: T) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => T; closed: boolean; pipe: { (): ",
+          "<any> | undefined; readonly value: T; error: (err: any) => void; forEach: { (next: (value: T) => void): Promise<void>; (next: (value: T) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+          "Operator",
+          "<any, T> | undefined; complete: () => void; getValue: () => T; closed: boolean; pipe: { (): ",
           "Observable",
           "<T>; <A>(op1: ",
           "OperatorFunction",
@@ -8580,9 +9675,7 @@
           "Observable",
           "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
           "Observable",
-          "<T>; operator: ",
-          "Operator",
-          "<any, T> | undefined; subscribe: { (observerOrNext?: Partial<",
+          "<T>; subscribe: { (observerOrNext?: Partial<",
           "Observer",
           "<T>> | ((value: T) => void) | undefined): ",
           "Subscription",
@@ -8591,6 +9684,36 @@
           "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.SAVED_OBJECT_REF_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECT_REF_NAME",
+        "description": [],
+        "signature": [
+          "\"savedObjectRef\""
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.SerializedTitles",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedTitles",
+        "description": [],
+        "signature": [
+          "{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8628,7 +9751,7 @@
         "label": "ViewMode",
         "description": [],
         "signature": [
-          "\"edit\" | \"view\" | \"print\" | \"preview\""
+          "\"view\" | \"edit\" | \"print\" | \"preview\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,

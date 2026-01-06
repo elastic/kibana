@@ -25,5 +25,4 @@ export type {
   VisualizationSearchOut,
   VisualizationSearchQuery,
   VisualizationCrudTypes,
-  Reference,
 } from './types';

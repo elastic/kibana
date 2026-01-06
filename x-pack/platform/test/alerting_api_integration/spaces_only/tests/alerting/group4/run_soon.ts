@@ -10,8 +10,8 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const LOADED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
+const STUCK_RULE_ID = 'd7f3cca6-e2aa-4921-aee8-12d2ad3873ca';
 
-// eslint-disable-next-line import/no-default-export
 export default function createRunSoonTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -25,8 +25,12 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
       // Not 100% sure why, seems the rules need to be loaded separately to avoid the task
       // failing to load the rule during execution and deleting itself. Otherwise
       // we have flakiness
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      );
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      );
     });
 
     afterEach(async () => {
@@ -34,8 +38,12 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      );
     });
 
     it('should successfully run rule where scheduled task id is different than rule id', async () => {
@@ -64,6 +72,21 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo');
         expect(runSoonResponse.status).to.eql(204);
       });
+    });
+
+    it('should successfully run rule where task is stuck in a running status', async () => {
+      // try running without forcing
+      const runSoonResponse = await supertest
+        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${STUCK_RULE_ID}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoonResponse.status).to.eql(200);
+      expect(runSoonResponse.text).to.eql(`Rule is already running`);
+
+      // now try running with force = true
+      const runSoonForcedResponse = await supertest
+        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${STUCK_RULE_ID}/_run_soon?force=true`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoonForcedResponse.status).to.eql(204);
     });
 
     it('should return message when task does not exist for rule', async () => {

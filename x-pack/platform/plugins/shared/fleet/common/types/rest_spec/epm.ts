@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf, schema } from '@kbn/config-schema';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageSpecIcon } from '../models/package_spec';
@@ -41,6 +41,7 @@ export interface GetPackagesRequest {
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
     withPackagePoliciesCount?: boolean;
+    type?: string;
   };
 }
 
@@ -171,6 +172,10 @@ export interface BulkUninstallPackagesRequest {
   force?: boolean;
 }
 
+export interface BulkRollbackPackagesRequest {
+  packages: Array<{ name: string }>;
+}
+
 export interface BulkOperationPackagesResponse {
   taskId: string;
 }
@@ -248,3 +253,29 @@ export interface DeletePackageDatastreamAssetsRequest {
 export interface DeletePackageDatastreamAssetsResponse {
   success: boolean;
 }
+
+export interface RollbackPackageRequest {
+  params: {
+    pkgname: string;
+  };
+}
+
+export interface RollbackPackageResponse {
+  success: boolean;
+  version: string;
+}
+export const RollbackAvailableCheckResponseSchema = schema.object({
+  reason: schema.maybe(schema.string()),
+  isAvailable: schema.boolean(),
+});
+
+export type RollbackAvailableCheckResponse = TypeOf<typeof RollbackAvailableCheckResponseSchema>;
+
+export const BulkRollbackAvailableCheckResponseSchema = schema.recordOf(
+  schema.string(),
+  RollbackAvailableCheckResponseSchema
+);
+
+export type BulkRollbackAvailableCheckResponse = TypeOf<
+  typeof BulkRollbackAvailableCheckResponseSchema
+>;

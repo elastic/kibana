@@ -28,7 +28,7 @@ import type {
 import { groupResourceNodes } from './group_resource_nodes';
 import { getEdgeId, getExitSpanNodeId, isExitSpan } from './utils';
 
-const FORBIDDEN_SERVICE_NAMES = ['constructor'];
+export const FORBIDDEN_SERVICE_NAMES = ['constructor'];
 
 function addMessagingConnections(
   connections: Connection[],

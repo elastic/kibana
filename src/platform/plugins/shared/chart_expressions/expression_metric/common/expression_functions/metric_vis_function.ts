@@ -9,14 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  prepareLogTable,
-  Dimension,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-common';
+import { validateAccessor } from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import { LayoutDirection } from '@elastic/charts';
-import { MetricVisRenderConfig, visType } from '../types';
-import { MetricVisExpressionFunctionDefinition } from '../types';
+import type { MetricVisRenderConfig } from '../types';
+import { visType } from '../types';
+import type { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
@@ -30,14 +29,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     metric: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
-        defaultMessage: 'The primary metric.',
+        defaultMessage: 'The Primary Metric.',
       }),
       required: true,
     },
     secondaryMetric: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.secondaryMetric.help', {
-        defaultMessage: 'The secondary metric (shown above the primary).',
+        defaultMessage: 'The Secondary Metric.',
       }),
     },
     max: {
@@ -64,10 +63,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
-    secondaryPrefix: {
+    secondaryLabel: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryPrefix.help', {
-        defaultMessage: 'Optional text to be show before secondaryMetric.',
+      help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
+        defaultMessage: 'Optional text displayed next to the Secondary Metric.',
       }),
     },
     progressDirection: {
@@ -84,10 +83,16 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The alignment of the Title and Subtitle.',
       }),
     },
-    valuesTextAlign: {
+    primaryAlign: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.valuesTextAlign.help', {
-        defaultMessage: 'The alignment of the Primary and Secondary Metric.',
+      help: i18n.translate('expressionMetricVis.function.primaryAlign.help', {
+        defaultMessage: 'The alignment of the Primary Metric.',
+      }),
+    },
+    secondaryAlign: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryAlign.help', {
+        defaultMessage: 'The alignment of the Secondary Metric.',
       }),
     },
     iconAlign: {
@@ -100,6 +105,18 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string', 'number'],
       help: i18n.translate('expressionMetricVis.function.valueFontSize.help', {
         defaultMessage: 'The value font size.',
+      }),
+    },
+    primaryPosition: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
+        defaultMessage: 'The postion of the Primary Metric (top or bottom).',
+      }),
+    },
+    titleWeight: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.titleWeight.help', {
+        defaultMessage: 'The title weight.',
       }),
     },
     color: {
@@ -145,30 +162,45 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryColor: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryColor.help', {
-        defaultMessage: 'A static color to use for the secondary metric',
+        defaultMessage: 'A static color to use for the Secondary Metric',
       }),
       required: false,
     },
     secondaryTrendVisuals: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.visuals.help', {
-        defaultMessage: 'Specifies the mode for the secondary metric trend value',
+        defaultMessage: 'Specifies the mode for the Secondary Metric trend value',
       }),
       required: false,
     },
     secondaryTrendBaseline: {
       types: ['string', 'number'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.baseline.help', {
-        defaultMessage: 'Specifies the baseline used for the secondary metric trend',
+        defaultMessage: 'Specifies the baseline used for the Secondary Metric trend',
       }),
       required: false,
     },
     secondaryTrendPalette: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.palette.help', {
-        defaultMessage: 'Specifies the palette used for the secondary metric trend',
+        defaultMessage: 'Specifies the palette used for the Secondary Metric trend',
       }),
       multi: true,
+      required: false,
+    },
+    secondaryLabelPosition: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
+        defaultMessage: 'Specifies the position of the Secondary Metric label',
+      }),
+      required: false,
+    },
+    applyColorTo: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.applyColorTo.help', {
+        defaultMessage:
+          'Determines whether the metric color is applied to the background area or to the value',
+      }),
       required: false,
     },
   },
@@ -238,15 +270,18 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             subtitle: args.subtitle,
-            secondaryPrefix: args.secondaryPrefix,
+            secondaryLabel: args.secondaryLabel,
             color: args.color,
             icon: args.icon,
             palette: args.palette,
             progressDirection: args.progressDirection,
             titlesTextAlign: args.titlesTextAlign,
-            valuesTextAlign: args.valuesTextAlign,
+            primaryAlign: args.primaryAlign,
+            secondaryAlign: args.secondaryAlign,
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
+            primaryPosition: args.primaryPosition,
+            titleWeight: args.titleWeight,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,
@@ -256,6 +291,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               baseline: args.secondaryTrendBaseline,
               palette: args.secondaryTrendPalette,
             },
+            secondaryLabelPosition: args.secondaryLabelPosition,
+            applyColorTo: args.applyColorTo,
           },
           dimensions: {
             metric: args.metric,

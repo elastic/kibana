@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/steps/checks/prompt_changes_detector.sh
+    label: 'Check Prompt Changes'
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+      diskSizeGb: 115
+    timeout_in_minutes: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

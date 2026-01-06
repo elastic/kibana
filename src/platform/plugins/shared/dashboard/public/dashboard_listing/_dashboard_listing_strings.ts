@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 export const dashboardListingErrorStrings = {
   getErrorDeletingDashboardToast: () =>
@@ -126,6 +126,29 @@ export const resetConfirmStrings = {
   getResetConfirmButtonText: () =>
     i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Reset dashboard',
+    }),
+};
+
+export const unsavedChangesConfirmStrings = {
+  getUnsavedChangesTitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
+      defaultMessage: 'Unsaved changes',
+    }),
+  getUnsavedChangesSubtitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+      defaultMessage: `You have unsaved changes. Would you like to save or discard your work?`,
+    }),
+  getCancelButtonLabel: () =>
+    i18n.translate('dashboard.unsavedChangesConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDiscardButtonText: () =>
+    i18n.translate('dashboard.unsavedChangesConfirmModal.discardButtonLabel', {
+      defaultMessage: 'Discard',
+    }),
+  getSaveButtonText: () =>
+    i18n.translate('dashboard.unsavedChangesConfirmModal.saveButtonLabel', {
+      defaultMessage: 'Save',
     }),
 };
 

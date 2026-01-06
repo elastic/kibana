@@ -20,14 +20,13 @@ import {
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
-
-import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 
 import { PackagePolicyInputPanel } from './components';
 
@@ -53,6 +52,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
+  const deploymentMode =
+    (isEditPage || isAgentlessSelected) && packagePolicy.supports_agentless
+      ? 'agentless'
+      : 'default';
   const packagePolicyTemplates = useMemo(
     () =>
       showOnlyIntegration
@@ -101,11 +104,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 });
               };
 
-              return packagePolicyInput &&
-                !(
-                  (isAgentlessSelected || packagePolicy.supports_agentless === true) &&
-                  AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type)
-                ) ? (
+              const isInputAvailable =
+                packagePolicyInput &&
+                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo);
+
+              return isInputAvailable ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
                     packageInput={packageInput}

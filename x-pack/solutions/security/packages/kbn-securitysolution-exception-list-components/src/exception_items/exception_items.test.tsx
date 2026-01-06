@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiThemeProvider, Pagination } from '@elastic/eui';
+import type { Pagination } from '@elastic/eui';
+import { EuiThemeProvider } from '@elastic/eui';
 import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 

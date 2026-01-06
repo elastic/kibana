@@ -14,33 +14,10 @@
       "tags": [],
       "label": "WorkChatAppPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/chat/plugins/workchat-app/public/types.ts",
+      "path": "x-pack/solutions/chat/plugins/workchat_app/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "workchatApp",
-          "id": "def-public.WorkChatAppPluginSetup.integrations",
-          "type": "Object",
-          "tags": [],
-          "label": "integrations",
-          "description": [],
-          "signature": [
-            "{ register: (integration: ",
-            {
-              "pluginId": "@kbn/wci-browser",
-              "scope": "public",
-              "docId": "kibKbnWciBrowserPluginApi",
-              "section": "def-public.IntegrationComponentDescriptor",
-              "text": "IntegrationComponentDescriptor"
-            },
-            ") => void; }"
-          ],
-          "path": "x-pack/solutions/chat/plugins/workchat-app/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -51,7 +28,7 @@
       "tags": [],
       "label": "WorkChatAppPluginStart",
       "description": [],
-      "path": "x-pack/solutions/chat/plugins/workchat-app/public/types.ts",
+      "path": "x-pack/solutions/chat/plugins/workchat_app/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -73,41 +50,10 @@
       "tags": [],
       "label": "WorkChatAppPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/chat/plugins/workchat-app/server/types.ts",
+      "path": "x-pack/solutions/chat/plugins/workchat_app/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "workchatApp",
-          "id": "def-server.WorkChatAppPluginSetup.integrations",
-          "type": "Object",
-          "tags": [],
-          "label": "integrations",
-          "description": [],
-          "signature": [
-            "{ register: (tool: ",
-            {
-              "pluginId": "@kbn/wci-server",
-              "scope": "server",
-              "docId": "kibKbnWciServerPluginApi",
-              "section": "def-server.WorkchatIntegrationDefinition",
-              "text": "WorkchatIntegrationDefinition"
-            },
-            "<",
-            {
-              "pluginId": "@kbn/wci-common",
-              "scope": "common",
-              "docId": "kibKbnWciCommonPluginApi",
-              "section": "def-common.IntegrationConfiguration",
-              "text": "IntegrationConfiguration"
-            },
-            ">) => void; }"
-          ],
-          "path": "x-pack/solutions/chat/plugins/workchat-app/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -118,7 +64,7 @@
       "tags": [],
       "label": "WorkChatAppPluginStart",
       "description": [],
-      "path": "x-pack/solutions/chat/plugins/workchat-app/server/types.ts",
+      "path": "x-pack/solutions/chat/plugins/workchat_app/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

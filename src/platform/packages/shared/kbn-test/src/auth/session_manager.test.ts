@@ -11,10 +11,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
 import { Session } from './saml_auth';
-import { SamlSessionManager, SupportedRoles } from './session_manager';
+import type { SupportedRoles } from './session_manager';
+import { SamlSessionManager } from './session_manager';
 import * as samlAuth from './saml_auth';
 import * as helper from './helper';
-import { Role, User, UserProfile } from './types';
+import type { Role, User, UserProfile } from './types';
 import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -135,6 +136,36 @@ describe('SamlSessionManager', () => {
       expect(cookieStr1).not.toEqual(cookieStr2);
     });
 
+    test(`'getSessionCookieForRole' should call 'createLocalSAMLSession' with UIAM properties when in UIAM mode`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleEditor);
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith({
+        username: '1806480617',
+        email: 'elastic_viewer@elastic.co',
+        fullname: 'test viewer',
+        role: 'viewer',
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiamEnabled: true },
+        kbnHost: 'http://localhost:5620',
+        log: expect.any(ToolingLog),
+      });
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith({
+        username: '2180895557',
+        email: 'elastic_editor@elastic.co',
+        fullname: 'test editor',
+        role: 'editor',
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiamEnabled: true },
+        kbnHost: 'http://localhost:5620',
+        log: expect.any(ToolingLog),
+      });
+      expect(createCloudSAMLSessionMock).not.toHaveBeenCalled();
+    });
+
     test(`'getEmail' return the correct email`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
       const email = await samlSessionManager.getEmail(roleEditor);
@@ -159,9 +190,13 @@ describe('SamlSessionManager', () => {
 
     test(`throws error when role is not in 'supportedRoles'`, async () => {
       const nonExistingRole = 'tester';
-      const expectedErrorMessage = `Role '${nonExistingRole}' is not in the supported list: ${supportedRoles.roles.join(
-        ', '
-      )}. Add role descriptor in ${supportedRoles.sourcePath} to enable it for testing`;
+      const expectedErrorMessage = [
+        `Role '${nonExistingRole}' not found in ${
+          supportedRoles.sourcePath
+        }. Available predefined roles: ${supportedRoles.roles.join(', ')}.`,
+        `Is '${nonExistingRole}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,
         supportedRoles,
@@ -369,9 +404,13 @@ describe('SamlSessionManager', () => {
 
     test(`throws error for non-existing role when 'supportedRoles' is defined`, async () => {
       const nonExistingRole = 'tester';
-      const expectedErrorMessage = `Role '${nonExistingRole}' is not in the supported list: ${supportedRoles.roles.join(
-        ', '
-      )}. Add role descriptor in ${supportedRoles.sourcePath} to enable it for testing`;
+      const expectedErrorMessage = [
+        `Role '${nonExistingRole}' not found in ${
+          supportedRoles.sourcePath
+        }. Available predefined roles: ${supportedRoles.roles.join(', ')}.`,
+        `Is '${nonExistingRole}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
       const samlSessionManager = new SamlSessionManager({
         ...samlSMOptionsWithCloudHostName,
         supportedRoles,

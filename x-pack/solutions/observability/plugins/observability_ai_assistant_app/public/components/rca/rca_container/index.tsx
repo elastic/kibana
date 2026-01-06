@@ -11,7 +11,8 @@ import {
 } from '@kbn/observability-ai-common/root_cause_analysis';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AssistantMessage, MessageRole, ToolMessage } from '@kbn/inference-common';
+import type { AssistantMessage, ToolMessage } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import type {
   RootCauseAnalysisEvent,
   RootCauseAnalysisToolMessage,

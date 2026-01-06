@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function getMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -101,5 +100,38 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
         });
       });
     }
+    it('should get disabled maintenance windows correctly', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('default')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({ ...createRequestBody, enabled: false });
+
+      objectRemover.add(
+        'default',
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      const response = await supertest
+        .get(`${getUrlPrefix('default')}/api/maintenance_window/${createdMaintenanceWindow.id}`)
+        .auth('superuser', 'superuser-password');
+
+      expect(response.statusCode).to.eql(200);
+      expect(response.body.title).to.eql('test-maintenance-window');
+      expect(response.body.status).to.eql('disabled');
+      expect(response.body.enabled).to.eql(false);
+      expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
+
+      expect(response.body.created_by).to.eql('elastic');
+      expect(response.body.updated_by).to.eql('elastic');
+
+      expect(response.body.schedule.custom.duration).to.eql('1m');
+      expect(response.body.schedule.custom.start).to.eql(start.toISOString());
+      expect(response.body.schedule.custom.recurring.every).to.eql('2d');
+      expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
+      expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['MO', 'FR']);
+    });
   });
 }

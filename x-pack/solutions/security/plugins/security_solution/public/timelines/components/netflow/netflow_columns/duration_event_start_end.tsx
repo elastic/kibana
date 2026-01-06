@@ -10,7 +10,7 @@ import { uniq } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 import { EVENT_DURATION_FIELD_NAME } from '../../duration';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { FormattedDuration } from '../../formatted_duration';
@@ -33,13 +33,11 @@ TimeIcon.displayName = 'TimeIcon';
  * - `event.end`
  */
 export const DurationEventStartEnd = React.memo<{
-  contextId: string;
   eventDuration?: string[] | null;
-  eventId: string;
   eventEnd?: string[] | null;
   eventStart?: string[] | null;
   scopeId: string;
-}>(({ contextId, eventDuration, eventId, eventEnd, eventStart, scopeId }) => (
+}>(({ eventDuration, eventEnd, eventStart, scopeId }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="duration-and-start-group"
@@ -50,12 +48,9 @@ export const DurationEventStartEnd = React.memo<{
     {eventDuration != null
       ? uniq(eventDuration).map((duration) => (
           <EuiFlexItem grow={false} key={duration}>
-            <DefaultDraggable
+            <CellActionsRenderer
               scopeId={scopeId}
               field={EVENT_DURATION_FIELD_NAME}
-              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
-              // @ts-expect-error
-              name={name}
               tooltipContent={null}
               value={duration}
             >
@@ -66,17 +61,16 @@ export const DurationEventStartEnd = React.memo<{
                   tooltipTitle={EVENT_DURATION_FIELD_NAME}
                 />
               </EuiText>
-            </DefaultDraggable>
+            </CellActionsRenderer>
           </EuiFlexItem>
         ))
       : null}
     {eventStart != null
       ? uniq(eventStart).map((start) => (
           <EuiFlexItem grow={false} key={start}>
-            <DefaultDraggable
+            <CellActionsRenderer
               scopeId={scopeId}
               field={EVENT_START_FIELD_NAME}
-              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_START_FIELD_NAME}-${start}`}
               tooltipContent={null}
               value={start}
             >
@@ -84,17 +78,16 @@ export const DurationEventStartEnd = React.memo<{
                 <TimeIcon size="m" type="clock" />
                 <FormattedDate fieldName={EVENT_START_FIELD_NAME} value={start} />
               </EuiText>
-            </DefaultDraggable>
+            </CellActionsRenderer>
           </EuiFlexItem>
         ))
       : null}
     {eventEnd != null
       ? uniq(eventEnd).map((end) => (
           <EuiFlexItem grow={false} key={end}>
-            <DefaultDraggable
+            <CellActionsRenderer
               scopeId={scopeId}
               field={EVENT_END_FIELD_NAME}
-              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_END_FIELD_NAME}-${end}`}
               tooltipContent={null}
               value={end}
             >
@@ -102,7 +95,7 @@ export const DurationEventStartEnd = React.memo<{
                 <TimeIcon size="m" type="clock" />
                 <FormattedDate fieldName={EVENT_END_FIELD_NAME} value={end} />
               </EuiText>
-            </DefaultDraggable>
+            </CellActionsRenderer>
           </EuiFlexItem>
         ))
       : null}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation as _useMutation } from '@tanstack/react-query';
+import { useMutation as _useMutation } from '@kbn/react-query';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import type { RenderHookResult } from '@testing-library/react';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -19,8 +19,8 @@ import { SCAN_ROUTE } from '../../../../common/endpoint/constants';
 import type { ScanActionRequestBody } from '../../../../common/api/endpoint';
 const useMutationMock = _useMutation as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

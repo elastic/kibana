@@ -7,10 +7,10 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_SLO_ALERTS_ACTION_ID } from '../embeddable/slo/alerts/constants';
-import { SLOPublicPluginsStart } from '..';
-import { SLORepositoryClient } from '../types';
+import type { SLOPublicPluginsStart } from '..';
+import type { SLORepositoryClient } from '../types';
 import { ADD_SLO_ERROR_BUDGET_ACTION_ID } from '../embeddable/slo/error_budget/constants';
 import { ADD_SLO_OVERVIEW_ACTION_ID } from '../embeddable/slo/overview/constants';
 import { ADD_BURN_RATE_ACTION_ID } from '../embeddable/slo/burn_rate/constants';

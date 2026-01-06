@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cps",
+  "owner": [
+    "@elastic/kibana-core",
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "cps",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "cps"
+    ],
+    "optionalPlugins": [],
+    "requiredPlugins": [],
+    "requiredBundles": []
+  }
+}

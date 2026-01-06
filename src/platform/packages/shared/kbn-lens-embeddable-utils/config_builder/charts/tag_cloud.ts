@@ -7,20 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-  TagcloudState,
-} from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, LensTagCloudState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTagCloudConfig } from '../types';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  mapToFormula,
-} from '../utils';
+import type { BuildDependencies, LensAttributes, LensTagCloudConfig } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
+import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
@@ -29,7 +20,7 @@ function getAccessorName(type: 'breakdown') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
+function buildVisualizationState(config: LensTagCloudConfig): LensTagCloudState {
   const layer = config;
 
   return {
@@ -50,12 +41,11 @@ function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
 function buildFormulaLayer(
   layer: LensTagCloudConfig,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
     },
   };
 
@@ -88,11 +78,11 @@ function getValueColumns(layer: LensTagCloudConfig) {
 
 export async function buildTagCloud(
   config: LensTagCloudConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensTagCloudConfig, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensTagCloudConfig, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
@@ -100,18 +90,19 @@ export async function buildTagCloud(
     getValueColumns,
     dataViewsAPI
   );
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
+
   return {
     title: config.title,
     visualizationType: 'lnsTagcloud',
-    references: buildReferences(dataviews),
+    references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

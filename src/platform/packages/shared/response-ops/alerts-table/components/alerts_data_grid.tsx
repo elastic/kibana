@@ -7,34 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, lazy, Suspense, useCallback, useMemo } from 'react';
-import {
-  EuiDataGrid,
+import type { FC } from 'react';
+import React, { lazy, Suspense, useCallback, useMemo } from 'react';
+import type {
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridStyle,
   RenderCellValue,
-  tint,
-  useEuiTheme,
 } from '@elastic/eui';
+import { EuiDataGrid, tint, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ActionsCellHost } from './actions_cell_host';
 import { ControlColumnHeaderCell } from './control_column_header_cell';
 import { CellValueHost } from './cell_value_host';
 import { BulkActionsCell } from './bulk_actions_cell';
 import { BulkActionsHeader } from './bulk_actions_header_cell';
-import { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from '../types';
+import type { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from '../types';
 import { useGetToolbarVisibility } from '../hooks/use_toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { typedMemo } from '../utils/react';
-import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
 import { useBulkActions } from '../hooks/use_bulk_actions';
 import { useSorting } from '../hooks/use_sorting';
 import { CellPopoverHost } from './cell_popover_host';
 import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
+import type { AlertDetailFlyout as AlertDetailFlyoutType } from './alert_detail_flyout';
+import { EditTagsFlyout } from './tags/edit_tags_flyout';
+import { IndividualTagsActionContextProvider } from '../contexts/individual_tags_action_context';
+import { useTagsAction } from './tags/use_tags_action';
 
-const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
+const AlertDetailFlyout = lazy(
+  () => import('./alert_detail_flyout')
+) as typeof AlertDetailFlyoutType;
 
 const defaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -54,10 +57,9 @@ export const AlertsDataGrid = typedMemo(
     const {
       ruleTypeIds,
       query,
-      visibleColumns,
+      columnVisibility,
       onToggleColumn,
       onResetColumns,
-      onChangeVisibleColumns,
       onColumnResize,
       showInspectButton = false,
       leadingControlColumns: additionalLeadingControlColumns,
@@ -73,11 +75,6 @@ export const AlertsDataGrid = typedMemo(
       renderContext,
       hideBulkActions,
       casesConfiguration,
-      flyoutAlertIndex,
-      setFlyoutAlertIndex,
-      onPaginateFlyout,
-      onChangePageSize,
-      onChangePageIndex,
       actionsColumnWidth = DEFAULT_ACTIONS_COLUMN_WIDTH,
       additionalBulkActions,
       fieldsBrowserOptions,
@@ -93,22 +90,31 @@ export const AlertsDataGrid = typedMemo(
       isLoadingAlerts,
       browserFields,
       renderActionsCell,
+      expandedAlertIndex,
+      renderExpandedAlertView,
       pageIndex,
+      onPageIndexChange,
       pageSize,
+      onPageSizeChange,
       refresh: refreshQueries,
       columns,
       dataGridRef,
       services: { http, notifications, application, cases: casesService, settings },
     } = renderContext;
 
-    const { colorMode } = useEuiTheme();
-    const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
+    const { colorMode, euiTheme } = useEuiTheme();
+    const { sortingColumns, onSort } = useSorting(
+      onSortChange,
+      columnVisibility.visibleColumns,
+      sortingFields
+    );
     const {
       isBulkActionsColumnActive,
       bulkActionsState,
       bulkActions,
       setIsBulkActionsLoading,
       clearSelection,
+      bulkEditTagsFlyoutState,
     } = useBulkActions({
       ruleTypeIds,
       query,
@@ -188,27 +194,15 @@ export const AlertsDataGrid = typedMemo(
       actionsColumnWidth,
     ]);
 
-    const flyoutRowIndex = flyoutAlertIndex + pageIndex * pageSize;
-
-    // Row classes do not deal with visible row indices, so we need to handle page offset
-    const activeRowClasses = useMemo<NonNullable<EuiDataGridStyle['rowClasses']>>(
-      () => ({
-        [flyoutRowIndex]: 'alertsTableActiveRow',
-      }),
-      [flyoutRowIndex]
-    );
-
-    const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
-
     const dataGridPagination = useMemo(
       () => ({
         pageIndex,
         pageSize,
         pageSizeOptions,
-        onChangeItemsPerPage: onChangePageSize,
-        onChangePage: onChangePageIndex,
+        onChangePage: onPageIndexChange,
+        onChangeItemsPerPage: onPageSizeChange,
       }),
-      [onChangePageIndex, onChangePageSize, pageIndex, pageSize, pageSizeOptions]
+      [onPageIndexChange, onPageSizeChange, pageIndex, pageSize, pageSizeOptions]
     );
 
     const { getCellActionsForColumn, visibleCellActions, disabledCellActions } =
@@ -258,10 +252,10 @@ export const AlertsDataGrid = typedMemo(
           // We're spreading the highlighted row classes first, so that the active
           // row classed can override the highlighted row classes.
           ...highlightedRowClasses,
-          ...activeRowClasses,
+          ...(expandedAlertIndex != null ? { [expandedAlertIndex]: 'alertsTableActiveRow' } : {}),
         },
       };
-    }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
+    }, [expandedAlertIndex, highlightedRowClasses, props.gridStyle]);
 
     // Merges the default grid style with the grid style that comes in through props.
     const actualGridStyle = useMemo(() => {
@@ -314,72 +308,104 @@ export const AlertsDataGrid = typedMemo(
       return { columns: sortingColumns, onSort };
     }, [sortingColumns, onSort]);
 
-    const columnVisibility = useMemo(() => {
-      return { visibleColumns, setVisibleColumns: onChangeVisibleColumns };
-    }, [visibleColumns, onChangeVisibleColumns]);
-
     const rowStyles = useMemo(
       () => css`
         .alertsTableHighlightedRow {
-          background-color: ${euiThemeVars.euiColorHighlight};
+          background-color: ${euiTheme.components.dataGridRowBackgroundMarked};
         }
 
         .alertsTableActiveRow {
           background-color: ${colorMode === 'LIGHT'
-            ? tint(euiThemeVars.euiColorLightShade, 0.5)
-            : euiThemeVars.euiColorLightShade};
+            ? tint(euiTheme.colors.lightShade, 0.5)
+            : euiTheme.colors.lightShade};
         }
       `,
-      [colorMode]
+      [colorMode, euiTheme]
     );
 
+    const ExpandedAlertView =
+      // By checking undefined explicitly, we allow falsy values (null) to skip rendering the flyout
+      renderExpandedAlertView !== undefined
+        ? renderExpandedAlertView
+        : // Overriding the simplified type here to avoid cyclic problems with generics
+          (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
+
+    const selectedAlerts = useMemo(
+      () =>
+        Array.from(bulkActionsState.rowSelection.keys())
+          .map((i) => alerts[i])
+          .filter(Boolean),
+      [alerts, bulkActionsState.rowSelection]
+    );
+
+    const individualTagsFlyout = useTagsAction({
+      onActionSuccess: () => {
+        refresh();
+      },
+      onActionError: () => {
+        refresh();
+      },
+      isDisabled: false,
+    });
+
+    const { selectedAlerts: selectedAlertsFromRowAction } = individualTagsFlyout;
+
     return (
-      <InspectButtonContainer>
-        <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-          <Suspense fallback={null}>
-            {flyoutAlertIndex > -1 && (
-              <AlertsFlyout<AC>
-                {...renderContext}
-                alert={alerts[flyoutAlertIndex]}
-                alertsCount={alertsCount}
-                onClose={handleFlyoutClose}
-                flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
-                onPaginate={onPaginateFlyout}
+      <IndividualTagsActionContextProvider value={individualTagsFlyout}>
+        <InspectButtonContainer>
+          <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+            <Suspense fallback={null}>
+              {expandedAlertIndex != null && ExpandedAlertView && (
+                <ExpandedAlertView {...renderContext} expandedAlertIndex={expandedAlertIndex} />
+              )}
+            </Suspense>
+            {bulkEditTagsFlyoutState.isFlyoutOpen && selectedAlerts.length > 0 && (
+              <EditTagsFlyout
+                selectedAlerts={selectedAlerts}
+                onClose={bulkEditTagsFlyoutState.onClose}
+                onSaveTags={bulkEditTagsFlyoutState.onSaveTags}
               />
             )}
-          </Suspense>
-          {alertsCount > 0 && (
-            <EuiDataGrid
-              {...euiDataGridProps}
-              // As per EUI docs, it is not recommended to switch between undefined and defined height.
-              // If user changes height, it is better to unmount and mount the component.
-              // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
-              key={height ? 'fixedHeight' : 'autoHeight'}
-              ref={dataGridRef}
-              css={rowStyles}
-              aria-label="Alerts table"
-              data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
-              height={height}
-              columns={columnsWithCellActions}
-              columnVisibility={columnVisibility}
-              trailingControlColumns={trailingControlColumns}
-              leadingControlColumns={leadingControlColumns}
-              rowCount={alertsCount}
-              renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
-              cellContext={renderContext}
-              // Cast necessary because `cellContext` is untyped in EuiDataGrid
-              renderCellValue={CellValueHost as RenderCellValue}
-              renderCellPopover={CellPopoverHost}
-              gridStyle={actualGridStyle}
-              sorting={sortProps}
-              toolbarVisibility={toolbarVisibility}
-              pagination={dataGridPagination}
-              rowHeightsOptions={rowHeightsOptions}
-              onColumnResize={onColumnResize}
-            />
-          )}
-        </section>
-      </InspectButtonContainer>
+            {individualTagsFlyout.isFlyoutOpen && selectedAlertsFromRowAction?.length > 0 && (
+              <EditTagsFlyout
+                selectedAlerts={selectedAlertsFromRowAction}
+                onClose={individualTagsFlyout.onClose}
+                onSaveTags={individualTagsFlyout.onSaveTags}
+              />
+            )}
+            {alertsCount > 0 && (
+              <EuiDataGrid
+                {...euiDataGridProps}
+                // As per EUI docs, it is not recommended to switch between undefined and defined height.
+                // If user changes height, it is better to unmount and mount the component.
+                // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+                key={height ? 'fixedHeight' : 'autoHeight'}
+                ref={dataGridRef}
+                css={rowStyles}
+                aria-label="Alerts table"
+                data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
+                height={height}
+                columns={columnsWithCellActions}
+                columnVisibility={columnVisibility}
+                trailingControlColumns={trailingControlColumns}
+                leadingControlColumns={leadingControlColumns}
+                rowCount={alertsCount}
+                renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
+                cellContext={renderContext}
+                // Cast necessary because `cellContext` is untyped in EuiDataGrid
+                renderCellValue={CellValueHost as RenderCellValue}
+                renderCellPopover={CellPopoverHost}
+                gridStyle={actualGridStyle}
+                sorting={sortProps}
+                toolbarVisibility={toolbarVisibility}
+                pagination={dataGridPagination}
+                rowHeightsOptions={rowHeightsOptions}
+                onColumnResize={onColumnResize}
+              />
+            )}
+          </section>
+        </InspectButtonContainer>
+      </IndividualTagsActionContextProvider>
     );
   }
 );

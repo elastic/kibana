@@ -141,6 +141,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         {isManaged && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
@@ -184,6 +185,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 }
               >
                 <EuiFieldText
+                  isInvalid={!!validationResults.name}
                   fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.name}
@@ -219,6 +221,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 error={validationResults.description}
               >
                 <EuiFieldText
+                  isInvalid={!!validationResults.description}
                   fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.description}
@@ -419,6 +422,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <EuiComboBox
+                        isInvalid={validationResults?.additional_datastreams_permissions !== null}
                         selectedOptions={selectedDatastreamOptions}
                         options={datastreamsOptions}
                         onChange={(val) => {

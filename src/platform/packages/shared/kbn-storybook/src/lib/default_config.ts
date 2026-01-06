@@ -20,7 +20,7 @@ import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
-const EXTENSIONS = ['.ts', '.js'];
+const EXTENSIONS = ['.ts', '.js', '.tsx'];
 
 /*
  * false is a valid option for typescript.reactDocgen,
@@ -83,7 +83,10 @@ export const defaultConfig: StorybookConfig = {
                     const req = JSON.stringify(
                       loaderContext.utils.contextify(
                         loaderContext.context || loaderContext.rootContext,
-                        resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                        resolve(
+                          REPO_ROOT,
+                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        )
                       )
                     );
                     return `@import ${req};\n${content}`;
@@ -92,6 +95,7 @@ export const defaultConfig: StorybookConfig = {
                   sassOptions: {
                     includePaths: [resolve(REPO_ROOT, 'node_modules')],
                     quietDeps: true,
+                    silenceDeprecations: ['import', 'legacy-js-api'],
                   },
                 },
               },
@@ -219,7 +223,7 @@ export const defaultConfig: StorybookConfig = {
   <script>
     const publicPath = window.top.location.pathname.replace(/index\.html$/, '');
     // set the kbn public path values, we create a pointer on the topmost window path since this assignment will happen within an iframe
-    window.top.__kbnPublicPath__ = window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': publicPath, 'kbn-ui-shared-deps-src': publicPath, 'kbn-monaco': publicPath }; 
+    window.top.__kbnPublicPath__ = window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': publicPath, 'kbn-ui-shared-deps-src': publicPath, 'kbn-monaco': publicPath };
     window.__kbnHardenPrototypes__ = false;
   </script>
   <script src="kbn-ui-shared-deps-npm.dll.js"></script>
@@ -237,7 +241,7 @@ export const defaultConfig: StorybookConfig = {
   staticDirs: [
     UiSharedDepsNpm.distDir,
     UiSharedDepsSrc.distDir,
-    `${REPO_ROOT}/bazel-bin/src/platform/packages/shared/kbn-monaco/target_workers`,
+    `${REPO_ROOT}/target/build/src/platform/packages/shared/kbn-monaco/target_workers`,
     {
       from: `${REPO_ROOT}/src/platform/plugins/shared/kibana_react/public/assets`,
       to: 'plugins/kibanaReact/assets',

@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
+import type { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
 import type { ConnectionDetailsOpts, TabID, ConnectionDetailsTelemetryEvents } from './types';
 
@@ -33,6 +33,8 @@ export class ConnectionDetailsService {
         // eslint-disable-next-line no-console
         console.error('Error checking API key creation permissions', error);
       });
+
+    if (opts.defaultTabId) this.tabId$.next(opts.defaultTabId);
   }
 
   public readonly setTab = (tab: TabID) => {

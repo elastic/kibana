@@ -8,15 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CanAccessViewMode, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
 import { map } from 'rxjs';
 import { INPUT_CONTROL_VIS_TYPE } from './input_control_vis_type';
@@ -36,44 +35,39 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   );
 };
 
-export class InputControlDeprecationBadge implements Action<EmbeddableApiContext> {
-  public id = ACTION_DEPRECATION_BADGE;
-  public type = ACTION_DEPRECATION_BADGE;
-  public disabled = true;
+export const inputControlDeprecationBadge = {
+  id: ACTION_DEPRECATION_BADGE,
+  type: ACTION_DEPRECATION_BADGE,
+  disabled: true,
 
-  public getDisplayName() {
-    return i18n.translate('inputControl.deprecationBadgeAction.deprecationBadgeLabel', {
+  getDisplayName: () =>
+    i18n.translate('inputControl.deprecationBadgeAction.deprecationBadgeLabel', {
       defaultMessage: 'Deprecated',
-    });
-  }
+    }),
 
-  public getIconType() {
-    return 'warning';
-  }
+  getIconType: () => 'warning',
 
-  public getDisplayNameTooltip() {
-    return i18n.translate('inputControl.deprecationBadgeAction.deprecationWarningDescription', {
+  getDisplayNameTooltip: () =>
+    i18n.translate('inputControl.deprecationBadgeAction.deprecationWarningDescription', {
       defaultMessage:
         'Input controls are deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data.',
-    });
-  }
+    }),
 
-  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+  isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return compatibilityCheck(embeddable);
-  }
+  },
 
-  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+  couldBecomeCompatible: ({ embeddable }: EmbeddableApiContext) => {
     return isApiCompatible(embeddable) && embeddable.getVis().type.name === INPUT_CONTROL_VIS_TYPE;
-  }
+  },
 
-  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+  getCompatibilityChangesSubject: ({ embeddable }: EmbeddableApiContext) => {
     return isApiCompatible(embeddable)
       ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
       : undefined;
-  }
+  },
 
-  public async execute() {
+  execute: async () => {
     // do nothing
-    return;
-  }
-}
+  },
+};

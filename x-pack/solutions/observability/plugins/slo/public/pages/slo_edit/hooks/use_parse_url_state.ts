@@ -6,12 +6,12 @@
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { RecursivePartial } from '@kbn/utility-types';
+import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { RecursivePartial } from '@kbn/utility-types';
 import { useHistory } from 'react-router-dom';
 import { useMemo } from 'react';
-import { transformPartialSLOStateToFormState } from '../helpers/process_slo_form_values';
-import { CreateSLOForm } from '../types';
+import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
+import type { CreateSLOForm } from '../types';
 
 export function useParseUrlState(): CreateSLOForm | undefined {
   const history = useHistory();
@@ -23,8 +23,8 @@ export function useParseUrlState(): CreateSLOForm | undefined {
       useHashQuery: false,
     });
 
-    const urlState = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
+    const urlState = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a') ?? undefined;
 
-    return !!urlState ? transformPartialSLOStateToFormState(urlState) : undefined;
+    return transformPartialSLODataToFormState(urlState);
   }, [history]);
 }

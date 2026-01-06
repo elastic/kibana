@@ -21,7 +21,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   CREATE_DETECTION_FROM_TABLE_ROW_ACTION,
   uiMetricService,
@@ -31,7 +32,7 @@ import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
-import { CloudSecurityPostureStartServices } from '../types';
+import type { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 

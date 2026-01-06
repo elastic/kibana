@@ -7,12 +7,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
-import { AppPluginStartDependencies } from './types';
+import type { AppPluginStartDependencies } from './types';
 
 export const renderApp = async (
   core: CoreStart,

@@ -6,7 +6,11 @@
  */
 
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
-export { INGEST_SAVED_OBJECT_INDEX, FLEET_SETUP_LOCK_TYPE } from './saved_objects';
+export {
+  INGEST_SAVED_OBJECT_INDEX,
+  FLEET_SETUP_LOCK_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';
@@ -27,6 +31,7 @@ export * from './secrets';
 export * from './uninstall_token';
 export * from './space_awareness';
 export * from './security_search_ai_lake';
+export * from './cloud_connector';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible

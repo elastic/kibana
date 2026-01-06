@@ -20,12 +20,10 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { PageScope } from '../../data_view_manager/constants';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
-import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface UseCreateTimelineParams {
   /**
@@ -58,17 +56,21 @@ export const useCreateTimeline = ({
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.default);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const {
+    id: experimentalSecurityDefaultDataViewId,
+    indexPatterns: experimentalSecurityDefaultIndexPatterns,
+  } = useSecurityDefaultPatterns();
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
-    [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalSecurityDefaultDataViewId ?? '' : oldDataViewId),
+    [experimentalSecurityDefaultDataViewId, newDataViewPickerEnabled, oldDataViewId]
   );
   const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+    () =>
+      newDataViewPickerEnabled ? experimentalSecurityDefaultIndexPatterns : oldSelectedPatterns,
+    [experimentalSecurityDefaultIndexPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
   );
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
@@ -97,12 +99,12 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         fallbackPatterns: selectedPatterns,
-        scope: DataViewManagerScopeName.timeline,
+        scope: PageScope.timeline,
       });
 
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: dataViewId,
           selectedPatterns,
         })

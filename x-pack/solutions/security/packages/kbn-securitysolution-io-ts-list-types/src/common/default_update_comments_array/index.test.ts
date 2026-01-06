@@ -7,7 +7,7 @@
 
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
-import { UpdateCommentsArray } from '../update_comment';
+import type { UpdateCommentsArray } from '../update_comment';
 import { DefaultUpdateCommentsArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getUpdateCommentsArrayMock } from '../update_comment/index.mock';

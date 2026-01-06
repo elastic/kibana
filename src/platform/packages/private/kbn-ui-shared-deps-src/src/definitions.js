@@ -13,13 +13,13 @@ const Fs = require('fs');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const localDist = Path.resolve(__dirname, '../shared_built_assets');
-const bazelDist = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localDist));
+const builtDist = Path.resolve(REPO_ROOT, 'target', 'build', Path.relative(REPO_ROOT, localDist));
 
 // extracted const vars
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Fs.existsSync(localDist) ? localDist : bazelDist;
+const distDir = Fs.existsSync(localDist) ? localDist : builtDist;
 
 /**
  * Filename of the main bundle file in the distributable directory
@@ -134,18 +134,20 @@ const externals = {
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
-  '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
+  '@kbn/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
-  '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/esql-language': '__kbnSharedDeps__.KbnEsqlAst',
   '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
   '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
   '@kbn/react-kibana-context-common': '__kbnSharedDeps__.KbnReactKibanaContextCommon',
   '@kbn/react-kibana-context-root': '__kbnSharedDeps__.KbnReactKibanaContextRoot',
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
+  '@kbn/react-kibana-context-env': '__kbnSharedDeps__.KbnReactKibanaContextEnv',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
+  '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

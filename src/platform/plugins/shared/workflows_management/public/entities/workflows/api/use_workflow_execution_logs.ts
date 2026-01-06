@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useQuery } from '@kbn/react-query';
+import { useKibana } from '../../../hooks/use_kibana';
+interface WorkflowExecutionLogEntry {
+  id: string;
+  timestamp: string;
+  level: 'info' | 'debug' | 'warn' | 'error';
+  message: string;
+  stepId?: string;
+  stepName?: string;
+  connectorType?: string;
+  duration?: number;
+  additionalData?: Record<string, unknown>;
+}
+
+interface WorkflowExecutionLogsResponse {
+  logs: WorkflowExecutionLogEntry[];
+  total: number;
+  size: number;
+  page: number;
+}
+
+interface UseWorkflowExecutionLogsParams {
+  executionId: string;
+  stepExecutionId?: string;
+  size?: number;
+  page?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  enabled?: boolean;
+}
+
+export function useWorkflowExecutionLogs({
+  executionId,
+  stepExecutionId,
+  size = 100,
+  page = 1,
+  sortField = 'timestamp',
+  sortOrder = 'desc',
+  enabled = true,
+}: UseWorkflowExecutionLogsParams) {
+  const { http } = useKibana().services;
+
+  return useQuery<WorkflowExecutionLogsResponse>({
+    queryKey: [
+      'workflowExecutionLogs',
+      executionId,
+      stepExecutionId,
+      size,
+      page,
+      sortField,
+      sortOrder,
+    ],
+    queryFn: async () => {
+      const response = await http.get<WorkflowExecutionLogsResponse>(
+        `/api/workflowExecutions/${executionId}/logs`,
+        {
+          query: {
+            stepExecutionId,
+            size,
+            page,
+            sortField,
+            sortOrder,
+          },
+        }
+      );
+      return response;
+    },
+    enabled: enabled && !!executionId,
+    staleTime: 5000, // Refresh every 5 seconds for real-time logs
+    refetchInterval: 5000, // Auto-refresh logs
+  });
+}
+
+export type { WorkflowExecutionLogEntry, WorkflowExecutionLogsResponse };

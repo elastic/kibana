@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -133,6 +134,7 @@ export const HotPhase: FunctionComponent = () => {
                 {showEmptyRolloverFieldsError && (
                   <>
                     <EuiCallOut
+                      announceOnMount={false}
                       size="s"
                       title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                       data-test-subj="rolloverSettingsRequired"

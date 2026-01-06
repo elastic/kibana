@@ -5,72 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
-import { IngestStreamLifecycle, Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
-import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/react-hooks';
-import { css } from '@emotion/react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { EditLifecycleModal, LifecycleEditAction } from './modal';
-import { RetentionSummary } from './summary';
-import { RetentionMetadata } from './metadata';
-import { IlmSummary } from './ilm_summary';
-import { IngestionRate } from './ingestion_rate';
+import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import type { Streams } from '@kbn/streams-schema';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { StreamDetailFailureStore } from './failure_store';
+import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
-import { getFormattedError } from '../../../util/errors';
-
-function useLifecycleState({
-  definition,
-  isServerless,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-  isServerless: boolean;
-}) {
-  const [updateInProgress, setUpdateInProgress] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState<LifecycleEditAction>('none');
-
-  const lifecycleActions = useMemo(() => {
-    const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isWired = Streams.WiredStream.GetResponse.is(definition);
-
-    actions.push({
-      name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
-        defaultMessage: 'Set specific retention days',
-      }),
-      action: 'dsl',
-    });
-
-    if (!isServerless) {
-      actions.push({
-        name: i18n.translate('xpack.streams.streamDetailLifecycle.setLifecyclePolicy', {
-          defaultMessage: 'Use a lifecycle policy',
-        }),
-        action: 'ilm',
-      });
-    }
-
-    if (isWired && !isRoot(definition.stream.name)) {
-      actions.push({
-        name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
-          defaultMessage: 'Reset to default',
-        }),
-        action: 'inherit',
-      });
-    }
-
-    return actions;
-  }, [definition, isServerless]);
-
-  return {
-    lifecycleActions,
-    openEditModal,
-    setOpenEditModal,
-    updateInProgress,
-    setUpdateInProgress,
-  };
-}
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 
 export function StreamDetailLifecycle({
   definition,
@@ -79,130 +22,51 @@ export function StreamDetailLifecycle({
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }) {
-  const {
-    core: { http, notifications },
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-    isServerless,
-  } = useKibana();
+  const { timeState } = useTimefilter();
+  const data = useDataStreamStats({ definition, timeState });
 
-  const {
-    lifecycleActions,
-    openEditModal,
-    setOpenEditModal,
-    updateInProgress,
-    setUpdateInProgress,
-  } = useLifecycleState({ definition, isServerless });
+  const { onPageReady } = usePerformanceContext();
 
-  const {
-    stats,
-    isLoading: isLoadingStats,
-    error: statsError,
-  } = useDataStreamStats({ definition });
-
-  const { signal } = useAbortController();
-
-  const getIlmPolicies = () =>
-    http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
-      signal,
-    });
-
-  const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
-    try {
-      setUpdateInProgress(true);
-
-      const request = {
-        ingest: {
-          ...definition.stream.ingest,
-          lifecycle,
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !data.isLoading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
         },
-      };
-
-      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
-        params: {
-          path: { name: definition.stream.name },
-          body: request,
+        customMetrics: {
+          key1: 'dataStreamStatsTotalDocs',
+          value1: data.stats?.ds?.stats?.totalDocs ?? 0,
+          key2: 'timeFrom',
+          value2: timeState.start,
+          key3: 'timeTo',
+          value3: timeState.end,
         },
-        signal,
       });
-
-      refreshDefinition();
-      setOpenEditModal('none');
-
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
-          defaultMessage: 'Stream lifecycle updated',
-        }),
-      });
-    } catch (error) {
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.streams.streamDetailLifecycle.failed', {
-          defaultMessage: 'Failed to update lifecycle',
-        }),
-        toastMessage: getFormattedError(error).message,
-      });
-    } finally {
-      setUpdateInProgress(false);
     }
-  };
+  }, [
+    definition,
+    data.isLoading,
+    onPageReady,
+    data.stats?.ds?.stats?.totalDocs,
+    timeState.start,
+    timeState.end,
+  ]);
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      <EditLifecycleModal
-        action={openEditModal}
+      <StreamDetailGeneralData
         definition={definition}
-        closeModal={() => setOpenEditModal('none')}
-        updateLifecycle={updateLifecycle}
-        getIlmPolicies={getIlmPolicies}
-        updateInProgress={updateInProgress}
+        refreshDefinition={refreshDefinition}
+        data={data}
       />
-      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
-        <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="m">
-          <RetentionSummary
-            definition={definition}
-            isLoadingStats={isLoadingStats}
-            stats={stats}
-            statsError={statsError}
-          />
-        </EuiPanel>
-        <EuiPanel grow hasShadow={false} hasBorder paddingSize="m">
-          <RetentionMetadata
-            definition={definition}
-            lifecycleActions={lifecycleActions}
-            openEditModal={(action) => setOpenEditModal(action)}
-            isLoadingStats={isLoadingStats}
-            stats={stats}
-            statsError={statsError}
-          />
-        </EuiPanel>
-      </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
-        {definition.privileges.monitor && (
-          <EuiFlexItem grow={2}>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <IngestionRate
-                definition={definition}
-                isLoadingStats={isLoadingStats}
-                stats={stats}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
-        {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
-          <EuiFlexItem grow={3}>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
-            </EuiPanel>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <StreamDetailFailureStore
+        definition={definition}
+        data={data}
+        refreshDefinition={refreshDefinition}
+      />
     </EuiFlexGroup>
   );
 }
-
-const flexRowCss = css`
-  flex-grow: 0;
-`;

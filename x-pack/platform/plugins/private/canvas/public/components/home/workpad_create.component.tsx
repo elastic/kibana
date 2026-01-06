@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 export interface Props
   extends Omit<EuiButtonPropsForButton, 'iconType' | 'fill' | 'data-test-subj' | 'children'> {

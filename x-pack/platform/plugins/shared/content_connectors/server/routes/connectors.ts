@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
+import type { ConnectorStatus, FilteringRule, Connector } from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -26,13 +27,10 @@ import {
   updateConnectorStatus,
   updateFiltering,
   updateFilteringDraft,
-  ConnectorStatus,
-  FilteringRule,
   SyncJobType,
   cancelSyncs,
   isResourceNotFoundException,
   isStatusTransitionException,
-  Connector,
   fetchConnectorByIndexName,
 } from '@kbn/search-connectors';
 
@@ -571,7 +569,6 @@ export function registerConnectorRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { advanced_snippet, filtering_rules } = request.body;
       const result = await updateFilteringDraft(client.asCurrentUser, connectorId, {
         advancedSnippet: advanced_snippet,
@@ -643,7 +640,6 @@ export function registerConnectorRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const connectorId = decodeURIComponent(request.params.connectorId);
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { is_native } = request.body;
       const result = await putUpdateNative(client.asCurrentUser, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();
@@ -1188,7 +1184,7 @@ export function registerConnectorRoutes({
       try {
         const index = await fetchIndex(client.asCurrentUser, indexName);
         return response.ok({
-          body: index,
+          body: index?.index,
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {

@@ -6,9 +6,9 @@
  */
 import dedent from 'dedent';
 import { ChatFunctionClient } from '.';
-import { Logger } from '@kbn/logging';
-import { RegisterInstructionCallback } from '../types';
-import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../functions/get_data_on_screen';
+import type { Logger } from '@kbn/logging';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../../common';
+import type { RegisterInstructionCallback } from '../types';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -54,7 +54,7 @@ describe('chatFunctionClient', () => {
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
-      }).rejects.toThrowError(`Function arguments are invalid`);
+      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
 
       expect(respondFn).not.toHaveBeenCalled();
     });

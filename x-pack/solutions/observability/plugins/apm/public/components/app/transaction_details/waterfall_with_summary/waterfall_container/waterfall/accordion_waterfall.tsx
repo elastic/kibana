@@ -20,13 +20,14 @@ import { WindowScroller, AutoSizer } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import type {
   IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,
-  IWaterfallGetRelatedErrorsHref,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';
@@ -100,7 +101,12 @@ function Waterfall(props: WaterfallProps) {
   };
 
   return (
-    <WindowScroller onScroll={onScroll} scrollElement={props.scrollElement}>
+    <WindowScroller
+      onScroll={onScroll}
+      scrollElement={
+        props.scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
+      }
+    >
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
@@ -200,7 +206,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
 
   return (
     <EuiAccordion
-      data-test-subj="waterfallItem"
+      data-test-subj="accordionWaterfall"
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}
@@ -303,7 +309,9 @@ function ToggleAccordionButton({
             }}
           >
             <EuiToolTip content={childrenCount} delay="long">
-              <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
+              <EuiText size="xs" tabIndex={0}>
+                {asBigNumber(childrenCount)}
+              </EuiText>
             </EuiToolTip>
           </div>
         </EuiFlexItem>

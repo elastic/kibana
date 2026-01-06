@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiModal,
   EuiModalHeader,
@@ -20,19 +21,17 @@ import {
   EuiSpacer,
   EuiCheckbox,
   EuiFormRow,
-  EuiSelectOption,
   EuiHorizontalRule,
   EuiFieldText,
   EuiPanel,
   EuiText,
   EuiIconTip,
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
@@ -315,13 +314,6 @@ export const AlertDeleteModal = ({
           <EuiModalHeaderTitle id={MODAL_ID}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>{translations.MODAL_TITLE}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  className="eui-alignTop"
-                  label={translations.RULE_SETTINGS_TECH_PREVIEW_LABEL}
-                  title={translations.RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION}
-                />
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -420,6 +412,7 @@ export const AlertDeleteModal = ({
             isInvalid={!validations.isDeleteConfirmationValid}
           >
             <EuiFieldText
+              isInvalid={!validations.isDeleteConfirmationValid}
               value={deleteConfirmation}
               disabled={isDisabled || !currentSettingsWouldDeleteAlerts}
               onChange={onChangeDeleteConfirmation}

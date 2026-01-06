@@ -32,7 +32,7 @@ const isRuleParametersFieldOrSubfield = (
 
 /**
  * Recursive function that processes all the fields from an Alert and returns a flattened object as a Record<string, string[]>.
- * This is used in the AI for SOC alert summary page, in the getPromptContext when passing data to the assistant.
+ * This is used in EASE alert summary page, in the getPromptContext when passing data to the assistant.
  * The logic is similar to x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts but for an Alert type.
  */
 export const flattenAlertType = (

@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
+import type Rx from 'rxjs';
+import { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { buildExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { SearchFieldValue, SearchSource, SearchSourceDependencies, SortDirection } from '.';
-import { AggConfigs, AggTypesRegistryStart } from '../..';
+import type { SearchFieldValue, SearchSourceDependencies } from '.';
+import { SearchSource, SortDirection } from '.';
+import type { AggTypesRegistryStart } from '../..';
+import { AggConfigs } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
-import { SearchSourceSearchOptions } from './types';
+import type { SearchSourceSearchOptions } from './types';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -1095,6 +1099,39 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       searchSource.getSerializedFields(true);
       expect(indexPattern123.toMinimalSpec).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('projectRouting field', () => {
+    test('should accept projectRouting as a field', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      expect(searchSource.getField('projectRouting')).toBe('_alias:_origin');
+    });
+
+    test('should serialize projectRouting in getSerializedFields', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should serialize undefined projectRouting', () => {
+      searchSource.setField('projectRouting', undefined);
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBeUndefined();
+    });
+
+    test('should include projectRouting in serialize()', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(JSON.parse(searchSourceJSON).projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should not include project_routing in ES request body (it is passed as an option)', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const request = searchSource.getSearchRequestBody();
+      // projectRouting is now passed as an option, not in the request body
+      expect(request.project_routing).toBeUndefined();
     });
   });
 

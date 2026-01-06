@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import util from 'util';
-import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
+import { diff } from 'jest-diff';
+import { isEqual, isEqualWith } from 'lodash';
+import util from 'util';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -21,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       graph: ['all', 'read', 'minimal_all', 'minimal_read'],
       savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
       canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
+      cloudConnect: ['all', 'read', 'minimal_all', 'minimal_read'],
       maps: ['all', 'read', 'minimal_all', 'minimal_read'],
       maps_v2: ['all', 'read', 'minimal_all', 'minimal_read'],
       generalCases: [
@@ -82,11 +84,24 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_assign',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-      onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
+      agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+      workflowsManagement: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'workflow_create',
+        'workflow_update',
+        'workflow_delete',
+        'workflow_execute',
+        'workflow_read',
+        'workflow_execution_read',
+        'workflow_execution_cancel',
+      ],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: [
         'all',
@@ -119,10 +134,13 @@ export default function ({ getService }: FtrProviderContext) {
         'blocklist_read',
         'event_filters_all',
         'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
+        'soc_management_all',
         'host_isolation_all',
         'process_operations_all',
         'file_operations_all',
@@ -138,6 +156,8 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'soc_management_all',
+        'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
         'host_isolation_exceptions_all',
@@ -146,6 +166,8 @@ export default function ({ getService }: FtrProviderContext) {
         'blocklist_read',
         'event_filters_all',
         'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
         'actions_log_management_all',
@@ -165,15 +187,86 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'soc_management_all',
         'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
+        'trusted_devices_all',
+        'trusted_devices_read',
         'host_isolation_exceptions_all',
         'host_isolation_exceptions_read',
         'blocklist_all',
         'blocklist_read',
         'event_filters_all',
         'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
+        'policy_management_all',
+        'policy_management_read',
+        'actions_log_management_all',
+        'actions_log_management_read',
+        'host_isolation_all',
+        'process_operations_all',
+        'file_operations_all',
+        'execute_operations_all',
+        'scan_operations_all',
+      ],
+      siemV4: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'endpoint_list_all',
+        'endpoint_list_read',
+        'workflow_insights_all',
+        'workflow_insights_read',
+        'soc_management_all',
+        'global_artifact_management_all',
+        'trusted_applications_all',
+        'trusted_applications_read',
+        'trusted_devices_all',
+        'trusted_devices_read',
+        'host_isolation_exceptions_all',
+        'host_isolation_exceptions_read',
+        'blocklist_all',
+        'blocklist_read',
+        'event_filters_all',
+        'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
+        'policy_management_all',
+        'policy_management_read',
+        'actions_log_management_all',
+        'actions_log_management_read',
+        'host_isolation_all',
+        'process_operations_all',
+        'file_operations_all',
+        'execute_operations_all',
+        'scan_operations_all',
+      ],
+      siemV5: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'endpoint_list_all',
+        'endpoint_list_read',
+        'workflow_insights_all',
+        'workflow_insights_read',
+        'soc_management_all',
+        'global_artifact_management_all',
+        'trusted_applications_all',
+        'trusted_applications_read',
+        'trusted_devices_all',
+        'trusted_devices_read',
+        'host_isolation_exceptions_all',
+        'host_isolation_exceptions_read',
+        'blocklist_all',
+        'blocklist_read',
+        'event_filters_all',
+        'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
         'actions_log_management_all',
@@ -191,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'elastic_managed_locations_enabled',
         'can_manage_private_locations',
+        'can_read_param_values',
       ],
       securitySolutionAssistant: [
         'all',
@@ -200,7 +294,13 @@ export default function ({ getService }: FtrProviderContext) {
         'update_anonymization',
         'manage_global_knowledge_base',
       ],
-      securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAttackDiscovery: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_schedule',
+      ],
       securitySolutionCases: [
         'all',
         'read',
@@ -233,6 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
       securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionSiemMigrations: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionRulesV1: ['all', 'read', 'minimal_all', 'minimal_read'],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],
@@ -313,10 +414,8 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-      guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
-      aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
-    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
   describe('Privileges', () => {
@@ -332,18 +431,30 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200)
           .expect((res: any) => {
+            let errorPointerMessage = '';
             // when comparing privileges, the order of the features doesn't matter (but the order of the privileges does)
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
             const success = isEqualWith(res.body, expectedWithoutActions, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
+                let isEqualResponse = false;
+
                 if (key === 'reserved') {
                   // order does not matter for the reserved privilege set.
-                  return isEqual(value.sort(), other.sort());
+                  isEqualResponse = isEqual(value.sort(), other.sort());
+                } else {
+                  // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
+                  isEqualResponse = isEqual(value, other);
                 }
-                // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
-                return isEqual(value, other);
+
+                if (!isEqualResponse) {
+                  errorPointerMessage = `Received value for property [${String(
+                    key
+                  )}] does not match expected value:\n${diff(other, value)}`;
+                }
+
+                return isEqualResponse;
               }
 
               // Lodash types aren't correct, `undefined` should be supported as a return value here and it
@@ -353,9 +464,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `Expected ${util.inspect(res.body)} to equal ${util.inspect(
-                  expectedWithoutActions
-                )}`
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
+                  res.body
+                )} to equal ${util.inspect(expectedWithoutActions)}`
               );
             }
           })
@@ -441,18 +552,30 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200)
           .expect((res: any) => {
+            let errorPointerMessage = '';
             // when comparing privileges, the order of the features doesn't matter (but the order of the privileges does)
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
             const success = isEqualWith(res.body, expectedWithoutActions, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
+                let isEqualResponse = false;
+
                 if (key === 'reserved') {
                   // order does not matter for the reserved privilege set.
-                  return isEqual(value.sort(), other.sort());
+                  isEqualResponse = isEqual(value.sort(), other.sort());
+                } else {
+                  // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
+                  isEqualResponse = isEqual(value, other);
                 }
-                // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
-                return isEqual(value, other);
+
+                if (!isEqualResponse) {
+                  errorPointerMessage = `Received value for property [${String(
+                    key
+                  )}] does not match expected value:\n${diff(other, value)}`;
+                }
+
+                return isEqualResponse;
               }
 
               // Lodash types aren't correct, `undefined` should be supported as a return value here and it
@@ -462,9 +585,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `Expected ${util.inspect(res.body)} to equal ${util.inspect(
-                  expectedWithoutActions
-                )}`
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
+                  res.body
+                )} to equal ${util.inspect(expectedWithoutActions)}`
               );
             }
           })

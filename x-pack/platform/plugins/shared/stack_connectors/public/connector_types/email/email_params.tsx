@@ -14,7 +14,7 @@ import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EmailActionParams } from '../types';
+import type { EmailActionParams } from '../types';
 
 const noop = () => {};
 
@@ -78,6 +78,13 @@ export const EmailParamsFields = ({
     errors.cc !== undefined && Number(errors.cc.length) > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
+
+  const subjectLabel = i18n.translate(
+    'xpack.stackConnectors.components.email.subjectTextFieldLabel',
+    {
+      defaultMessage: 'Subject',
+    }
+  );
 
   return (
     <>
@@ -237,9 +244,7 @@ export const EmailParamsFields = ({
           fullWidth
           error={errors.subject as string}
           isInvalid={isSubjectInvalid}
-          label={i18n.translate('xpack.stackConnectors.components.email.subjectTextFieldLabel', {
-            defaultMessage: 'Subject',
-          })}
+          label={subjectLabel}
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -248,6 +253,7 @@ export const EmailParamsFields = ({
             paramsProperty={'subject'}
             inputTargetValue={subject}
             errors={(errors.subject ?? []) as string[]}
+            aria-label={subjectLabel}
           />
         </EuiFormRow>
       )}

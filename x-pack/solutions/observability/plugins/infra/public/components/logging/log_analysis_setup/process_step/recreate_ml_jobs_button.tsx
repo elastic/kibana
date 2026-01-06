@@ -17,7 +17,7 @@ export const RecreateMLJobsButton: React.FunctionComponent<{
     <>
       <FormattedMessage
         id="xpack.infra.analysisSetup.deleteAnalysisResultsWarning"
-        defaultMessage="This removes previously detected anomalies."
+        defaultMessage="This removes previously detected anomalies. The results are retained for 120 days by default."
         tagName="p"
       />
       <EuiButton

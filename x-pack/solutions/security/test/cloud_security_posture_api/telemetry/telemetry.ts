@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const findingsIndexProvider = new EsIndexDataProvider(es, FINDINGS_INDEX);
 
-  describe('Verify cloud_security_posture telemetry payloads', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/247313
+  describe.skip('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
       await waitForPluginInitialized({ retry, logger, supertest });
     });
@@ -63,6 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 1,
+          cspm_namespaces_count: 0,
         },
       ]);
       expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
@@ -117,6 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 1,
         },
       ]);
 
@@ -164,6 +169,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 1,
         },
         {
           account_id: 'my-k8s-cluster-5555',
@@ -178,6 +185,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 1,
+          cspm_namespaces_count: 0,
         },
       ]);
 
@@ -242,6 +251,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 0,
         },
       ]);
 
@@ -298,6 +309,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 1,
         },
         {
           account_id: 'my-k8s-cluster-5555',
@@ -312,6 +325,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 0,
         },
       ]);
 
@@ -344,6 +359,72 @@ export default function ({ getService }: FtrProviderContext) {
           failed_findings_count: 0,
         },
       ]);
+    });
+
+    it('includes cspm_cloud_connector_usage_stats in telemetry', async () => {
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/internal/telemetry/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
+
+      // Verify that cspm_cloud_connector_usage_stats field exists
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture).to.have.property(
+        'cspm_cloud_connector_usage_stats'
+      );
+
+      // Verify it's an array (even if empty)
+      expect(
+        Array.isArray(
+          apiResponse.stack_stats.kibana.plugins.cloud_security_posture
+            .cspm_cloud_connector_usage_stats
+        )
+      ).to.be(true);
+
+      // When cloud connectors exist, each item should have these fields:
+      // - id: string
+      // - created_at: string
+      // - updated_at: string
+      // - hasCredentials: boolean
+      // - cloud_provider: string
+      // - account_type: 'single' | 'organization' | undefined
+      // - packagePolicyIds: string[]
+      // - packagePolicyCount: number
+    });
+
+    it('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/internal/telemetry/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
+
+      // Verify that asset_inventory_cloud_connector_usage_stats field exists in asset_inventory
+      expect(apiResponse.stack_stats.kibana.plugins.asset_inventory).to.have.property(
+        'asset_inventory_cloud_connector_usage_stats'
+      );
+
+      // Verify it's an array (even if empty)
+      expect(
+        Array.isArray(
+          apiResponse.stack_stats.kibana.plugins.asset_inventory
+            .asset_inventory_cloud_connector_usage_stats
+        )
+      ).to.be(true);
     });
   });
 }

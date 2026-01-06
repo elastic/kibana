@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { COMPARE_ALL_OPTIONS, Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import { combineLatest, distinctUntilChanged, Observable, skip, startWith } from 'rxjs';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, startWith } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../unified_search_manager';
@@ -19,6 +21,22 @@ const shouldRefreshFilterCompareOptions = {
   state: false,
 };
 
+const onlySectionScopedFiltersChanged = (
+  previous: Filter[] | undefined,
+  current: Filter[] | undefined
+) => {
+  const onlyGlobalFilters = (filters: Filter[]) => {
+    return filters.filter((filter) => {
+      return !Boolean(filter.meta.group); // if group is undefined, then the filters are global
+    });
+  };
+  return compareFilters(
+    onlyGlobalFilters(previous ?? []),
+    onlyGlobalFilters(current ?? []),
+    shouldRefreshFilterCompareOptions
+  );
+};
+
 export function newSession$(api: unknown) {
   const observables: Array<Observable<unknown>> = [];
 
@@ -26,7 +44,10 @@ export function newSession$(api: unknown) {
     observables.push(
       api.filters$.pipe(
         distinctUntilChanged((previous: Filter[] | undefined, current: Filter[] | undefined) => {
-          return onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions);
+          return (
+            onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions) ||
+            onlySectionScopedFiltersChanged(previous, current)
+          );
         })
       )
     );
@@ -64,5 +85,5 @@ export function newSession$(api: unknown) {
     observables.push(api.reload$.pipe(startWith(undefined)));
   }
 
-  return combineLatest(observables).pipe(skip(1));
+  return combineLatest(observables);
 }

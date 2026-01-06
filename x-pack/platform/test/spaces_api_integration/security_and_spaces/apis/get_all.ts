@@ -16,9 +16,7 @@ import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { getAllTestSuiteFactory } from '../../common/suites/get_all.agnostic';
 
-// eslint-disable-next-line import/no-default-export
 export default function getAllSpacesTestSuite(context: FtrProviderContext) {
-  // @ts-expect-error getAllTestSuiteFactory expects only DeploymentAgnosticFtrProviderContext
   const { getAllTest, expectRbacForbidden } = getAllTestSuiteFactory(context);
 
   describe('get all', function () {

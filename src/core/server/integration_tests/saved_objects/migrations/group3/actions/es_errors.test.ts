@@ -8,8 +8,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClient } from '../../../../..';
 import {
@@ -57,8 +57,8 @@ describe('Elasticsearch Errors', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   describe('isWriteBlockException', () => {

@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiDataGridCustomToolbarProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import './render_custom_toolbar.scss';
+import type { EuiDataGridCustomToolbarProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
@@ -54,12 +55,16 @@ export const internalRenderCustomToolbar = (
       )}
       {columnControl && (
         <EuiFlexItem grow={false}>
-          <div className="unifiedDataTableToolbarControlButton">{columnControl}</div>
+          <div className="unifiedDataTableToolbarControlButton" css={styles.controlButton}>
+            {columnControl}
+          </div>
         </EuiFlexItem>
       )}
       {columnSortingControl && (
         <EuiFlexItem grow={false}>
-          <div className="unifiedDataTableToolbarControlButton">{columnSortingControl}</div>
+          <div className="unifiedDataTableToolbarControlButton" css={styles.controlButton}>
+            {columnSortingControl}
+          </div>
         </EuiFlexItem>
       )}
       {!leftSide && additionalControls && (
@@ -78,6 +83,7 @@ export const internalRenderCustomToolbar = (
         justifyContent="spaceBetween"
         alignItems="center"
         className="unifiedDataTableToolbar"
+        css={styles.toolbar}
         data-test-subj="unifiedDataTableToolbar"
         wrap
       >
@@ -98,22 +104,36 @@ export const internalRenderCustomToolbar = (
                 inTableSearchControl
             ) && (
               <EuiFlexItem grow={false}>
-                <div className="unifiedDataTableToolbarControlGroup">
+                <div className="unifiedDataTableToolbarControlGroup" css={styles.controlGroup}>
                   {Boolean(inTableSearchControl) && (
-                    <div className="unifiedDataTableToolbarControlIconButton">
+                    <div
+                      className="unifiedDataTableToolbarControlIconButton"
+                      css={styles.controlGroupIconButton}
+                    >
                       {inTableSearchControl}
                     </div>
                   )}
                   {Boolean(keyboardShortcutsControl) && (
-                    <div className="unifiedDataTableToolbarControlIconButton">
+                    <div
+                      className="unifiedDataTableToolbarControlIconButton"
+                      css={styles.controlGroupIconButton}
+                    >
                       {keyboardShortcutsControl}
                     </div>
                   )}
                   {Boolean(displayControl) && (
-                    <div className="unifiedDataTableToolbarControlIconButton">{displayControl}</div>
+                    <div
+                      className="unifiedDataTableToolbarControlIconButton"
+                      css={styles.controlGroupIconButton}
+                    >
+                      {displayControl}
+                    </div>
                   )}
                   {Boolean(fullScreenControl) && (
-                    <div className="unifiedDataTableToolbarControlIconButton">
+                    <div
+                      className="unifiedDataTableToolbarControlIconButton"
+                      css={styles.controlGroupIconButton}
+                    >
                       {fullScreenControl}
                     </div>
                   )}
@@ -126,6 +146,7 @@ export const internalRenderCustomToolbar = (
       {bottomSection ? (
         <div
           className="unifiedDataTableToolbarBottom"
+          css={styles.toolbarBottom}
           data-test-subj="unifiedDataTableToolbarBottom"
         >
           {bottomSection}
@@ -154,4 +175,85 @@ export const getRenderCustomToolbarWithElements = ({
       leftSide: leftSide || reservedSpace,
       bottomSection,
     });
+};
+
+export const styles = {
+  toolbar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+    }),
+  controlButton: ({ euiTheme }: UseEuiTheme) =>
+    euiTheme
+      ? css({
+          '.euiDataGridToolbarControl': {
+            blockSize: euiTheme.size.xl,
+            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.backgroundBaseFormsControlDisabled}`,
+            borderRadius: euiTheme.border.radius.small,
+
+            // making the icons larger than the default size
+            '& svg': {
+              inlineSize: euiTheme.size.base,
+              blockSize: euiTheme.size.base,
+            },
+          },
+        })
+      : undefined, // for making unit tests pass
+  controlGroup: ({ euiTheme }: UseEuiTheme) =>
+    euiTheme
+      ? css({
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: euiTheme.border.radius.small,
+          display: 'inline-flex',
+          alignItems: 'stretch',
+          flexDirection: 'row',
+
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            borderRadius: 'inherit',
+            pointerEvents: 'none',
+          },
+
+          '& .unifiedDataTableToolbarControlIconButton .euiDataGridToolbarControl': {
+            borderRadius: 0,
+            border: 'none',
+          },
+
+          '& .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton':
+            {
+              borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            },
+
+          '& .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl': {
+            borderRadius: 0,
+            border: 'none',
+          },
+
+          '& .unifiedDataTableToolbarControlButton + .unifiedDataTableToolbarControlButton': {
+            borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            borderRadius: 0,
+          },
+        })
+      : undefined,
+  controlGroupIconButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.euiToolTipAnchor .euiButtonIcon': {
+        inlineSize: euiTheme.size.xl,
+        blockSize: euiTheme.size.xl,
+        borderRadius: 'inherit',
+
+        // cancel default behavior
+        '&:hover, &:active, &:focus': {
+          background: 'transparent',
+          animation: 'none !important',
+          transform: 'none !important',
+        },
+      },
+    }),
+  toolbarBottom: css({
+    position: 'relative', // for placing a loading indicator correctly
+  }),
 };

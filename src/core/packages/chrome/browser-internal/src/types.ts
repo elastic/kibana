@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
   ChromeStart,
   ChromeBreadcrumb,
-  SideNavComponent,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
@@ -63,6 +63,13 @@ export interface InternalChromeStart extends ChromeStart {
   getProjectHeaderComponentForGridLayout(): JSX.Element;
 
   /**
+   * Used only by the rendering service to render the new project side navigation UI
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectSideNavComponentForGridLayout(): JSX.Element;
+
+  /**
    * Used only by the rendering service to render the header banner UI
    * @internal
    *
@@ -100,6 +107,12 @@ export interface InternalChromeStart extends ChromeStart {
   getBodyClasses$(): Observable<string[]>;
 
   /**
+   * Used only by the rendering service to render the global footer UI (devbar)
+   * @internal
+   */
+  getGlobalFooter$(): Observable<ReactNode>;
+
+  /**
    * Used only by the serverless plugin to customize project-style chrome.
    * @internal
    */
@@ -119,10 +132,16 @@ export interface InternalChromeStart extends ChromeStart {
     setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
-     * Sets the project name.
-     * @param projectName
+     * Sets the feedback URL parameters.
+     * @param feedbackUrlParams
      */
-    setProjectName(projectName: string): void;
+    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
+
+    /**
+     * Sets the Kibana name - project name for serverless, deployment name for ECH.
+     * @param kibanaName
+     */
+    setKibanaName(kibanaName: string): void;
 
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -130,7 +149,8 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      config?: { dataTestSubj?: string }
     ): void;
 
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
@@ -139,16 +159,6 @@ export interface InternalChromeStart extends ChromeStart {
      * Returns an observable of the active nodes in the project navigation.
      */
     getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
-
-    /**
-     * Set custom project sidenav component to be used instead of the default project sidenav.
-     * @param component A getter function returning a CustomNavigationComponent.
-     *
-     * @remarks This component will receive Chrome navigation state as props (not yet implemented)
-     *
-     * Use {@link ServerlessPluginStart.setSideNavComponent} to set custom project navigation.
-     */
-    setSideNavComponent(component: SideNavComponent | null): void;
 
     /** Get an Observable of the current project breadcrumbs */
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;

@@ -7,12 +7,13 @@
 
 import type { DataView, DataViewLazy, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty } from 'lodash';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
-import type { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 
 /**
  * Creates a Redux listener for handling data view selection logic in the data view manager.
@@ -27,12 +28,13 @@ import type { DataViewManagerScopeName } from '../../constants';
  * If a data view is successfully resolved, it dispatches an action to set it as selected for the current scope.
  * If an error occurs during fetching or creation, it dispatches an error action for the current scope.
  *
- * @param dependencies - The dependencies required for the listener, including the scope and DataViews service.
+ * @param dependencies - The dependencies required for the listener, including the scope, DataViews service, and storage.
  * @returns An object with the action creator and effect for Redux middleware.
  */
 export const createDataViewSelectedListener = (dependencies: {
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
   dataViews: DataViewsServicePublic;
+  storage: Storage;
 }) => {
   return {
     actionCreator: selectDataViewAsync,
@@ -71,7 +73,7 @@ export const createDataViewSelectedListener = (dependencies: {
         // This is required to compute browserFields later.
         // If the view is not returned here, it will be fetched further down this file, and that
         // should return the full data view.
-        if (isEmpty(cachedDataView?.fields)) {
+        if (cachedDataView === cachedPersistedDataView && isEmpty(cachedDataView?.fields)) {
           return null;
         }
 
@@ -112,7 +114,14 @@ export const createDataViewSelectedListener = (dependencies: {
         }
       }
 
-      const resolvedIdToUse = cachedDataViewSpec?.id || dataViewById?.id || adHocDataView?.id;
+      const resolvedIdToUse =
+        cachedDataViewSpec?.id ||
+        dataViewById?.id ||
+        adHocDataView?.id ||
+        // WARN: added this because some of the e2e tests, such as
+        // x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/rule_creation/indicator_match_rule.cy.ts
+        // seem to depend on this, not sure if we want it.
+        state.dataViewManager.shared.defaultDataViewId;
 
       const currentScopeActions = scopes[action.payload.scope].actions;
       if (resolvedIdToUse) {
@@ -123,6 +132,12 @@ export const createDataViewSelectedListener = (dependencies: {
         }
 
         listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
+        if (action.payload.scope === PageScope.analyzer) {
+          dependencies.storage.set(
+            `securitySolution.dataViewManager.selectedDataView.${action.payload.scope}`,
+            resolvedIdToUse
+          );
+        }
       } else if (dataViewByIdError || adhocDataViewCreationError) {
         const err = dataViewByIdError || adhocDataViewCreationError;
         listenerApi.dispatch(

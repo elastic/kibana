@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -20,9 +20,7 @@
     "@kbn/core-chrome-browser-internal",
     "@kbn/cloud-plugin",
     "@kbn/serverless-common-settings",
-    "@kbn/shared-ux-chrome-navigation",
     "@kbn/i18n",
     "@kbn/management-cards-navigation",
-    "@kbn/react-kibana-mount",
   ]
 }

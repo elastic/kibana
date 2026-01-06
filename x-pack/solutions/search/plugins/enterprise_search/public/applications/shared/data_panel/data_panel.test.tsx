@@ -98,12 +98,11 @@ describe('DataPanel', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
       expect(wrapper.prop('color')).toEqual('plain');
-      expect(wrapper.prop('className')).toEqual('dataPanel');
 
       wrapper.setProps({ filled: true });
 
       expect(wrapper.prop('color')).toEqual('subdued');
-      expect(wrapper.prop('className')).toEqual('dataPanel dataPanel--filled');
+      expect(wrapper.prop('className')).toEqual('dataPanel--filled');
     });
 
     it('renders a loading overlay based on isLoading flag', () => {
@@ -129,7 +128,7 @@ describe('DataPanel', () => {
     it('passes class names', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} className="testing" />);
 
-      expect(wrapper.prop('className')).toEqual('dataPanel testing');
+      expect(wrapper.prop('className')).toEqual('testing');
     });
 
     it('passes arbitrary props', () => {

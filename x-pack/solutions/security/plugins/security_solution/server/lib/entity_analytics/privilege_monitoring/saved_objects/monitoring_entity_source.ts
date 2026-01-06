@@ -5,133 +5,220 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CreateMonitoringEntitySource,
+  ListEntitySourcesRequestQuery,
+  MonitoringEntitySource,
+} from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
+import type { MonitoringEntitySyncType } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
 
-export interface MonitoringEntitySourceDescriptor {
-  type: string;
-  name: string;
-  managed?: boolean;
-  indexPattern?: string;
-  enabled?: boolean;
-  error?: string;
-  integrationName?: string;
-  matchers?: Array<{
-    fields: string[];
-    values: string[];
-  }>;
-  filter?: Record<string, unknown>;
+type UpsertWithId = CreateMonitoringEntitySource & { id: string };
+type UpsertInput = CreateMonitoringEntitySource | UpsertWithId;
+interface UpsertResult {
+  action: 'created' | 'updated';
+  source: MonitoringEntitySource;
 }
+
+export type Processor = (source: MonitoringEntitySource) => Promise<void>;
 
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
-  getDynamicSavedObjectId(attributes: MonitoringEntitySourceDescriptor) {
-    const { type, indexPattern, integrationName } = this.assertValidIdFields(attributes);
-    const sourceName = indexPattern || integrationName;
-    return `entity-analytics-monitoring-entity-source-${this.dependencies.namespace}-${type}${
-      sourceName ? `-${sourceName}` : ''
-    }`;
+  async create(attributes: CreateMonitoringEntitySource) {
+    await this.assertNameUniqueness(attributes);
+
+    const { id, attributes: created } =
+      await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
+        monitoringEntitySourceTypeName,
+        { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
+        { refresh: 'wait_for' }
+      );
+
+    return { ...created, id };
   }
 
-  async create(attributes: MonitoringEntitySourceDescriptor) {
-    const savedObjectId = this.getDynamicSavedObjectId(attributes);
+  async bulkCreate(sources: CreateMonitoringEntitySource[]) {
+    const createdSources = await this.dependencies.soClient.bulkCreate(
+      sources.map((source) => ({
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...source },
+      })),
+      { refresh: 'wait_for' }
+    );
+    return createdSources;
+  }
 
-    try {
-      // If exists, update it.
-      const { attributes: updated } =
-        await this.dependencies.soClient.update<MonitoringEntitySourceDescriptor>(
-          monitoringEntitySourceTypeName,
-          savedObjectId,
-          attributes,
-          { refresh: 'wait_for' }
-        );
-      return updated;
-    } catch (e) {
-      if (e.output?.statusCode !== 404) throw e;
-
-      // Does not exist, create it.
-      const { attributes: created } =
-        await this.dependencies.soClient.create<MonitoringEntitySourceDescriptor>(
-          monitoringEntitySourceTypeName,
-          attributes,
-          { id: savedObjectId }
-        );
-      return created;
+  async upsert(source: UpsertInput): Promise<UpsertResult> {
+    const foundResult = await this.find({ name: source.name });
+    const found = foundResult.saved_objects[0];
+    if (found) {
+      await this.update({ ...source, id: found.id });
+      return { action: 'updated', source: { ...source, id: found.id } as MonitoringEntitySource };
+    } else {
+      const createdSource = await this.create(source as CreateMonitoringEntitySource);
+      return { action: 'created', source: createdSource };
     }
   }
 
-  async update(monitoringEntitySource: Partial<MonitoringEntitySourceDescriptor>) {
-    const id = this.getDynamicSavedObjectId(
-      monitoringEntitySource as MonitoringEntitySourceDescriptor
-    );
-    const { attributes } =
-      await this.dependencies.soClient.update<MonitoringEntitySourceDescriptor>(
-        monitoringEntitySourceTypeName,
-        id,
-        monitoringEntitySource,
-        { refresh: 'wait_for' }
-      );
-    return attributes;
+  async bulkUpsert(sources: UpsertInput[]) {
+    if (!sources.length) return { created: 0, updated: 0, results: [] };
+
+    const existing = await this.findAll({});
+    const byName = new Map(existing.map((s) => [s.name, s]));
+
+    let created = 0;
+    let updated = 0;
+    const results: UpsertResult[] = [];
+
+    for (const attrs of sources) {
+      const found = byName.get(attrs.name);
+      if (!found) {
+        const createdSo = await this.create(attrs);
+        created++;
+        byName.set(createdSo.name, createdSo);
+        results.push({ action: 'created', source: createdSo });
+      } else {
+        const updatedSo = await this.update({ id: found.id, ...attrs });
+        updated++;
+        byName.set(updatedSo.name, updatedSo);
+        results.push({ action: 'updated', source: updatedSo });
+      }
+    }
+    return { created, updated, results };
   }
 
-  async find() {
-    return this.dependencies.soClient.find<MonitoringEntitySourceDescriptor>({
+  async update(
+    monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }
+  ): Promise<MonitoringEntitySource> {
+    await this.assertNameUniqueness(monitoringEntitySource);
+
+    const { attributes } = await this.dependencies.soClient.update<MonitoringEntitySource>(
+      monitoringEntitySourceTypeName,
+      monitoringEntitySource.id,
+      monitoringEntitySource,
+      { refresh: 'wait_for' }
+    );
+
+    return { ...attributes, id: monitoringEntitySource.id };
+  }
+
+  async find(query?: ListEntitySourcesRequestQuery) {
+    const scopedSoClient = this.dependencies.soClient;
+    return scopedSoClient.find<MonitoringEntitySource>({
       type: monitoringEntitySourceTypeName,
-      namespaces: [this.dependencies.namespace],
+      filter: this.getQueryFilters(query),
     });
   }
 
-  /**
-   * Need to update to understand the id based on the
-   * type and indexPattern or integrationName.
-   *
-   * Two options: create a getById method that takes the id,
-   * or use a dynamic ID based on the type and indexPattern/integrationName.
-   */
-  async get() {
-    const { attributes } = await this.dependencies.soClient.get<MonitoringEntitySourceDescriptor>(
+  private getQueryFilters = (query?: ListEntitySourcesRequestQuery) => {
+    return Object.entries(query ?? {})
+      .map(([key, value]) => `${monitoringEntitySourceTypeName}.attributes.${key}: ${value}`)
+      .join(' and ');
+  };
+
+  async get(id: string): Promise<MonitoringEntitySource> {
+    const { attributes } = await this.dependencies.soClient.get<MonitoringEntitySource>(
       monitoringEntitySourceTypeName,
-      'temp-id' // TODO: https://github.com/elastic/security-team/issues/12851
+      id
     );
     return attributes;
   }
 
-  /**
-   * Need to update to understand the id based on the
-   * type and indexPattern or integrationName.
-   *
-   * * Two options: create a getById method that takes the id,
-   * or use a dynamic ID based on the type and indexPattern/integrationName.
-   */
-  async delete() {
-    await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, 'temp-id'); // TODO: https://github.com/elastic/security-team/issues/12851
+  async delete(id: string) {
+    await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
 
-  public async findByIndex(): Promise<MonitoringEntitySourceDescriptor[]> {
+  /**
+   * entity_analytics_integration or index type
+   */
+  public async findSourcesByType(
+    type: MonitoringEntitySyncType
+  ): Promise<MonitoringEntitySource[]> {
     const result = await this.find();
     return result.saved_objects
-      .filter((so) => so.attributes.type === 'index')
-      .map((so) => so.attributes);
+      .filter((so) => so.attributes.type === type)
+      .map((so) => ({ ...so.attributes, id: so.id }));
   }
 
-  public async findAll(): Promise<MonitoringEntitySourceDescriptor[]> {
-    const result = await this.find();
+  public async findAll(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
+    const result = await this.find(query);
     return result.saved_objects
       .filter((so) => so.attributes.type !== 'csv') // from the spec we are not using CSV on monitoring
-      .map((so) => so.attributes);
+      .map((so) => ({ ...so.attributes, id: so.id }));
   }
 
-  public assertValidIdFields(
-    source: Partial<MonitoringEntitySourceDescriptor>
-  ): MonitoringEntitySourceDescriptor {
-    if (!source.type || (!source.indexPattern && !source.integrationName)) {
-      throw new Error('Missing required fields for ID generation');
+  public async findByQuery(query: string): Promise<MonitoringEntitySource[]> {
+    const scopedSoClient = this.dependencies.soClient;
+
+    const results = await scopedSoClient.find<MonitoringEntitySource>({
+      type: monitoringEntitySourceTypeName,
+      filter: query,
+      namespaces: [this.dependencies.namespace],
+    });
+    return results.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
+  }
+
+  private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
+    if (attributes.name) {
+      const { saved_objects: savedObjects } = await this.find({
+        name: attributes.name,
+      });
+
+      // Exclude the current entity source if updating
+      const filteredSavedObjects = attributes.id
+        ? savedObjects.filter((so) => so.id !== attributes.id)
+        : savedObjects;
+
+      if (filteredSavedObjects.length > 0) {
+        throw new Error(
+          `A monitoring entity source with the name "${attributes.name}" already exists.`
+        );
+      }
     }
-    return source as MonitoringEntitySourceDescriptor;
+  }
+
+  /**
+   * Integrations Specific Methods
+   */
+  async updateLastProcessedMarker(
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastUpdateProcessed: lastProcessedMarker,
+        },
+      },
+    });
+  }
+
+  async getLastProcessedMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastUpdateProcessed;
+  }
+
+  async getLastFullSyncMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastFullSync;
+  }
+
+  async updateLastFullSyncMarker(
+    source: MonitoringEntitySource,
+    lastFullSyncMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastFullSync: lastFullSyncMarker,
+        },
+      },
+    });
   }
 }

@@ -8,21 +8,19 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  DiscoverLatestFetchDetails,
 } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -32,9 +30,11 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { internalStateActions } from '../../state_management/redux';
+import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverMainContentProps } from './discover_main_content';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 const mockSearchSessionId = '123';
 
@@ -51,15 +51,20 @@ function getStateContainer({
   searchSessionId?: string;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
+  const dataView = selectTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    stateContainer.getCurrentTab().id
+  ).currentDataView$.getValue()!;
   const appState = {
-    dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
     interval: 'auto',
     hideChart: false,
+    query: { query: '', language: 'kuery' },
   };
 
-  stateContainer.appState.update(appState);
-
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({ appState })
+  );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
   );
@@ -75,6 +80,7 @@ function getStateContainer({
           to: '2020-05-14T11:20:13.590',
         },
         searchSessionId,
+        isSearchSessionRestored: false,
       },
     })
   );
@@ -84,15 +90,13 @@ function getStateContainer({
 
 const mountComponent = async ({
   storage,
-  savedSearch = savedSearchMockWithTimeField,
   noSearchSessionId,
 }: {
   isTimeBased?: boolean;
   storage?: Storage;
-  savedSearch?: SavedSearch;
   noSearchSessionId?: boolean;
 } = {}) => {
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
+  const dataView = dataViewWithTimefieldMock;
 
   let services = discoverServiceMock;
 
@@ -126,20 +130,21 @@ const mountComponent = async ({
   };
 
   const stateContainer = getStateContainer({
-    savedSearch,
     searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
-  const props: DiscoverHistogramLayoutProps = {
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
+  fetchChart$.next({});
+  stateContainer.dataState.fetchChart$ = fetchChart$;
+
+  const props: DiscoverMainContentProps = {
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
-    container: null,
     panelsToggle: (
       <PanelsToggle
         stateContainer={stateContainer}

@@ -7,7 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { cspConfig } from './config';
+
+const deprecationContext = {
+  branch: 'main',
+  version: '9.0.0',
+  docLinks: {} as any,
+};
+
+const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
+  const deprecations = cspConfig.deprecations!(configDeprecationFactory);
+  const deprecationMessages: string[] = [];
+  const configPaths: string[] = [];
+  const { config: migrated } = applyDeprecations(
+    settings,
+    deprecations.map((deprecation) => ({
+      deprecation,
+      path: cspConfig.path,
+      context: deprecationContext,
+    })),
+    () =>
+      ({ message, configPath }) => {
+        deprecationMessages.push(message);
+        configPaths.push(configPath);
+      }
+  );
+  return {
+    configPaths,
+    messages: deprecationMessages,
+    migrated,
+  };
+};
 
 describe('config.validate()', () => {
   it(`does not allow "disableEmbedding" to be set to true`, () => {
@@ -320,6 +352,36 @@ describe('config.validate()', () => {
     });
   });
 
+  describe(`"object_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          object_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[object_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          object_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[object_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          object_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[object_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
   describe(`"frame_ancestors"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
@@ -348,5 +410,42 @@ describe('config.validate()', () => {
         `"[frame_ancestors]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
       );
     });
+  });
+});
+
+describe('config deprecations', () => {
+  it('does not report deprecations for default configuration', () => {
+    const defaultConfig = { csp: {} };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    expect(migrated).toEqual(defaultConfig);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('warns when configuring csp.disableUnsafeEval', () => {
+    const userConfig = {
+      csp: {
+        disableUnsafeEval: false,
+      },
+    };
+    const { messages, configPaths, migrated } = applyConfigDeprecations(cloneDeep(userConfig));
+    expect(migrated).toEqual(userConfig);
+    expect(configPaths).toEqual(['csp.disableUnsafeEval']);
+    expect(messages).toEqual([
+      '`csp.disableUnsafeEval` has been replaced by the `csp.script_src` setting.',
+    ]);
+  });
+
+  it('warns when configuring the unused csp.report_only.object_src', () => {
+    const userConfig = {
+      csp: {
+        report_only: {
+          object_src: "'self'",
+        },
+      },
+    };
+    const { messages, configPaths, migrated } = applyConfigDeprecations(cloneDeep(userConfig));
+    expect(migrated).toEqual({}); // the setting should be removed from config
+    expect(configPaths).toEqual(['csp.report_only.object_src']);
+    expect(messages).toEqual(['You no longer need to configure "csp.report_only.object_src".']);
   });
 });

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
-import { useEuiOverflowScroll } from '@elastic/eui';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { styles } from './layout_application.styles';
 
@@ -28,13 +29,16 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const overflow = useEuiOverflowScroll('y');
-
   return (
-    <main css={[styles.root, overflow]}>
+    <div
+      css={styles.root}
+      id={APP_MAIN_SCROLL_CONTAINER_ID}
+      className="kbnChromeLayoutApplication"
+      data-test-subj="kbnChromeLayoutApplication"
+    >
       {topBar && <div css={styles.topBar}>{topBar}</div>}
       <div css={[styles.content]}>{children}</div>
       {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
-    </main>
+    </div>
   );
 };

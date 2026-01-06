@@ -18,18 +18,18 @@ import {
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import {
   type ChartSizeEvent,
   type ChartSizeSpec,
@@ -37,7 +37,7 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
-import { ThemeServiceSetup } from '@kbn/core/public';
+import type { ThemeServiceSetup } from '@kbn/core/public';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { getDataLayers } from '../helpers';

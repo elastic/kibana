@@ -23,7 +23,7 @@ import {
   hasRowInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
-import { PointerPosition, UserInteractionEvent } from '../types';
+import type { PointerPosition, UserInteractionEvent } from '../types';
 import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPosition } from './utils';
 
@@ -76,6 +76,7 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
           onStart,
           onMove,
           onEnd,
+          scrollContainer: gridLayoutStateManager.scrollContainer$.getValue(),
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({

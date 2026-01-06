@@ -7,16 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { TimeScaleUnit } from '../../../../../common/expressions';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import type { IndexPatternField } from '../../../../types';
+import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
+import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,
   getFilter,
@@ -71,14 +69,6 @@ function ofName(
     reducedTimeRange
   );
 }
-
-export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
-  operationType: typeof COUNT_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
-};
 
 const SCALE = 'ratio';
 const IS_BUCKETED = false;
@@ -150,7 +140,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CountIndexPatternColumn>) => {
+    euiTheme,
+  }: ParamEditorProps<CountIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -165,7 +156,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}

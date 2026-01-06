@@ -6,7 +6,7 @@
  */
 import { of } from 'rxjs';
 import { getIsAlertSuppressionActive } from './get_is_alert_suppression_active';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 jest.mock('@kbn/licensing-plugin/server', () => ({
   LicensingPluginSetup: jest.fn(),

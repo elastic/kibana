@@ -7,24 +7,26 @@
 
 import type { KibanaLocation, SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
   AdvancedUiActionsStart,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
-import { Config } from './types';
+import type { Config } from './types';
 export interface Params {
   start: StartServicesGetter<{
     uiActionsEnhanced: AdvancedUiActionsStart;
     data: DataPublicPluginStart;
     share: SharePluginStart;
+    dashboard: DashboardStart;
   }>;
 }
 

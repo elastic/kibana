@@ -21,7 +21,7 @@ import globby from 'globby';
 import cpy from 'cpy';
 import del from 'del';
 import * as tar from 'tar';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {

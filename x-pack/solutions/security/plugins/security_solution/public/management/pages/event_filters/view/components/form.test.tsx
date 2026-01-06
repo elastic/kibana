@@ -28,6 +28,9 @@ import {
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 
+jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
+
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
@@ -174,8 +177,7 @@ describe('Event filter form', () => {
     cleanup();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/214053
-  describe.skip('Details and Conditions', () => {
+  describe('Details and Conditions', () => {
     it('should display sections', async () => {
       render();
       expect(renderResult.queryByText('Details')).not.toBeNull();
@@ -279,21 +281,6 @@ describe('Event filter form', () => {
   });
 
   describe('Filter process descendants', () => {
-    beforeEach(() => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-    });
-
-    it('should not display selector when feature flag is disabled', () => {
-      mockedContext.setExperimentalFlag({
-        filterProcessDescendantsForEventFiltersEnabled: false,
-      });
-      render();
-
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-filterProcessDescendantsButton`)
-      ).not.toBeInTheDocument();
-    });
-
     it('should show `Events` filter selected when tags are missing', () => {
       delete formProps.item.tags;
       render();
@@ -505,34 +492,7 @@ describe('Event filter form', () => {
       });
 
       describe('in relation with Process Descendant filtering', () => {
-        it('should not show warning text when event.category is added but feature flag is disabled', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: false,
-          });
-
-          formProps.item.entries = [
-            {
-              field: 'event.category',
-              operator: 'included',
-              type: 'match',
-              value: 'some value 1',
-            },
-          ];
-          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
-
-          render();
-          expect(await renderResult.findByDisplayValue('some value 1')).toBeInTheDocument();
-
-          expect(
-            renderResult.queryByTestId('duplicate-fields-warning-message')
-          ).not.toBeInTheDocument();
-        });
-
         it('should not show warning text when event.category is added but process descendant filter is disabled', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: true,
-          });
-
           formProps.item.entries = [
             {
               field: 'event.category',
@@ -552,10 +512,6 @@ describe('Event filter form', () => {
         });
 
         it('should not show warning text when event.category is NOT added and process descendant filter is enabled', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: true,
-          });
-
           formProps.item.entries = [
             {
               field: 'event.action',
@@ -575,10 +531,6 @@ describe('Event filter form', () => {
         });
 
         it('should show warning text when event.category is added and process descendant filter is enabled', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: true,
-          });
-
           formProps.item.entries = [
             {
               field: 'event.category',
@@ -598,10 +550,6 @@ describe('Event filter form', () => {
         });
 
         it('should add warning text when switching to process descendant filtering', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: true,
-          });
-
           formProps.item.entries = [
             {
               field: 'event.category',
@@ -630,10 +578,6 @@ describe('Event filter form', () => {
         });
 
         it('should remove warning text when switching from process descendant filtering', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: true,
-          });
-
           formProps.item.entries = [
             {
               field: 'event.category',
@@ -661,10 +605,6 @@ describe('Event filter form', () => {
         });
 
         it('should remove warning text when removing `event.category`', async () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForEventFiltersEnabled: true,
-          });
-
           formProps.item.entries = [
             {
               field: 'event.category',

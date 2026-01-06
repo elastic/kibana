@@ -123,6 +123,7 @@ export const RulePage = (props: RulePageProps) => {
           {hasActionsDisabled && (
             <>
               <EuiCallOut
+                announceOnMount
                 size="s"
                 color="danger"
                 iconType="error"

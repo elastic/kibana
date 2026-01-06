@@ -14,7 +14,7 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { FeatureFlagsService } from '..';
-import { FeatureFlagsConfig } from './feature_flags_config';
+import type { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;

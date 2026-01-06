@@ -8,7 +8,7 @@
 import type { FilterSpecification } from '@kbn/mapbox-gl';
 import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE } from '../../../common/constants';
 
-import { Timeslice } from '../../../common/descriptor_types';
+import type { Timeslice } from '../../../common/descriptor_types';
 
 export interface TimesliceMaskConfig {
   timesliceMaskField: string;

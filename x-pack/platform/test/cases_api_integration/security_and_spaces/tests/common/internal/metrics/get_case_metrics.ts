@@ -23,7 +23,6 @@ import {
 } from '../../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -54,13 +53,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -95,13 +94,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.1.0/status_changes.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.1.0/status_changes.json'
         );
         await deleteAllCaseItems(es);
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_EMAIL_BODY_LENGTH } from '../common';
 import type { ActionsConfig } from './config';
 import { configSchema, getValidatedConfig } from './config';
 import type { Logger } from '@kbn/core/server';
@@ -227,11 +228,6 @@ describe('config validation', () => {
     let result = configSchema.validate(config);
     expect(result.email === undefined);
 
-    config.email = {};
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: email.domain_allowlist or email.services must be defined"`
-    );
-
     config.email = { domain_allowlist: [] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual([]);
@@ -239,6 +235,123 @@ describe('config validation', () => {
     config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
+
+  describe('email.recipient_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    test('validates no email config at all', () => {
+      const result = configSchema.validate(config);
+      expect(result.email === undefined);
+    });
+
+    test('validates email config with recipient_allowlist = null', () => {
+      config.email = { recipient_allowlist: null };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: expected value of type [array] but got [null]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist = []', () => {
+      config.email = { recipient_allowlist: [] };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist', () => {
+      config.email = {
+        recipient_allowlist: ['*.bar@a.com', 'foo.*@b.com', '*@d.e.f.com'],
+      };
+
+      const result = configSchema.validate(config);
+      expect(result.email?.recipient_allowlist).toEqual([
+        '*.bar@a.com',
+        'foo.*@b.com',
+        '*@d.e.f.com',
+      ]);
+    });
+  });
+
+  describe('email.maximum_body_length', () => {
+    // note, this just tests the current behavior, but if we change so the
+    // default was ALWAYS the defined default, it's fine to change it.
+    test('validates that the value is undefined with no email parent', () => {
+      const validatedConfig = configSchema.validate({});
+      expect(validatedConfig.email?.maximum_body_length).toBe(undefined);
+    });
+
+    test('validates with value 0', () => {
+      const validatedConfig = configSchema.validate({
+        email: {
+          maximum_body_length: 0,
+        },
+      });
+      expect(validatedConfig.email?.maximum_body_length).toBe(0);
+    });
+
+    test('validates valid value set', () => {
+      const validatedConfig = configSchema.validate({
+        email: {
+          maximum_body_length: 42,
+        },
+      });
+      expect(validatedConfig.email?.maximum_body_length).toBe(42);
+    });
+
+    test('throws error on negative value', () => {
+      const config = {
+        email: {
+          maximum_body_length: -42,
+        },
+      };
+
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.maximum_body_length]: Value must be equal to or greater than [0]."`
+      );
+    });
+
+    test('logs warning when value is greater than max', () => {
+      const config = {
+        email: {
+          maximum_body_length: MAX_EMAIL_BODY_LENGTH + 1,
+        },
+      };
+      const validatedConfig = getValidatedConfig(mockLogger, configSchema.validate(config));
+
+      // value is still > max here, fixed in actionConfigUtils getMaxEmailBodyLength()
+      expect(validatedConfig.email?.maximum_body_length).toBe(MAX_EMAIL_BODY_LENGTH + 1);
+      expect(mockLogger.warn.mock.calls[0][0]).toBe(
+        'The configuration xpack.actions.email.maximum_body_length value 25000001 is larger than the maximum setting of 25000000 and the maximum value will be used instead'
+      );
+    });
+
+    test('logs warning on zero value', () => {
+      const config = {
+        email: {
+          maximum_body_length: 0,
+        },
+      };
+      const validatedConfig = getValidatedConfig(mockLogger, configSchema.validate(config));
+
+      expect(validatedConfig.email?.maximum_body_length).toBe(0);
+      expect(mockLogger.warn.mock.calls[0][0]).toBe(
+        'The configuration xpack.actions.email.maximum_body_length is set to 0 and will result in sending empty emails'
+      );
+    });
+  });
+
+  test('throws when domain_allowlist and recipient_allowlist are used at the same time', () => {
+    const config: Record<string, unknown> = {};
+    const result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {
+      domain_allowlist: ['a.com'],
+      recipient_allowlist: ['*.bar@a.com'],
+    };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
+    );
   });
 
   test('validates rate limiter connector name', () => {
@@ -312,13 +425,6 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     test('validates no email config at all', () => {
       expect(configSchema.validate(config).email).toBe(undefined);
-    });
-
-    test('validates empty email config', () => {
-      config.email = {};
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: email.domain_allowlist or email.services must be defined"`
-      );
     });
 
     test('validates email config with empty services', () => {

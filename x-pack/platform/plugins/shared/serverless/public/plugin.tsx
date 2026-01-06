@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
-import {
-  generateManageOrgMembersNavCard,
-  manageOrgMembersNavCardName,
-  SideNavComponent,
-} from './navigation';
-import {
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
+import type {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
   ServerlessPluginStart,
@@ -45,7 +37,7 @@ export class ServerlessPlugin
     core: CoreStart,
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
-    const { chrome, rendering } = core;
+    const { chrome } = core;
 
     // Casting the "chrome.project" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = chrome as InternalChromeStart;
@@ -54,43 +46,19 @@ export class ServerlessPlugin
     chrome.setChromeStyle('project');
 
     if (cloud.serverless.projectName) {
-      project.setProjectName(cloud.serverless.projectName);
+      project.setKibanaName(cloud.serverless.projectName);
     }
-    project.setCloudUrls(cloud);
 
-    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
-    const navigationTreeUi$ = project.getNavigationTreeUi$();
+    project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+    cloud.getPrivilegedUrls().then((privilegedUrls) => {
+      if (Object.keys(privilegedUrls).length === 0) return;
 
-    chrome.navControls.registerRight({
-      order: 1,
-      mount: toMountPoint(
-        <EuiButton
-          href="https://ela.st/serverless-feedback"
-          size={'s'}
-          color={'warning'}
-          iconType={'popout'}
-          iconSide={'right'}
-          target={'_blank'}
-        >
-          {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
-            defaultMessage: 'Give feedback',
-          })}
-        </EuiButton>,
-        rendering
-      ),
+      project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
     });
 
     return {
-      setSideNavComponentDeprecated: (sideNavigationComponent) =>
-        project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (id, navigationTree$, { dataTestSubj } = {}) => {
-        project.initNavigation(id, navigationTree$);
-        project.setSideNavComponent(() => (
-          <SideNavComponent
-            navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj }}
-            deps={{ core, activeNodes$: activeNavigationNodes$ }}
-          />
-        ));
+      initNavigation: (id, navigationTree$, config) => {
+        project.initNavigation(id, navigationTree$, config);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),

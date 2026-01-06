@@ -20,7 +20,6 @@ import {
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -128,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esClient.deleteByQuery({
           index: METRICS_ALERTS_INDEX,
           query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+          conflicts: 'proceed',
         });
         await esClient.deleteByQuery({
           index: '.kibana-event-log-*',

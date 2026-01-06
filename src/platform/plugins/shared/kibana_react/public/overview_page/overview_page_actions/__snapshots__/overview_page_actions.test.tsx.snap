@@ -2,30 +2,15 @@
 
 exports[`overviewPageActions all buttons 1`] = `
 Array [
-  <mockConstructor
-    coreStart={
-      Object {
-        "application": Object {
-          "capabilities": Object {
-            "navLinks": Object {
-              "dev_tools": true,
-              "management": true,
-            },
-          },
-        },
-      }
-    }
+  <EuiButtonEmpty
+    className="kbnOverviewPageHeader__actionButton"
+    data-test-subj="homeAddData"
+    flush="both"
+    href=""
+    iconType="plusInCircle"
   >
-    <EuiButtonEmpty
-      className="kbnOverviewPageHeader__actionButton"
-      data-test-subj="homeAddData"
-      flush="both"
-      href=""
-      iconType="plusInCircle"
-    >
-      Add integrations
-    </EuiButtonEmpty>
-  </mockConstructor>,
+    Add integrations
+  </EuiButtonEmpty>,
 ]
 `;
 
@@ -33,29 +18,14 @@ exports[`overviewPageActions no buttons 1`] = `Array []`;
 
 exports[`overviewPageActions only add data button 1`] = `
 Array [
-  <mockConstructor
-    coreStart={
-      Object {
-        "application": Object {
-          "capabilities": Object {
-            "navLinks": Object {
-              "dev_tools": true,
-              "management": true,
-            },
-          },
-        },
-      }
-    }
+  <EuiButtonEmpty
+    className="kbnOverviewPageHeader__actionButton"
+    data-test-subj="homeAddData"
+    flush="both"
+    href=""
+    iconType="plusInCircle"
   >
-    <EuiButtonEmpty
-      className="kbnOverviewPageHeader__actionButton"
-      data-test-subj="homeAddData"
-      flush="both"
-      href=""
-      iconType="plusInCircle"
-    >
-      Add integrations
-    </EuiButtonEmpty>
-  </mockConstructor>,
+    Add integrations
+  </EuiButtonEmpty>,
 ]
 `;

@@ -6,18 +6,18 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '@kbn/event-annotation-plugin/common';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
-  StartServices,
+  LensStartServices as StartServices,
   StateSetter,
-} from '../../../../types';
-import { XYState, XYAnnotationLayerConfig } from '../../types';
+} from '@kbn/lens-common';
+import type { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getSaveLayerAction } from './save_action';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';

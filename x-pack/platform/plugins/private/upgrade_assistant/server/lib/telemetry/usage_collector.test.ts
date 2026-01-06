@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
-import { IClusterClient } from '@kbn/core/server';
+import type { IClusterClient } from '@kbn/core/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests

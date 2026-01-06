@@ -14,7 +14,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
-import { TextAreaField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { TextAreaField, SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { ObservablePatch, ObservablePost } from '../../../common/types/api';
@@ -37,7 +37,7 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
   const options = useMemo(() => {
     return [...OBSERVABLE_TYPES_BUILTIN, ...data.observableTypes].map((observableType) => ({
       value: observableType.key,
-      text: observableType.label,
+      inputDisplay: observableType.label,
     }));
   }, [data.observableTypes]);
 
@@ -59,13 +59,13 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
     <>
       {!observable && (
         <UseField
-          component={SelectField}
+          component={SuperSelectField}
           componentProps={{
             euiFieldProps: {
               options,
-              hasNoInitialSelection: true,
               isLoading,
               'data-test-subj': 'observable-type-select',
+              placeholder: i18n.SELECT_OBSERVABLE_TYPE_PLACEHOLDER,
             },
           }}
           onChange={handleSelectedTypeChange}
@@ -76,7 +76,12 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
       <ValueComponent />
       <UseField
         path="description"
-        componentProps={{ euiFieldProps: { 'data-test-subj': 'observable-description-textarea' } }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'observable-description-text-area',
+            placeholder: i18n.SELECT_OBSERVABLE_DESCRIPTION_PLACEHOLDER,
+          },
+        }}
         config={fieldsConfig.description}
         component={TextAreaField}
       />

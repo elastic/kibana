@@ -12,7 +12,7 @@ import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { TablePublicConfig } from '../server/config';
 import { setDataViewsStart, setFormatService } from './services';
 import { registerTableVis } from './register_vis';

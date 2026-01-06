@@ -6,13 +6,13 @@
  */
 
 export * from './common';
-export * from './details';
+export type * from './details';
 export * from './dns';
 export * from './http';
-export * from './overview';
+export type * from './overview';
 export * from './tls';
-export * from './top_countries';
-export * from './top_n_flow';
+export type * from './top_countries';
+export type * from './top_n_flow';
 export * from './users';
 
 export { NetworkQueries } from '../../../api/search_strategy';

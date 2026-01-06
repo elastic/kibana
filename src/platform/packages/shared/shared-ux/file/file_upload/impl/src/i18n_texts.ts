@@ -13,6 +13,9 @@ export const i18nTexts = {
   defaultPickerLabel: i18n.translate('sharedUXPackages.fileUpload.defaultFilePickerLabel', {
     defaultMessage: 'Upload a file',
   }),
+  fileEmpty: i18n.translate('sharedUXPackages.fileUpload.fileEmptyErrorMessage', {
+    defaultMessage: 'File is empty. Please provide a file with content.',
+  }),
   upload: i18n.translate('sharedUXPackages.fileUpload.uploadButtonLabel', {
     defaultMessage: 'Upload',
   }),

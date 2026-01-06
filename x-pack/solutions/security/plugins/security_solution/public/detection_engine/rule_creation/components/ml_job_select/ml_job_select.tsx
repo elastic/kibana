@@ -97,6 +97,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
                 renderOption={renderJobOption}
                 rowHeight={50}
                 selectedOptions={selectedJobOptions}
+                aria-label={field.label}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -120,7 +121,7 @@ const JobDisplay: React.FC<MlJobValue> = ({ description, name, id }) => (
   <div className={styles.jobDisplayClassName}>
     <strong>{name ?? id}</strong>
     <EuiToolTip content={description}>
-      <EuiText size="xs" color="subdued">
+      <EuiText size="xs" color="subdued" tabIndex={0}>
         <p>{description}</p>
       </EuiText>
     </EuiToolTip>

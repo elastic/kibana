@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -9,15 +9,26 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*",
+    "security_solution_cypress/cypress/**/*",
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*"
+  ],
   "kbn_references": [
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/detections-response-ftr-services",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -27,7 +38,6 @@
     "@kbn/tooling-log",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/test-suites-xpack",
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
     "@kbn/test-suites-src",
@@ -35,17 +45,25 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/test-subj-selector",
     "@kbn/std",
-    "@kbn/alerts-as-data-utils",
     "@kbn/rule-data-utils",
     "@kbn/alerting-api-integration-helpers",
-    "@kbn/event-log-plugin",
     "@kbn/alerting-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/cases-plugin",
     "@kbn/es",
     "@kbn/cypress-test-helper",
     "@kbn/fleet-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/session-view-plugin",
+    "@kbn/repo-info",
+    "@kbn/serverless-security-settings",
+    "@kbn/rison",
+    "@kbn/core-chrome-browser",
+    "@kbn/management-settings-ids",
+    "@kbn/connector-schemas",
+    "@kbn/cloud-security-posture-graph",
+    "@kbn/kubernetes-security-plugin",
+    "@kbn/securitysolution-list-constants",
   ]
 }

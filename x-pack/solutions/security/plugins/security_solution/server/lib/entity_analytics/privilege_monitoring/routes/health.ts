@@ -8,20 +8,20 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { PrivMonHealthResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/health.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import type { PrivMonHealthResponse } from '../../../../../common/api/entity_analytics';
+import { API_VERSIONS, APP_ID, PRIVMON_HEALTH_URL } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { createEngineStatusService } from '../engine/status_service';
+import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/privileges/health',
+      path: PRIVMON_HEALTH_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -38,17 +38,34 @@ export const healthCheckPrivilegeMonitoringRoute = (
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 
+        const dataClient = secSol.getPrivilegeMonitoringDataClient();
+        const soClient = dataClient.getScopedSoClient(request);
+        const config = secSol.getConfig();
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+
+        const statusService = createEngineStatusService(dataClient, soClient);
+
         try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().getEngineStatus();
-          return response.ok({ body });
+          const body = await statusService.get();
+
+          // Only include user count if engine status is "started"
+          if (body.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+            const userCountResponse = await statusService.getCurrentUserCount();
+            return response.ok({
+              body: {
+                ...body,
+                users: {
+                  current_count: userCountResponse.count,
+                  max_allowed: maxUsersAllowed,
+                },
+              },
+            });
+          } else {
+            return response.ok({ body });
+          }
         } catch (e) {
           const error = transformError(e);
-
-          if (error?.statusCode === 404) {
-            return response.ok({
-              body: { status: 'not_found' },
-            });
-          }
 
           logger.error(`Error checking privilege monitoring health: ${error.message}`);
           return siemResponse.error({

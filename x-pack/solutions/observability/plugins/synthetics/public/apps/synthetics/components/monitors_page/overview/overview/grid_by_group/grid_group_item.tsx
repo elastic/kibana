@@ -20,14 +20,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import useKey from 'react-use/lib/useKey';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
-import { OverviewStatusMetaData } from '../../types';
+import type { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item/metric_item';
-import { OverviewView } from '../../../../../state';
+import type { OverviewView } from '../../../../../state';
 import { MonitorsTable } from '../compact_view/components/monitors_table';
+import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -47,6 +48,7 @@ const GroupGridCardContent = ({
     activePage * rowSize * PER_ROW,
     (activePage + 1) * rowSize * PER_ROW
   );
+  useOverviewTrendsRequests(visibleMonitors);
 
   const totalEntries = groupMonitors.length / PER_ROW;
 

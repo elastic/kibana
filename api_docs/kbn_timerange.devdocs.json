@@ -166,7 +166,15 @@
         "label": "getTimeDifferenceInSeconds",
         "description": [],
         "signature": [
-          "({\n  startDate,\n  endDate,\n}: { startDate: number; endDate: number; }) => number"
+          "(input: { startDate: number; endDate: number; } | ",
+          {
+            "pluginId": "@kbn/timerange",
+            "scope": "common",
+            "docId": "kibKbnTimerangePluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ") => number"
         ],
         "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
         "deprecated": false,
@@ -175,44 +183,84 @@
           {
             "parentPluginId": "@kbn/timerange",
             "id": "def-common.getTimeDifferenceInSeconds.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  startDate,\n  endDate,\n}",
+            "label": "input",
             "description": [],
+            "signature": [
+              "{ startDate: number; endDate: number; } | ",
+              {
+                "pluginId": "@kbn/timerange",
+                "scope": "common",
+                "docId": "kibKbnTimerangePluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
+            ],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/timerange",
-                "id": "def-common.getTimeDifferenceInSeconds.$1.startDate",
-                "type": "number",
-                "tags": [],
-                "label": "startDate",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/timerange",
-                "id": "def-common.getTimeDifferenceInSeconds.$1.endDate",
-                "type": "number",
-                "tags": [],
-                "label": "endDate",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.TimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [
+          "\nRepresents a time range with from and to ISO string dates"
+        ],
+        "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.TimeRange.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.TimeRange.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.TimeRange.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"absolute\" | \"relative\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

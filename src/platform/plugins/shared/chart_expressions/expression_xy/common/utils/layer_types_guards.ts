@@ -8,7 +8,7 @@
  */
 
 import { LayerTypes } from '../constants';
-import { DataLayerConfig, CommonXYLayerConfig } from '..';
+import type { DataLayerConfig, CommonXYLayerConfig } from '..';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is DataLayerConfig =>
   layer.layerType === LayerTypes.DATA;

@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  searchSessionSavedObjectMigrations,
+import type {
   SearchSessionSavedObjectAttributesPre$7$13$0,
   SearchSessionSavedObjectAttributesPre$7$14$0,
   SearchSessionSavedObjectAttributesPre$8$0$0,
   SearchSessionSavedObjectAttributesPre$8$6$0,
 } from './search_session_migration';
+import { searchSessionSavedObjectMigrations } from './search_session_migration';
 import type { SavedObject } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
-import { SavedObjectMigrationContext } from '@kbn/core/server';
+import type { SavedObjectMigrationContext } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 describe('7.12.0 -> 7.13.0', () => {

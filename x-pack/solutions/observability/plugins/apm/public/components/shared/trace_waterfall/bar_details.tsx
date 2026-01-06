@@ -7,36 +7,49 @@
 
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
+import { isFailureOrError } from './utils/is_failure_or_error';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { SpanLinksBadge, SyncBadge } from './badges';
 
-export function BarDetails({
-  item,
-  left,
-  onErrorClick,
-}: {
-  item: TraceItem;
-  left: number;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
-}) {
+const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
+  defaultMessage: 'Orphan',
+});
+const ORPHAN_CONTENT = i18n.translate(
+  'xpack.apm.trace.barDetails.euiIconTip.orphanSpanContentLabel',
+  {
+    defaultMessage:
+      'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
+  }
+);
+
+export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
+  const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
+  const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
-    { defaultMessage: 'View related errors' }
+    {
+      defaultMessage: '{count, plural, one {View error} other {View # errors}}',
+      values: {
+        count: errorCount,
+      },
+    }
   );
 
   return (
@@ -62,6 +75,11 @@ export function BarDetails({
           }
         `}
       >
+        {item.icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem
           grow={false}
           css={css`
@@ -77,47 +95,77 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
-        {item.hasError ? (
+        {item.status && itemStatusIsFailureOrError && (
           <EuiFlexItem grow={false}>
-            {onErrorClick ? (
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
-                  defaultMessage: 'View error details',
-                })}
-                data-test-subj="apmBarDetailsButton"
-                color="danger"
-                iconType="errorFilled"
-                iconSize="s"
-                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
-                onClick={(e: React.MouseEvent) => {
-                  if (onErrorClick) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onErrorClick({ traceId: item.traceId, docId: item.id });
-                  }
-                }}
-              />
-            ) : getRelatedErrorsHref ? (
+            <EuiToolTip
+              data-test-subj="apmBarDetailsFailureTooltip"
+              content={`${item.status.fieldName} = ${item.status.value}`}
+            >
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger" tabIndex={0}>
+                {item.status.value}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {errorCount > 0 ? (
+          <EuiFlexItem grow={false}>
+            {getRelatedErrorsHref || onErrorClick ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
                 iconType="arrowRight"
-                href={getRelatedErrorsHref(item.id) as any}
+                href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
-                  e.stopPropagation();
+                  if (onErrorClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onErrorClick({
+                      traceId: item.traceId,
+                      docId: item.id,
+                      errorCount,
+                      errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                    });
+                  }
                 }}
                 tabIndex={0}
                 role="button"
                 aria-label={viewRelatedErrorsLabel}
                 onClickAriaLabel={viewRelatedErrorsLabel}
+                data-test-subj="apmBarDetailsErrorBadge"
               >
                 {viewRelatedErrorsLabel}
               </EuiBadge>
             ) : (
-              <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
+              <EuiIcon
+                type="errorFilled"
+                color={theme.euiTheme.colors.danger}
+                size="s"
+                data-test-subj="apmBarDetailsErrorIcon"
+              />
             )}
           </EuiFlexItem>
         ) : null}
+        {item.isOrphan ? (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              data-test-subj="apmBarDetailsOrphanTooltip"
+              iconProps={{
+                'data-test-subj': 'apmBarDetailsOrphanIcon',
+                'aria-label': ORPHAN_TITLE,
+              }}
+              color={theme.euiTheme.colors.danger}
+              type="unlink"
+              title={ORPHAN_TITLE}
+              content={ORPHAN_CONTENT}
+            />
+          </EuiFlexItem>
+        ) : null}
+        <SyncBadge sync={item.sync} agentName={item.agentName} />
+        <SpanLinksBadge
+          outgoingCount={item.spanLinksCount.outgoing}
+          incomingCount={item.spanLinksCount.incoming}
+          id={item.id}
+        />
       </EuiFlexGroup>
     </div>
   );

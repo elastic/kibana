@@ -1,0 +1,145 @@
+{
+  "id": "@kbn/core-chrome-layout-feature-flags",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+        "id": "def-public.getLayoutDebugFlag",
+        "type": "Function",
+        "tags": [],
+        "label": "getLayoutDebugFlag",
+        "description": [],
+        "signature": [
+          "(featureFlags: ",
+          "FeatureFlagsStart",
+          ") => boolean"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+            "id": "def-public.getLayoutDebugFlag.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "FeatureFlagsStart"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+        "id": "def-public.getLayoutVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "getLayoutVersion",
+        "description": [],
+        "signature": [
+          "(featureFlags: ",
+          "FeatureFlagsStart",
+          ") => ",
+          "LayoutFeatureFlag"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+            "id": "def-public.getLayoutVersion.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "FeatureFlagsStart"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+        "id": "def-public.LAYOUT_DEBUG_FEATURE_FLAG_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "LAYOUT_DEBUG_FEATURE_FLAG_KEY",
+        "description": [],
+        "signature": [
+          "\"core.chrome.layoutDebug\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+        "id": "def-public.LAYOUT_FEATURE_FLAG_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "LAYOUT_FEATURE_FLAG_KEY",
+        "description": [],
+        "signature": [
+          "\"core.chrome.layoutType\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
+        "id": "def-public.LayoutFeatureFlag",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutFeatureFlag",
+        "description": [],
+        "signature": [
+          "\"grid\" | \"legacy-fixed\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

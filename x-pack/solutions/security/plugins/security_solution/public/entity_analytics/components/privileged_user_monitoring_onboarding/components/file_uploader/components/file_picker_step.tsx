@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormatBytes } from '../../../../../../common/components/formatted_bytes';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES } from '../../../../../../../common/constants';
 import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from '../constants';
+import { useUserLimitStatus } from '../../../../../hooks/use_privileged_monitoring_health';
 
 interface PrivilegedUserMonitoringFilePickerStepProps {
   onFileChange: (fileList: FileList | null) => void;
@@ -41,6 +42,8 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+    const { userStats } = useUserLimitStatus();
+    const maxUsersAllowed = userStats?.maxAllowed ?? 10000; // fallback to default config value
 
     const listStyle = css`
       list-style-type: disc;
@@ -83,6 +86,15 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
                 }}
               />
             </li>
+            <li>
+              <FormattedMessage
+                defaultMessage="Maximum number of privileged users: {maxUsers}"
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.maxUsersLimit"
+                values={{
+                  maxUsers: maxUsersAllowed,
+                }}
+              />
+            </li>
           </ul>
 
           <EuiTitle size="xxs">
@@ -98,14 +110,20 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="User.name: holds a privileged user’s name"
+                defaultMessage="{field}: privileged user’s name"
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.userNameDescription"
+                values={{
+                  field: <code>{'user.name'}</code>,
+                }}
               />
             </li>
             <li>
               <FormattedMessage
-                defaultMessage="User.label (optional): represents a label assigned to user, e.g. their role, group, team etc."
+                defaultMessage="{field} (optional): user role, group, team, or similar"
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.userLabelDescription"
+                values={{
+                  field: <code>{'user.label'}</code>,
+                }}
               />
             </li>
           </ul>

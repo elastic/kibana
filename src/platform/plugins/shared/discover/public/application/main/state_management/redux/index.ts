@@ -8,54 +8,26 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
-import {
-  loadDataViewList,
-  appendAdHocDataViews,
-  initializeSession,
-  replaceAdHocDataViewWithId,
-  setAdHocDataViews,
-  setDataView,
-  setDefaultProfileAdHocDataViews,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  updateTabAppStateAndGlobalState,
-  restoreTab,
-  clearAllTabs,
-  initializeTabs,
-} from './actions';
+import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
+import { actions } from './actions';
 
-export type {
-  DiscoverInternalState,
-  TabState,
-  TabStateGlobalState,
-  InternalStateDataRequestParams,
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type DiscoverAppState,
+  type InternalStateDataRequestParams,
+  TabInitializationStatus,
 } from './types';
+
+export { DEFAULT_TAB_STATE } from './constants';
 
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(
-    internalStateSlice.actions,
-    'setTabs',
-    'setDataViewId',
-    'setDefaultProfileAdHocDataViewIds'
-  ),
-  loadDataViewList,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  setDataView,
-  setAdHocDataViews,
-  setDefaultProfileAdHocDataViews,
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
-  initializeSession,
-  updateTabAppStateAndGlobalState,
-  restoreTab,
-  clearAllTabs,
-  initializeTabs,
+  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...actions,
+  syncLocallyPersistedTabState,
 };
 
 export {
@@ -64,23 +36,49 @@ export {
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors';
+export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+  selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
+} from './selectors';
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  getSerializedSearchSourceDataViewDetails,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
+
+export {
+  fromSavedObjectTabToTabState,
+  fromSavedObjectTabToSavedSearch,
+  fromTabStateToSavedObjectTab,
+  fromSavedSearchToSavedObjectTab,
+} from './tab_mapping_utils';

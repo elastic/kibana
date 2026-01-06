@@ -14,6 +14,9 @@ import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/us
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { mockRule } from '../../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import type { ExternalRuleSource } from '../../../../../../common/api/detection_engine';
+import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -21,6 +24,10 @@ const showManualRuleRunConfirmation = () => Promise.resolve(null);
 jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
+jest.mock(
+  '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
+);
+jest.mock('../../../../../common/components/user_privileges');
 
 const mockReportEvent = jest.fn();
 jest.mock('../../../../../common/lib/kibana', () => {
@@ -47,9 +54,19 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 const useExecuteBulkActionMock = useExecuteBulkAction as jest.Mock;
 const useBulkExportMock = useBulkExport as jest.Mock;
-const openRuleDiffFlyoutMock = jest.fn();
+const useRuleCustomizationsContextMock = useRuleCustomizationsContext as jest.Mock;
 
 describe('RuleActionsOverflow', () => {
+  beforeEach(() => {
+    useRuleCustomizationsContextMock.mockReturnValue({
+      actions: { openCustomizationsRevertFlyout: jest.fn() },
+      state: { doesBaseVersionExist: true },
+    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: { read: true, edit: true },
+    });
+  });
   describe('rules details menu panel', () => {
     test('menu items rendered when a rule is passed to the component', () => {
       const { getByTestId } = render(
@@ -57,11 +74,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -79,11 +94,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={null}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -93,17 +106,15 @@ describe('RuleActionsOverflow', () => {
   });
 
   describe('rules details pop over button icon', () => {
-    test('it does not open the popover when rules-details-popover-button-icon is clicked when the user does not have permission', () => {
+    test('it does not open the popover when rules-details-popover-button-icon is clicked when the disabled flag is passed', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions={false}
+          isDisabled={true}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -120,11 +131,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -145,11 +154,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -165,11 +172,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -178,6 +183,27 @@ describe('RuleActionsOverflow', () => {
 
       // Popover is not shown
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
+    });
+
+    test('should be enabled when user only has rule read permissions', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: { read: true, edit: false },
+      });
+
+      const { getByTestId } = render(
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+          rule={mockRule('id')}
+          isDisabled={false}
+          canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
+        />,
+        { wrapper: TestProviders }
+      );
+      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
+      expect(getByTestId('rules-details-export-rule')).not.toBeDisabled();
     });
   });
 
@@ -188,11 +214,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -212,11 +236,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -238,11 +260,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={rule}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -263,11 +283,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -284,11 +302,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -317,11 +333,9 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={customizedMockRule}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={false}
         />,
         { wrapper: TestProviders }
       );
@@ -336,16 +350,18 @@ describe('RuleActionsOverflow', () => {
     });
 
     test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {
+      useRuleCustomizationsContextMock.mockReturnValue({
+        actions: { openCustomizationsRevertFlyout: jest.fn() },
+        state: { doesBaseVersionExist: false },
+      });
       const { getByTestId } = render(
         <RuleActionsOverflow
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={customizedMockRule}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
-          openRuleDiffFlyout={openRuleDiffFlyoutMock}
-          isRevertBaseVersionDisabled={true}
         />,
         { wrapper: TestProviders }
       );

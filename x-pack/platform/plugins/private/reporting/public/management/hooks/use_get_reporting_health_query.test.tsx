@@ -7,7 +7,7 @@
 
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { testQueryClient } from '../test_utils/test_query_client';
 import { useGetReportingHealthQuery } from './use_get_reporting_health_query';
 import * as getReportingHealthModule from '../apis/get_reporting_health';

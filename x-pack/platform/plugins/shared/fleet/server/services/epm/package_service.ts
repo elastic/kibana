@@ -40,9 +40,11 @@ import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/ep
 
 import type { InstallResult } from '../../../common';
 
-import { appContextService } from '..';
+import { appContextService, packagePolicyService } from '..';
 
-import type { GetInstalledPackagesResponse } from '../../../common/types';
+import type { GetInstalledPackagesResponse, RollbackPackageResponse } from '../../../common/types';
+
+import type { TemplateAgentPolicyInput } from '../../../common/types/models/agent_policy';
 
 import {
   type CustomPackageDatasetConfiguration,
@@ -67,6 +69,7 @@ import {
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
 import { createArchiveIteratorFromMap } from './archive/archive_iterator';
+import { rollbackInstallation } from './packages/rollback';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -94,6 +97,8 @@ export interface PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -138,6 +143,7 @@ export interface PackageClient {
   getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ): Promise<string>;
@@ -150,6 +156,8 @@ export interface PackageClient {
   getInstalledPackages(
     params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
   ): Promise<GetInstalledPackagesResponse>;
+
+  rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -243,6 +251,8 @@ class PackageClientImpl implements PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
@@ -252,6 +262,8 @@ class PackageClientImpl implements PackageClient {
       spaceId = DEFAULT_SPACE_ID,
       force = false,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     } = options;
 
     // If pkgVersion isn't specified, find the latest package version
@@ -269,6 +281,8 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
   }
 
@@ -321,6 +335,7 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ) {
@@ -337,6 +352,7 @@ class PackageClientImpl implements PackageClient {
       pkgName,
       pkgVersion,
       'yml',
+      isInputIncluded,
       prerelease,
       ignoreUnverified
     );
@@ -415,6 +431,29 @@ class PackageClientImpl implements PackageClient {
     }
 
     return installedAssets;
+  }
+
+  public async rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse> {
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
+    const { pkgName } = options;
+    const esClient = this.internalEsClient;
+    const soClient = this.internalSoClient;
+
+    const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(soClient, {
+      searchFields: ['package.name'],
+      search: pkgName,
+      spaceIds: ['*'],
+      fields: ['id', 'name'],
+    });
+    // rollback all package policies that are accessible to the internal user, we don't have a request when called from an async task
+    const packagePolicyIdsForInternalUser = packagePolicySORes.saved_objects.map((so) => so.id);
+
+    return await rollbackInstallation({
+      esClient,
+      currentUserPolicyIds: packagePolicyIdsForInternalUser,
+      pkgName,
+      spaceId: '*',
+    });
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {

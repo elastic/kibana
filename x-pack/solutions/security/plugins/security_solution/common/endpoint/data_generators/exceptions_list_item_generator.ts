@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  EntriesArray,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type ExceptionListItemSchema,
+  type CreateExceptionListItemSchema,
+  type UpdateExceptionListItemSchema,
+  type EntriesArray,
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -45,7 +43,6 @@ export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {
-    /* eslint-disable @typescript-eslint/naming-convention */
     description,
     entries,
     expire_time,
@@ -58,7 +55,6 @@ export const exceptionItemToCreateExceptionItem = (
     namespace_type,
     os_types,
     tags,
-    /* eslint-enable @typescript-eslint/naming-convention */
   } = exceptionItem;
 
   return {
@@ -80,7 +76,6 @@ export const exceptionItemToCreateExceptionItem = (
 const exceptionItemToUpdateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchemaWithNonNullProps => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, item_id, _version } = exceptionItem;
   const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
 
@@ -163,9 +158,18 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
   generateEndpointExceptionForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
-  ): CreateExceptionListItemSchema {
+  ): CreateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToCreateExceptionItem(this.generateEndpointException()),
+      ...overrides,
+    };
+  }
+
+  generateEndpointExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateEndpointException()),
       ...overrides,
     };
   }
@@ -407,6 +411,45 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): UpdateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToUpdateExceptionItem(this.generateBlocklist()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    // Use HOST field by default for compatibility with all OS types
+    // USERNAME field can only be used with Windows-only OS
+    const defaultEntries: ExceptionListItemSchema['entries'] = [
+      {
+        field: 'host.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: `host_${this.randomString(5)}`,
+      },
+    ];
+
+    return this.generate({
+      name: `Trusted device (${this.randomString(5)})`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
+      entries: defaultEntries,
+      ...overrides,
+    });
+  }
+
+  generateTrustedDeviceForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDeviceForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedDevice()),
       ...overrides,
     };
   }

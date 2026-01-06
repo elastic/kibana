@@ -359,7 +359,7 @@
             "description": [],
             "signature": [
               "AxiosResponse",
-              "<T, any>"
+              "<T, any, {}>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,

@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import {
-  DeleteKnowledgeBaseEntryRequestParams,
-  DeleteKnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas';
-import { ElasticAssistantPluginRouter } from '../../../types';
+import type { DeleteKnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { DeleteKnowledgeBaseEntryRequestParams } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 

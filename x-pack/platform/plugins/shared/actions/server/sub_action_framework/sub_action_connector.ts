@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { isPlainObject, isEmpty } from 'lodash';
-import type { Type } from '@kbn/config-schema';
+import { isEmpty, isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type {
-  AxiosInstance,
-  AxiosResponse,
+  AxiosBasicCredentials,
   AxiosError,
-  AxiosRequestHeaders,
   AxiosHeaders,
   AxiosHeaderValue,
-  AxiosBasicCredentials,
+  AxiosInstance,
+  AxiosRequestHeaders,
+  AxiosResponse,
 } from 'axios';
 import axios from 'axios';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -24,13 +23,12 @@ import { finished } from 'stream/promises';
 import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { inspect } from 'util';
+import type { ZodType } from '@kbn/zod';
 import type { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { SubAction, SubActionRequestParams } from './types';
-import type { ServiceParams } from './types';
+import type { ServiceParams, SubAction, SubActionRequestParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
 import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
@@ -105,9 +103,9 @@ export abstract class SubActionConnector<Config, Secrets> {
     return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
 
-  private validateResponse(responseSchema: Type<unknown>, data: unknown) {
+  private validateResponse(responseSchema: ZodType<unknown>, data: unknown) {
     try {
-      responseSchema.validate(data);
+      responseSchema.parse(data);
     } catch (resValidationError) {
       const err = new Error(`Response validation failed (${resValidationError})`);
       this.logger.debug(() => `${err.message}:\n${inspect(data, { depth: 10 })}`);
@@ -177,27 +175,19 @@ export abstract class SubActionConnector<Config, Secrets> {
         `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config?.method}. URL: ${error.config?.url}`
       );
 
-      const finalError = await this.getRequestError(error);
-      throw finalError;
+      throw await this.addMessageToResponseError(error);
     }
   }
 
-  private async getRequestError(initialError: unknown) {
+  private async addMessageToResponseError(initialError: unknown) {
     if (isAxiosError(initialError)) {
       const error = await this.getErrorWithResponse(initialError);
 
-      const errorMessage = `Status code: ${
+      // Here we overwrite the message without creating a new Error to preserve the user/framework
+      // categorization
+      initialError.message = `Status code: ${
         error.status ?? error.response?.status
       }. Message: ${this.getResponseErrorMessage(error)}`;
-
-      const errorInstance = new Error(errorMessage);
-
-      // Mark rate limiting errors as user errors
-      if (error.status === 429 || error.response?.status === 429) {
-        return createTaskRunError(errorInstance, TaskErrorSource.USER);
-      }
-
-      return errorInstance;
     }
 
     return initialError;

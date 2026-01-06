@@ -16,7 +16,6 @@ import { connectorTokenClientMock } from '../../../../lib/connector_token_client
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { actionsAuthorizationMock } from '../../../../mocks';
 import { inMemoryMetricsMock } from '../../../../monitoring/in_memory_metrics.mock';
-import { schema } from '@kbn/config-schema';
 import {
   httpServerMock,
   loggingSystemMock,
@@ -26,16 +25,13 @@ import {
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
-import type { ExecutorType } from '../../../../types';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
+import { getConnectorType } from '../../../../fixtures';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let actionTypeRegistry: ActionTypeRegistry;
-
-const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-  return { status: 'ok', actionId: options.actionId };
-};
 
 describe('listTypes()', () => {
   let actionsClient: ActionsClient;
@@ -73,48 +69,37 @@ describe('listTypes()', () => {
       authorization: actionsAuthorizationMock.create() as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient: jest.fn(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      isESOCanEncrypt: true,
+      getAxiosInstanceWithAuth: jest.fn(),
     });
   });
 
   it('filters action types by feature ID', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
 
-    actionTypeRegistry.register({
-      id: 'my-action-type-2',
-      name: 'My action type 2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: 'my-connector-type-2',
+        name: 'My connector type 2',
+        supportedFeatureIds: ['cases'],
+      })
+    );
 
     expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
       {
-        id: 'my-action-type',
-        name: 'My action type',
+        id: 'my-connector-type',
+        name: 'My connector type',
         minimumLicenseRequired: 'basic',
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });
@@ -122,66 +107,49 @@ describe('listTypes()', () => {
   it('filters out system action types when not defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
 
-    actionTypeRegistry.register({
-      id: 'my-action-type-2',
-      name: 'My action type 2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: 'my-connector-type-2',
+        name: 'My connector type 2',
+        supportedFeatureIds: ['cases'],
+      })
+    );
 
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        isSystemActionType: true,
+      })
+    );
 
     expect(await actionsClient.listTypes({})).toEqual([
       {
-        id: 'my-action-type',
-        name: 'My action type',
+        id: 'my-connector-type',
+        name: 'My connector type',
         minimumLicenseRequired: 'basic',
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
+        source: 'stack',
       },
       {
-        id: 'my-action-type-2',
-        name: 'My action type 2',
+        id: 'my-connector-type-2',
+        name: 'My connector type 2',
         isSystemActionType: false,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['cases'],
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });
@@ -189,43 +157,30 @@ describe('listTypes()', () => {
   it('return system action types when defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
 
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+      })
+    );
 
     expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
       {
-        id: 'my-action-type',
-        name: 'My action type',
+        id: 'my-connector-type',
+        name: 'My connector type',
         minimumLicenseRequired: 'basic',
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
+        source: 'stack',
       },
       {
         id: '.cases',
@@ -236,6 +191,8 @@ describe('listTypes()', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });

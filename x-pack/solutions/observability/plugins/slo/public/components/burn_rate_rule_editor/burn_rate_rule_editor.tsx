@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
-import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
+import type { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
 import { SloSelector } from './slo_selector';
-import { ValidationBurnRateRuleResult } from './validation';
+import type { ValidationBurnRateRuleResult } from './validation';
 import { createNewWindow, Windows } from './windows';
 import { BURN_RATE_DEFAULTS } from './constants';
 import { AlertTimeTable } from './alert_time_table';
 import { getGroupKeysProse } from '../../utils/slo/groupings';
 import { Dependencies } from './dependencies';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { SloSelectorEmptyState } from './slo_selector_empty_state';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -36,6 +39,7 @@ export function BurnRateRuleEditor(props: Props) {
   const [selectedSlo, setSelectedSlo] = useState<SLODefinitionResponse | undefined>(undefined);
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
   const [dependencies, setDependencies] = useState<Dependency[]>(ruleParams?.dependencies || []);
+  const { isLoading, data } = useFetchSloDefinitions({});
 
   useEffect(() => {
     setSelectedSlo(initialSlo);
@@ -63,6 +67,20 @@ export function BurnRateRuleEditor(props: Props) {
     setRuleParams('dependencies', dependencies);
   }, [dependencies, setRuleParams]);
 
+  const renderSloSelector = () => {
+    if (isLoading) {
+      return <EuiLoadingSpinner size="m" data-test-subj="sloSelectorLoadingSpinner" />;
+    }
+
+    if (data?.total === 0) {
+      return <SloSelectorEmptyState />;
+    }
+
+    return (
+      <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+    );
+  };
+
   return (
     <>
       <EuiTitle size="xs">
@@ -73,11 +91,12 @@ export function BurnRateRuleEditor(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+      {renderSloSelector()}
       {selectedSlo?.groupBy && ![selectedSlo.groupBy].flat().includes(ALL_VALUE) && (
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.rules.groupByMessage', {

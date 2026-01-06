@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { RouteValidationResultFactory } from '@kbn/core/server';
+import type { RouteValidationResultFactory } from '@kbn/core/server';
 
 import { buildRouteValidation } from './route_validation';
 

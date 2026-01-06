@@ -28,6 +28,7 @@ const selectInputs = (state: State): InputsModel => state.inputs;
 const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
+const selectValueReport = (state: State): InputsState['valueReport'] => state.inputs.valueReport;
 
 // TODO: remove undefined when socTrendsEnabled feature flag removed
 const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
@@ -41,6 +42,11 @@ export const inputsSelector = () => createSelector(selectInputs, (inputs) => inp
 export const timelineTimeRangeSelector = createSelector(
   selectTimeline,
   (timeline) => timeline.timerange
+);
+
+export const valueReportTimeRangeSelector = createSelector(
+  selectValueReport,
+  (valueReport) => valueReport.timerange
 );
 
 // TODO: remove ? when socTrendsEnabled feature flag removed

@@ -18,7 +18,6 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { NotFoundError } from '../../errors';
 
 /**
  * GET API handler
@@ -33,10 +32,6 @@ export const getReadOrphanActionsSpaceHandler = (
     logger.debug(`Retrieving current orphan response actions space id`);
 
     try {
-      if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        throw new NotFoundError(`Space awareness feature is disabled`);
-      }
-
       const orphanSpaceRefData = await endpointService
         .getReferenceDataClient()
         .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace);
@@ -70,10 +65,6 @@ export const getUpdateOrphanActionsSpaceHandler = (
     logger.debug(`Updating orphan response actions space id`);
 
     try {
-      if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        throw new NotFoundError(`Space awareness feature is disabled`);
-      }
-
       const newSpaceIdValue = req.body.spaceId.trim();
       const refDataClient = endpointService.getReferenceDataClient();
       const updatedData = await refDataClient.get<OrphanResponseActionsMetadata>(

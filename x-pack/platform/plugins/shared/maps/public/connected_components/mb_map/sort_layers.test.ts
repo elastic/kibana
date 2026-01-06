@@ -11,7 +11,7 @@ import _ from 'lodash';
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
 import { getIsTextLayer, syncLayerOrder } from './sort_layers';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
-import { ILayer } from '../../classes/layers/layer';
+import type { ILayer } from '../../classes/layers/layer';
 
 let moveCounter = 0;
 

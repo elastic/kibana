@@ -29,3 +29,4 @@ export { fieldSupportsBreakdown } from './src/utils/field_supports_breakdown';
 
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';
 export { FieldDescription, type FieldDescriptionProps } from './src/components/field_description';
+export { FieldSelect, type FieldSelectProps } from './src/components/field_select';

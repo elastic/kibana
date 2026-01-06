@@ -18,8 +18,8 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import type { RenderCellValueProps } from './render_cell_value';
 import { CellValue } from './render_cell_value';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { AlertTableCellContextProvider } from './cell_value_context';
+import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../sourcerer/containers', () => ({
@@ -31,7 +31,6 @@ jest.mock('../../../sourcerer/containers', () => ({
     sourcererDataView: {},
   }),
 }));
-jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -73,14 +72,11 @@ describe('RenderCellValue', () => {
     return (
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <AlertTableCellContextProvider
-            tableId={TableId.test}
-            sourcererScope={SourcererScopeName.detections}
-          >
+          <AlertTableCellContextProvider tableId={TableId.test} sourcererScope={PageScope.alerts}>
             <CellValue
               {...defaultProps}
               {...props}
-              sourcererScope={SourcererScopeName.detections}
+              pageScope={PageScope.alerts}
               tableType={TableId.test}
             />
           </AlertTableCellContextProvider>
@@ -94,11 +90,7 @@ describe('RenderCellValue', () => {
       render(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <CellValue
-              {...defaultProps}
-              sourcererScope={SourcererScopeName.detections}
-              tableType={TableId.test}
-            />
+            <CellValue {...defaultProps} pageScope={PageScope.alerts} tableType={TableId.test} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -112,11 +104,5 @@ describe('RenderCellValue', () => {
     const { getByText } = render(<RenderCellValueComponent {...defaultProps} />);
 
     expect(getByText('Nov 5, 2018 @ 19:03:25.937')).toBeInTheDocument();
-  });
-
-  it('should render the guided onboarding step', () => {
-    const { getByTestId } = render(<RenderCellValueComponent {...defaultProps} />);
-
-    expect(getByTestId('GuidedOnboardingTourStep')).toBeInTheDocument();
   });
 });

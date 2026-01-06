@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/rule_type_modal';
 
 export { RuleForm, type RuleFormProps } from './src/rule_form';
@@ -24,6 +24,8 @@ export {
 } from './src/common/apis';
 
 export { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE } from './src/constants';
+
+export { useRuleTemplate } from './src/common/hooks/use_rule_template';
 
 export {
   RuleActionsNotifyWhen,

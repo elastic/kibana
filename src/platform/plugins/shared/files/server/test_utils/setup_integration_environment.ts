@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaults } from 'lodash';
 import {
   createRootWithCorePlugins,
   createTestServers,
   request,
 } from '@kbn/core-test-helpers-kbn-server';
+import { defaults } from 'lodash';
 import pRetry from 'p-retry';
-import { FileJSON } from '../../common';
+import type { FileJSON } from '../../common';
 import { getFileKindsRegistry } from '../../common/file_kinds_registry';
 
 export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;
@@ -95,11 +95,22 @@ export async function setupIntegrationEnvironment() {
   await root.setup();
 
   /**
-   * Register a test file type
+   * Register a test file kind with MIME type restrictions for validation testing
    */
   const testHttpConfig = { requiredPrivileges: ['myapp'] };
   const myFileKind = {
     id: fileKind,
+    allowedMimeTypes: [
+      'image/png',
+      'image/jpeg',
+      'application/pdf',
+      'text/html',
+      'text/plain',
+      'application/json',
+      'application/gzip',
+      'application/octet-stream',
+      'image/x:123', // Special characters test case
+    ],
     blobStoreSettings: {
       esFixedSizeIndex: { index: testIndex },
     },

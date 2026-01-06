@@ -13,15 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSuperSelect,
   EuiTextTruncate,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
-import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
 type CustomCriticalityError = Error & {
@@ -39,54 +36,31 @@ export const HeaderDataCards = ({
   subType: string;
   type: string;
 }) => {
-  const { getAssetCriticality, assignAssetCriticality } = useGenericEntityCriticality({
+  const { assignAssetCriticality } = useGenericEntityCriticality({
     idField: EntityIdentifierFields.generic,
     idValue: id,
   });
   const cards = useMemo(
     () => [
       {
-        title: i18n.translate(
-          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.criticalityLabel',
-          {
-            defaultMessage: 'Criticality',
-          }
-        ),
-        description: (
-          <div
-            css={css`
-              width: fit-content;
-            `}
-          >
-            <EuiSuperSelect
-              popoverProps={{
-                repositionOnScroll: true,
-                panelMinWidth: 200,
-              }}
-              fullWidth={false}
-              compressed
-              hasDividers
-              options={assetCriticalityOptions}
-              valueOfSelected={getAssetCriticality.data?.criticality_level || 'unassigned'}
-              onChange={(newValue) => {
-                assignAssetCriticality.mutate({
-                  criticalityLevel: newValue,
-                  idField: EntityIdentifierFields.generic,
-                  idValue: id,
-                });
-              }}
-              isInvalid={assignAssetCriticality.isError}
-            />
-          </div>
-        ),
-      },
-      {
         title: (
           <EuiFlexGroup justifyContent={'spaceBetween'} wrap={false} responsive={false}>
             <EuiFlexItem grow={false}>{'ID'}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={id}>
-                {(copy) => <EuiButtonIcon onClick={copy} iconType="document" color="text" />}
+                {(copy) => (
+                  <EuiButtonIcon
+                    onClick={copy}
+                    iconType="document"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.copyIdAriaLabel',
+                      {
+                        defaultMessage: 'Copy ID',
+                      }
+                    )}
+                  />
+                )}
               </EuiCopy>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -112,7 +86,7 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [getAssetCriticality.data?.criticality_level, id, type, subType, assignAssetCriticality]
+    [id, type, subType]
   );
 
   return (
@@ -120,6 +94,7 @@ export const HeaderDataCards = ({
       {assignAssetCriticality.isError && (
         <>
           <EuiCallOut
+            announceOnMount
             onDismiss={() => {
               assignAssetCriticality.reset();
             }}

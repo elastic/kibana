@@ -13,3 +13,6 @@ export const FLEET_APP_ID = 'fleet';
 export const OSQUERY_APP_ID = 'osquery';
 export const MANAGEMENT_APP_ID = 'management';
 export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';
+export const STACK_MANAGEMENT_NAV_ID = 'stack_management';
+export const DATA_MANAGEMENT_NAV_ID = 'data_management';
+export const CLOUD_CONNECT_NAV_ID = 'cloud_connect';

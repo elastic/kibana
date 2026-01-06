@@ -20,10 +20,12 @@ import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasesSearchRequest,
+  CasesFindRequestWithCustomFields,
   SimilarCasesSearchRequest,
   CasesSimilarResponse,
   AddObservableRequest,
   UpdateObservableRequest,
+  BulkAddObservablesRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -32,6 +34,7 @@ import { bulkGet } from './bulk_get';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { search } from './search';
+import { find } from './find';
 import type { CasesByAlertIDParams, GetParams } from './get';
 import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
 import type { PushParams } from './push';
@@ -41,7 +44,12 @@ import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
 import { similar } from './similar';
-import { addObservable, deleteObservable, updateObservable } from './observables';
+import {
+  addObservable,
+  bulkAddObservables,
+  deleteObservable,
+  updateObservable,
+} from './observables';
 
 /**
  * API for interacting with the cases entities.
@@ -56,9 +64,15 @@ export interface CasesSubClient {
    */
   bulkCreate(data: BulkCreateCasesRequest): Promise<BulkCreateCasesResponse>;
   /**
-   * Returns cases that match the search criteria.
+   * Returns cases using Saved Objects find API (uses Kuery queries).
    *
    * If the `owner` field is left empty then all the cases that the user has access to will be returned.
+   */
+  find(params: CasesFindRequestWithCustomFields): Promise<CasesFindResponse>;
+  /**
+   * Returns cases using Saved Objects search API (uses raw Elasticsearch queries).
+   * Supports nested fields and attachment filtering.
+   * Owner field is required.
    */
   search(params: CasesSearchRequest): Promise<CasesFindResponse>;
   /**
@@ -128,6 +142,10 @@ export interface CasesSubClient {
    * Removes observable
    */
   deleteObservable(caseId: string, observableId: string): Promise<void>;
+  /**
+   * Bulk adds observables to the case
+   */
+  bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
 }
 
 /**
@@ -143,6 +161,7 @@ export const createCasesSubClient = (
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
     bulkCreate: (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient),
+    find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
@@ -164,6 +183,8 @@ export const createCasesSubClient = (
       updateObservable(caseId, observableId, params, clientArgs, casesClient),
     deleteObservable: (caseId: string, observableId: string) =>
       deleteObservable(caseId, observableId, clientArgs, casesClient),
+    bulkAddObservables: (params: BulkAddObservablesRequest) =>
+      bulkAddObservables(params, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);

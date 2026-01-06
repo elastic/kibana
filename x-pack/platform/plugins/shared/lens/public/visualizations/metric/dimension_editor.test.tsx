@@ -6,25 +6,32 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, getByTitle, queryByRole } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  getByTitle,
+  queryByRole,
+  within,
+  fireEvent,
+} from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { euiLightVars } from '@kbn/ui-theme';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { DataType } from '../../types';
-import { MetricVisualizationState } from './types';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { DataType } from '@kbn/lens-common';
+import type { MetricVisualizationState } from './types';
+import type { Props, SupportingVisType, ApplyColor } from './dimension_editor';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
-  Props,
-  SupportingVisType,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { GROUP_ID } from './constants';
+import { GROUP_ID, legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import { getDefaultConfigForMode } from './helpers';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -38,6 +45,7 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
+// Failing: See https://github.com/elastic/kibana/issues/234063
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
@@ -47,34 +55,40 @@ describe('dimension editor', () => {
     },
   };
 
-  const fullState: Required<MetricVisualizationState> = {
-    layerId: 'first',
-    layerType: 'data',
-    metricAccessor: 'metric-col-id',
-    secondaryMetricAccessor: 'secondary-metric-col-id',
-    maxAccessor: 'max-metric-col-id',
-    breakdownByAccessor: 'breakdown-col-id',
-    collapseFn: 'sum',
-    subtitle: faker.lorem.word(5),
-    secondaryPrefix: faker.lorem.word(3),
-    secondaryTrend: { type: 'none' },
-    progressDirection: 'vertical',
-    maxCols: 5,
-    color: faker.color.rgb(),
-    palette,
-    icon: 'tag',
-    showBar: true,
-    titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
-    iconAlign: 'left',
-    valueFontMode: 'default',
-    trendlineLayerId: 'second',
-    trendlineLayerType: 'metricTrendline',
-    trendlineMetricAccessor: 'trendline-metric-col-id',
-    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
-    trendlineTimeAccessor: 'trendline-time-col-id',
-    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-  };
+  const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign'>> =
+    {
+      layerId: 'first',
+      layerType: 'data',
+      metricAccessor: 'metric-col-id',
+      secondaryMetricAccessor: 'secondary-metric-col-id',
+      maxAccessor: 'max-metric-col-id',
+      breakdownByAccessor: 'breakdown-col-id',
+      collapseFn: 'sum',
+      subtitle: faker.lorem.word(5),
+      secondaryLabel: faker.lorem.word(3),
+      secondaryTrend: { type: 'none' },
+      progressDirection: 'vertical',
+      maxCols: 5,
+      color: faker.color.rgb(),
+      palette,
+      icon: 'tag',
+      showBar: true,
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: 'right',
+      primaryPosition: 'bottom',
+      titleWeight: 'bold',
+      iconAlign: 'left',
+      valueFontMode: 'default',
+      trendlineLayerId: 'second',
+      trendlineLayerType: 'metricTrendline',
+      trendlineMetricAccessor: 'trendline-metric-col-id',
+      trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
+      trendlineTimeAccessor: 'trendline-time-col-id',
+      trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
+      secondaryLabelPosition: 'before',
+      applyColorTo: 'background',
+    };
 
   let props: Props;
 
@@ -144,29 +158,44 @@ describe('dimension editor', () => {
         />
       );
 
-      const colorModeGroup = screen.queryByRole('group', { name: /Color by value/i });
-      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
+      const getStaticColorPicker = () => screen.queryByTestId(SELECTORS.COLOR_PICKER);
 
-      const typeColor = async (color: string) => {
-        if (!staticColorPicker) {
-          throw new Error('Static color picker not found');
+      const iconSelect = screen.getByTestId('lns-icon-select');
+      const setIcon = async (icon: string) => {
+        const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
+        await userEvent.click(iconInput);
+        const optionsList = await screen.findByTestId(
+          'comboBoxOptionsList lns-icon-select-optionsList'
+        );
+        const option = within(optionsList).getByText(icon, { exact: true });
+        if (option) {
+          await userEvent.click(option);
+        } else {
+          throw new Error(`option ${icon} not found`);
         }
-        await userEvent.clear(staticColorPicker);
-        await userEvent.type(staticColorPicker, color);
       };
-
-      const clearColor = async () => {
-        if (!staticColorPicker) {
-          throw new Error('Static color picker not found');
+      const clearIcon = async () => {
+        const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
+        // Type 'None' to filter the options list to the "None" option
+        fireEvent.input(iconInput, { target: { value: 'None' } });
+        // Wait for the options list popover to appear
+        const optionsList = await screen.findByTestId(
+          'comboBoxOptionsList lns-icon-select-optionsList'
+        );
+        // Find the "None" option in the options list
+        const noneOption = within(optionsList).getByText('None', { exact: true });
+        // Click the "None" option to clear the icon selection
+        if (noneOption) {
+          await userEvent.click(noneOption);
+        } else {
+          throw new Error(`none option not found`);
         }
-        await userEvent.clear(staticColorPicker);
       };
 
       return {
-        colorModeGroup,
-        staticColorPicker,
-        typeColor,
-        clearColor,
+        getStaticColorPicker,
+        setIcon,
+        clearIcon,
         ...rtlRender,
       };
     }
@@ -179,69 +208,73 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
     });
 
-    it('Color mode switch is shown when the primary metric is numeric', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor();
-      expect(colorModeGroup).toBeInTheDocument();
-    });
-
-    it('Color mode switch is not shown when the primary metric is non-numeric', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor({
+    it('static color control is visible when metric is non-numeric even if palette is set', () => {
+      const { getStaticColorPicker } = renderPrimaryMetricEditor({
         datasource: getNonNumericDatasource(),
+        state: { ...metricAccessorState, palette },
       });
-      expect(colorModeGroup).not.toBeInTheDocument();
+      expect(getStaticColorPicker()).toBeInTheDocument();
     });
 
-    it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor({
-        datasource: getNumericDatasourceWithArraySupport(),
-      });
-      expect(colorModeGroup).not.toBeInTheDocument();
-    });
-
-    describe('static color controls', () => {
-      it('is hidden when dynamic coloring is enabled', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette },
+    describe('icon select', () => {
+      it('sets icon with deafult iconAlign', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: undefined, iconAlign: undefined },
+          setState,
         });
-        expect(staticColorPicker).not.toBeInTheDocument();
-      });
-      it('is visible if palette is not defined', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette: undefined },
-        });
-        expect(staticColorPicker).toBeInTheDocument();
-      });
-      it('is visible when metric is non-numeric even if palette is set', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          datasource: getNonNumericDatasource(),
-          state: { ...metricAccessorState, palette },
-        });
-        expect(staticColorPicker).toBeInTheDocument();
-      });
-
-      it('fills with default value', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette: undefined, color: undefined },
-        });
-        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
-      });
-
-      it('sets color', async () => {
-        const { typeColor, clearColor } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette: undefined, color: faker.color.rgb() },
-        });
-
-        const newColor = faker.color.rgb().toUpperCase();
-        await typeColor(newColor);
-        await waitFor(() =>
-          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: newColor }))
+        await setIcon('Compute');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({ icon: 'compute', iconAlign: metricStateDefaults.iconAlign })
         );
-        await clearColor();
-        await waitFor(() =>
-          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: undefined }))
-        );
+      });
 
-        expect(mockSetState).toHaveBeenCalledTimes(2);
+      it('sets iconAlign with legacy icon', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: undefined },
+          setState,
+        });
+        await setIcon('Compute');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            icon: 'compute',
+            iconAlign: legacyMetricStateDefaults.iconAlign,
+          })
+        );
+      });
+
+      it('sets icon and iconAlign with icon and iconAlign already set', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: 'left' },
+          setState,
+        });
+        await setIcon('Compute');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({ icon: 'compute', iconAlign: 'left' })
+        );
+      });
+
+      it('clears icon and iconAlign when none is selected', async () => {
+        const setState = jest.fn();
+        const { clearIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: 'left' },
+          setState,
+        });
+        await clearIcon();
+        const { icon, iconAlign, ...noIconState } = fullState;
+        expect(setState).toHaveBeenCalledWith(noIconState);
+      });
+
+      it('does not call setState when same icon is selected', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: 'left' },
+          setState,
+        });
+        await setIcon('Heart');
+        expect(setState).not.toHaveBeenCalled();
       });
     });
   });
@@ -258,18 +291,18 @@ describe('dimension editor', () => {
         />
       );
 
-      const customPrefixGroup = screen.getByRole('group', { name: 'Prefix' });
-      const getCustomPrefixTextbox = () =>
-        customPrefixGroup.parentElement?.parentElement
-          ? queryByRole<HTMLInputElement>(customPrefixGroup.parentElement.parentElement, 'textbox')
+      const customLabelGroup = screen.getByRole('group', { name: 'Label' });
+      const getCustomLabelTextbox = () =>
+        customLabelGroup.parentElement?.parentElement
+          ? queryByRole<HTMLInputElement>(customLabelGroup.parentElement.parentElement, 'textbox')
           : null;
-      const typePrefix = async (prefix: string) => {
-        const customPrefixTextbox = getCustomPrefixTextbox();
-        if (customPrefixTextbox === null) {
-          throw new Error('custom prefix textbox not found');
+      const typeLabel = async (label: string) => {
+        const customLabelTextbox = getCustomLabelTextbox();
+        if (customLabelTextbox === null) {
+          throw new Error('custom label textbox not found');
         }
-        await userEvent.clear(customPrefixTextbox);
-        await userEvent.type(customPrefixTextbox, prefix);
+        await userEvent.clear(customLabelTextbox);
+        await userEvent.type(customLabelTextbox, label);
       };
 
       const getBaselineGroup = () => screen.getByRole('group', { name: 'Compare to' });
@@ -293,11 +326,11 @@ describe('dimension editor', () => {
       const getSelectedPalette = (name: string) =>
         screen.queryByRole('button', { name: new RegExp(name, 'i') });
 
-      const colorModeGroup = screen.getByRole('group', { name: /Color by value/i });
+      const colorModeGroup = screen.getByRole('group', { name: /Color mode/i });
       const clickOnColorMode = async (mode: 'none' | 'static' | 'dynamic') => {
         const colorByValueOption = getByTitle(colorModeGroup, mode, { exact: false });
         if (!colorByValueOption) {
-          throw new Error(`Supported color by value ${mode} not found`);
+          throw new Error(`Supported color mode ${mode} not found`);
         }
         await userEvent.click(colorByValueOption);
       };
@@ -321,12 +354,24 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
+      const labelPositionGroup = screen.queryByRole('group', { name: /Label position/i });
+      const clickOnLabelPosition = async (position: 'before' | 'after') => {
+        if (!labelPositionGroup) {
+          throw new Error('Label position group not found');
+        }
+        const labelPositionOption = getByTitle(labelPositionGroup, position, { exact: false });
+        if (!labelPositionOption) {
+          throw new Error(`Label position option '${position}' not found`);
+        }
+        await userEvent.click(labelPositionOption);
+      };
+
       return {
-        getSettingNone: () => getByTitle(customPrefixGroup, 'none', { exact: false }),
-        getSettingAuto: () => getByTitle(customPrefixGroup, 'auto', { exact: false }),
-        getSettingCustom: () => getByTitle(customPrefixGroup, 'custom', { exact: false }),
-        getCustomPrefixTextbox,
-        typePrefix,
+        getSettingNone: () => getByTitle(customLabelGroup, 'none', { exact: false }),
+        getSettingAuto: () => getByTitle(customLabelGroup, 'auto', { exact: false }),
+        getSettingCustom: () => getByTitle(customLabelGroup, 'custom', { exact: false }),
+        getCustomLabelTextbox,
+        typeLabel,
         getSelectedPalette,
         getCustomBaselineTextbox,
         getBaselineGroup,
@@ -339,6 +384,8 @@ describe('dimension editor', () => {
         getStaticColorPicker,
         typeColor,
         clearColor,
+        labelPositionGroup,
+        clickOnLabelPosition,
         ...rtlRender,
       };
     }
@@ -360,16 +407,16 @@ describe('dimension editor', () => {
       expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
     });
 
-    describe('metric prefix', () => {
-      const NONE_PREFIX = '';
-      const AUTO_PREFIX = undefined;
+    describe('metric label', () => {
+      const NONE_SECONDARY_LABEL = '';
+      const AUTO_SECONDARY_LABEL = undefined;
       const localState = {
         ...fullState,
-        secondaryPrefix: AUTO_PREFIX,
+        secondaryLabel: AUTO_SECONDARY_LABEL,
         secondaryMetricAccessor: accessor,
       };
-      it('correctly renders chosen auto prefix', () => {
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
+      it('correctly renders chosen auto label', () => {
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
           renderSecondaryMetricEditor({
             state: localState,
           });
@@ -377,66 +424,109 @@ describe('dimension editor', () => {
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'true');
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(getCustomPrefixTextbox()).not.toBeInTheDocument();
+        expect(getCustomLabelTextbox()).not.toBeInTheDocument();
       });
 
-      it('correctly renders chosen none prefix', () => {
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
-          renderSecondaryMetricEditor({ state: { ...localState, secondaryPrefix: NONE_PREFIX } });
+      it('correctly renders chosen none label', () => {
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
+          renderSecondaryMetricEditor({
+            state: { ...localState, secondaryLabel: NONE_SECONDARY_LABEL },
+          });
 
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'true');
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(getCustomPrefixTextbox()).not.toBeInTheDocument();
+        expect(getCustomLabelTextbox()).not.toBeInTheDocument();
       });
 
-      it('correctly renders custom prefix', () => {
-        const customPrefixState = { ...localState, secondaryPrefix: faker.lorem.word(3) };
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
-          renderSecondaryMetricEditor({ state: customPrefixState });
+      it('correctly renders custom label', () => {
+        const customLabelState = { ...localState, secondaryLabel: faker.lorem.word(3) };
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
+          renderSecondaryMetricEditor({ state: customLabelState });
 
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'true');
-        expect(getCustomPrefixTextbox()).toHaveValue(customPrefixState.secondaryPrefix);
+        expect(getCustomLabelTextbox()).toHaveValue(customLabelState.secondaryLabel);
       });
 
-      it('clicking on the buttons calls setState with a correct secondaryPrefix', async () => {
-        const customPrefix = faker.lorem.word(3);
+      it('clicking on the buttons calls setState with a correct secondaryLabel', async () => {
+        const customSecondaryLabel = faker.lorem.word(3);
         const setState = jest.fn();
 
         const { getSettingAuto, getSettingNone } = renderSecondaryMetricEditor({
           setState,
-          state: { ...localState, secondaryPrefix: customPrefix },
+          state: { ...localState, secondaryLabel: customSecondaryLabel },
         });
 
         await userEvent.click(getSettingNone());
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
+          expect.objectContaining({ secondaryLabel: NONE_SECONDARY_LABEL })
         );
 
         await userEvent.click(getSettingAuto());
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
+          expect.objectContaining({ secondaryLabel: AUTO_SECONDARY_LABEL })
         );
       });
 
-      it('sets a custom prefix value', async () => {
-        const customPrefix = faker.lorem.word(3);
+      it('sets a custom label value', async () => {
+        const customSecondaryLabel = faker.lorem.word(3);
         const setState = jest.fn();
 
-        const { typePrefix } = renderSecondaryMetricEditor({
+        const { typeLabel } = renderSecondaryMetricEditor({
           setState,
-          state: { ...localState, secondaryPrefix: customPrefix },
+          state: { ...localState, secondaryLabel: customSecondaryLabel },
         });
 
-        const newCustomPrefix = faker.lorem.word(3);
-        await typePrefix(newCustomPrefix);
+        const newCustomSecondaryLabel = faker.lorem.word(3);
+        await typeLabel(newCustomSecondaryLabel);
 
         await waitFor(() =>
           expect(setState).toHaveBeenCalledWith(
-            expect.objectContaining({ secondaryPrefix: newCustomPrefix })
+            expect.objectContaining({ secondaryLabel: newCustomSecondaryLabel })
           )
+        );
+      });
+
+      it('does not show the label position option if Label is None', async () => {
+        const { labelPositionGroup: labelPostionGroup } = renderSecondaryMetricEditor({
+          state: {
+            ...localState,
+            secondaryLabel: NONE_SECONDARY_LABEL,
+          },
+        });
+        expect(labelPostionGroup).not.toBeInTheDocument();
+      });
+
+      it('sets the label position to after', async () => {
+        const setState = jest.fn();
+        const { clickOnLabelPosition: clickOnLabelPostion } = renderSecondaryMetricEditor({
+          setState,
+          state: localState,
+        });
+        await clickOnLabelPostion('after');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            secondaryLabelPosition: 'after',
+          })
+        );
+      });
+
+      it('sets the label position to before', async () => {
+        const setState = jest.fn();
+        const { clickOnLabelPosition: clickOnLabelPostion } = renderSecondaryMetricEditor({
+          setState,
+          state: {
+            ...localState,
+            secondaryLabelPosition: 'after',
+          },
+        });
+        await clickOnLabelPostion('before');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            secondaryLabelPosition: 'before',
+          })
         );
       });
     });
@@ -597,11 +687,11 @@ describe('dimension editor', () => {
         expect(getCustomBaselineTextbox()).not.toBeInTheDocument();
       });
 
-      it('should set a default prefix if auto is set and Primary Metric is chosen', async () => {
-        const { getCustomPrefixTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
+      it('should set a default secondary label if auto is set and Primary Metric is chosen', async () => {
+        const { getCustomLabelTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
           state: {
             ...localState,
-            secondaryPrefix: undefined,
+            secondaryLabel: undefined,
             secondaryTrend: {
               type: 'dynamic',
               visuals: 'both',
@@ -616,9 +706,9 @@ describe('dimension editor', () => {
           'aria-pressed',
           'true'
         );
-        const el = getCustomPrefixTextbox();
+        const el = getCustomLabelTextbox();
         if (el == null) {
-          fail('Prefix textbox not in view');
+          fail('secondary label textbox not in view');
         }
         expect(el.value).toBe('Difference');
       });
@@ -627,12 +717,12 @@ describe('dimension editor', () => {
         // mind that auto gets converted into {name: 'custom', value: 'Difference'}
         { name: 'auto', value: undefined },
         { name: 'none', value: '' },
-        { name: 'custom', value: 'customPrefix' },
+        { name: 'custom', value: 'customSecondaryLabel' },
       ])(
-        'should preserve the current prefix is set to $name and Primary Metric is chosen',
+        'should preserve the current secondary label is set to $name and Primary Metric is chosen',
         async ({ name, value }) => {
           const {
-            getCustomPrefixTextbox,
+            getCustomLabelTextbox,
             getBaselineGroup,
             getSettingAuto,
             getSettingCustom,
@@ -640,7 +730,7 @@ describe('dimension editor', () => {
           } = renderSecondaryMetricEditor({
             state: {
               ...localState,
-              secondaryPrefix: value,
+              secondaryLabel: value,
               secondaryTrend: {
                 type: 'dynamic',
                 visuals: 'both',
@@ -658,16 +748,16 @@ describe('dimension editor', () => {
 
           expect(getSettingAuto()).toHaveAttribute('aria-pressed', `false`);
           expect(getSettingNone()).toHaveAttribute('aria-pressed', `${name === 'none'}`);
-          // When primary is chosen auto gets converted into Custom with the default 'Difference' prefix
+          // When primary is chosen auto gets converted into Custom with the default 'Difference' secondary label
           expect(getSettingCustom()).toHaveAttribute(
             'aria-pressed',
             `${name === 'custom' || name === 'auto'}`
           );
 
           if (value || name === 'auto') {
-            const el = getCustomPrefixTextbox();
+            const el = getCustomLabelTextbox();
             if (el == null) {
-              fail('Prefix textbox not in view');
+              fail('secondary label textbox not in view');
             }
             expect(el.value).toBe(value ?? 'Difference');
           }
@@ -857,9 +947,40 @@ describe('dimension editor', () => {
       const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
         if (!supportingVis) {
-          throw new Error(`Supporting visualization ${type} not found`);
+          throw new Error(`Background chart ${type} not found`);
         }
         await userEvent.click(supportingVis);
+      };
+
+      const applyColorToOptions = {
+        background: screen.queryByTitle(/background/i),
+        value: screen.queryByTitle(/value/i),
+      };
+
+      const clickOnApplyColorToOption = async (option: ApplyColor) => {
+        const applyColorTo = applyColorToOptions[option];
+        if (!applyColorTo) {
+          throw new Error(`Supporting visualization ${option} not found`);
+        }
+        await userEvent.click(applyColorTo);
+      };
+
+      const colorModeGroup = screen.queryByRole('group', { name: /Color mode/i });
+      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
+
+      const typeColor = async (color: string) => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+        await userEvent.type(staticColorPicker, color);
+      };
+
+      const clearColor = async () => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
       };
 
       return {
@@ -870,6 +991,13 @@ describe('dimension editor', () => {
         },
         supportingVisOptions,
         clickOnSupportingVis,
+        applyColorToBtnGroup: screen.queryByTestId('lnsMetric_apply_color_to_buttons'),
+        applyColorToOptions,
+        clickOnApplyColorToOption,
+        colorModeGroup,
+        staticColorPicker,
+        typeColor,
+        clearColor,
         ...rtlRender,
       };
     }
@@ -883,14 +1011,14 @@ describe('dimension editor', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
-    describe('supporting visualizations', () => {
+    describe('background visualizations', () => {
       const stateWOTrend = {
         ...metricAccessorState,
         trendlineLayerId: undefined,
       };
 
       describe('reflecting visualization state', () => {
-        it('when `showBar` is false and maximum value is not defined, option none should be selected', () => {
+        it('when `showBar` is false and maximum value is not defined, option `none` should be selected', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
@@ -1012,6 +1140,32 @@ describe('dimension editor', () => {
 
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
+
+        it('selects trendline from none with apply color to value', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              applyColorTo: 'value',
+            },
+          });
+          await clickOnSupportingVis('trendline');
+          expect(mockSetState).toHaveBeenCalledWith(
+            expect.objectContaining({ applyColorTo: 'background' })
+          );
+        });
+
+        it('selects bar from none with apply color to value', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: {
+              ...metricAccessorState,
+              applyColorTo: 'value',
+            },
+          });
+          await clickOnSupportingVis('bar');
+          expect(mockSetState).toHaveBeenCalledWith(
+            expect.objectContaining({ applyColorTo: 'background' })
+          );
+        });
       });
 
       describe('progress bar direction controls', () => {
@@ -1040,6 +1194,146 @@ describe('dimension editor', () => {
             progressDirection: 'horizontal',
           });
         });
+      });
+
+      describe('`apply color to` controls', () => {
+        it('should show `apply color to` button group when `None` option is selected', async () => {
+          const { applyColorToBtnGroup, applyColorToOptions } = renderAdditionalSectionEditor({
+            state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
+          });
+          expect(applyColorToBtnGroup).toBeInTheDocument();
+          expect(applyColorToOptions.background).toHaveAttribute('aria-pressed', 'true');
+        });
+
+        it('should not show `apply color to` button group when `Line` option is selected', () => {
+          const { applyColorToBtnGroup } = renderAdditionalSectionEditor({
+            state: { ...stateWOTrend, showBar: true },
+          });
+          expect(applyColorToBtnGroup).not.toBeInTheDocument();
+        });
+
+        it('should not show `apply color to` button group when `Bar` option is selected', () => {
+          const { applyColorToBtnGroup } = renderAdditionalSectionEditor({
+            state: metricAccessorState,
+          });
+          expect(applyColorToBtnGroup).not.toBeInTheDocument();
+        });
+
+        it('should toggle options', async () => {
+          const mockState = { ...stateWOTrend, showBar: false, maxAccessor: undefined };
+          const { clickOnApplyColorToOption } = renderAdditionalSectionEditor({ state: mockState });
+
+          await clickOnApplyColorToOption('value');
+          expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'value' });
+
+          await clickOnApplyColorToOption('background');
+          expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
+        });
+
+        it('should show help message when color mode static, supporting visualization is none, apply color to value', () => {
+          renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              maxAccessor: undefined,
+              palette: undefined,
+              applyColorTo: 'value',
+            },
+          });
+          expect(
+            screen.getByText(
+              /Color palette has been automatically adjusted for provide the required contrast for text elements/i
+            )
+          );
+        });
+
+        it('should show help message when color mode dynamic, supporting visualization is none, apply color to value', () => {
+          renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              maxAccessor: undefined,
+              applyColorTo: 'value',
+            },
+          });
+          expect(screen.getByText(/Color scales might cause accessibility issues./i));
+        });
+      });
+    });
+
+    it('Color mode switch is shown when the primary metric is numeric', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor();
+      expect(colorModeGroup).toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is non-numeric', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor({
+        datasource: getNonNumericDatasource(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor({
+        datasource: getNumericDatasourceWithArraySupport(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    describe('static color controls', () => {
+      it('is hidden when dynamic coloring is enabled', () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: { ...metricAccessorState, palette },
+        });
+        expect(staticColorPicker).not.toBeInTheDocument();
+      });
+
+      it('is visible if palette is not defined', () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: { ...metricAccessorState, palette: undefined },
+        });
+        expect(staticColorPicker).toBeInTheDocument();
+      });
+
+      it('fills with default EUI visualization color value', () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: {
+            ...metricAccessorState,
+            palette: undefined,
+            color: undefined,
+          },
+        });
+        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
+      });
+
+      it('fills with default vis text color', async () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: {
+            ...metricAccessorState,
+            palette: undefined,
+            trendlineLayerId: undefined,
+            showBar: false,
+            color: undefined,
+            applyColorTo: 'value',
+          },
+        });
+        expect(staticColorPicker).toHaveValue(euiThemeVars.euiColorVisText0.toUpperCase());
+      });
+
+      it('sets color', async () => {
+        const { typeColor, clearColor } = renderAdditionalSectionEditor({
+          state: { ...metricAccessorState, palette: undefined, color: faker.color.rgb() },
+        });
+
+        const newColor = faker.color.rgb().toUpperCase();
+        await typeColor(newColor);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: newColor }))
+        );
+        await clearColor();
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: undefined }))
+        );
+
+        expect(mockSetState).toHaveBeenCalledTimes(2);
       });
     });
   });

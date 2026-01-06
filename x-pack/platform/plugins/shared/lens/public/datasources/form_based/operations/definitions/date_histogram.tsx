@@ -10,6 +10,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiCode,
@@ -17,17 +18,15 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
+import type {
   AggFunctionsMapping,
   AggParamOption,
   IndexPatternAggRestrictions,
-  search,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
+import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   extendedBoundsToAst,
   intervalOptions,
@@ -36,28 +35,20 @@ import {
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { DateRange } from '../../../../../common/types';
-import { IndexPattern } from '../../../../types';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  IndexPattern,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
-import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
-
-export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'date_histogram';
-  params: {
-    interval: string;
-    ignoreTimeRange?: boolean;
-    includeEmptyRows?: boolean;
-    dropPartials?: boolean;
-  };
-}
 
 function getMultipleDateHistogramsErrorMessage(
   layer: FormBasedLayer,

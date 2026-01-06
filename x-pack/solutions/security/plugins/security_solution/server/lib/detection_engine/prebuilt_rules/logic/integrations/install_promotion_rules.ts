@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger, LogMeta } from '@kbn/core/server';
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
@@ -18,7 +19,9 @@ import type {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
-import { PROMOTION_RULE_TAG } from '../../../../../../common/constants';
+import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';
+import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { getFleetPackageInstallation } from './get_fleet_package_installation';
 
 interface InstallPromotionRulesParams {
   rulesClient: RulesClient;
@@ -26,17 +29,18 @@ interface InstallPromotionRulesParams {
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
   fleetServices: EndpointInternalFleetServicesInterface;
+  logger: Logger;
 }
 
 /**
- * Install or upgrade promotion rules. These rules are needed for the AI4SOC
+ * Install or upgrade promotion rules. These rules are needed for the EASE
  * tier integrations to work (promote alerts from external SIEMs).
  *
  * Note: due to current limitations, the promotion rules cannot be placed in
  * their corresponding packages and are shipped as part of the
  * security_detection_engine package. However, the promotion rules should only
  * be installed if the corresponding integration package is installed. The logic
- * is following: we go through the list of known AI4SOC integrations and check
+ * is following: we go through the list of known EASE integrations and check
  * if their package are installed. Then for installed integrations, we need to
  * find corresponding promotion rules, they are tagged as Promotion, and install
  * or upgrade them to latest versions.
@@ -48,17 +52,23 @@ export async function installPromotionRules({
   ruleAssetsClient,
   ruleObjectsClient,
   fleetServices,
+  logger,
 }: InstallPromotionRulesParams): Promise<RuleBootstrapResults> {
+  logger.debug('installPromotionRules: Promotion rules - installing');
   // Get the list of installed integrations
   const installedIntegrations = new Set(
     (
       await Promise.all(
         SEARCH_AI_LAKE_PACKAGES.map(async (integration) => {
           // We don't care about installation status of the integration as all
-          // AI4SOC integrations are agentless (don't require setting up an
+          // EASE integrations are agentless (don't require setting up an
           // integration policy). So the fact that the corresponding package is
           // installed is enough.
-          const installation = await fleetServices.packages.getInstallation(integration);
+          const installation = await getFleetPackageInstallation(
+            fleetServices,
+            integration,
+            logger
+          );
           return installation ? integration : [];
         })
       )
@@ -70,7 +80,7 @@ export async function installPromotionRules({
   const latestPromotionRules = latestRuleAssets.filter((rule) => {
     // Rule should be tagged as 'Promotion' and should be related to an enabled integration
     return (
-      (rule.tags ?? []).includes(PROMOTION_RULE_TAG) &&
+      isPromotionRule(rule) &&
       rule.related_integrations?.some((integration) =>
         installedIntegrations.has(integration.package)
       )
@@ -90,7 +100,8 @@ export async function installPromotionRules({
     promotionRulesToInstall.map((asset) => ({
       ...asset,
       enabled: true,
-    }))
+    })),
+    logger
   );
 
   const promotionRulesToUpgrade = latestPromotionRules.filter(({ rule_id: ruleId, version }) => {
@@ -99,7 +110,8 @@ export async function installPromotionRules({
   });
   const { results: upgradeResults, errors: upgradeErrors } = await upgradePrebuiltRules(
     detectionRulesClient,
-    promotionRulesToUpgrade
+    promotionRulesToUpgrade,
+    logger
   );
 
   // Cleanup any unknown rules, we don't allow users to install any detection
@@ -137,7 +149,7 @@ export async function installPromotionRules({
     new Map<string, RuleBootstrapError>()
   );
 
-  return {
+  const installationResult = {
     total: latestPromotionRules.length,
     installed: installationResults.length,
     updated: upgradeResults.length,
@@ -145,4 +157,15 @@ export async function installPromotionRules({
     skipped: alreadyUpToDate.length,
     errors: allErrors.size > 0 ? Array.from(allErrors.values()) : [],
   };
+
+  logger.debug(
+    'installPromotionRules: Promotion rules - installation complete:',
+    installationResult as LogMeta
+  );
+
+  return installationResult;
+}
+
+function isPromotionRule(rule: PrebuiltRuleAsset): boolean {
+  return (rule.tags ?? []).some((tag) => PROMOTION_RULE_TAGS.includes(tag));
 }

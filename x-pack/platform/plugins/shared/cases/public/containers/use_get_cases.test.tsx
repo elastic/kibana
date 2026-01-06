@@ -154,9 +154,7 @@ describe('useGetCases', () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases({ filterOptions: { search: '#123' } }), {
-      wrapper: (props) => (
-        <TestProviders {...props} settings={{ displayIncrementalCaseId: true }} />
-      ),
+      wrapper: (props) => <TestProviders {...props} />,
     });
 
     await waitFor(() => {
@@ -167,7 +165,29 @@ describe('useGetCases', () => {
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: '123',
-        searchFields: ['incremental_id'],
+        searchFields: ['incremental_id.text'],
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
+  it('should change search and searchFields when incremental id and title are provided', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(() => useGetCases({ filterOptions: { search: 'test #123' } }), {
+      wrapper: (props) => <TestProviders {...props} />,
+    });
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: 'test #123',
         owner: ['securitySolution'],
       },
       queryParams: DEFAULT_QUERY_PARAMS,

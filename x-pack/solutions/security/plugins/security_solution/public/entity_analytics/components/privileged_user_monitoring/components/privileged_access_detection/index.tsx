@@ -6,9 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiProgress,
+} from '@elastic/eui';
 import React from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@kbn/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PRIVILEGED_USER_ACTIVITY_QUERY_ID } from '../privileged_user_activity/constants';
@@ -17,13 +26,9 @@ import { PrivilegedAccessDetectionChart } from './pad_chart';
 import { usePrivilegedAccessDetectionRoutes } from './pad_routes';
 import { PrivilegedAccessDetectionInstallPrompt } from './pad_install_prompt';
 import { PrivilegedAccessDetectionViewAllAnomaliesButton } from './pad_view_all_anomalies_button';
+import { PrivilegedAccessInfoPopover } from './info_popover';
 
-const TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title',
-  { defaultMessage: 'Top privileged access detection anomalies' }
-);
-
-const PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID = 'privileged-access-detection-query';
+export const PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID = 'privileged-access-detection-query';
 
 const PRIVILEGED_ACCESS_DETECTIONS_STATUS_REFRESH_INTERVAL_IN_MS = 10_000;
 
@@ -63,9 +68,11 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
     padInstallationStatus?.ml_module_setup_status === 'complete';
 
   return (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {padInstallationStatusError && (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.errorStatus',
             {
@@ -122,33 +129,56 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
       )}
 
       {packageInstallationComplete && (
-        <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-access-detections-panel">
-          <HeaderSection
-            toggleStatus={toggleStatus}
-            toggleQuery={setToggleStatus}
-            id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
-            showInspectButton={false}
-            title={TITLE}
-            titleSize="s"
-            outerDirection="column"
-            hideSubtitle
-          >
+        <InspectButtonContainer>
+          <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-access-detections-panel">
+            <HeaderSection
+              toggleStatus={toggleStatus}
+              toggleQuery={setToggleStatus}
+              id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
+              title={
+                <EuiFlexGroup gutterSize="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
+                    defaultMessage="Top privileged access anomalies"
+                  />
+                  <EuiBetaBadge
+                    tooltipContent={i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.technicalPreviewLabelTooltip',
+                      {
+                        defaultMessage:
+                          'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                      }
+                    )}
+                    label={i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.technicalPreviewLabel',
+                      { defaultMessage: 'TECHNICAL PREVIEW' }
+                    )}
+                    iconType="flask"
+                  />
+                  <PrivilegedAccessInfoPopover />
+                </EuiFlexGroup>
+              }
+              titleSize="m"
+              outerDirection="column"
+              hideSubtitle
+            >
+              {toggleStatus && (
+                <EuiFlexGroup gutterSize="s">
+                  <PrivilegedAccessDetectionMLPopover />
+                  <PrivilegedAccessDetectionViewAllAnomaliesButton />
+                </EuiFlexGroup>
+              )}
+            </HeaderSection>
             {toggleStatus && (
-              <EuiFlexGroup gutterSize="s">
-                <PrivilegedAccessDetectionMLPopover />
-                <PrivilegedAccessDetectionViewAllAnomaliesButton />
-              </EuiFlexGroup>
+              <>
+                <PrivilegedAccessDetectionChart
+                  jobIds={padInstallationStatus.jobs.map((eachJob) => eachJob.job_id)}
+                  spaceId={spaceId}
+                />
+              </>
             )}
-          </HeaderSection>
-          {toggleStatus && (
-            <>
-              <PrivilegedAccessDetectionChart
-                jobIds={padInstallationStatus.jobs.map((eachJob) => eachJob.job_id)}
-                spaceId={spaceId}
-              />
-            </>
-          )}
-        </EuiPanel>
+          </EuiPanel>
+        </InspectButtonContainer>
       )}
     </>
   );

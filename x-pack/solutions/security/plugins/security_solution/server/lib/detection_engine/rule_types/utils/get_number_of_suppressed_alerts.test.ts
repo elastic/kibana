@@ -9,7 +9,7 @@ import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 describe('getNumberOfSuppressedAlerts', () => {
   it('should count total number of suppressed alerts in created alerts', () => {
     const createdAlerts = [
@@ -17,7 +17,7 @@ describe('getNumberOfSuppressedAlerts', () => {
       { _id: '2', [ALERT_SUPPRESSION_DOCS_COUNT]: 0 },
       { _id: '3', [ALERT_SUPPRESSION_DOCS_COUNT]: 4 },
       { _id: '4' },
-    ] as Array<SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }>;
+    ] as Array<SuppressionFieldsLatest & DetectionAlertLatest & { _id: string }>;
 
     expect(getNumberOfSuppressedAlerts(createdAlerts, [])).toBe(6);
   });
@@ -28,17 +28,17 @@ describe('getNumberOfSuppressedAlerts', () => {
       { _id: '1', [ALERT_SUPPRESSION_DOCS_COUNT]: 2 },
       { _id: '2', [ALERT_SUPPRESSION_DOCS_COUNT]: 0 },
       { _id: '3', [ALERT_SUPPRESSION_DOCS_COUNT]: 4 },
-    ] as Array<SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }>;
+    ] as Array<SuppressionFieldsLatest & DetectionAlertLatest & { _id: string }>;
 
     expect(getNumberOfSuppressedAlerts([], suppressedAlerts)).toBe(9);
   });
 
   it('should count total number of suppressed alerts', () => {
     const createdAlerts = [{ _id: '1', [ALERT_SUPPRESSION_DOCS_COUNT]: 2 }] as Array<
-      SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }
+      SuppressionFieldsLatest & DetectionAlertLatest & { _id: string }
     >;
     const suppressedAlerts = [{ _id: '3', [ALERT_SUPPRESSION_DOCS_COUNT]: 4 }] as Array<
-      SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }
+      SuppressionFieldsLatest & DetectionAlertLatest & { _id: string }
     >;
     expect(getNumberOfSuppressedAlerts(createdAlerts, suppressedAlerts)).toBe(7);
   });

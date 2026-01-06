@@ -8,7 +8,6 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { AppContextTestRender } from '../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../mock/endpoint';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -62,14 +61,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
 
   beforeEach(() => {
     appContextMock = createAppRootMockRenderer();
-
-    // Enable feature flags by default
-    appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
-      responseActionsSentinelOneGetFileEnabled: true,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-      responseActionsMSDefenderEndpointEnabled: true,
-    });
 
     alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
     renderHook = () =>
@@ -172,39 +163,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         },
         { noAgentSupport: true }
       )
-    );
-  });
-
-  it.each(
-    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint') as Array<
-      Exclude<ResponseActionAgentType, 'endpoint'>
-    >
-  )('should set `isSupported` to `false` for [%s] if feature flag is disabled', (agentType) => {
-    switch (agentType) {
-      case 'sentinel_one':
-        appContextMock.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: false });
-        break;
-      case 'crowdstrike':
-        appContextMock.setExperimentalFlag({
-          responseActionsCrowdstrikeManualHostIsolationEnabled: false,
-        });
-        break;
-      case 'microsoft_defender_endpoint':
-        appContextMock.setExperimentalFlag({
-          responseActionsMSDefenderEndpointEnabled: false,
-        });
-        break;
-      default:
-        throw new Error(`Unknown agent type: ${agentType}`);
-    }
-
-    alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType);
-
-    expect(renderHook().result.current).toEqual(
-      getExpectedResult({
-        isSupported: false,
-        details: { agentType },
-      })
     );
   });
 });

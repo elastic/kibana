@@ -18,7 +18,6 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createMuteAlertInstanceTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -64,7 +63,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -128,7 +131,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -189,7 +196,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -250,7 +261,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 

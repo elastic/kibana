@@ -11,14 +11,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 import { PageTemplate } from '../page_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { TabMenuItem } from '../page_template';
+import type { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
+import type { SetupModeProps } from '../../../components/renderers/setup_mode';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 
@@ -90,7 +91,13 @@ export const ClusterOverview: React.FC<{}> = () => {
   }, [clusters, generateBreadcrumbs]);
 
   return (
-    <PageTemplate title={title} pageTitle={pageTitle} tabs={tabs} getPageData={getPageData}>
+    <PageTemplate
+      title={title}
+      pageTitle={pageTitle}
+      tabs={tabs}
+      getPageData={getPageData}
+      showAutoOpsPromotion={true}
+    >
       <SetupModeRenderer
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>

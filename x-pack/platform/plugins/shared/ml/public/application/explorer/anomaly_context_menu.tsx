@@ -184,7 +184,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   );
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<AnomalyChartsEmbeddableState> = {
@@ -200,8 +200,8 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -234,6 +234,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             }
           >
             <EuiFieldNumber
+              isInvalid={!isMaxSeriesToPlotValid}
               data-test-subj="mlAnomalyChartsInitializerMaxSeries"
               id="selectMaxSeriesToPlot"
               name="selectMaxSeriesToPlot"

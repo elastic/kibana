@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../helpers';
 
-// eslint-disable-next-line import/no-default-export
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Actions', () => {
     before(async () => buildUp(getService));
@@ -32,11 +31,16 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./connector_types/stack/webhook'));
     loadTestFile(require.resolve('./connector_types/stack/preconfigured_alert_history_connector'));
     loadTestFile(require.resolve('./type_not_enabled'));
+    loadTestFile(require.resolve('./deprecated'));
     loadTestFile(require.resolve('./schedule_unsecured_action'));
     loadTestFile(require.resolve('./execute_unsecured_action'));
     loadTestFile(require.resolve('./get_all_unsecured_actions'));
     loadTestFile(require.resolve('./check_registered_connector_types'));
     loadTestFile(require.resolve('./max_queued_actions_circuit_breaker'));
+
+    loadTestFile(require.resolve('./single_file_connector_types/create'));
+    loadTestFile(require.resolve('./single_file_connector_types/execute'));
+    loadTestFile(require.resolve('./single_file_connector_types/get_axios_instance'));
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));

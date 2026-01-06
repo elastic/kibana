@@ -37,13 +37,18 @@ export interface HighlightedFieldsTableRow {
     values: string[] | null | undefined;
     /**
      * Maintain backwards compatibility // TODO remove when possible
-     * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
+     * Only needed if alerts page flyout (which uses CellActions), NOT in EASE alert summary flyout.
      */
     scopeId: string;
     /**
      * If true, cell actions will be shown on hover
      */
     showCellActions: boolean;
+    /**
+     * The indexName to be passed to the flyout preview panel
+     * when clicking on "Source event" id
+     */
+    ancestorsIndexName?: string;
   };
 }
 
@@ -76,6 +81,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       scopeId: string;
       isPreview: boolean;
       showCellActions: boolean;
+      ancestorsIndexName?: string;
     }) => (
       <>
         {description.showCellActions ? (
@@ -86,6 +92,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               originalField={description.originalField}
               scopeId={description.scopeId}
               showPreview={true}
+              ancestorsIndexName={description.ancestorsIndexName}
             />
           </CellActions>
         ) : (
@@ -111,24 +118,29 @@ export interface HighlightedFieldsProps {
   investigationFields: string[];
   /**
    * Maintain backwards compatibility // TODO remove when possible
-   * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
+   * Only needed if alerts page flyout (which uses CellActions), NOT in EASE alert summary flyout.
    */
   scopeId?: string;
   /**
    * If true, cell actions will be shown on hover.
-   * This is false for the AI for SOC alert summary page and true for the alerts page.
+   * This is false for EASE alert summary page and true for the alerts page.
    */
   showCellActions: boolean;
   /**
-   * If true, the edit button will be shown on hover (granted that the editHighlightedFieldsEnabled is also turned on).
-   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   * If true, the edit button will be shown on hover.
+   * This is false by default (for EASE alert summary page) and will be true for the alerts page.
    */
   showEditButton?: boolean;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  ancestorsIndexName?: string;
 }
 
 /**
  * Component that displays the highlighted fields in the right panel under the Investigation section.
- * It is used in both in the alerts page and the AI for SOC alert summary page. The latter has no CellActions enabled.
+ * It is used in both in the alerts page and EASE alert summary page. The latter has no CellActions enabled.
  */
 export const HighlightedFields = memo(
   ({
@@ -137,6 +149,7 @@ export const HighlightedFields = memo(
     scopeId = '',
     showCellActions,
     showEditButton = false,
+    ancestorsIndexName,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
 
@@ -144,9 +157,16 @@ export const HighlightedFields = memo(
       dataFormattedForFieldBrowser,
       investigationFields,
     });
+
     const items = useMemo(
-      () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions),
-      [highlightedFields, scopeId, showCellActions]
+      () =>
+        convertHighlightedFieldsToTableRow(
+          highlightedFields,
+          scopeId,
+          showCellActions,
+          ancestorsIndexName
+        ),
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
     );
 
     return (
@@ -181,7 +201,7 @@ export const HighlightedFields = memo(
               columns={columns}
               compressed
               loading={isEditLoading}
-              message={
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
                   defaultMessage="There's no highlighted fields for this alert."

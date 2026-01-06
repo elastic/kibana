@@ -10,11 +10,12 @@
 import Path from 'path';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { Cluster, ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
+import { Cluster } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
-import { CliArgs } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
 import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { systemIndicesSuperuser } from '@kbn/test';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
@@ -161,7 +162,7 @@ const getServerlessDefault = () => {
   };
 };
 
-function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+export function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   return createRoot(defaultsDeep(settings, getServerlessDefault()), {
     ...cliArgs,
     serverless: true,

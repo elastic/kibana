@@ -265,6 +265,7 @@ export interface DiffViewProps extends Partial<DiffProps> {
     https://github.com/otakustay/react-diff-view/blob/8a2dbdf97af0890aff6e563ed435e7da13c5e7b1/README.md#parse-diff-text
   */
   zip?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const DiffView = ({
@@ -273,6 +274,7 @@ export const DiffView = ({
   diffMethod = DiffMethod.WORDS_WITH_SPACE,
   viewType = 'split',
   zip = false,
+  'data-test-subj': dataTestSubj,
 }: DiffViewProps) => {
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
@@ -308,23 +310,25 @@ export const DiffView = ({
 
   return (
     <CustomStyles>
-      <Diff
-        /*
+      <div data-test-subj={dataTestSubj}>
+        <Diff
+          /*
           "diffType": can be either 'add', 'delete', 'modify', 'rename' or 'copy'.
           Passing 'add' or 'delete' would skip rendering one of the sides in split view.
         */
-        diffType={diffFile.type}
-        viewType={viewType}
-        hunks={hunks}
-        renderGutter={renderGutter}
-        tokens={tokens}
-        className={tableClassName}
-        gutterClassName={GUTTER_CLASS_NAME}
-        codeClassName={CODE_CLASS_NAME}
-      >
-        {/* eslint-disable-next-line @typescript-eslint/no-shadow */}
-        {(hunks) => <Hunks hunks={hunks} oldSource={oldSource} expandRange={expandRange} />}
-      </Diff>
+          diffType={diffFile.type}
+          viewType={viewType}
+          hunks={hunks}
+          renderGutter={renderGutter}
+          tokens={tokens}
+          className={tableClassName}
+          gutterClassName={GUTTER_CLASS_NAME}
+          codeClassName={CODE_CLASS_NAME}
+        >
+          {/* eslint-disable-next-line @typescript-eslint/no-shadow */}
+          {(hunks) => <Hunks hunks={hunks} oldSource={oldSource} expandRange={expandRange} />}
+        </Diff>
+      </div>
     </CustomStyles>
   );
 };

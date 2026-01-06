@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as v1 from './v1';
-export * from './latest';
+export type * as v1 from './v1';
+export type * from './latest';

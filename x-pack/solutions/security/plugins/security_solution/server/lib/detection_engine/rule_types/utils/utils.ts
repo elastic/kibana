@@ -36,6 +36,7 @@ import type {
   ElasticsearchClient,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -68,11 +69,11 @@ import type { BaseHit, SearchTypes } from '../../../../../common/detection_engin
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
-  BaseFieldsLatest,
+  DetectionAlertLatest,
   DetectionAlert,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
@@ -89,7 +90,6 @@ import {
   SECURITY_QUERY_SPAN_S,
 } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
-
 export const MAX_RULE_GAP_RATIO = 4;
 
 export const hasReadIndexPrivileges = async (args: {
@@ -299,15 +299,26 @@ export const getNumCatchupIntervals = ({
 export const getExceptions = async ({
   client,
   lists,
+  shouldFilterOutEndpointExceptions,
 }: {
   client: ExceptionListClient;
   lists: ListArray;
+  shouldFilterOutEndpointExceptions: boolean;
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
-    if (lists.length > 0) {
+    const filteredLists = shouldFilterOutEndpointExceptions
+      ? lists.filter(
+          ({ list_id: listId }) =>
+            !(ENDPOINT_ARTIFACT_LIST_IDS as readonly string[]).includes(listId)
+        )
+      : lists;
+
+    if (filteredLists.length > 0) {
       try {
-        const listIds = lists.map(({ list_id: listId }) => listId);
-        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+        const listIds = filteredLists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = filteredLists.map(
+          ({ namespace_type: namespaceType }) => namespaceType
+        );
 
         // Stream the results from the Point In Time (PIT) finder into this array
         let items: ExceptionListItemSchema[] = [];
@@ -427,7 +438,13 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
+    return {
+      tuples,
+      remainingGap: moment.duration(0),
+      warningStatusMessage,
+      originalFrom,
+      originalTo,
+    };
   }
 
   const gap = getGapBetweenRuns({
@@ -469,6 +486,8 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    originalFrom,
+    originalTo,
   };
 };
 
@@ -672,7 +691,7 @@ export const addToSearchAfterReturn = ({
   next,
 }: {
   current: SearchAfterAndBulkCreateReturnType;
-  next: Omit<GenericBulkCreateResponse<BaseFieldsLatest>, 'alertsWereTruncated'>;
+  next: Omit<GenericBulkCreateResponse<DetectionAlertLatest>, 'alertsWereTruncated'>;
 }) => {
   current.success = current.success && next.success;
   current.createdSignalsCount += next.createdItemsCount;
@@ -899,16 +918,16 @@ export type RuleWithInMemorySuppression =
 
 export interface SequenceSuppressionTermsAndFieldsParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
-  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
-  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest>;
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
   shellAlert: WrappedEqlShellOptionalSubAlertsType,
-  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>,
   buildReasonMessage: BuildReasonMessage
-) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
-  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+) => WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 };
 
 /**
@@ -929,10 +948,10 @@ export const buildShellAlertSuppressionTermsAndFields = ({
   sharedParams,
   shellAlert,
   buildingBlockAlerts,
-}: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
-  EqlShellFieldsLatest & SuppressionFieldsLatest
+}: SequenceSuppressionTermsAndFieldsParams): WrappedAlert<
+  EqlShellAlertLatest & SuppressionFieldsLatest
 > & {
-  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
     sharedParams;
@@ -969,12 +988,12 @@ export const buildShellAlertSuppressionTermsAndFields = ({
     [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
   };
 
-  merge<EqlShellFieldsLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
+  merge<EqlShellAlertLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
 
   return {
     _id: shellAlert._id,
     _index: shellAlert._index,
-    _source: shellAlert._source as EqlShellFieldsLatest & SuppressionFieldsLatest,
+    _source: shellAlert._source as EqlShellAlertLatest & SuppressionFieldsLatest,
     subAlerts: buildingBlockAlerts,
   };
 };

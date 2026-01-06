@@ -47,6 +47,7 @@ export const indexCase = async (
     },
     settings: {
       syncAlerts: true,
+      extractObservables: true,
     },
     owner: 'securitySolution',
     ...newCase,

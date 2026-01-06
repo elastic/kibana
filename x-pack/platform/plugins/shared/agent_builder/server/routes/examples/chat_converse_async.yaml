@@ -1,0 +1,33 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        converseAsyncRequestExample:
+          description: "Example request to send a message to the agent as a part of the conversation"
+          value:
+            input: "Hello"
+            agent_id: "elastic-ai-agent"
+            conversation_id: "c250305b-1929-4248-b568-b9e3f065fda5"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      text/event-stream:
+        examples:
+          converseAsyncResponseExample:
+            description: "Example stream containing the chain of events representing a conversation with the agent"
+            value:
+              - event: conversation_id_set
+                data: {"data":{"conversation_id":"c250305b-1929-4248-b568-b9e3f065fda5"}}
+              
+              - event: reasoning
+                data: {"data":{"reasoning":"Starting with a general search to understand what content is available."}}
+              
+              - event: tool_call
+                data: {"data":{"tool_call_id":"tooluse__2aJELgyRYqD8SDOKSiwtg","tool_id":"platform.core.search","params":{"query":"latest documents"}}}
+              
+              - event: tool_result
+                data: {"data":{"tool_call_id":"tooluse__2aJELgyRYqD8SDOKSiwtg","results":[{"type":"error","data":{"message":"Could not figure out which index to use"}}]}}
+              
+              - event: round_complete
+                data: {"data":{"round":{"id":"a5692d54-bc06-4a6e-aea1-412779c73f66","input":{"message":"Hello"},"response":{"message":"Hello! How can I help you today?"}}}}

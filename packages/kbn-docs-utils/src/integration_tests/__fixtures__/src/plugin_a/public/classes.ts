@@ -9,7 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { FnTypeWithGeneric, ImAType } from './types';
+import type { FnTypeWithGeneric, ImAType } from './types';
 
 /**
  * @internal

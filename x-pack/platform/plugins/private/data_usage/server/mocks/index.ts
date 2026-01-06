@@ -6,11 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { DeepReadonly } from 'utility-types';
-import { PluginInitializerContext } from '@kbn/core/server';
-import { Observable } from 'rxjs';
-import { DataUsageContext } from '../types';
-import { DataUsageConfigType } from '../config';
+import type { DeepReadonly } from 'utility-types';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { DataUsageContext } from '../types';
+import type { DataUsageConfigType } from '../config';
 
 export interface MockedDataUsageContext extends DataUsageContext {
   logFactory: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;

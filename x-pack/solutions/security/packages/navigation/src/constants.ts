@@ -29,4 +29,12 @@ export enum SecurityGroupName {
   assets = 'securityGroup:assets',
   entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
+  launchpad = 'securityGroup:launchpad',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'securityGroup:alertDetections',
 }
+
+/** Feature flag for the alerts and attacks alignment feature */
+export const ATTACKS_ALERTS_ALIGNMENT_ENABLED = 'securitySolution.attacksAlertsAlignment' as const;

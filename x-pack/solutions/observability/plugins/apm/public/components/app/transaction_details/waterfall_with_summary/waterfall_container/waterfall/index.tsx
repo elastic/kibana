@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -19,7 +20,6 @@ import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import type {
   IWaterfall,
-  IWaterfallGetRelatedErrorsHref,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
@@ -88,7 +88,7 @@ export function Waterfall({
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryTransaction);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction?.transaction.marks?.agent);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   const timelineMargins = useMemo(() => {
@@ -107,6 +107,7 @@ export function Waterfall({
     <Container>
       {waterfall.exceedsMax && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="apmWaterfallSizeWarning"
           color="warning"
           size="s"

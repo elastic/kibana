@@ -11,7 +11,7 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
 export function InspectorHeaderLink() {

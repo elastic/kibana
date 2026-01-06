@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 /**
- * Copied from x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/refresh_index.ts
+ * Copied from x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils/refresh_index.ts
  *
  * Refresh an index, making changes available to search.
  * Reusable utility which refreshes all saved object indices, to make them available for search, especially

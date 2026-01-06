@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, FC, CSSProperties } from 'react';
+import type { FC, CSSProperties } from 'react';
+import React, { useCallback } from 'react';
 
 interface Props {
   render: (element: HTMLElement) => void;

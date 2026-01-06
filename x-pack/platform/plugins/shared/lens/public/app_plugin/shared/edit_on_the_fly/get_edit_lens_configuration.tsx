@@ -16,22 +16,29 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  LensStoreDeps,
+  LensDocument,
+} from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import type { LensRootStore } from '../../../state_management';
+import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
 import {
   makeConfigureStore,
-  LensRootStore,
   loadInitial,
   initExisting,
   initEmpty,
-  type LensStoreDeps,
+  setSelectedLayerId,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { SavedObjectIndexStore, type LensDocument } from '../../../persistence';
+import { LensDocumentService } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
+import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -76,9 +83,17 @@ export const updatingMiddleware =
       !isEqual(prevVisualization, visualization)
     ) {
       // ignore the actions that initialize the store with the state from the attributes
-      if (initExisting.match(action) || initEmpty.match(action)) {
+      // selectedLayerId is UI runtime state only and shouldn't trigger the updater
+      if (
+        initExisting.match(action) ||
+        initEmpty.match(action) ||
+        setSelectedLayerId.match(action)
+      ) {
         return;
       }
+      // The user is updating the Visualization parameters,
+      // this means he is choosing this chart
+      saveUserChartTypeToSessionStorage(visualization.activeId);
 
       updater(
         datasourceStates[activeDatasourceId].state,
@@ -116,7 +131,7 @@ const MaybeWrapper = ({
       size="s"
       hideCloseButton
       css={css`
-        clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+        clip-path: none; // need to override the eui-flyout clip-path for dnd outside of the flyout
       `}
     >
       {children}
@@ -134,7 +149,7 @@ export async function getEditLensConfiguration(
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,
-    getLensAttributeService(coreStart, startDependencies)
+    getLensAttributeService(coreStart.http)
   );
 
   return ({
@@ -159,6 +174,7 @@ export async function getEditLensConfiguration(
     hideTimeFilterInfo,
     isReadOnly,
     parentApi,
+    applyButtonLabel,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -172,8 +188,8 @@ export async function getEditLensConfiguration(
      */
     const saveByRef = useCallback(
       async (attrs: LensDocument) => {
-        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
-        await savedObjectStore.save({
+        const lensDocumentService = new LensDocumentService(lensServices.http);
+        await lensDocumentService.save({
           ...attrs,
           savedObjectId,
           type: DOC_TYPE,
@@ -215,10 +231,8 @@ export async function getEditLensConfiguration(
       datasourceId,
       coreStart,
       startDependencies,
-      visualizationMap,
       dataLoading$,
       lensAdapters,
-      datasourceMap,
       saveByRef,
       savedObjectId,
       updateByRefInput,
@@ -234,6 +248,7 @@ export async function getEditLensConfiguration(
       isReadOnly,
       parentApi,
       panelId,
+      applyButtonLabel,
     };
 
     return (
@@ -241,9 +256,16 @@ export async function getEditLensConfiguration(
         <Provider store={lensStore}>
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaContextProvider services={lensServices}>
-              <RootDragDropProvider>
-                <LensEditConfigurationFlyout {...configPanelProps} />
-              </RootDragDropProvider>
+              <EditorFrameServiceProvider
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+              >
+                <RootDragDropProvider>
+                  {coreStart.rendering.addContext(
+                    <LensEditConfigurationFlyout {...configPanelProps} />
+                  )}
+                </RootDragDropProvider>
+              </EditorFrameServiceProvider>
             </KibanaContextProvider>
           </KibanaRenderContextProvider>
         </Provider>

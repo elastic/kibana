@@ -12,11 +12,11 @@ import { TableListViewTable } from '@kbn/content-management-table-list-view-tabl
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
@@ -24,8 +24,9 @@ import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
-import { ISessionService, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { ISessionService } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import { css } from '@emotion/react';
 import { GroupEditorFlyout } from './group_editor_flyout';
 

@@ -23,7 +23,7 @@ import {
   clearLog,
   currentVersion,
   nextMinor,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import {
   BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
   BASELINE_DOCUMENTS_PER_TYPE_LARGE,
@@ -33,9 +33,8 @@ import {
   getReindexingBaselineTypes,
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
-import { delay } from '../test_utils';
-import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
+} from '@kbn/migrator-test-kit/fixtures';
+import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
 
@@ -46,12 +45,7 @@ describe('v2 migration', () => {
     esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
   });
 
-  afterAll(async () => {
-    if (esServer) {
-      await esServer.stop();
-      await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
-    }
-  });
+  afterAll(async () => await esServer?.stop());
 
   describe('to the current stack version', () => {
     let upToDateKit: KibanaMigratorTestKit;

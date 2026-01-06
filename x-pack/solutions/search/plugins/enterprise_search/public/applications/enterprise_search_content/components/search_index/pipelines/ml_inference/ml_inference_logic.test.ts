@@ -7,10 +7,12 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import { HttpResponse } from '@kbn/core/public';
+import type { HttpResponse } from '@kbn/core/public';
 
-import { ErrorResponse, Status } from '../../../../../../../common/types/api';
-import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import type { ErrorResponse } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
+import type { MlModel } from '../../../../../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
@@ -23,11 +25,8 @@ import { FetchMlInferencePipelinesApiLogic } from '../../../../api/pipelines/fet
 import { SimulateExistingMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
 import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
-import {
-  MLInferenceLogic,
-  EMPTY_PIPELINE_CONFIGURATION,
-  MLInferenceProcessorsValues,
-} from './ml_inference_logic';
+import type { MLInferenceProcessorsValues } from './ml_inference_logic';
+import { MLInferenceLogic, EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
 import { AddInferencePipelineSteps } from './types';
 
 const DEFAULT_VALUES: MLInferenceProcessorsValues = {

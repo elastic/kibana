@@ -50,11 +50,6 @@ import {
   getCaseSavedObjectsFromES,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
-import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
@@ -70,6 +65,11 @@ import {
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/users';
 import { getAlertById } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/alerts';
 import type { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '@kbn/detections-response-ftr-services';
 import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,
@@ -547,14 +547,14 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('alerts', () => {
       describe('security_solution', () => {
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
           await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
         });
 
         const createCommentAndRefreshIndex = async ({
@@ -592,12 +592,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bulkCreateAlertsAndVerifyAlertStatus = async ({
           syncAlerts,
+          extractObservables,
           expectedAlertStatus,
           caseAuth,
           attachmentExpectedHttpCode,
           attachmentAuth,
         }: {
           syncAlerts: boolean;
+          extractObservables: boolean;
           expectedAlertStatus: string;
           caseAuth?: { user: User; space: string | null };
           attachmentExpectedHttpCode?: number;
@@ -607,7 +609,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertestWithoutAuth,
             {
               ...postCaseReq,
-              settings: { syncAlerts },
+              settings: { syncAlerts, extractObservables },
             },
             200,
             caseAuth
@@ -652,7 +654,7 @@ export default ({ getService }: FtrProviderContext): void => {
             [...Array(totalCases).keys()].map((index) =>
               createCase(supertest, {
                 ...postCaseReq,
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               })
             )
           );
@@ -679,6 +681,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should change the status of the alert if sync alert is on', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'acknowledged',
           });
         });
@@ -686,6 +689,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should NOT change the status of the alert if sync alert is off', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: false,
+            extractObservables: false,
             expectedAlertStatus: 'open',
           });
         });
@@ -693,6 +697,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should change the status of the alert when the user has write access to the indices and only read access to the siem solution', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'acknowledged',
             caseAuth: {
               user: superUser,
@@ -705,6 +710,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should NOT change the status of the alert when the user does NOT have access to the alert', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'open',
             caseAuth: {
               user: superUser,
@@ -718,6 +724,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should NOT change the status of the alert when the user has read access to the kibana feature but no read access to the ES index', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'open',
             caseAuth: {
               user: superUser,
@@ -759,7 +766,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           await createCommentAndRefreshIndex({
@@ -775,7 +782,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -798,7 +805,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -821,7 +828,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -845,11 +852,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const apmIndex = '.alerts-observability.apm.alerts';
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {
@@ -858,7 +865,7 @@ export default ({ getService }: FtrProviderContext): void => {
               createCase(supertest, {
                 ...postCaseReq,
                 owner: 'observabilityFixture',
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               })
             )
           );
@@ -936,7 +943,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           await createComment({
@@ -962,7 +969,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               ...postCaseReq,
               owner: 'observabilityFixture',
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -992,7 +999,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               ...postCaseReq,
               owner: 'observabilityFixture',
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }

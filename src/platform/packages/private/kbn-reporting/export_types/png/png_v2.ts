@@ -8,19 +8,10 @@
  */
 
 import apm from 'elastic-apm-node';
-import {
-  finalize,
-  fromEventPattern,
-  lastValueFrom,
-  map,
-  mergeMap,
-  Observable,
-  of,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { finalize, fromEventPattern, lastValueFrom, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -30,17 +21,13 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
-import {
-  JobParamsPNGV2,
-  PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-  TaskPayloadPNGV2,
-} from '@kbn/reporting-export-types-png-common';
+import type { JobParamsPNGV2, TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
+import { PNG_JOB_TYPE_V2, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
 import {
   ExportType,
   getFullRedirectAppUrl,
   REPORTING_TRANSACTION_TYPE,
-  RunTaskOpts,
 } from '@kbn/reporting-server';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
@@ -92,7 +79,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadPNGV2>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
@@ -152,7 +139,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
               }, [] as string[]),
             })),
             tap(({ buffer }) => {
-              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
+              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`, { tags: [jobId] });
               apmTrans.setLabel('byte-length', buffer.byteLength, false);
             }),
             finalize(() => {
@@ -167,7 +154,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         metrics: { png: metrics },
         warnings,
       })),
-      tap({ error: (error) => logger.error(error) }),
+      tap({ error: (error) => logger.error(error, { tags: [jobId] }) }),
       finalize(() => apmGeneratePng?.end())
     );
 

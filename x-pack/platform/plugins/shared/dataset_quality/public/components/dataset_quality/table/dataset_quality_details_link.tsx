@@ -6,14 +6,12 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import {
-  DATA_QUALITY_DETAILS_LOCATOR_ID,
-  DataQualityDetailsLocatorParams,
-} from '@kbn/deeplinks-observability';
+import type { DataQualityDetailsLocatorParams } from '@kbn/deeplinks-observability';
+import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
-import { TimeRangeConfig } from '../../../../common/types';
+import type { TimeRangeConfig } from '../../../../common/types';
 
 export const DatasetQualityDetailsLink = React.memo(
   ({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -17,6 +18,7 @@ interface OwnProps {
   onSelectAll: () => void;
   onClearSelection: () => void;
   bulkActionItems: AlertTableContextMenuItem[];
+  bulkActionPanels: EuiContextMenuPanelDescriptor[];
 }
 
 const BulkActionsContainer = styled.div`
@@ -36,6 +38,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   onSelectAll,
   onClearSelection,
   bulkActionItems,
+  bulkActionPanels,
 }) => {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -67,8 +70,9 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
         id: 0,
         items: bulkActionItems,
       },
+      ...bulkActionPanels,
     ],
-    [bulkActionItems]
+    [bulkActionItems, bulkActionPanels]
   );
 
   return (

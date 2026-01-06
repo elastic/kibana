@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
-  DeprecatedColorMappingConfig,
   convertToRawColorMappings,
   getColumnMetaFn,
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
-import { GeneralDatasourceStates } from '../../../../state_management';
-import { XYDataLayerConfig, XYLayerConfig, XYState } from '../../types';
+import type { XYDataLayerConfig, XYLayerConfig, XYState } from '../../types';
 
 /** @deprecated */
 interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {

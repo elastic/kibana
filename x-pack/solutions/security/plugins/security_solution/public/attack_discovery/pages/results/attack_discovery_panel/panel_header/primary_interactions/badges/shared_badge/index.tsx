@@ -21,11 +21,10 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import * as i18n from './translations';
 import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
 import { useInvalidateFindAttackDiscoveries } from '../../../../../../use_find_attack_discoveries';
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
-import { useKibanaFeatureFlags } from '../../../../../../use_kibana_feature_flags';
-import * as i18n from './translations';
 
 const LIST_PROPS = {
   isVirtualized: false,
@@ -41,7 +40,6 @@ interface SharedBadgeOptionData {
 }
 
 const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
 
@@ -156,7 +154,6 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         const visibility = newOptions[0].checked === 'on' ? 'not_shared' : 'shared';
 
         await attackDiscoveryBulk({
-          attackDiscoveryAlertsEnabled,
           ids: [attackDiscovery.id],
           visibility,
         });
@@ -174,12 +171,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         invalidateFindAttackDiscoveries();
       }
     },
-    [
-      attackDiscovery,
-      attackDiscoveryAlertsEnabled,
-      attackDiscoveryBulk,
-      invalidateFindAttackDiscoveries,
-    ]
+    [attackDiscovery, attackDiscoveryBulk, invalidateFindAttackDiscoveries]
   );
 
   const allItemsDisabled = useMemo(() => items.every((item) => item.disabled), [items]);

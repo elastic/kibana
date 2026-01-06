@@ -9,7 +9,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import {
+import type {
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistry,
 } from './feature_catalogue_registry';

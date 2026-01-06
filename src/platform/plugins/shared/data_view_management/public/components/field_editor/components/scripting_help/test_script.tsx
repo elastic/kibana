@@ -9,6 +9,7 @@
 
 import React, { Component, Fragment } from 'react';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -18,17 +19,17 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Query, buildEsQuery } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContextValue } from '../../../../types';
-import { ExecuteScript } from '../../types';
+import type { IndexPatternManagmentContextValue } from '../../../../types';
+import type { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
   indexPattern: DataView;
@@ -128,6 +129,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     if (previewData.error) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('indexPatternManagement.testScript.errorMessage', {
             defaultMessage: `There's an error in your script`,
           })}

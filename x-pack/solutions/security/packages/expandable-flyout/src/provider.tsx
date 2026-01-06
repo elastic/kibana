@@ -6,11 +6,12 @@
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
-import { FlyoutPanels } from './store/state';
+import type { FlyoutPanels } from './store/state';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
 import { Context, selectNeedsSync, store, useDispatch, useSelector } from './store/redux';
 import { urlChangedAction } from './store/actions';

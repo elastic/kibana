@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import {
+import { ALERT_GROUPING, ALERT_REASON } from '@kbn/rule-data-utils';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type {
   AlertPendingStatusMetaData,
   AlertStatusMetaData,
   MissingPingMonitorInfo,
@@ -17,7 +17,7 @@ import {
 import { getConditionType } from '../../../common/rules/status_rule';
 import { AND_LABEL, getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
-import { MonitorSummaryStatusRule } from './types';
+import type { MonitorSummaryStatusRule } from './types';
 import {
   MONITOR_ID,
   MONITOR_TYPE,
@@ -31,7 +31,7 @@ import {
   SERVICE_NAME,
   ERROR_STACK_TRACE,
 } from '../../../common/field_names';
-import { OverviewPing } from '../../../common/runtime_types';
+import type { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 
 export const getMonitorAlertDocument = (
@@ -39,7 +39,8 @@ export const getMonitorAlertDocument = (
   locationNames: string[],
   locationIds: string[],
   useLatestChecks: boolean,
-  threshold: number
+  threshold: number,
+  grouping?: Record<string, unknown>
 ) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
@@ -62,6 +63,8 @@ export const getMonitorAlertDocument = (
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
+  'monitor.failed_step_info': monitorSummary.failedStepInfo,
+  ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
 });
 
 type Reason = 'pending' | 'down' | 'recovered';
@@ -96,6 +99,7 @@ export interface MonitorSummaryData {
     down: number;
   };
   params?: StatusRuleParams;
+  failedStepInfo?: string;
 }
 
 export const getMonitorSummary = ({
@@ -107,6 +111,7 @@ export const getMonitorSummary = ({
   reason,
   checks,
   params,
+  failedStepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const { downThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
@@ -173,6 +178,7 @@ export const getMonitorSummary = ({
     downThreshold,
     timestamp,
     monitorTags: monitorInfo.tags,
+    failedStepInfo,
   };
 };
 
@@ -207,7 +213,7 @@ export const getUngroupedReasonMessage = ({
             '{downCount} {downCount, plural, one {time} other {times}} from {locName}',
           values: {
             locName:
-              c.ping?.observer.geo?.name ||
+              c.latestPing?.observer.geo?.name ||
               ('monitorInfo' in c && c.monitorInfo.observer.geo.name) ||
               c.locationId,
             downCount,
@@ -360,3 +366,70 @@ export const UNAVAILABLE_LABEL = i18n.translate(
 export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
   defaultMessage: 'Host',
 });
+
+const MAX_SCRIPT_LENGTH = 200;
+
+/**
+ * Formats step information for display in alert messages
+ */
+export const formatStepInformation = (
+  stepInfo: {
+    stepName?: string;
+    scriptSource?: string;
+    stepNumber?: number;
+  } | null
+): string => {
+  if (!stepInfo) {
+    return '';
+  }
+
+  const parts: string[] = [];
+
+  // Format: "Step: 1. Step name"
+  if (stepInfo.stepNumber !== undefined && stepInfo.stepName) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.step', {
+        defaultMessage: '\n- Step: {stepNumber}. {stepName}  ',
+        values: {
+          stepNumber: stepInfo.stepNumber,
+          stepName: stepInfo.stepName,
+        },
+      })
+    );
+  } else if (stepInfo.stepName) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNameOnly', {
+        defaultMessage: '\n- Step: {stepName}  ',
+        values: {
+          stepName: stepInfo.stepName,
+        },
+      })
+    );
+  } else if (stepInfo.stepNumber !== undefined) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNumberOnly', {
+        defaultMessage: '\n- Step: {stepNumber}  ',
+        values: {
+          stepNumber: stepInfo.stepNumber,
+        },
+      })
+    );
+  }
+
+  if (stepInfo.scriptSource) {
+    // Limit script source to first 200 characters to avoid too long messages
+    const truncatedScript = stepInfo.scriptSource.substring(0, MAX_SCRIPT_LENGTH);
+    const script =
+      stepInfo.scriptSource.length > MAX_SCRIPT_LENGTH ? `${truncatedScript}...` : truncatedScript;
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepScript', {
+        defaultMessage: '\n- Step script: {script}  ',
+        values: {
+          script,
+        },
+      })
+    );
+  }
+
+  return parts.join('');
+};

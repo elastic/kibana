@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
 
 interface UnvalidatedMessage {
   content: string;
+  refusal?: string;
   tool_calls: UnvalidatedToolCall[];
 }
 
@@ -19,6 +20,9 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
   const message = chunks.reduce<UnvalidatedMessage>(
     (prev, chunk) => {
       prev.content += chunk.content ?? '';
+      if (chunk.refusal) {
+        prev.refusal = chunk.refusal;
+      }
 
       chunk.tool_calls?.forEach((toolCall) => {
         let prevToolCall = prev.tool_calls[toolCall.index];

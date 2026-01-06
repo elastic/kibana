@@ -2,7 +2,7 @@
 
 exports[`HeaderSection it renders 1`] = `
 .c0 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }

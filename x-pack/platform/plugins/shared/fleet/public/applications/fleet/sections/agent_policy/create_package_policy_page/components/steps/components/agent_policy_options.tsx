@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
-import { EuiIcon, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -140,16 +140,16 @@ export function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
 
               return {
                 append: isAPMPackageAndDataOutputIsLogstash ? (
-                  <EuiToolTip
+                  <EuiIconTip
                     content={
                       <FormattedMessage
                         id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
                         defaultMessage="Logstash output for integrations is not supported with APM"
                       />
                     }
-                  >
-                    <EuiIcon size="s" type="warningFilled" />
-                  </EuiToolTip>
+                    type="warningFilled"
+                    size="s"
+                  />
                 ) : null,
                 key: policy.id,
                 label: policy.name,

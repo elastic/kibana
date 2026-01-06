@@ -1,0 +1,336 @@
+{
+  "id": "chatDataRegistry",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "chatDataRegistry",
+      "id": "def-public.ChatDataRegistryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ChatDataRegistryPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/chat_data_registry/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "chatDataRegistry",
+      "id": "def-public.ChatDataRegistryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ChatDataRegistryPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/chat_data_registry/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "chatDataRegistry",
+        "id": "def-server.DataCatalog",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataCatalog",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "chatDataRegistry",
+            "id": "def-server.DataCatalog.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(dataTypeId: string) => ",
+              {
+                "pluginId": "chatDataRegistry",
+                "scope": "server",
+                "docId": "kibChatDataRegistryPluginApi",
+                "section": "def-server.DataTypeDefinition",
+                "text": "DataTypeDefinition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "chatDataRegistry",
+                "id": "def-server.DataCatalog.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dataTypeId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "chatDataRegistry",
+            "id": "def-server.DataCatalog.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "chatDataRegistry",
+                "scope": "server",
+                "docId": "kibChatDataRegistryPluginApi",
+                "section": "def-server.DataTypeDefinition",
+                "text": "DataTypeDefinition"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "chatDataRegistry",
+            "id": "def-server.DataCatalog.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(dataType: ",
+              {
+                "pluginId": "chatDataRegistry",
+                "scope": "server",
+                "docId": "kibChatDataRegistryPluginApi",
+                "section": "def-server.DataTypeDefinition",
+                "text": "DataTypeDefinition"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "chatDataRegistry",
+                "id": "def-server.DataCatalog.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "chatDataRegistry",
+                    "scope": "server",
+                    "docId": "kibChatDataRegistryPluginApi",
+                    "section": "def-server.DataTypeDefinition",
+                    "text": "DataTypeDefinition"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "chatDataRegistry",
+        "id": "def-server.DataTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataTypeDefinition",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "chatDataRegistry",
+            "id": "def-server.DataTypeDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "chatDataRegistry",
+            "id": "def-server.DataTypeDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "chatDataRegistry",
+            "id": "def-server.DataTypeDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/chat_data_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "chatDataRegistry",
+      "id": "def-server.ChatDataRegistryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ChatDataRegistryPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/chat_data_registry/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "chatDataRegistry",
+          "id": "def-server.ChatDataRegistryPluginSetup.register",
+          "type": "Function",
+          "tags": [],
+          "label": "register",
+          "description": [],
+          "signature": [
+            "(dataType: ",
+            {
+              "pluginId": "chatDataRegistry",
+              "scope": "server",
+              "docId": "kibChatDataRegistryPluginApi",
+              "section": "def-server.DataTypeDefinition",
+              "text": "DataTypeDefinition"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/chat_data_registry/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "chatDataRegistry",
+              "id": "def-server.ChatDataRegistryPluginSetup.register.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "dataType",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "chatDataRegistry",
+                  "scope": "server",
+                  "docId": "kibChatDataRegistryPluginApi",
+                  "section": "def-server.DataTypeDefinition",
+                  "text": "DataTypeDefinition"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/chat_data_registry/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "chatDataRegistry",
+      "id": "def-server.ChatDataRegistryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ChatDataRegistryPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/chat_data_registry/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "chatDataRegistry",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"chatDataRegistry\""
+        ],
+        "path": "x-pack/platform/plugins/shared/chat_data_registry/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "chatDataRegistry",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"chatDataRegistry\""
+        ],
+        "path": "x-pack/platform/plugins/shared/chat_data_registry/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

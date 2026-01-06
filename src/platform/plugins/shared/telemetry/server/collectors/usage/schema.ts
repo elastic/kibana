@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { LicenseUsage, StaticTelemetryUsage } from './telemetry_usage_collector';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { LicenseUsage, StaticTelemetryUsage } from './telemetry_usage_collector';
 
 const licenseSchema: MakeSchemaFrom<LicenseUsage> = {
   uuid: { type: 'keyword' },

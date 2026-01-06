@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
@@ -13,10 +12,12 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
-import { StreamsAppStartDependencies } from '../../types';
-import { StreamsAppServices } from '../../services/types';
+import type { StreamsAppStartDependencies } from '../../types';
+import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 
 export function AppRoot({
@@ -45,15 +46,18 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <RedirectAppLinks coreStart={coreStart}>
+      <StreamsTourProvider>
+        {/* @ts-expect-error upgrade typescript v5.4.5 */}
         <RouterProvider history={history} router={streamsAppRouter}>
-          <KbnUrlStateStorageFromRouterProvider>
-            <BreadcrumbsContextProvider>
-              <RouteRenderer />
-            </BreadcrumbsContextProvider>
-          </KbnUrlStateStorageFromRouterProvider>
+          <PerformanceContextProvider>
+            <KbnUrlStateStorageFromRouterProvider>
+              <BreadcrumbsContextProvider>
+                <RouteRenderer />
+              </BreadcrumbsContextProvider>
+            </KbnUrlStateStorageFromRouterProvider>
+          </PerformanceContextProvider>
         </RouterProvider>
-      </RedirectAppLinks>
+      </StreamsTourProvider>
     </StreamsAppContextProvider>
   );
 }

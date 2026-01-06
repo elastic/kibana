@@ -13,6 +13,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { updateSavedSearch } from './update_saved_search';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { TabStateGlobalState } from '../redux';
 
 describe('updateSavedSearch', () => {
   const query: Query = {
@@ -47,13 +48,26 @@ describe('updateSavedSearch', () => {
       store: FilterStateStore.GLOBAL_STATE,
     },
   };
-  const createGlobalStateContainer = () => ({
-    get: jest.fn(() => ({ filters: [globalFilter] })),
-    set: jest.fn(),
-  });
+  const globalState: TabStateGlobalState = { filters: [globalFilter] };
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should set visContext from initialInternalState', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      initialInternalState: { visContext: { foo: 'bar' } },
+      appState: undefined,
+      globalState: undefined,
+      services: discoverServiceMock,
+    });
+    expect(savedSearch.visContext).toEqual({ foo: 'bar' });
   });
 
   it('should set query and filters from appState and globalState', async () => {
@@ -65,9 +79,11 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.searchSource.getField('filter')).toBeUndefined();
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         query,
         filters: [appFilter],
       },
@@ -82,15 +98,19 @@ describe('updateSavedSearch', () => {
       searchSource: savedSearchMock.searchSource.createCopy(),
       timeRestore: true,
     };
-    (discoverServiceMock.timefilter.getTime as jest.Mock).mockReturnValue({
-      from: 'now-666m',
-      to: 'now',
-    });
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState: {
+        ...globalState,
+        timeRange: {
+          from: 'now-666m',
+          to: 'now',
+        },
+      },
       services: discoverServiceMock,
-      state: {
+      appState: {
         query,
         filters: [appFilter],
       },
@@ -107,15 +127,19 @@ describe('updateSavedSearch', () => {
       searchSource: savedSearchMock.searchSource.createCopy(),
       timeRestore: false,
     };
-    (discoverServiceMock.timefilter.getTime as jest.Mock).mockReturnValue({
-      from: 'now-666m',
-      to: 'now',
-    });
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState: {
+        ...globalState,
+        timeRange: {
+          from: 'now-666m',
+          to: 'now',
+        },
+      },
       services: discoverServiceMock,
-      state: {
+      appState: {
         query,
         filters: [appFilter],
       },
@@ -134,9 +158,11 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.breakdownField).toBeUndefined();
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         breakdownField: 'test',
       },
     });
@@ -151,13 +177,53 @@ describe('updateSavedSearch', () => {
     };
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         breakdownField: undefined,
       },
     });
     expect(savedSearch.breakdownField).toEqual('');
+  });
+
+  it('should pass chartInterval if state has interval', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    expect(savedSearch.chartInterval).toBeUndefined();
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
+      services: discoverServiceMock,
+      appState: {
+        interval: 'm',
+      },
+    });
+    expect(savedSearch.chartInterval).toEqual('m');
+  });
+
+  it('should pass "auto" if state already has interval', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      chartInterval: 'm',
+    };
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
+      services: discoverServiceMock,
+      appState: {
+        interval: undefined,
+      },
+    });
+    expect(savedSearch.chartInterval).toEqual('auto');
   });
 
   it('should set query and filters from services', async () => {
@@ -173,7 +239,10 @@ describe('updateSavedSearch', () => {
     jest.spyOn(discoverServiceMock.data.query.queryString, 'getQuery').mockReturnValue(query);
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      dataView: undefined,
+      initialInternalState: undefined,
+      appState: undefined,
+      globalState,
       services: discoverServiceMock,
       useFilterAndQueryServices: true,
     });

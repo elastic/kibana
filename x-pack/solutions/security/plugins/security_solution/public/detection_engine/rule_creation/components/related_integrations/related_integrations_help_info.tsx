@@ -10,6 +10,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RELATED_INTEGRATIONS_HELP_ARIA_LABEL } from './translations';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -25,12 +26,16 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
+    <EuiButtonIcon
+      iconType="question"
+      onClick={togglePopover}
+      aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
+    />
   );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.fieldRelatedIntegrationsHelpText"
           defaultMessage="Choose the {integrationsDocLink} this rule depends on, and correct if necessary each integration’s version constraint in {semverLink} format. Only tilde, caret, and plain versions are supported, such as ~1.2.3, ^1.2.3, or 1.2.3."

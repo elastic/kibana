@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { KbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { fetchIndices } from '../../../lib/fetch_indices';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
 export function registerGetRoute({

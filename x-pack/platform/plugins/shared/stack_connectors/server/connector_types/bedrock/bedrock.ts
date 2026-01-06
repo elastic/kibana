@@ -7,19 +7,22 @@
 
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { trace } from '@opentelemetry/api';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import type { AxiosError, Method } from 'axios';
 import type { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ConverseRequest, ConverseStreamRequest } from '@aws-sdk/client-bedrock-runtime';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
@@ -30,7 +33,8 @@ import {
   BedrockClientSendParamsSchema,
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
-} from '../../../common/bedrock/schema';
+  DashboardActionParamsSchema,
+} from '@kbn/connector-schemas/bedrock';
 import type {
   Config,
   Secrets,
@@ -45,18 +49,11 @@ import type {
   ConverseActionResponse,
   ConverseParams,
   ConverseStreamParams,
-} from '../../../common/bedrock/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_TIMEOUT_MS,
-} from '../../../common/bedrock/constants';
-import type {
   DashboardActionParams,
   DashboardActionResponse,
   StreamingResponse,
-} from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
+} from '@kbn/connector-schemas/bedrock';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   extractRegionId,
   formatBedrockBody,
@@ -279,10 +276,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', body);
     // set model on per request basis
     // Application Inference Profile IDs need to be encoded when using the API
     // Decode first to ensure an existing encoded value is not double encoded
-    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const model = reqModel ?? this.model;
+    if (!model) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
+    const currentModel = encodeURIComponent(decodeURIComponent(model));
     const path = `/model/${currentModel}/invoke`;
     const signed = this.signRequest(body, path, false);
     const requestArgs = {
@@ -326,10 +329,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { body, model: reqModel, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', body);
     // set model on per request basis
     // Application Inference Profile IDs need to be encoded when using the API
     // Decode first to ensure an existing encoded value is not double encoded
-    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const model = reqModel ?? this.model;
+    if (!model) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
+    const currentModel = encodeURIComponent(decodeURIComponent(model));
     const path = `/model/${currentModel}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
 
@@ -522,6 +531,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const modelId = reqModel ?? this.model;
+    if (!modelId) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse`;
 
@@ -567,8 +579,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout = DEFAULT_TIMEOUT_MS,
     connectorUsageCollector,
-  }: ConverseStreamParams) {
+  }: ConverseStreamParams): Promise<ConverseActionResponse> {
     const modelId = reqModel ?? this.model;
+    if (!modelId) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse-stream`;
 
@@ -590,6 +605,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 
     const signed = this.signRequest(requestBody, path, true);
 
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', requestBody);
+
     const response = await this.request(
       {
         ...signed,
@@ -604,7 +622,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       connectorUsageCollector
     );
 
-    return response.data.pipe(new PassThrough()) as unknown as IncomingMessage;
+    if (response.data) {
+      const resultStream = response.data as SmithyMessageDecoderStream<unknown>;
+      // splits the stream in two, [stream = consumer, tokenStream = token tracking]
+      const [stream, tokenStream] = tee(resultStream);
+      return {
+        ...response.data,
+        stream: Readable.from(stream).pipe(new PassThrough()),
+        tokenStream: Readable.from(tokenStream).pipe(new PassThrough()),
+      };
+    }
+
+    return response;
   }
 
   /**
@@ -628,8 +657,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout = DEFAULT_TIMEOUT_MS,
     }: ConverseStreamParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<IncomingMessage> {
-    const res = (await this._converseStream({
+  ): Promise<ConverseActionResponse> {
+    return await this._converseStream({
       messages,
       model: reqModel,
       stopSequences,
@@ -641,7 +670,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
       connectorUsageCollector,
-    })) as unknown as IncomingMessage;
-    return res;
+    });
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -22,7 +22,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
     });
 
     after(async () => {
@@ -31,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with no features disabled', () => {
-      const canvasDefaultArchive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+      const canvasDefaultArchive =
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default';
 
       before(async () => {
         // we need to load the following in every situation as deleting
@@ -93,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('space with Canvas disabled', () => {
       const spaceWithCanvasDisabledArchive =
-        'x-pack/test/functional/fixtures/kbn_archiver/spaces/disabled_features';
+        'x-pack/platform/test/functional/fixtures/kbn_archives/spaces/disabled_features';
 
       before(async () => {
         // we need to load the following in every situation as deleting

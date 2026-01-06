@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { useMemoCss } from '../use_memo_css';
@@ -18,7 +18,7 @@ const queryStringInputStyles = {
     css({
       width: '100%',
       zIndex: euiThemeVars.euiZContentMenu,
-      height: euiTheme.size.xxl,
+      height: euiTheme.size.xl,
       display: 'flex',
       '> [aria-expanded="true"]': {
         // Using filter allows it to adhere the children's bounds
@@ -44,12 +44,12 @@ const queryStringInputStyles = {
       },
       '.kbnQueryBar__textarea': {
         zIndex: euiTheme.levels.content,
-        height: euiTheme.size.xxl,
+        height: euiTheme.size.xl,
         // Unlike most inputs within layout control groups, the text area still needs a border
         // for multi-line content. These adjusts help it sit above the control groups
         // shadow to line up correctly.
-        padding: euiTheme.size.s,
-        paddingTop: `calc(${euiTheme.size.s} + 2px)`,
+        padding: euiTheme.size.xs,
+        paddingTop: `calc(${euiTheme.size.xs} + 2px)`,
         paddingLeft: euiTheme.size.xxl, // Account for search icon
         // Firefox adds margin to textarea
         margin: 0,
@@ -69,7 +69,7 @@ const queryStringInputStyles = {
           overflowY: 'auto',
           whiteSpace: `pre-wrap`,
           maxHeight: `calc(35vh - 100px)`,
-          minHeight: euiTheme.size.xxl,
+          minHeight: euiTheme.size.xl,
         },
 
         '~.euiFormControlLayoutIcons': {

@@ -207,7 +207,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-        defaultMessage: 'Service Map',
+        defaultMessage: 'Service map',
       }),
     },
     {
@@ -239,7 +239,9 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
               }
             )}
           >
-            <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
+            <EuiBadge color="danger" tabIndex={0}>
+              {serviceAlertsCount.alertsCount}
+            </EuiBadge>
           </EuiToolTip>
         ) : null,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {

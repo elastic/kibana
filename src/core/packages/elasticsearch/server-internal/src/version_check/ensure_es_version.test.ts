@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
+import type { NodesInfo } from './ensure_es_version';
+import { mapNodesVersionCompatibility, pollEsNodesVersion } from './ensure_es_version';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { take, delay } from 'rxjs';
+import { take, of, delay } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { of } from 'rxjs';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
-
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
   versions
@@ -129,11 +128,11 @@ describe('mapNodesVersionCompatibility', () => {
     );
   });
 });
-
 describe('pollEsNodesVersion', () => {
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     internalClient = elasticsearchClientMock.createInternalClient();
   });
 
@@ -145,14 +144,18 @@ describe('pollEsNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
   };
 
-  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
+  it('returns isCompatible=false and keeps polling when nodes.info requests fail', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
 
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
-    nodeInfosErrorOnce('mock request error');
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+    // poll cycle 1
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit not compatible
+    // poll cycle 2
+    nodeInfosErrorOnce('mock request error'); // error
+    nodeInfosErrorOnce('mock request error'); // retry error, emit error
+    // poll cycle 3
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit compatible
 
     pollEsNodesVersion({
       internalClient,
@@ -160,6 +163,7 @@ describe('pollEsNodesVersion', () => {
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(3))
       .subscribe({
@@ -171,7 +175,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('returns the error from a failed nodes.info call when a poll request throws', (done) => {
+  it('returns the error from a failed nodes.info poll attempt when all the retries are exhausted', (done) => {
     expect.assertions(2);
     const expectedCompatibilityResults = [false];
     const expectedMessageResults = [
@@ -179,7 +183,8 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosErrorOnce('mock request error');
+    nodeInfosErrorOnce('mock request error'); // initial
+    nodeInfosErrorOnce('mock request error'); // retry emit
 
     pollEsNodesVersion({
       internalClient,
@@ -187,6 +192,7 @@ describe('pollEsNodesVersion', () => {
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(1))
       .subscribe({
@@ -208,9 +214,14 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosErrorOnce('mock request error'); // emit
-    nodeInfosErrorOnce('mock request error'); // ignore, same error message
-    nodeInfosErrorOnce('mock request error 2'); // emit
+    nodeInfosErrorOnce('mock request error'); // initial
+    nodeInfosErrorOnce('mock request error'); // retry emit
+
+    nodeInfosErrorOnce('mock request error'); // initial
+    nodeInfosErrorOnce('mock request error'); // retry doesn't emit same error as cycle 1
+
+    nodeInfosErrorOnce('mock request error 2'); // initial
+    nodeInfosErrorOnce('mock request error 2'); // retry emit changed error
 
     pollEsNodesVersion({
       internalClient,
@@ -218,6 +229,7 @@ describe('pollEsNodesVersion', () => {
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(2))
       .subscribe({
@@ -230,7 +242,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('returns isCompatible=false and keeps polling when a poll request throws, only responding again if the error message has changed', (done) => {
+  it('returns isCompatible=false and keeps polling when requests fail, only emitting again if the error message has changed', (done) => {
     expect.assertions(8);
     const expectedCompatibilityResults = [false, false, true, false];
     const expectedMessageResults = [
@@ -241,11 +253,18 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
-    nodeInfosErrorOnce('mock request error'); // emit
-    nodeInfosErrorOnce('mock request error'); // ignore
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit
-    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // poll 1 emit
+
+    nodeInfosErrorOnce('mock request error'); // poll 2
+    nodeInfosErrorOnce('mock request error'); // retry attempt, emit
+
+    nodeInfosErrorOnce('mock request error'); // poll 3
+    nodeInfosErrorOnce('mock request error'); // retry doesn't emit same error as cycle 1
+
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // poll 4 emit
+
+    nodeInfosErrorOnce('mock request error'); // poll 5
+    nodeInfosErrorOnce('mock request error'); // retry emit
 
     pollEsNodesVersion({
       internalClient,
@@ -253,6 +272,7 @@ describe('pollEsNodesVersion', () => {
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(4))
       .subscribe({
@@ -277,6 +297,7 @@ describe('pollEsNodesVersion', () => {
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(1))
       .subscribe({
@@ -288,7 +309,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('only emits if the node versions changed since the previous poll', (done) => {
+  it('only emits when node versions changed since the previous poll', (done) => {
     expect.assertions(4);
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
@@ -303,6 +324,7 @@ describe('pollEsNodesVersion', () => {
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(4))
       .subscribe({
@@ -338,6 +360,7 @@ describe('pollEsNodesVersion', () => {
           ignoreVersionMismatch: false,
           kibanaVersion: KIBANA_VERSION,
           log: mockLogger,
+          healthCheckRetry: 1,
         }).pipe(take(2));
 
         expectObservable(esNodesCompatibility$).toBe(expected, {
@@ -376,6 +399,7 @@ describe('pollEsNodesVersion', () => {
           ignoreVersionMismatch: false,
           kibanaVersion: KIBANA_VERSION,
           log: mockLogger,
+          healthCheckRetry: 1,
         }).pipe(take(2));
 
         expectObservable(esNodesCompatibility$).toBe(expected, {
@@ -411,6 +435,7 @@ describe('pollEsNodesVersion', () => {
           ignoreVersionMismatch: false,
           kibanaVersion: KIBANA_VERSION,
           log: mockLogger,
+          healthCheckRetry: 1,
         }).pipe(take(4));
 
         expectObservable(esNodesCompatibility$).toBe('a 49ms b 99ms c 99ms (d|)', {

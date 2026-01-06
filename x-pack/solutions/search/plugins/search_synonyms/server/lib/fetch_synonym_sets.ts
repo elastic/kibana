@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { Page, Paginate, pageToPagination } from '../../common/pagination';
+import type { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Page, Paginate } from '../../common/pagination';
+import { pageToPagination } from '../../common/pagination';
 
 export const fetchSynonymSets = async (
   client: ElasticsearchClient,

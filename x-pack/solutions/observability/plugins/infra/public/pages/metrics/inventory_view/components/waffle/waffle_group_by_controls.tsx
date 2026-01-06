@@ -170,6 +170,7 @@ export const WaffleGroupByControls = ({
       button={button}
       panelPaddingSize="none"
       closePopover={closePopover}
+      anchorPosition="downCenter"
     >
       <EuiContextMenu
         css={css`

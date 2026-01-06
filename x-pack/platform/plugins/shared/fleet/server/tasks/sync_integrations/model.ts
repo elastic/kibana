@@ -13,6 +13,7 @@ export interface IntegrationsData {
   updated_at: string;
   install_status: string;
   install_source?: InstallSource;
+  rolled_back?: boolean;
 }
 
 export interface BaseCustomAssetsData {

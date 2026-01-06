@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PaletteContinuity, DataBounds, CustomPaletteParams } from '../../../../palettes';
 import {
   checkIsMaxContinuity,
   checkIsMinContinuity,
-  PaletteContinuity,
-  DataBounds,
   roundValue,
   getDataMinMax,
-  CustomPaletteParams,
 } from '../../../../palettes';
 
 import type { ColorRange } from '../types';

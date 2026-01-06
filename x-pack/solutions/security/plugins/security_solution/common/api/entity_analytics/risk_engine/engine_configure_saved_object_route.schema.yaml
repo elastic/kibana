@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
+  version: "2023-10-31"
   title: Risk Scoring API
   description: These APIs allow the consumer to configure the Risk Engine Saved Object.
 paths:
@@ -33,8 +33,26 @@ paths:
                   type: array
                   items:
                     type: string
+                enable_reset_to_zero:
+                  type: boolean
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        type: array
+                        items:
+                          type: string
+                          enum: [host, user, service]
+                      filter:
+                        type: string
+                        description: KQL filter string
+                    required:
+                      - entity_types
+                      - filter
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -43,18 +61,18 @@ paths:
                 properties:
                   risk_engine_saved_object_configured:
                     type: boolean
-        '400':
+        "400":
           description: Task manager is unavailable
           content:
             application/json:
               schema:
-                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+                $ref: "../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse"
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse'
+                $ref: "#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse"
 
 components:
   schemas:

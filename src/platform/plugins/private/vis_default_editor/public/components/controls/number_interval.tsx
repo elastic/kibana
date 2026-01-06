@@ -10,13 +10,12 @@
 import { get } from 'lodash';
 import React, { useEffect, useCallback } from 'react';
 
+import type { EuiSwitchProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiSwitchProps,
-  EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -24,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 const label = (
   <>

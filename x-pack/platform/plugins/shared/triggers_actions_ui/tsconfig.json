@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -48,7 +48,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/field-types",
     "@kbn/core-ui-settings-common",
-    "@kbn/dashboard-plugin",
     "@kbn/licensing-plugin",
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-api-server",
@@ -59,10 +58,8 @@
     "@kbn/code-editor-mock",
     "@kbn/io-ts-utils",
     "@kbn/lens-plugin",
-    "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/controls-plugin",
     "@kbn/alerting-comparators",
     "@kbn/alerting-types",
     "@kbn/visualization-utils",
@@ -84,12 +81,18 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/response-ops-alerts-delete",
     "@kbn/content-management-plugin",
     "@kbn/esql-types",
-    "@kbn/presentation-containers",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/ebt-tools",
+    "@kbn/presentation-util",
+    "@kbn/discover-utils",
+    "@kbn/react-query",
+    "@kbn/router-utils",
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/actions-types"
   ],
   "exclude": ["target/**/*"]
 }

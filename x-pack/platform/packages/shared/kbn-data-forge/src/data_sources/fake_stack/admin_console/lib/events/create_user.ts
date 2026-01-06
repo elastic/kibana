@@ -11,7 +11,7 @@ import { ADMIN_CONSOLE, ADMIN_CONSOLE_HOSTS, DOMAINS } from '../../../common/con
 import { getLoggedInUser, createUser as createNewUser } from '../login_cache';
 import { createEvent } from './create_base_event';
 import { createWriteEvent } from '../../../mongodb/lib/events/mongo_actions';
-import { EventFunction } from '../../../../../types';
+import type { EventFunction } from '../../../../../types';
 import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
 
 export const createUser: EventFunction = (_schedule, timestamp) => {

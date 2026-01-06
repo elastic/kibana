@@ -142,7 +142,7 @@ describe('APM service template', () => {
       'Errors',
       'Metrics',
       'Infrastructure',
-      'Service Map',
+      'Service map',
       'Logs',
       'Alerts',
       'Universal Profiling',
@@ -180,6 +180,14 @@ describe('APM service template', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 

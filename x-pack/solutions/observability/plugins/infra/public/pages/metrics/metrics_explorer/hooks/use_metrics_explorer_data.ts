@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { InfraHttpError } from '../../../../types';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import type { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import { metricsExplorerResponseRT } from '../../../../../common/http_api/metrics_explorer';
-import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import type {
   MetricsExplorerOptions,
   MetricsExplorerTimestamp,
@@ -58,13 +57,7 @@ export function useMetricsExplorerData({
           afterKey,
           limit: options.limit,
           indexPattern: metricsView.indices,
-          filterQuery:
-            (options.filterQuery &&
-              convertKueryToElasticSearchQuery(
-                options.filterQuery,
-                metricsView.dataViewReference
-              )) ||
-            void 0,
+          kuery: options.filterQuery,
           timerange: {
             interval,
             from: fromTimestamp,

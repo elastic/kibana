@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsEsClient } from '../lib';
-import { NetworkEvent } from '../../common/runtime_types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsEsClient } from '../lib';
+import type { NetworkEvent } from '../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
   checkGroup: string;

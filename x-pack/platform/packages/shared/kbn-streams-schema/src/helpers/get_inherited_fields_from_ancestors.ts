@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { InheritedFieldDefinition } from '../fields';
-import { Streams } from '../models/streams';
+import type { InheritedFieldDefinition } from '../fields';
+import type { Streams } from '../models/streams';
 
 export const getInheritedFieldsFromAncestors = (ancestors: Streams.WiredStream.Definition[]) => {
   return ancestors.reduce<InheritedFieldDefinition>((acc, def) => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { AnalyticsCollection } from '../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../common/types/analytics';
 import { KibanaLogic } from '../../shared/kibana/kibana_logic';
 
 import { findOrCreateDataView } from './find_or_create_data_view';

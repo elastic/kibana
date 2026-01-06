@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +18,7 @@ import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { CSPM_STATS_QUERY_KEY, KSPM_STATS_QUERY_KEY } from '../../common/api';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
-import { CloudSecurityPostureStartServices } from '../../types';
+import type { CloudSecurityPostureStartServices } from '../../types';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;

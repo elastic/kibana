@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import { defaultExpression } from './default_expression';
 import { getFieldPath, getFieldValue } from './utils';
@@ -48,6 +50,7 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
 
 SimpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -42,9 +42,12 @@ const DatasetWithFewQualityStatsDocs = ({
   return (
     <EuiText size="s">
       ~0%{' '}
-      <EuiToolTip content={fewDocsTooltipContent(docsCount)}>
-        <EuiIcon type="warning" color="warning" size="s" />
-      </EuiToolTip>
+      <EuiIconTip
+        content={fewDocsTooltipContent(docsCount)}
+        type="warning"
+        color="warning"
+        size="s"
+      />
     </EuiText>
   );
 };

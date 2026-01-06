@@ -6,9 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
+const connectorIdsFromSpecs = new Set(
+  Object.values(connectorsSpecs).map(({ metadata }) => metadata.id)
+);
+
 export default function createRegisteredConnectorTypeTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
@@ -24,7 +28,11 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
 
       expect(
         registeredConnectorTypes
-          .filter((connectorType: string) => !connectorType.startsWith('test.'))
+          .filter(
+            (connectorType: string) =>
+              // Skip review of test and single-file connector specs
+              !connectorType.startsWith('test.') && !connectorIdsFromSpecs.has(connectorType)
+          )
           .sort()
       ).to.eql(
         [
@@ -32,6 +40,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.email',
           '.index',
           '.inference',
+          '.mcp',
           '.pagerduty',
           '.swimlane',
           '.server-log',
@@ -44,6 +53,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.servicenow-sir',
           '.servicenow-itom',
           '.jira',
+          '.jira-service-management',
           '.observability-ai-assistant',
           '.resilient',
           '.teams',
@@ -58,6 +68,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.cases',
           '.crowdstrike',
           '.microsoft_defender_endpoint',
+          '.workflows',
           '.xsoar',
         ].sort()
       );

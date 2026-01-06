@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
@@ -19,10 +19,10 @@ import {
 import { ANONYMIZATION_FIELDS_RESOURCE } from '../../../../ai_assistant_service/constants';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { getResourceName } from '../../../../ai_assistant_service';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
-import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
+import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
   generateAttackDiscoveryAlertHash,
@@ -30,6 +30,7 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
+import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -116,7 +117,9 @@ export const attackDiscoveryScheduleExecutor = async ({
       anonymizedAlerts,
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
+      enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
       replacements,
+      withReplacements: false, // Never apply replacements to the results. It's still possible for clients who read the generated discoveries to specify true when retrieving them.
     };
 
     // Deduplicate attackDiscoveries before creating alerts
@@ -127,9 +130,20 @@ export const attackDiscoveryScheduleExecutor = async ({
       connectorId: params.apiConfig.connectorId,
       indexPattern,
       logger,
-      ownerId: rule.id,
+      ownerInfo: {
+        id: rule.id,
+        isSchedule: true,
+      },
+      replacements,
       spaceId,
     });
+
+    /**
+     * Map that uses alert id as key and an array
+     * of attack ids as value.
+     * Used to update alerts in one query
+     */
+    const alertIdToAttackIds: Record<string, string[]> = {};
 
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
@@ -137,12 +151,18 @@ export const attackDiscoveryScheduleExecutor = async ({
           attackDiscovery,
           connectorId: params.apiConfig.connectorId,
           ownerId: rule.id,
+          replacements,
           spaceId,
         });
         const { uuid: alertDocId } = alertsClient.report({
           id: alertInstanceId,
           actionGroup: 'default',
         });
+
+        for (const alertId of attackDiscovery.alertIds) {
+          alertIdToAttackIds[alertId] = alertIdToAttackIds[alertId] ?? [];
+          alertIdToAttackIds[alertId].push(alertDocId);
+        }
 
         const baseAlertDocument = transformToBaseAlertDocument({
           alertDocId,
@@ -179,6 +199,12 @@ export const attackDiscoveryScheduleExecutor = async ({
         });
       })
     );
+
+    await updateAlertsWithAttackIds({
+      alertIdToAttackIdsMap: alertIdToAttackIds,
+      esClient,
+      spaceId,
+    });
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);

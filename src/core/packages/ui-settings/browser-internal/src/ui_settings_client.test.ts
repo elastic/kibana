@@ -11,7 +11,7 @@ import { Subject } from 'rxjs';
 import { materialize, take, toArray } from 'rxjs';
 
 import { UiSettingsClient } from './ui_settings_client';
-import { ValidationApiResponse } from './ui_settings_api';
+import type { ValidationApiResponse } from './ui_settings_api';
 
 const TEST_VALIDATION_ERROR_MESSAGE = 'Test validation message.';
 
@@ -240,8 +240,8 @@ describe('#isDefault', () => {
 
   it('returns false if name is not known', () => {
     const { client } = setup();
-    client.set('dateFormat', 'foo');
-    expect(client.isDefault('dateFormat')).toBe(false);
+    client.set('unknownSettingKey', 'foo');
+    expect(client.isDefault('unknownSettingKey')).toBe(false);
   });
 });
 

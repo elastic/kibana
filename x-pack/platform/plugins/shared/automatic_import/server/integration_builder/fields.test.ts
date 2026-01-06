@@ -8,7 +8,7 @@
 import { createSync } from '../util';
 import { render } from 'nunjucks';
 import { createFieldMapping } from './fields';
-import { Docs } from '../../common';
+import type { Docs } from '../../common';
 
 jest.mock('nunjucks');
 

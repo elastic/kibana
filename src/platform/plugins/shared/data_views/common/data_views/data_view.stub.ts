@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DataView } from './data_view';
-import { DataViewSpec } from '../types';
+import type { DataViewSpec } from '../types';
 
 /**
  * Create a custom stub index pattern. Use it in your unit tests where an {@link DataView} expected.

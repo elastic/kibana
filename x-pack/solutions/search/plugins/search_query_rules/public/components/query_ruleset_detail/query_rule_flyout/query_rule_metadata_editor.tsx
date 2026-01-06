@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -15,11 +15,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiPanel,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldError } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface QueryRuleMetadataEditorProps {
   onRemove: () => void;
@@ -45,16 +48,43 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            label={i18n.translate(
-              'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel',
-              {
-                defaultMessage: 'Metadata field',
-              }
-            )}
+            label={
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <FormattedMessage
+                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel"
+                      defaultMessage="Metadata field"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltip',
+                      {
+                        defaultMessage:
+                          'Metadata is used to match documents based on their query criteria. Metadata is ignored when the type is set to "always".',
+                      }
+                    )}
+                    type="question"
+                    color="subdued"
+                    aria-label={i18n.translate(
+                      'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltipLabel',
+                      {
+                        defaultMessage: 'Metadata field tooltip',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isInvalid={!!error?.metadata}
             error={error?.metadata ? error.metadata.message : undefined}
+            isDisabled={criteria.type === 'always'}
           >
             <EuiFieldText
+              isInvalid={!!error?.metadata}
               data-test-subj="searchQueryRulesQueryRuleMetadataEditorField"
               fullWidth
               aria-label={i18n.translate(
@@ -76,7 +106,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
             />
           </EuiFormRow>
           <EuiFormRow fullWidth>
-            <EuiFlexGroup alignItems="center" direction="row">
+            <EuiFlexGroup alignItems="flexStart" direction="row">
               <EuiFlexItem grow={false}>
                 <EuiFormRow
                   label={i18n.translate(
@@ -193,16 +223,44 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
               <EuiFlexItem grow>
                 <EuiFormRow
                   fullWidth
-                  label={i18n.translate(
-                    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesLabel',
-                    {
-                      defaultMessage: 'Values',
-                    }
-                  )}
+                  label={
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <FormattedMessage
+                            id="xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesLabel"
+                            defaultMessage="Values"
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltip',
+                            {
+                              defaultMessage:
+                                'Values are used to match documents based on their query criteria. Values are ignored when the type is set to "always".',
+                            }
+                          )}
+                          type="question"
+                          color="subdued"
+                          aria-label={i18n.translate(
+                            'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltipLabel',
+                            {
+                              defaultMessage: 'Metadata values tooltip',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
                   isInvalid={!!error?.values}
+                  isDisabled={criteria.type === 'always'}
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
+                    isInvalid={!!error?.values}
+                    isDisabled={criteria.type === 'always'}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
                     fullWidth
                     aria-label={i18n.translate(

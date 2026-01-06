@@ -44,6 +44,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -69,6 +70,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -101,6 +103,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -125,6 +128,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -154,6 +158,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -256,12 +261,47 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
+      shouldLogAlerts: true,
       shouldPersistAlerts: false,
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(0);
     expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toEqual(0);
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(0);
+
+    expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
+  });
+
+  test('should not call alertingEventLogger.logAlert but still update ruleRunMetricsStore if autoRecoverAlerts is false', () => {
+    jest.clearAllMocks();
+
+    logAlerts({
+      logger,
+      alertingEventLogger,
+      newAlerts: {
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      activeAlerts: {
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { uuid: 'uuid-1' } }),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2', { meta: { uuid: 'uuid-2' } }),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      recoveredAlerts: {
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7', { meta: { uuid: 'uuid-7' } }),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { uuid: 'uuid-8' } }),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9', { meta: { uuid: 'uuid-9' } }),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10', { meta: { uuid: 'uuid-10' } }),
+      },
+      ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: false,
+      shouldLogAlerts: false,
+      shouldPersistAlerts: true,
+    });
+
+    expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
+    expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toEqual(3);
+    expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(4);
 
     expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
   });
@@ -287,6 +327,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -387,6 +428,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 

@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+  const archive = 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default';
   const browser = getService('browser');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');

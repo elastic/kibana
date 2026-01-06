@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensAppServices } from './types';
+import { omit } from 'lodash';
+
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import { extract } from '../../common/embeddable_factory';
-import { LensSerializedState } from '../react_embeddable/types';
+import { extractLensReferences } from '../../common/references';
 
 export const redirectToDashboard = ({
   embeddableInput: rawState,
@@ -17,24 +19,43 @@ export const redirectToDashboard = ({
   originatingApp,
   getOriginatingPath,
   stateTransfer,
+  controlsState,
 }: {
   embeddableInput: LensSerializedState;
   dashboardId: string;
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string | undefined;
   stateTransfer: LensAppServices['stateTransfer'];
+  controlsState?: ControlPanelsState;
 }) => {
-  const { references } = extract(rawState as unknown as EmbeddableStateWithType);
+  const { references } = extractLensReferences(rawState);
 
   const appId = originatingApp || 'dashboards';
-  stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(appId, {
-    state: {
+
+  const embeddablePackages: EmbeddablePackageState[] = [
+    {
       type: LENS_EMBEDDABLE_TYPE,
       serializedState: {
         rawState,
         references,
       },
     },
+  ];
+
+  // Add each control to the embeddable package (if any)
+  Object.values(controlsState ?? {}).forEach((control) => {
+    embeddablePackages.push({
+      type: control.type,
+      serializedState: {
+        rawState: {
+          ...omit(control, ['type', 'order', 'width', 'grow']), // add as panel rather than pinned, so strip out unnecessary info
+        },
+      },
+    });
+  });
+
+  stateTransfer.navigateToWithEmbeddablePackages(appId, {
+    state: embeddablePackages,
     path:
       getOriginatingPath?.(dashboardId) ??
       (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`),

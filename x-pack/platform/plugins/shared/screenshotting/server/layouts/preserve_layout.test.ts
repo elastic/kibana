@@ -10,6 +10,8 @@ import { PreserveLayout } from './preserve_layout';
 it('preserve layout uses default layout selectors', () => {
   const testPreserveLayout = new PreserveLayout({ width: 16, height: 16 });
 
+  testPreserveLayout.setPdfImageSize({ height: 16, width: 16 });
+
   expect(testPreserveLayout.getCssOverridesPath()).toMatch(`layouts/preserve_layout.css`);
   expect(testPreserveLayout.getBrowserViewport()).toMatchObject({ height: 32, width: 32 });
   expect(testPreserveLayout.getBrowserZoom()).toBe(2);

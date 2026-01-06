@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
+import * as commonI18n from '../../common/genai_connectors/translations';
 import * as i18n from './translations';
-import { Config } from './types';
+import type { Config } from './types';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =
@@ -88,8 +90,10 @@ export const openAiConfig: ConfigFieldSchema[] = [
         id="xpack.stackConnectors.components.genAi.openAiDocumentationModel"
       />
     ),
-    defaultValue: DEFAULT_OPENAI_MODEL,
+    defaultValue: DEFAULT_MODEL,
   },
+  contextWindowLengthField,
+  temperatureField,
   {
     id: 'organizationId',
     label: i18n.ORG_ID_LABEL,
@@ -103,7 +107,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     euiFieldProps: {
       append: (
         <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
+          {commonI18n.OPTIONAL_LABEL}
         </EuiText>
       ),
     },
@@ -126,7 +130,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
       },
       append: (
         <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
+          {commonI18n.OPTIONAL_LABEL}
         </EuiText>
       ),
     },
@@ -158,6 +162,8 @@ export const azureAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const otherOpenAiConfig: ConfigFieldSchema[] = [
@@ -194,6 +200,8 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const openAiSecrets: SecretsFieldSchema[] = [

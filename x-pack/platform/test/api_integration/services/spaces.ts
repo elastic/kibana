@@ -12,7 +12,7 @@ import { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
 import Url from 'url';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
 
@@ -22,7 +22,7 @@ interface SpaceCreate {
   description?: string;
   color?: string;
   initials?: string;
-  solution?: 'es' | 'oblt' | 'security' | 'chat' | 'classic';
+  solution?: 'es' | 'oblt' | 'security' | 'workplaceai' | 'classic';
   disabledFeatures?: string[];
 }
 

@@ -43,9 +43,9 @@ type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
 type TopMetricKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
-    ? TField
+    ? Extract<TField, string | number | symbol>
     : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
-    ? TField
+    ? Extract<TField, string | number | symbol>
     : string;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
@@ -670,6 +670,7 @@ export interface ESQLSearchResponse {
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
   took?: number;
+  documents_found?: number;
   _clusters?: estypes.ClusterStatistics;
 }
 
@@ -680,10 +681,16 @@ export interface ESQLSearchParams {
   // time_zone?: string;
   query: string;
   filter?: unknown;
+  project_routing?: string;
   locale?: string;
-  include_ccs_metadata?: boolean;
+  include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
   params?:
     | estypes.ScalarValue[]
-    | Array<Record<string, string | number | Record<string, string | number> | undefined>>;
+    | Array<
+        Record<
+          string,
+          string | number | (string | number)[] | Record<string, string | number> | undefined
+        >
+      >;
 }

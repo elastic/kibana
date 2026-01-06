@@ -7,6 +7,7 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React from 'react';
@@ -23,7 +24,7 @@ import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { SingleMetricViewerEmbeddableApi, SingleMetricViewerEmbeddableState } from '../types';
+import type { SingleMetricViewerEmbeddableApi } from '../types';
 import {
   initializeSingleMetricViewerControls,
   singleMetricViewerComparators,
@@ -32,6 +33,8 @@ import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_
 import { getServices } from './get_services';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
+import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
+import type { SingleMetricViewerEmbeddableState } from './types';
 
 export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -100,27 +103,32 @@ export const getSingleMetricViewerEmbeddableFactory = (
             defaultMessage: 'single metric viewer',
           }),
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
-              './single_metric_viewer_setup_flyout'
-            );
-            const [coreStart, { data, share }, { mlApi }] = services;
-            const result = await resolveEmbeddableSingleMetricViewerUserInput(
-              coreStart,
-              parentApi,
-              uuid,
-              { data, share },
-              mlApi,
-              {
-                ...titleManager.getLatestState(),
-                ...singleMetricManager.getLatestState(),
-              }
-            );
-
-            singleMetricManager.api.updateUserInput(result);
-          } catch (e) {
-            return Promise.reject();
-          }
+          const [coreStart, { data, share }, { mlApi }] = services;
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              return (
+                <EmbeddableSingleMetricViewerUserInput
+                  coreStart={coreStart}
+                  services={{ data, share }}
+                  mlApi={mlApi}
+                  onConfirm={(result) => {
+                    singleMetricManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={{
+                    ...titleManager.getLatestState(),
+                    ...singleMetricManager.getLatestState(),
+                  }}
+                />
+              );
+            },
+          });
         },
         ...titleManager.api,
         ...timeRangeManager.api,

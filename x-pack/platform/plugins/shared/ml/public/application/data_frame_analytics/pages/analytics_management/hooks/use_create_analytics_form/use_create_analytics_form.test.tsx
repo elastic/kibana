@@ -6,25 +6,24 @@
  */
 
 import React from 'react';
-import { mountHook } from '@kbn/test-jest-helpers';
+import { renderHook } from '@testing-library/react';
 import { useCreateAnalyticsForm } from './use_create_analytics_form';
 import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-const getMountedHook = () =>
-  mountHook(
-    () => useCreateAnalyticsForm(),
-    ({ children }) => (
+const getRenderHook = () =>
+  renderHook(() => useCreateAnalyticsForm(), {
+    wrapper: ({ children }: { children: React.ReactNode }) => (
       <KibanaContextProvider services={kibanaContextMock.services}>
         {children}
       </KibanaContextProvider>
-    )
-  );
+    ),
+  });
 
 describe('useCreateAnalyticsForm()', () => {
   test('initialization', () => {
-    const { getLastHookValue } = getMountedHook();
-    const { actions } = getLastHookValue();
+    const { result } = getRenderHook();
+    const { actions } = result.current;
 
     expect(typeof actions.createAnalyticsJob).toBe('function');
     expect(typeof actions.startAnalyticsJob).toBe('function');

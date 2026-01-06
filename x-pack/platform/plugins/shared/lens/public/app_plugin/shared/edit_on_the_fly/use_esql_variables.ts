@@ -8,10 +8,9 @@
 import { useMemo, useCallback } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import {
-  isApiESQLVariablesCompatible,
-  TypedLensSerializedState,
-} from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 
 export const useESQLVariables = ({
   parentApi,
@@ -25,12 +24,7 @@ export const useESQLVariables = ({
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
-  );
-  const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
-      ? parentApi?.controlGroupApi$
-      : new BehaviorSubject(undefined)
+    apiIsPresentationContainer(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
   );
 
   const panel = useMemo(() => {
@@ -45,19 +39,28 @@ export const useESQLVariables = ({
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
-      if (!panelId) {
+      if (
+        !panelId ||
+        !apiPublishesESQLVariables(parentApi) ||
+        !apiIsPresentationContainer(parentApi)
+      ) {
         return;
       }
 
       // add a new control
-      controlGroupApi?.addNewPanel?.({
-        panelType: 'esqlControl',
-        serializedState: {
-          rawState: {
-            ...controlState,
+      await parentApi.addNewPanel(
+        {
+          panelType: 'esqlControl',
+          serializedState: {
+            rawState: {
+              ...controlState,
+            },
           },
         },
-      });
+        {
+          beside: panelId,
+        }
+      );
       if (panel && updatedQuery && attributes) {
         panel.updateAttributes({
           ...attributes,
@@ -71,7 +74,7 @@ export const useESQLVariables = ({
         await panel.onEdit();
       }
     },
-    [attributes, controlGroupApi, panel, panelId]
+    [attributes, parentApi, panel, panelId]
   );
 
   const onCancelControl = useCallback(() => {

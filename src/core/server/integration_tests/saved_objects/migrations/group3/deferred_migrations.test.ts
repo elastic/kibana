@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type {
   SavedObjectsRawDocSource,
   SavedObjectsType,
@@ -15,13 +15,13 @@ import type {
 } from '@kbn/core-saved-objects-server';
 
 import '../jest_matchers';
+import type { KibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import {
   clearLog,
   defaultKibanaIndex,
   startElasticsearch,
-  KibanaMigratorTestKit,
   getKibanaMigratorTestKit,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 describe('deferred migrations', () => {
   let client: KibanaMigratorTestKit['client'];

@@ -13,20 +13,21 @@ import type { CoreUsageData, CoreUsageDataStart } from '@kbn/core-usage-data-ser
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
-  const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = {
+  const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = lazyObject({
     registerType: jest.fn(),
     registerDeprecatedUsageFetch: jest.fn(),
     getClient: jest.fn().mockReturnValue(usageStatsClient),
     registerUsageCounter: jest.fn(),
     incrementUsageCounter: jest.fn(),
-  };
+  });
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<CoreUsageDataStart> = {
+  const startContract: jest.Mocked<CoreUsageDataStart> = lazyObject({
     getCoreUsageData: jest.fn().mockResolvedValue(
       new BehaviorSubject<CoreUsageData>({
         config: {
@@ -36,7 +37,6 @@ const createStartContractMock = () => {
             healthCheckDelayMs: 2500,
             logQueries: false,
             numberOfHostsConfigured: 1,
-            pingTimeoutMs: 30000,
             requestHeadersWhitelistConfigured: false,
             requestTimeoutMs: 30000,
             shardTimeoutMs: 30000,
@@ -162,17 +162,17 @@ const createStartContractMock = () => {
       })
     ),
     getConfigsUsageData: jest.fn(),
-  };
+  });
 
   return startContract;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<CoreUsageDataService>> = {
+  const mocked: jest.Mocked<PublicMethodsOf<CoreUsageDataService>> = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
-  };
+  });
   return mocked;
 };
 

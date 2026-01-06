@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import { ControlParams } from '../editor_utils';
+import type { ControlParams } from '../editor_utils';
 
 export function getLineageMap(controlParamsList: ControlParams[]) {
   function getControlParamsById(controlId: string) {

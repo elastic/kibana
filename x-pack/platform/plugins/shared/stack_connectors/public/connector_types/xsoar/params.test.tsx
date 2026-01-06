@@ -8,12 +8,14 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import XSOARParamsFields from './params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
-import { SUB_ACTION } from '../../../common/xsoar/constants';
-import { ExecutorParams, XSOARRunActionParams } from '../../../common/xsoar/types';
 import * as translations from './translations';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import type { ExecutorParams, XSOARRunActionParams } from '@kbn/connector-schemas/xsoar';
+import { SUB_ACTION } from '@kbn/connector-schemas/xsoar/constants';
 
 interface Result {
   isLoading: boolean;
@@ -150,7 +152,7 @@ const mockUseSubActionPlaybooks = jest.fn().mockImplementation(() => ({
 }));
 const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseSubActionPlaybooks);
 
-const mockToasts = { danger: jest.fn(), warning: jest.fn() };
+const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
 jest.mock(triggersActionsPath, () => {
   const original = jest.requireActual(triggersActionsPath);
   return {
@@ -158,7 +160,9 @@ jest.mock(triggersActionsPath, () => {
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
     useKibana: () => ({
       ...original.useKibana(),
-      notifications: { toasts: mockToasts },
+      services: {
+        notifications: { toasts: mockToasts },
+      },
     }),
   };
 });
@@ -177,16 +181,11 @@ describe('XSOARParamsFields renders', () => {
     subAction: SUB_ACTION.RUN,
     subActionParams,
   };
-  const connector: ActionConnector = {
-    secrets: {},
-    config: {},
+  const connector: ActionConnector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
-  };
+  });
 
   const editAction = jest.fn();
   const defaultProps = {
@@ -328,7 +327,7 @@ describe('XSOARParamsFields renders', () => {
       };
       render(<XSOARParamsFields {...props} />);
 
-      expect(mockToasts.warning).toHaveBeenCalledWith({
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
         title: translations.PLAYBOOK_NOT_FOUND_WARNING,
       });
     });
@@ -343,9 +342,9 @@ describe('XSOARParamsFields renders', () => {
 
       render(<XSOARParamsFields {...defaultProps} />);
 
-      expect(mockToasts.danger).toHaveBeenCalledWith({
+      expect(mockToasts.addDanger).toHaveBeenCalledWith({
         title: translations.PLAYBOOKS_ERROR,
-        body: errorMessage,
+        text: errorMessage,
       });
     });
 

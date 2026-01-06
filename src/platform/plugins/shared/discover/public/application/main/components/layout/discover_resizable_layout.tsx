@@ -25,12 +25,10 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
 export const InternalDiscoverResizableLayout = ({
-  container,
   sidebarToggleState$,
   sidebarPanel,
   mainPanel,
 }: {
-  container: HTMLElement | null;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
@@ -86,7 +84,6 @@ export const InternalDiscoverResizableLayout = ({
         css={dscPageBodyContentsCss}
         mode={layoutMode}
         direction={layoutDirection}
-        container={container}
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
         minFixedPanelSize={minSidebarWidth}
         minFlexPanelSize={minMainPanelWidth}

@@ -9,12 +9,27 @@
 
 import React, { Fragment, useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
-
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import type { SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
+import { AccessModeContainer } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
+import { getAccessControlClient } from '../../services/access_control_service';
+import {
+  coreServices,
+  savedObjectsTaggingService,
+  spacesService,
+} from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
 interface DashboardSaveModalProps {
@@ -24,17 +39,23 @@ interface DashboardSaveModalProps {
     newCopyOnSave,
     newTags,
     newTimeRestore,
+    newProjectRoutingRestore,
     isTitleDuplicateConfirmed,
+    newAccessMode,
     onTitleDuplicate,
-  }: DashboardSaveOptions) => void;
+  }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
   description: string;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   showCopyOnSave: boolean;
   showStoreTimeOnSave?: boolean;
+  showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
+  accessControl?: Partial<SavedObjectAccessControl>;
+  isDuplicateAction?: boolean;
 }
 
 type SaveDashboardHandler = (args: {
@@ -52,26 +73,48 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   onSave,
   showCopyOnSave,
   showStoreTimeOnSave = true,
+  showStoreProjectRoutingOnSave = true,
   tags,
   title,
   timeRestore,
+  projectRoutingRestore,
+  accessControl,
+  isDuplicateAction,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
+  const [persistSelectedProjectRouting, setPersistSelectedProjectRouting] =
+    React.useState(projectRoutingRestore);
+  const [selectedAccessMode, setSelectedAccessMode] = React.useState(
+    accessControl?.accessMode ?? 'default'
+  );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    ({ newTitle, newDescription, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+    async ({
+      newTitle,
+      newDescription,
+      newCopyOnSave,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
+    }) =>
       onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
+        newProjectRoutingRestore: persistSelectedProjectRouting,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
-      });
-    },
-    [onSave, persistSelectedTimeInterval, selectedTags]
+        newAccessMode: selectedAccessMode,
+      }),
+    [
+      onSave,
+      persistSelectedTimeInterval,
+      persistSelectedProjectRouting,
+      selectedTags,
+      selectedAccessMode,
+    ]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -121,12 +164,65 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
+        {showStoreProjectRoutingOnSave ? (
+          <EuiFormRow>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  data-test-subj="storeProjectRoutingWithDashboard"
+                  checked={persistSelectedProjectRouting}
+                  onChange={(event) => {
+                    setPersistSelectedProjectRouting(event.target.checked);
+                  }}
+                  label={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowLabel"
+                      defaultMessage="Store project routing with dashboard"
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowHelpText"
+                      defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                    />
+                  }
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ) : null}
+        {!isDuplicateAction && (
+          <>
+            <EuiSpacer size="l" />
+            <AccessModeContainer
+              accessControl={accessControl}
+              onChangeAccessMode={setSelectedAccessMode}
+              getActiveSpace={spacesService?.getActiveSpace}
+              getCurrentUser={coreServices.userProfile.getCurrent}
+              accessControlClient={getAccessControlClient()}
+              contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
+            />
+          </>
+        )}
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
+  }, [
+    persistSelectedTimeInterval,
+    persistSelectedProjectRouting,
+    selectedTags,
+    showStoreTimeOnSave,
+    showStoreProjectRoutingOnSave,
+    accessControl,
+    isDuplicateAction,
+  ]);
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
       onSave={saveDashboard}
       onClose={onClose}
       title={title}

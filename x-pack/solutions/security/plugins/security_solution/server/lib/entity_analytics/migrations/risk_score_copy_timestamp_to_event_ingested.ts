@@ -63,11 +63,9 @@ export const createMigrationTask =
     logger,
     auditLogger,
   }: Pick<EntityAnalyticsMigrationsParams, 'getStartServices' | 'logger' | 'auditLogger'>) =>
-  () => {
-    let abortController: AbortController;
+  ({ abortController }: { abortController: AbortController }) => {
     return {
       run: async () => {
-        abortController = new AbortController();
         const [coreStart] = await getStartServices();
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace: '*' });

@@ -57,7 +57,8 @@ const getIsLogRecord = (
   return (
     getDataStreamType(record).includes('logs') ||
     hasFieldsWithPrefix('log.')(record) ||
-    getIndices(record).some(isLogsIndexPattern)
+    getIndices(record).some(isLogsIndexPattern) ||
+    hasLogsStreamName(record)
   );
 };
 
@@ -70,6 +71,15 @@ const getFieldValues =
 
 const getDataStreamType = getFieldValues('data_stream.type');
 const getIndices = getFieldValues('_index');
+
+// stream.name is set for wired streams. Everything that starts with logs. is a log stream.
+const hasLogsStreamName = (record: DataTableRecord) => {
+  const streamName = record.flattened['stream.name'];
+  if (!streamName || typeof streamName !== 'string') {
+    return false;
+  }
+  return streamName === 'logs' || streamName.startsWith('logs.');
+};
 
 const hasFieldsWithPrefix = (prefix: string) => (record: DataTableRecord) => {
   return Object.keys(record.flattened).some(

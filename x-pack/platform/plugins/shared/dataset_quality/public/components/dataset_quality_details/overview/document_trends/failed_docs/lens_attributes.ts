@@ -94,7 +94,7 @@ export function getLensAttributes({
             accessors: [DatasetQualityLensColumn.FailedDocs],
             layerId: 'layer1',
             layerType: 'data',
-            seriesType: 'line',
+            seriesType: breakdownFieldName ? 'line' : 'bar',
             xAccessor: DatasetQualityLensColumn.Date,
             ...(breakdownFieldName
               ? { splitAccessor: DatasetQualityLensColumn.Breakdown }
@@ -114,7 +114,7 @@ export function getLensAttributes({
           legendSize: 'large',
           shouldTruncate: true,
         },
-        preferredSeriesType: 'line',
+        preferredSeriesType: breakdownFieldName ? 'line' : 'bar',
         tickLabelsVisibilitySettings: {
           x: true,
           yLeft: true,

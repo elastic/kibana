@@ -75,38 +75,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "observabilityAIAssistantApp",
-        "id": "def-server.CHANGES_FUNCTION_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "CHANGES_FUNCTION_NAME",
-        "description": [],
-        "signature": [
-          "\"changes\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/changes/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistantApp",
-        "id": "def-server.QUERY_FUNCTION_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "QUERY_FUNCTION_NAME",
-        "description": [],
-        "signature": [
-          "\"query\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "observabilityAIAssistantApp",

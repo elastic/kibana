@@ -25,6 +25,9 @@ import {
   NETWORK_PREVIEW_BANNER,
 } from '../../network_details';
 import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
+import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
+import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
 
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
@@ -48,9 +51,15 @@ interface GetFlyoutParams {
   field: string;
   scopeId: string;
   ruleId?: string;
+  ancestorsIndexName?: string;
 }
 
-const FLYOUT_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
+const FLYOUT_FIELDS = [
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  EVENT_SOURCE_FIELD_DESCRIPTOR,
+];
 
 // Helper get function to get flyout parameters based on field name and isFlyoutOpen
 // If flyout is currently open, preview panel params are returned
@@ -112,6 +121,7 @@ export const getPreviewPanelParams = ({
   field,
   scopeId,
   ruleId,
+  ancestorsIndexName,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
   if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
@@ -157,6 +167,16 @@ export const getPreviewPanelParams = ({
           ruleId,
           banner: RULE_PREVIEW_BANNER,
           isPreviewMode: true,
+        },
+      };
+    case EVENT_SOURCE_FIELD_DESCRIPTOR:
+      return {
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: value,
+          scopeId,
+          indexName: ancestorsIndexName,
+          banner: EVENT_PREVIEW_BANNER,
         },
       };
     default:

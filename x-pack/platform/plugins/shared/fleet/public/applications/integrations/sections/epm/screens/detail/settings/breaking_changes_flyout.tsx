@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
@@ -86,9 +87,10 @@ const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) =
 
 export const BreakingChangesFlyout = ({ onClose, breakingChanges }: BreakingChangesFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout onClose={onClose} size="m" paddingSize="none">
+    <EuiFlyout onClose={onClose} size="m" paddingSize="none" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <div
           className={css`
@@ -96,7 +98,7 @@ export const BreakingChangesFlyout = ({ onClose, breakingChanges }: BreakingChan
           `}
         >
           <EuiTitle>
-            <h2>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerTitle"
                 defaultMessage="Review breaking changes"

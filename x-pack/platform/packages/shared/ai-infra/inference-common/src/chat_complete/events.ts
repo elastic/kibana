@@ -6,7 +6,10 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { ToolCallsOf, ToolOptions } from './tools';
+import type { Deanonymization } from './anonymization';
+import type { Message } from './messages';
+import type { ToolOptions } from './tools';
+import type { ToolCallOfToolOptions } from './tools_of';
 
 /**
  * List possible values of {@link ChatCompletionEvent} types.
@@ -30,21 +33,23 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       content: string;
       /**
-       * The eventual tool calls performed by the LLM.
+       * Optional refusal reason returned by the model when content is filtered.
        */
-      toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+      refusal?: string;
+      /**
+       * Optional deanonymized input messages metadata
+       */
+      deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+      /**
+       * Optional deanonymized output metadata
+       */
+      deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+      /**
+       * Tool calls from the LLM
+       */
+      toolCalls: ToolCallOfToolOptions<TToolOptions>[];
     }
   >;
-// with unredactions
-export interface ChatCompletionUnredactedMessageEvent<
-  TToolOptions extends ToolOptions = ToolOptions
-> extends ChatCompletionMessageEvent<TToolOptions> {
-  unredactions: Array<{
-    entity: string;
-    class_name: string;
-    hash: string;
-  }>;
-}
 /**
  * Represent a partial tool call present in a chunk event.
  *
@@ -84,9 +89,21 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      */
     content: string;
     /**
+     * Optional refusal reason chunk.
+     */
+    refusal?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
+    /**
+     * Optional deanonymized input messages metadata
+     */
+    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+    /**
+     * Optional deanonymized output metadata
+     */
+    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
   }
 >;
 
@@ -103,7 +120,11 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Total token count
+   * Thinking token count, if available
+   */
+  thinking?: number;
+  /**
+   * Total token count (prompt + completion + thinking)
    */
   total: number;
   /**
@@ -123,6 +144,7 @@ export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
+    model?: string;
   }
 >;
 

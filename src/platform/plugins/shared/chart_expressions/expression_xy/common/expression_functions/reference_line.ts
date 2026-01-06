@@ -18,7 +18,7 @@ import {
   REFERENCE_LINE,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
-import { ReferenceLineFn } from '../types';
+import type { ReferenceLineFn } from '../types';
 import { strings } from '../i18n';
 
 export const referenceLineFunction: ReferenceLineFn = {

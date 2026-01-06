@@ -10,31 +10,29 @@ import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import OpsgenieParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { OpsgenieSubActions } from '../../../common';
-import type { OpsgenieActionParams } from '../../../server/connector_types';
+import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie/constants';
+import type { Params as OpsgenieActionParams } from '@kbn/connector-schemas/opsgenie';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();
   const createAlertActionParams: OpsgenieActionParams = {
-    subAction: OpsgenieSubActions.CreateAlert,
+    subAction: SUB_ACTION.CreateAlert,
     subActionParams: { message: 'hello', alias: '123' },
   };
 
   const closeAlertActionParams: OpsgenieActionParams = {
-    subAction: OpsgenieSubActions.CloseAlert,
+    subAction: SUB_ACTION.CloseAlert,
     subActionParams: { alias: '456' },
   };
 
-  const connector = {
-    secrets: { apiKey: '123' },
-    config: { apiUrl: 'http://test.com' },
+  const connector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isSystemAction: false as const,
-    isDeprecated: false,
-  };
+    secrets: { apiKey: '123' },
+    config: { apiUrl: 'http://test.com' },
+  });
 
   const defaultCreateAlertProps = {
     actionParams: createAlertActionParams,

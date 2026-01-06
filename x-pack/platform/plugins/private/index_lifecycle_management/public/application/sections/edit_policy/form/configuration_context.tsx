@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionComponent, createContext, useContext } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import { useFormData } from '../../../../shared_imports';
 

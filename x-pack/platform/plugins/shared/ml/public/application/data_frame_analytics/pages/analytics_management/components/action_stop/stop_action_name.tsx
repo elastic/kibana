@@ -31,7 +31,7 @@ export const StopActionName: FC<StopActionNameProps> = ({ isDisabled }) => {
         position="top"
         content={createPermissionFailureMessage('canStartStopDataFrameAnalytics')}
       >
-        <>{stopActionNameText}</>
+        <span tabIndex={0}>{stopActionNameText}</span>
       </EuiToolTip>
     );
   }

@@ -18,6 +18,7 @@ export const transformRuleTypesResponse = (
       ...(ruleType.actionVariables ? { action_variables: ruleType.actionVariables } : {}),
       ...(ruleType.alerts ? { alerts: ruleType.alerts } : {}),
       authorized_consumers: ruleType.authorizedConsumers,
+      auto_recover_alerts: ruleType.autoRecoverAlerts,
       category: ruleType.category,
       default_action_group_id: ruleType.defaultActionGroupId,
       ...(ruleType.defaultScheduleInterval
@@ -31,6 +32,7 @@ export const transformRuleTypesResponse = (
       has_alerts_mappings: ruleType.hasAlertsMappings,
       has_fields_for_a_a_d: true,
       id: ruleType.id,
+      is_internally_managed: Boolean(ruleType.internallyManaged),
       is_exportable: ruleType.isExportable,
       minimum_license_required: ruleType.minimumLicenseRequired,
       name: ruleType.name,

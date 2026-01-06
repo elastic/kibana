@@ -9,8 +9,8 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import type { MouseEvent } from 'react';
-import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
-import type { FieldValueOptionType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
+import type { FieldValueOptionType, Query } from '@elastic/eui';
 
 import type { Tag } from '../types';
 

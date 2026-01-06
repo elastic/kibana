@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { PricingProductFeature } from '@kbn/core-pricing-common';
+import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
 export const ASSET_VERSION = 1;
+
+export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
 export const STREAMS_FEATURE_ID = 'streams';
 export const STREAMS_CONSUMER = 'streams';
@@ -51,3 +53,7 @@ export const STREAMS_TIERED_FEATURES = [
   STREAMS_TIERED_AI_FEATURE,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 ];
+
+export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const MAX_STREAM_NAME_LENGTH = 200;

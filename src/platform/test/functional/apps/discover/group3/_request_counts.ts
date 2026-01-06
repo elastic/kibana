@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
   const log = getService('log');
-  const retry = getService('retry');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
@@ -57,39 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    const expectSearchCount = async (type: 'ese' | 'esql', searchCount: number) => {
-      await retry.tryWithRetries(
-        `expect ${type} request to match count ${searchCount}`,
-        async () => {
-          if (searchCount === 0) {
-            await browser.execute(async () => {
-              performance.clearResourceTimings();
-            });
-          }
-          await waitForLoadingToFinish();
-          const endpoint = type === 'esql' ? `${type}_async` : type;
-          const requests = await browser.execute(() =>
-            performance
-              .getEntries()
-              .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
-          );
-          const result = requests.filter((entry) =>
-            entry.name.endsWith(`/internal/search/${endpoint}`)
-          );
-          const count = result.length;
-          if (count !== searchCount) {
-            log.warning('Request count differs:', result);
-          }
-          expect(count).to.be(searchCount);
-        },
-        { retryCount: 5, retryDelay: 500 }
-      );
-    };
-
     const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
-      await expectSearchCount(type, 0);
-      await cb();
-      await expectSearchCount(type, expected);
+      await discover.expectSearchRequestCount(type, expected, cb);
     };
 
     const waitForLoadingToFinish = async () => {
@@ -111,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2: string;
       setQuery: (query: string) => Promise<void>;
     }) => {
-      it(`should send 2 search requests (documents + chart) on page load`, async () => {
+      it('should send 2 search requests (documents + chart) on page load', async () => {
         if (type === 'ese') {
           await browser.refresh();
         }
@@ -123,24 +90,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await queryBar.clickQuerySubmitButton();
           });
         } else {
-          await expectSearchCount(type, 2);
+          await discover.expectSearchRequestCount(type, 2);
         }
       });
 
-      it(`should send 2 requests (documents + chart) when refreshing`, async () => {
+      it('should send 2 requests (documents + chart) when refreshing', async () => {
         await expectSearches(type, 2, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it(`should send 2 requests (documents + chart) when changing the query`, async () => {
+      it('should send 2 requests (documents + chart) when changing the query', async () => {
         await expectSearches(type, 2, async () => {
           await setQuery(query1);
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it(`should send 2 requests (documents + chart) when changing the time range`, async () => {
+      it('should send 2 requests (documents + chart) when changing the time range', async () => {
         await expectSearches(type, 2, async () => {
           await timePicker.setAbsoluteRange(
             'Sep 21, 2015 @ 06:31:44.000',
@@ -149,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+      it('should send no requests (documents + chart) when toggling the chart visibility', async () => {
         await expectSearches(type, 0, async () => {
           // hide chart
           await discover.toggleChartVisibility();
@@ -158,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+      it('should send a request for chart data when toggling the chart visibility after a time range change', async () => {
         // hide chart
         await discover.toggleChartVisibility();
         await timePicker.setAbsoluteRange(
@@ -172,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should send no more than 2 requests for saved search changes`, async () => {
+      it('should send expected requests for saved search changes', async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await timePicker.setAbsoluteRange(
@@ -181,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await waitForLoadingToFinish();
         log.debug('Creating saved search');
-        await expectSearches(type, 2, async () => {
+        await expectSearches(type, 0, async () => {
           await discover.saveSearch(savedSearch);
         });
         log.debug('Resetting saved search');
@@ -238,21 +205,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
-        await expectSearches(type, 2, async () => {
+      it('should send 1 request (chart) when changing to a breakdown field without an other bucket', async () => {
+        await expectSearches(type, 1, async () => {
           await discover.chooseBreakdownField('type');
         });
       });
 
-      it('should send 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+      it('should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
         await testSubjects.click('discoverNewButton');
-        await expectSearches(type, 3, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.chooseBreakdownField('extension.raw');
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the chart interval', async () => {
-        await expectSearches(type, 2, async () => {
+      it('should send 1 request (chart) when changing the chart interval', async () => {
+        await expectSearches(type, 1, async () => {
           await discover.setChartInterval('Day');
         });
       });

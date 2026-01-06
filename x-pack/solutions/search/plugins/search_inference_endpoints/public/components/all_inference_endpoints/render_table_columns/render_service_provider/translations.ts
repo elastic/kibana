@@ -13,3 +13,17 @@ export const MIT_LICENSE = i18n.translate(
     defaultMessage: 'License: MIT',
   }
 );
+
+export const TOKEN_BASED_BILLING_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.elastic.description',
+  {
+    defaultMessage: 'Runs on GPUs (token-based billing)',
+  }
+);
+
+export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.description',
+  {
+    defaultMessage: 'Runs on ML Nodes (resource-based billing)',
+  }
+);

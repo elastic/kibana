@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as serverTypes from './server_types';
+import type * as serverTypes from './server_types';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -79,3 +79,5 @@ export type SavedObjectReference = serverTypes.SavedObjectReference;
  * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObject<T = unknown> = serverTypes.SavedObject<T>;
+
+export type SavedObjectAccessControl = serverTypes.SavedObjectAccessControl;

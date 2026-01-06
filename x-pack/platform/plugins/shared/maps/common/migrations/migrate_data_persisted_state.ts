@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import type { MapAttributes } from '../content_management';
+import type { Filter } from '@kbn/es-query';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { StoredMapAttributes } from '../../server';
 
 export function migrateDataPersistedState(
   {
     attributes,
   }: {
-    attributes: MapAttributes;
+    attributes: StoredMapAttributes;
   },
   filterMigration: MigrateFunction<Filter[], Filter[]>
-): MapAttributes {
+): StoredMapAttributes {
   let mapState: { filters: Filter[] } = { filters: [] };
   if (attributes.mapStateJSON) {
     try {

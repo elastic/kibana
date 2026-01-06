@@ -8,7 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import type { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
@@ -25,6 +26,9 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   'kibana' | 'intl' | 'timeHistory'
 > & {
   config?: TopNavMenuData[];
+  /**
+   * @deprecated Badges will no longer be part of TopNavMenu in the future. Instead, they will be part of BreadcrumbsWithExtensions.
+   */
   badges?: TopNavMenuBadgeProps[];
   showSearchBar?: boolean;
   showQueryInput?: boolean;
@@ -69,6 +73,9 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
  *
  **/
 
+/**
+ * @deprecated
+ */
 export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   props: TopNavMenuProps<QT>
 ): ReactElement | null {

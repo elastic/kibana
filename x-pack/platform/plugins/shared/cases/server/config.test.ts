@@ -12,7 +12,11 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
-          "analytics": Object {},
+          "analytics": Object {
+            "index": Object {
+              "enabled": false,
+            },
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
@@ -106,7 +110,7 @@ describe('config validation', () => {
             ],
           },
           "incrementalId": Object {
-            "enabled": false,
+            "enabled": true,
             "taskIntervalMinutes": 10,
             "taskStartDelayMinutes": 10,
           },

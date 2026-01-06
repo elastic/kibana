@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useMemo } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { useVerticalBreakpoint } from './use_vertical_breakpoint';
-import { useAssistantContext } from '../../..';
 import { StarterPrompts } from './starter_prompts';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
 import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';
@@ -39,7 +39,6 @@ export const EmptyConvo: React.FC<Props> = ({
   setIsSettingsModalVisible,
   setUserPrompt,
 }) => {
-  const { assistantAvailability } = useAssistantContext();
   const breakpoint = useVerticalBreakpoint();
   const compressed = useMemo(() => breakpoint !== 'tall', [breakpoint]);
   return (
@@ -89,15 +88,13 @@ export const EmptyConvo: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
-      {assistantAvailability.isStarterPromptsEnabled && (
-        <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
-          <StarterPrompts
-            compressed={compressed}
-            connectorId={connectorId}
-            setUserPrompt={setUserPrompt}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
+        <StarterPrompts
+          compressed={compressed}
+          connectorId={connectorId}
+          setUserPrompt={setUserPrompt}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

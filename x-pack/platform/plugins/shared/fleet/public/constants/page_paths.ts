@@ -38,6 +38,7 @@ export type DynamicPage =
   | 'integration_details_configs'
   | 'integration_policy_edit'
   | 'integration_policy_upgrade'
+  | 'integration_policy_edit_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
@@ -95,6 +96,7 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
+export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
@@ -126,19 +128,31 @@ export const pagePathGetters: {
     searchTerm,
     category,
     subCategory,
+    onlyAgentless,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
+    onlyAgentless?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
-        ? `/${category}/${subCategory} `
+        ? `/${category}/${subCategory}`
         : category && !subCategory
         ? `/${category}`
         : ``;
-    const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
-    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
+    const queryParams = new URLSearchParams();
+    if (searchTerm) {
+      queryParams.set(INTEGRATIONS_SEARCH_QUERYPARAM, searchTerm);
+    }
+    if (onlyAgentless) {
+      queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    const queryString = queryParams.toString();
+    return [
+      INTEGRATIONS_BASE_PATH,
+      `/browse${categoryPath}${queryString ? `?${queryString}` : ''}`,
+    ];
   },
   integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
     const categoryPath = category ? `/${category}` : ``;
@@ -201,6 +215,11 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
+  // Used for breadcrumbs when editing a policy from the installed integrations tab
+  integration_policy_edit_from_installed: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
   // This route allows rendering custom language integration pages registered in the language_client plugin
   integration_details_language_clients: ({ pkgkey }) => [
     INTEGRATIONS_BASE_PATH,
@@ -212,10 +231,17 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
+  add_integration_to_policy: ({
+    pkgkey,
+    integration,
+    agentPolicyId,
+    useMultiPageLayout,
+    prerelease,
+  }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
       ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+      ...(prerelease ? { prerelease } : {}),
     });
     return [
       FLEET_BASE_PATH,

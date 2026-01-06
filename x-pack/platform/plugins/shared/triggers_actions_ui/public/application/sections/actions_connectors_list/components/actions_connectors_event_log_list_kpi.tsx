@@ -9,11 +9,9 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
-import { IExecutionKPIResult } from '@kbn/actions-plugin/common';
-import {
-  ComponentOpts as ConnectorApis,
-  withActionOperations,
-} from '../../common/components/with_actions_api_operations';
+import type { IExecutionKPIResult } from '@kbn/actions-plugin/common';
+import type { ComponentOpts as ConnectorApis } from '../../common/components/with_actions_api_operations';
+import { withActionOperations } from '../../common/components/with_actions_api_operations';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';

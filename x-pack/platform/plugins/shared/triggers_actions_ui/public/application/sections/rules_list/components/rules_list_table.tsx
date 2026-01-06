@@ -9,6 +9,11 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
+import {
+  getRuleDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -18,21 +23,21 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiToolTip,
-  EuiTableSortingType,
   EuiButtonIcon,
-  EuiSelectableOption,
   EuiScreenReaderOnly,
   EuiCheckbox,
   RIGHT_ALIGNMENT,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutionStatus,
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
+
+import { getRouterLinkProps } from '@kbn/router-utils';
 
 import {
   SELECT_ALL_RULES,
@@ -41,17 +46,17 @@ import {
   SELECT_ALL_ARIA_LABEL,
   CLEAR_FILTERS,
 } from '../translations';
-import {
+import type {
   Rule,
   RuleTableItem,
   RuleTypeIndex,
   Pagination,
-  Percentiles,
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
   SnoozeSchedule,
   BulkOperationResponse,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
@@ -64,7 +69,8 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
+import type { RulesListColumns } from './rules_list_column_selector';
+import { useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;
@@ -163,11 +169,13 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       index,
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
+      autoRecoverAlerts: ruleTypeIndex.get(rule.ruleTypeId)?.autoRecoverAlerts,
       isEditable:
         hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+      isInternallyManaged: ruleTypeIndex.get(rule.ruleTypeId)!.isInternallyManaged,
     };
   });
 }
@@ -345,6 +353,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           rule={rule}
           onRuleChanged={onRuleChanged}
           isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
+          autoRecoverAlerts={rule.autoRecoverAlerts}
         />
       );
     },
@@ -371,9 +380,16 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiCheckbox
             id={`ruleListTable_select_${rule.id}}`}
             onChange={() => onSelectRow(rule)}
-            disabled={!rule.isEditable}
+            disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.selectRuleCheckbox',
+              {
+                defaultMessage: 'Select rule {ruleName}',
+                values: { ruleName: rule.name },
+              }
+            )}
           />
         );
       },
@@ -403,13 +419,20 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+
+          const linkProps = getRouterLinkProps({
+            href: pathToRuleDetails,
+            onClick: () => onRuleClick(rule),
+          });
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} {...linkProps}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
@@ -539,7 +562,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             />
           </span>
         ),
-        width: '14%',
+        width: '100px',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
           if (!rule.enabled) {
@@ -558,7 +581,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                   await onSnoozeRule(rule, snoozeSchedule);
                 }}
                 unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-                isRuleEditable={rule.isEditable}
+                isRuleEditable={rule.isEditable && !rule.isInternallyManaged}
               />
             </div>
           );
@@ -669,7 +692,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               {<RuleDurationFormat duration={value} />}
               {showDurationWarning && (
                 <EuiIconTip
-                  data-test-subj="ruleDurationWarning"
+                  iconProps={{ 'data-test-subj': 'ruleDurationWarning' }}
                   anchorClassName="ruleDurationWarningIcon"
                   css={css`
                     .ruleDurationWarningIcon {
@@ -792,7 +815,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
             >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-                  {rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId) ? (
+                  {rule.isEditable &&
+                  isRuleTypeEditableInContext(rule.ruleTypeId) &&
+                  !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
                       <EuiButtonIcon
                         color={'primary'}
@@ -813,7 +838,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                       />
                     </EuiFlexItem>
                   ) : null}
-                  {rule.isEditable ? (
+                  {rule.isEditable && !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarDeleteAction">
                       <EuiButtonIcon
                         color={'danger'}
@@ -902,7 +927,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     (rule: RuleTableItem) => {
       const selectedClass = isRowSelected(rule) ? 'euiTableRow-isSelected' : '';
       return {
-        'data-test-subj': 'rule-row',
+        'data-test-subj': `rule-row${rule.isEditable ? '' : '-isNotEditable'}`,
         className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
           ? `actRulesList__tableRowDisabled ${selectedClass}`
           : selectedClass,

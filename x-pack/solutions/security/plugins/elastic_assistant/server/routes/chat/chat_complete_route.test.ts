@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../../__mocks__/action_result_data';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
-import { getConversationResponseMock } from '../../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
+import {
+  getConversationResponseMock,
+  getFindAnonymizationFieldsResultWithSingleHit,
+} from '../../__mocks__/response';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { chatCompleteRoute } from './chat_complete_route';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -25,6 +27,8 @@ import {
   createConversationWithUserInput,
   langChainExecute,
 } from '../helpers';
+import type { OnLlmResponse } from '../../lib/langchain/executors/types';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const license = licensingMock.createLicenseMock();
 
@@ -159,24 +163,32 @@ describe('chatCompleteRoute', () => {
       }: {
         connectorId: string;
         isStream: boolean;
-        onLlmResponse: (
-          content: string,
-          replacements: Record<string, string>,
-          isError: boolean
-        ) => Promise<void>;
+        onLlmResponse: OnLlmResponse;
       }) => {
         if (!isStream && connectorId === 'mock-connector-id') {
-          onLlmResponse('Non-streamed test reply.', {}, false).catch(() => {});
+          onLlmResponse({
+            content: 'Non-streamed test reply.',
+            traceData: {},
+            isError: false,
+          }).catch(() => {});
           return {
             connector_id: 'mock-connector-id',
             data: mockActionResponse,
             status: 'ok',
           };
         } else if (isStream && connectorId === 'mock-connector-id') {
-          onLlmResponse('Streamed test reply.', {}, false).catch(() => {});
+          onLlmResponse({
+            content: 'Streamed test reply.',
+            traceData: {},
+            isError: false,
+          }).catch(() => {});
           return mockStream;
         } else {
-          onLlmResponse('simulated error', {}, true).catch(() => {});
+          onLlmResponse({
+            content: 'simulated error',
+            traceData: {},
+            isError: true,
+          }).catch(() => {});
           throw new Error('simulated error');
         }
       }
@@ -188,20 +200,16 @@ describe('chatCompleteRoute', () => {
       }))
     );
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'my name',
         actionTypeId: '.gen-ai',
-        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
           c: true,
         },
-      },
+      }),
     ]);
   });
 

@@ -137,6 +137,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
             <EuiFlexItem className={className}>
               <EuiToolTip content={label}>
                 <EuiText
+                  tabIndex={0}
                   className={className}
                   size="s"
                   css={dataExists ? undefined : emptyLabelStyle}
