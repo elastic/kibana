@@ -8,14 +8,29 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { AttackDetailsContainer, TABS_TEST_ID } from './attack_details_container';
+import {
+  AttackDetailsContainer,
+  TABS_TEST_ID,
+  ATTACK_SUMMARY_TAB,
+  ALERTS_TAB,
+} from './attack_details_container';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
-import { AlertsTab } from './alerts_tab';
+import { useLocalStorage } from '../../../../../common/components/local_storage';
+import { getSettingKey } from '../../../../../common/components/local_storage/helpers';
+import {
+  ATTACK_GROUP_DETAILS_CATEGORY,
+  ATTACKS_PAGE,
+  SELECTED_TAB_SETTING_NAME,
+} from '../../constants';
 
 // Mock heavy child components to speed up tests
 jest.mock('./alerts_tab', () => ({
   AlertsTab: jest.fn(() => <div data-test-subj="alertsTab">{'AlertsTab'}</div>),
+}));
+
+jest.mock('../../../../../common/components/local_storage', () => ({
+  useLocalStorage: jest.fn(),
 }));
 
 describe('AttackDetailsContainer', () => {
@@ -27,6 +42,7 @@ describe('AttackDetailsContainer', () => {
     defaultFilters: [],
     isTableLoading: false,
   };
+  const mockSetSelectedTabId = jest.fn();
 
   const renderContainer = (props = {}) =>
     render(
@@ -37,6 +53,7 @@ describe('AttackDetailsContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useLocalStorage as jest.Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
   });
 
   describe('tab rendering', () => {
@@ -67,54 +84,46 @@ describe('AttackDetailsContainer', () => {
     });
   });
 
-  describe('tab switching', () => {
-    it("renders the alerts tab when it's selected", () => {
+  describe('local storage', () => {
+    it('initializes useLocalStorage with correct key and default value', () => {
       renderContainer();
-      const alertsTabButton = screen.getByText('Alerts');
 
-      fireEvent.click(alertsTabButton);
+      const expectedKey = getSettingKey({
+        page: ATTACKS_PAGE,
+        category: ATTACK_GROUP_DETAILS_CATEGORY,
+        setting: SELECTED_TAB_SETTING_NAME,
+      });
 
-      expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
-      expect(AlertsTab).toHaveBeenCalledWith(
-        expect.objectContaining({
-          groupingFilters: [],
-          defaultFilters: [],
-          isTableLoading: false,
-        }),
-        {}
-      );
+      expect(useLocalStorage).toHaveBeenCalledWith({
+        defaultValue: ATTACK_SUMMARY_TAB,
+        key: expectedKey,
+      });
     });
 
-    it('renders the correct tab content when switching tabs', () => {
+    it('renders the content based on stored value', () => {
+      (useLocalStorage as jest.Mock).mockReturnValue([ALERTS_TAB, mockSetSelectedTabId]);
+      renderContainer();
+
+      expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('attackSummaryTabPlaceholder')).not.toBeInTheDocument();
+    });
+
+    it('updates stored value to alerts tab when tab is clicked', () => {
+      (useLocalStorage as jest.Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
       renderContainer();
 
       fireEvent.click(screen.getByText('Alerts'));
-      expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
+
+      expect(mockSetSelectedTabId).toHaveBeenCalledWith(ALERTS_TAB);
+    });
+
+    it('updates stored value to summary tab when tab is clicked', () => {
+      (useLocalStorage as jest.Mock).mockReturnValue([ALERTS_TAB, mockSetSelectedTabId]);
+      renderContainer();
 
       fireEvent.click(screen.getByText('Attack summary'));
-      expect(screen.getByTestId('attackSummaryTabPlaceholder')).toBeInTheDocument();
-    });
-  });
 
-  describe('tab reset on attack change', () => {
-    it('resets the selected tab when the attack changes', () => {
-      const { rerender } = render(
-        <TestProviders>
-          <AttackDetailsContainer {...defaultProps} />
-        </TestProviders>
-      );
-
-      fireEvent.click(screen.getByText('Alerts'));
-      expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
-
-      const newAttack = { ...mockAttack, id: 'new-id' };
-      rerender(
-        <TestProviders>
-          <AttackDetailsContainer {...defaultProps} attack={newAttack} />
-        </TestProviders>
-      );
-      // Should be back to summary tab
-      expect(screen.getByTestId('attackSummaryTabPlaceholder')).toBeInTheDocument();
+      expect(mockSetSelectedTabId).toHaveBeenCalledWith(ATTACK_SUMMARY_TAB);
     });
   });
 });

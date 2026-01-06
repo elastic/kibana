@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useLocalStorage } from '../../../../../common/components/local_storage';
+import { getSettingKey } from '../../../../../common/components/local_storage/helpers';
+import {
+  ATTACK_GROUP_DETAILS_CATEGORY,
+  ATTACKS_PAGE,
+  SELECTED_TAB_SETTING_NAME,
+} from '../../constants';
 import { AlertsTab } from './alerts_tab';
 import * as i18n from './translations';
 
@@ -46,6 +53,15 @@ interface AttackDetailsContainerProps {
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
   ({ attack, groupingFilters, defaultFilters, isTableLoading }) => {
+    const [selectedTabId, setSelectedTabId] = useLocalStorage<string>({
+      defaultValue: ATTACK_SUMMARY_TAB,
+      key: getSettingKey({
+        page: ATTACKS_PAGE,
+        category: ATTACK_GROUP_DETAILS_CATEGORY,
+        setting: SELECTED_TAB_SETTING_NAME,
+      }),
+    });
+
     const tabs = useMemo<TabInfo[]>(() => {
       const tabsList: TabInfo[] = [];
 
@@ -81,21 +97,16 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
       return tabsList;
     }, [attack, groupingFilters, defaultFilters, isTableLoading]);
 
-    const firstTabId = useMemo(() => (attack ? ATTACK_SUMMARY_TAB : ALERTS_TAB), [attack]);
-
-    const [selectedTabId, setSelectedTabId] = useState(firstTabId);
-
     const selectedTabContent = useMemo(() => {
-      return tabs.find((obj) => obj.id === selectedTabId)?.content;
+      let content = tabs.find((obj) => obj.id === selectedTabId)?.content;
+      if (!content && tabs.length > 0) {
+        // Fallback to the existing tab if selectedTabId points to the tab that does not exist for the attack group.
+        // This can happen for the default group shown as "-" and representing the alerts that are not part of any attack.
+        // This will change once we have a "Summary tab" for the generic group as well.
+        content = tabs[0].content;
+      }
+      return content;
     }, [selectedTabId, tabs]);
-
-    const onSelectedTabChanged = useCallback((id: string) => setSelectedTabId(id), []);
-
-    useEffect(() => {
-      // Reset to the first tab if the attack changes,
-      // because (for example) the workflow status of the alerts may have changed:
-      setSelectedTabId(firstTabId);
-    }, [attack, firstTabId]);
 
     return (
       <>
@@ -104,7 +115,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             <EuiTab
               key={index}
               isSelected={tab.id === selectedTabId}
-              onClick={() => onSelectedTabChanged(tab.id)}
+              onClick={() => setSelectedTabId(tab.id)}
             >
               {tab.name}
             </EuiTab>
