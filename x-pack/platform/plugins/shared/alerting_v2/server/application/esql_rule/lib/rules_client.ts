@@ -81,7 +81,7 @@ export class RulesClient {
       esql: params.data.esql,
       timeField: params.data.timeField,
       lookbackWindow: params.data.lookbackWindow,
-      groupKey: params.data.groupKey ?? [],
+      groupingKey: params.data.groupingKey ?? [],
       scheduledTaskId: null,
       createdBy: username,
       createdAt: nowIso,

@@ -38,7 +38,7 @@ describe('writeEsqlAlerts', () => {
           esql: 'FROM idx | STATS count = COUNT(*) BY host.name',
           timeField: '@timestamp',
           lookbackWindow: '5m',
-          groupKey: ['host.name'],
+          groupingKey: ['host.name'],
           scheduledTaskId: null,
           createdBy: 'u',
           createdAt: '2025-01-01T00:00:00.000Z',

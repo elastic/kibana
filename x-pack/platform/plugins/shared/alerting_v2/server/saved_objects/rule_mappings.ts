@@ -21,7 +21,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     esql: { type: 'text' },
     timeField: { type: 'keyword' },
     lookbackWindow: { type: 'keyword' },
-    groupKey: { type: 'keyword' },
+    groupingKey: { type: 'keyword' },
 
     scheduledTaskId: { type: 'keyword' },
 

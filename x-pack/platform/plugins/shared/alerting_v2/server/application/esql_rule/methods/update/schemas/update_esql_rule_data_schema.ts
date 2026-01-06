@@ -17,7 +17,7 @@ export const updateEsqlRuleDataSchema = schema.object(
     esql: schema.maybe(schema.string({ minLength: 1 })),
     timeField: schema.maybe(schema.string({ minLength: 1 })),
     lookbackWindow: schema.maybe(schema.string({ validate: validateDuration })),
-    groupKey: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),
+    groupingKey: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),
   },
   { unknowns: 'allow' }
 );

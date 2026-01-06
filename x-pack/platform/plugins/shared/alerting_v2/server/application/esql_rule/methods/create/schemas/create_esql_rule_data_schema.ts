@@ -17,7 +17,7 @@ export const createEsqlRuleDataSchema = schema.object(
     esql: schema.string({ minLength: 1, maxLength: 10000 }),
     timeField: schema.string({ minLength: 1, maxLength: 128, defaultValue: '@timestamp' }),
     lookbackWindow: schema.string({ validate: validateDuration }),
-    groupKey: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 16 }),
+    groupingKey: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 16 }),
   },
   { unknowns: 'ignore' }
 );

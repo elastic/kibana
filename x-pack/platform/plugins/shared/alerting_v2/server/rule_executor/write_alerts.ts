@@ -91,7 +91,7 @@ export async function writeEsqlAlerts({
     const rowDoc = rowToDocument(columns, row);
     const grouping = buildGrouping({
       rowDoc,
-      groupKeyFields: ruleAttributes.groupKey ?? [],
+      groupKeyFields: ruleAttributes.groupingKey ?? [],
       get fallbackSeed(): string {
         return `${executionUuid}|row:${i}|${stringify(rowDoc)}`;
       },

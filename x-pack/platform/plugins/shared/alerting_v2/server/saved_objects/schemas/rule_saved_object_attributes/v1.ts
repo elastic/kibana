@@ -20,7 +20,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   esql: schema.string(),
   timeField: schema.string(),
   lookbackWindow: schema.string(),
-  groupKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  groupingKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
 
   scheduledTaskId: schema.maybe(schema.nullable(schema.string())),
 
