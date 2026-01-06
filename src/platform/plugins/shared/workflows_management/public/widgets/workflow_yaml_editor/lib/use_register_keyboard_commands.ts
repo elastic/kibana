@@ -122,6 +122,19 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
             saveAndRun();
           }),
         }),
+
+        editor.addAction({
+          id: 'workflows.editor.action.find',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.find', {
+            defaultMessage: 'Find',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF],
+          run: (ed) => {
+            // Trigger Monaco's built-in find widget
+            ed.trigger('keyboard', 'actions.find', null);
+          },
+        }),
       ];
     },
     [unregisterKeyboardCommands]
