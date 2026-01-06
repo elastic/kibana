@@ -467,6 +467,49 @@ export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<JoinProcessor>;
 
+/**
+ * Concat processor
+ */
+
+interface ConcatFromField {
+  from: 'field';
+  value: string;
+}
+
+const concatFromFieldSchema = z.object({
+  from: z.literal('field'),
+  value: StreamlangSourceField,
+}) satisfies z.Schema<ConcatFromField>;
+
+interface ConcatFromLiteral {
+  from: 'literal';
+  value: string;
+}
+
+const concatFromLiteralSchema = z.object({
+  from: z.literal('literal'),
+  value: StreamlangSeparator,
+}) satisfies z.Schema<ConcatFromLiteral>;
+
+type ConcatFrom = ConcatFromField | ConcatFromLiteral;
+
+const concatFromSchema = z.union([
+  concatFromFieldSchema,
+  concatFromLiteralSchema,
+]) satisfies z.Schema<ConcatFrom>;
+
+export interface ConcatProcessor extends ProcessorBaseWithWhere {
+  action: 'concat';
+  from: ConcatFrom[];
+  to: string;
+}
+
+export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('concat'),
+  from: z.array(concatFromSchema),
+  to: StreamlangTargetField,
+}) satisfies z.Schema<ConcatProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -484,6 +527,7 @@ export type StreamlangProcessorDefinition =
   | LowercaseProcessor
   | TrimProcessor
   | JoinProcessor
+  | ConcatProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -503,6 +547,7 @@ export const streamlangProcessorSchema = z.union([
   trimProcessorSchema,
   joinProcessorSchema,
   convertProcessorSchema,
+  concatProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
