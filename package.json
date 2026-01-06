@@ -1143,6 +1143,7 @@
     "@kbn/url-forwarding-plugin": "link:src/platform/plugins/private/url_forwarding",
     "@kbn/usage-collection-plugin": "link:src/platform/plugins/shared/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:src/platform/test/plugin_functional/plugins/usage_collection",
+    "@kbn/use-observable": "link:src/platform/packages/shared/react/use_observable",
     "@kbn/use-tracked-promise": "link:src/platform/packages/shared/kbn-use-tracked-promise",
     "@kbn/user-profile-components": "link:src/platform/packages/shared/kbn-user-profile-components",
     "@kbn/user-profile-examples-plugin": "link:examples/user_profile_examples",
