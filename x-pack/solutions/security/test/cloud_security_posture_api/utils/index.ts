@@ -9,8 +9,11 @@ export { EsIndexDataProvider } from './es_index_data_provider';
 export { waitForPluginInitialized, result } from './helpers';
 export {
   cleanupEntityStore,
+  waitForEnrichIndexPopulated,
   waitForEntityDataIndexed,
   enableAssetInventory,
+  waitForEnrichPolicyCreated,
   executeEnrichPolicy,
+  installCloudAssetInventoryPackage,
 } from './entity_store';
 export type { EntityStoreHelpersDeps } from './entity_store';

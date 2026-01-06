@@ -10,6 +10,7 @@ import {
   cleanupEntityStore,
   waitForEntityDataIndexed,
   enableAssetInventory,
+  waitForEnrichPolicyCreated,
   executeEnrichPolicy,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
@@ -347,7 +348,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
 
             // Enable asset inventory which creates the enrich policy
-            await enableAssetInventory({ supertest });
+            await enableAssetInventory({ supertest, logger });
 
             // Load entity data from the appropriate archive
             await esArchiver.load(config.archivePath);
@@ -363,8 +364,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             // Only execute enrich policy and wait for enrich index if using ENRICH policy
             if (config.useEnrichPolicy) {
+              await waitForEnrichPolicyCreated({ es, retry, logger });
               // Execute enrich policy to pick up entity data
-              await executeEnrichPolicy({ es, retry });
+              await executeEnrichPolicy({ es, retry, logger });
             }
           });
 

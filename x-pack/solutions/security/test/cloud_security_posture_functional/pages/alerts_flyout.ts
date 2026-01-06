@@ -11,6 +11,7 @@ import {
   waitForEntityDataIndexed,
   enableAssetInventory,
   executeEnrichPolicy,
+  waitForEnrichPolicyCreated,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -287,16 +288,14 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
             if (config.name === 'via LOOKUP JOIN (v2)') {
-              await esArchiver.unload(
-                'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
-              );
+              await esArchiver.unload(config.archivePath);
             }
 
             // Enable asset inventory setting
             await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
 
             // Enable asset inventory which creates the enrich policy
-            await enableAssetInventory({ supertest });
+            await enableAssetInventory({ supertest, logger });
 
             await esArchiver.load(
               'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
@@ -316,8 +315,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             // Only execute enrich policy and wait for enrich index if using ENRICH policy
             if (config.useEnrichPolicy) {
+              await waitForEnrichPolicyCreated({ es, retry, logger });
               // Execute enrich policy to pick up entity data
-              await executeEnrichPolicy({ es, retry });
+              await executeEnrichPolicy({ es, retry, logger });
             }
           });
 

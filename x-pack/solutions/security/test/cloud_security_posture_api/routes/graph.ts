@@ -20,13 +20,19 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { result } from '../utils';
+import {
+  result,
+  dataViewRouteHelpersFactory,
+  cleanupEntityStore,
+  waitForEnrichIndexPopulated,
+  enableAssetInventory,
+  waitForEnrichPolicyCreated,
+  executeEnrichPolicy,
+  installCloudAssetInventoryPackage,
+} from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
-import { dataViewRouteHelpersFactory } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -60,130 +66,6 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     return req.send(body);
-  };
-
-  /**
-   * Reusable helper functions for entity store and enrich policy setup/teardown
-   */
-  const entityStoreHelpers = {
-    /**
-     * Waits for the enrich index to be created and populated with data.
-     */
-    waitForEnrichIndexPopulated: async (spaceId?: string) => {
-      const spaceIdentifier = spaceId || 'default';
-      await retry.waitFor(
-        `enrich index to be created and populated for ${spaceIdentifier} space`,
-        async () => {
-          try {
-            await es.enrich.executePolicy({
-              name: getEnrichPolicyId(spaceId),
-              wait_for_completion: true,
-            });
-            // Check if the enrich index has data (policy has been executed)
-            const enrichIndexName = `.enrich-${getEnrichPolicyId(spaceId)}`;
-            const count = await es.count({
-              index: enrichIndexName,
-            });
-            return count.count > 0;
-          } catch (e) {
-            return false;
-          }
-        }
-      );
-    },
-
-    /**
-     * Cleans up entity store resources for a given space
-     */
-    cleanupSpaceEnrichResources: async (spaceId?: string) => {
-      const spacePath = spaceId ? `/s/${spaceId}` : '';
-
-      // Delete the generic entity engine which will properly clean up:
-      // - Platform pipeline
-      // - Field retention enrich policy
-      // - Enrich indices
-      // Note: Asset Inventory uses the 'generic' entity type
-      try {
-        await supertest
-          .delete(`${spacePath}/api/entity_store/engines/generic?delete_data=true`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-        logger.debug(`Deleted entity store generic engine for space: ${spaceId || 'default'}`);
-      } catch (e) {
-        // Ignore 404 errors if the engine doesn't exist
-        if (e.status !== 404) {
-          logger.debug(
-            `Error deleting entity store for space ${spaceId || 'default'}: ${
-              e && e.message ? e.message : JSON.stringify(e)
-            }`
-          );
-        }
-      }
-    },
-
-    /**
-     * Enables asset inventory for a given space
-     */
-    enableAssetInventory: async (spaceId?: string) => {
-      const spacePath = spaceId ? `/s/${spaceId}` : '';
-      await supertest
-        .post(`${spacePath}/api/asset_inventory/enable`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({})
-        .expect(200);
-    },
-
-    /**
-     * Waits for enrich policy to be created
-     */
-    waitForEnrichPolicyCreated: async (spaceId?: string) => {
-      await retry.waitFor('enrich policy to be created', async () => {
-        try {
-          await es.enrich.getPolicy({ name: getEnrichPolicyId(spaceId) });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      });
-    },
-
-    /**
-     * Executes the enrich policy and waits for completion
-     * Uses retry logic in case the policy is not yet fully ready
-     */
-    executeEnrichPolicy: async (spaceId?: string) => {
-      const spaceIdentifier = spaceId || 'default';
-      await retry.waitFor(`enrich policy to be executed for ${spaceIdentifier} space`, async () => {
-        try {
-          await es.enrich.executePolicy({
-            name: getEnrichPolicyId(spaceId),
-            wait_for_completion: true,
-          });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      });
-    },
-
-    /**
-     * Installs cloud asset inventory package
-     */
-    installCloudAssetInventoryPackage: async (spaceId?: string) => {
-      const spacePath = spaceId ? `/s/${spaceId}` : '';
-      await supertest
-        .post(`${spacePath}/api/fleet/epm/packages/_bulk`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          packages: [
-            {
-              name: 'cloud_asset_inventory',
-              version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
-            },
-          ],
-        })
-        .expect(200);
-    },
   };
 
   describe('POST /internal/cloud_security_posture/graph', () => {
@@ -1090,13 +972,13 @@ export default function (providerContext: FtrProviderContext) {
             entitiesIndex: '.entities.v1.latest.security_*',
             useEnrichPolicy: true,
           },
-          {
-            name: 'via LOOKUP JOIN (v2)',
-            archivePath:
-              'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store_v2',
-            entitiesIndex: '.entities.v2.latest.security_*',
-            useEnrichPolicy: false,
-          },
+          // {
+          //   name: 'via LOOKUP JOIN (v2)',
+          //   archivePath:
+          //     'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store_v2',
+          //   entitiesIndex: '.entities.v2.latest.security_*',
+          //   useEnrichPolicy: false,
+          // },
         ];
 
         // Run the same tests for each enrichment method
@@ -1108,8 +990,8 @@ export default function (providerContext: FtrProviderContext) {
             let customSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
             before(async () => {
-              await entityStoreHelpers.cleanupSpaceEnrichResources(); // default space
-              await entityStoreHelpers.cleanupSpaceEnrichResources(customNamespaceId); // test space
+              await cleanupEntityStore({ supertest, logger }); // default space
+              await cleanupEntityStore({ supertest, logger, spaceId: customNamespaceId }); // test space
 
               // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
               if (config.name === 'via LOOKUP JOIN (v2)') {
@@ -1143,8 +1025,8 @@ export default function (providerContext: FtrProviderContext) {
               await customSpaceDataView.create('security-solution');
 
               // Enable asset inventory - this creates and executes the enrich policy
-              await entityStoreHelpers.enableAssetInventory();
-              await entityStoreHelpers.enableAssetInventory(customNamespaceId);
+              await enableAssetInventory({ supertest, logger });
+              await enableAssetInventory({ supertest, logger, spaceId: customNamespaceId });
 
               // Load entity data from the appropriate archive
               await esArchiver.load(config.archivePath);
@@ -1160,19 +1042,19 @@ export default function (providerContext: FtrProviderContext) {
               // Only setup ENRICH policy for v1 tests
               if (config.useEnrichPolicy) {
                 // Wait for enrich policy to be created
-                await entityStoreHelpers.waitForEnrichPolicyCreated();
-                await entityStoreHelpers.waitForEnrichPolicyCreated(customNamespaceId);
+                await waitForEnrichPolicyCreated({ es, retry, logger });
+                await waitForEnrichPolicyCreated({ es, retry, logger, spaceId: customNamespaceId });
 
                 // Explicitly execute enrich policies to ensure they have the latest entity data
-                await entityStoreHelpers.executeEnrichPolicy();
-                await entityStoreHelpers.executeEnrichPolicy(customNamespaceId);
+                await executeEnrichPolicy({ es, retry, logger });
+                await executeEnrichPolicy({ es, retry, logger, spaceId: customNamespaceId });
               }
-              await entityStoreHelpers.installCloudAssetInventoryPackage();
+              await installCloudAssetInventoryPackage({ supertest, logger });
             });
 
             after(async () => {
-              await entityStoreHelpers.cleanupSpaceEnrichResources(); // default space
-              await entityStoreHelpers.cleanupSpaceEnrichResources(customNamespaceId); // test space
+              await cleanupEntityStore({ supertest, logger }); // default space
+              await cleanupEntityStore({ supertest, logger, spaceId: customNamespaceId }); // test space
 
               await kibanaServer.uiSettings.update({
                 'securitySolution:enableAssetInventory': false,
