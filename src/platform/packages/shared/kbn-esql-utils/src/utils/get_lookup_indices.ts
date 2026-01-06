@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLSource } from '@kbn/esql-ast';
-import { Parser, isSource } from '@kbn/esql-ast';
+import type { ESQLSource } from '@kbn/esql-language';
+import { Parser, isSource } from '@kbn/esql-language';
 
 /**
  * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.

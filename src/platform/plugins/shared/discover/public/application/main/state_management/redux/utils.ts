@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isObject } from 'lodash';
 import { v4 as uuid } from 'uuid';
+
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ESQLControlState, ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { DiscoverInternalState, TabState } from './types';
+
 import type {
-  InternalStateDispatch,
   InternalStateDependencies,
+  InternalStateDispatch,
   TabActionPayload,
 } from './internal_state';
+import type { DiscoverInternalState, TabState } from './types';
 
 // For some reason if this is not explicitly typed, TypeScript fails with the following error:
 // TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -72,6 +78,40 @@ export const createTabItem = (allTabs: TabState[]): TabItem => {
 };
 
 /**
+ * Gets a minimal representation of the data view in a serialized
+ * search source. Useful when you want e.g. the time field name
+ * and don't have access to the full data view.
+ */
+export const getSerializedSearchSourceDataViewDetails = (
+  serializedSearchSource: SerializedSearchSourceFields | undefined,
+  savedDataViews: DataViewListItem[]
+): Pick<DataView, 'id' | 'timeFieldName'> | undefined => {
+  const dataViewIdOrSpec = serializedSearchSource?.index;
+
+  if (!dataViewIdOrSpec) {
+    return undefined;
+  }
+
+  if (isObject(dataViewIdOrSpec)) {
+    return {
+      id: dataViewIdOrSpec.id,
+      timeFieldName: dataViewIdOrSpec.timeFieldName,
+    };
+  }
+
+  const dataViewListItem = savedDataViews.find((item) => item.id === dataViewIdOrSpec);
+
+  if (!dataViewListItem) {
+    return undefined;
+  }
+
+  return {
+    id: dataViewListItem.id,
+    timeFieldName: dataViewListItem.timeFieldName,
+  };
+};
+
+/**
  * Parses a JSON string into a ControlPanelsState object.
  * If the JSON is invalid or null, it returns an empty object.
  *
@@ -105,8 +145,9 @@ export const extractEsqlVariables = (
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const isSingleSelect = panel.singleSelect ?? true;
-      const selectedValues = panel.selectedOptions || [];
+      const typedPanel = panel as OptionsListESQLControlState;
+      const isSingleSelect = typedPanel.singleSelect ?? true;
+      const selectedValues = typedPanel.selectedOptions || [];
 
       let value: string | number | (string | number)[];
 
@@ -120,8 +161,8 @@ export const extractEsqlVariables = (
       }
 
       acc.push({
-        key: panel.variableName,
-        type: panel.variableType,
+        key: typedPanel.variableName,
+        type: typedPanel.variableType as ESQLVariableType,
         value,
       });
     }

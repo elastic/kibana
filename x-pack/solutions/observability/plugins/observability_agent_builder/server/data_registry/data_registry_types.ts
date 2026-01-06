@@ -38,7 +38,7 @@ interface ServiceSummary {
   deployments: Array<{ '@timestamp': string }>;
 }
 
-interface APMDownstreamDependency {
+export interface APMDownstreamDependency {
   'service.name'?: string | undefined;
   'span.destination.service.resource': string;
   'span.type'?: string | undefined;
@@ -86,7 +86,7 @@ interface APMTransaction {
   };
 }
 
-interface ServicesItemsItem {
+export interface ServicesItemsItem {
   serviceName: string;
   transactionType?: string;
   environments?: string[];
@@ -129,7 +129,7 @@ interface InfraEntityMetadata {
   value: string | number | null;
 }
 
-interface InfraEntityMetricsItem {
+export interface InfraEntityMetricsItem {
   name: string;
   metrics: InfraEntityMetrics[];
   metadata: InfraEntityMetadata[];
@@ -209,7 +209,7 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     from: string;
     to: string;
     limit: number;
-    kqlFilter?: string;
+    query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
 }
