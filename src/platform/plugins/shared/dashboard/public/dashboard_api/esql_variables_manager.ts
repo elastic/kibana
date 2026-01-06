@@ -67,6 +67,9 @@ export const initializeESQLVariablesManager = (
       unpublishedEsqlVariables$.next(esqlVariablesWithUUIDs.map(({ variable }) => variable));
 
       const nextESQLRelatedPanels: Map<string, string[]> = new Map();
+
+      // For each panel with an ES|QL query, check if it has any variables, then create a map of which
+      // panels publish these corresponding variables
       for (const { esql, uuid } of esqlQueries) {
         const variables = getESQLQueryVariables(esql);
         if (variables.length > 0) {

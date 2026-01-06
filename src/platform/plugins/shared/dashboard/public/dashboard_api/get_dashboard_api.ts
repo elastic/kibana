@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, map, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import { getReferencesForPanelId } from '../../common';
 
@@ -43,6 +43,7 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
+import { initializeRelatedPanelsManager } from './related_panels_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -169,24 +170,7 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
-  const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
-  const relatedPanelSubscription = esqlVariablesManager.internalApi.esqlRelatedPanels$
-    .pipe(
-      map((esqlRelatedPanels) => (uuid: string) => {
-        const relatedPanelUUIDs = [];
-        const esqlRelatedPanelUUIDs = esqlRelatedPanels.get(uuid);
-        if (esqlRelatedPanelUUIDs) {
-          for (const relatedUUID of esqlRelatedPanelUUIDs) {
-            relatedPanelUUIDs.push(relatedUUID);
-          }
-        }
-
-        return relatedPanelUUIDs;
-      })
-    )
-    .subscribe((getRelatedPanels) =>
-      arePanelsRelated$.next((a: string, b: string) => getRelatedPanels(a).includes(b))
-    );
+  const relatedPanelsManager = initializeRelatedPanelsManager(layoutManager, esqlVariablesManager);
 
   const dashboardApi = {
     ...viewModeManager.api,
@@ -309,9 +293,9 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
+    ...relatedPanelsManager.api,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
-    arePanelsRelated$,
   };
 
   const searchSessionManager = initializeSearchSessionManager(
@@ -338,7 +322,6 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
-      relatedPanelSubscription.unsubscribe();
     },
   };
 }
