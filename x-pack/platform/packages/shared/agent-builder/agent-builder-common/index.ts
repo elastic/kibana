@@ -152,3 +152,4 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
+export type { VersionedAttachment } from './attachments';
