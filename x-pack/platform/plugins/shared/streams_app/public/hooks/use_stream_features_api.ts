@@ -12,6 +12,7 @@ import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
+import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
   upsertFeature: (feature: Feature) => Promise<void>;
@@ -37,7 +38,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
 
   return {
     identifyFeatures: async (connectorId: string) => {
-      const now = Date.now();
+      const { from, to } = getLast24HoursTimeRange();
       const events$ = streamsRepositoryClient.stream(
         'POST /internal/streams/{name}/features/_identify',
         {
@@ -46,8 +47,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
             path: { name: definition.name },
             query: {
               connectorId,
-              to: new Date(now).toISOString(),
-              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+              from,
+              to,
             },
           },
         }

@@ -2,13 +2,18 @@
   "text_structure.find_structure": {
     "url_params": {
       "charset": "",
-      "column_names": "",
+      "column_names": [],
       "delimiter": "",
       "ecs_compatibility": [
         "disabled"
       ],
       "explain": "__flag__",
-      "format": "",
+      "format": [
+        "ndjson",
+        "xml",
+        "delimited",
+        "semi_structured_text"
+      ],
       "grok_pattern": "",
       "has_header_row": "__flag__",
       "line_merge_size_limit": [
