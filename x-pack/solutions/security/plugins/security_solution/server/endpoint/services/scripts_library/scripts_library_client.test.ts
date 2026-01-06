@@ -176,9 +176,7 @@ describe('scripts library client', () => {
     it('should use defaults when called with no options', async () => {
       await scriptsClient.list();
 
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
-      ).toHaveBeenCalledWith({
+      expect(soClientMock.find).toHaveBeenCalledWith({
         filter: undefined,
         page: 1,
         perPage: 10,
@@ -196,9 +194,7 @@ describe('scripts library client', () => {
         sortDirection: 'desc',
       });
 
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
-      ).toHaveBeenCalledWith({
+      expect(soClientMock.find).toHaveBeenCalledWith({
         filter: undefined,
         page: 101,
         perPage: 500,
@@ -213,9 +209,7 @@ describe('scripts library client', () => {
         kuery: 'name:script_one AND platform: (linux OR macos)',
       });
 
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
-      ).toHaveBeenCalledWith(
+      expect(soClientMock.find).toHaveBeenCalledWith(
         expect.objectContaining({
           // The `kuery` passed to soClient.find() is converted to `KueryNode` (AST) and field names
           // prepended with the SO type
