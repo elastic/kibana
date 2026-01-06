@@ -2706,7 +2706,7 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.12":
+"@elastic/monaco-esql@^3.1.13":
   version "3.1.13"
   resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.13.tgz#70ba489dcfb07edbf5b72fb46c0024ab876e4b67"
   integrity sha512-T0+n6Rog+ACRXzb4ULZuznETvB4K9AZdbRT3t4hY0erVKonu7YlYkJ81PyOTzn+aD0hOr3jRvZdxsWxSVkA5yg==
@@ -5100,6 +5100,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/control-group-renderer@link:src/platform/packages/shared/controls/control-group-renderer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-constants@link:src/platform/packages/shared/controls/controls-constants":
   version "0.0.0"
   uid ""
@@ -5109,6 +5113,10 @@
   uid ""
 
 "@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
+  version "0.0.0"
+  uid ""
+
+"@kbn/controls-renderer@link:src/platform/packages/private/kbn-controls-renderer":
   version "0.0.0"
   uid ""
 
@@ -9317,6 +9325,10 @@
   uid ""
 
 "@kbn/usage-collection-test-plugin@link:src/platform/test/plugin_functional/plugins/usage_collection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/use-observable@link:src/platform/packages/shared/react/use_observable":
   version "0.0.0"
   uid ""
 
