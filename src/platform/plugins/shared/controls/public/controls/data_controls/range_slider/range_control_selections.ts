@@ -9,16 +9,16 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import type { RangeValue, RangesliderControlState } from './types';
+import type { RangeSliderControlState, RangeSliderValue } from '@kbn/controls-schemas';
 
 export function initializeRangeControlSelections(
-  initialState: RangesliderControlState,
+  initialState: RangeSliderControlState,
   onSelectionChange: () => void
 ) {
-  const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
+  const value$ = new BehaviorSubject<RangeSliderValue | undefined>(initialState.value);
   const hasRangeSelection$ = new BehaviorSubject<boolean>(Boolean(value$.getValue()));
 
-  function setValue(next: RangeValue | undefined) {
+  function setValue(next: RangeSliderValue | undefined) {
     if (value$.value !== next) {
       value$.next(next);
       hasRangeSelection$.next(Boolean(next));
@@ -27,8 +27,7 @@ export function initializeRangeControlSelections(
   }
 
   return {
-    hasInitialSelections: initialState.value !== undefined,
-    value$: value$ as PublishingSubject<RangeValue | undefined>,
+    value$: value$ as PublishingSubject<RangeSliderValue | undefined>,
     hasRangeSelection$: hasRangeSelection$ as PublishingSubject<boolean | undefined>,
     setValue,
   };
