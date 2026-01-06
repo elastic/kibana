@@ -47,15 +47,6 @@ export class AddSectionAction implements Action<EmbeddableApiContext> {
         <EuiFlexItem>
           <EuiText size="s">{this.getDisplayName()}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiBadge color="accent">
-            {i18n
-              .translate('dashboard.collapsibleSection.newBadge', {
-                defaultMessage: 'New',
-              })
-              .toLocaleUpperCase()}
-          </EuiBadge>
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
