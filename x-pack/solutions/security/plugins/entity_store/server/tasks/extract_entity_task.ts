@@ -6,17 +6,17 @@
  */
 
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { EntityStoreLogger } from '../infra/logging';
 import { EntityType } from '../domain/definitions/constants';
 import config from './config';
 import { EntityStoreTaskType } from './constants';
 import { EntityStoreTask } from './entity_store_task';
 import { TaskManager } from '../types';
 import { RunResult } from '@kbn/task-manager-plugin/server/task';
+import { Logger } from '@kbn/logging';
 
 export class ExtractEntityTask extends EntityStoreTask {
 
-    constructor(taskManager: TaskManager, logger: EntityStoreLogger, private readonly entityType: EntityType) {
+    constructor(taskManager: TaskManager, logger: Logger, private readonly entityType: EntityType) {
         super(taskManager, config[EntityStoreTaskType.Values.entity], logger);
         this.entityType = entityType;
     }
@@ -51,7 +51,7 @@ export class ExtractEntityTask extends EntityStoreTask {
             };
         } catch (e) {
             this.logger.error(`[task ${taskId}]: error running task, received ${e.message}`);
-            // Return current state even on error to preserve execution history
+
             return {
                 state: {
                     ...currentState,
@@ -69,7 +69,6 @@ export class ExtractEntityTask extends EntityStoreTask {
         // 2. Clean up any resources
         // 3. Log the cancellation
         
-        // For simple tasks, a no-op is acceptable if there's nothing to clean up
         // If you have async operations that support cancellation, you should:
         // - Check for abortController.signal.aborted in your run method
         // - Abort any ongoing operations here

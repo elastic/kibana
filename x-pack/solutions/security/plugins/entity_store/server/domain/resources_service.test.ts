@@ -6,16 +6,16 @@
  */
 
 import { ResourcesService } from './resources_service';
-import { EntityType } from './definitions/constants';
+import { EntityType } from './definitions/entity_type';
 import { ExtractEntityTask } from '../tasks/extract_entity_task';
-import { EntityStoreLogger } from '../infra/logging';
 import type { TaskManager } from '../types';
+import { Logger } from '@kbn/logging';
 
 jest.mock('../tasks/extract_entity_task');
 
 describe('ResourcesService', () => {
   let resourcesService: ResourcesService;
-  let mockLogger: jest.Mocked<EntityStoreLogger>;
+  let mockLogger: jest.Mocked<Logger>;
   let mockTaskManager: jest.Mocked<TaskManager>;
   let mockExtractEntityTask: jest.MockedClass<typeof ExtractEntityTask>;
 
@@ -27,7 +27,7 @@ describe('ResourcesService', () => {
       debug: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-    } as unknown as jest.Mocked<EntityStoreLogger>;
+    } as unknown as jest.Mocked<Logger>;
 
     mockTaskManager = {
       registerTaskDefinitions: jest.fn(),

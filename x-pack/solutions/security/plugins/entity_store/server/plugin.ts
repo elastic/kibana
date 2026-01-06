@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type { EntityStoreRequestHandlerContext } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
@@ -21,9 +21,10 @@ export class EntityStorePlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: EntityStorePlugins) {
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
+
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger })
+      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger, plugins })
     );
 
     registerRoutes(router);

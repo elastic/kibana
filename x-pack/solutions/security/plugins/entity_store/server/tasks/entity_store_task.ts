@@ -6,13 +6,13 @@
  */
 
 import type { ConcreteTaskInstance, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
-import type { EntityStoreLogger } from '../infra/logging';
 import type { TaskConfig } from './config';
 import { TaskManager } from '../types';
 import { RunResult } from '@kbn/task-manager-plugin/server/task';
+import { Logger } from '@kbn/logging';
 
 export abstract class EntityStoreTask {
-  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected readonly logger: EntityStoreLogger) {
+  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected readonly logger: Logger) {
     this.taskManager = taskManager;
     this.config = config;
     this.logger = logger;
@@ -33,7 +33,6 @@ export abstract class EntityStoreTask {
         },
       });
     } catch (e) {
-      this.logger.error(`Error registering task ${taskName}`, e);
       if (
         e instanceof Error &&
         e.message.includes('is already defined') &&
@@ -42,6 +41,8 @@ export abstract class EntityStoreTask {
         this.logger.warn(`Task ${taskName} is already registered`);
         return;
       }
+      
+      this.logger.error(`Error registering task ${taskName}`, e);
       throw e;
     }
   }

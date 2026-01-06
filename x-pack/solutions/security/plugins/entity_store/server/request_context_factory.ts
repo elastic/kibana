@@ -10,12 +10,15 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type {
   EntityStoreApiRequestHandlerContext,
+  EntityStorePlugins,
   EntityStoreRequestHandlerContext,
 } from './types';
 import { ResourcesService } from './domain/resources_service';
+import { getTaskManager } from './utils';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
+  plugins: EntityStorePlugins;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
 }
@@ -23,6 +26,8 @@ interface EntityStoreApiRequestHandlerContextDeps {
 export async function createRequestHandlerContext({
   logger,
   context,
+  core,
+  plugins,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const coreCtx = await context.core;
 
@@ -30,5 +35,6 @@ export async function createRequestHandlerContext({
     core: coreCtx,
     getLogger: memoize(() => logger),
     getResourcesService: memoize(() => new ResourcesService(logger)),
+    getTaskManager: memoize(() => getTaskManager(core, plugins))
   };
 }
