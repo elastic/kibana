@@ -10312,9 +10312,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
-                type: array
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -58784,6 +58782,9 @@ components:
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.
