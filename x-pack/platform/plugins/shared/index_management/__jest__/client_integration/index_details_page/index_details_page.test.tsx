@@ -35,6 +35,7 @@ import {
   testIndexName,
   testIndexSettings,
   testIndexStats,
+  testUserStartPrivilegesResponse,
 } from './mocks';
 import { setupEnvironment, WithAppDependencies } from '../helpers/setup_environment';
 import { renderIndexDetailsPage } from './index_details_page.helpers';
@@ -78,6 +79,10 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
     httpRequestsMockHelpers.setInferenceModels([]);
+    httpRequestsMockHelpers.setUserStartPrivilegesResponse(
+      testIndexName,
+      testUserStartPrivilegesResponse
+    );
   });
 
   describe('error section', () => {
@@ -1200,7 +1205,7 @@ describe('<IndexDetailsPage />', () => {
       await renderPage();
       await clickMappingsTab();
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
+        expect(httpSetup.get).toHaveBeenCalledWith(
           `${API_BASE_PATH}/mapping/${testIndexName}`,
           requestOptions
         );
@@ -1263,16 +1268,13 @@ describe('<IndexDetailsPage />', () => {
         await renderPage();
         await clickMappingsTab();
       });
-
       it('displays empty mappings prompt', async () => {
         expect(screen.getByTestId('indexDetailsMappingsAddField')).toBeInTheDocument();
         expect(screen.getByTestId('indexDetailsMappingsEmptyPrompt')).toBeInTheDocument();
       });
-
       it('hides filter, search and toggle while adding fields', async () => {
         fireEvent.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('indexDetailsMappingsPendingBlock');
-
         expect(screen.queryByTestId('indexDetailsMappingsFieldSearch')).not.toBeInTheDocument();
         expect(
           screen.queryByTestId('indexDetailsMappingsToggleViewButton')
@@ -1280,13 +1282,10 @@ describe('<IndexDetailsPage />', () => {
         expect(screen.queryByTestId('indexDetailsMappingsFilter')).not.toBeInTheDocument();
         expect(screen.getByTestId('indexDetailsMappingsSaveMappings')).toBeInTheDocument();
       });
-
       it('does not display empty prompt after adding a field', async () => {
         fireEvent.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('indexDetailsMappingsPendingBlock');
-
         expect(screen.queryByTestId('indexDetailsMappingsEmptyPrompt')).not.toBeInTheDocument();
-
         // Close add-field flow
         fireEvent.click(await screen.findByTestId('cancelButton'));
         await waitFor(() =>

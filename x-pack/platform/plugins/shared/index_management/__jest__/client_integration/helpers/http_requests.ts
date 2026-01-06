@@ -212,7 +212,13 @@ const registerHttpRequestMockHelpers = (
 
   const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
-
+  const setUserStartPrivilegesResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => {
+    mockResponse('GET', `${API_BASE_PATH}/start_privileges/${indexName}`, response, error);
+  };
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -244,6 +250,7 @@ const registerHttpRequestMockHelpers = (
     setCreateEnrichPolicy,
     setInferenceModels,
     setGetMatchingDataStreams,
+    setUserStartPrivilegesResponse,
   };
 };
 
