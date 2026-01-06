@@ -18,12 +18,12 @@ import type {
 } from '../types';
 
 export interface UseAttackAssigneesContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
-  /** Array of attack discoveries with assignees */
+  /** Array of attacks with assignees */
   attacksWithAssignees: AttackWithAssignees[];
 }
 
 /**
- * Hook that provides context menu items and panels for managing assignees on attack discoveries.
+ * Hook that provides context menu items and panels for managing assignees on attacks.
  * The hook creates mock alert items from the attack IDs and related alert IDs to work with the bulk actions system.
  *
  * @param props - Hook configuration props

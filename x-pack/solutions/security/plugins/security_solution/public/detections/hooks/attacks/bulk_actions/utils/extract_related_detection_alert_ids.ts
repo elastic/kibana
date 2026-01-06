@@ -10,11 +10,11 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
 
 /**
- * Extracts all unique related detection alert IDs from attack alerts.
- * Each attack alert may reference multiple detection alerts via the ALERT_ATTACK_DISCOVERY_ALERT_IDS field.
+ * Extracts all unique related alert IDs from attacks.
+ * Each attack may reference multiple alerts via the ALERT_ATTACK_DISCOVERY_ALERT_IDS field.
  *
- * @param alertItems - Array of TimelineItem representing attack alerts
- * @returns Array of unique detection alert IDs extracted from all attack alerts
+ * @param alertItems - Array of TimelineItem representing attacks
+ * @returns Array of unique alert IDs extracted from all attacks
  */
 export const extractRelatedDetectionAlertIds = (alertItems: TimelineItem[]): string[] => {
   const allRelatedIds: string[] = [];

@@ -19,8 +19,8 @@ interface ApplyAttackAssigneesProps extends BaseApplyAttackProps {
 }
 
 /**
- * Hook that provides a function to apply assignees to attack discoveries and optionally related detection alerts.
- * Shows a confirmation modal to let users choose whether to update only attack discoveries or both attack discoveries and related detection alerts.
+ * Hook that provides a function to apply assignees to attacks and optionally related alerts.
+ * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  *
  * @returns Object containing the applyAssignees function
  */

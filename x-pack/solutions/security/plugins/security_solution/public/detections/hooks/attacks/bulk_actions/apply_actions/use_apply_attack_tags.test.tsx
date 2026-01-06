@@ -44,7 +44,7 @@ describe('useApplyAttackTags', () => {
     mockUseUpdateAttacksModal.mockReturnValue(mockShowModal);
   });
 
-  it('should show modal and update only attack discoveries when user chooses attacks only', async () => {
+  it('should show modal and update only attacks when user chooses attacks only', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
     mockMutateAsync.mockResolvedValue({ updated: 2 });
 

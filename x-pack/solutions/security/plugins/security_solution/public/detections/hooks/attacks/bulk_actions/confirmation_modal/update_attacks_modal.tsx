@@ -41,9 +41,9 @@ export const UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_AND_ALERTS_TEST_ID =
 export type AttackActionType = 'workflow_status' | 'assignees' | 'tags';
 
 export interface UpdateAttacksModalProps {
-  /** Number of related detection alerts */
+  /** Number of related alerts */
   alertsCount: number;
-  /** Number of attack discoveries being updated */
+  /** Number of attacks being updated */
   attackDiscoveriesCount: number;
   /** Callback when user cancels the action */
   onCancel: () => void;
@@ -54,8 +54,8 @@ export interface UpdateAttacksModalProps {
 }
 
 /**
- * Generic confirmation modal for bulk actions on attack alerts.
- * Allows users to choose whether to update only attack discoveries or both attack discoveries and related detection alerts.
+ * Generic confirmation modal for bulk actions on attacks.
+ * Allows users to choose whether to update only attacks or both attacks and related alerts.
  *
  * @param props - Component props
  * @returns Modal component

@@ -14,7 +14,7 @@ import type { BulkAttackActionItems, BulkAttackContextMenuItems } from '../types
 interface TransformBulkActionsToContextMenuItemsProps {
   /** Bulk action items and panels from bulk action hooks. */
   bulkActionItems: BulkAttackActionItems;
-  /** Array of TimelineItem representing attack alerts. */
+  /** Array of TimelineItem representing attacks. */
   alertItems: TimelineItem[];
   /** Optional callback to close the popover menu. */
   closePopover?: () => void;

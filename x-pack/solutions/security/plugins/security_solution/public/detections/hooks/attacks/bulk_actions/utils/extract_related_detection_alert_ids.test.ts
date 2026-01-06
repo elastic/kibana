@@ -11,7 +11,7 @@ import { extractRelatedDetectionAlertIds } from './extract_related_detection_ale
 const ALERT_ATTACK_DISCOVERY_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids';
 
 describe('extractRelatedDetectionAlertIds', () => {
-  it('should extract related detection alert IDs from attack alerts', () => {
+  it('should extract related alert IDs from attacks', () => {
     const alertItems: TimelineItem[] = [
       {
         _id: 'attack-1',

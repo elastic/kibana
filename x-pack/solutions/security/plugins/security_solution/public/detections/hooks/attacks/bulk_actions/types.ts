@@ -12,12 +12,12 @@ import type { AlertWorkflowStatus } from '../../../../common/types';
 
 /**
  * Base props shared by all apply attack hooks.
- * These props are common to all hooks that apply bulk actions to attack discoveries and related detection alerts.
+ * These props are common to all hooks that apply bulk actions to attacks and related alerts.
  */
 export interface BaseApplyAttackProps {
-  /** IDs of attack discoveries to update */
+  /** IDs of attacks to update */
   attackIds: string[];
-  /** IDs of related detection alerts to potentially update */
+  /** IDs of related alerts to potentially update */
   relatedAlertIds: string[];
   /** Optional callback to set loading state */
   setIsLoading?: (loading: boolean) => void;
@@ -27,7 +27,7 @@ export interface BaseApplyAttackProps {
 
 /**
  * Base props shared by all attack context menu items hooks.
- * These props are common to all hooks that provide context menu items for a single attack discovery and its related detection alerts.
+ * These props are common to all hooks that provide context menu items for a single attack and its related alerts.
  */
 export interface BaseAttackContextMenuItemsProps {
   /** Optional callback to clear selection */
@@ -44,39 +44,39 @@ export interface BaseAttackContextMenuItemsProps {
 
 /**
  * Base properties shared by all attack-related types.
- * Contains the fundamental identification information for an attack discovery and its related detection alerts.
+ * Contains the fundamental identification information for an attack and its related alerts.
  */
 export interface BaseAttackProps {
-  /** ID of the attack discovery */
+  /** ID of the attack */
   attackId: string;
-  /** IDs of related detection alerts */
+  /** IDs of related alerts */
   relatedAlertIds: string[];
 }
 
 /**
- * Represents an attack discovery with its workflow status information.
+ * Represents an attack with its workflow status information.
  * Used by context menu hooks to provide workflow status management functionality.
  */
 export interface AttackWithWorkflowStatus extends BaseAttackProps {
-  /** Workflow status of the attack discovery */
+  /** Workflow status of the attack */
   workflowStatus?: AlertWorkflowStatus;
 }
 
 /**
- * Represents an attack discovery with its assignees information.
+ * Represents an attack with its assignees information.
  * Used by context menu hooks to provide assignee management functionality.
  */
 export interface AttackWithAssignees extends BaseAttackProps {
-  /** Assignees of the attack discovery */
+  /** Assignees of the attack */
   assignees?: string[];
 }
 
 /**
- * Represents an attack discovery with its tags information.
+ * Represents an attack with its tags information.
  * Used by context menu hooks to provide tag management functionality.
  */
 export interface AttackWithTags extends BaseAttackProps {
-  /** Tags of the attack discovery */
+  /** Tags of the attack */
   tags?: string[];
 }
 

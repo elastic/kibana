@@ -286,9 +286,9 @@ describe('useUpdateAttacksModal', () => {
     const call = mockOverlays.openModal.mock.calls[0][0];
     const updateAttacksModal = React.Children.only(call.props.children);
 
-    // Should have 2 attack discoveries
+    // Should have 2 attacks
     expect(updateAttacksModal.props.attackDiscoveriesCount).toBe(2);
-    // Should have 3 related detection alerts
+    // Should have 3 related alerts
     expect(updateAttacksModal.props.alertsCount).toBe(3);
   });
 

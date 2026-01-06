@@ -10,22 +10,22 @@ import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts
 import { useGetMissingIndexPrivileges } from '../../../../attack_discovery/pages/use_get_missing_index_privileges';
 
 /**
- * Combined privilege state for both detection alerts and attack alerts indices
+ * Combined privilege state for both alerts and attacks indices
  */
 export interface AttacksPrivileges {
-  /** Whether user has write access to detection alerts indices */
+  /** Whether user has write access to alerts indices */
   hasIndexWrite: boolean;
-  /** Whether user has write access to attack alerts indices */
+  /** Whether user has write access to attacks indices */
   hasAttackIndexWrite: boolean;
   /** Whether privilege checks are still loading */
   loading: boolean;
 }
 
 /**
- * Hook that combines privilege checks for both detection alerts and attack alerts indices.
+ * Hook that combines privilege checks for both alerts and attacks indices.
  * Returns write access status for both index types, which must both be true for bulk actions to be enabled.
  *
- * @returns Combined privilege state with detection and attack alerts write access
+ * @returns Combined privilege state with alerts and attacks write access
  */
 export const useAttacksPrivileges = (): AttacksPrivileges => {
   const { hasIndexWrite, loading: detectionLoading } = useAlertsPrivileges();
@@ -33,7 +33,7 @@ export const useAttacksPrivileges = (): AttacksPrivileges => {
     useGetMissingIndexPrivileges();
 
   return useMemo(() => {
-    // If missingIndexPrivileges array is empty, user has write access to attack alerts indices
+    // If missingIndexPrivileges array is empty, user has write access to attacks indices
     const hasAttackIndexWrite = missingIndexPrivileges.length === 0;
 
     return {

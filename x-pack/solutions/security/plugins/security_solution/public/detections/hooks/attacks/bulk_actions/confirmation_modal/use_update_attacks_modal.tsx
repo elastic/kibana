@@ -11,22 +11,22 @@ import { useAssistantAvailability } from '../../../../../assistant/use_assistant
 import { UpdateAttacksModal } from './update_attacks_modal';
 
 export interface ShowUpdateAttacksModalProps {
-  /** Number of related detection alerts */
+  /** Number of related alerts */
   alertsCount: number;
-  /** Number of attack discoveries being updated */
+  /** Number of attacks being updated */
   attackDiscoveriesCount: number;
 }
 
 /**
  * Hook that provides a function to show the update attacks confirmation modal if needed.
- * The modal allows users to choose whether to update only attack alerts or both attack alerts and related detection alerts.
+ * The modal allows users to choose whether to update only attacks or both attacks and related alerts.
  * For EASE (when hasSearchAILakeConfigurations is true), the modal is skipped and the function resolves with updateAlerts: false.
  *
  * @returns Function that shows the modal (if needed) and returns a promise that resolves to:
  *   - `null` if the user cancels or closes the modal (no update should be performed)
  *   - `{ updateAlerts: boolean }` if the user confirms or if EASE is enabled:
- *     - `{ updateAlerts: false }` when user chooses to update only attack alerts, or when EASE is enabled
- *     - `{ updateAlerts: true }` when user chooses to update both attack alerts and related detection alerts
+ *     - `{ updateAlerts: false }` when user chooses to update only attacks, or when EASE is enabled
+ *     - `{ updateAlerts: true }` when user chooses to update both attacks and related alerts
  */
 export const useUpdateAttacksModal = () => {
   const { overlays, services } = useKibana();

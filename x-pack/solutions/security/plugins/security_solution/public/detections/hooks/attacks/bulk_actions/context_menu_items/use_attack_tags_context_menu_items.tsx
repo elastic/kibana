@@ -18,12 +18,12 @@ import type {
 } from '../types';
 
 export interface UseAttackTagsContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
-  /** Array of attack discoveries with tags */
+  /** Array of attacks with tags */
   attacksWithTags: AttackWithTags[];
 }
 
 /**
- * Hook that provides context menu items and panels for managing tags on attack discoveries.
+ * Hook that provides context menu items and panels for managing tags on attacks.
  * The hook creates mock alert items from the attack IDs and related alert IDs to work with the bulk actions system.
  *
  * @param props - Hook configuration props

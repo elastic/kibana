@@ -18,12 +18,12 @@ import type {
 
 export interface UseAttackWorkflowStatusContextMenuItemsProps
   extends BaseAttackContextMenuItemsProps {
-  /** Array of attack discoveries with workflow status */
+  /** Array of attacks with workflow status */
   attacksWithWorkflowStatus: AttackWithWorkflowStatus[];
 }
 
 /**
- * Hook that provides context menu items and panels for managing workflow status on attack discoveries.
+ * Hook that provides context menu items and panels for managing workflow status on attacks.
  * The hook creates mock alert items from the attack IDs and related alert IDs to work with the bulk actions system.
  * Uses the workflow status of the first attack in the array to determine the current status for bulk actions.
  *

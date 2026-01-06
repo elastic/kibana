@@ -6,7 +6,7 @@
  */
 
 /**
- * Field name for attack discovery alert IDs that reference related detection alerts.
- * This field contains an array of detection alert IDs that are associated with the attack alert.
+ * Field name for attack IDs that reference related alerts.
+ * This field contains an array of alert IDs that are associated with the attack.
  */
 export const ALERT_ATTACK_DISCOVERY_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;

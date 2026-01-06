@@ -26,8 +26,8 @@ export interface UseBulkAttackWorkflowStatusItemsProps {
 }
 
 /**
- * Hook that provides bulk action items and panels for updating workflow status on attack alerts.
- * Handles both attack alerts only and attack alerts + related detection alerts updates.
+ * Hook that provides bulk action items and panels for updating workflow status on attacks.
+ * Handles both attacks only and attacks + related alerts updates.
  *
  * @param props - Hook configuration props
  * @returns Object containing workflow status action items and panels
