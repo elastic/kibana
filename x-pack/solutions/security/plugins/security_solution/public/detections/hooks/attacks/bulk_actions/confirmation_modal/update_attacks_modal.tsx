@@ -63,13 +63,12 @@ export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
     const modalId = useGeneratedHtmlId({ prefix: 'updateAttacksModal' });
     const titleId = useGeneratedHtmlId();
 
-    const updateAttacksOnly = useCallback(() => {
-      onConfirm({ updateAlerts: false });
-    }, [onConfirm]);
+    const updateAttacksOnly = useCallback(() => onConfirm({ updateAlerts: false }), [onConfirm]);
 
-    const updateAttacksAndAlerts = useCallback(() => {
-      onConfirm({ updateAlerts: true });
-    }, [onConfirm]);
+    const updateAttacksAndAlerts = useCallback(
+      () => onConfirm({ updateAlerts: true }),
+      [onConfirm]
+    );
 
     const confirmButtons = useMemo(
       () => (
