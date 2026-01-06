@@ -43,10 +43,7 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
           return unsavedSavedBookState ? unsavedSavedBookState : lastSavedbookState;
         }
 
-        return {
-          rawState: {},
-          references: [],
-        };
+        return {};
       },
       lastSavedStateForChild$: (childId: string) => {
         return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$ : of(undefined);
@@ -54,10 +51,7 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
       getLastSavedStateForChild: (childId: string) => {
         return childId === BOOK_EMBEDDABLE_ID
           ? lastSavedBookState$.value
-          : {
-              rawState: {},
-              references: [],
-            };
+          : {};
       },
       setLastSavedBookState: (savedState: BookEmbeddableState) => {
         lastSavedBookState$.next(savedState);
