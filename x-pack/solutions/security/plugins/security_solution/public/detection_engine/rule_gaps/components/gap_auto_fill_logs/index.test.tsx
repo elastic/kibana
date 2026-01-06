@@ -96,7 +96,7 @@ describe('getStatusTooltip', () => {
       };
 
       const tooltip = getStatusTooltip(logEntry);
-      expect(tooltip).toBe(i18n.GAP_AUTO_FILL_STATUS_ERROR_SOME_SUCCEEDED_TOOLTIP);
+      expect(tooltip).toBe(i18n.getGapAutoFillStatusErrorSomeSucceededTooltip(1));
     });
 
     it('returns general error tooltip for unknown message', () => {
@@ -125,7 +125,7 @@ describe('getStatusTooltip', () => {
       };
 
       const tooltip = getStatusTooltip(logEntry);
-      expect(tooltip).toBe(i18n.GAP_AUTO_FILL_STATUS_SKIPPED_SOME_SUCCEEDED_TOOLTIP);
+      expect(tooltip).toBe(i18n.getGapAutoFillStatusSkippedSomeSucceededTooltip(1));
     });
 
     it('with "capacity limit reached" message and no results', () => {

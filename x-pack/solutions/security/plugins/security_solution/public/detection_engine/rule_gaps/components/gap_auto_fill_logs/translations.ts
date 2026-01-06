@@ -144,7 +144,7 @@ export const GAP_AUTO_FILL_STATUS_NO_GAPS = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_SUCCESS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSuccessTooltip',
   {
-    defaultMessage: 'All rules successfully scheduled.',
+    defaultMessage: 'Gap fill tasks were scheduled for all rules.',
   }
 );
 
@@ -152,28 +152,30 @@ export const GAP_AUTO_FILL_STATUS_SUCCESS_TOOLTIP = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusErrorAllFailedTooltip',
   {
-    defaultMessage: 'All rules failed to schedule.',
+    defaultMessage: 'Gap fill tasks could not be scheduled for rules.',
   }
 );
 
-export const GAP_AUTO_FILL_STATUS_ERROR_SOME_SUCCEEDED_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.gapAutoFillLogs.statusErrorSomeFailedTooltip',
-  {
-    defaultMessage: 'At least 1 rule successfully scheduled, but other failed to schedule.',
-  }
-);
+export const getGapAutoFillStatusErrorSomeSucceededTooltip = (successCount: number): string =>
+  i18n.translate('xpack.securitySolution.gapAutoFillLogs.statusErrorSomeFailedTooltip', {
+    defaultMessage:
+      'Gap fill tasks were successfully scheduled for {successCount} {successCount, plural, one {rule} other {rules}}. Tasks could not be scheduled for the other rules.',
+    values: { successCount },
+  });
 
 export const GAP_AUTO_FILL_STATUS_ERROR_TASK_CRASH_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusErrorTaskCrashTooltip',
   {
-    defaultMessage: 'An error occurred during task execution that caused the task to crash.',
+    defaultMessage:
+      'An error caused the gap fill task to crash. For troubleshooting tips, refer to the documentation.',
   }
 );
 
 export const GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusErrorTooltip',
   {
-    defaultMessage: 'Some or all rules failed to schedule due to an error during task execution.',
+    defaultMessage:
+      'Gap fill tasks for some or all rules were not scheduled due to an error during task execution.',
   }
 );
 
@@ -181,29 +183,29 @@ export const GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_SKIPPED_NO_CAPACITY_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSkippedNoCapacityTooltip',
   {
-    defaultMessage: 'No capacity to schedule more backfills.',
+    defaultMessage: 'The limit for scheduled gap fill tasks has been met.',
   }
 );
 
 export const GAP_AUTO_FILL_STATUS_SKIPPED_RULES_DISABLED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSkippedRulesDisabledTooltip',
   {
-    defaultMessage: 'There are unfilled gaps, but rules are disabled.',
+    defaultMessage: 'Disabled rules have unfilled gaps. Enable them to schedule gap fill tasks.',
   }
 );
 
-export const GAP_AUTO_FILL_STATUS_SKIPPED_SOME_SUCCEEDED_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.gapAutoFillLogs.statusSkippedSomeSucceededTooltip',
-  {
+export const getGapAutoFillStatusSkippedSomeSucceededTooltip = (successCount: number): string =>
+  i18n.translate('xpack.securitySolution.gapAutoFillLogs.statusSkippedSomeSucceededTooltip', {
     defaultMessage:
-      'At least 1 rule successfully scheduled. No capacity to schedule more backfills.',
-  }
-);
+      'Gap fill tasks for {successCount} {successCount, plural, one {rule} other {rules}} were successfully scheduled. Tasks for other rules were not scheduled because the task limit has been met.',
+    values: { successCount },
+  });
 
 export const GAP_AUTO_FILL_STATUS_SKIPPED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSkippedTooltip',
   {
-    defaultMessage: 'No capacity to schedule more backfills or some rules are disabled.',
+    defaultMessage:
+      'Gap fill tasks cannot be scheduled because the max limit of tasks has been met or some rules are disabled.',
   }
 );
 
@@ -211,6 +213,6 @@ export const GAP_AUTO_FILL_STATUS_SKIPPED_TOOLTIP = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_NO_GAPS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusNoGapsTooltip',
   {
-    defaultMessage: 'No gaps with unfilled intervals present in the system.',
+    defaultMessage: "Gaps in rule executions don't currently exist.",
   }
 );
