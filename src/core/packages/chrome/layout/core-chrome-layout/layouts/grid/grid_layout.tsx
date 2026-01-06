@@ -44,6 +44,9 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     /** we use it only in project style, because in classic it is included as part of the global header */
     applicationTopBarHeight: 48,
 
+    applicationMarginRight: 8,
+    applicationMarginBottom: 8,
+
     /** for debug for now */
     sidebarWidth: 48,
     footerHeight: 0,
