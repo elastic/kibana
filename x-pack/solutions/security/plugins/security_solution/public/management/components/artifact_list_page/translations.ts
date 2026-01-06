@@ -47,6 +47,18 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Artifact list export failed',
     }
   ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastTitle',
+    {
+      defaultMessage: 'Artifact list imported successfully',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importErrorToastTitle',
+    {
+      defaultMessage: 'Artifact list import failed',
+    }
+  ),
 
   // ------------------------------
   // EMPTY state labels
@@ -136,6 +148,8 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageExportButtonTitle'
   | 'pageExportSuccessToastTitle'
   | 'pageExportErrorToastTitle'
+  | 'pageImportSuccessToastTitle'
+  | 'pageImportErrorToastTitle'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'
   | 'cardActionDeleteLabel'

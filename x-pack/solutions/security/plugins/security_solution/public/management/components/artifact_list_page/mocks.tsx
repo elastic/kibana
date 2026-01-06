@@ -145,3 +145,35 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
     setExperimentalFlag: mockedContext.setExperimentalFlag,
   };
 };
+
+export const getArtifactImportExportUiMocks = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'testPage'
+) => {
+  const getMenuButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuButtonIcon`);
+  const queryMenuButton = () =>
+    renderResult.queryByTestId(`${dataTestSubj}-exportImportMenuButtonIcon`);
+  const getExportButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuActionItemExportButton`);
+  const getImportButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuActionItemImportButton`);
+
+  return { getExportButton, getImportButton, getMenuButton, queryMenuButton };
+};
+
+export const getArtifactImportFlyoutUiMocks = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'artifactImportFlyout'
+) => {
+  const getCancelButton = () => renderResult.getByTestId(`${dataTestSubj}-cancelButton`);
+  const getImportButton = () => renderResult.getByTestId(`${dataTestSubj}-importButton`);
+
+  const uploadFile = () =>
+    userEvent.upload(
+      renderResult.getByTestId(`${dataTestSubj}-filePicker`),
+      new File(['random file content'], 'trusted_apps.ndjson')
+    );
+
+  return { getCancelButton, getImportButton, uploadFile };
+};

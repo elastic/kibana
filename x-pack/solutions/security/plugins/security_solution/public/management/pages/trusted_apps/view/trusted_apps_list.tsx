@@ -60,6 +60,18 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Trusted application list export failed',
     }
   ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageImportSuccessToastTitle',
+    {
+      defaultMessage: 'Trusted application list imported successfully',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageImportErrorToastTitle',
+    {
+      defaultMessage: 'Trusted application list import failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.trustedApps.showingTotal', {
       defaultMessage:
