@@ -9,6 +9,7 @@
 
 import typeDetect from 'type-detect';
 
+import type { Schema, SwitchCases } from 'joi';
 import { internals } from '../internals';
 import type { ExtendsDeepOptions } from './type';
 import { Type } from './type';
@@ -22,7 +23,7 @@ export type PropsWithDiscriminator<Discriminator extends string, T extends Props
   T,
   Discriminator
 > & {
-  [Key in Discriminator]: Type<string>; // this should only be a LiteralType
+  [Key in Discriminator]: Type<string>;
 };
 
 export class DiscriminatedUnionType<
@@ -36,36 +37,59 @@ export class DiscriminatedUnionType<
   private readonly typeOptions?: UnionTypeOptions<T>;
 
   constructor(discriminator: Discriminator, types: RTS, options?: UnionTypeOptions<T>) {
+    const discriminators = new Set<string>();
+
+    let otherwise: Schema | undefined;
+    const switchCases = types.reduce<SwitchCases[]>((acc, type, index) => {
+      const discriminatorSchema = type.getPropSchemas()[discriminator];
+      const discriminatorValue = discriminatorSchema.expectedValue;
+
+      if (discriminatorValue == null) {
+        if (otherwise) {
+          throw new Error(`Only one fallback schema is allowed`);
+        }
+
+        otherwise = type.getSchema();
+        return acc;
+      } else {
+        if (typeof discriminatorValue !== 'string') {
+          throw new Error(
+            `Discriminator for schema at index ${index} must be a string type, got ${typeof discriminatorValue}`
+          );
+        }
+
+        if (discriminators.has(discriminatorValue)) {
+          throw new Error(
+            `Discriminator for schema at index ${index} must be a unique, ${discriminatorValue} is already used`
+          );
+        }
+
+        discriminators.add(discriminatorValue);
+      }
+
+      acc.push({
+        is: discriminatorValue,
+        then: type.getSchema(),
+      });
+
+      return acc;
+    }, []);
+
     const schema = internals
       .alternatives()
       .match('any')
       .conditional(
-        internals.ref(`.${discriminator}`), // self reference
-        types.map((type, index) => {
-          const discriminatorSchema = type.getPropSchemas()[discriminator];
-          const discriminatorValue = discriminatorSchema.expectedValue;
-
-          if (discriminatorValue == null) {
-            throw new Error(
-              `Discriminator for schema at index ${index} must be a literal type, got ${
-                discriminatorSchema.getSchema().type
-              } type`
-            );
-          }
-
-          return {
-            is: discriminatorValue,
-            then: type.getSchema(),
-          };
-        })
+        internals.ref(`.${discriminator}`), // self reference object property
+        {
+          switch: switchCases,
+          otherwise,
+        }
       );
 
     super(schema, options);
 
     this.discriminator = discriminator;
-    this.discriminatedValues = types.map(
-      (type) => type.getPropSchemas()[discriminator].expectedValue
-    );
+    this.discriminatedValues = Array.from(discriminators);
     this.unionTypes = types;
     this.typeOptions = options;
   }

@@ -93,14 +93,71 @@ describe('DiscriminatedUnionType', () => {
   });
 
   describe('schema config errors', () => {
-    // We cannot type the discriminator to be a `LiteralType` as `schema.literal('a')` returns `Type<'a'>`
-    it('should throw if discriminator type is not a literal', () => {
+    it('should throw on duplicate discriminators', () => {
       expect(() => {
         schema.oneOfKind('type', [
-          schema.object({ type: schema.string(), string: schema.string() }),
+          schema.object({ type: schema.literal('str'), string: schema.string() }),
+          schema.object({ type: schema.literal('num'), number: schema.number() }),
+          schema.object({ type: schema.literal('num'), num: schema.number() }),
         ]);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Discriminator for schema at index 0 must be a literal type, got string type"`
+        `"Discriminator for schema at index 2 must be a unique, num is already used"`
+      );
+    });
+
+    it('should throw if multiple fallback schemas are provided', () => {
+      expect(() => {
+        schema.oneOfKind('type', [
+          schema.object({ type: schema.literal('str'), string: schema.string() }),
+          schema.object({ type: schema.literal('num'), number: schema.number() }),
+          schema.object({ type: schema.string(), string: schema.string() }),
+          schema.object({ type: schema.string(), number: schema.number() }),
+        ]);
+      }).toThrowErrorMatchingInlineSnapshot(`"Only one fallback schema is allowed"`);
+    });
+  });
+
+  describe('catch-all case', () => {
+    const catchAllType = schema.oneOfKind('type', [
+      schema.object({ type: schema.literal('str'), string: schema.string() }),
+      schema.object({ type: schema.literal('num'), number: schema.number() }),
+      schema.object(
+        {
+          type: schema.string(),
+        },
+        {
+          unknowns: 'allow',
+        }
+      ),
+    ]);
+
+    it('should validate known type', () => {
+      const input = { type: 'str', string: 'test' };
+
+      expect(catchAllType.validate(input)).toEqual(input);
+    });
+
+    it('should validate unknown fallback type', () => {
+      const input = { type: 'unknown', unknown: 'test' };
+
+      expect(catchAllType.validate(input)).toEqual(input);
+    });
+
+    it('should invalidate bad known type, avoiding fallback schema', () => {
+      const input = { type: 'str', string: 123 };
+
+      expect(() => {
+        catchAllType.validate(input);
+      }).toThrowError();
+    });
+
+    it('should invalidate bad fallback schema', () => {
+      const input = { type: 123, number: 123 };
+
+      expect(() => {
+        catchAllType.validate(input);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"[type]: expected value of type [string] but got [number]"`
       );
     });
   });
