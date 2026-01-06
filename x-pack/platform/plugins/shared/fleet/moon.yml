@@ -135,6 +135,7 @@ fileGroups:
     - package.json
     - cypress.config.ts
     - cypress.config.space_awareness.ts
+    - tests/**/*
     - '!cypress.config.ts'
     - '!cypress.config.space_awareness.ts'
     - '!target/**/*'
