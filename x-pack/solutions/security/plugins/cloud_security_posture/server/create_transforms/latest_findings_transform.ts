@@ -30,6 +30,13 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
     index: FINDINGS_INDEX_PATTERN,
+    query: {
+      range: {
+        '@timestamp': {
+          gte: 'now-26h',
+        },
+      },
+    },
   },
   dest: {
     index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,

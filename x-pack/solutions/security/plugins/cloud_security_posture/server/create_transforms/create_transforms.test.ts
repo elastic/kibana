@@ -47,6 +47,16 @@ describe('createTransformIfNotExist', () => {
     expect(mockEsClient.transform.getTransform).toHaveBeenCalledTimes(1);
     expect(mockEsClient.transform.putTransform).toHaveBeenCalledTimes(0);
   });
+
+  it('expect latestFindingsTransform to have 26h date filter', () => {
+    expect(latestFindingsTransform.source.query).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-26h',
+        },
+      },
+    });
+  });
 });
 
 function getTransformWithState(state: string) {
