@@ -28,28 +28,21 @@ export const getNavCategories = (
     },
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.siemMigrationsLanding],
-    },
-    {
-      type: LinkCategoryType.separator,
       linkIds: [
         SecurityPageName.entityAnalyticsLanding,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,
+        SecurityPageName.assetInventory,
       ],
     },
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.assetInventory],
-    },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.siemReadiness],
-    },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.aiValue],
+      linkIds: [
+        SecurityPageName.siemReadiness,
+        SecurityPageName.aiValue,
+        SecurityPageName.siemMigrationsLanding,
+      ],
     },
   ];
 };

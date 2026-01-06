@@ -31,7 +31,6 @@ import { FormProvider, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pushFlyoutPaddingStyles } from '../../../common.styles';
-import { docLinks } from '../../../../common/doc_links';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -56,6 +55,7 @@ import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
 import { useFlyoutState } from '../../hooks/use_flyout_state';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -91,6 +91,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
   const deferNavigateToAgentBuilderUrl = useCallback(
     (...args: Parameters<typeof navigateToAgentBuilderUrl>) => {
@@ -336,7 +337,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={docLinks.tools}
+                        href={docLinksService.tools}
                         target="_blank"
                         aria-label={i18n.translate(
                           'xpack.agentBuilder.tools.createToolDocumentationAriaLabel',
