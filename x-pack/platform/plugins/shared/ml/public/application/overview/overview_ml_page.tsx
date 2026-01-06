@@ -187,7 +187,7 @@ export const OverviewPage: FC = () => {
                       title={
                         <FormattedMessage
                           id="xpack.ml.overview.logPatternAnalysisTitle"
-                          defaultMessage="Log Pattern Analysis"
+                          defaultMessage="Log pattern analysis"
                         />
                       }
                       titleElement="h3"
@@ -225,7 +225,7 @@ export const OverviewPage: FC = () => {
                       title={
                         <FormattedMessage
                           id="xpack.ml.overview.logRateAnalysis.title"
-                          defaultMessage="Log Rate Analysis"
+                          defaultMessage="Log rate analysis"
                         />
                       }
                       titleElement="h3"
@@ -263,7 +263,7 @@ export const OverviewPage: FC = () => {
                       title={
                         <FormattedMessage
                           id="xpack.ml.overview.changePointDetection.title"
-                          defaultMessage="Change Point Detection"
+                          defaultMessage="Change point detection"
                         />
                       }
                       titleElement="h3"
@@ -324,7 +324,7 @@ export const OverviewPage: FC = () => {
           <EuiFlexItem>
             <OverviewFooterItem
               title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
-                defaultMessage: 'Manage ML Assets',
+                defaultMessage: 'Manage ML assets',
               })}
               description={i18n.translate('xpack.ml.overview.manageMlAssetsDescription', {
                 defaultMessage: 'Overview of your ML jobs, memory usage, and notifications.',
@@ -344,17 +344,17 @@ export const OverviewPage: FC = () => {
           <EuiFlexItem>
             <OverviewFooterItem
               title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
-                defaultMessage: 'Trained Models',
+                defaultMessage: 'Trained models',
               })}
               description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
                 defaultMessage:
-                  'Add or manage Trained Models. See deployment stats or add a new deployment.',
+                  'Add or manage trained models. See deployment stats or add a new deployment.',
               })}
               docLink={trainedModelsDocLink}
               callToAction={
                 <EuiLink onClick={navigateToTrainedModels}>
                   {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
-                    defaultMessage: 'Manage Trained Models',
+                    defaultMessage: 'Manage trained models',
                   })}
                 </EuiLink>
               }

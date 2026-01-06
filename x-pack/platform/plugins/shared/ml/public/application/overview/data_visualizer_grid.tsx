@@ -30,11 +30,11 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean }> = ({ isEsqlEnabl
           'xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg',
           {
             defaultMessage:
-              'A powerful way to filter, transform, and analyze data stored in Elasticsearch.',
+              "Use Elastic's piped query language to analyze the shape of data in an Elasticsearch index.",
           }
         )}
         buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.tryESQLNowButtonLabel', {
-          defaultMessage: 'Try ES|QL editor',
+          defaultMessage: 'Open ES|QL editor',
         })}
         cardDataTestSubj="mlDataVisualizerSelectESQLCard"
         buttonDataTestSubj="mlDataVisualizerSelectESQLButton"
