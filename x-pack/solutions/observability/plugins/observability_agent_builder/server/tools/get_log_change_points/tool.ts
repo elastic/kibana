@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolType } from '@kbn/onechat-common';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,

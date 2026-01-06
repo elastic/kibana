@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_change_points/tool';
 import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server/utils/get_change_points';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
