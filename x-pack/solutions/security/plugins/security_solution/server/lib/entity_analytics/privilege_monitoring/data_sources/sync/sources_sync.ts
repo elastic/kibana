@@ -27,7 +27,7 @@ export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClie
       soClient,
       namespace: deps.namespace,
     });
-    const sources = await monitoringIndexSourceClient.findSourcesByType(sourceType); // this will be index or integration
+    const { sources } = await monitoringIndexSourceClient.list({ type: sourceType }); // this will be index or integration
     if (sources.length === 0) {
       dataClient.log('debug', `No ${sourceType} monitoring sources found. Skipping sync.`);
       return;
