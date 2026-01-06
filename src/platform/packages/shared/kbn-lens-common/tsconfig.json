@@ -65,6 +65,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/controls-plugin",
     "@kbn/cps",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/control-group-renderer"
   ]
 }

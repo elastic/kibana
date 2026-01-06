@@ -60,7 +60,6 @@
     "@kbn/lens-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/controls-plugin",
     "@kbn/alerting-comparators",
     "@kbn/alerting-types",
     "@kbn/visualization-utils",
