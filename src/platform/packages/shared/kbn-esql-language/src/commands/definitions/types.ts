@@ -252,6 +252,14 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  unknownCastingType: {
+    message: string;
+    type: { castType: string };
+  };
+  invalidInlineCast: {
+    message: string;
+    type: { castType: string; valueType: string };
+  };
   functionNotAllowedHere: {
     message: string;
     type: { name: string; locationName: string };

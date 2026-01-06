@@ -63,7 +63,7 @@
     "@kbn/i18n",
     "@kbn/chart-icons",
     "@kbn/alerts-ui-shared",
-    "@kbn/controls-plugin",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/control-group-renderer"
   ]
 }
