@@ -23,6 +23,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {
@@ -35,12 +36,25 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       async (ctx, req, res) => {
         const entityStoreCtx = await ctx.entityStore;
-        const logger = entityStoreCtx.getLogger();
+        const logger = entityStoreCtx.logger;
         const resourcesService = entityStoreCtx.getResourcesService();
+        const isEntityStoreV2Enabled = await entityStoreCtx
+          .getFeatureFlags()
+          .isEntityStoreV2Enabled();
 
         logger.debug('Install api called');
-        resourcesService.install(req.body.entityType);
 
+        if (!isEntityStoreV2Enabled) {
+          logger.warn('Entity store v2 cannot be installed (feature flag not enabled)');
+          return res.customError({
+            statusCode: 501,
+            body: {
+              message: 'Entity store v2 cannot be installed (feature flag not enabled)',
+            },
+          });
+        }
+
+        resourcesService.install(req.body.entityType);
         return res.ok({
           body: {
             ok: true,

@@ -12,11 +12,13 @@ import type {
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { ResourcesService } from './domain/resources_service';
+import type { FeatureFlags } from './infra/feature_flags';
 
 export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  logger: Logger;
   getResourcesService: () => ResourcesService;
-  getLogger: () => Logger;
+  getFeatureFlags: () => FeatureFlags;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
