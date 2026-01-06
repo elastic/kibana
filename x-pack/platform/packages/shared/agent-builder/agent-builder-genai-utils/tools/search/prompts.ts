@@ -24,7 +24,7 @@ export const getSearchPrompt = ({
   customInstructions?: string;
 }): BaseMessageLike[] => {
   const systemPrompt =
-    cleanPrompt(`You are a search dispatcher. Your ONLY task is to call the appropriate search tool.
+    cleanPrompt(`You are a search dispatcher. Your ONLY task is to call the appropriate search tool with the correct parameters.
 
 ## CRITICAL INSTRUCTIONS
 
