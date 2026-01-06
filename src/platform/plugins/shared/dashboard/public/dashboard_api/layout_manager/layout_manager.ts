@@ -488,7 +488,8 @@ export function initializeLayoutManager(
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
-      serializeLayout: () => serializeLayout(layout$.value, currentChildState),
+      serializeLayout: (subset?: string[]) =>
+        serializeLayout(layout$.value, currentChildState, subset),
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{ panels?: DashboardState['panels'] }> => {

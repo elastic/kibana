@@ -77,13 +77,41 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  const lastSavedState = getLastSavedState(readResult);
+  console.log({
+    lastSavedState,
+    unsavedChanges,
+    initialState: {
+      ...lastSavedState,
+      ...unsavedChanges,
+      ...overrideState,
+      panels: [
+        ...(lastSavedState.panels ?? []),
+        ...(unsavedChanges?.panels ?? []),
+        ...(overrideState?.panels ?? []),
+      ],
+    },
+  });
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddables,
     initialState: {
-      ...getLastSavedState(readResult),
+      ...lastSavedState,
       ...unsavedChanges,
       ...overrideState,
+      panels: [
+        ...(lastSavedState.panels ?? []),
+        ...(unsavedChanges?.panels ?? []),
+        ...(overrideState?.panels ?? []),
+      ],
+      controlGroupInput: {
+        controls: [
+          ...(lastSavedState.controlGroupInput?.controls ?? []),
+          ...(unsavedChanges?.controlGroupInput?.controls ?? []),
+          ...(overrideState?.controlGroupInput?.controls ?? []),
+        ],
+      },
     },
     readResult,
     savedObjectId,

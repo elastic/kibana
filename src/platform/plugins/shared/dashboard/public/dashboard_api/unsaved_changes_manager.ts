@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, tap, type Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  map,
+  Observable,
+  tap,
+  type Subject,
+} from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-containers';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
@@ -66,7 +74,9 @@ export function initializeUnsavedChangesManager({
 
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
-  const hasChildrenUnsavedChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
+  const childrenWithUnsavedChanges$: Observable<string[]> = childrenUnsavedChanges$(
+    layoutManager.api.children$
+  ).pipe(
     tap((childrenWithChanges) => {
       // propagate the latest serialized state back to the layout manager.
       for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
@@ -76,7 +86,9 @@ export function initializeUnsavedChangesManager({
       }
     }),
     map((childrenWithChanges) => {
-      return childrenWithChanges.some(({ hasUnsavedChanges }) => hasUnsavedChanges);
+      return childrenWithChanges
+        .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
+        .map(({ uuid }) => uuid);
     })
   );
 
@@ -87,6 +99,7 @@ export function initializeUnsavedChangesManager({
     projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
   ]).pipe(
     map(([settings, unifiedSearch, panels, projectRouting]) => {
+      console.log({ panels });
       return { ...settings, ...unifiedSearch, ...panels, ...projectRouting };
     })
   );
@@ -94,13 +107,14 @@ export function initializeUnsavedChangesManager({
   const unsavedChangesSubscription = combineLatest([
     viewMode$,
     dashboardStateChanges$,
-    hasChildrenUnsavedChanges$,
+    childrenWithUnsavedChanges$,
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, hasChildrenUnsavedChanges]) => {
+    .subscribe(([viewMode, dashboardChanges, childrenWithUnsavedChanges]) => {
       const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
       const hasLayoutChanges = dashboardChanges.panels;
-      const hasUnsavedChanges = hasDashboardChanges || hasChildrenUnsavedChanges;
+      const hasUnsavedChanges = hasDashboardChanges || Boolean(childrenWithUnsavedChanges.length);
+      console.log({ childrenWithUnsavedChanges, dashboardChanges });
 
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
@@ -115,17 +129,22 @@ export function initializeUnsavedChangesManager({
         };
 
         // Backup latest state from children that have unsaved changes
-        if (hasChildrenUnsavedChanges || hasLayoutChanges) {
+        if (childrenWithUnsavedChanges.length || hasLayoutChanges) {
           const { panels, controlGroupInput, references } =
-            layoutManager.internalApi.serializeLayout();
+            layoutManager.internalApi.serializeLayout(
+              hasLayoutChanges || !(childrenWithUnsavedChanges ?? []).length
+                ? undefined // serialized the whole layout by sending in `undefined` for the subset
+                : childrenWithUnsavedChanges
+            );
+
+          console.log({ panels, controlGroupInput, references });
+
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
           dashboardBackupState.references = references ?? [];
-          if (hasChildrenUnsavedChanges) {
-            dashboardBackupState.panels = panels;
-            dashboardBackupState.controlGroupInput = controlGroupInput;
-          }
+          dashboardBackupState.panels = panels;
+          dashboardBackupState.controlGroupInput = controlGroupInput;
         }
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
