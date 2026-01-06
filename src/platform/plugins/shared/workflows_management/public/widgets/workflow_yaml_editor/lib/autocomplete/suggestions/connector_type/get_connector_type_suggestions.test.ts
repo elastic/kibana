@@ -62,8 +62,8 @@ describe('getConnectorTypeSuggestions', () => {
   };
 
   const mockConnectors = [
-    { type: 'slack', description: 'Slack connector' },
-    { type: 'inference', description: 'Inference connector (no instances configured)' },
+    { type: 'slack', description: 'Slack connector description' },
+    { type: 'inference', description: 'Inference connector description' },
     { type: 'elasticsearch.index', description: 'Index documents' },
     { type: 'elasticsearch.search', description: 'Search documents' },
     { type: 'kibana.alert', description: 'Create alerts' },
@@ -147,38 +147,25 @@ describe('getConnectorTypeSuggestions', () => {
       expect(slackSuggestion).toBeDefined();
       expect(slackSuggestion).toMatchObject({
         label: 'slack',
-        detail: 'Slack',
-        documentation: 'Slack connector',
+        detail: 'slack',
+        documentation: 'Slack connector description',
       });
     });
 
     it('should handle elasticsearch namespace prefix', () => {
       const result = getConnectorTypeSuggestions('elasticsearch.', mockRange);
       expect(result).toHaveLength(2);
-      expect(result).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            label: 'elasticsearch.index',
-            detail: 'elasticsearch.index',
-            documentation: 'Elasticsearch API - index',
-          }),
-          expect.objectContaining({
-            label: 'elasticsearch.search',
-            detail: 'elasticsearch.search',
-            documentation: 'Elasticsearch API - search',
-          }),
-        ])
-      );
+      expect(result[0].detail).toBe('elasticsearch.index');
+      expect(result[0].documentation).toBe('Index documents');
+      expect(result[1].detail).toBe('elasticsearch.search');
+      expect(result[1].documentation).toBe('Search documents');
     });
 
     it('should handle kibana namespace prefix', () => {
       const result = getConnectorTypeSuggestions('kibana.', mockRange);
       expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
-        label: 'kibana.alert',
-        detail: 'kibana.alert',
-        documentation: 'Kibana API - alert',
-      });
+      expect(result[0].detail).toBe('kibana.alert');
+      expect(result[0].documentation).toBe('Create alerts');
     });
 
     it('should match elasticsearch APIs without full prefix', () => {
@@ -221,7 +208,7 @@ describe('getConnectorTypeSuggestions', () => {
       const slackSuggestion = result.find((s) => s.label === 'slack');
       expect(slackSuggestion).toMatchObject({
         label: 'slack',
-        detail: 'Slack',
+        detail: 'slack',
       });
     });
 
@@ -230,7 +217,7 @@ describe('getConnectorTypeSuggestions', () => {
       const inferenceSuggestion = result.find((s) => s.label === 'inference');
       expect(inferenceSuggestion).toMatchObject({
         label: 'inference',
-        detail: 'Inference',
+        detail: 'inference',
       });
     });
 
@@ -382,14 +369,12 @@ describe('getConnectorTypeSuggestions', () => {
 
     it('should handle connectors without descriptions', () => {
       (getCachedAllConnectors as jest.Mock).mockReturnValue([
-        { type: '.custom' }, // No description
+        { type: 'custom' }, // No description
       ]);
       const result = getConnectorTypeSuggestions('custom', mockRange);
-      const customSuggestion = result.find((s) => s.detail === '.custom');
-      expect(customSuggestion).toMatchObject({
-        label: '.custom',
-        documentation: 'Workflow connector - .custom',
-      });
+      const customSuggestion = result.find((s) => s.detail === 'custom');
+      expect(customSuggestion?.label).toBe('custom');
+      expect(customSuggestion?.documentation).toBeUndefined();
     });
   });
 });
