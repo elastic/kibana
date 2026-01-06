@@ -296,7 +296,6 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.t
 2. **Filtering** — Each filter parameter works correctly
 3. **Grouping** — Each supported `groupBy` dimension works (service, transaction, infrastructure)
 4. **Edge cases** — Empty results, invalid filters
-5. **Summary field** — Summary is accurate and helpful
 
 ---
 
@@ -307,7 +306,6 @@ Before merging a new or updated tool:
 - [ ] Tool added to `allow_lists.ts`
 - [ ] Description includes "When to use" section
 - [ ] Description includes "When NOT to use" with alternatives
-- [ ] Handler returns a `summary` field
 - [ ] Works with both ECS and OTel data (where applicable)
 - [ ] Metrics normalized (ms for latency, per-minute for rates, 0-1 for failure rate)
 - [ ] README with 2-4 usage examples
