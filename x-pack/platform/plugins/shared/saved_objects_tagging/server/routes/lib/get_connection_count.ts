@@ -35,7 +35,7 @@ export const addConnectionCount = async (
     perPage: 1000,
     hasReference: references,
     hasReferenceOperator: 'OR',
-    fields: [], // No need to retrieve any fields
+    fields: ['title'], // No need to retrieve all fields, so we scope it down to just one
   });
 
   for await (const response of pitFinder.find()) {
