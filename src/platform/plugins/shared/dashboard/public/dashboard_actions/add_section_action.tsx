@@ -42,13 +42,7 @@ export class AddSectionAction implements Action<EmbeddableApiContext> {
   }
 
   public readonly MenuItem = () => {
-    return (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="s">{this.getDisplayName()}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <EuiText size="s">{this.getDisplayName()}</EuiText>;
   };
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable);
