@@ -47,7 +47,9 @@ export const createEngineCrudService = (
       soClient,
     });
 
-    const allDataSources = await indexSourceClient.findAll({});
+    const { sources: allDataSources } = await indexSourceClient.list({
+      per_page: 10000,
+    });
     const deleteSourcePromises = allDataSources.map((so) => indexSourceClient.delete(so.id));
     await Promise.all(deleteSourcePromises);
 
