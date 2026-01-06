@@ -16,7 +16,8 @@
     "package.json",
     "cypress.config.ts",
     "cypress.config.space_awareness.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "tests/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
