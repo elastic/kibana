@@ -152,6 +152,34 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
 
+  it('should pass all monitor namespaces to getMaintenanceWindows', async () => {
+    const id = 'test-id-1';
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
+
+    const monitorWithNamespaces = {
+      ...previousMonitor,
+      namespaces: ['space-a', 'space-b'],
+    };
+
+    await client.editMonitors(
+      [
+        {
+          id,
+          monitor,
+          decryptedPreviousMonitor: monitorWithNamespaces,
+        },
+      ],
+      privateLocations,
+      'space-a'
+    );
+
+    expect(syntheticsService.getMaintenanceWindows).toHaveBeenCalledWith('space-a', [
+      'space-a',
+      'space-b',
+    ]);
+  });
+
   it('deletes a monitor from location, if location is removed from monitor', async () => {
     locations[1].isServiceManaged = false;
 

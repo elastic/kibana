@@ -517,6 +517,65 @@ describe('SyntheticsService', () => {
     });
   });
 
+  describe('getMaintenanceWindows', () => {
+    it('queries only the current space when no additional spaces provided', async () => {
+      const service = new SyntheticsService(serverMock);
+      const mockMWClient = {
+        find: jest.fn().mockResolvedValue({ data: [] }),
+      };
+      serverMock.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue(mockMWClient);
+
+      await service.getMaintenanceWindows('space-a');
+
+      expect(mockMWClient.find).toHaveBeenCalledWith({
+        page: 0,
+        perPage: 1000,
+        namespaces: ['space-a'],
+      });
+    });
+
+    it('queries all shared spaces when additional spaces provided', async () => {
+      const service = new SyntheticsService(serverMock);
+      const mockMWClient = {
+        find: jest.fn().mockResolvedValue({ data: [] }),
+      };
+      serverMock.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue(mockMWClient);
+
+      await service.getMaintenanceWindows('space-a', ['space-a', 'space-b', 'space-c']);
+
+      expect(mockMWClient.find).toHaveBeenCalledWith({
+        page: 0,
+        perPage: 1000,
+        namespaces: ['space-a', 'space-b', 'space-c'],
+      });
+    });
+
+    it('deduplicates spaces when current space is in additional spaces', async () => {
+      const service = new SyntheticsService(serverMock);
+      const mockMWClient = {
+        find: jest.fn().mockResolvedValue({ data: [] }),
+      };
+      serverMock.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue(mockMWClient);
+
+      await service.getMaintenanceWindows('space-a', ['space-a', 'space-a', 'space-b']);
+
+      expect(mockMWClient.find).toHaveBeenCalledWith({
+        page: 0,
+        perPage: 1000,
+        namespaces: ['space-a', 'space-b'],
+      });
+    });
+
+    it('returns empty array when MW client is not available', async () => {
+      const service = new SyntheticsService(serverMock);
+      serverMock.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue(null);
+
+      const result = await service.getMaintenanceWindows('space-a');
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('pagination', () => {
     const service = new SyntheticsService(serverMock);
 
