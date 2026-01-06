@@ -17,7 +17,7 @@ export interface ArtifactListPageUrlParams {
   pageSize?: number;
   filter?: string;
   includedPolicies?: string;
-  show?: 'create' | 'edit';
+  show?: 'create' | 'edit' | 'import';
   itemId?: string;
 }
 

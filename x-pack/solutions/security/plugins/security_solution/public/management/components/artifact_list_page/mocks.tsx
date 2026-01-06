@@ -166,6 +166,7 @@ export const getArtifactImportFlyoutUiMocks = (
   renderResult: ReturnType<AppContextTestRender['render']>,
   dataTestSubj: string = 'artifactImportFlyout'
 ) => {
+  const queryImportFlyout = () => renderResult.queryByTestId(dataTestSubj);
   const getCancelButton = () => renderResult.getByTestId(`${dataTestSubj}-cancelButton`);
   const getImportButton = () => renderResult.getByTestId(`${dataTestSubj}-importButton`);
 
@@ -175,5 +176,5 @@ export const getArtifactImportFlyoutUiMocks = (
       new File(['random file content'], 'trusted_apps.ndjson')
     );
 
-  return { getCancelButton, getImportButton, uploadFile };
+  return { queryImportFlyout, getCancelButton, getImportButton, uploadFile };
 };

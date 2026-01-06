@@ -121,7 +121,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
       await userEvent.click(importButton);
 
       expect(renderResult.getByTestId('artifactImportFlyout')).toBeTruthy();
-      // todo expect(history.location.search).toMatch(/show=import/);
+      expect(history.location.search).toMatch(/show=import/);
     });
 
     describe('and the first item is created', () => {
