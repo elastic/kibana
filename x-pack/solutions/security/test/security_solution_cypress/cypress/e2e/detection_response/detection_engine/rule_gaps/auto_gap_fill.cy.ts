@@ -178,7 +178,7 @@ describe(
               // Check that the tooltip is visible and contains the expected message
               cy.get(TOOLTIP)
                 .should('be.visible')
-                .should('contain.text', 'No gaps with unfilled intervals present in the system.');
+                .should('contain.text', "Gaps in rule executions don't currently exist.");
             });
         });
       });
