@@ -115,7 +115,7 @@ export const SearchHomepagePage = () => {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <ConnectToElasticsearch />

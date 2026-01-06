@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -48,8 +49,9 @@ const ResourceCard = ({
     <EuiSplitPanel.Outer
       direction="row"
       css={css({
-        maxWidth: euiTheme.base * 36,
+        //maxWidth: euiTheme.base * 36,
       })}
+      responsive={['xs', 's', 'm']}
       data-test-subj={dataTestSubj}
     >
       <EuiSplitPanel.Inner
@@ -72,7 +74,7 @@ const ResourceCard = ({
             <h4>{title}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
+          <EuiText size="s" color="subdued">
             <p>{description}</p>
           </EuiText>
           <EuiSpacer size="xs" />
@@ -85,6 +87,7 @@ const ResourceCard = ({
               data-test-subj="searchHomepageSearchCloudResourceCardAction"
               href={actionHref}
               target="_blank"
+              flush='both'
             >
               {actionText}
             </EuiButtonEmpty>
@@ -179,12 +182,16 @@ export const CloudResources = () => {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
+          
           <h6>
+            <EuiTextColor color="subdued">
             {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
               defaultMessage: 'Cloud resources',
             })}
+            </EuiTextColor>
           </h6>
+          
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>

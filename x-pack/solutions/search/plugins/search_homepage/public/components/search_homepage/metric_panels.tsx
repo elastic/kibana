@@ -189,9 +189,9 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
           alignItems="center"
           justifyContent="center"
           gutterSize="s"
-          css={css({ height: '100%' })}
+          css={{ height: '100%' }}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={true}>
             <div>
               <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
             </div>

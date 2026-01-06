@@ -33,7 +33,7 @@ export const ConnectToElasticsearch = () => {
   }, [status]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
+    <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
           <p>
