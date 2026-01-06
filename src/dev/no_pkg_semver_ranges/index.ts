@@ -37,7 +37,10 @@ export function checkSemverRanges(
   const resolveVersionFromYarnLock = (name: string, version: string): string | null => {
     const versionSpec = `${name}@${version}`;
     const versionLineIndex = yarnLockLines.findIndex(
-      (line) => line.includes(versionSpec) || line.includes(`"${versionSpec}"`)
+      (line) =>
+        (line.includes(versionSpec) || line.includes(`"${versionSpec}"`)) &&
+        !line.match(/^\s+#/) &&
+        !line.includes('@types/' + name)
     );
     if (versionLineIndex === -1) {
       return null;

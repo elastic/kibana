@@ -150,4 +150,42 @@ lodash@^4.17.20:
       })
     ).toThrow('Could not resolve version for lodash with version ^4.17.21 from yarn.lock');
   });
+
+  it(`doesn't pick the @types version`, () => {
+    const pkgJson = JSON.stringify({
+      dependencies: {
+        'chroma-js': '^2.1.0',
+      },
+    });
+
+    const yarnLock = `
+@types/chroma-js@^2.1.0:
+  version "2.1.1"
+chroma-js@^2.1.0:
+  version "2.1.0"
+`;
+
+    const result = checkSemverRanges({
+      pkgJsonContent: pkgJson,
+      yarnLockContent: yarnLock,
+      fix: true,
+    });
+
+    expect(result.totalFixes).toBe(1);
+    expect(result.fixesPerField).toEqual({
+      dependencies: 1,
+    });
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      expect.any(String),
+      JSON.stringify(
+        {
+          dependencies: {
+            'chroma-js': '2.1.0',
+          },
+        },
+        null,
+        2
+      )
+    );
+  });
 });
