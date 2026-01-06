@@ -27,7 +27,7 @@ export function useObservable<T>(observable$: Observable<T>): T | undefined;
 export function useObservable<T>(observable$: Observable<T>, initialValue?: T): T | undefined {
   if (isDev) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useObservableUnstableRefWarning(observable$);
+    useUnstableObservableWarning(observable$);
   }
 
   const valueRef = useRef<T | undefined>(initialValue);
@@ -56,32 +56,49 @@ export function useObservable<T>(observable$: Observable<T>, initialValue?: T): 
   return useSyncExternalStore(adapter.subscribe, adapter.getSnapshot, adapter.getSnapshot);
 }
 
-// Dev only hook to detect changing observable refs
-// and warn the developer about potential performance issues
-function useObservableUnstableRefWarning<T>(observable$: Observable<T>): void {
-  const renderCount = useRef(0);
-  const changeCount = useRef(0);
-  const prevObs = useRef<Observable<T>>();
-  const hasWarned = useRef(false);
+/**
+ * Development-only hook that warns when an observable reference changes
+ * on consecutive renders, indicating a missing useMemo() or unstable reference.
+ *
+ * Tracks committed renders (not render phase) to handle React StrictMode correctly.
+ */
+function useUnstableObservableWarning<T>(observable$: Observable<T>): void {
+  // Capture observable in render phase (last write wins before commit)
+  const pendingRef = useRef(observable$);
+  pendingRef.current = observable$;
+
+  // All tracking state in a single ref to avoid multiple refs
+  const trackingRef = useRef({
+    committedObservable: undefined as Observable<T> | undefined,
+    consecutiveChanges: 0,
+    hasWarned: false,
+  });
 
   useEffect(() => {
-    renderCount.current++;
+    const tracking = trackingRef.current;
+    const current = pendingRef.current;
 
-    if (prevObs.current !== undefined && prevObs.current !== observable$) {
-      changeCount.current++;
+    // First commit: initialize and exit
+    if (tracking.committedObservable === undefined) {
+      tracking.committedObservable = current;
+      return;
     }
-    prevObs.current = observable$;
 
-    if (
-      renderCount.current >= 3 &&
-      changeCount.current === renderCount.current - 1 &&
-      !hasWarned.current
-    ) {
-      hasWarned.current = true;
+    // Update consecutive change counter
+    const didChange = tracking.committedObservable !== current;
+    tracking.consecutiveChanges = didChange ? tracking.consecutiveChanges + 1 : 0;
+    tracking.committedObservable = current;
+
+    // Warn after 3 consecutive changes
+    if (tracking.consecutiveChanges >= 3 && !tracking.hasWarned) {
+      tracking.hasWarned = true;
       // eslint-disable-next-line no-console
       console.warn(
-        `[useObservable] ⚠️ Performance Warning: The observable passed to useObservable is changing on every render.\n` +
-          `This causes constant unsubscribing/resubscribing. Wrap the observable creation in useMemo() or extract from the component.`
+        '[useObservable] Observable reference changed on 3+ consecutive renders.\n\n' +
+          'This causes repeated subscribe/unsubscribe cycles. To fix:\n' +
+          '  • useMemo(() => createObservable(dep), [dep])\n' +
+          '  • Move observable creation outside the component\n' +
+          '  • Use a stable reference from a store or context'
       );
     }
   });

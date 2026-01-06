@@ -99,12 +99,18 @@ describe('useObservable', () => {
 
     const { rerender } = renderHook(() => useObservable(new BehaviorSubject(1)));
 
-    expect(consoleWarnSpy).not.toHaveBeenCalledWith(expect.stringContaining('Performance Warning'));
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
     rerender();
-    expect(consoleWarnSpy).not.toHaveBeenCalledWith(expect.stringContaining('Performance Warning'));
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
+    rerender();
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
     rerender();
 
-    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Performance Warning'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '[useObservable] Observable reference changed on 3+ consecutive renders'
+      )
+    );
 
     consoleWarnSpy.mockRestore();
   });
