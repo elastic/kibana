@@ -18,7 +18,7 @@ import type {
  */
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: DashboardState; }
+  | { status: 'success'; attributes: DashboardState }
   | { status: 'error'; notFound: boolean; error: Error }
 );
 

@@ -35,9 +35,13 @@ export const initializeSingleMetricViewerControls = (
   initialState: SingleMetricViewerEmbeddableState,
   titlesApi: TitlesApi
 ) => {
-  const functionDescription = new BehaviorSubject<string | undefined>(initialState.functionDescription);
+  const functionDescription = new BehaviorSubject<string | undefined>(
+    initialState.functionDescription
+  );
   const jobIds = new BehaviorSubject<JobId[]>(initialState.jobIds);
-  const selectedDetectorIndex = new BehaviorSubject<number>(initialState.selectedDetectorIndex ?? 0);
+  const selectedDetectorIndex = new BehaviorSubject<number>(
+    initialState.selectedDetectorIndex ?? 0
+  );
   const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
     initialState.selectedEntities
   );

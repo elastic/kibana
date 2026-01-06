@@ -50,19 +50,21 @@ import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
-import { Reference } from '@kbn/content-management-utils';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState & { references?: Reference[], viewMode?: ViewMode }>;
+  getInitialInput?: () => Partial<
+    DashboardState & { references?: Reference[]; viewMode?: ViewMode }
+  >;
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 

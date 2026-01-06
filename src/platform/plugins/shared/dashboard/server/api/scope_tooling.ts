@@ -17,7 +17,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
   if (controlGroupInput) {
     warnings.push(`Dropped unmapped key 'controlGroupInput' from dashboard`);
   }
-  
+
   function isMappedPanelType(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (transforms?.throwOnUnmappedPanel) {

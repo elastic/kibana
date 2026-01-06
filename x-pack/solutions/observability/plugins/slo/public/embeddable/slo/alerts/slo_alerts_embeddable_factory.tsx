@@ -66,13 +66,10 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(
-        initialState,
-        {
-          slos: [],
-          showAllGroupByInstances: false,
-        }
-      );
+      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(initialState, {
+        slos: [],
+        showAllGroupByInstances: false,
+      });
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 

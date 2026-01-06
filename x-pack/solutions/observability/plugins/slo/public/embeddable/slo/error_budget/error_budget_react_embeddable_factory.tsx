@@ -49,13 +49,10 @@ export const getErrorBudgetEmbeddableFactory = ({
       const deps = { ...coreStart, ...pluginsStart };
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
-      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(
-        initialState,
-        {
-          sloId: undefined,
-          sloInstanceId: undefined,
-        }
-      );
+      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(initialState, {
+        sloId: undefined,
+        sloInstanceId: undefined,
+      });
       const reload$ = new Subject<boolean>();
 
       function serializeState() {

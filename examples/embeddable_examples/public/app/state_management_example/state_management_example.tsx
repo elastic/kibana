@@ -49,9 +49,7 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
         return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$ : of(undefined);
       },
       getLastSavedStateForChild: (childId: string) => {
-        return childId === BOOK_EMBEDDABLE_ID
-          ? lastSavedBookState$.value
-          : {};
+        return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$.value : {};
       },
       setLastSavedBookState: (savedState: BookEmbeddableState) => {
         lastSavedBookState$.next(savedState);

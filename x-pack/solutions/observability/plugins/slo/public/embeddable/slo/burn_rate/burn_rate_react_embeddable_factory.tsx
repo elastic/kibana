@@ -45,14 +45,11 @@ export const getBurnRateEmbeddableFactory = ({
       const deps = { ...coreStart, ...pluginsStart };
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(
-        initialState,
-        {
-          sloId: '',
-          sloInstanceId: '',
-          duration: '',
-        }
-      );
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(initialState, {
+        sloId: '',
+        sloInstanceId: '',
+        duration: '',
+      });
       const reload$ = new Subject<boolean>();
 
       function serializeState() {

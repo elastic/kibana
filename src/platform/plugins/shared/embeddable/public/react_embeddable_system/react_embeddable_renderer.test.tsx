@@ -119,7 +119,7 @@ describe('embeddable renderer', () => {
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
             name: 'Kuni Garu',
-            bork: 'Dara'
+            bork: 'Dara',
           }),
         })}
       />
@@ -140,7 +140,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            name: 'Kuni Garu'
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -170,7 +170,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            name: 'Kuni Garu'
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -204,8 +204,7 @@ describe('embeddable renderer', () => {
           maybeId={'12345'}
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
-            getSerializedStateForChild: () => ({
-            }),
+            getSerializedStateForChild: () => ({}),
           })}
         />
       </EuiThemeProvider>
@@ -244,7 +243,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            name: 'Kuni Garu'
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -297,7 +296,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            name: 'Kuni Garu'
+            name: 'Kuni Garu',
           }),
         })}
       />

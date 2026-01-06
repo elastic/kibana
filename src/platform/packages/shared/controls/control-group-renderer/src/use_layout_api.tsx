@@ -69,9 +69,9 @@ export const useLayoutApi = (
         if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
         const oldControls = layout$Ref.current.getValue().controls;
         const controlState = {
-            width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
-            grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
-            ...serializedState,
+          width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
+          grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
+          ...serializedState,
         };
         layout$Ref.current.next({
           controls: {

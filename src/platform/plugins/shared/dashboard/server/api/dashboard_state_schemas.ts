@@ -163,7 +163,7 @@ export function getDashboardStateSchema() {
     // unsuppoted "as code" keys
     // TODO remove before GA
     controlGroupInput: schema.maybe(controlsGroupSchema),
-    
+
     // supported "as code" keys
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),

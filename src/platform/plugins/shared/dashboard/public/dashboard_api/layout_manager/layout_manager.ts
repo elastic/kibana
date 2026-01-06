@@ -245,9 +245,7 @@ export function initializeLayoutManager(
     return {
       type: childLayout.type,
       grid: childLayout.grid,
-      serializedState: apiHasSerializableState(childApi)
-        ? childApi.serializeState()
-        : {},
+      serializedState: apiHasSerializableState(childApi) ? childApi.serializeState() : {},
     };
   }
 

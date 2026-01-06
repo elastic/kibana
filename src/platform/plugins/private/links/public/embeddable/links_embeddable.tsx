@@ -125,9 +125,7 @@ export const getLinksEmbeddableFactory = () => {
           titleManager.reinitializeState(lastSaved);
           if (!savedObjectId) {
             layout$.next((lastSaved as LinksByValueState)?.layout);
-            resolvedLinks$.next(
-              await resolveLinks((lastSaved as LinksByValueState)?.links ?? [])
-            );
+            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
           }
         },
       });

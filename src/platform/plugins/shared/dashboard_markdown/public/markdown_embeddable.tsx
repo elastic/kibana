@@ -46,10 +46,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
-    const markdownStateManager = initializeStateManager(
-      initialState,
-      defaultMarkdownState
-    );
+    const markdownStateManager = initializeStateManager(initialState, defaultMarkdownState);
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);

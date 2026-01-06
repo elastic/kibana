@@ -136,7 +136,7 @@ describe('embeddable state transfer', () => {
         [destinationApp]: [
           {
             type: 'coolestType',
-            serializedState: { savedObjectId: '150'},
+            serializedState: { savedObjectId: '150' },
           },
         ],
       },
