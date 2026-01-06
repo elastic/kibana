@@ -11,13 +11,14 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { RouteSecurity } from '@kbn/core-http-server';
 
-import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
 import {
   updateEsqlRuleDataSchema,
   type UpdateEsqlRuleData,
 } from '../application/esql_rule/methods/update';
 import { RulesClient } from '../application/esql_rule/lib/rules_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
 
@@ -29,8 +30,12 @@ const updateRuleParamsSchema = schema.object({
 export class UpdateRuleRoute {
   static method = 'patch' as const;
   static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id}`;
-  static security = DEFAULT_ALERTING_V2_ROUTE_SECURITY;
-  static options = { access: 'internal', tags: ['access:alerting'] } as const;
+  static security: RouteSecurity = {
+    authz: {
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
+    },
+  };
+  static options = { access: 'internal' } as const;
   static validate = {
     request: {
       body: updateEsqlRuleDataSchema,

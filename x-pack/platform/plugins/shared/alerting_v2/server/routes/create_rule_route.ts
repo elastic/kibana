@@ -14,12 +14,13 @@ import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   createEsqlRuleDataSchema,
   type CreateEsqlRuleData,
 } from '../application/esql_rule/methods/create';
 import { RulesClient } from '../application/esql_rule/lib/rules_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
 
@@ -31,7 +32,11 @@ const createRuleParamsSchema = schema.object({
 export class CreateRuleRoute implements RouteHandler {
   static method = 'post' as const;
   static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id?}`;
-  static security = DEFAULT_ALERTING_V2_ROUTE_SECURITY;
+  static security: RouteSecurity = {
+    authz: {
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
+    },
+  };
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
