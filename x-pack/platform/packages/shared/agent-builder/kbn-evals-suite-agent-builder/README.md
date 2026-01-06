@@ -73,20 +73,34 @@ The EDOT Collector receives traces from Kibana via the HTTP exporter configured 
 
 ### Load AgentBuilder Datasets
 
+The following options are available to load Knowledge bases:
+
+1. Restore snapshot from gcs-bucket, [documentation](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting), credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
+   
+2. Use the [ETL pipeline](https://github.com/elastic/workchat-solution-ds-experiments/blob/main/src/experiments/elastic-etl/README.md) from the workchat-solution-ds-experiments repo maintained by Agent Builder DS team. **Recommended when restoring snapshot is not an option, e.g. serverless**. Takes approximately 30 minutes on Serverless Cloud, and about 1 hour for local ingestion.
+
+3. Use Huggingface Loader in Kibana 
+
 **Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up with your `@elastic.co` email address.
 
 Load the required AgentBuilder datasets into Elasticsearch using the HuggingFace dataset loader:
 
+**KNOWLEDGE BASE OPTIONS**
+1. Airline loyalty domain: `airline_loyalty_program_kb`
+2. Customer support domain: `customer_support_kb`
+3. Retail domain: `global_electronics_retailer_kb`
+4. Healthcare survey domain: `hcahps_patient_survey_kb`
+5. Elasticsearch customer support knowledge articles: `elastic_customer_support_kb`
+
 ```bash
-# Load Wix knowledge base and users datasets
+# Load customer support domain knowledge base
 HUGGING_FACE_ACCESS_TOKEN=<your-token> \
 node --require ./src/setup_node_env/index.js \
   x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
-  --datasets agent_builder/knowledge-base/* \
-  --clear
+  --datasets "agent_builder/{REPLACE_WITH_A_KNOWLEDGE_BASE}/*" \
+  --clear \
   --kibana-url http://elastic:changeme@localhost:5620
 ```
-
 **Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
 Once done, documents with embeddings will be cached and re-used on subsequent data loads.
 
@@ -115,7 +129,7 @@ SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright 
 # Override RAG evaluator K value (takes priority over config)
 RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
-# Retrieve traces from another (monitoring) closter
+# Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 ```
