@@ -47,7 +47,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
     const panelStateMap: Record<string, BehaviorSubject<object>> = {};
 
     function getSerializedStateForChild(childId: string) {
-      return panelStateMap[childId]?.value ?? { rawState: {} };
+      return panelStateMap[childId]?.value ?? {};
     }
 
     return {

@@ -56,9 +56,7 @@ const renderReactEmbeddable = ({
 
     // set intial panel state onMount
     useMemo(() => {
-      container.setSerializedStateForChild(uuid, {
-        rawState: omit(input, ['disableTriggers', 'filters']),
-      });
+      container.setSerializedStateForChild(uuid, omit(input, ['disableTriggers', 'filters']));
     }, []);
 
     const searchApi = useMemo(() => {
@@ -86,7 +84,7 @@ const renderReactEmbeddable = ({
               // canvas auto-saves so update child state on any change
               container.setSerializedStateForChild(uuid, newState);
               const newExpression = embeddableInputToExpression(
-                newState.rawState,
+                newState,
                 type,
                 undefined,
                 true
