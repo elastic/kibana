@@ -14,6 +14,9 @@ describe('Telemetry Types', () => {
         pageSize: 1000,
         maxResponseSize: 5000000,
         maxCompressedResponseSize: 1000000,
+        excludeColdAndFrozenTiers: async () => {
+          return false;
+        },
       };
 
       expect(config.pageSize).toBe(1000);

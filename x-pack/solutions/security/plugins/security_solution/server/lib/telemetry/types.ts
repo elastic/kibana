@@ -506,6 +506,7 @@ export interface TelemetryQueryConfiguration {
   pageSize: number;
   maxResponseSize: number;
   maxCompressedResponseSize: number;
+  excludeColdAndFrozenTiers: () => Promise<boolean>;
 }
 
 export interface TelemetryConfiguration {

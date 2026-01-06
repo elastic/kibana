@@ -91,6 +91,9 @@ describe('telemetry configuration task test', () => {
       pageSize: 1000,
       maxResponseSize: 5000000,
       maxCompressedResponseSize: 1000000,
+      excludeColdAndFrozenTiers: async () => {
+        return false;
+      },
     };
 
     const mockConfig: TelemetryConfiguration = {

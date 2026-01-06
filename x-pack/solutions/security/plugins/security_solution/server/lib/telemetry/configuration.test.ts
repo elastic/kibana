@@ -28,6 +28,9 @@ describe('TelemetryConfiguration', () => {
         pageSize: 500,
         maxResponseSize: 2500000,
         maxCompressedResponseSize: 500000,
+        excludeColdAndFrozenTiers: async () => {
+          return false;
+        },
       };
 
       telemetryConfiguration.query_config = config;
@@ -39,6 +42,9 @@ describe('TelemetryConfiguration', () => {
         pageSize: 1000,
         maxResponseSize: 5000000,
         maxCompressedResponseSize: 1000000,
+        excludeColdAndFrozenTiers: async () => {
+          return false;
+        },
       };
 
       const expectedDefaults = {
