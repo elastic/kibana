@@ -8,16 +8,12 @@
     ]
   },
   "include": [
-<<<<<<<< HEAD:x-pack/solutions/search/packages/kbn-scout-search/tsconfig.json
     "**/*.ts",
-========
-    "**/*",
   ],
   "kbn_references": [
     "@kbn/scout-oblt",
     "@kbn/fleet-plugin",
     "@kbn/observability-plugin"
->>>>>>>> 698e957b1938 ([Profiling] Fix Flaky Profiling tests (#239014)):x-pack/solutions/observability/plugins/profiling/test/scout/tsconfig.json
   ],
   "exclude": [
     "target/**/*"
