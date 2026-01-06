@@ -6,7 +6,7 @@
  */
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -17,7 +17,6 @@ import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { apiPublishesESQLVariables, type ESQLControlVariable } from '@kbn/esql-types';
-import { getESQLQuerySyntaxErrors } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -86,7 +85,6 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
-  const { euiTheme } = useEuiTheme();
   const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
   const [query, setQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
@@ -96,7 +94,6 @@ export function ESQLEditor({
   const { visualization } = useLensSelector((state) => state.lens);
 
   const [errors, setErrors] = useState<Error[]>([]);
-  const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
   const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
   );
@@ -205,41 +202,25 @@ export function ESQLEditor({
     setIsInitialized,
   });
 
-  // Handle query change with syntax validation
-  const handleQueryChange = useCallback(
-    (newQuery: AggregateQuery | Query) => {
-      setQuery(newQuery);
-      // Validate syntax on every query change
-      if (isOfAggregateQueryType(newQuery)) {
-        const syntaxErrors = getESQLQuerySyntaxErrors(newQuery.esql);
-        setHasSyntaxErrors(syntaxErrors.length > 0);
-      }
-    },
-    [setQuery]
-  );
-
   // Track and report query state to parent
   useEffect(() => {
     onTextBasedQueryStateChange?.({
-      hasSyntaxErrors,
       hasErrors: errors.length > 0,
       isQueryPendingSubmit: !isEqual(query, submittedQuery),
     });
-  }, [query, submittedQuery, errors.length, hasSyntaxErrors, onTextBasedQueryStateChange]);
+  }, [query, submittedQuery, errors.length, onTextBasedQueryStateChange]);
 
   // Early exit if it's not in TextBased mode
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
     return null;
   }
 
-  const isQueryPendingSubmit = !isEqual(query, submittedQuery);
-
   const EditorComponent = (
     <>
       <InnerESQLEditor
         query={query}
         prevQuery={prevQuery}
-        setQuery={handleQueryChange}
+        setQuery={setQuery}
         runQuery={runQuery}
         adHocDataViews={adHocDataViews}
         errors={errors}
@@ -252,21 +233,6 @@ export function ESQLEditor({
         attributes={attributes}
         parentApi={parentApi}
       />
-      {isQueryPendingSubmit && !hasSyntaxErrors && (
-        <EuiText
-          size="xs"
-          color="danger"
-          css={css`
-            padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-          `}
-          role="status"
-          aria-live="polite"
-        >
-          {i18n.translate('xpack.lens.esqlEditor.queryNotRunHelpText', {
-            defaultMessage: 'Run the query to apply changes',
-          })}
-        </EuiText>
-      )}
       {dataGridAttrs ? (
         <ESQLDataGridAccordion
           dataGridAttrs={dataGridAttrs}

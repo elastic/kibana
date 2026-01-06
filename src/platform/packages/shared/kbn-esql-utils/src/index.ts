@@ -21,7 +21,6 @@ export {
   mapVariableToColumn,
   getValuesFromQueryField,
   getESQLQueryVariables,
-  getESQLQuerySyntaxErrors,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
   getArgsFromRenameFunction,

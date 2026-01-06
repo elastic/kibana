@@ -25,7 +25,6 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-  EditorError,
 } from '@kbn/esql-language';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -298,25 +297,6 @@ export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = Parser.parse(esql);
   const usedVariablesInQuery = Walker.params(root);
   return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
-};
-
-export const getESQLQuerySyntaxErrors = (esql: string): EditorError[] => {
-  try {
-    return Parser.parseErrors(esql);
-  } catch (e) {
-    // Parser.parseErrors can throw for severely malformed queries
-    return [
-      {
-        startLineNumber: 1,
-        endLineNumber: 1,
-        startColumn: 1,
-        endColumn: 1,
-        message: e instanceof Error ? e.message : 'Failed to parse query',
-        severity: 'error',
-        code: 'parserError',
-      },
-    ];
-  }
 };
 
 /**

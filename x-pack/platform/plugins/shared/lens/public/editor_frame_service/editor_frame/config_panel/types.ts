@@ -26,8 +26,6 @@ import type {
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 export interface TextBasedQueryState {
-  /** Whether the query has syntax errors (client-side parsing) */
-  hasSyntaxErrors: boolean;
   /** Whether the query has errors from the last run attempt */
   hasErrors: boolean;
   /** Whether the query has been modified but not yet submitted */

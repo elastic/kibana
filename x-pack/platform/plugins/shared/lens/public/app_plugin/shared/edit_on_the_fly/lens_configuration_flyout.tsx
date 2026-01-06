@@ -248,13 +248,9 @@ export function LensEditConfigurationFlyout({
     if (!visualization.state || !visualization.activeId) {
       return false;
     }
-    // For text-based mode, check if query has been successfully concluded (no syntax errors, no runtime errors, and not pending)
+    // For text-based mode, check if query has been successfully concluded (no runtime errors, and not pending)
     if (textBasedMode && esqlQueryState) {
-      if (
-        esqlQueryState.hasSyntaxErrors ||
-        esqlQueryState.hasErrors ||
-        esqlQueryState.isQueryPendingSubmit
-      ) {
+      if (esqlQueryState.hasErrors || esqlQueryState.isQueryPendingSubmit) {
         return false;
       }
     }
