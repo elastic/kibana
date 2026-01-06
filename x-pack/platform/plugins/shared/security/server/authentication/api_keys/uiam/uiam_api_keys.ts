@@ -53,7 +53,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @param request The Kibana request instance containing the authorization header.
    * @param params The parameters for creating the API key (name and optional expiration).
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
-   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
+   * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   async grant(
     request: KibanaRequest,
@@ -102,7 +102,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @param request The Kibana request instance containing the authorization header.
    * @param params The parameters containing the ID of the API key to invalidate.
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
-   * @throws {Error} If the UIAM service is not available, if the request does not contain an authorization header, or if the credential is not a UIAM credential.
+   * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   async invalidate(
     request: KibanaRequest,
@@ -159,8 +159,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * authentication headers.
    *
    * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication, or null if the license is not enabled.
-   * @throws {Error} If the UIAM service is not available.
+   * @returns A scoped cluster client configured with API key authentication
    */
   getScopedClusterClientWithApiKey(apiKey: string) {
     // Create authorization header in the format: ApiKey base64(id:key)

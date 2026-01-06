@@ -22,7 +22,7 @@ export interface UiamAPIKeysWithContextType {
    *
    * @param params The parameters for creating the API key (name and optional expiration).
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
-   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
+   * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   grant(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
 
@@ -31,7 +31,7 @@ export interface UiamAPIKeysWithContextType {
    *
    * @param params The parameters containing the ID of the API key to invalidate.
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
-   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
+   * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   invalidate(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
 
@@ -43,7 +43,7 @@ export interface UiamAPIKeysWithContextType {
    * authentication headers.
    *
    * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication, or null if the license is not enabled.
+   * @returns A scoped cluster client configured with API key authentication
    */
   getScopedClusterClientWithApiKey(apiKey: string): IScopedClusterClient | null;
 }
