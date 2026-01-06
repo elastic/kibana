@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { apiAppliesFilters } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import type { initializeESQLVariablesManager } from './esql_variables_manager';
 import type { initializeLayoutManager } from './layout_manager';
 
@@ -27,10 +27,13 @@ export const initializeRelatedPanelsManager = (
   layoutManager: ReturnType<typeof initializeLayoutManager>,
   esqlVariablesManager: ReturnType<typeof initializeESQLVariablesManager>
 ) => {
-  const { children$, getDashboardPanelFromId } = layoutManager.api;
+  const { children$, layout$, getDashboardPanelFromId } = layoutManager.api;
   const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
-  const filterRelatedPanels$ = children$.pipe(
-    map((children) => {
+  const filterRelatedPanels$ = combineLatest(
+    // Update on layout change to get the most recent sectionIds
+    [children$, layout$]
+  ).pipe(
+    map(([children]) => {
       const childrenBySectionAndFilterApplication = new Map<string | Symbol, SectionFilterEntry>();
 
       for (const child of Object.values(children)) {
