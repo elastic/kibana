@@ -833,10 +833,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     const queryConfig: TelemetryQueryConfiguration = {
-      pageSize: this.config.telemetry?.queryConfig.pageSize ?? 500,
-      maxResponseSize: this.config.telemetry?.queryConfig.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
-      maxCompressedResponseSize:
-        this.config.telemetry?.queryConfig.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
+      pageSize: this.config.telemetry?.queryConfig.pageSize,
+      maxResponseSize: this.config.telemetry?.queryConfig.maxResponseSize,
+      maxCompressedResponseSize: this.config.telemetry?.queryConfig.maxCompressedResponseSize,
       excludeColdAndFrozenTiers: async () => {
         try {
           return await uiSettingsClient.get<boolean>(EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER);

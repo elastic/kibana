@@ -503,9 +503,9 @@ export interface ValueListIndicatorMatchResponseAggregation {
 }
 
 export interface TelemetryQueryConfiguration {
-  pageSize: number;
-  maxResponseSize: number;
-  maxCompressedResponseSize: number;
+  pageSize?: number;
+  maxResponseSize?: number;
+  maxCompressedResponseSize?: number;
   excludeColdAndFrozenTiers: () => Promise<boolean>;
 }
 

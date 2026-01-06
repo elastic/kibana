@@ -1353,13 +1353,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     let queryOptions = {};
     let pageSize = -1;
     // kibana.yml configurations take precedence over CDN parameters
-    if (this.queryConfig !== undefined) {
+    if (this.queryConfig?.pageSize !== undefined) {
       queryOptions = {
         maxResponseSize: this.queryConfig.maxResponseSize,
         maxCompressedResponseSize: this.queryConfig.maxCompressedResponseSize,
       };
       pageSize = this.queryConfig.pageSize;
-    } else if (queryConfig !== undefined) {
+    } else if (queryConfig?.pageSize !== undefined) {
       queryOptions = {
         maxResponseSize: queryConfig.maxResponseSize,
         maxCompressedResponseSize: queryConfig.maxCompressedResponseSize,
