@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
-import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
-import { LowercaseTargetField } from './lowercase_optional_fields';
+import { ProcessorFieldSelector } from '../processor_field_selector';
+import { TransformStringTargetField } from './transform_string_optional_fields';
 
-export const LowercaseProcessorForm = () => {
+interface TransformStringProcessorFormProps {
+  fieldSelectorHelpText: string;
+  targetFieldHelpText: string;
+}
+
+export const TransformStringProcessorForm = ({
+  fieldSelectorHelpText,
+  targetFieldHelpText,
+}: TransformStringProcessorFormProps) => {
   return (
     <>
-      <ProcessorFieldSelector
-        fieldKey="from"
-        helpText={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseFieldHelpText',
-          { defaultMessage: 'The field to lowercase.' }
-        )}
-      />
+      <ProcessorFieldSelector fieldKey="from" helpText={fieldSelectorHelpText} />
       <EuiSpacer size="m" />
       <FieldsAccordion>
-        <LowercaseTargetField />
+        <TransformStringTargetField targetFieldHelpText={targetFieldHelpText} />
         <ProcessorConditionEditor />
       </FieldsAccordion>
       <EuiSpacer size="m" />

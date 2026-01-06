@@ -7,26 +7,26 @@
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
-export const UppercaseTargetField = () => {
+interface TransformStringTargetFieldProps {
+  targetFieldHelpText: string;
+}
+
+export const TransformStringTargetField = ({
+  targetFieldHelpText,
+}: TransformStringTargetFieldProps) => {
   const { register } = useFormContext();
   const { ref, ...inputProps } = register('to');
 
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseTargetLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.transformStringTargetLabel',
         { defaultMessage: 'Target field' }
       )}
-      helpText={
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseTargetHelpText"
-          defaultMessage="The field that will hold the uppercased string. If empty, the input field is updated in place."
-        />
-      }
+      helpText={targetFieldHelpText}
       fullWidth
     >
       <EuiFieldText {...inputProps} inputRef={ref} />
