@@ -9,8 +9,9 @@ import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
-import { computeHealth, type SLOHealth } from '../../../domain/services/compute_health';
-import { HEALTH_INDEX_ALIAS } from '../../health_diagnose/health_index_installer';
+import { computeHealth } from '../../../domain/services/compute_health';
+import { HEALTH_DATA_STREAM_NAME } from '../../health_diagnose/health_index_installer';
+import type { HealthDocument, SLO } from './types';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -21,20 +22,6 @@ interface Dependencies {
 
 interface RunParams {
   taskId: string;
-}
-
-interface SLO {
-  id: string;
-  revision: number;
-}
-
-interface HealthDocument {
-  taskId: string;
-  sloId: string;
-  revision: number;
-  isProblematic: boolean;
-  checkedAt: string;
-  health: SLOHealth['health'];
 }
 
 const COMPOSITE_BATCH_SIZE = 500;
@@ -77,12 +64,13 @@ export async function runHealthDiagnose(
         { scopedClusterClient }
       );
 
+      const now = new Date().toISOString();
       const documents: HealthDocument[] = healthResults.map((result) => ({
+        '@timestamp': now,
         taskId,
         sloId: result.id,
         revision: result.revision,
         isProblematic: result.health.isProblematic,
-        checkedAt: new Date().toISOString(),
         health: result.health,
       }));
 
@@ -207,7 +195,10 @@ async function bulkInsertHealthDocuments(
   const { esClient, logger, abortController } = dependencies;
   logger.debug(`Bulk inserting ${documents.length} health documents`);
 
-  const operations = documents.flatMap((doc) => [{ index: { _index: HEALTH_INDEX_ALIAS } }, doc]);
+  const operations = documents.flatMap((doc) => [
+    { create: { _index: HEALTH_DATA_STREAM_NAME } },
+    doc,
+  ]);
 
   await esClient.bulk({ operations, refresh: false }, { signal: abortController.signal });
 }

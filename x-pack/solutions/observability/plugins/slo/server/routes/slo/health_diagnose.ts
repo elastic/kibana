@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
+import {
+  getHealthDiagnoseParamsSchema,
+  postHealthDiagnoseParamsSchema,
+  type GetHealthDiagnoseResponse,
+  type HealthDiagnoseResultResponse,
+  type PostHealthDiagnoseResponse,
+} from '@kbn/slo-schema';
 import { v4 } from 'uuid';
-import { HEALTH_INDEX_ALIAS } from '../../services/health_diagnose/health_index_installer';
+import { HEALTH_DATA_STREAM_NAME } from '../../services/health_diagnose/health_index_installer';
 import {
   HEALTH_DIAGNOSE_TASK_TYPE,
   type HealthDiagnoseTaskParams,
@@ -16,55 +21,6 @@ import {
 } from '../../services/tasks/health_diagnose_task/health_diagnose_task';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-
-const getHealthDiagnoseParamsSchema = t.type({
-  path: t.type({
-    taskId: t.string,
-  }),
-  query: t.union([
-    t.undefined,
-    t.partial({
-      size: toNumberRt,
-      searchAfter: t.string,
-      isProblematic: toBooleanRt,
-    }),
-  ]),
-});
-
-const postHealthDiagnoseParamsSchema = t.type({
-  body: t.union([
-    t.undefined,
-    t.partial({
-      force: toBooleanRt,
-    }),
-  ]),
-});
-
-interface HealthDiagnoseResult {
-  taskId: string;
-  sloId: string;
-  revision: number;
-  checkedAt: string;
-  health: {
-    isProblematic: boolean;
-    rollup: Record<string, unknown>;
-    summary: Record<string, unknown>;
-  };
-}
-
-interface GetHealthDiagnoseResponse {
-  results: HealthDiagnoseResult[];
-  total: number;
-  searchAfter?: string[];
-}
-
-interface PostHealthDiagnoseResponse {
-  taskId: string;
-  status: 'scheduled' | 'pending' | 'done';
-  processed?: number;
-  problematic?: number;
-  error?: string;
-}
 
 export const postHealthDiagnoseRoute = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/poc/_health/diagnose',
@@ -155,31 +111,54 @@ export const getHealthDiagnoseRoute = createSloServerRoute({
     const esClient = scopedClusterClient.asCurrentUser;
 
     const { taskId } = params.path;
-    const { size = 1000 } = params.query ?? {};
+    const { size = 100, problematic } = params.query ?? {};
 
-    // TODO: Add pagination through searchAfter and isProblematic filter if provided
-    const result = await esClient.search<HealthDiagnoseResult>({
-      index: HEALTH_INDEX_ALIAS,
+    let searchAfter;
+    if (params.query?.searchAfter) {
+      try {
+        const decoded = JSON.parse(params.query.searchAfter);
+        if (Array.isArray(decoded)) {
+          searchAfter = decoded;
+        }
+      } catch (e) {
+        // ignore invalid searchAfter
+      }
+    }
+
+    const result = await esClient.search<HealthDiagnoseResultResponse>({
+      index: HEALTH_DATA_STREAM_NAME,
       size,
       query: {
         bool: {
-          filter: [{ term: { taskId } }],
+          filter: [
+            { term: { taskId } },
+            ...(problematic ? [{ term: { isProblematic: problematic } }] : []),
+          ],
         },
       },
+      sort: [
+        { '@timestamp': 'desc' },
+        { taskId: 'asc' },
+        { isProblematic: 'asc' },
+        { sloId: 'asc' },
+      ],
+      search_after: searchAfter,
     });
 
     const hits = result.hits.hits;
     const total =
       typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+    const lastHit = hits[hits.length - 1];
+    const nextSearchAfter = lastHit && hits.length === size ? lastHit.sort : undefined;
 
     const results = hits
       .map((hit) => hit._source)
-      .filter((source): source is HealthDiagnoseResult => source !== undefined);
+      .filter((source): source is HealthDiagnoseResultResponse => source !== undefined);
 
-    // TODO: add last hit searchafter in the response
     return {
       results,
       total,
+      searchAfter: nextSearchAfter,
     };
   },
 });
