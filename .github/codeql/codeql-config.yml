@@ -140,5 +140,5 @@ query-filters:
 packs:
   - githubsecuritylab/codeql-javascript-queries
 queries:
-  - ./.github/codeql/custom-queries
-  - codeql/javascript-queries/AlertSuppression.ql
+  - uses: ./.github/codeql/custom-queries
+  - uses: github/codeql/javascript/ql/src/AlertSuppression.ql@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
