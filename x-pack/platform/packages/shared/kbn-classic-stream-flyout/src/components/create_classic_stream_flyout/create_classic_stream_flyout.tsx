@@ -32,6 +32,7 @@ import {
   buildStreamName,
   countWildcards,
   type IlmPolicyFetcher,
+  type SimulatedTemplateFetcher,
 } from '../../utils';
 import { useStreamValidation } from './hooks/use_stream_validation';
 import { formReducer, initialFormState } from './reducers/form_reducer';
@@ -84,12 +85,10 @@ interface CreateClassicStreamFlyoutProps {
    */
   getIlmPolicy?: IlmPolicyFetcher;
   /**
-   * Whether to show data retention information.
-   * If false, data retention details (ILM policies and retention periods) will be hidden
-   * in both the template selection step and the confirmation step.
-   * @default true
+   * Async callback to fetch simulated template data by template name.
+   * If provided, the resolved template data will be used in the template details section.
    */
-  showDataRetention?: boolean;
+  getSimulatedTemplate?: SimulatedTemplateFetcher;
 }
 
 export const CreateClassicStreamFlyout = ({
@@ -102,7 +101,7 @@ export const CreateClassicStreamFlyout = ({
   onRetryLoadTemplates,
   onValidate,
   getIlmPolicy,
-  showDataRetention = true,
+  getSimulatedTemplate,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
@@ -176,12 +175,16 @@ export const CreateClassicStreamFlyout = ({
   );
 
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
-  const hasNextStep = isFirstStep;
   const hasPreviousStep = !isFirstStep;
-  const isNextButtonEnabled = formState.selectedTemplate !== null;
+  const isTemplateSelected = formState.selectedTemplate !== null;
 
   const goToNextStep = () => setCurrentStep(ClassicStreamStep.NAME_AND_CONFIRM);
-  const goToPreviousStep = () => setCurrentStep(ClassicStreamStep.SELECT_TEMPLATE);
+  const goToPreviousStep = useCallback(() => {
+    // Clear template selection so user can click to re-select and auto-advance
+    dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: null });
+    resetValidation();
+    setCurrentStep(ClassicStreamStep.SELECT_TEMPLATE);
+  }, [resetValidation]);
 
   const steps: EuiStepsHorizontalProps['steps'] = useMemo(
     () => [
@@ -198,12 +201,12 @@ export const CreateClassicStreamFlyout = ({
           defaultMessage: 'Name and confirm',
         }),
         status: isFirstStep ? 'incomplete' : 'current',
-        disabled: !isNextButtonEnabled,
+        disabled: !isTemplateSelected,
         onClick: goToNextStep,
         'data-test-subj': 'createClassicStreamStep-nameAndConfirm',
       },
     ],
-    [isFirstStep, isNextButtonEnabled]
+    [isFirstStep, isTemplateSelected, goToPreviousStep]
   );
 
   const renderCurrentStepContent = () => {
@@ -223,10 +226,10 @@ export const CreateClassicStreamFlyout = ({
             templates={templates}
             selectedTemplate={selectedTemplate}
             onTemplateSelect={handleTemplateSelect}
+            onTemplateConfirm={goToNextStep}
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
-            showDataRetention={showDataRetention}
           />
         );
 
@@ -244,7 +247,7 @@ export const CreateClassicStreamFlyout = ({
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}
             getIlmPolicy={getIlmPolicy}
-            showDataRetention={showDataRetention}
+            getSimulatedTemplate={getSimulatedTemplate}
           />
         );
       }
@@ -298,20 +301,8 @@ export const CreateClassicStreamFlyout = ({
               </EuiButtonEmpty>
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {hasNextStep ? (
-              <EuiButton
-                onClick={goToNextStep}
-                fill
-                disabled={!isNextButtonEnabled}
-                data-test-subj="nextButton"
-              >
-                <FormattedMessage
-                  id="xpack.createClassicStreamFlyout.footer.next"
-                  defaultMessage="Next"
-                />
-              </EuiButton>
-            ) : (
+          {!isFirstStep && (
+            <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={handleCreate}
                 fill
@@ -323,8 +314,8 @@ export const CreateClassicStreamFlyout = ({
                   defaultMessage="Create"
                 />
               </EuiButton>
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
