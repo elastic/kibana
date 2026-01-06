@@ -195,9 +195,9 @@ const getToolEventConverter = ({ toolId, toolCallId }: { toolId: string; toolCal
         },
       };
     }
-    if (toolEvent.type === ChatEventType.toolCustom) {
+    if (toolEvent.type === ChatEventType.toolUi) {
       return {
-        type: ChatEventType.toolCustom,
+        type: ChatEventType.toolUi,
         data: {
           ...toolEvent.data,
           tool_id: toolId,

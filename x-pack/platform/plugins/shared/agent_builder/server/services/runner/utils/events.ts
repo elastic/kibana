@@ -13,7 +13,7 @@ import type {
   ToolEventHandlerFn,
 } from '@kbn/agent-builder-server';
 import type {
-  InternalToolCustomEvent,
+  InternalToolUiEvent,
   InternalToolProgressEvent,
 } from '@kbn/agent-builder-server/runner/events';
 import { ChatEventType } from '@kbn/agent-builder-common';
@@ -63,9 +63,9 @@ export const createToolEventEmitter = ({
       };
       eventHandler(event);
     },
-    emitCustomEvent: (eventName, data) => {
-      const event: InternalToolCustomEvent = {
-        type: ChatEventType.toolCustom,
+    sendUiEvent: (eventName, data) => {
+      const event: InternalToolUiEvent = {
+        type: ChatEventType.toolUi,
         data: {
           custom_event: eventName,
           data,
@@ -79,7 +79,7 @@ export const createToolEventEmitter = ({
 const createNoopToolEventEmitter = (): ToolEventEmitter => {
   return {
     reportProgress: () => {},
-    emitCustomEvent: () => {},
+    sendUiEvent: () => {},
   };
 };
 
