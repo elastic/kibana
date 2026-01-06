@@ -295,6 +295,36 @@ export const GithubConnector: ConnectorSpec = {
         });
       },
     },
+    forkRepo: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        organization: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          organization?: string;
+        };
+
+        const requestBody = typedInput.organization
+          ? { organization: typedInput.organization }
+          : {};
+
+        const response = await ctx.client.post(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/forks`,
+          requestBody,
+          {
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
   },
 
   test: {

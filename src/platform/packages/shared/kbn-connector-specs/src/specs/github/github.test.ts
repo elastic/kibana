@@ -823,6 +823,69 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('fork_repository action', () => {
+    it('should fork a repository to the authenticated user account', async () => {
+      const mockResponse = {
+        data: {
+          id: 123456,
+          name: 'repo',
+          full_name: 'authenticated-user/repo',
+          owner: {
+            login: 'authenticated-user',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.forkRepo.handler(mockContext, {
+        owner: 'original-owner',
+        repo: 'repo',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.github.com/repos/original-owner/repo/forks',
+        {},
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should fork a repository to a specified organization', async () => {
+      const mockResponse = {
+        data: {
+          id: 123456,
+          name: 'repo',
+          full_name: 'target-org/repo',
+          owner: {
+            login: 'target-org',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.forkRepo.handler(mockContext, {
+        owner: 'original-owner',
+        repo: 'repo',
+        organization: 'target-org',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.github.com/repos/original-owner/repo/forks',
+        { organization: 'target-org' },
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
