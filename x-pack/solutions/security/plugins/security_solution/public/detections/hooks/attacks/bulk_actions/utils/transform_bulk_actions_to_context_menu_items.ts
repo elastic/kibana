@@ -32,7 +32,6 @@ interface TransformBulkActionsToContextMenuItemsProps {
  * into the format required by EuiContextMenu.
  *
  * @param props - {@link TransformBulkActionsToContextMenuItemsProps}
- * @returns Transformed context menu items and panels
  */
 export const transformBulkActionsToContextMenuItems = ({
   bulkActionItems,

@@ -21,8 +21,6 @@ interface ApplyAttackAssigneesProps extends BaseApplyAttackProps {
 /**
  * Hook that provides a function to apply assignees to attacks and optionally related alerts.
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
- *
- * @returns Object containing the applyAssignees function
  */
 export const useApplyAttackAssignees = () => {
   const { mutateAsync: setUnifiedAlertsAssignees } = useSetUnifiedAlertsAssignees();

@@ -25,8 +25,6 @@ interface ApplyAttackWorkflowStatusProps extends BaseApplyAttackProps {
 /**
  * Hook that provides a function to apply workflow status to attacks and optionally related alerts.
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
- *
- * @returns Object containing the applyWorkflowStatus function
  */
 export const useApplyAttackWorkflowStatus = () => {
   const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();

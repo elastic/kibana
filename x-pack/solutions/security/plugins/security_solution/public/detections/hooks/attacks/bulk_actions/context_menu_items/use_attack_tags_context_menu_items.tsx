@@ -25,9 +25,6 @@ export interface UseAttackTagsContextMenuItemsProps extends BaseAttackContextMen
 /**
  * Hook that provides context menu items and panels for managing tags on attacks.
  * The hook creates mock alert items from the attack IDs and related alert IDs to work with the bulk actions system.
- *
- * @param props - Hook configuration props
- * @returns Object containing context menu items and panels for tag management
  */
 export const useAttackTagsContextMenuItems = ({
   attacksWithTags,

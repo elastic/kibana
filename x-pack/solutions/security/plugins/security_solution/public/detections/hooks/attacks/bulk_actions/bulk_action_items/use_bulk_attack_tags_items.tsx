@@ -27,9 +27,6 @@ export interface UseBulkAttackTagsItemsProps {
  * Hook that provides bulk action items and panels for updating tags on attacks.
  * Handles both attacks only and attacks + related alerts updates.
  * Shows a confirmation modal internally when related alerts exist.
- *
- * @param props - Hook configuration props
- * @returns Object containing tags action items and panels
  */
 export const useBulkAttackTagsItems = ({
   onTagsUpdate,

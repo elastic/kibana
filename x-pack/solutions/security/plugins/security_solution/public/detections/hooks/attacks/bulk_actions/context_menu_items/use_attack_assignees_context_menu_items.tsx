@@ -25,9 +25,6 @@ export interface UseAttackAssigneesContextMenuItemsProps extends BaseAttackConte
 /**
  * Hook that provides context menu items and panels for managing assignees on attacks.
  * The hook creates mock alert items from the attack IDs and related alert IDs to work with the bulk actions system.
- *
- * @param props - Hook configuration props
- * @returns Object containing context menu items and panels for assignee management
  */
 export const useAttackAssigneesContextMenuItems = ({
   attacksWithAssignees,

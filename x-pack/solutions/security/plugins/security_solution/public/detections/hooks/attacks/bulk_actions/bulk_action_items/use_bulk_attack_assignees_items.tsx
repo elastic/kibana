@@ -36,9 +36,6 @@ export interface UseBulkAttackAssigneesItemsProps {
  * Hook that provides bulk action items and panels for updating assignees on attacks.
  * Handles both attacks only and attacks + related alerts updates.
  * Shows a confirmation modal internally when related alerts exist.
- *
- * @param props - Hook configuration props
- * @returns Object containing assignees action items and panels
  */
 export const useBulkAttackAssigneesItems = ({
   onAssigneesUpdate,

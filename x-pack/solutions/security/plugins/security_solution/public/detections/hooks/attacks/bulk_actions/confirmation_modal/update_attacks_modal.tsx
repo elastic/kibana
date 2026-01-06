@@ -56,9 +56,6 @@ export interface UpdateAttacksModalProps {
 /**
  * Generic confirmation modal for bulk actions on attacks.
  * Allows users to choose whether to update only attacks or both attacks and related alerts.
- *
- * @param props - Component props
- * @returns Modal component
  */
 export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
   ({ alertsCount, attackDiscoveriesCount, onCancel, onClose, onConfirm }) => {
