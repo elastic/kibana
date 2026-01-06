@@ -36,6 +36,18 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.trustedApps.pageAddButtonTitle', {
     defaultMessage: 'Add trusted application',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import trusted application list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export trusted application list',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.trustedApps.showingTotal', {
       defaultMessage:

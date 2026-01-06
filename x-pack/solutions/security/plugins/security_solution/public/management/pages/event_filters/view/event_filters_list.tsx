@@ -61,6 +61,18 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.eventFilters.pageAddButtonTitle', {
     defaultMessage: 'Add event filter',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import event filter list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export event filter list',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.eventFilters.showingTotal', {
       defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',
