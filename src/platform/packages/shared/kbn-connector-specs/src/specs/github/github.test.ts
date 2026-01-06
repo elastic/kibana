@@ -886,6 +886,74 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('createRepository action', () => {
+    it('should create a repository with all parameters', async () => {
+      const mockResponse = {
+        data: {
+          id: 123456,
+          name: 'my-new-repo',
+          full_name: 'authenticated-user/my-new-repo',
+          description: 'A test repository',
+          private: true,
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.createRepository.handler(mockContext, {
+        name: 'my-new-repo',
+        description: 'A test repository',
+        private: true,
+        autoInit: true,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.github.com/user/repos',
+        {
+          name: 'my-new-repo',
+          description: 'A test repository',
+          private: true,
+          auto_init: true,
+        },
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should create a repository with minimal parameters', async () => {
+      const mockResponse = {
+        data: {
+          id: 123456,
+          name: 'minimal-repo',
+          full_name: 'authenticated-user/minimal-repo',
+          description: null,
+          private: false,
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.createRepository.handler(mockContext, {
+        name: 'minimal-repo',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.github.com/user/repos',
+        {
+          name: 'minimal-repo',
+        },
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {

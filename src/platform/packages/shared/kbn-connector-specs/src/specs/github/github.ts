@@ -325,6 +325,49 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    createRepository: {
+      isTool: false,
+      input: z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        private: z.boolean().optional(),
+        autoInit: z.boolean().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          name: string;
+          description?: string;
+          private?: boolean;
+          autoInit?: boolean;
+        };
+
+        const requestBody: {
+          name: string;
+          description?: string;
+          private?: boolean;
+          auto_init?: boolean;
+        } = {
+          name: typedInput.name,
+        };
+
+        if (typedInput.description !== undefined) {
+          requestBody.description = typedInput.description;
+        }
+        if (typedInput.private !== undefined) {
+          requestBody.private = typedInput.private;
+        }
+        if (typedInput.autoInit !== undefined) {
+          requestBody.auto_init = typedInput.autoInit;
+        }
+
+        const response = await ctx.client.post('https://api.github.com/user/repos', requestBody, {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+        return response.data;
+      },
+    },
   },
 
   test: {
