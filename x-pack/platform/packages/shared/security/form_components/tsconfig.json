@@ -6,6 +6,8 @@
       "jest",
       "node",
       "react",
+      "@emotion/react/types/css-prop",
+      "../../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
