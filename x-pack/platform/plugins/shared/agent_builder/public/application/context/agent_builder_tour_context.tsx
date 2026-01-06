@@ -71,7 +71,7 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.content', {
       defaultMessage:
-        'Your agent uses this model to generate responses. Switch LLM to prioritize faster responses, lower costs, or more complex reasoning.',
+        'Your agent uses this model to generate responses. Switch LLMs to prioritize faster responses, lower costs, or more complex reasoning.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
