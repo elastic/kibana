@@ -16,8 +16,10 @@ import { getNotifications } from '../services';
 /**
  * @internal
  */
-export class ActionInternal<Context extends object = object>
-  implements Action<Context>, Presentable<Context>
+export class ActionInternal<
+  Context extends object = object,
+  ActionExtension extends object = object
+> implements Action<Context, ActionExtension>, Presentable<Context>
 {
   public readonly id: string;
   public readonly type: string;
@@ -31,7 +33,9 @@ export class ActionInternal<Context extends object = object>
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
 
-  constructor(public readonly definition: ActionDefinition<Context>) {
+  public readonly extension?: ActionExtension;
+
+  constructor(public readonly definition: ActionDefinition<Context, ActionExtension>) {
     this.id = this.definition.id;
     this.type = this.definition.type || '';
     this.order = this.definition.order || 0;
@@ -40,6 +44,7 @@ export class ActionInternal<Context extends object = object>
     this.showNotification = this.definition.showNotification;
     this.disabled = this.definition.disabled;
     this.errorLogged = false;
+    this.extension = this.definition.extension;
 
     if (this.definition.getCompatibilityChangesSubject) {
       this.getCompatibilityChangesSubject = definition.getCompatibilityChangesSubject;

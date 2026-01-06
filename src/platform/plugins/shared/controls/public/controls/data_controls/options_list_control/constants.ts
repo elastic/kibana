@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  OptionsListSortingType,
-  OptionsListSearchTechnique,
-} from '../../../../common/options_list';
+import type { OptionsListSearchTechnique, OptionsListSortingType } from '@kbn/controls-schemas';
 
 export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
 export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {

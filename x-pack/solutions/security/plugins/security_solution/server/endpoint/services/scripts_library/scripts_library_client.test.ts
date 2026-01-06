@@ -427,4 +427,105 @@ describe('scripts library client', () => {
       });
     });
   });
+
+  describe('#get()', () => {
+    it('should retrieve script entry using ID provided', async () => {
+      await scriptsClient.get('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().get
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+
+    it('should respond with script', async () => {
+      await expect(scriptsClient.get('1-2-3')).resolves.toEqual({
+        createdAt: '2025-11-24T16:04:17.471Z',
+        createdBy: 'elastic',
+        downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+        fileHash: 'e5441eb2bb',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
+        id: '1-2-3',
+        name: 'my script',
+        platform: ['macos', 'linux'],
+        requiresInput: false,
+        updatedAt: '2025-11-24T16:04:17.471Z',
+        updatedBy: 'elastic',
+        version: 'WzgsMV0=',
+      });
+    });
+  });
+
+  describe('#download()', () => {
+    it('should retrieve script metadata using ID provided', async () => {
+      await scriptsClient.download('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().get
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+
+    it('should retrieve file content using file ID from script metadata', async () => {
+      await scriptsClient.download('1-2-3');
+
+      expect(filesPluginClient.get).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+      expect(fileMock.downloadContent).toHaveBeenCalled();
+    });
+
+    it('should return script metadata and file stream', async () => {
+      const result = await scriptsClient.download('1-2-3');
+
+      expect(result).toEqual({
+        stream: expect.any(Readable),
+        fileName: 'my_script.sh',
+        mimeType: 'text/plain',
+      });
+    });
+
+    it('should throw error when script does not exist', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(scriptsClient.download('non-existent')).rejects.toThrow(
+        'Script with id non-existent not found'
+      );
+    });
+  });
+
+  describe('#delete()', () => {
+    it('should delete both script entry and associated file', async () => {
+      await scriptsClient.delete('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().delete
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+
+      expect(filesPluginClient.delete).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+    });
+
+    it('should return void on successful deletion', async () => {
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+    });
+
+    it('should throw error when script does not exist', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
+        'Script with id non-existent not found'
+      );
+    });
+
+    it('should complete successfully even if file deletion fails', async () => {
+      filesPluginClient.delete.mockRejectedValue(new Error('file deletion failed'));
+
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().delete
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+  });
 });
