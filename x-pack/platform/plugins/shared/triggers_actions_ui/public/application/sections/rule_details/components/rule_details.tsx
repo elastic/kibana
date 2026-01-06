@@ -135,7 +135,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     };
     setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
-  }, [application, rule.name, setBreadcrumbs, chrome, isAppRegistered, getUrlForApp]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Determine if any attached action has an issue with its connector
   useEffect(() => {
