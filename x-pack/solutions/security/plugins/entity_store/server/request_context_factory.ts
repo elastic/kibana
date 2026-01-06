@@ -12,15 +12,27 @@ import type {
   EntityStoreApiRequestHandlerContext,
   EntityStorePlugins,
   EntityStoreRequestHandlerContext,
+  TaskManager,
 } from './types';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ResourcesService } from './domain/resources_service';
-import { getTaskManager } from './utils';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
   plugins: EntityStorePlugins;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
+}
+
+async function getTaskManager(core: CoreSetup, setupPlugins: EntityStorePlugins): Promise<TaskManager> {
+  const [, startPlugins] = await core.getStartServices();
+  const taskManagerStart = (startPlugins as { taskManager: TaskManagerStartContract }).taskManager;
+  const taskManagerSetup = setupPlugins.taskManager;
+
+  return {
+   ...taskManagerSetup,
+   ...taskManagerStart,
+ };
 }
 
 export async function createRequestHandlerContext({
@@ -34,7 +46,6 @@ export async function createRequestHandlerContext({
   return {
     core: coreCtx,
     getLogger: memoize(() => logger),
-    getResourcesService: memoize(() => new ResourcesService(logger)),
-    getTaskManager: memoize(() => getTaskManager(core, plugins))
+    getResourcesService: memoize(async () => new ResourcesService(logger, await getTaskManager(core, plugins)))
   };
 }

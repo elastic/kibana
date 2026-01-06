@@ -6,8 +6,8 @@
  */
 
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { EntityType } from '../domain/definitions/constants';
-import config from './config';
+import { EntityType } from '../domain/definitions/entity_type';
+import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import { EntityStoreTask } from './entity_store_task';
 import { TaskManager } from '../types';
@@ -17,7 +17,7 @@ import { Logger } from '@kbn/logging';
 export class ExtractEntityTask extends EntityStoreTask {
 
     constructor(taskManager: TaskManager, logger: Logger, private readonly entityType: EntityType) {
-        super(taskManager, config[EntityStoreTaskType.Values.extractEntity], logger);
+        super(taskManager, TasksConfig[EntityStoreTaskType.Values.extractEntity], logger);
         this.entityType = entityType;
     }
 
@@ -26,8 +26,7 @@ export class ExtractEntityTask extends EntityStoreTask {
     }
 
     protected async run(taskInstance: ConcreteTaskInstance): Promise<RunResult> {
-        const taskId = taskInstance.id;
-        this.logger.info(`[task ${taskId}]: executing entity task for entity type ${this.entityType}`);
+        this.logger.info(`Executing entity task for entity type ${this.entityType}`);
         
         // Read the current state from the previous run (or default empty object)
         const currentState = taskInstance.state || {};
@@ -44,13 +43,13 @@ export class ExtractEntityTask extends EntityStoreTask {
                 entityType: this.entityType,
             };
             
-            this.logger.info(`[task ${taskId}]: completed successfully. Total runs: ${updatedState.runs}`);
+            this.logger.info(`Completed successfully. Total runs: ${updatedState.runs}`);
             
             return {
                 state: updatedState,
             };
         } catch (e) {
-            this.logger.error(`[task ${taskId}]: error running task, received ${e.message}`);
+            this.logger.error(`Error running task, received ${e.message}`);
 
             return {
                 state: {

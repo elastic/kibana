@@ -12,13 +12,9 @@ import { RunResult } from '@kbn/task-manager-plugin/server/task';
 import { Logger } from '@kbn/logging';
 
 export abstract class EntityStoreTask {
-  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected readonly logger: Logger) {
-    this.taskManager = taskManager;
-    this.config = config;
-    this.logger = logger;
-  }
+  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected logger: Logger) { }
 
-  abstract get name(): string;
+  public abstract get name(): string;
 
   public register(): void {
     const taskName = this.name;
@@ -41,7 +37,7 @@ export abstract class EntityStoreTask {
         this.logger.warn(`Task ${taskName} is already registered`);
         return;
       }
-      
+
       this.logger.error(`Error registering task ${taskName}: ${e}`);
       throw e;
     }
@@ -69,10 +65,13 @@ export abstract class EntityStoreTask {
   }
 
   private createRunnerFactory(): TaskRunCreatorFunction {
-    return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-      run: async () => this.run(taskInstance),
-      cancel: async () => this.cancel()
-    });
+    return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+      this.logger = this.logger.get(taskInstance.id);
+      return {
+        run: async () => this.run(taskInstance),
+        cancel: async () => this.cancel()
+      };
+    };
   }
 
   protected abstract run(taskInstance: ConcreteTaskInstance): Promise<RunResult>;

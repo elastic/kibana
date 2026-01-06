@@ -19,9 +19,8 @@ export interface EntityStorePlugins {
 
 export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
-  getResourcesService: () => ResourcesService;
+  getResourcesService: () => Promise<ResourcesService>;
   getLogger: () => Logger;
-  getTaskManager: () => Promise<TaskManager>;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{

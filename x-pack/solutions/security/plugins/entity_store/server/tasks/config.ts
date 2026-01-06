@@ -8,7 +8,7 @@ export interface TaskConfig extends Partial<TaskRegisterDefinition> {
     interval: string;
 }
 
-const config: Record<EntityStoreTaskType, TaskConfig> = {
+export const TasksConfig: Record<EntityStoreTaskType, TaskConfig> = {
     [EntityStoreTaskType.Values.extractEntity]: {
         title: 'Entity Store - Execute Entity Task',
         type: 'entity_store:v2:entity',
@@ -16,5 +16,3 @@ const config: Record<EntityStoreTaskType, TaskConfig> = {
         interval: '30s',
     }
 };
-
-export default config;
