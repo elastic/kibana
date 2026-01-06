@@ -52,17 +52,12 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 56px; /* 56 = 40 + 8 + 8 */
+      min-width: ${size.xxl};
       cursor: pointer;
     `,
     logo: css`
       min-width: 0; /* overrides min-width: 40px */
       padding: 0;
-    `,
-    spinner: css`
-      position: relative;
-      left: 4px;
-      top: 2px;
     `,
   },
   leftHeaderSection: css`
@@ -202,7 +197,7 @@ const Logo = ({
       {loadingCount === 0 ? (
         renderLogo()
       ) : (
-        <a onClick={navigateHome} href={fullHref} css={logoCss.spinner}>
+        <a onClick={navigateHome} href={fullHref}>
           <EuiLoadingSpinner
             size="l"
             aria-hidden={false}
@@ -231,8 +226,11 @@ export const ProjectHeader = ({
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
-  const topBarStyles = css`
+  const topBarStyles = () => css`
     box-shadow: none !important;
+    background-color: ${euiTheme.colors.backgroundTransparent};
+    border-bottom-color: ${euiTheme.colors.backgroundTransparent};
+    padding-inline: 4px 8px;
   `;
 
   return (
