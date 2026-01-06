@@ -291,4 +291,38 @@ describe('ChangeKbModel', () => {
       });
     });
   });
+
+  describe('knowledge base installation state', () => {
+    it('passes `isKnowledgeBaseInstalled: true` when KB is installed to return the correct model options', () => {
+      const mockKb = createMockKnowledgeBase({
+        status: createMockStatus({
+          inferenceModelState: InferenceModelState.READY,
+        }),
+      });
+
+      renderComponent(mockKb);
+
+      expect(mockGetModelOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isKnowledgeBaseInstalled: true,
+        })
+      );
+    });
+
+    it('passes isKnowledgeBaseInstalled: false` when KB is not installed to return the correct model options', () => {
+      const mockKb = createMockKnowledgeBase({
+        status: createMockStatus({
+          inferenceModelState: InferenceModelState.NOT_INSTALLED,
+        }),
+      });
+
+      renderComponent(mockKb);
+
+      expect(mockGetModelOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isKnowledgeBaseInstalled: false,
+        })
+      );
+    });
+  });
 });

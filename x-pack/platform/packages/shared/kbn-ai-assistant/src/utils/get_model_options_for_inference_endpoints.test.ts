@@ -24,7 +24,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 describe('getModelOptionsForInferenceEndpoints', () => {
-  describe('when isKnowledgeBaseInstalled is true (existing installations)', () => {
+  describe('for existing knowledge base installations', () => {
     it('maps known inference endpoints to user-friendly titles and descriptions', () => {
       const endpoints = [
         { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
@@ -85,8 +85,8 @@ describe('getModelOptionsForInferenceEndpoints', () => {
     });
   });
 
-  describe('when isKnowledgeBaseInstalled is false (new installations)', () => {
-    it('returns only Jina model when Jina is available', () => {
+  describe('for new knowledge base installations', () => {
+    it('returns only Jina Embedding v3 model when available', () => {
       const endpoints = [
         { inference_id: ELSER_IN_EIS_INFERENCE_ID },
         { inference_id: E5_SMALL_INFERENCE_ID },
@@ -107,7 +107,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
       ]);
     });
 
-    it('returns all available models when Jina is not available', () => {
+    it('returns all available models when Jina Embedding v3 is not available', () => {
       const endpoints = [
         { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
         { inference_id: E5_SMALL_INFERENCE_ID },
@@ -125,8 +125,8 @@ describe('getModelOptionsForInferenceEndpoints', () => {
     });
   });
 
-  describe('default behavior (backwards compatibility)', () => {
-    it('defaults to isKnowledgeBaseInstalled=false and returns only Jina when available', () => {
+  describe('default behavior (for backwards compatibility)', () => {
+    it('defaults to isKnowledgeBaseInstalled=false and returns only Jina Embedding v3 when available', () => {
       const endpoints = [
         { inference_id: ELSER_IN_EIS_INFERENCE_ID },
         { inference_id: E5_SMALL_INFERENCE_ID },
@@ -146,7 +146,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
       ]);
     });
 
-    it('returns all models when Jina is not available (default behavior)', () => {
+    it('returns all models when Jina Embedding v3 is not available', () => {
       const endpoints = [
         { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
         { inference_id: E5_SMALL_INFERENCE_ID },
