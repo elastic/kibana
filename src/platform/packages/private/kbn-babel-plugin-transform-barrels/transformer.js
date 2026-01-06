@@ -244,7 +244,7 @@ function toImportPath(absolutePath, fromDir, packageName, packageRoot, publicSub
   // For package imports without exports field: compute from file path
   if (packageName && packageRoot) {
     let subPath = path.relative(packageRoot, absolutePath);
-    subPath = subPath.replace(/\.(ts|tsx|js|jsx)$/, '');
+    subPath = subPath.replace(/\.(ts|tsx|js|jsx|mjs|cjs)$/, '');
     subPath = subPath.replace(/\/index$/, '');
     return `${packageName}/${subPath}`;
   }
