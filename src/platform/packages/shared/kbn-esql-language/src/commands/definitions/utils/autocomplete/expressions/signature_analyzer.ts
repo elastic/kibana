@@ -23,7 +23,9 @@ import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
 // Parses mapParams format: {name='paramName', values=[val1, val2]}
+// Captures: [1] = param name, [2] = comma-separated values
 const MAP_PARAMS_REGEX = /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*\}/g;
+const STRIP_SINGLE_QUOTES_REGEX = /^'|'$/g;
 
 /** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
 export class SignatureAnalyzer {
@@ -473,7 +475,7 @@ export class SignatureAnalyzer {
 
       const values = rawValues
         .split(',')
-        .map((val) => val.trim().replace(/^'|'$/g, ''))
+        .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
         .filter(Boolean);
 
       result[paramName] = parseMapValues(values);

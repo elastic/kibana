@@ -24,7 +24,7 @@ import { Location, type ICommandContext, type ISuggestionItem } from '../types';
 export const FUNCTIONS_TO_IGNORE = {
   names: [...FULL_TEXT_SEARCH_FUNCTIONS],
   allowedInsideFunctions: Object.fromEntries(
-    FULL_TEXT_SEARCH_FUNCTIONS.map((fn) => [fn, ['scsore']])
+    FULL_TEXT_SEARCH_FUNCTIONS.map((fn) => [fn, ['score']])
   ) as Record<(typeof FULL_TEXT_SEARCH_FUNCTIONS)[number], string[]>,
 };
 
