@@ -104,7 +104,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={none}
@@ -148,7 +148,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={none}
@@ -176,7 +176,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some({
@@ -203,7 +203,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some({
@@ -231,7 +231,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some({
@@ -269,7 +269,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some(undefined)}

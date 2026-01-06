@@ -18,7 +18,7 @@ import React from 'react';
 import { documentationService } from '../../../../services/documentation';
 
 interface EmptyMappingsProps {
-  addFieldButton: React.ReactElement;
+  addFieldButton: React.ReactNode;
 }
 
 export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({ addFieldButton }) => {

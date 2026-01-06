@@ -995,7 +995,8 @@
     "installation_status",
     "last_installation_date",
     "product_name",
-    "product_version"
+    "product_version",
+    "resource_type"
   ],
   "query": [
     "description",
@@ -1206,6 +1207,10 @@
     "version"
   ],
   "slo-settings": [],
+  "slo_template": [
+    "name",
+    "tags"
+  ],
   "space": [
     "disabledFeatures",
     "name",
