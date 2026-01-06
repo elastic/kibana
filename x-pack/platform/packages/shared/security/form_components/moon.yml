@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
+  - '@kbn/storybook'
 tags:
   - shared-browser
   - package
@@ -31,6 +32,7 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
+    - .storybook/**/*
     - '!target/**/*'
 tasks:
   jest:
