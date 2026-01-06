@@ -49,6 +49,7 @@ export function defineEnrollRoutes({
       },
       validate: {
         body: schema.object({
+          // codeql[js/kibana/unbounded-array-in-schema]
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
             minSize: 1,
           }),
