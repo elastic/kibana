@@ -163,6 +163,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           statusFilter={statusFilter}
           pageFilters={pageFilters}
           assignees={assignees}
+          selectedConnectorNames={selectedConnectorNames}
         />
 
         {showFlyout && <SchedulesFlyout onClose={onClose} />}

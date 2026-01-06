@@ -65,13 +65,38 @@ export interface TableSectionProps {
    * The list of assignees to add to the others filters
    */
   assignees: AssigneesIdsSelection[];
+  /**
+   * The list of selected connectors ID to filter the table
+   */
+  selectedConnectorNames: string[];
+}
+
+function buildConnectorIdFilter(connectorNames: string[]): Filter {
+  return {
+    meta: {
+      key: 'kibana.alert.attack_discovery.api_config.name',
+      type: 'term',
+      index: '.internal.adhoc.alerts-security.attack',
+    },
+    query: {
+      terms: {
+        'kibana.alert.attack_discovery.api_config.name': connectorNames,
+      },
+    },
+  };
 }
 
 /**
  * Renders the alerts table with grouping functionality in the attacks page.
  */
 export const TableSection = React.memo(
-  ({ dataView, statusFilter, pageFilters, assignees }: TableSectionProps) => {
+  ({
+    dataView,
+    statusFilter,
+    pageFilters,
+    assignees,
+    selectedConnectorNames,
+  }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -139,8 +164,15 @@ export const TableSection = React.memo(
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
+        ...(selectedConnectorNames.length ? [buildConnectorIdFilter(selectedConnectorNames)] : []),
       ],
-      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, pageFilters, assignees]
+      [
+        showBuildingBlockAlerts,
+        showOnlyThreatIndicatorAlerts,
+        pageFilters,
+        assignees,
+        selectedConnectorNames,
+      ]
     );
 
     const isLoading = useMemo(

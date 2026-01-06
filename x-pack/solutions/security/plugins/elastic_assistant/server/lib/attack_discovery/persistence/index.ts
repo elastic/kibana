@@ -32,6 +32,7 @@ import type { AttackDiscoveryAlertDocument } from '../schedules/types';
 import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
+import { getConnectors } from './get_connectors';
 
 const FIRST_PAGE = 1; // CAUTION: sever-side API uses a 1-based page index convention (for consistency with similar existing APIs)
 const DEFAULT_PER_PAGE = 10;
@@ -351,5 +352,11 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     }
 
     return result?.generations[0];
+  };
+
+  public getConnectors = async ({ spaceId }: { spaceId: string }): Promise<string[]> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    return getConnectors({ spaceId, esClient });
   };
 }
