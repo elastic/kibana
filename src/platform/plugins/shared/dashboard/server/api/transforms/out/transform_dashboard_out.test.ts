@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_CHAINING,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_CONTROL_WIDTH,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '@kbn/controls-constants';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
@@ -72,19 +72,12 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardState>({
       controlGroupInput: {
-        chainingSystem: DEFAULT_CONTROLS_CHAINING,
-        labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
-        ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-        autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [
           {
-            controlConfig: { anyKey: 'some value' },
-            grow: DEFAULT_CONTROL_GROW,
-            id: 'foo',
-            order: 0,
+            config: { anyKey: 'some value' },
+            uid: 'foo',
             type: 'type1',
-            width: DEFAULT_CONTROL_WIDTH,
-          },
+          } as unknown as PinnedControlState,
         ],
       },
       description: 'my description',
@@ -120,7 +113,6 @@ describe('transformDashboardOut', () => {
         }),
         ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
         controlStyle: 'twoLine',
-        chainingSystem: 'NONE',
         showApplySelections: true,
       },
       description: 'description',
@@ -160,26 +152,16 @@ describe('transformDashboardOut', () => {
     ];
     expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
       controlGroupInput: {
-        chainingSystem: 'NONE',
-        labelPosition: 'twoLine',
-        ignoreParentSettings: {
-          ignoreFilters: true,
-          ignoreQuery: false,
-          ignoreTimerange: false,
-          ignoreValidations: false,
-        },
-        autoApplySelections: false,
         controls: [
           {
-            controlConfig: {
-              anyKey: 'some value',
-            },
-            id: 'foo',
+            uid: 'foo',
             grow: false,
             width: 'small',
-            order: 0,
+            config: {
+              anyKey: 'some value',
+            },
             type: 'type1',
-          },
+          } as unknown as PinnedControlState,
         ],
       },
       description: 'description',
@@ -190,6 +172,7 @@ describe('transformDashboardOut', () => {
         sync_colors: false,
         sync_tooltips: false,
         sync_cursor: false,
+        auto_apply_filters: false,
       },
       panels: [
         {
