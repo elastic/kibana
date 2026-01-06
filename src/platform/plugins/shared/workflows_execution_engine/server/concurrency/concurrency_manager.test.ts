@@ -542,6 +542,71 @@ describe('ConcurrencyManager', () => {
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
 
+    it('should create different concurrency groups for different input values', async () => {
+      const settings: ConcurrencySettings = {
+        key: '{{ inputs.mamba }}',
+        strategy: 'drop',
+        max: 2,
+      };
+
+      // First execution with input value "group1"
+      const context1: WorkflowContext = {
+        ...mockContext,
+        inputs: {
+          mamba: 'group1',
+        },
+      };
+      const key1 = concurrencyManager.evaluateConcurrencyKey(settings, context1);
+      expect(key1).toBe('group1');
+
+      // Second execution with input value "group2"
+      const context2: WorkflowContext = {
+        ...mockContext,
+        inputs: {
+          mamba: 'group2',
+        },
+      };
+      const key2 = concurrencyManager.evaluateConcurrencyKey(settings, context2);
+      expect(key2).toBe('group2');
+
+      // Third execution with input value "group3"
+      const context3: WorkflowContext = {
+        ...mockContext,
+        inputs: {
+          mamba: 'group3',
+        },
+      };
+      const key3 = concurrencyManager.evaluateConcurrencyKey(settings, context3);
+      expect(key3).toBe('group3');
+
+      // Verify that executions with different keys don't interfere with each other
+      // Each group should have its own concurrency limit
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+      ]); // Only one execution in group1
+
+      const result1 = await concurrencyManager.checkConcurrency(
+        settings,
+        key1!,
+        'exec-2',
+        'default'
+      );
+      expect(result1).toBe(true); // Should proceed (within limit for group1)
+
+      // group2 should be independent
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-3',
+      ]); // Only one execution in group2
+
+      const result2 = await concurrencyManager.checkConcurrency(
+        settings,
+        key2!,
+        'exec-4',
+        'default'
+      );
+      expect(result2).toBe(true); // Should proceed (within limit for group2)
+    });
+
     describe('error handling', () => {
       it('should throw error when getRunningExecutionsByConcurrencyGroup fails', async () => {
         const settings: ConcurrencySettings = {
