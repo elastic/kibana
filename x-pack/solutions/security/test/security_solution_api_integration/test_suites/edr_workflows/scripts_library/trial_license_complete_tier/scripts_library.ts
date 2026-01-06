@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const rolesUsersProvider = getService('rolesUsersProvider');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Endpoint Scripts Library', function () {
+  // @skipInServerless: because tests use custom roles
+  describe('@ess @serverless @skipInServerless @skipInServerlessMKI Endpoint Scripts Library', function () {
     const afterEachCleanupCallbacks: Array<() => void | Promise<unknown>> = [];
     let adminSupertest: TestAgent;
 
