@@ -14,7 +14,9 @@ import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from '../../plugin_contract';
+import type { ExperimentalFeatures } from '../../../common';
 import { getBuildAgent } from '../../lib/detection_engine/ai_assisted_rule_creation/iterative_agent';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
 
@@ -28,7 +30,8 @@ const createDetectionRuleSchema = z.object({
 
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
-  logger: Logger
+  logger: Logger,
+  experimentalFeatures: ExperimentalFeatures
 ): StaticToolRegistration<typeof createDetectionRuleSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof createDetectionRuleSchema> = {
     id: SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -37,6 +40,23 @@ export function createDetectionRuleTool(
       'Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.',
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        if (!experimentalFeatures?.aiAssistedRuleCreationEnabled) {
+          return {
+            status: 'unavailable',
+            reason: 'AI assisted rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
+          };
+        }
+
+        return getAgentBuilderResourceAvailability({
+          core,
+          request,
+          logger,
+        });
+      },
+    },
     handler: async ({ user_query: userQuery }, { esClient, modelProvider, request, events }) => {
       try {
         logger.debug(
