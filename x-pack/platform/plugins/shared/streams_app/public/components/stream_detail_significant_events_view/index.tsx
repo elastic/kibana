@@ -61,8 +61,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
-    start: timeState.start,
-    end: timeState.end,
     query,
   });
 
@@ -128,8 +126,8 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   }, [features]);
 
   if (
-    !significantEventsFetchState.value &&
-    (featuresLoading || significantEventsFetchState.loading)
+    !significantEventsFetchState.data &&
+    (featuresLoading || significantEventsFetchState.isLoading)
   ) {
     return <LoadingPanel size="xxl" />;
   }
@@ -154,7 +152,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
       refreshDefinition={refreshDefinition}
-      refresh={significantEventsFetchState.refresh}
+      refresh={significantEventsFetchState.refetch}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
@@ -169,9 +167,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
 
   const noSignificantEvents =
     !query &&
-    !significantEventsFetchState.loading &&
-    significantEventsFetchState.value &&
-    significantEventsFetchState.value.significant_events.length === 0;
+    !significantEventsFetchState.isLoading &&
+    significantEventsFetchState.data &&
+    significantEventsFetchState.data.significant_events.length === 0;
 
   if (noSignificantEvents) {
     return (
@@ -226,7 +224,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                   query,
                   language: 'text',
                 }}
-                isLoading={significantEventsFetchState.loading}
+                isLoading={significantEventsFetchState.isLoading}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -259,7 +257,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                     defaultMessage: 'Detected event occurrences ({count})',
                     values: {
                       count: (
-                        significantEventsFetchState.value?.aggregated_occurrences ?? []
+                        significantEventsFetchState.data?.aggregated_occurrences ?? []
                       ).reduce((acc, point) => acc + point.y, 0),
                     },
                   }
@@ -270,9 +268,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             <EuiFlexItem grow={false}>
               <SignificantEventsHistogramChart
                 id={'all-events'}
-                occurrences={significantEventsFetchState.value?.aggregated_occurrences ?? []}
+                occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
                 changes={compact(
-                  (significantEventsFetchState.value?.significant_events ?? []).map((item) =>
+                  (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
                     formatChangePoint({
                       query: item.query,
                       change_points: item.change_points,
@@ -289,16 +287,16 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
-            loading={significantEventsFetchState.loading}
+            loading={significantEventsFetchState.isLoading}
             definition={definition.stream}
-            items={significantEventsFetchState.value?.significant_events ?? []}
+            items={significantEventsFetchState.data?.significant_events ?? []}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
               setQueryToEdit({ ...item.query });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {
-                significantEventsFetchState.refresh();
+                significantEventsFetchState.refetch();
               });
             }}
             xFormatter={xFormatter}
