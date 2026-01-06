@@ -92,4 +92,20 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
     expect(renderResult.queryByTestId('noIngestPermissions')).toBeNull();
   });
+
+  it('should hide endpoint exceptions card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: false,
+    });
+    render();
+
+    // Verify endpoint exceptions card is not present
+    expect(renderResult.queryByTestId('endpointExceptions-fleetCard')).toBeNull();
+
+    // Verify other cards are still visible
+    expect(renderResult.getByTestId('trustedApps-fleetCard')).toBeInTheDocument();
+    expect(renderResult.getByTestId('eventFilters-fleetCard')).toBeInTheDocument();
+    expect(renderResult.getByTestId('hostIsolationExceptions-fleetCard')).toBeInTheDocument();
+    expect(renderResult.getByTestId('blocklists-fleetCard')).toBeInTheDocument();
+  });
 });

@@ -104,4 +104,29 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
       ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
     }
   );
+
+  it('should not display endpoint exceptions card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: false,
+    });
+
+    const renderResult = render();
+
+    // Endpoint exceptions card should not be present
+    expect(
+      renderResult.queryByTestId('endpointExceptions-fleet-integration-card')
+    ).not.toBeInTheDocument();
+
+    // Other cards should still be visible
+    expect(
+      renderResult.getByTestId('trustedApps-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('eventFilters-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(renderResult.getByTestId('blocklists-fleet-integration-card')).toBeInTheDocument();
+  });
 });
