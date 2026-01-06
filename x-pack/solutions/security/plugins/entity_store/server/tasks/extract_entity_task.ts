@@ -17,7 +17,7 @@ import { Logger } from '@kbn/logging';
 export class ExtractEntityTask extends EntityStoreTask {
 
     constructor(taskManager: TaskManager, logger: Logger, private readonly entityType: EntityType) {
-        super(taskManager, config[EntityStoreTaskType.Values.entity], logger);
+        super(taskManager, config[EntityStoreTaskType.Values.extractEntity], logger);
         this.entityType = entityType;
     }
 

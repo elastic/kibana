@@ -9,7 +9,7 @@ export interface TaskConfig extends Partial<TaskRegisterDefinition> {
 }
 
 const config: Record<EntityStoreTaskType, TaskConfig> = {
-    [EntityStoreTaskType.Values.entity]: {
+    [EntityStoreTaskType.Values.extractEntity]: {
         title: 'Entity Store - Execute Entity Task',
         type: 'entity_store:v2:entity',
         timeout: '25s',

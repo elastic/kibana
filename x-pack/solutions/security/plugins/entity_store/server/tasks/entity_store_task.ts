@@ -42,7 +42,7 @@ export abstract class EntityStoreTask {
         return;
       }
       
-      this.logger.error(`Error registering task ${taskName}`, e);
+      this.logger.error(`Error registering task ${taskName}: ${e}`);
       throw e;
     }
   }
