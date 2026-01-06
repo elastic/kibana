@@ -16,7 +16,8 @@ import type {
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
 import { painlessFieldAccessor } from '../../types/utils';
-import { evaluateDateMath, encodeValue } from './painless_date_math_helpers';
+import { encodeValue } from '../../types/utils';
+import { evaluateDateMath } from './painless_date_math_helpers';
 
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {

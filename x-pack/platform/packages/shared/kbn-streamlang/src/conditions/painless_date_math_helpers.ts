@@ -6,25 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { isBoolean, isString, isNil } from 'lodash';
-import type { StringOrNumberOrBoolean } from '../../types/conditions';
-
-/**
- * Encodes a value for use in Painless scripts
- */
-export function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {
-  if (isString(value)) {
-    return `"${value}"`;
-  }
-  if (isBoolean(value)) {
-    return value ? 'true' : 'false';
-  }
-  if (isNil(value)) {
-    return 'null';
-  }
-
-  return value;
-}
+import { encodeValue } from '../../types/utils';
 
 /**
  * Helper to normalize various date formats to ISO format
