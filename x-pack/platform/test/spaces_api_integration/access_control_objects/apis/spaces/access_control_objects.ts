@@ -1055,7 +1055,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.body.message).to.contain(`Unable to update ${ACCESS_CONTROL_TYPE}`);
       });
 
-      it('should apply defaults when upserting a supprting type', async () => {
+      it('should apply defaults when upserting a supported type', async () => {
         const { cookie: objectOwnerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
