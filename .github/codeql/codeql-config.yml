@@ -139,7 +139,6 @@ query-filters:
         - codeql/javascript-queries/Electron
 packs:
   - githubsecuritylab/codeql-javascript-queries
-include:
-  - codeql/javascript-queries/AlertSuppression.ql
 queries:
-  - uses: ./.github/codeql/custom-queries
+  - ./.github/codeql/custom-queries
+  - codeql/javascript-queries/AlertSuppression.ql
