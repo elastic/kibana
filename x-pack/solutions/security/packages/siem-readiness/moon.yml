@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
-  - '@kbn/i18n'
   - '@kbn/react-query'
 tags:
   - shared-browser
