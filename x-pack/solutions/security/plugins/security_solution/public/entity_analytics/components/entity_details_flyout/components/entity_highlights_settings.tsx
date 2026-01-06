@@ -164,7 +164,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
                       }
                     )}
                     data-test-subj="anonymizationSettings"
-                    iconType="eye"
+                    iconType="gear"
                     onClick={showAnonymizationModal}
                     size="s"
                     color="text"
