@@ -94,8 +94,8 @@ describe('Test pipeline', () => {
       await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
 
       // Verify request
-      const latestRequest = postMock.mock.calls[postMock.mock.calls.length - 1] ?? [];
-      const requestOptions = latestRequest[1];
+      const latestRequest = postMock.mock.calls[postMock.mock.calls.length - 1];
+      const requestOptions: unknown = latestRequest?.[1];
       if (!hasStringBody(requestOptions)) {
         throw new Error('Expected simulate request body to be a string');
       }
