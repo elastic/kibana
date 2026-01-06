@@ -63,8 +63,7 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 
 ```bash
 # In a separate terminal, configure CCM
-# Use --no-ssl for HTTP connections
 node scripts/eis.js
 ```
 
-The script will fetch the API key and inference URL from Vault, configure the inference URL via Elasticsearch cluster settings, and set up Cloud Connected Mode in your local Elasticsearch instance.
+The script will automatically try HTTPS first and fall back to HTTP if needed. It will fetch the API key and inference URL from Vault, configure the inference URL via Elasticsearch cluster settings, and set up Cloud Connected Mode in your local Elasticsearch instance.
