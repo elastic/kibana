@@ -49,6 +49,20 @@ describe('ApiKeyForm', () => {
   const mockToggleApiKeyVisibility = jest.fn();
   const mockUpdateApiKey = jest.fn();
 
+  const renderWithStatus = (status: Status) => {
+    mockUseSearchApiKey.mockReturnValue({
+      apiKey: 'test-api-key-123',
+      status,
+      toggleApiKeyVisibility: mockToggleApiKeyVisibility,
+      updateApiKey: mockUpdateApiKey,
+    });
+    return render(
+      <Wrapper>
+        <ApiKeyForm />
+      </Wrapper>
+    );
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -69,60 +83,26 @@ describe('ApiKeyForm', () => {
 
   describe('accessibility', () => {
     it('should have aria-label "Show API key" when API key is hidden', () => {
-      mockUseSearchApiKey.mockReturnValue({
-        apiKey: 'test-api-key-123',
-        status: Status.showHiddenKey,
-        toggleApiKeyVisibility: mockToggleApiKeyVisibility,
-        updateApiKey: mockUpdateApiKey,
-      });
-
-      render(
-        <Wrapper>
-          <ApiKeyForm />
-        </Wrapper>
-      );
+      renderWithStatus(Status.showHiddenKey);
 
       const toggleButton = screen.getByTestId('searchHomepageShowAPIKeyButton');
       expect(toggleButton).toHaveAttribute('aria-label', 'Show API key');
     });
 
     it('should have aria-label "Hide API key" when API key is visible', () => {
-      mockUseSearchApiKey.mockReturnValue({
-        apiKey: 'test-api-key-123',
-        status: Status.showPreviewKey,
-        toggleApiKeyVisibility: mockToggleApiKeyVisibility,
-        updateApiKey: mockUpdateApiKey,
-      });
-
-      render(
-        <Wrapper>
-          <ApiKeyForm />
-        </Wrapper>
-      );
+      renderWithStatus(Status.showPreviewKey);
 
       const toggleButton = screen.getByTestId('searchHomepageShowAPIKeyButton');
       expect(toggleButton).toHaveAttribute('aria-label', 'Hide API key');
     });
 
     it('should update aria-label when toggling visibility', () => {
-      // Start with hidden key
-      mockUseSearchApiKey.mockReturnValue({
-        apiKey: 'test-api-key-123',
-        status: Status.showHiddenKey,
-        toggleApiKeyVisibility: mockToggleApiKeyVisibility,
-        updateApiKey: mockUpdateApiKey,
-      });
-
-      const { rerender } = render(
-        <Wrapper>
-          <ApiKeyForm />
-        </Wrapper>
-      );
+      const { rerender } = renderWithStatus(Status.showHiddenKey);
 
       const toggleButton = screen.getByTestId('searchHomepageShowAPIKeyButton');
       expect(toggleButton).toHaveAttribute('aria-label', 'Show API key');
 
-      // Simulate clicking the toggle (which would change the status)
+      // Simulate clicking the toggle
       fireEvent.click(toggleButton);
       expect(mockToggleApiKeyVisibility).toHaveBeenCalled();
 
@@ -147,37 +127,14 @@ describe('ApiKeyForm', () => {
 
   describe('icon changes', () => {
     it('should show "eye" icon when API key is hidden', () => {
-      mockUseSearchApiKey.mockReturnValue({
-        apiKey: 'test-api-key-123',
-        status: Status.showHiddenKey,
-        toggleApiKeyVisibility: mockToggleApiKeyVisibility,
-        updateApiKey: mockUpdateApiKey,
-      });
-
-      render(
-        <Wrapper>
-          <ApiKeyForm />
-        </Wrapper>
-      );
+      renderWithStatus(Status.showHiddenKey);
 
       const toggleButton = screen.getByTestId('searchHomepageShowAPIKeyButton');
-      // EuiButtonIcon with iconType="eye" renders with data-euiicon-type attribute
       expect(toggleButton.querySelector('[data-euiicon-type="eye"]')).toBeInTheDocument();
     });
 
     it('should show "eyeClosed" icon when API key is visible', () => {
-      mockUseSearchApiKey.mockReturnValue({
-        apiKey: 'test-api-key-123',
-        status: Status.showPreviewKey,
-        toggleApiKeyVisibility: mockToggleApiKeyVisibility,
-        updateApiKey: mockUpdateApiKey,
-      });
-
-      render(
-        <Wrapper>
-          <ApiKeyForm />
-        </Wrapper>
-      );
+      renderWithStatus(Status.showPreviewKey);
 
       const toggleButton = screen.getByTestId('searchHomepageShowAPIKeyButton');
       expect(toggleButton.querySelector('[data-euiicon-type="eyeClosed"]')).toBeInTheDocument();
