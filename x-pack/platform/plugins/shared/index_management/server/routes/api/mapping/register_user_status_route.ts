@@ -15,7 +15,10 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-export function registerUserStatusPrivilegeRoutes({ router }: RouteDependencies) {
+export function registerUserStatusPrivilegeRoutes({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/start_privileges/{indexName}'),
@@ -34,11 +37,19 @@ export function registerUserStatusPrivilegeRoutes({ router }: RouteDependencies)
       const core = await context.core;
       const client = core.elasticsearch.client.asCurrentUser;
       const { indexName } = request.params as typeof paramsSchema.type;
-      const body = await fetchUserStartPrivileges(client, indexName);
-      return response.ok({
-        body,
-        headers: { 'content-type': 'application/json' },
-      });
+      try {
+        const securityCheck = await fetchUserStartPrivileges(client, indexName);
+        return response.ok({
+          body: {
+            privileges: {
+              canManageIndex: securityCheck?.index?.[indexName]?.manage ?? false,
+            },
+          },
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
     }
   );
 }

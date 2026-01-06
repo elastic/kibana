@@ -7,33 +7,18 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import type { UserStartPrivilegesResponse } from './types';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export async function fetchUserStartPrivileges(
   client: ElasticsearchClient,
   indexName: string
-): Promise<UserStartPrivilegesResponse> {
-  try {
-    const securityCheck = await client.security.hasPrivileges({
-      cluster: ['manage_api_key'],
-      index: [
-        {
-          names: [indexName],
-          privileges: ['manage', 'delete'],
-        },
-      ],
-    });
-
-    return {
-      privileges: {
-        canManageIndex: securityCheck?.index?.[indexName]?.manage ?? false,
+): Promise<SecurityHasPrivilegesResponse> {
+  return await client.security.hasPrivileges({
+    index: [
+      {
+        names: [indexName],
+        privileges: ['manage'],
       },
-    };
-  } catch (e) {
-    return {
-      privileges: {
-        canManageIndex: false,
-      },
-    };
-  }
+    ],
+  });
 }
