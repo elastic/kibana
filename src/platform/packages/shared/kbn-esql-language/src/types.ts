@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { inlineCastsMapping } from './commands/definitions/generated/inline_casts_mapping';
+
 /**
  * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
  */
@@ -326,28 +328,7 @@ export type BinaryExpressionMatchOperator = ':';
 export type BinaryExpressionIn = 'in' | 'not in';
 export type BinaryExpressionLogical = 'and' | 'or';
 
-// from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
-export type InlineCastingType =
-  | 'bool'
-  | 'boolean'
-  | 'cartesian_point'
-  | 'cartesian_shape'
-  | 'date_nanos'
-  | 'date_period'
-  | 'datetime'
-  | 'double'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'int'
-  | 'integer'
-  | 'ip'
-  | 'keyword'
-  | 'long'
-  | 'string'
-  | 'text'
-  | 'time_duration'
-  | 'unsigned_long'
-  | 'version';
+export type InlineCastingType = keyof typeof inlineCastsMapping;
 
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
