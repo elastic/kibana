@@ -103,7 +103,7 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...(panelPackage.serializedState?.rawState ?? {}),
+              ...(panelPackage.serializedState ?? {}),
               id: newId,
             },
           },
