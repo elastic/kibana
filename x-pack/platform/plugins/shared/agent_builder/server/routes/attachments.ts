@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
@@ -99,6 +100,9 @@ export function registerAttachmentRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_list.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
@@ -175,6 +179,9 @@ export function registerAttachmentRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_create.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
@@ -249,6 +256,9 @@ export function registerAttachmentRoutes({
               ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -343,6 +353,9 @@ export function registerAttachmentRoutes({
               ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -462,6 +475,9 @@ export function registerAttachmentRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_restore.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
@@ -547,6 +563,9 @@ export function registerAttachmentRoutes({
               }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_rename.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
