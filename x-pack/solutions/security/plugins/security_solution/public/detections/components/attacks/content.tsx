@@ -22,7 +22,7 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
-import type { DefaultControlApi } from '@kbn/controls-plugin/public';
+import type { CanClearSelections } from '@kbn/controls-plugin/public/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -106,7 +106,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const clearPageFilters = useCallback(() => {
     if (pageFilterHandler) {
       Object.values(pageFilterHandler.children$.getValue()).forEach((controlApi) => {
-        (controlApi as DefaultControlApi)?.clearSelections?.();
+        (controlApi as CanClearSelections)?.clearSelections?.();
       });
     }
   }, [pageFilterHandler]);
