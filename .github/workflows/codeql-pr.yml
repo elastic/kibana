@@ -84,8 +84,8 @@ jobs:
 
     - name: Dismiss alerts
       uses: advanced-security/dismiss-alerts@v2
+      env:
+        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
       with:
         sarif-id: ${{ steps.analyze.outputs.sarif-id }}
         sarif-file: sarif-results/${{ matrix.language }}.sarif
-      env:
-        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
