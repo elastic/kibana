@@ -13,12 +13,12 @@ import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { BlocklistsApiClient } from '../services';
 import { BlockListForm } from './components/blocklist_form';
 
-const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
     defaultMessage: 'Blocklist',
   }),
@@ -35,6 +35,18 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageExportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageExportButtonTitle', {
     defaultMessage: 'Export blocklist',
   }),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.blocklist.pageExportSuccessToastTitle',
+    {
+      defaultMessage: 'Blocklist exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.blocklist.pageExportErrorToastTitle',
+    {
+      defaultMessage: 'Blocklist export failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
       defaultMessage:
