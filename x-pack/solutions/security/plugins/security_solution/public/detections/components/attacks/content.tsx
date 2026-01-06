@@ -157,7 +157,12 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
         </Display>
 
-        <TableSection dataView={dataView} statusFilter={statusFilter} pageFilters={pageFilters} />
+        <TableSection
+          dataView={dataView}
+          statusFilter={statusFilter}
+          pageFilters={pageFilters}
+          assignees={assignees}
+        />
 
         {showFlyout && <SchedulesFlyout onClose={onClose} />}
       </SecuritySolutionPageWrapper>
