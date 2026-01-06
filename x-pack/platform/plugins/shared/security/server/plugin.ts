@@ -431,10 +431,13 @@ export class SecurityPlugin
       spaces: spaces?.spacesService,
     });
 
+    // Destructure to exclude 'uiam' from the public API
+    const { uiam: _uiam, ...publicApiKeys } = this.authenticationStart.apiKeys;
+
     return Object.freeze<SecurityPluginStart>({
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
-        apiKeys: this.authenticationStart.apiKeys,
+        apiKeys: publicApiKeys,
       },
       authz: {
         actions: this.authorizationSetup!.actions,

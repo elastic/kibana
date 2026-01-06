@@ -95,8 +95,8 @@ const createRequestHandlerContextMock = () => {
         validate: jest.fn(),
         invalidate: jest.fn(),
         uiam: {
-          grantApiKey: jest.fn(),
-          invalidateApiKey: jest.fn(),
+          grant: jest.fn(),
+          invalidate: jest.fn(),
           getScopedClusterClientWithApiKey: jest.fn(),
         },
       }),

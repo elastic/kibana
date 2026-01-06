@@ -239,8 +239,11 @@ export class UiamService implements UiamServicePublic {
         internal: true,
         ...(params.expiration ? { expiration: params.expiration } : {}),
         role_assignments: {
+          // currently required  to downscope privileges
           limit: {
+            // limit access to applications within projects (i.e. application_roles, not cloud roles)
             access: ['application'],
+            // limit access to projects  (i.e. not deployments, organizations, etc.)
             resource: ['project'],
           },
         },

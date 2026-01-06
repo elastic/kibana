@@ -11,9 +11,6 @@ import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 
 const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
 const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERROR);
-const THROW_WHEN_API_KEYS_DISABLED = () => {
-  throw API_KEYS_DISABLED_ERROR;
-};
 
 export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
   return {
@@ -28,11 +25,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         validate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidateAsInternalUser: REJECT_WHEN_API_KEYS_DISABLED,
-        uiam: {
-          grantApiKey: REJECT_WHEN_API_KEYS_DISABLED,
-          invalidateApiKey: REJECT_WHEN_API_KEYS_DISABLED,
-          getScopedClusterClientWithApiKey: THROW_WHEN_API_KEYS_DISABLED,
-        },
+        uiam: null,
       },
     },
     audit: {

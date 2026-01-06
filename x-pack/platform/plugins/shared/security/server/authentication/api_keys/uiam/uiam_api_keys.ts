@@ -11,7 +11,7 @@ import type {
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
   InvalidateUiamAPIKeyParams,
-  UiamAPIKeys as UiamAPIKeysType,
+  UiamAPIKeysType,
 } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '../../../../common';
@@ -55,15 +55,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
-  async grantApiKey(
+  async grant(
     request: KibanaRequest,
     params: GrantUiamAPIKeyParams
   ): Promise<GrantAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
-
-    this.isUiamEnabled();
 
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
 
@@ -72,13 +70,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     let result: GrantAPIKeyResult;
 
-    // If credentials don't start with UIAM_CREDENTIALS_PREFIX, reuse the existing API key
+    // Provided credential must be a UIAM credential with appropriate prefix
     if (!UiamAPIKeys.isUiamCredential(authorization)) {
-      result = {
-        id: 'same_api_key_id',
-        name: params.name,
-        api_key: authorization.credentials,
-      };
+      const nonUiamCredentialError =
+        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM';
+      this.logger.error(nonUiamCredentialError);
+      throw new Error(nonUiamCredentialError);
     } else {
       try {
         const { id, key, description } = await this.uiam!.grantApiKey(authorization, params);
@@ -107,7 +104,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available, if the request does not contain an authorization header, or if the credential is not a UIAM credential.
    */
-  async invalidateApiKey(
+  async invalidate(
     request: KibanaRequest,
     params: InvalidateUiamAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null> {
@@ -115,15 +112,15 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       return null;
     }
 
-    this.isUiamEnabled();
-
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
     const { id } = params;
 
     this.logger.debug(`Trying to invalidate API key ${id} via UIAM`);
 
     if (!UiamAPIKeys.isUiamCredential(authorization)) {
-      throw new Error('Cannot invalidate API key via UIAM: not a UIAM API key');
+      const uiamCredentialError = 'Cannot invalidate API key via UIAM: not a UIAM API key';
+      this.logger.error(uiamCredentialError);
+      throw new Error(uiamCredentialError);
     }
 
     try {
@@ -137,7 +134,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         error_count: 0,
       };
     } catch (e) {
-      this.logger.error(`Failed to invalidate API key ${id} via UIAM: ${e.message}`);
+      const errorMessage = `Failed to invalidate API key ${id} via UIAM: ${e.message}`;
+      this.logger.error(errorMessage);
 
       return {
         invalidated_api_keys: [],
@@ -146,7 +144,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         error_details: [
           {
             type: 'exception',
-            reason: e.message,
+            reason: errorMessage,
           },
         ],
       };
@@ -165,12 +163,6 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @throws {Error} If the UIAM service is not available.
    */
   getScopedClusterClientWithApiKey(apiKey: string) {
-    if (!this.license.isEnabled()) {
-      return null;
-    }
-
-    this.isUiamEnabled();
-
     // Create authorization header in the format: ApiKey base64(id:key)
     const authorizationHeader = `ApiKey ${apiKey}`;
 
@@ -222,11 +214,5 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     return authorizationHeader;
-  }
-
-  private isUiamEnabled(): void {
-    if (!this.uiam) {
-      throw new Error('UIAM service is not available.');
-    }
   }
 }

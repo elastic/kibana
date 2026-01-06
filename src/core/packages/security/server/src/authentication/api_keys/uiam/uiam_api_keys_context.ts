@@ -16,7 +16,7 @@ import type { GrantUiamAPIKeyParams, InvalidateUiamAPIKeyParams } from './uiam_a
  * UIAM-specific API key operations, including granting and invalidating
  * API keys through the UIAM service.
  */
-export interface UiamAPIKeysServiceWithContext {
+export interface UiamAPIKeysWithContextType {
   /**
    * Grants an API key via the UIAM service.
    *
@@ -24,7 +24,7 @@ export interface UiamAPIKeysServiceWithContext {
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
-  grantApiKey(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
+  grant(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
 
   /**
    * Invalidates an API key via the UIAM service.
@@ -33,7 +33,7 @@ export interface UiamAPIKeysServiceWithContext {
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
-  invalidateApiKey(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
+  invalidate(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
 
   /**
    * Creates a scoped Elasticsearch client authenticated with an API key.

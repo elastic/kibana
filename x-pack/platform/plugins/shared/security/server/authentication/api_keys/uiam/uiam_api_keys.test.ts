@@ -59,7 +59,7 @@ describe('UiamAPIKeys', () => {
     });
   });
 
-  describe('grantApiKey()', () => {
+  describe('grant()', () => {
     const createMockRequest = (authHeader?: string): KibanaRequest => {
       return httpServerMock.createKibanaRequest({
         headers: authHeader ? { authorization: authHeader } : {},
@@ -70,7 +70,7 @@ describe('UiamAPIKeys', () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const request = createMockRequest('ApiKey test_key');
 
-      const result = await uiamApiKeys.grantApiKey(request, {
+      const result = await uiamApiKeys.grant(request, {
         name: 'test-key',
       });
 
@@ -78,42 +78,30 @@ describe('UiamAPIKeys', () => {
       expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
     });
 
-    it('throws error when UIAM service is not available', async () => {
-      const uiamApiKeysWithoutUiam = new UiamAPIKeys({
-        logger,
-        clusterClient: mockClusterClient,
-        license: mockLicense,
-      });
-
-      const request = createMockRequest('ApiKey essu_test_key');
-
-      await expect(
-        uiamApiKeysWithoutUiam.grantApiKey(request, { name: 'test-key' })
-      ).rejects.toThrow('UIAM service is not available.');
-    });
-
     it('throws error when request does not contain authorization header', async () => {
       const request = createMockRequest();
 
-      await expect(uiamApiKeys.grantApiKey(request, { name: 'test-key' })).rejects.toThrow(
+      await expect(uiamApiKeys.grant(request, { name: 'test-key' })).rejects.toThrow(
         'Unable to determine if request has UIAM credentials, request does not contain an authorization header'
       );
     });
 
-    it('reuses existing API key when credentials do not start with UIAM prefix', async () => {
+    it('throws error when credentials do not start with UIAM prefix', async () => {
       const request = createMockRequest('ApiKey regular_api_key_123');
 
-      const result = await uiamApiKeys.grantApiKey(request, {
-        name: 'test-key',
-        expiration: '7d',
-      });
+      await expect(
+        uiamApiKeys.grant(request, {
+          name: 'test-key',
+          expiration: '7d',
+        })
+      ).rejects.toThrow(
+        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM'
+      );
 
-      expect(result).toEqual({
-        id: 'same_api_key_id',
-        name: 'test-key',
-        api_key: 'regular_api_key_123',
-      });
       expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM'
+      );
     });
 
     it('grants a new API key via UIAM when credentials start with UIAM prefix', async () => {
@@ -124,7 +112,7 @@ describe('UiamAPIKeys', () => {
         description: 'My Test Key',
       });
 
-      const result = await uiamApiKeys.grantApiKey(request, {
+      const result = await uiamApiKeys.grant(request, {
         name: 'test-key',
         expiration: '7d',
       });
@@ -158,7 +146,7 @@ describe('UiamAPIKeys', () => {
         description: 'My Test Key',
       });
 
-      const result = await uiamApiKeys.grantApiKey(request, {
+      const result = await uiamApiKeys.grant(request, {
         name: 'test-key',
       });
 
@@ -183,7 +171,7 @@ describe('UiamAPIKeys', () => {
       const error = new Error('UIAM service error');
       mockUiam.grantApiKey.mockRejectedValue(error);
 
-      await expect(uiamApiKeys.grantApiKey(request, { name: 'test-key' })).rejects.toThrow(
+      await expect(uiamApiKeys.grant(request, { name: 'test-key' })).rejects.toThrow(
         'UIAM service error'
       );
 
@@ -192,19 +180,18 @@ describe('UiamAPIKeys', () => {
       );
     });
 
-    it('reuses existing token when using Bearer scheme without UIAM prefix', async () => {
+    it('throws error when using Bearer scheme without UIAM prefix', async () => {
       const request = createMockRequest('Bearer regular_bearer_token_123');
 
-      const result = await uiamApiKeys.grantApiKey(request, {
-        name: 'test-key',
-        expiration: '7d',
-      });
+      await expect(
+        uiamApiKeys.grant(request, {
+          name: 'test-key',
+          expiration: '7d',
+        })
+      ).rejects.toThrow(
+        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM'
+      );
 
-      expect(result).toEqual({
-        id: 'same_api_key_id',
-        name: 'test-key',
-        api_key: 'regular_bearer_token_123',
-      });
       expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
     });
 
@@ -216,7 +203,7 @@ describe('UiamAPIKeys', () => {
         description: 'My Bearer Test Key',
       });
 
-      const result = await uiamApiKeys.grantApiKey(request, {
+      const result = await uiamApiKeys.grant(request, {
         name: 'test-bearer-key',
         expiration: '30d',
       });
@@ -240,7 +227,7 @@ describe('UiamAPIKeys', () => {
     });
   });
 
-  describe('invalidateApiKey()', () => {
+  describe('invalidate()', () => {
     const createMockRequest = (authHeader?: string): KibanaRequest => {
       return httpServerMock.createKibanaRequest({
         headers: authHeader ? { authorization: authHeader } : {},
@@ -251,7 +238,7 @@ describe('UiamAPIKeys', () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const request = createMockRequest('ApiKey essu_test_key');
 
-      const result = await uiamApiKeys.invalidateApiKey(request, {
+      const result = await uiamApiKeys.invalidate(request, {
         id: 'key_id_123',
       });
 
@@ -259,24 +246,10 @@ describe('UiamAPIKeys', () => {
       expect(mockUiam.revokeApiKey).not.toHaveBeenCalled();
     });
 
-    it('throws error when UIAM service is not available', async () => {
-      const uiamApiKeysWithoutUiam = new UiamAPIKeys({
-        logger,
-        clusterClient: mockClusterClient,
-        license: mockLicense,
-      });
-
-      const request = createMockRequest('ApiKey essu_test_key');
-
-      await expect(
-        uiamApiKeysWithoutUiam.invalidateApiKey(request, { id: 'key_id_123' })
-      ).rejects.toThrow('UIAM service is not available.');
-    });
-
     it('throws error when request does not contain authorization header', async () => {
       const request = createMockRequest();
 
-      await expect(uiamApiKeys.invalidateApiKey(request, { id: 'key_id_123' })).rejects.toThrow(
+      await expect(uiamApiKeys.invalidate(request, { id: 'key_id_123' })).rejects.toThrow(
         'Unable to determine if request has UIAM credentials, request does not contain an authorization header'
       );
     });
@@ -284,7 +257,7 @@ describe('UiamAPIKeys', () => {
     it('throws error when credentials do not start with UIAM prefix', async () => {
       const request = createMockRequest('ApiKey regular_api_key_123');
 
-      await expect(uiamApiKeys.invalidateApiKey(request, { id: 'key_id_123' })).rejects.toThrow(
+      await expect(uiamApiKeys.invalidate(request, { id: 'key_id_123' })).rejects.toThrow(
         'Cannot invalidate API key via UIAM: not a UIAM API key'
       );
     });
@@ -293,7 +266,7 @@ describe('UiamAPIKeys', () => {
       const request = createMockRequest('ApiKey essu_uiam_credential_123');
       mockUiam.revokeApiKey.mockResolvedValue();
 
-      const result = await uiamApiKeys.invalidateApiKey(request, {
+      const result = await uiamApiKeys.invalidate(request, {
         id: 'key_id_123',
       });
 
@@ -314,7 +287,7 @@ describe('UiamAPIKeys', () => {
       const error = new Error('Revocation failed');
       mockUiam.revokeApiKey.mockRejectedValue(error);
 
-      const result = await uiamApiKeys.invalidateApiKey(request, {
+      const result = await uiamApiKeys.invalidate(request, {
         id: 'key_id_123',
       });
 
@@ -325,7 +298,7 @@ describe('UiamAPIKeys', () => {
         error_details: [
           {
             type: 'exception',
-            reason: 'Revocation failed',
+            reason: 'Failed to invalidate API key key_id_123 via UIAM: Revocation failed',
           },
         ],
       });
@@ -336,27 +309,6 @@ describe('UiamAPIKeys', () => {
   });
 
   describe('getScopedClusterClientWithApiKey()', () => {
-    it('returns null when license is not enabled', () => {
-      mockLicense.isEnabled.mockReturnValue(false);
-
-      const result = uiamApiKeys.getScopedClusterClientWithApiKey('essu_test_key');
-
-      expect(result).toBeNull();
-      expect(mockClusterClient.asScoped).not.toHaveBeenCalled();
-    });
-
-    it('throws error when UIAM service is not available', () => {
-      const uiamApiKeysWithoutUiam = new UiamAPIKeys({
-        logger,
-        clusterClient: mockClusterClient,
-        license: mockLicense,
-      });
-
-      expect(() =>
-        uiamApiKeysWithoutUiam.getScopedClusterClientWithApiKey('essu_test_key')
-      ).toThrow('UIAM service is not available.');
-    });
-
     it('creates scoped client with UIAM headers when API key starts with UIAM prefix', () => {
       const result = uiamApiKeys.getScopedClusterClientWithApiKey('essu_test_key_123');
 

@@ -16,7 +16,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Plugin, PluginInitializer } from '@kbn/core-plugins-server';
-import type { CoreAuthenticationService } from '@kbn/core-security-server';
 import {
   readRolesFromResource,
   SERVERLESS_ROLES_ROOT_PATH,
@@ -81,8 +80,6 @@ export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
   initializerContext
 ): Promise<Plugin> => {
-  let getAuthenticationService: (() => CoreAuthenticationService) | undefined;
-
   return {
     setup(core, plugins: PluginSetupDependencies) {
       const logger = initializerContext.logger.get();
@@ -203,14 +200,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         },
         async (context, request, response) => {
           try {
-            if (!getAuthenticationService) {
-              return response.badRequest({
-                body: { message: 'Authentication service not available yet' },
-              });
-            }
-
             const { name, authcScheme, credential, expiration } = request.body;
-            const authcService = getAuthenticationService();
+            const [
+              {
+                security: { authc },
+              },
+            ] = await core.getStartServices();
 
             // Create a new request with authentication header if authcScheme and credential are provided
             let requestToUse = request;
@@ -226,7 +221,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               requestToUse = kibanaRequestFactory(fakeRawRequest);
             }
 
-            const result = await authcService.apiKeys.uiam.grantApiKey(requestToUse, {
+            const result = await authc.apiKeys.uiam?.grant(requestToUse, {
               name,
               expiration,
             });
@@ -256,25 +251,23 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           validate: {
             body: schema.object({
               apiKey: schema.string(),
-              authcScheme: schema.string(),
             }),
           },
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+          security: {
+            authc: { enabled: 'optional' },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
         },
         async (context, request, response) => {
           try {
-            if (!getAuthenticationService) {
-              return response.badRequest({
-                body: { message: 'Authentication service not available yet' },
-              });
-            }
-
             const { apiKey } = request.body;
-            const authcService = getAuthenticationService();
-
+            const [
+              {
+                security: { authc },
+              },
+            ] = await core.getStartServices();
             // Get scoped client with UIAM headers
-            const scopedClient = authcService.apiKeys.uiam.getScopedClusterClientWithApiKey(apiKey);
+            const scopedClient = authc.apiKeys.uiam?.getScopedClusterClientWithApiKey(apiKey);
 
             if (!scopedClient) {
               return response.badRequest({
@@ -283,7 +276,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             }
 
             // Call Elasticsearch info endpoint to verify the API key works
-            // Note: info() doesn't require special security privileges unlike security.authenticate()
             const esInfo = await scopedClient.asCurrentUser.info();
 
             return response.ok({
@@ -319,14 +311,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         },
         async (context, request, response) => {
           try {
-            if (!getAuthenticationService) {
-              return response.badRequest({
-                body: { message: 'Authentication service not available yet' },
-              });
-            }
-
             const { apiKeyId, authcScheme, credential } = request.body;
-            const authcService = getAuthenticationService();
+            const [
+              {
+                security: { authc },
+              },
+            ] = await core.getStartServices();
 
             // Create a request with authentication header for UIAM
             const requestHeaders: Headers = {
@@ -339,7 +329,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             };
             const requestToUse = kibanaRequestFactory(fakeRawRequest);
 
-            const result = await authcService.apiKeys.uiam.invalidateApiKey(requestToUse, {
+            const result = await authc.apiKeys.uiam?.invalidate(requestToUse, {
               id: apiKeyId,
             });
 
@@ -362,9 +352,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         }
       );
     },
-    start(core) {
-      getAuthenticationService = (): CoreAuthenticationService => core.security.authc;
-    },
+    start() {},
     stop() {},
   };
 };

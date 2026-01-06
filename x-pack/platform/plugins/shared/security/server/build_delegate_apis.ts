@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  CoreSecurityDelegateContract,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+} from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
@@ -34,13 +39,20 @@ export const buildSecurityApi = ({
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
-        uiam: {
-          grantApiKey: (request, grantUiamApiKeyParams) =>
-            getAuthc().apiKeys.uiam.grantApiKey(request, grantUiamApiKeyParams),
-          invalidateApiKey: (request, invalidateUiamApiKeyParams) =>
-            getAuthc().apiKeys.uiam.invalidateApiKey(request, invalidateUiamApiKeyParams),
-          getScopedClusterClientWithApiKey: (apiKey) =>
-            getAuthc().apiKeys.uiam.getScopedClusterClientWithApiKey(apiKey),
+        get uiam() {
+          const uiamApiKeys = getAuthc().apiKeys.uiam;
+          return uiamApiKeys
+            ? {
+                grant: (request: KibanaRequest, grantUiamApiKeyParams: GrantUiamAPIKeyParams) =>
+                  uiamApiKeys.grant(request, grantUiamApiKeyParams),
+                invalidate: (
+                  request: KibanaRequest,
+                  invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
+                ) => uiamApiKeys.invalidate(request, invalidateUiamApiKeyParams),
+                getScopedClusterClientWithApiKey: (apiKey: string) =>
+                  uiamApiKeys.getScopedClusterClientWithApiKey(apiKey),
+              }
+            : null;
         },
       },
     },

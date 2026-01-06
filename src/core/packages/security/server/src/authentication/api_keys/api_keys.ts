@@ -11,14 +11,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
-import type { UiamAPIKeysService } from './uiam';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,
  * validation, and invalidation of API keys,
  * as well as checking the status of API key features.
  */
-export interface APIKeys {
+export interface NativeAPIKeysType {
   /**
    * Determines if API Keys are enabled in Elasticsearch.
    */
@@ -90,12 +89,6 @@ export interface APIKeys {
    * @param params The params to invalidate the API keys.
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
-
-  /**
-   * UIAM-specific API key operations.
-   * Provides methods for managing API keys through the UIAM service.
-   */
-  uiam: UiamAPIKeysService;
 }
 
 export type CreateAPIKeyParams =

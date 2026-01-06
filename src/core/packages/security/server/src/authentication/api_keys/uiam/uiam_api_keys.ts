@@ -16,7 +16,7 @@ import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
  * Interface for managing UIAM-specific API key operations.
  * This interface handles API key grants and invalidations through the UIAM service.
  */
-export interface UiamAPIKeys {
+export interface UiamAPIKeysType {
   /**
    * Grants an API key via the UIAM service.
    *
@@ -25,10 +25,7 @@ export interface UiamAPIKeys {
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
-  grantApiKey(
-    request: KibanaRequest,
-    params: GrantUiamAPIKeyParams
-  ): Promise<GrantAPIKeyResult | null>;
+  grant(request: KibanaRequest, params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
 
   /**
    * Invalidates an API key via the UIAM service.
@@ -38,7 +35,7 @@ export interface UiamAPIKeys {
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
-  invalidateApiKey(
+  invalidate(
     request: KibanaRequest,
     params: InvalidateUiamAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null>;

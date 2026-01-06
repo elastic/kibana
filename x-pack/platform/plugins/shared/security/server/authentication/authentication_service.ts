@@ -16,6 +16,7 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
+import type { APIKeysType } from '@kbn/core-security-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
   AuditServiceSetup,
@@ -72,7 +73,7 @@ interface AuthenticationServiceStartParams {
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
   apiKeys: Pick<
-    APIKeys,
+    APIKeysType,
     | 'areAPIKeysEnabled'
     | 'areCrossClusterAPIKeysEnabled'
     | 'create'
@@ -81,12 +82,8 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
-  > & {
-    uiam: Pick<
-      UiamAPIKeys,
-      'grantApiKey' | 'invalidateApiKey' | 'getScopedClusterClientWithApiKey'
-    >;
-  };
+    | 'uiam'
+  >;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
@@ -360,12 +357,14 @@ export class AuthenticationService {
       buildFlavor,
     });
 
-    const uiamAPIKeys = new UiamAPIKeys({
-      logger: this.logger.get('api-key-uiam'),
-      clusterClient,
-      license: this.license,
-      uiam,
-    });
+    const uiamAPIKeys = uiam
+      ? new UiamAPIKeys({
+          logger: this.logger.get('api-key-uiam'),
+          clusterClient,
+          license: this.license,
+          uiam,
+        })
+      : null;
 
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -412,12 +411,14 @@ export class AuthenticationService {
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
-        uiam: {
-          grantApiKey: uiamAPIKeys.grantApiKey.bind(uiamAPIKeys),
-          invalidateApiKey: uiamAPIKeys.invalidateApiKey.bind(uiamAPIKeys),
-          getScopedClusterClientWithApiKey:
-            uiamAPIKeys.getScopedClusterClientWithApiKey.bind(uiamAPIKeys),
-        },
+        uiam: uiamAPIKeys
+          ? {
+              grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
+              invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
+              getScopedClusterClientWithApiKey:
+                uiamAPIKeys.getScopedClusterClientWithApiKey.bind(uiamAPIKeys),
+            }
+          : null,
       },
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {

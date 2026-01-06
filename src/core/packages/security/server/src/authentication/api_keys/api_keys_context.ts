@@ -16,7 +16,6 @@ import type {
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
 } from './api_keys';
-import type { UiamAPIKeysServiceWithContext } from './uiam';
 
 /**
  * Public API Keys service exposed through core context to manage
@@ -24,7 +23,7 @@ import type { UiamAPIKeysServiceWithContext } from './uiam';
  * validation, and invalidation of API keys,
  * as well as checking the status of API key features.
  */
-export interface APIKeysServiceWithContext {
+export interface NativeAPIKeysWithContextType {
   /**
    * Determines if API Keys are enabled in Elasticsearch.
    */
@@ -63,10 +62,4 @@ export interface APIKeysServiceWithContext {
    * @param params The params to invalidate an API keys.
    */
   invalidate(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
-
-  /**
-   * UIAM-specific API key operations.
-   * Provides methods for managing API keys through the UIAM service.
-   */
-  uiam: UiamAPIKeysServiceWithContext;
 }

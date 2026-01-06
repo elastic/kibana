@@ -36,20 +36,19 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
           validate: (apiKeyParams) => this.securityStart.authc.apiKeys.validate(apiKeyParams),
           invalidate: (apiKeyParams) =>
             this.securityStart.authc.apiKeys.invalidate(this.request, apiKeyParams),
-          uiam: {
-            grantApiKey: (grantUiamApiKeyParams) =>
-              this.securityStart.authc.apiKeys.uiam.grantApiKey(
-                this.request,
-                grantUiamApiKeyParams
-              ),
-            invalidateApiKey: (invalidateUiamApiKeyParams) =>
-              this.securityStart.authc.apiKeys.uiam.invalidateApiKey(
-                this.request,
-                invalidateUiamApiKeyParams
-              ),
-            getScopedClusterClientWithApiKey: (apiKey) =>
-              this.securityStart.authc.apiKeys.uiam.getScopedClusterClientWithApiKey(apiKey),
-          },
+          uiam: this.securityStart.authc.apiKeys.uiam
+            ? {
+                grant: (grantUiamApiKeyParams) =>
+                  this.securityStart.authc.apiKeys.uiam!.grant(this.request, grantUiamApiKeyParams),
+                invalidate: (invalidateUiamApiKeyParams) =>
+                  this.securityStart.authc.apiKeys.uiam!.invalidate(
+                    this.request,
+                    invalidateUiamApiKeyParams
+                  ),
+                getScopedClusterClientWithApiKey: (apiKey) =>
+                  this.securityStart.authc.apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey),
+              }
+            : null,
         },
       };
     }
