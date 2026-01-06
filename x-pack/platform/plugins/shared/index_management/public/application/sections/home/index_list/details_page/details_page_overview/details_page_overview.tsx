@@ -82,7 +82,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   // Setting undefined here because we don't have user privileges data in index management
   // If the user doesn't have update mappings privileges we let the api handle the error
-  // TODO: Add route and api to get user privileges data in index management plugin
+
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = useMemo(
     () => data?.privileges?.canManageIndex === true,
