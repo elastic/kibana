@@ -51,7 +51,7 @@ ALL_NODE_OPTIONS="$BASE_NODE_OPTIONS $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NOD
 
 if [ "$ELASTIC_CONTAINER" = "true" ] && ! printf '%s' "$ALL_NODE_OPTIONS" | grep -q -- '--max-old-space-size'; then
   heap_mb=
-  target_heap_percent=75
+  target_heap_percent=60
   min_heap_mb=512
   max_heap_mb=4096
   cgroup_max_bytes=$((1024 * 1024 * 1024 * 1024)) # 1TB
