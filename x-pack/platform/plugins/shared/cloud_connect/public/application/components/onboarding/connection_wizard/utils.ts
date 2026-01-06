@@ -34,10 +34,7 @@ export const buildClusterQueryParams = (clusterConfig?: ClusterQueryParams): str
   if (clusterConfig.license?.uid) {
     params.append('license_uid', clusterConfig.license.uid);
   }
-
-  if (clusterConfig.organizationId) {
-    params.append('organization_id', clusterConfig.organizationId);
-  }
+  params.append('organization_id', clusterConfig.organizationId || '');
 
   return params.toString();
 };
