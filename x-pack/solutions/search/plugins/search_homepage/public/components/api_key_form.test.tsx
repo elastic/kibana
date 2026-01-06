@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Status, useSearchApiKey } from '@kbn/search-api-keys-components';
 
 import { ApiKeyForm } from './api_key_form';
+import { useKibana } from '../hooks/use_kibana';
 
 // Mock the hooks
 jest.mock('@kbn/search-api-keys-components', () => ({
@@ -25,23 +26,10 @@ jest.mock('@kbn/search-api-keys-components', () => ({
   },
 }));
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      share: {
-        url: {
-          locators: {
-            get: () => ({
-              useUrl: () => '/app/management/security/api_keys',
-            }),
-          },
-        },
-      },
-    },
-  }),
-}));
+jest.mock('../hooks/use_kibana');
 
 const mockUseSearchApiKey = useSearchApiKey as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +51,20 @@ describe('ApiKeyForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        share: {
+          url: {
+            locators: {
+              get: () => ({
+                useUrl: () => '/app/management/security/api_keys',
+              }),
+            },
+          },
+        },
+      },
+    });
   });
 
   describe('accessibility', () => {
