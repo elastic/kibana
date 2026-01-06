@@ -317,7 +317,10 @@ export const AgentResponseSchema = schema.object({
           schema.object({
             valid_until: schema.string(),
             version: schema.string(),
-          })
+          }),
+          {
+            maxSize: 100,
+          }
         )
       ),
     })
@@ -860,12 +863,12 @@ export const PostAgentRollbackResponseSchema = ActionIdOrMessageSchema;
 
 export const PostBulkAgentRollbackRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
 export const PostBulkAgentRollbackResponseSchema = schema.object({
-  actionIds: schema.arrayOf(schema.string()),
+  actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
