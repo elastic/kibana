@@ -542,16 +542,13 @@ describe('Attachment Routes', () => {
           {
             type: ConversationRoundStepType.toolCall,
             tool_call_id: 'tc-1',
-            tool_id: 'test-tool',
-            params: {},
+            tool_id: 'platform.core.attachment_read',
+            params: { attachment_id: 'att-1' },
             results: [
               {
                 tool_result_id: 'result-1',
                 type: ToolResultType.other,
-                data: {
-                  __attachment_operation__: 'read',
-                  attachment_id: 'att-1',
-                },
+                data: { type: 'text', data: 'test content' },
               },
             ],
           },
@@ -591,6 +588,7 @@ describe('Attachment Routes', () => {
             data: { client_id: 'flyout-config-123' },
             created_at: '2024-01-01',
             content_hash: 'abc',
+            estimated_tokens: 5,
           },
         ],
       });
