@@ -19,6 +19,10 @@ jobs:
       matrix:
         language: [ 'javascript' ]
         branch: [ 'main', '8.19' ]
+        include:
+          - language: javascript
+            build-mode: none
+            query: codeql/javascript-queries:AlertSuppression.ql
 
     steps:
     - name: Checkout repository
