@@ -7,14 +7,16 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiPanel,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
-  EuiContextMenuPanel,
+  EuiContextMenu,
   EuiPopover,
   EuiButtonIcon,
+  EuiText,
+  EuiPopoverTitle,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { noop } from 'lodash';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
-import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
@@ -37,6 +38,7 @@ interface EntityHighlightsSettingsProps {
   onChangeShowAnonymizedValues: (event: EuiSwitchEvent) => void;
   setConnectorId: (id: string) => void;
   connectorId: string;
+  connectorName: string;
   entityType: string;
   entityIdentifier: string;
   assistantResult: {
@@ -56,6 +58,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   onChangeShowAnonymizedValues,
   setConnectorId,
   connectorId,
+  connectorName,
   closePopover,
   openPopover,
   isLoading,
@@ -114,98 +117,179 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     closePopover();
   }, [closePopover, openAgentBuilderFlyout]);
 
-  const items = useMemo(
+  const panels = useMemo(
     () => [
-      <EuiPanel color="transparent" paddingSize="none" key={'entity-highlights-settings-menu'}>
-        <EuiContextMenuItem
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.entityDetails.highlights.anonymizeValuesAriaLabel',
-            {
-              defaultMessage: 'Show anonymized values',
-            }
-          )}
-          key="anonymize-values"
-        >
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues',
+      {
+        id: 0,
+        items: [
+          {
+            name: (
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.highlights.connectorMenuTitle"
+                    defaultMessage="Connector"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <strong>
+                      <EuiTextTruncate text={connectorName} />
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            icon: 'plugs',
+            panel: 2,
+            key: 'entity-highlights-settings-connector',
+            'data-test-subj': 'entity-highlights-settings-connector',
+          },
+          {
+            key: 'entity-highlights-settings-options-title',
+            renderItem: () => (
+              <EuiPopoverTitle
+                paddingSize="s"
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.flyout.entityDetails.highlights.optionsMenuTitle.ariaLabel',
+                  {
+                    defaultMessage: 'Options',
+                  }
+                )}
+              >
+                <EuiText size="xs">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.optionsMenuTitle"
+                      defaultMessage="Options"
+                    />
+                  </strong>
+                </EuiText>
+              </EuiPopoverTitle>
+            ),
+          },
+          // {
+          //   isSeparator: true as const,
+          //   key: 'entity-highlights-settings-options-separator',
+          //   margin: 'xs' as const,
+          // },
+          {
+            key: 'anonymize-values',
+            renderItem: () => (
+              <EuiContextMenuItem
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.flyout.entityDetails.highlights.anonymizeValuesAriaLabel',
                   {
                     defaultMessage: 'Show anonymized values',
                   }
                 )}
-                checked={showAnonymizedValues}
-                onChange={onChangeShowAnonymizedValues}
-                compressed
-                disabled={!selectedConversationHasAnonymizedValues}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>
-
-        {isAgentBuilderEnabled ? (
-          <EuiContextMenuItem
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-              {
-                defaultMessage: 'Ask AI Assistant',
+              >
+                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      label={i18n.translate(
+                        'xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues',
+                        {
+                          defaultMessage: 'Show anonymized values',
+                        }
+                      )}
+                      checked={showAnonymizedValues}
+                      onChange={onChangeShowAnonymizedValues}
+                      compressed
+                      disabled={!selectedConversationHasAnonymizedValues}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiContextMenuItem>
+            ),
+          },
+          {
+            key: 'ask-ai-assistant',
+            renderItem: () => {
+              if (isAgentBuilderEnabled) {
+                return (
+                  <EuiContextMenuItem
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+                      {
+                        defaultMessage: 'Ask AI Assistant',
+                      }
+                    )}
+                  >
+                    <NewAgentBuilderAttachment
+                      onClick={onAgentBuildAttachmentClick}
+                      size="s"
+                      disabled={isLoading || !assistantResult}
+                      telemetry={{
+                        pathway: 'entity_highlights',
+                        attachments: ['entity'],
+                      }}
+                    />
+                  </EuiContextMenuItem>
+                );
               }
-            )}
-            key={'ask-ai-assistant'}
-          >
-            <NewAgentBuilderAttachment
-              onClick={onAgentBuildAttachmentClick}
-              size="s"
-              disabled={isLoading || !assistantResult}
-              telemetry={{
-                pathway: 'entity_highlights',
-                attachments: ['entity'],
-              }}
-            />
-          </EuiContextMenuItem>
-        ) : (
-          isAssistantVisible && (
-            <EuiContextMenuItem
-              aria-label={i18n.translate(
-                'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-                {
-                  defaultMessage: 'Ask AI Assistant',
-                }
-              )}
-              key={'ask-ai-assistant'}
-              onClick={() => {
-                showAssistantOverlay();
-                closePopover();
-              }}
-              icon={<AssistantIcon />}
-              disabled={isLoading || !assistantResult}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-                defaultMessage="Ask AI Assistant"
-              />
-            </EuiContextMenuItem>
-          )
-        )}
 
-        <EuiContextMenuItem
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.entityDetails.highlights.connectorSelectorAriaLabel',
-            {
-              defaultMessage: 'Connector selector',
-            }
-          )}
-        >
-          <ConnectorSelectorInline
-            onConnectorSelected={noop}
-            onConnectorIdSelected={setConnectorId}
-            selectedConnectorId={connectorId}
+              if (!isAssistantVisible) return null;
+
+              return (
+                <EuiContextMenuItem
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+                    {
+                      defaultMessage: 'Ask AI Assistant',
+                    }
+                  )}
+                  onClick={() => {
+                    showAssistantOverlay();
+                    closePopover();
+                  }}
+                  icon={<AssistantIcon />}
+                  disabled={isLoading || !assistantResult}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
+                    defaultMessage="Ask AI Assistant"
+                  />
+                </EuiContextMenuItem>
+              );
+            },
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.highlights.connectorMenuTitle"
+            defaultMessage="Connector"
           />
-        </EuiContextMenuItem>
-      </EuiPanel>,
+        ),
+        items: [
+          {
+            key: 'entity-highlights-settings-connector-selector',
+            renderItem: () => (
+              <EuiContextMenuItem
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.flyout.entityDetails.highlights.connectorSelectorAriaLabel',
+                  {
+                    defaultMessage: 'Connector selector',
+                  }
+                )}
+              >
+                <ConnectorSelectorInline
+                  onConnectorSelected={noop}
+                  onConnectorIdSelected={setConnectorId}
+                  selectedConnectorId={connectorId}
+                  explicitConnectorSelection={true}
+                />
+              </EuiContextMenuItem>
+            ),
+          },
+        ],
+      },
     ],
     [
+      connectorName,
       showAnonymizedValues,
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
@@ -241,12 +325,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       panelPaddingSize="none"
       anchorPosition="leftUp"
     >
-      <EuiContextMenuPanel
-        items={items}
-        css={css`
-          width: 280px;
-        `}
-      />
+      <EuiContextMenu initialPanelId={0} size="m" panels={panels} />
     </EuiPopover>
   );
 };
