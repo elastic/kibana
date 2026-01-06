@@ -74,17 +74,20 @@ export const RulesPage = () => {
     }
   };
 
+  const { pathname, search, hash } = location;
   const navigateToEditRuleForm = useCallback(
     (ruleId: string) => {
+      const returnPath = `${pathname}${search}${hash}`;
+      const returnApp = 'rules';
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleId)}`,
         state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/rules`,
+          returnApp,
+          returnPath,
         },
       });
     },
-    [navigateToApp]
+    [navigateToApp, pathname, search, hash]
   );
 
   const renderRulesList = useCallback(() => {

@@ -121,9 +121,13 @@ export const RuleFormRoute = () => {
           }
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (returnApp && returnPath) {
+            application.navigateToApp(returnApp, { path: returnPath });
+          } else {
+            application.navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            });
+          }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}
       />
