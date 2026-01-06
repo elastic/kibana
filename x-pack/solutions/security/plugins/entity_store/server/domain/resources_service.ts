@@ -20,10 +20,12 @@ export class ResourcesService {
   }
 
   private async initExtractEntitiesTasks(types: EntityType[]) {
-    const tasks = types.map(type => new ExtractEntityTask(this.taskManager, this.logger, type));
-    await Promise.all(tasks.map(async task => {
-      task.register();
-      await task.schedule();
-    }));
+    const tasks = types.map((type) => new ExtractEntityTask(this.taskManager, this.logger, type));
+    await Promise.all(
+      tasks.map(async (task) => {
+        task.register();
+        await task.schedule();
+      })
+    );
   }
 }
