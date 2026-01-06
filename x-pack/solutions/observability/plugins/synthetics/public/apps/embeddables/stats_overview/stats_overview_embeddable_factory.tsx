@@ -62,10 +62,10 @@ export const getStatsOverviewEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
+      const filters$ = new BehaviorSubject(initialState.filters);
 
       const { embeddableEnhanced } = pluginStart;
       const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
@@ -77,12 +77,9 @@ export const getStatsOverviewEmbeddableFactory = (
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            ...(dynamicActionsManager?.getLatestState() ?? {}),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          ...(dynamicActionsManager?.getLatestState() ?? {}),
         };
       }
 
@@ -104,9 +101,9 @@ export const getStatsOverviewEmbeddableFactory = (
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
+          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
         },
       });
 

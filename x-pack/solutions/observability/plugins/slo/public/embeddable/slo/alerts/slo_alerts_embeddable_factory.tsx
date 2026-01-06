@@ -65,9 +65,9 @@ export function getAlertsEmbeddableFactory({
         }
       }
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(
-        initialState.rawState,
+        initialState,
         {
           slos: [],
           showAllGroupByInstances: false,
@@ -78,10 +78,8 @@ export function getAlertsEmbeddableFactory({
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloAlertsStateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloAlertsStateManager.getLatestState(),
         };
       }
 
@@ -96,8 +94,8 @@ export function getAlertsEmbeddableFactory({
           showAllGroupByInstances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          sloAlertsStateManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
+          sloAlertsStateManager.reinitializeState(lastSaved);
         },
       });
 

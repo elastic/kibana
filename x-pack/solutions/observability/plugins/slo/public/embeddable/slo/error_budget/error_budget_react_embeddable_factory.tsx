@@ -47,10 +47,10 @@ export const getErrorBudgetEmbeddableFactory = ({
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(
-        initialState.rawState,
+        initialState,
         {
           sloId: undefined,
           sloInstanceId: undefined,
@@ -60,10 +60,8 @@ export const getErrorBudgetEmbeddableFactory = ({
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloErrorBudgetManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloErrorBudgetManager.getLatestState(),
         };
       }
 
@@ -78,8 +76,8 @@ export const getErrorBudgetEmbeddableFactory = ({
           sloInstanceId: 'referenceEquality',
         }),
         onReset: (lastState) => {
-          sloErrorBudgetManager.reinitializeState(lastState?.rawState);
-          titleManager.reinitializeState(lastState?.rawState);
+          sloErrorBudgetManager.reinitializeState(lastState);
+          titleManager.reinitializeState(lastState);
         },
       });
 
