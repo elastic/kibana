@@ -93,6 +93,11 @@ export class SyntheticsMonitorClient {
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
+    // Collect all namespaces from monitors to fetch MWs from all shared spaces
+    const allMonitorNamespaces = monitors.flatMap(
+      (m) => m.decryptedPreviousMonitor.namespaces ?? []
+    );
+
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
       [];
 
@@ -100,7 +105,10 @@ export class SyntheticsMonitorClient {
     const deletedPublicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(
+      spaceId,
+      allMonitorNamespaces
+    );
 
     for (const editedMonitor of monitors) {
       const { str: paramsString, params } = mixParamsWithGlobalParams(

@@ -6,7 +6,7 @@
  */
 
 import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/common';
-import { INITIAL_REST_VERSION } from '../../../../../common/constants';
+import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const getMaintenanceWindows = async (): Promise<FindMaintenanceWindowsResult> => {
@@ -16,4 +16,22 @@ export const getMaintenanceWindows = async (): Promise<FindMaintenanceWindowsRes
       version: INITIAL_REST_VERSION,
     }
   );
+};
+
+export interface MaintenanceWindowInfo {
+  id: string;
+  title: string;
+  spaceId?: string;
+}
+
+export interface GetMaintenanceWindowsResponse {
+  maintenanceWindows: MaintenanceWindowInfo[];
+}
+
+export const getMaintenanceWindowsForMonitor = async (
+  monitorId: string
+): Promise<GetMaintenanceWindowsResponse> => {
+  return apiService.post<GetMaintenanceWindowsResponse>(SYNTHETICS_API_URLS.MAINTENANCE_WINDOWS, {
+    monitorId,
+  });
 };

@@ -669,7 +669,7 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows(spaceId: string) {
+  async getMaintenanceWindows(spaceId: string, additionalSpaces?: string[]) {
     const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
       {} as KibanaRequest
     );
@@ -678,11 +678,16 @@ export class SyntheticsService {
       return [];
     }
 
+    const namespacesToQuery = additionalSpaces?.length
+      ? [...new Set([spaceId, ...additionalSpaces])]
+      : [spaceId];
+
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
-      namespaces: [spaceId],
+      namespaces: namespacesToQuery,
     });
+
     return mws.data;
   }
 

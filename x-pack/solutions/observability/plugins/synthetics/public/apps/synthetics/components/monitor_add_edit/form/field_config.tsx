@@ -1696,7 +1696,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'A list of maintenance windows to apply to this monitor. The monitor will not run during these times.',
     }),
-    props: ({ field, setValue, trigger }): MaintenanceWindowsFieldProps => ({
+    props: ({ field, setValue, trigger, formState }): MaintenanceWindowsFieldProps => ({
       readOnly,
       onChange: async (value) => {
         setValue(ConfigKey.MAINTENANCE_WINDOWS, value);
@@ -1704,6 +1704,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
       fullWidth: true,
       value: field?.value as string[],
+      monitorId: formState.defaultValues?.[ConfigKey.CONFIG_ID] as string | undefined,
     }),
     labelAppend: <MaintenanceWindowsLink />,
   },

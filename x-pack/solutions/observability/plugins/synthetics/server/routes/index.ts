@@ -67,6 +67,7 @@ import { getLocationMonitors } from './settings/private_locations/get_location_m
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
+import { getMaintenanceWindowsRoute } from './settings/get_maintenance_windows';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -111,6 +112,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   cleanupPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
+  getMaintenanceWindowsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
