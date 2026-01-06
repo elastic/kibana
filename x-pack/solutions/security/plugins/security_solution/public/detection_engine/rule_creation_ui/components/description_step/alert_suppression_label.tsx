@@ -32,9 +32,8 @@ export const AlertSuppressionLabel = ({ label, ruleType }: AlertSuppressionLabel
         <EuiIconTip
           content={alertSuppressionUpsellingMessage}
           position="top"
-          type="warning"
+          type="lock"
           size="l"
-          color="danger"
           css={{ marginLeft: '8px' }}
           iconProps={{
             'data-test-subj': 'alertSuppressionInsufficientLicensingIcon',
