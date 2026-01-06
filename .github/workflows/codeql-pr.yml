@@ -74,8 +74,18 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
     - name: Perform CodeQL Analysis
+      id: analyze
       uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
       env:
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
       with:
         category: "/language:${{matrix.language}}"
+        output: sarif-results
+
+    - name: Dismiss alerts
+      uses: advanced-security/dismiss-alerts@v2
+      with:
+        sarif-id: ${{ steps.analyze.outputs.sarif-id }}
+        sarif-file: sarif-results/${{ matrix.language }}.sarif
+      env:
+        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
