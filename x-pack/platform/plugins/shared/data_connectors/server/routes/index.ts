@@ -194,6 +194,7 @@ export function registerRoutes(
 
         let stackConnector: ActionResult;
         let secrets: Record<string, string> = {};
+        let toolIds: string[] = [];
         if (connectorType === '.mcp') {
           const registry = await agentBuilder.tools.getRegistry({ request });
           stackConnector = await createMcpConnector(
@@ -205,6 +206,10 @@ export function registerRoutes(
             token,
             logger
           );
+          toolIds = (dataConnectorTypeDef.importedTools ?? []).map(
+            (tool) => `${name}.${tool.toLowerCase()}`
+          );
+          logger.info(`Imported tools: ${JSON.stringify(toolIds)}`);
         } else {
           const actionsClient = await actions.getActionsClientWithRequest(request);
           secrets = buildSecretsFromConnectorSpec(connectorType, token);
@@ -230,7 +235,7 @@ export function registerRoutes(
           createdAt: now,
           updatedAt: now,
           workflowIds: [],
-          toolIds: [],
+          toolIds,
           kscIds: [stackConnector.id],
         });
 
@@ -282,7 +287,13 @@ export function registerRoutes(
           `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
         );
 
-        const [, { actions }] = await getStartServices();
+        const [, { actions, agentBuilder }] = await getStartServices();
+        const registry = await agentBuilder.tools.getRegistry({ request });
+
+        const toolIds: string[] = connectors.flatMap((connector) => connector.attributes.toolIds);
+        const deleteToolPromises = toolIds.map((toolId) => registry.delete(toolId));
+        await Promise.all(deleteToolPromises);
+
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
         await Promise.all(deleteKscPromises);

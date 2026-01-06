@@ -17,28 +17,18 @@ import type {
 } from '../../../../common/http_api/tools';
 
 export interface BulkCreateMcpToolsParams {
-  /** The tool registry to create tools in */
   registry: ToolRegistry;
-  /** Actions plugin to validate connector */
   actions: ActionsPluginStart;
-  /** Request object for actions client */
   request: KibanaRequest;
-  /** The ID of the MCP connector to create tools from */
   connectorId: string;
-  /** Tools to create (from client's listTools call on the connector) */
   tools: Array<{
-    /** MCP tool name */
     name: string;
-    /** Tool description */
     description?: string;
   }>;
-  /** Optional namespace to prepend to tool IDs */
   namespace?: string;
-  /** Optional tags to apply to all created tools */
-  tags?: string[];
-  /** Skip tools that already exist (default: true) */
   skipExisting?: boolean;
-  /** Logger to use for logging */
+  tags?: string[];
+  // delete this
   kibanaLogger: Logger;
 }
 
@@ -56,9 +46,9 @@ export async function bulkCreateMcpTools({
   connectorId,
   tools,
   namespace,
+  skipExisting,
   kibanaLogger,
   tags = [],
-  skipExisting = true,
 }: BulkCreateMcpToolsParams): Promise<BulkCreateMcpToolsResponse> {
   // Validate namespace if provided (must be valid tool ID segment)
   if (namespace) {
@@ -81,48 +71,33 @@ export async function bulkCreateMcpTools({
   const toolsWithIds = tools.map((tool) => {
     const toolName = tool.name.toLowerCase();
     const toolId = namespace ? `${namespace}.${toolName}` : toolName;
-    const description = tool.description ?? '';
-    kibanaLogger.info(`Description: ${description}`);
-    return { toolId, mcpToolName: tool.name, description };
+    return { toolId, mcpToolName: tool.name, description: tool.description };
   });
 
-  kibanaLogger.info(`Tools with IDs: ${JSON.stringify(toolsWithIds)}`);
+  // Process tools in parallel using Promise.allSettled (matches bulk delete pattern)
+  const createResults = await Promise.allSettled(
+    toolsWithIds.map(async ({ toolId, mcpToolName, description }) => {
+      // Check if tool already exists
+      const exists = await registry.has(toolId);
+      if (exists && skipExisting) {
+        return { toolId, mcpToolName, skipped: true as const };
+      }
 
-  // Process tools in batches of 5
-  const BATCH_SIZE = 5;
-  const createResults: PromiseSettledResult<{
-    toolId: string;
-    mcpToolName: string;
-    skipped: boolean;
-  }>[] = [];
+      // Create the MCP tool
+      await registry.create({
+        id: toolId,
+        type: ToolType.mcp,
+        description: description ?? '',
+        tags,
+        configuration: {
+          connector_id: connectorId,
+          tool_name: mcpToolName,
+        },
+      });
 
-  for (let i = 0; i < toolsWithIds.length; i += BATCH_SIZE) {
-    const batch = toolsWithIds.slice(i, i + BATCH_SIZE);
-    const batchResults = await Promise.allSettled(
-      batch.map(async ({ toolId, mcpToolName, description }) => {
-        // Check if tool already exists
-        const exists = await registry.has(toolId);
-        if (exists && skipExisting) {
-          return { toolId, mcpToolName, skipped: true as const };
-        }
-
-        // Create the MCP tool
-        await registry.create({
-          id: toolId,
-          type: ToolType.mcp,
-          description: description ?? '',
-          tags,
-          configuration: {
-            connector_id: connectorId,
-            tool_name: mcpToolName,
-          },
-        });
-
-        return { toolId, mcpToolName, skipped: false as const };
-      })
-    );
-    createResults.push(...batchResults);
-  }
+      return { toolId, mcpToolName, skipped: false as const };
+    })
+  );
 
   // Map results to response format (matches bulk delete pattern)
   const results: BulkCreateMcpToolResult[] = createResults.map((result, index) => {

@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
-import { ToolType, validateToolId } from '@kbn/agent-builder-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
