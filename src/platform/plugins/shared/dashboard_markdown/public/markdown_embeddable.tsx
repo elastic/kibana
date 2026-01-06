@@ -45,9 +45,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const titleManager = initializeTitleManager(initialState.rawState);
+    const titleManager = initializeTitleManager(initialState);
     const markdownStateManager = initializeStateManager(
-      initialState.rawState,
+      initialState,
       defaultMarkdownState
     );
     const isEditing$ = new BehaviorSubject<boolean>(false);
@@ -57,10 +57,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
 
     const serializeState = () => ({
-      rawState: {
-        ...titleManager.getLatestState(),
-        ...markdownStateManager.getLatestState(),
-      },
+      ...titleManager.getLatestState(),
+      ...markdownStateManager.getLatestState(),
     });
 
     const resetEditingState = () => {
@@ -84,8 +82,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         return { ...titleComparators, ...markdownComparators };
       },
       onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved?.rawState);
-        markdownStateManager.reinitializeState(lastSaved?.rawState);
+        titleManager.reinitializeState(lastSaved);
+        markdownStateManager.reinitializeState(lastSaved);
       },
     });
 

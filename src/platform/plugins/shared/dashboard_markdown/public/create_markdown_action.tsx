@@ -33,9 +33,7 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
       {
         panelType: MARKDOWN_EMBEDDABLE_TYPE,
         serializedState: {
-          rawState: {
-            content: '',
-          },
+          content: '',
         },
       },
       { displaySuccessMessage: true }
