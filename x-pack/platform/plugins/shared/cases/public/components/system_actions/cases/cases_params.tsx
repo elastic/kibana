@@ -26,7 +26,7 @@ import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant
 import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
-import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
+import { CASES_CONNECTOR_SUB_ACTION, DEFAULT_MAX_OPEN_CASES } from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
@@ -162,6 +162,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const onChangeMaxCasesToOpend: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      editSubActionProperty('maximumCasesToOpen', Number(event.target.value));
+    },
+    [editSubActionProperty]
+  );
+
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     if (!dataView) {
       return [];
@@ -289,6 +296,26 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             onTemplateChange={onTemplateChange}
             initialTemplate={selectedTemplate}
           />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            fullWidth
+            label={i18n.MAX_CASES_TO_OPEN_LABEL}
+            labelAppend={OptionalFieldLabel}
+          >
+            <EuiFieldNumber
+              fullWidth
+              min={1}
+              max={DEFAULT_MAX_OPEN_CASES}
+              step={1}
+              defaultValue={actionParams.subActionParams?.maximumCasesToOpen ?? 5}
+              data-test-subj="max-case-to-open-input"
+              onChange={onChangeMaxCasesToOpend}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

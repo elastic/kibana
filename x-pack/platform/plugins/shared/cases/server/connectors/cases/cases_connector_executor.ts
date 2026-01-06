@@ -25,15 +25,12 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
+  MAX_OPEN_CASES,
 } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import {
-  INITIAL_ORACLE_RECORD_COUNTER,
-  MAX_CONCURRENT_ES_REQUEST,
-  MAX_OPEN_CASES,
-} from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
   BulkCreateOracleRecordRequest,
   CasesConnectorRunParams,

@@ -10,6 +10,7 @@ import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASE_RULES_SAVED_OBJECT,
+  MAX_OPEN_CASES,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -45,7 +46,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
-import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');

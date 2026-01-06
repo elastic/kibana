@@ -115,3 +115,10 @@ export const ATTACK_DISCOVERY_TEMPLATE_TOOLTIP = i18n.translate(
       'Attack Discovery Schedules fully manage Case actions, automatically filling in all fields for new Cases.',
   }
 );
+
+export const MAX_CASES_TO_OPEN_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.maxCasesToOpenLabel',
+  {
+    defaultMessage: 'Maximum amount of cases to open',
+  }
+);
