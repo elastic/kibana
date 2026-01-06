@@ -17,8 +17,7 @@ interface Params {
   end: number;
   feature?: System;
   sampleDocsSize?: number;
-  // optional overrides for templates
-  systemPromptOverride?: string;
+  systemPrompt: string;
 }
 
 interface Dependencies {
@@ -32,8 +31,7 @@ export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
 ): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, feature, sampleDocsSize, systemPromptOverride } =
-    params;
+  const { definition, connectorId, start, end, feature, sampleDocsSize, systemPrompt } = params;
   const { inferenceClient, esClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
@@ -50,7 +48,7 @@ export async function generateSignificantEventDefinitions(
     feature,
     signal,
     sampleDocsSize,
-    systemPromptOverride,
+    systemPrompt,
   });
 
   return {

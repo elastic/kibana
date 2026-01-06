@@ -24,7 +24,7 @@ export async function generateStreamDescription({
   inferenceClient,
   signal,
   logger,
-  systemPromptOverride,
+  systemPrompt,
 }: {
   stream: Streams.all.Definition;
   system?: System;
@@ -34,7 +34,7 @@ export async function generateStreamDescription({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-  systemPromptOverride?: string;
+  systemPrompt: string;
 }): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
   logger.debug(
     `Generating stream description for stream ${stream.name}${
@@ -63,9 +63,7 @@ export async function generateStreamDescription({
     )
   );
 
-  const prompt = createGenerateStreamDescriptionPrompt({
-    systemPromptOverride,
-  });
+  const prompt = createGenerateStreamDescriptionPrompt({ systemPrompt });
 
   logger.trace('Generating stream description via inference client');
   const response = await withSpan('generate_stream_description', () =>

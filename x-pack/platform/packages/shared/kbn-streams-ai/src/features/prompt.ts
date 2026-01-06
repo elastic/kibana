@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createPrompt } from '@kbn/inference-common';
+import { z } from '@kbn/zod';
+import { featureTypes, type FeatureType } from '@kbn/streams-schema';
+import featuresUserPrompt from './user_prompt.text';
+import featuresSystemPrompt from './system_prompt.text';
+
+export { featuresSystemPrompt as featuresPrompt };
+
+const featuresSchema = {
+  type: 'object',
+  properties: {
+    features: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            enum: featureTypes,
+          },
+          description: {
+            type: 'string',
+            description: 'A summary of the feature.',
+          },
+          name: {
+            type: 'string',
+          },
+          value: {
+            type: 'object',
+            properties: {},
+          },
+          confidence: {
+            type: 'number',
+            minimum: 0,
+            maximum: 100,
+          },
+          evidence: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
+          },
+        },
+        required: ['type', 'description', 'name', 'value', 'confidence', 'evidence'],
+      },
+    },
+  },
+  required: ['features'],
+} as const;
+
+export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: string }) {
+  return createPrompt({
+    name: 'identify_features',
+    input: z.object({
+      dataset_analysis: z.string(),
+    }),
+  })
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: featuresUserPrompt,
+        },
+      },
+      tools: {
+        finalize_features: {
+          description: 'Finalize features identification',
+          schema: featuresSchema,
+        },
+      },
+    })
+    .get();
+}

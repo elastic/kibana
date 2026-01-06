@@ -26,8 +26,7 @@ export interface IdentifySystemsOptions {
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   signal: AbortSignal;
-  featurePromptOverride?: string;
-  descriptionPromptOverride?: string;
+  descriptionPrompt: string;
 }
 
 /**
@@ -46,7 +45,6 @@ export async function identifySystems({
   inferenceClient,
   logger,
   signal,
-  featurePromptOverride,
   maxSteps: initialMaxSteps,
 }: IdentifySystemsOptions & {
   maxSteps?: number;
@@ -96,7 +94,7 @@ export async function identifySystems({
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
       },
-      prompt: createIdentifySystemsPrompt({ systemPromptOverride: featurePromptOverride }),
+      prompt: createIdentifySystemsPrompt(),
       inferenceClient,
       finalToolChoice: {
         function: 'finalize_systems',

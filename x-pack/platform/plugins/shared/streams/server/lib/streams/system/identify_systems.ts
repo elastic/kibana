@@ -16,7 +16,7 @@ export async function identifySystemsWithDescription(
 ): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
   const result = await identifySystems(options);
 
-  options.logger.trace('Generating descriptions for identified system features');
+  options.logger.trace('Generating descriptions for identified systems');
 
   let totalTokensUsed: ChatCompletionTokenCount = result.tokensUsed;
   const systemsWithDescription = await withSpan('generate_system_feature_descriptions', () =>
@@ -31,7 +31,7 @@ export async function identifySystemsWithDescription(
           inferenceClient: options.inferenceClient,
           signal: options.signal,
           logger: options.logger,
-          systemPromptOverride: options.descriptionPromptOverride,
+          systemPrompt: options.descriptionPrompt,
         });
 
         totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);

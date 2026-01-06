@@ -318,22 +318,19 @@ export const identifySystemsRoute = createServerRoute({
 
     // Get connector info for error enrichment
     const connector = await inferenceClient.getConnectorById(connectorId);
-    const [{ systems }, stream] = await Promise.all([
+    const [{ systems }, stream, { descriptionPromptOverride }] = await Promise.all([
       systemClient.getSystems(name),
       streamsClient.getStream(name),
+      new PromptsConfigService({
+        soClient,
+        logger,
+      }).getPrompt(),
     ]);
 
     const esClient = scopedClusterClient.asCurrentUser;
 
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
     const signal = getRequestAbortSignal(request);
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
-
-    const { featurePromptOverride, descriptionPromptOverride } =
-      await promptsConfigService.getPrompt();
 
     return from(
       identifySystemsWithDescription({
@@ -345,8 +342,7 @@ export const identifySystemsRoute = createServerRoute({
         stream,
         systems,
         signal,
-        featurePromptOverride,
-        descriptionPromptOverride,
+        descriptionPrompt: descriptionPromptOverride,
       })
     ).pipe(
       map(({ systems: identifiedSystems, tokensUsed }) => {
@@ -432,12 +428,10 @@ export const describeStreamRoute = createServerRoute({
 
     const stream = await streamsClient.getStream(name);
 
-    const promptsConfigService = new PromptsConfigService({
+    const { descriptionPromptOverride } = await new PromptsConfigService({
       soClient,
       logger,
-    });
-
-    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
+    }).getPrompt();
 
     return from(
       generateStreamDescription({
@@ -448,7 +442,7 @@ export const describeStreamRoute = createServerRoute({
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
         logger: logger.get('stream_description'),
-        systemPromptOverride: descriptionPromptOverride,
+        systemPrompt: descriptionPromptOverride,
       })
     ).pipe(
       map((result) => {
