@@ -50,7 +50,7 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
-    '.sharepoint_online',
+    '.sharepoint-online',
     lazy(
       () =>
         import(
