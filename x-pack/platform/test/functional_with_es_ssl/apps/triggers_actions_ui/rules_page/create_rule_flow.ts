@@ -100,12 +100,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('return path is set correctly after rule creation', async () => {
-      // After creating a rule and navigating back, verify we're on the rules page
+      // Start on the rules page
       await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      // Create a new rule
+      const ruleName = `test-rule-return-path-${Date.now()}`;
+
+      // Click create rule button
+      await retry.waitFor(
+        'Create Rule button is visible',
+        async () => await testSubjects.exists('createRuleButton')
+      );
+      await testSubjects.click('createRuleButton');
+
+      // Select rule type
+      await retry.waitFor(
+        'Rule Type Modal is visible',
+        async () => await testSubjects.exists('ruleTypeModal')
+      );
+      await testSubjects.click('test.noop-SelectOption');
+
+      // Wait for form to load
+      await retry.waitFor(
+        'Create Rule form is visible',
+        async () => await testSubjects.exists('ruleForm')
+      );
+
+      // Fill in rule name
+      await testSubjects.setValue('ruleDetailsNameInput', ruleName);
+
+      // Save the rule
+      await testSubjects.click('rulePageFooterSaveButton');
+
+      // Handle confirmation modal if it appears
+      const confirmationModalExists = await testSubjects.exists('confirmCreateRuleModal');
+      if (confirmationModalExists) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+
+      // Wait for automatic redirect back to rules page (not manual navigation)
+      await retry.try(async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const url = await browser.getCurrentUrl();
+        if (!url.includes('/app/rules')) {
+          throw new Error(`Expected URL to contain '/app/rules' but got: ${url}`);
+        }
+      });
+
+      // Verify we're on the rules page
       const url = await browser.getCurrentUrl();
       expect(url).to.contain('/app/rules');
+
+      // Track the created rule for cleanup
+      const ruleId = await getRuleIdByName(ruleName);
+      objectRemover.add(ruleId, 'rule', 'alerting');
     });
   });
 };

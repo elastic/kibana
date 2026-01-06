@@ -122,6 +122,7 @@ export interface RulesListProps {
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
+  navigateToCreateRuleForm?: (ruleTypeId: string) => void;
 }
 
 export const percentileFields = {
@@ -164,6 +165,7 @@ export const RulesList = ({
   onRefresh,
   setHeaderActions,
   navigateToEditRuleForm,
+  navigateToCreateRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -1019,16 +1021,30 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-              });
+              if (navigateToCreateRuleForm) {
+                navigateToCreateRuleForm(ruleTypeId);
+              } else {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                });
+              }
             }}
             onSelectTemplate={(templateId) => {
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                  encodeURIComponent(templateId)
-                )}`,
-              });
+              if (navigateToCreateRuleForm) {
+                // For templates, we need to extract the ruleTypeId or handle it differently
+                // For now, fall back to default behavior
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                    encodeURIComponent(templateId)
+                  )}`,
+                });
+              } else {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                    encodeURIComponent(templateId)
+                  )}`,
+                });
+              }
             }}
             http={http}
             toasts={toasts}

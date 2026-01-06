@@ -11,7 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { getEditRuleRoute } from '@kbn/rule-data-utils';
+import { getCreateRuleRoute, getEditRuleRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
@@ -90,6 +90,21 @@ export const RulesPage = () => {
     [navigateToApp, pathname, search, hash]
   );
 
+  const navigateToCreateRuleForm = useCallback(
+    (ruleTypeId: string) => {
+      const returnPath = `${pathname}${search}${hash}`;
+      const returnApp = 'rules';
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+        state: {
+          returnApp,
+          returnPath,
+        },
+      });
+    },
+    [navigateToApp, pathname, search, hash]
+  );
+
   const renderRulesList = useCallback(() => {
     return (
       <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
@@ -99,10 +114,11 @@ export const RulesPage = () => {
           showCreateRuleButtonInPrompt={true}
           setHeaderActions={setHeaderActions}
           navigateToEditRuleForm={navigateToEditRuleForm}
+          navigateToCreateRuleForm={navigateToCreateRuleForm}
         />
       </KibanaPageTemplate.Section>
     );
-  }, [navigateToEditRuleForm]);
+  }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
 
   const renderLogsList = useCallback(() => {
     return (
