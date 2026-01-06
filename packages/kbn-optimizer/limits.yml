@@ -46,7 +46,7 @@ pageLoadAssetSize:
   dataVisualizer: 32797
   developerToolbar: 4467
   devTools: 8109
-  discover: 26000
+  discover: 28752
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
@@ -55,6 +55,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 40244
+  entityStore: 4075
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -119,7 +120,7 @@ pageLoadAssetSize:
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
-  observabilityAgentBuilder: 7079
+  observabilityAgentBuilder: 7077
   observabilityAIAssistant: 54556
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7126
@@ -206,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 68415
+  workflowsExtensions: 77926
   workflowsManagement: 8497
   workplaceAIApp: 6135

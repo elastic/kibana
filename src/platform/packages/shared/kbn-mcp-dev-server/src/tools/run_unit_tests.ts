@@ -13,6 +13,8 @@ import execa from 'execa';
 import path from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
+import fsPromises from 'fs/promises';
+import os from 'os';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPkgsById } from '@kbn/repo-packages';
 
@@ -122,6 +124,36 @@ interface PackageTestResult {
     summary: CoverageSummary;
     files: FileCoverage[];
   };
+}
+
+/**
+ * Jest assertion result from the JSON report.
+ */
+interface JestAssertionResult {
+  title: string;
+  ancestorTitles?: string[];
+  status: 'passed' | 'failed' | 'pending';
+  failureMessages?: string[];
+  location?: {
+    line: number;
+    column: number;
+  };
+}
+
+/**
+ * Jest test suite result from the JSON report.
+ */
+interface JestTestResult {
+  name: string;
+  status: 'passed' | 'failed';
+  assertionResults?: JestAssertionResult[];
+}
+
+/**
+ * Structure of Jest's JSON output report.
+ */
+interface JestReport {
+  testResults?: JestTestResult[];
 }
 
 const getChangedFiles = async (): Promise<string[]> => {
@@ -239,8 +271,53 @@ const parseCoverage = (
   return { summary, files };
 };
 
+const createReportPath = async (
+  pkgDir: string
+): Promise<{ reportPath: string; cleanup: () => Promise<void> }> => {
+  const buildPath = async (basePrefix: string) => {
+    const tempDir = await fsPromises.mkdtemp(basePrefix);
+    const reportPath = path.join(tempDir, 'mcp-jest-report.json');
+    const cleanup = async () => {
+      await fsPromises.rm(tempDir, { recursive: true, force: true });
+    };
+    return { reportPath, cleanup };
+  };
+
+  const targetDir = path.join(pkgDir, 'target');
+  try {
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    return await buildPath(path.join(targetDir, 'mcp-jest-'));
+  } catch {
+    // Fall back to OS temp dir if package dir is unavailable (e.g., in tests or mock FS).
+    return await buildPath(path.join(os.tmpdir(), 'mcp-jest-'));
+  }
+};
+
+const parseReportFromOutput = (output: string): unknown => {
+  const firstBrace = output.indexOf('{');
+  if (firstBrace === -1) {
+    return null;
+  }
+  try {
+    const candidate = output.slice(firstBrace);
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      const lastBrace = candidate.lastIndexOf('}');
+      if (lastBrace !== -1) {
+        return JSON.parse(candidate.slice(0, lastBrace + 1));
+      }
+      return null;
+    }
+  } catch {
+    return null;
+  }
+};
+
 const parseJestResults = (
-  report: any,
+  report: JestReport,
   pkgDir: string,
   options: { verbose: boolean }
 ): { testSuites: TestSuiteResult[]; coverage?: PackageTestResult['coverage'] } => {
@@ -265,10 +342,8 @@ const parseJestResults = (
       filePath: suite.name,
       relativePath: path.relative(REPO_ROOT, suite.name),
       status: suite.status === 'failed' ? 'failed' : 'passed',
-      numPassingTests:
-        suite.assertionResults?.filter((a: any) => a.status === 'passed').length || 0,
-      numFailingTests:
-        suite.assertionResults?.filter((a: any) => a.status === 'failed').length || 0,
+      numPassingTests: suite.assertionResults?.filter((a) => a.status === 'passed').length || 0,
+      numFailingTests: suite.assertionResults?.filter((a) => a.status === 'failed').length || 0,
       assertions: assertions.filter((a) => a.status === 'failed' || options.verbose),
     });
   }
@@ -282,7 +357,12 @@ const runJestWithDetails = async (
   pkgDir: string,
   files: string[] | null,
   options: { collectCoverage: boolean; verbose: boolean }
-): Promise<{ testSuites: TestSuiteResult[]; coverage?: PackageTestResult['coverage'] }> => {
+): Promise<{
+  testSuites: TestSuiteResult[];
+  coverage?: PackageTestResult['coverage'];
+  warning?: string;
+}> => {
+  const { reportPath, cleanup } = await createReportPath(pkgDir);
   const coverageDir = path.join(pkgDir, 'coverage');
   const coverageArgs = options.collectCoverage
     ? `--coverage --coverageDirectory=${coverageDir} --coverageReporters=json-summary --coverageReporters=json`
@@ -296,29 +376,92 @@ const runJestWithDetails = async (
     files && files.length > 0
       ? `node scripts/jest --config ${configPath}/jest.config.js --findRelatedTests ${files.join(
           ' '
-        )} --json ${coverageArgs}`
-      : `node scripts/jest --config ${configPath}/jest.config.js --json ${coverageArgs}`;
+        )} --json --outputFile ${reportPath} ${coverageArgs}`
+      : `node scripts/jest --config ${configPath}/jest.config.js --json --outputFile ${reportPath} ${coverageArgs}`;
 
   try {
-    const { stdout } = await execa.command(testCommand, { cwd: REPO_ROOT });
+    const { all: combinedOutput = '', exitCode } = await execa.command(testCommand, {
+      cwd: REPO_ROOT,
+      env: process.env,
+      extendEnv: true,
+      reject: false, // Don't throw on non-zero exit codes.
+      all: true, // Combine stdout and stderr into the "all" property.
+    });
+    let report: unknown;
+    let hasReport = false;
 
-    const jsonStart = stdout.indexOf('{');
-    if (jsonStart === -1) {
-      return { testSuites: [] };
+    if (fs.existsSync(reportPath)) {
+      try {
+        const reportRaw = await fsPromises.readFile(reportPath, 'utf-8');
+        report = JSON.parse(reportRaw);
+        hasReport = true;
+      } catch {
+        // Fall through to parse from stdout/stderr.
+      }
     }
 
-    const report = JSON.parse(stdout.slice(jsonStart));
-    return parseJestResults(report, pkgDir, options);
-  } catch (err: any) {
-    // Jest exits non-zero on test failures, but we still get valid JSON output.
-    const jsonStart = err.stdout?.indexOf('{') ?? -1;
-    if (jsonStart === -1) {
-      return { testSuites: [] };
+    if (!hasReport) {
+      const parsed = parseReportFromOutput(combinedOutput);
+      if (parsed) {
+        report = parsed;
+        hasReport = true;
+      }
     }
 
-    const jsonPart = err.stdout.slice(jsonStart);
-    const report = JSON.parse(jsonPart);
-    return parseJestResults(report, pkgDir, options);
+    if (!hasReport) {
+      if (exitCode === 0 || exitCode === undefined) {
+        const reportLocation = path.relative(REPO_ROOT, reportPath);
+        return {
+          testSuites: [],
+          coverage: undefined,
+          warning: `Jest exited successfully but did not produce a JSON report at ${reportLocation}. This may indicate the test run was skipped or output was truncated.`,
+        };
+      }
+
+      const errorMessage =
+        combinedOutput.substring(Math.max(0, combinedOutput.length - 2000)) || 'No output';
+      const reportLocation = path.relative(REPO_ROOT, reportPath);
+      throw new Error(
+        `Jest did not produce a JSON report at ${reportLocation} (exit code: ${exitCode}). Last output: ${errorMessage}`
+      );
+    }
+
+    return parseJestResults(report as JestReport, pkgDir, options);
+  } catch (err: unknown) {
+    const error = err as { all?: string; stdout?: string; stderr?: string; message?: string };
+    const combinedOutput =
+      error.all || `${error.stdout || ''}${error.stderr ? `\n${error.stderr}` : ''}`;
+    let report: unknown;
+    let hasReport = false;
+
+    if (fs.existsSync(reportPath)) {
+      try {
+        const reportRaw = await fsPromises.readFile(reportPath, 'utf-8');
+        report = JSON.parse(reportRaw);
+        hasReport = true;
+      } catch {
+        // Fall through.
+      }
+    }
+
+    if (!hasReport) {
+      const parsed = parseReportFromOutput(combinedOutput);
+      if (parsed) {
+        report = parsed;
+        hasReport = true;
+      }
+    }
+
+    if (hasReport) {
+      return parseJestResults(report as JestReport, pkgDir, options);
+    }
+
+    const reportLocation = path.relative(REPO_ROOT, reportPath);
+    throw new Error(
+      `Failed to read Jest JSON report at ${reportLocation}: ${error.message || String(err)}`
+    );
+  } finally {
+    await cleanup();
   }
 };
 
@@ -357,31 +500,47 @@ const runUnitTests = async (options: {
     }
 
     // Run all tests for the package.
-    const { testSuites, coverage } = await runJestWithDetails(pkgDir, null, {
-      collectCoverage,
-      verbose,
-    });
+    try {
+      const { testSuites, coverage, warning } = await runJestWithDetails(pkgDir, null, {
+        collectCoverage,
+        verbose,
+      });
 
-    const failedSuites = testSuites.filter((s) => s.status === 'failed');
-    const totalTests = testSuites.reduce(
-      (acc, s) => acc + s.numPassingTests + s.numFailingTests,
-      0
-    );
-    const passedTests = testSuites.reduce((acc, s) => acc + s.numPassingTests, 0);
-    const failedTests = testSuites.reduce((acc, s) => acc + s.numFailingTests, 0);
+      const failedSuites = testSuites.filter((s) => s.status === 'failed');
+      const totalTests = testSuites.reduce(
+        (acc, s) => acc + s.numPassingTests + s.numFailingTests,
+        0
+      );
+      const passedTests = testSuites.reduce((acc, s) => acc + s.numPassingTests, 0);
+      const failedTests = testSuites.reduce((acc, s) => acc + s.numFailingTests, 0);
 
-    return {
-      success: failedSuites.length === 0,
-      results: [
-        {
-          package: path.relative(REPO_ROOT, pkgDir),
-          status: failedSuites.length > 0 ? 'failed' : 'passed',
-          summary: { totalTests, passedTests, failedTests },
-          testSuites,
-          coverage,
-        },
-      ],
-    };
+      return {
+        success: failedSuites.length === 0,
+        message: warning,
+        results: [
+          {
+            package: path.relative(REPO_ROOT, pkgDir),
+            status: failedSuites.length > 0 ? 'failed' : 'passed',
+            summary: { totalTests, passedTests, failedTests },
+            testSuites,
+            coverage,
+          },
+        ],
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || 'Failed to run tests',
+        results: [
+          {
+            package: path.relative(REPO_ROOT, pkgDir),
+            status: 'failed',
+            summary: { totalTests: 0, passedTests: 0, failedTests: 0 },
+            testSuites: [],
+          },
+        ],
+      };
+    }
   }
 
   // Otherwise, run tests for changed files (existing behavior).
@@ -405,13 +564,18 @@ const runUnitTests = async (options: {
   }
 
   const results: PackageTestResult[] = [];
+  const warnings: string[] = [];
 
   for (const pkg of Object.keys(changedFilesGroupedByPkg)) {
     const pkgChangedFiles = changedFilesGroupedByPkg[pkg];
-    const { testSuites, coverage } = await runJestWithDetails(pkg, pkgChangedFiles, {
+    const { testSuites, coverage, warning } = await runJestWithDetails(pkg, pkgChangedFiles, {
       collectCoverage,
       verbose,
     });
+
+    if (warning) {
+      warnings.push(`${path.relative(REPO_ROOT, pkg)}: ${warning}`);
+    }
 
     const failedSuites = testSuites.filter((s) => s.status === 'failed');
     const totalTests = testSuites.reduce(
@@ -431,7 +595,11 @@ const runUnitTests = async (options: {
   }
 
   const success = results.every((r) => r.status === 'passed');
-  return { success, results };
+  return {
+    success,
+    message: warnings.length > 0 ? warnings.join('\n') : undefined,
+    results,
+  };
 };
 
 export const runUnitTestsTool: ToolDefinition<typeof runUnitTestsInputSchema> = {
