@@ -439,10 +439,7 @@ export class DiscoverPlugin
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: [],
+              savedObjectId: savedObject.id,
             },
           },
           {

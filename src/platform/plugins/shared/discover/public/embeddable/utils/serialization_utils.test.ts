@@ -138,19 +138,16 @@ describe('Serialization utils', () => {
       );
 
       expect(serializedState).toEqual({
-        rawState: {
-          attributes: {
-            ...attributes,
-            tabs: [
-              {
-                ...attributes.tabs![0]!,
-                id: expect.any(String),
-              },
-            ],
-            references: mockedSavedSearchAttributes.references,
-          },
+        attributes: {
+          ...attributes,
+          tabs: [
+            {
+              ...attributes.tabs![0]!,
+              id: expect.any(String),
+            },
+          ],
+          references: mockedSavedSearchAttributes.references,
         },
-        references: [],
       });
     });
 
@@ -179,10 +176,7 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            savedObjectId: 'test-id',
-          },
-          references: [],
+          savedObjectId: 'test-id',
         });
       });
 
@@ -200,12 +194,9 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            sampleSize: 500,
-            sort: [['order_date', 'asc']],
-            savedObjectId: 'test-id',
-          },
-          references: [],
+          sampleSize: 500,
+          sort: [['order_date', 'asc']],
+          savedObjectId: 'test-id',
         });
       });
     });
