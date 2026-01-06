@@ -14,7 +14,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
 const YARN_LOCK_PATH = resolve(REPO_ROOT, 'yarn.lock');
 const DEPENDENCIES_FIELDS = ['dependencies', 'devDependencies'] as const;
-const RESOLUTIONS_FIELD = 'resolutions';
 
 export function checkSemverRanges(
   runOptions: {
@@ -69,7 +68,9 @@ export function checkSemverRanges(
         const resolvedVersion = resolveVersionFromYarnLock(name, version);
         if (!resolvedVersion) {
           throw new Error(
-            `Could not resolve version for ${name} with version ${version} from yarn.lock`
+            `Could not resolve version for ${name} with version ${version} from yarn.lock` +
+              '\n' +
+              `Please ensure that your yarn.lock is up to date.`
           );
         }
 
@@ -91,7 +92,7 @@ export function checkSemverRanges(
       // eslint-disable-next-line no-console
       console.warn(
         `[no-pkg-semver-ranges] Removed ^/~ from ${totalFixes} version(s) ` +
-          `in package.json (${fieldsSummary})`
+          `in package.json (${fieldsSummary}) - don't forget to bootstrap!`
       );
     } else {
       throw new Error(
