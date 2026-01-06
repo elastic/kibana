@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'entityStore';
-export const PLUGIN_NAME = 'Entity Store';
+import { registerInstall } from './install';
+import type { EntityStorePluginRouter } from '../types';
+
+export function registerRoutes(router: EntityStorePluginRouter) {
+  registerInstall(router);
+}
