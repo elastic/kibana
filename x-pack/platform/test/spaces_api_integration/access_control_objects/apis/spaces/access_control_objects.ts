@@ -1095,7 +1095,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
       });
 
-      it('should not upsert access control metadata for unsupported types', async () => {
+      it('should not write access control metadata when upserting unsupported types', async () => {
         const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
 
         const objectId = 'upserted-object-2';
@@ -1120,7 +1120,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body).not.to.have.property('accessControl');
       });
 
-      it('should not upsert access control metadata if there is no active user profile ID', async () => {
+      it('should not write access control metadata when upserting a supported type if there is no active user profile ID', async () => {
         const objectId = 'upserted-object-3';
         const updateResponse = await supertestWithoutAuth
           .put('/access_control_objects/update')
