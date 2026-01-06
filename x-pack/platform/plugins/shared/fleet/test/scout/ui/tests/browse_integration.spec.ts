@@ -10,21 +10,42 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 
 test.describe('Browse integration', { tag: ['@ess'] }, () => {
-  test('loads the browse integration page', async ({ pageObjects, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+  test('loads the browse integration page and allow to scroll through it', async ({
+    pageObjects,
+    browserAuth,
+  }) => {
+    await browserAuth.loginAsPrivilegedUser();
 
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    //  TODO add an expect
+
+    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+
+    await browseIntegrations.scrollToIntegration('nginx');
+  });
+
+  test('it allow to sort integrations', async ({ pageObjects, browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+
+    const { browseIntegrations } = pageObjects;
+
+    await browseIntegrations.navigateTo();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+
+    await browseIntegrations.sortIntegrations('z-a');
+
+    await browseIntegrations.expectIntegrationCardToBeVisible('zoom');
   });
 
   test('it allow to search for an integration', async ({ pageObjects, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
 
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+
     await browseIntegrations.searchForIntegration('nginx');
 
     await browseIntegrations.expectIntegrationCardToBeVisible('nginx');

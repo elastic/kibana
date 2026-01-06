@@ -192,6 +192,10 @@ export const defaultConfig: ScoutServerConfig = {
           hosts: ['https://localhost:9200'],
         },
       ])}`,
+      // Temporary while on a feature flag for Fleet new UX
+      `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+        newBrowseIntegrationUx: true,
+      })}`,
     ],
   },
 };
