@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { CoreRequestHandlerContext, CustomRequestHandlerContext} from '@kbn/core-http-request-handler-context-server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type {
+  CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { ResourcesService } from './domain/resources_service';
@@ -15,7 +21,7 @@ export type TaskManager = TaskManagerSetupContract & TaskManagerStartContract;
 
 export interface EntityStorePlugins {
   taskManager: TaskManager;
-};
+}
 
 export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
