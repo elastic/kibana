@@ -397,62 +397,6 @@
             "path": "x-pack/platform/plugins/private/snapshot_restore/__jest__/client_integration/home.test.ts"
           },
           {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_list_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_list_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_status_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_status_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_status_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/index.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/watch_list_page.test.ts"
-          },
-          {
             "plugin": "ingestPipelines",
             "path": "x-pack/platform/plugins/shared/ingest_pipelines/__jest__/client_integration/helpers/pipelines_list.helpers.ts"
           },
@@ -1069,46 +1013,6 @@
           {
             "plugin": "snapshotRestore",
             "path": "x-pack/platform/plugins/private/snapshot_restore/__jest__/client_integration/helpers/snapshot_list.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_list_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_list_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_status_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_status_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_create_json_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_create_json_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_create_threshold_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_create_threshold_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_edit_page.helpers.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/platform/plugins/private/watcher/__jest__/client_integration/helpers/watch_edit_page.helpers.ts"
           },
           {
             "plugin": "ingestPipelines",
