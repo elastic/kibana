@@ -40,9 +40,9 @@ export const getPatternAnalysisEmbeddableFactory = (
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
-      const runtimeState = initialState.rawState;
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const runtimeState = initialState;
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       const {
         patternAnalysisControlsApi,
@@ -63,12 +63,9 @@ export const getPatternAnalysisEmbeddableFactory = (
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...serializePatternAnalysisChartState(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializePatternAnalysisChartState(),
         };
       }
 
@@ -91,10 +88,10 @@ export const getPatternAnalysisEmbeddableFactory = (
           ...patternAnalysisControlsComparators,
         }),
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved?.rawState) {
-            patternAnalysisControlsApi.updateUserInput(lastSaved.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) {
+            patternAnalysisControlsApi.updateUserInput(lastSaved);
           }
         },
       });

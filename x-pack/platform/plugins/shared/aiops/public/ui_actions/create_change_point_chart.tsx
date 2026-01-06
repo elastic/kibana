@@ -76,9 +76,7 @@ export function createAddChangePointChartAction(
               onConfirm={(initialState) => {
                 presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
                   panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-                  serializedState: {
-                    rawState: initialState,
-                  },
+                  serializedState: initialState,
                 });
                 closeFlyout();
               }}
