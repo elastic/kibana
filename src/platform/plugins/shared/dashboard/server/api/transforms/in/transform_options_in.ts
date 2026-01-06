@@ -15,6 +15,7 @@ const APIToSavedObjectOptionsKeys = {
   sync_colors: 'syncColors',
   sync_tooltips: 'syncTooltips',
   sync_cursor: 'syncCursor',
+  auto_apply_filters: 'autoApplyFilters',
 } as const;
 
 export function transformOptionsIn(options: DashboardState['options']): string {
