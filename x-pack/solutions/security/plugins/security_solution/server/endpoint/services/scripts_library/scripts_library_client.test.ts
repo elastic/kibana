@@ -31,12 +31,16 @@ const createEsFileClientMock = _createEsFileClient as jest.Mock;
 
 describe('scripts library client', () => {
   let endpointAppServicesMock: EndpointAppContextService;
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let scriptsClient: ScriptsLibraryClientInterface;
   let filesPluginClient: ReturnType<typeof createFileClientMock>;
   let fileMock: ReturnType<typeof createFileMock>;
 
   beforeEach(async () => {
     endpointAppServicesMock = createMockEndpointAppContextService();
+
+    soClientMock =
+      endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
 
     const filesPluginMocks = ScriptsLibraryMock.createFilesPluginClient({
       hash: { sha256: 'e5441eb2bb' },
@@ -63,6 +67,14 @@ describe('scripts library client', () => {
 
     beforeEach(() => {
       createBodyMock = ScriptsLibraryMock.generateCreateScriptBody();
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).find.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
     });
 
     it('should create a file record and upload file content to it', async () => {
@@ -86,8 +98,7 @@ describe('scripts library client', () => {
 
     it('should create a script entry (SO) with expected content', async () => {
       await scriptsClient.create(createBodyMock);
-      const soClientMock = endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient();
-      const scriptSoId = (soClientMock.create as jest.Mock).mock.calls[0][2].id;
+      const scriptSoId = soClientMock.create.mock.calls?.[0]?.[2]?.id;
 
       expect(
         endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
@@ -318,6 +329,14 @@ describe('scripts library client', () => {
     });
 
     it('should upload file content, update script with new file info and delete old file', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).find.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
       const fileContent = createHapiReadableStreamMock();
       await scriptsClient.update({
         id: '1-2-3',
@@ -393,9 +412,13 @@ describe('scripts library client', () => {
     });
 
     it('should delete new uploaded file when update to script data fails', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).update.mockRejectedValue(new Error('Failed to update script record'));
+      soClientMock.update.mockRejectedValue(new Error('Failed to update script record'));
+      soClientMock.find.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
 
       await expect(
         scriptsClient.update({
