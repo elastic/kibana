@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-<<<<<<<< HEAD:x-pack/platform/plugins/shared/lens/common/layer_types.ts
+import Path from 'node:path';
+
 export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
   METRIC_TRENDLINE: 'metricTrendline',
 } as const;
-========
-import Path from 'node:path';
 
 // Test data time range constants
 export const PROFILING_TEST_DATES = {
@@ -26,4 +25,3 @@ export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collec
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export const esArchiversPath = Path.join(__dirname, 'es_archiver', 'profiling', 'data.json');
 export const esResourcesEndpoint = 'api/profiling/setup/es_resources';
->>>>>>>> 698e957b1938 ([Profiling] Fix Flaky Profiling tests (#239014)):x-pack/solutions/observability/plugins/profiling/test/scout/common/fixtures/constants.ts
