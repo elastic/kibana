@@ -77,11 +77,6 @@ export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}
 export class PackageRollbackError extends FleetError {}
-export class PackageRuleAssetsHaveNoDataError extends FleetError {
-  constructor(message: string) {
-    super(`Error installing rule assets because underlying data does not exist yet, ${message}`);
-  }
-}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}

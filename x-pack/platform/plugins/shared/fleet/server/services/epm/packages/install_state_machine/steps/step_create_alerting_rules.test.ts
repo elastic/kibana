@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
@@ -26,8 +22,6 @@ import {
 
 jest.mock('../../install');
 
-const mockEsqlQuery = 'from elastic_agent-* | limit 1;';
-
 describe('createAlertingRuleFromTemplate', () => {
   it('should create a rule if the rule does not exist', async () => {
     const rulesClient = {
@@ -36,11 +30,7 @@ describe('createAlertingRuleFromTemplate', () => {
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
         consumer: 'alerts',
-        params: {
-          esqlQuery: {
-            esql: mockEsqlQuery,
-          },
-        },
+        params: {},
         schedule: { interval: '1m' },
         actions: [],
         tags: [],
@@ -49,11 +39,10 @@ describe('createAlertingRuleFromTemplate', () => {
       create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggingSystemMock.createLogger();
 
     const result = await createAlertingRuleFromTemplate(
-      { rulesClient, esClient, logger },
+      { rulesClient, logger },
       {
         alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
         pkgName: 'test-package',
@@ -61,9 +50,6 @@ describe('createAlertingRuleFromTemplate', () => {
       }
     );
 
-    expect(esClient.esql.asyncQuery).toHaveBeenCalledWith({
-      query: mockEsqlQuery,
-    });
     expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: 'template-id' });
     expect(rulesClient.get).toHaveBeenCalledWith({ id: 'fleet-default-test-package-template-id' });
     expect(rulesClient.create).toHaveBeenCalledWith({
@@ -72,11 +58,7 @@ describe('createAlertingRuleFromTemplate', () => {
         alertTypeId: 'rule-type-id',
         name: 'Template Rule',
         consumer: 'alerts',
-        params: {
-          esqlQuery: {
-            esql: mockEsqlQuery,
-          },
-        },
+        params: {},
         schedule: { interval: '1m' },
         actions: [],
         tags: [],
@@ -84,11 +66,9 @@ describe('createAlertingRuleFromTemplate', () => {
       options: { id: 'fleet-default-test-package-template-id' },
     });
     expect(result).toEqual({
-      assetRef: {
-        id: 'fleet-default-test-package-template-id',
-        deferred: false,
-        type: 'alert',
-      },
+      id: 'fleet-default-test-package-template-id',
+      deferred: false,
+      type: 'alert',
     });
   });
 
@@ -99,11 +79,10 @@ describe('createAlertingRuleFromTemplate', () => {
       create: jest.fn().mockRejectedValue(new Error('No access to alerts')),
     } as unknown as RulesClientApi;
 
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggingSystemMock.createLogger();
 
     const result = await createAlertingRuleFromTemplate(
-      { rulesClient, esClient, logger },
+      { rulesClient, logger },
       {
         alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
         pkgName: 'test-package',
@@ -113,64 +92,11 @@ describe('createAlertingRuleFromTemplate', () => {
 
     expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: 'template-id' });
     expect(rulesClient.get).not.toHaveBeenCalled();
-    expect(esClient.esql.asyncQuery).not.toHaveBeenCalled();
     expect(rulesClient.create).not.toHaveBeenCalled();
     expect(result).toEqual({
-      assetRef: {
-        id: 'fleet-default-test-package-template-id',
-        deferred: true,
-        type: 'alert',
-      },
-      error: new Error('No access to alerts'),
-    });
-  });
-
-  it('should not create a rule and return a deferred reference if esql validation fails', async () => {
-    const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
-        id: 'template-id',
-        ruleTypeId: 'rule-type-id',
-        name: 'Template Rule',
-        consumer: 'alerts',
-        params: {
-          esqlQuery: {
-            esql: mockEsqlQuery,
-          },
-        },
-        schedule: { interval: '1m' },
-        actions: [],
-        tags: [],
-      }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
-    } as unknown as RulesClientApi;
-
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const mockEsqlError = new Error('verification_exception: index not found');
-    esClient.esql.asyncQuery.mockRejectedValue(mockEsqlError);
-
-    const logger = loggingSystemMock.createLogger();
-
-    const result = await createAlertingRuleFromTemplate(
-      { rulesClient, esClient, logger },
-      {
-        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
-        pkgName: 'test-package',
-        spaceId: 'default',
-      }
-    );
-
-    expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: 'template-id' });
-    expect(rulesClient.get).toHaveBeenCalledWith({ id: 'fleet-default-test-package-template-id' });
-    expect(esClient.esql.asyncQuery).toHaveBeenCalledWith({ query: mockEsqlQuery });
-    expect(rulesClient.create).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      assetRef: {
-        id: 'fleet-default-test-package-template-id',
-        deferred: true,
-        type: 'alert',
-      },
-      error: mockEsqlError,
+      id: 'fleet-default-test-package-template-id',
+      deferred: true,
+      type: 'alert',
     });
   });
 
@@ -181,11 +107,7 @@ describe('createAlertingRuleFromTemplate', () => {
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
         consumer: 'alerts',
-        params: {
-          esqlQuery: {
-            esql: mockEsqlQuery,
-          },
-        },
+        params: {},
         schedule: { interval: '1m' },
         actions: [],
         tags: [],
@@ -194,11 +116,10 @@ describe('createAlertingRuleFromTemplate', () => {
       create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggingSystemMock.createLogger();
 
     const result = await createAlertingRuleFromTemplate(
-      { rulesClient, esClient, logger },
+      { rulesClient, logger },
       {
         alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
         pkgName: 'test-package',
@@ -208,14 +129,11 @@ describe('createAlertingRuleFromTemplate', () => {
 
     expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: 'template-id' });
     expect(rulesClient.get).toHaveBeenCalledWith({ id: 'fleet-default-test-package-template-id' });
-    expect(esClient.esql.asyncQuery).not.toHaveBeenCalled();
     expect(rulesClient.create).not.toHaveBeenCalledWith();
     expect(result).toEqual({
-      assetRef: {
-        id: 'fleet-default-test-package-template-id',
-        deferred: false,
-        type: 'alert',
-      },
+      id: 'fleet-default-test-package-template-id',
+      deferred: false,
+      type: 'alert',
     });
   });
 });
@@ -249,11 +167,7 @@ describe('stepCreateAlertingRules', () => {
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
         consumer: 'alerts',
-        params: {
-          esqlQuery: {
-            esql: mockEsqlQuery,
-          },
-        },
+        params: {},
         schedule: { interval: '1m' },
         actions: [],
         tags: [],
@@ -291,7 +205,7 @@ describe('stepCreateAlertingRules', () => {
       authorizationHeader: 'Basic abc123',
     };
 
-    const results = await stepCreateAlertingRules(context as any);
+    await stepCreateAlertingRules(context as any);
     expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
       expect.anything(),
       'elastic_agent',
@@ -305,15 +219,5 @@ describe('stepCreateAlertingRules', () => {
       false,
       true
     );
-
-    expect(results).toEqual([
-      {
-        assetRef: {
-          id: 'fleet-default-elastic_agent-template-id',
-          type: 'alert',
-          deferred: false,
-        },
-      },
-    ]);
   });
 });

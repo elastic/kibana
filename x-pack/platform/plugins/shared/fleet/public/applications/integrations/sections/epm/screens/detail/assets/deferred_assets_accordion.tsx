@@ -72,15 +72,6 @@ export const getDeferredAssetDescription = (
           values: { assetCount: assetCount ?? 1 },
         }
       );
-    case KibanaSavedObjectType.alert:
-      return i18n.translate(
-        'xpack.fleet.epm.packageDetails.assets.deferredAlertInstallationsDescription',
-        {
-          defaultMessage:
-            '{assetCount, plural, one {Rule requires} other {Rules require}} additional permissions or queryable data to be installed.',
-          values: { assetCount: assetCount ?? 1 },
-        }
-      );
     default:
       return i18n.translate(
         'xpack.fleet.epm.packageDetails.assets.deferredInstallationsDescription',

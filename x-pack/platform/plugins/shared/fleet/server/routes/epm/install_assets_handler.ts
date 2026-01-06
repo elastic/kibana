@@ -8,12 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
-  FleetError,
-  FleetNotFoundError,
-  FleetUnauthorizedError,
-  PackageRuleAssetsHaveNoDataError,
-} from '../../errors';
+import { FleetError, FleetNotFoundError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../../services';
 import {
   deleteKibanaAssetsAndReferencesForSpace,
@@ -176,7 +171,7 @@ export const installRuleAssetsHandler: FleetRequestHandler<
 
   const { packageInfo } = installedPkgWithAssets;
 
-  const results = await stepCreateAlertingRules({
+  await stepCreateAlertingRules({
     logger,
     savedObjectsClient,
     packageInstallContext: {
@@ -187,17 +182,6 @@ export const installRuleAssetsHandler: FleetRequestHandler<
     spaceId,
     authorizationHeader,
   });
-
-  const verificationErrorResults = results.filter((r) =>
-    r.error?.message.includes('verification_exception')
-  );
-
-  if (verificationErrorResults.length > 0) {
-    const joinedMessages = Array.from(
-      new Set(verificationErrorResults.map((r) => r.error?.message))
-    ).join(';\n');
-    throw new PackageRuleAssetsHaveNoDataError(joinedMessages);
-  }
 
   return response.ok({ body: { success: true } });
 };
