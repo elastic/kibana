@@ -24,8 +24,6 @@ export type DashboardLocatorParams = Partial<
   DashboardState & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
-    references?: DashboardState['references'] & SerializableRecord;
-
     viewMode?: ViewMode;
 
     /**

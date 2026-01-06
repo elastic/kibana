@@ -55,13 +55,14 @@ import type { DashboardReadResponseBody, DashboardState, GridData } from '../../
 import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
+import { Reference } from '@kbn/content-management-utils';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
+  getInitialInput?: () => Partial<DashboardState & { references?: Reference[], viewMode?: ViewMode }>;
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
@@ -180,7 +181,7 @@ export type DashboardApi = CanExpandPanels &
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput' | 'references'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
