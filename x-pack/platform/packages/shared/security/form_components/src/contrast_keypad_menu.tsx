@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiIconTip,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
+} from '@elastic/eui';
 import type { Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import { useField } from 'formik';
@@ -117,4 +124,3 @@ export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
     </EuiKeyPadMenu>
   );
 };
-

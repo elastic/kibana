@@ -118,4 +118,3 @@ export const ThemeKeyPadMenu: FunctionComponent<ThemeKeyPadMenuProps> = ({
     themeKeyPadMenu
   );
 };
-
