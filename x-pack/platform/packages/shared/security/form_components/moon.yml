@@ -19,8 +19,9 @@ project:
     sourceRoot: x-pack/platform/packages/shared/security/form_components
 dependsOn:
   - '@kbn/i18n-react'
+  - '@kbn/i18n'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform
