@@ -954,6 +954,112 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getFileContents action', () => {
+    it('should get a file from repository', async () => {
+      const mockResponse = {
+        data: {
+          name: 'README.md',
+          path: 'README.md',
+          content: Buffer.from('File content').toString('base64'),
+          html_url: 'https://github.com/owner/repo/blob/main/README.md',
+          size: 1024,
+          type: 'file',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        path: 'README.md',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/contents/README.md',
+        {
+          params: { ref: 'main' },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should get a directory from repository', async () => {
+      const mockResponse = {
+        data: [
+          {
+            name: 'file1.ts',
+            path: 'src/file1.ts',
+            type: 'file',
+            size: 512,
+            url: 'https://api.github.com/repos/owner/repo/contents/src/file1.ts',
+            html_url: 'https://github.com/owner/repo/blob/main/src/file1.ts',
+          },
+          {
+            name: 'file2.js',
+            path: 'src/file2.js',
+            type: 'file',
+            size: 256,
+            url: 'https://api.github.com/repos/owner/repo/contents/src/file2.js',
+            html_url: 'https://github.com/owner/repo/blob/main/src/file2.js',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        path: 'src/',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/contents/src/',
+        {
+          params: { ref: 'main' },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should use custom ref when provided', async () => {
+      const mockResponse = {
+        data: {
+          name: 'config.json',
+          path: 'config.json',
+          content: Buffer.from('Config content').toString('base64'),
+          html_url: 'https://github.com/owner/repo/blob/develop/config.json',
+          size: 128,
+          type: 'file',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        path: 'config.json',
+        ref: 'develop',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/contents/config.json',
+        {
+          params: { ref: 'develop' },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {

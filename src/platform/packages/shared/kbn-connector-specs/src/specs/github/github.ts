@@ -368,6 +368,40 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    getFileContents: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        path: z.string(),
+        ref: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          path: string;
+          ref?: string;
+        };
+
+        const ref = typedInput.ref || 'main';
+
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
+          {
+            params: { ref },
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+
+        // Return raw response data to support both file and directory responses
+        // Files: object with name, path, content (base64), html_url, etc.
+        // Directories: array of objects with type, name, path, size, url, etc.
+        return response.data;
+      },
+    },
   },
 
   test: {
