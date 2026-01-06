@@ -26,7 +26,6 @@ import {
   result,
   dataViewRouteHelpersFactory,
   cleanupEntityStore,
-  waitForEnrichIndexPopulated,
   enableAssetInventory,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
