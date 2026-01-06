@@ -9,3 +9,5 @@ import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+
+export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);
