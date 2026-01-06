@@ -9,21 +9,10 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const INFERENCE_TYPE = 'inference';
-type DndWarningWindow = Window & { '__@hello-pangea/dnd-disable-dev-warnings'?: boolean };
 
 describe('Processor: Script', () => {
   let onUpdate: jest.Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-
-  beforeAll(() => {
-    // disable all react-beautiful-dnd development warnings
-    (window as DndWarningWindow)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
-  });
-
-  afterAll(() => {
-    // enable all react-beautiful-dnd development warnings
-    (window as DndWarningWindow)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
-  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -74,10 +63,10 @@ describe('Processor: Script', () => {
 
     expect(processors[0][INFERENCE_TYPE]).toEqual({
       model_id: 'test_inference_processor',
-      // eslint-disable-next-line prettier/prettier
-      inference_config: { inf_conf_1: 'aaa\"bbb', inf_conf_2: 'aaa(bbb' },
-      // eslint-disable-next-line prettier/prettier
-      field_map: { field_map_1: 'aaa\"bbb', field_map_2: 'aaa(bbb' },
+
+      inference_config: { inf_conf_1: 'aaa"bbb', inf_conf_2: 'aaa(bbb' },
+
+      field_map: { field_map_1: 'aaa"bbb', field_map_2: 'aaa(bbb' },
     });
   });
 });

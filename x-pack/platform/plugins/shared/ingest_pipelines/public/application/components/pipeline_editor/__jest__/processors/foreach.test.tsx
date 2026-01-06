@@ -9,21 +9,10 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const FOREACH_TYPE = 'foreach';
-type DndWarningWindow = Window & { '__@hello-pangea/dnd-disable-dev-warnings'?: boolean };
 
 describe('Processor: Foreach', () => {
   let onUpdate: jest.Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-
-  beforeAll(() => {
-    // disable all react-beautiful-dnd development warnings
-    (window as DndWarningWindow)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
-  });
-
-  afterAll(() => {
-    // enable all react-beautiful-dnd development warnings
-    (window as DndWarningWindow)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
-  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -87,8 +76,8 @@ describe('Processor: Foreach', () => {
 
     expect(processors[0][FOREACH_TYPE]).toEqual({
       field: 'test_foreach_processor',
-      // eslint-disable-next-line prettier/prettier
-      processor: { def_1: 'aaa\"bbb', def_2: 'aaa(bbb' },
+
+      processor: { def_1: 'aaa"bbb', def_2: 'aaa(bbb' },
     });
   });
 });
