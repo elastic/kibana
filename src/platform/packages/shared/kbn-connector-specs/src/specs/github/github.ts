@@ -427,6 +427,48 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    getIssueComments: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        issue_number: z.number(),
+        page: z.number().optional(),
+        per_page: z.number().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          issue_number: number;
+          page?: number;
+          per_page?: number;
+        };
+
+        const params: {
+          page?: number;
+          per_page?: number;
+        } = {};
+
+        if (typedInput.page !== undefined) {
+          params.page = typedInput.page;
+        }
+        if (typedInput.per_page !== undefined) {
+          params.per_page = typedInput.per_page;
+        }
+
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issue_number}/comments`,
+          {
+            ...(Object.keys(params).length > 0 ? { params } : {}),
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
   },
 
   test: {

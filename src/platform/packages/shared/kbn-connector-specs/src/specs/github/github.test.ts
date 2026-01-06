@@ -1095,6 +1095,92 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getIssueComments action', () => {
+    it('should get issue comments without pagination', async () => {
+      const mockResponse = {
+        data: [
+          {
+            id: 1,
+            body: 'This is a comment',
+            user: {
+              login: 'user1',
+              id: 123,
+            },
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
+          },
+          {
+            id: 2,
+            body: 'This is another comment',
+            user: {
+              login: 'user2',
+              id: 456,
+            },
+            created_at: '2024-01-02T00:00:00Z',
+            updated_at: '2024-01-02T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getIssueComments.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        issue_number: 42,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues/42/comments',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should get issue comments with pagination', async () => {
+      const mockResponse = {
+        data: [
+          {
+            id: 3,
+            body: 'Page 2 comment',
+            user: {
+              login: 'user3',
+              id: 789,
+            },
+            created_at: '2024-01-03T00:00:00Z',
+            updated_at: '2024-01-03T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getIssueComments.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        issue_number: 42,
+        page: 2,
+        per_page: 10,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues/42/comments',
+        {
+          params: {
+            page: 2,
+            per_page: 10,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
