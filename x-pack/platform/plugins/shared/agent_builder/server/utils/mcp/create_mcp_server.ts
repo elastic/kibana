@@ -29,6 +29,7 @@ export const createMcpServer = async ({
   runner,
   serverName = MCP_SERVER_NAME,
   serverVersion = MCP_SERVER_VERSION,
+  sessionIdGenerator,
 }: {
   logger: Logger;
   request: KibanaRequest;
@@ -36,8 +37,9 @@ export const createMcpServer = async ({
   runner: Runner;
   serverName?: string;
   serverVersion?: string;
+  sessionIdGenerator?: () => string;
 }) => {
-  const transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
+  const transport = new KibanaMcpHttpTransport({ sessionIdGenerator, logger });
 
   const server = new McpServer(
     {
@@ -92,7 +94,7 @@ const createHandler = ({
   request: KibanaRequest;
   server: McpServer;
 }) => {
-  const handler: ToolCallback<ZodTypeAny> = async (args) => {
+  const handler: ToolCallback<ZodTypeAny> = async (args, extra) => {
     const promptState: PromptManagerInitialState = {
       promptMap: {},
     };

@@ -6,3 +6,4 @@
  */
 
 export { createMcpServer } from './create_mcp_server';
+export { KibanaMcpHttpTransport } from './kibana_mcp_http_transport';
