@@ -7,8 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PolicyArtifactsPageLabels } from '../artifacts/translations';
 
-export const POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS = Object.freeze({
+export const POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS: Omit<
+  PolicyArtifactsPageLabels,
+  'layoutAboutMessage'
+> = Object.freeze({
   deleteModalTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.endpointExceptions.list.removeDialog.title',
     {
@@ -131,6 +135,10 @@ export const POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS = Object.freeze({
   emptyUnexistingPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.endpointExceptions.empty.unexisting.action',
     { defaultMessage: 'Add endpoint exception' }
+  ),
+  emptyUnexistingImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.endpointExceptions.empty.unexisting.importAction',
+    { defaultMessage: 'Import endpoint exception list' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate(
