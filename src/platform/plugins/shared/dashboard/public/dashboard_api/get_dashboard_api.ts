@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, map, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import { getReferencesForPanelId } from '../../common';
 
@@ -169,6 +169,25 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
+  const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
+  const relatedPanelSubscription = esqlVariablesManager.internalApi.esqlRelatedPanels$
+    .pipe(
+      map((esqlRelatedPanels) => (uuid: string) => {
+        const relatedPanelUUIDs = [];
+        const esqlRelatedPanelUUIDs = esqlRelatedPanels.get(uuid);
+        if (esqlRelatedPanelUUIDs) {
+          for (const relatedUUID of esqlRelatedPanelUUIDs) {
+            relatedPanelUUIDs.push(relatedUUID);
+          }
+        }
+
+        return relatedPanelUUIDs;
+      })
+    )
+    .subscribe((getRelatedPanels) =>
+      arePanelsRelated$.next((a: string, b: string) => getRelatedPanels(a).includes(b))
+    );
+
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -292,6 +311,7 @@ export function getDashboardApi({
     ...esqlVariablesManager.api,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
+    arePanelsRelated$,
   };
 
   const searchSessionManager = initializeSearchSessionManager(
@@ -318,6 +338,7 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
+      relatedPanelSubscription.unsubscribe();
     },
   };
 }
