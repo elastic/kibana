@@ -47,39 +47,6 @@ export const cleanupEntityStore = async ({
 };
 
 /**
- * Helper to wait for enrich index to be populated
- */
-export const waitForEnrichIndexPopulated = async ({
-  es,
-  logger,
-  retry,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'logger' | 'retry'> & { spaceId?: string }) => {
-  const spaceIdentifier = spaceId || 'default';
-  const enrichIndexName = `.enrich-${getEnrichPolicyId(spaceId)}`;
-  await retry.waitFor(
-    `enrich index to be created and populated for ${spaceIdentifier} space`,
-    async () => {
-      try {
-        await es.enrich.executePolicy({
-          name: getEnrichPolicyId(spaceId),
-          wait_for_completion: true,
-        });
-        // Check if the enrich index has data (policy has been executed)
-        const count = await es.count({
-          index: enrichIndexName,
-        });
-        logger.debug(`Enrich index count: ${count.count}`);
-        return count.count > 0;
-      } catch (e) {
-        logger.debug(`Waiting for enrich index: ${e.message}`);
-        return false;
-      }
-    }
-  );
-};
-
-/**
  * Helper to wait for entity data to be indexed
  */
 export const waitForEntityDataIndexed = async ({
