@@ -39,6 +39,7 @@ import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
 import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AzureCredentialsFormProps {
+  packagePolicyId?: string;
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
@@ -65,6 +66,7 @@ const getCloudConnectorCredentialOptions = (
 };
 
 export const AzureCredentialsFormAgentless = ({
+  packagePolicyId,
   input,
   newPolicy,
   updatePolicy,
@@ -147,6 +149,7 @@ export const AzureCredentialsFormAgentless = ({
       )}
       {azureCredentialsType === 'cloud_connectors' && isAzureCloudConnectorEnabled ? (
         <CloudConnectorSetup
+          packagePolicyId={packagePolicyId}
           input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}

@@ -17,7 +17,8 @@ export const AzureReusableConnectorForm: React.FC<{
   isEditPage: boolean;
   credentials: AzureCloudConnectorCredentials;
   setCredentials: (credentials: AzureCloudConnectorCredentials) => void;
-}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
+  packagePolicyId?: string;
+}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId, packagePolicyId }) => {
   return (
     <>
       <EuiSpacer size="m" />
@@ -33,6 +34,7 @@ export const AzureReusableConnectorForm: React.FC<{
         cloudConnectorId={cloudConnectorId}
         credentials={credentials}
         setCredentials={setCredentials}
+        packagePolicyId={packagePolicyId}
       />
       <EuiSpacer size="m" />
     </>

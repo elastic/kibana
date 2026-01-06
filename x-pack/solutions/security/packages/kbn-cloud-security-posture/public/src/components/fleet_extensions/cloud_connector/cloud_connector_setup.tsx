@@ -26,6 +26,7 @@ import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
 import { isCloudConnectorReusableEnabled } from './utils';
 export interface CloudConnectorSetupProps {
+  packagePolicyId?: string;
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
@@ -38,6 +39,7 @@ export interface CloudConnectorSetupProps {
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
+  packagePolicyId,
   input,
   newPolicy,
   packageInfo,
@@ -147,6 +149,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       content: (
         <ReusableCloudConnectorForm
           isEditPage={isEditPage}
+          packagePolicyId={packagePolicyId}
           newPolicy={newPolicy}
           cloudProvider={cloudProvider}
           credentials={existingConnectionCredentials}

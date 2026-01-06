@@ -58,6 +58,7 @@ type CloudSetupProps = CloudIntegrationSetupProps & {
 
 interface CloudIntegrationSetupProps {
   cloud: ICloudSetup;
+  packagePolicyId?: string;
   defaultSetupTechnology?: SetupTechnology;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
   isAgentlessEnabled?: boolean;
@@ -74,6 +75,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
   // eslint-disable-next-line complexity
   ({
     cloud,
+    packagePolicyId,
     defaultSetupTechnology,
     handleSetupTechnologyChange,
     isAgentlessEnabled,
@@ -278,6 +280,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {selectedProvider === AWS_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AwsCredentialsFormAgentless
             cloud={cloud}
+            packagePolicyId={packagePolicyId}
             input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
@@ -323,6 +326,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
 
         {selectedProvider === AZURE_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AzureCredentialsFormAgentless
+            packagePolicyId={packagePolicyId}
             input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
@@ -356,6 +360,7 @@ export const CloudSetup = memo<CloudSetupProps>(
   ({
     configuration,
     cloud,
+    packagePolicyId,
     defaultSetupTechnology,
     handleSetupTechnologyChange,
     isAgentlessEnabled,
@@ -377,6 +382,7 @@ export const CloudSetup = memo<CloudSetupProps>(
       >
         <CloudIntegrationSetup
           cloud={cloud}
+          packagePolicyId={packagePolicyId}
           defaultSetupTechnology={defaultSetupTechnology}
           handleSetupTechnologyChange={handleSetupTechnologyChange}
           isAgentlessEnabled={isAgentlessEnabled}

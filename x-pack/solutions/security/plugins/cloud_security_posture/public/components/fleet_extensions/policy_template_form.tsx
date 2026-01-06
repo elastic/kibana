@@ -70,7 +70,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     defaultSetupTechnology,
     integrationToEnable,
     setIntegrationToEnable,
+    ...rest
   }) => {
+    const policy = 'policy' in rest ? rest.policy : undefined;
+    const packagePolicyId = policy?.id;
     const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '2.0.0-preview01';
     const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '3.1.0-preview02';
     const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
@@ -214,6 +217,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {input.policy_template === CSPM_POLICY_TEMPLATE && (
           <CloudSetup
             configuration={CLOUD_SETUP_MAPPING}
+            packagePolicyId={packagePolicyId}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}

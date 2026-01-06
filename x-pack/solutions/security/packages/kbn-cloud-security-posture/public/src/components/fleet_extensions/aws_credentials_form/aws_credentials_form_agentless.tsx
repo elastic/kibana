@@ -54,6 +54,7 @@ import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AwsAgentlessFormProps {
   cloud: CloudSetup;
+  packagePolicyId?: string;
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
@@ -131,6 +132,7 @@ const getCloudFormationConfig = (
 // TODO: Extract cloud connector logic into separate component
 export const AwsCredentialsFormAgentless = ({
   cloud,
+  packagePolicyId,
   input,
   newPolicy,
   packageInfo,
@@ -339,6 +341,7 @@ export const AwsCredentialsFormAgentless = ({
       {awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
         <CloudConnectorSetup
           templateName={templateName}
+          packagePolicyId={packagePolicyId}
           input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}

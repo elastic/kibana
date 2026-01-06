@@ -24,6 +24,9 @@ import {
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
   EuiHorizontalRule,
+  EuiPopover,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,6 +44,7 @@ import {
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
+import { SwitchConnectorModal } from './switch_connector_modal';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -49,6 +53,7 @@ interface CloudConnectorPoliciesFlyoutProps {
   accountType?: AccountType;
   provider: CloudProviders;
   onClose: () => void;
+  onPolicyCloudConnectorSwitched?: (packagePolicyId: string, newCloudConnectorId: string) => void;
 }
 
 export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyoutProps> = ({
@@ -58,6 +63,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   accountType,
   provider,
   onClose,
+  onPolicyCloudConnectorSwitched,
 }) => {
   const { application } = useKibana().services;
   const flyoutTitleId = useGeneratedHtmlId();
@@ -66,11 +72,26 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [switchModalPolicy, setSwitchModalPolicy] = useState<{
+    id: string;
+    name: string;
+    newCloudConnectorId?: string;
+  } | null>(null);
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
+  const togglePopover = useCallback((itemId: string) => {
+    setOpenPopoverId((currentId) => (currentId === itemId ? null : itemId));
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setOpenPopoverId(null);
+  }, []);
 
   const {
     data: usageData,
     isLoading,
     error,
+    refetch: refetchUsage,
   } = useCloudConnectorUsage(
     cloudConnectorId,
     pageIndex + 1, // Convert from 0-based to 1-based
@@ -165,7 +186,29 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [application]
   );
 
-  const columns: Array<EuiBasicTableColumn<(typeof usageItems)[0]>> = useMemo(
+  const handleOpenSwitchModal = useCallback((item: (typeof usageItems)[0]) => {
+    setSwitchModalPolicy({
+      id: item.id,
+      name: item.name,
+    });
+  }, []);
+
+  const handleCloseSwitchModal = useCallback(() => {
+    setSwitchModalPolicy(null);
+  }, []);
+
+  const handleSwitchSuccess = useCallback(
+    (newCloudConnectorId: string) => {
+      refetchUsage();
+      // Notify parent if the switched policy's connector was changed
+      if (onPolicyCloudConnectorSwitched && switchModalPolicy) {
+        onPolicyCloudConnectorSwitched(switchModalPolicy.id, newCloudConnectorId);
+      }
+    },
+    [refetchUsage, onPolicyCloudConnectorSwitched, switchModalPolicy]
+  );
+
+  const columns = useMemo<Array<EuiBasicTableColumn<(typeof usageItems)[0]>>>(
     () => [
       {
         field: 'name',
@@ -219,8 +262,79 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         ),
         render: (updatedAt: string) => new Date(updatedAt).toLocaleDateString(),
       },
+      {
+        name: i18n.translate(
+          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.actionsColumn',
+          {
+            defaultMessage: 'Actions',
+          }
+        ),
+        align: 'right',
+        render: (item: (typeof usageItems)[0]) => {
+          const isOpen = openPopoverId === item.id;
+
+          const items = [
+            <EuiContextMenuItem
+              key="switch"
+              icon="merge"
+              onClick={() => {
+                closePopover();
+                handleOpenSwitchModal(item);
+              }}
+              data-test-subj="switchConnectorMenuItem"
+            >
+              {i18n.translate(
+                'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.switchConnectorAction',
+                {
+                  defaultMessage: 'Switch Connector',
+                }
+              )}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="view"
+              icon="eye"
+              onClick={() => {
+                closePopover();
+                handleNavigateToPolicy(item.id);
+              }}
+              data-test-subj="viewPolicyMenuItem"
+            >
+              {i18n.translate(
+                'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.viewPolicyAction',
+                {
+                  defaultMessage: 'View Policy',
+                }
+              )}
+            </EuiContextMenuItem>,
+          ];
+
+          return (
+            <EuiPopover
+              anchorPosition="downLeft"
+              panelPaddingSize="none"
+              button={
+                <EuiButtonIcon
+                  iconType="boxesHorizontal"
+                  onClick={() => togglePopover(item.id)}
+                  aria-label={i18n.translate(
+                    'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.actionsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Actions',
+                    }
+                  )}
+                  data-test-subj="policyActionsButton"
+                />
+              }
+              isOpen={isOpen}
+              closePopover={closePopover}
+            >
+              <EuiContextMenuPanel size="s" items={items} />
+            </EuiPopover>
+          );
+        },
+      },
     ],
-    [handleNavigateToPolicy]
+    [handleNavigateToPolicy, handleOpenSwitchModal, openPopoverId, togglePopover, closePopover]
   );
 
   return (
@@ -391,6 +505,19 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           />
         )}
       </EuiFlyoutBody>
+
+      {switchModalPolicy && (
+        <SwitchConnectorModal
+          packagePolicyId={switchModalPolicy.id}
+          packagePolicyName={switchModalPolicy.name}
+          currentCloudConnectorId={cloudConnectorId}
+          currentCloudConnectorName={cloudConnectorName}
+          provider={provider}
+          accountType={accountType}
+          onClose={handleCloseSwitchModal}
+          onSuccess={handleSwitchSuccess}
+        />
+      )}
     </EuiFlyout>
   );
 };

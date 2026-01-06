@@ -15,10 +15,11 @@ import { AWS_PROVIDER, AZURE_PROVIDER } from '../constants';
 export const ReusableCloudConnectorForm: React.FC<{
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  packagePolicyId?: string;
   newPolicy: NewPackagePolicy;
   cloudProvider?: CloudProvider;
   isEditPage: boolean;
-}> = ({ credentials, setCredentials, cloudProvider, newPolicy, isEditPage }) => {
+}> = ({ credentials, setCredentials, cloudProvider, packagePolicyId, newPolicy, isEditPage }) => {
   const provider = cloudProvider || AWS_PROVIDER;
 
   switch (provider) {
@@ -29,6 +30,7 @@ export const ReusableCloudConnectorForm: React.FC<{
           credentials={credentials}
           cloudConnectorId={newPolicy.cloud_connector_id || undefined}
           setCredentials={setCredentials}
+          packagePolicyId={packagePolicyId}
         />
       );
     case AZURE_PROVIDER:
@@ -38,6 +40,7 @@ export const ReusableCloudConnectorForm: React.FC<{
           credentials={credentials}
           cloudConnectorId={newPolicy.cloud_connector_id || undefined}
           setCredentials={setCredentials}
+          packagePolicyId={packagePolicyId}
         />
       );
     case 'gcp':

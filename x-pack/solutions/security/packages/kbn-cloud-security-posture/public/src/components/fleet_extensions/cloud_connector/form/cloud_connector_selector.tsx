@@ -36,6 +36,7 @@ interface CloudConnectorSelectorProps {
   cloudConnectorId: string | undefined;
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  packagePolicyId?: string;
 }
 
 export const CloudConnectorSelector = ({
@@ -43,6 +44,7 @@ export const CloudConnectorSelector = ({
   cloudConnectorId,
   credentials,
   setCredentials,
+  packagePolicyId,
 }: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors(provider);
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
@@ -192,6 +194,25 @@ export const CloudConnectorSelector = ({
     [cloudConnectors, provider, setCredentials]
   );
 
+  // Handle when a policy's connector is switched from within the flyout
+  const handlePolicyCloudConnectorSwitched = useCallback(
+    (switchedPackagePolicyId: string, newCloudConnectorId: string) => {
+      // Only update if the switched policy is the one currently being edited
+      if (!packagePolicyId || switchedPackagePolicyId !== packagePolicyId) {
+        return;
+      }
+
+      // Check if the new connector is already in our loaded list
+      const connectorExists = cloudConnectors.some((c) => c.id === newCloudConnectorId);
+
+      if (connectorExists) {
+        // Reuse the existing handleChange logic
+        handleChange(newCloudConnectorId);
+      }
+    },
+    [packagePolicyId, cloudConnectors, handleChange]
+  );
+
   const testSubj =
     provider === 'aws'
       ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
@@ -225,6 +246,7 @@ export const CloudConnectorSelector = ({
           accountType={flyoutConnector.accountType}
           provider={provider}
           onClose={handleCloseFlyout}
+          onPolicyCloudConnectorSwitched={handlePolicyCloudConnectorSwitched}
         />
       )}
     </>
