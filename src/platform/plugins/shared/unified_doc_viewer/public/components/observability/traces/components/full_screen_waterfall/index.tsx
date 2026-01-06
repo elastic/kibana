@@ -57,34 +57,32 @@ export const FullScreenWaterfall = ({
   const getParentApi = useCallback(
     () => ({
       getSerializedStateForChild: () => ({
-        rawState: {
-          traceId,
-          rangeFrom,
-          rangeTo,
-          serviceName,
-          scrollElement: overlayMaskRef.current,
-          onErrorClick: (params: {
-            traceId: string;
-            docId: string;
-            errorCount: number;
-            errorDocId?: string;
-          }) => {
-            if (params.errorCount > 1) {
-              setActiveFlyoutId(spanFlyoutId);
-              setActiveSection('errors-table');
-              setDocId(params.docId);
-            } else if (params.errorDocId) {
-              setActiveFlyoutId(logsFlyoutId);
-              setDocId(params.errorDocId);
-            }
-          },
-          onNodeClick: (nodeSpanId: string) => {
-            setActiveSection(undefined);
-            setDocId(nodeSpanId);
+        traceId,
+        rangeFrom,
+        rangeTo,
+        serviceName,
+        scrollElement: overlayMaskRef.current,
+        onErrorClick: (params: {
+          traceId: string;
+          docId: string;
+          errorCount: number;
+          errorDocId?: string;
+        }) => {
+          if (params.errorCount > 1) {
             setActiveFlyoutId(spanFlyoutId);
-          },
-          mode: 'full',
+            setActiveSection('errors-table');
+            setDocId(params.docId);
+          } else if (params.errorDocId) {
+            setActiveFlyoutId(logsFlyoutId);
+            setDocId(params.errorDocId);
+          }
         },
+        onNodeClick: (nodeSpanId: string) => {
+          setActiveSection(undefined);
+          setDocId(nodeSpanId);
+          setActiveFlyoutId(spanFlyoutId);
+        },
+        mode: 'full',
       }),
     }),
     [traceId, rangeFrom, rangeTo, serviceName]

@@ -55,16 +55,14 @@ describe('embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
+            bork: 'blorp?',
           }),
         })}
       />
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
         finalizeApi: expect.any(Function),
@@ -80,16 +78,14 @@ describe('embeddable renderer', () => {
         maybeId={'12345'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
+            bork: 'blorp?',
           }),
         })}
       />
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
         finalizeApi: expect.any(Function),
@@ -102,15 +98,13 @@ describe('embeddable renderer', () => {
     const parentApi = {
       ...getMockPresentationContainer(),
       getSerializedStateForChild: () => ({
-        rawState: {
-          bork: 'blorp?',
-        },
+        bork: 'blorp?',
       }),
     };
     render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),
         finalizeApi: expect.any(Function),
@@ -124,7 +118,8 @@ describe('embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu', bork: 'Dara' },
+            name: 'Kuni Garu',
+            bork: 'Dara'
           }),
         })}
       />
@@ -145,7 +140,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu'
           }),
         })}
       />
@@ -175,7 +170,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu'
           }),
         })}
       />
@@ -210,7 +205,6 @@ describe('embeddable renderer', () => {
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
             getSerializedStateForChild: () => ({
-              rawState: {},
             }),
           })}
         />
@@ -250,7 +244,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu'
           }),
         })}
       />
@@ -303,7 +297,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu'
           }),
         })}
       />

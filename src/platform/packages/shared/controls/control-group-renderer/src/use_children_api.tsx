@@ -52,7 +52,7 @@ export const useChildrenApi = (
     const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
       const serializedState: { [id: string]: object } = {};
       Object.entries(lastSavedState).forEach(([id, control]) => {
-        serializedState[id] = { rawState: omit(control, ['grow', 'width', 'order']) };
+        serializedState[id] = omit(control, ['grow', 'width', 'order']);
       });
       lastSavedChildState$Ref.current.next(serializedState);
       currentChildState$Ref.current.next(serializedState);

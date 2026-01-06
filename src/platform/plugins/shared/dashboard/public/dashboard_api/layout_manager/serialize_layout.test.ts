@@ -59,32 +59,16 @@ describe('serializeLayout', () => {
     } as unknown as DashboardLayout;
     const childState = {
       '1': {
-        rawState: {
-          title: 'panel One',
-        },
-        references: [
-          {
-            name: 'myRef',
-            id: 'ref1',
-            type: 'testRefType',
-          },
-        ],
+        title: 'panel One',
       },
       '3': {
-        rawState: {
-          title: 'panel Three',
-        },
-        references: [],
+        title: 'panel Three',
       },
       control1: {
-        rawState: {
-          selection: 'some value',
-        },
+        selection: 'some value',
       },
       control2: {
-        rawState: {
-          anotherValue: 'test',
-        },
+        anotherValue: 'test',
       },
     };
 

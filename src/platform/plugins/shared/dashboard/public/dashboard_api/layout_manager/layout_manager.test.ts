@@ -80,9 +80,7 @@ describe('layout manager', () => {
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
-    serializeState: () => ({
-      rawState: titleManager.getLatestState(),
-    }),
+    serializeState: () => titleManager.getLatestState(),
   };
 
   const section1 = {
@@ -112,9 +110,7 @@ describe('layout manager', () => {
       {
         embeddableId: 'panelTwo',
         serializedState: {
-          rawState: {
-            title: 'Panel Two',
-          },
+          title: 'Panel Two',
         },
         size: {
           height: 1,
@@ -125,9 +121,7 @@ describe('layout manager', () => {
       {
         embeddableId: 'panelThree',
         serializedState: {
-          rawState: {
-            title: 'Panel Three',
-          },
+          title: 'Panel Three',
         },
         size: {
           height: 1,
@@ -222,9 +216,7 @@ describe('layout manager', () => {
         saveToLibrary: jest.fn(),
         getSerializedStateByReference: jest.fn(),
         getSerializedStateByValue: () => ({
-          rawState: {
-            isByValue: true,
-          },
+          isByValue: true,
         }),
       } as DefaultEmbeddableApi & HasLibraryTransforms);
 
@@ -249,9 +241,7 @@ describe('layout manager', () => {
       layoutManager.api.registerChildApi({
         ...panel1Api,
         ...titleManagerOfClone.api,
-        serializeState: () => ({
-          rawState: titleManagerOfClone.getLatestState(),
-        }),
+        serializeState: () => titleManagerOfClone.getLatestState(),
       });
 
       await layoutManager.api.duplicatePanel('panelOne');

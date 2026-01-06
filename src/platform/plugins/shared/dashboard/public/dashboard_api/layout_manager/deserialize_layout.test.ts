@@ -107,26 +107,16 @@ describe('deserializeLayout', () => {
     expect(childState).toMatchInlineSnapshot(`
       Object {
         "1": Object {
-          "rawState": Object {
-            "title": "panel One",
-          },
-          "references": Array [],
+          "title": "panel One",
         },
         "3": Object {
-          "rawState": Object {
-            "title": "panel Three",
-          },
-          "references": Array [],
+         "title": "panel Three",
         },
         "control1": Object {
-          "rawState": Object {
-            "someValue": "test",
-          },
+          "someValue": "test",
         },
         "control2": Object {
-          "rawState": Object {
-            "anotherValue": 1,
-          },
+          "anotherValue": 1,
         },
       }
     `);

@@ -47,8 +47,8 @@ describe('AddToLibraryAction', () => {
     checkForDuplicateTitle: async () => {},
     canLinkToLibrary: async () => true,
     canUnlinkFromLibrary: async () => false,
-    getSerializedStateByReference: () => ({ rawState: { savedObjectId: 'libraryId1' } }),
-    getSerializedStateByValue: () => ({ rawState: {} }),
+    getSerializedStateByReference: () => ({ savedObjectId: 'libraryId1' }),
+    getSerializedStateByValue: () => ({}),
     parentApi: {
       replacePanel: replacePanelMock,
       viewMode$: new BehaviorSubject('edit'),
@@ -69,11 +69,8 @@ describe('AddToLibraryAction', () => {
       expect(replacePanelMock).toHaveBeenCalledWith('1', {
         panelType: 'testEmbeddable',
         serializedState: {
-          rawState: {
-            savedObjectId: 'libraryId1',
-            title: 'Library panel one',
-          },
-          references: undefined,
+          savedObjectId: 'libraryId1',
+          title: 'Library panel one',
         },
       });
     });

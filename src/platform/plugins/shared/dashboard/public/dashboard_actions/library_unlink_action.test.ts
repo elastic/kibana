@@ -19,8 +19,8 @@ describe('AddToLibraryAction', () => {
     checkForDuplicateTitle: async () => {},
     canLinkToLibrary: async () => false,
     canUnlinkFromLibrary: async () => true,
-    getSerializedStateByReference: () => ({ rawState: {} }),
-    getSerializedStateByValue: () => ({ rawState: { key1: 'value1' } }),
+    getSerializedStateByReference: () => ({}),
+    getSerializedStateByValue: () => ({ key1: 'value1' }),
     parentApi: {
       replacePanel: replacePanelMock,
       viewMode$: new BehaviorSubject('edit'),
@@ -40,12 +40,9 @@ describe('AddToLibraryAction', () => {
       expect(replacePanelMock).toHaveBeenCalledWith('1', {
         panelType: 'testEmbeddable',
         serializedState: {
-          rawState: {
-            key1: 'value1',
-            // should get default title from by reference embeddable
-            title: 'Panel one',
-          },
-          references: undefined,
+          key1: 'value1',
+          // should get default title from by reference embeddable
+          title: 'Panel one',
         },
       });
     });
