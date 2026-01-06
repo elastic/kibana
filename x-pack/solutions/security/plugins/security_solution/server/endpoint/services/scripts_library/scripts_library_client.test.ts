@@ -51,9 +51,7 @@ describe('scripts library client', () => {
 
     fileMock = filesPluginMocks.file;
 
-    ScriptsLibraryMock.applyMocksToSoClient(
-      endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-    );
+    ScriptsLibraryMock.applyMocksToSoClient(soClientMock);
 
     scriptsClient = new ScriptsLibraryClient({
       spaceId: 'spaceA',
@@ -67,9 +65,7 @@ describe('scripts library client', () => {
 
     beforeEach(() => {
       createBodyMock = ScriptsLibraryMock.generateCreateScriptBody();
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).find.mockResolvedValue({
+      soClientMock.find.mockResolvedValue({
         page: 0,
         per_page: 0,
         total: 0,
@@ -135,14 +131,25 @@ describe('scripts library client', () => {
     });
 
     it('should delete the file record if creating the script entry fails', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).create.mockRejectedValue(new Error('Failed to create so record'));
+      soClientMock.create.mockRejectedValue(new Error('Failed to create so record'));
 
       await expect(scriptsClient.create(createBodyMock)).rejects.toThrow(
         'Failed to create so record'
       );
       expect(fileMock.delete).toHaveBeenCalled();
+    });
+
+    it('should validate that file hash does not already exist', async () => {
+      soClientMock.find.mockResolvedValue({
+        page: 1,
+        per_page: 1,
+        total: 1,
+        saved_objects: [{ ...ScriptsLibraryMock.generateSavedObjectScriptEntry(), score: 1 }],
+      });
+
+      await expect(scriptsClient.create(createBodyMock)).rejects.toThrow(
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with with a script entry named [my script] (script ID: [1-2-3])'
+      );
     });
 
     it('should return the new Script record', async () => {
@@ -299,9 +306,7 @@ describe('scripts library client', () => {
 
   describe('#update()', () => {
     beforeEach(() => {
-      ScriptsLibraryMock.applyMocksToSoClient(
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      );
+      ScriptsLibraryMock.applyMocksToSoClient(soClientMock);
     });
 
     it('should update script entry only when no file content is provided', async () => {
@@ -329,9 +334,7 @@ describe('scripts library client', () => {
     });
 
     it('should upload file content, update script with new file info and delete old file', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).find.mockResolvedValue({
+      soClientMock.find.mockResolvedValue({
         page: 0,
         per_page: 0,
         total: 0,
@@ -367,9 +370,7 @@ describe('scripts library client', () => {
     });
 
     it('should throw error when script does not exist', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
       await expect(
         scriptsClient.update({
@@ -428,6 +429,21 @@ describe('scripts library client', () => {
       ).rejects.toThrow('Failed to update script record');
 
       expect(fileMock.delete).toHaveBeenCalled();
+    });
+
+    it('should validate that file hash does not already exist for another script', async () => {
+      soClientMock.find.mockResolvedValue({
+        page: 1,
+        per_page: 1,
+        total: 1,
+        saved_objects: [{ ...ScriptsLibraryMock.generateSavedObjectScriptEntry(), score: 1 }],
+      });
+
+      await expect(
+        scriptsClient.update({ id: '1-2-3', file: createHapiReadableStreamMock() })
+      ).rejects.toThrow(
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with with a script entry named [my script] (script ID: [1-2-3])'
+      );
     });
 
     it('should return script record on successful update', async () => {
@@ -511,9 +527,7 @@ describe('scripts library client', () => {
     });
 
     it('should throw error when script does not exist', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
       await expect(scriptsClient.download('non-existent')).rejects.toThrow(
         'Script with id non-existent not found'
@@ -537,9 +551,7 @@ describe('scripts library client', () => {
     });
 
     it('should throw error when script does not exist', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
       await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
         'Script with id non-existent not found'

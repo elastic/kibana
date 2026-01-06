@@ -185,6 +185,7 @@ export const ScriptsLibraryMock = Object.freeze({
   generateScriptEntry: generateScriptEntryMock,
   generateCreateScriptBody: generateCreateScriptBodyMock,
   generateUpdateScriptBody: generateUpdateScriptBodyMock,
+  generateSavedObjectScriptEntry: generateSavedObjectScriptEntryMock,
   createFilesPluginClient: createFilesPluginClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });
