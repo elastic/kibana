@@ -11,11 +11,6 @@ import '@kbn/code-editor-mock/jest_helper';
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
-  const isRecord = (v: unknown): v is Record<string, unknown> =>
-    typeof v === 'object' && v !== null;
-
-  const isArrayLikeWithZero = (v: unknown): v is { 0: unknown } => isRecord(v) && '0' in v;
-
   return {
     ...original,
     EuiComboBox: (props: {
@@ -27,19 +22,12 @@ jest.mock('@elastic/eui', () => {
         data-test-subj={props['data-test-subj'] || 'mockComboBox'}
         data-currentvalue={props.selectedOptions}
         value={props.selectedOptions[0]?.value}
-        onChange={(evt: unknown) => {
-          if (isArrayLikeWithZero(evt)) {
-            const first = evt[0];
-            if (isRecord(first) && typeof first.label === 'string') {
-              props.onChange([first as { label: string; value?: string }]);
-            }
-            return;
-          }
-
-          if (isRecord(evt) && isRecord(evt.target) && typeof evt.target.value === 'string') {
-            const value = evt.target.value;
-            props.onChange([{ label: value, value }]);
-          }
+        // The real `EuiComboBox` calls `onChange` with an array of selected options.
+        // Our RTL unit tests drive this mock via `fireEvent.change(input, { target: { value } })`,
+        // so we translate the input value into the EuiComboBox-style payload.
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          const value = event.target.value;
+          props.onChange([{ label: value, value }]);
         }}
       />
     ),
