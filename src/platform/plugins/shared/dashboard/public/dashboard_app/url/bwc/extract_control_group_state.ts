@@ -17,21 +17,23 @@ import {
 import type { DashboardState } from '../../../../common';
 
 export function extractControlGroupState(state: { [key: string]: unknown }): {
-  controlGroupState?: DashboardState['controlGroupInput'];
+  pinned_panels?: DashboardState['pinned_panels'];
   autoApplyFilters?: boolean;
 } {
-  let pathToState = 'controlGroupInput';
-  let pathToControls: string | undefined;
+  let pathToState = 'pinned_panels'; // >=9.3 controls exported under pinned_panels
+  let pathToControls = 'pinned_panels.controls';
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // >8.16 to <=8.18 passed control group runtime state in with controlGroupState key
     pathToState = 'controlGroupState';
     pathToControls = 'controlGroupState.initialChildControlState';
   } else if (state.controlGroupInput && typeof state.controlGroupInput === 'object') {
+    // <9.4 controls exported as controlGroupInput
+    pathToState = 'controlGroupInput';
     if ('panels' in state.controlGroupInput) {
       // <8.16 controls exported as panels
       pathToControls = 'controlGroupInput.panels';
     } else if ('controls' in state.controlGroupInput) {
-      // >8.18 controls exported as controls
+      // >8.18 to <=9.4 controls exported as controls
       pathToControls = 'controlGroupInput.controls';
     }
   }
@@ -143,7 +145,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   return {
     autoApplyFilters:
       autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
-    controlGroupState: standardizedControls.length
+    pinned_panels: standardizedControls.length
       ? {
           controls: standardizedControls,
         }

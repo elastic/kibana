@@ -22,7 +22,7 @@ export interface DashboardCapabilities {
 
 export type DashboardLocatorParams = Partial<
   DashboardState & {
-    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
+    pinned_panels?: DashboardState['pinned_panels'] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;
 

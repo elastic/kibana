@@ -183,7 +183,7 @@ export type DashboardApi = CanExpandPanels &
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput' | 'references'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;

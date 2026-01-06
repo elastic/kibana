@@ -76,7 +76,7 @@ export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
-  initialControls: DashboardState['controlGroupInput'] | undefined,
+  initialControls: DashboardState['pinned_panels'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferences: (id: string) => Reference[]
 ) {
@@ -497,7 +497,7 @@ export function initializeLayoutManager(
           combineLatestWith(
             lastSavedState$.pipe(
               map((lastSaved) =>
-                deserializeLayout(lastSaved.panels, lastSaved.controlGroupInput, getReferences)
+                deserializeLayout(lastSaved.panels, lastSaved.pinned_panels, getReferences)
               ),
               tap(({ layout, childState }) => {
                 lastSavedChildState = childState;

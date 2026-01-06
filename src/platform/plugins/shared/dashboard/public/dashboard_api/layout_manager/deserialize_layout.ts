@@ -15,7 +15,7 @@ import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  controls: DashboardState['controlGroupInput'],
+  controls: DashboardState['pinned_panels'],
   getReferences: (id: string) => Reference[]
 ) {
   const childState: DashboardChildState = {};

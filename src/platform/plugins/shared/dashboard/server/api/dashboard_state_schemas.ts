@@ -10,7 +10,7 @@
 import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { controlsGroupSchema } from '@kbn/controls-schemas';
+import { controlsGroupSchema as pinnedControlsSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
@@ -163,7 +163,6 @@ export function getDashboardStateSchema() {
   return schema.object({
     // unsuppoted "as code" keys
     // TODO remove before GA
-    controlGroupInput: schema.maybe(controlsGroupSchema),
     references: schema.maybe(
       schema.arrayOf(referenceSchema, {
         meta: {
@@ -173,6 +172,7 @@ export function getDashboardStateSchema() {
     ),
 
     // supported "as code" keys
+    pinned_panels: schema.maybe(pinnedControlsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
     options: schema.maybe(optionsSchema),

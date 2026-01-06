@@ -161,10 +161,10 @@ export function ShowShareModal({
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...unsavedDashboardState,
-    controlGroupInput:
-      unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
     references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
+
+  console.log({ unsavedDashboardState, unsavedDashboardStateForLocator });
 
   const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,

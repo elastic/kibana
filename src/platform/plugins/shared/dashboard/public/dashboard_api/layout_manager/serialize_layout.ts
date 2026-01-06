@@ -17,7 +17,7 @@ import type { DashboardSection } from '../../../server';
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState
-): Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'> {
+): Pick<DashboardState, 'panels' | 'references' | 'pinned_panels'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
@@ -46,7 +46,7 @@ export function serializeLayout(
 
   return {
     panels: [...panels, ...Object.values(sections)],
-    controlGroupInput: {
+    pinned_panels: {
       controls: Object.entries(layout.controls)
         .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
         .map(([id, control]) => {
