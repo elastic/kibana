@@ -120,7 +120,7 @@ async function getEisApiKey(log: ToolingLog): Promise<string> {
     return apiKey.trim();
   } catch (error) {
     throw new Error(
-      'Failed to read EIS API key from vault. Please ensure you are logged in to vault (vault login -method=okta) and connected to VPN if needed. See https://docs.elastic.dev/vault',
+      'Failed to read EIS API key from vault. Please ensure you are logged in to vault (vault login --method oidc) and connected to VPN if needed. See https://docs.elastic.dev/vault',
       { cause: error }
     );
   }
