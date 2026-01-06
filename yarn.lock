@@ -5100,6 +5100,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/control-group-renderer@link:src/platform/packages/shared/controls/control-group-renderer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-constants@link:src/platform/packages/shared/controls/controls-constants":
   version "0.0.0"
   uid ""
@@ -5109,6 +5113,10 @@
   uid ""
 
 "@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
+  version "0.0.0"
+  uid ""
+
+"@kbn/controls-renderer@link:src/platform/packages/private/kbn-controls-renderer":
   version "0.0.0"
   uid ""
 
