@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import Path from 'node:path';
+
 export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
   METRIC_TRENDLINE: 'metricTrendline',
 } as const;
-
-import Path from 'node:path';
 
 // Test data time range constants
 export const PROFILING_TEST_DATES = {
