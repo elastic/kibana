@@ -19,14 +19,14 @@ export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
       path: '/internal/security/entity-store/install',
-      access: 'public',
+      access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v2,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
