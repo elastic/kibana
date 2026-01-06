@@ -58,7 +58,7 @@ describe('Processor: GeoGrid', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GEO_GRID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GEO_GRID_TYPE]).toEqual(
       expect.objectContaining({
@@ -97,7 +97,7 @@ describe('Processor: GeoGrid', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GEO_GRID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GEO_GRID_TYPE]).toEqual({
       field: 'test_geo_grid_processor',

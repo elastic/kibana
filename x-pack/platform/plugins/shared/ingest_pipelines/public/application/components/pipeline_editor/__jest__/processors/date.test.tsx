@@ -57,7 +57,7 @@ describe('Processor: Date', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DATE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].date).toEqual({
       field: 'field_1',
       formats: ['ISO8601'],
@@ -91,7 +91,7 @@ describe('Processor: Date', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DATE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].date).toEqual({
       field: 'field_1',
       formats: ['ISO8601'],

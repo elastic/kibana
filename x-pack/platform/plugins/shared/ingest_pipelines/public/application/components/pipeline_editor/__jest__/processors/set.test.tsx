@@ -220,7 +220,7 @@ describe('Processor: Set', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    const processors = getProcessorValue(onUpdate);
     // "false" is JSON-parsed to the boolean false during serialization
     expect(processors[0][SET_TYPE].field).toEqual('field_1');
     expect(processors[0][SET_TYPE].value).toEqual(false);

@@ -51,7 +51,7 @@ describe('Processor: Fail', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, FAIL_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].fail).toEqual({
       message: 'Test Error Message',
     });

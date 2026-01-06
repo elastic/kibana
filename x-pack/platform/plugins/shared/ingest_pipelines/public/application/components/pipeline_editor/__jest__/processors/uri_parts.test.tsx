@@ -58,7 +58,7 @@ describe('Processor: URI parts', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].uri_parts).toEqual({
       field: 'field_1',
       ...defaultUriPartsParameters,
@@ -82,7 +82,7 @@ describe('Processor: URI parts', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].uri_parts).toEqual({
       field: 'field_1',
       keep_original: false,

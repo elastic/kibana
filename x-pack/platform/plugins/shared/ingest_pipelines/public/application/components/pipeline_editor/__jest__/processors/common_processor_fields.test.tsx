@@ -67,7 +67,7 @@ describe('Processor: Common Fields For All Processors', () => {
     fireEvent.click(within(addProcessorForm).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       ignore_failure: true,

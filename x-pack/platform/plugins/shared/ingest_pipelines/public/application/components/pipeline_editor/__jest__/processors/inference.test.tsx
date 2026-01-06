@@ -59,7 +59,7 @@ describe('Processor: Script', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][INFERENCE_TYPE]).toEqual({
       model_id: 'test_inference_processor',

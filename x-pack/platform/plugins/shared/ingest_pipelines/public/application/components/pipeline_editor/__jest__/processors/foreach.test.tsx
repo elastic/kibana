@@ -52,7 +52,7 @@ describe('Processor: Foreach', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, FOREACH_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][FOREACH_TYPE]).toEqual({
       field: 'test_foreach_processor',
@@ -72,7 +72,7 @@ describe('Processor: Foreach', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, FOREACH_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][FOREACH_TYPE]).toEqual({
       field: 'test_foreach_processor',

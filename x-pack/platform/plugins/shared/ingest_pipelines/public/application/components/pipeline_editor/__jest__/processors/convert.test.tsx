@@ -66,7 +66,7 @@ describe('Processor: Convert', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CONVERT_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][CONVERT_TYPE]).toEqual({
       ...defaultConvertParameters,
       field: 'field_1',
@@ -93,7 +93,7 @@ describe('Processor: Convert', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CONVERT_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][CONVERT_TYPE]).toEqual({
       ...defaultConvertParameters,
       type: 'ip',

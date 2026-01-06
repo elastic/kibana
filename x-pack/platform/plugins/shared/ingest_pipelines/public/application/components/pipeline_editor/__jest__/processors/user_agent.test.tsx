@@ -63,7 +63,7 @@ describe('Processor: User Agent', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, USER_AGENT_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][USER_AGENT_TYPE]).toEqual({
       ...defaultUserAgentParameters,
       field: 'field_1',
@@ -92,7 +92,7 @@ describe('Processor: User Agent', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, USER_AGENT_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][USER_AGENT_TYPE]).toEqual({
       ...defaultUserAgentParameters,
       field: 'field_1',

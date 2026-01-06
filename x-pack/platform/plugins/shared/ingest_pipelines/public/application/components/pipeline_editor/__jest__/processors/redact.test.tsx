@@ -72,7 +72,7 @@ describe('Processor: Redact', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REDACT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][REDACT_TYPE]).toEqual({
       field: 'test_redact_processor',
@@ -105,7 +105,7 @@ describe('Processor: Redact', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REDACT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][REDACT_TYPE]).toEqual({
       field: 'test_redact_processor',
@@ -132,7 +132,7 @@ describe('Processor: Redact', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REDACT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][REDACT_TYPE]).toEqual({
       field: 'test_redact_processor',

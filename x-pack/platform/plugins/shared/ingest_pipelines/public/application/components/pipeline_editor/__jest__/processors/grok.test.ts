@@ -76,7 +76,7 @@ describe('Processor: Grok', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GROK_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GROK_TYPE]).toEqual({
       field: 'test_grok_processor',
@@ -100,7 +100,7 @@ describe('Processor: Grok', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GROK_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GROK_TYPE].patterns).toEqual([escapedValue]);
   });
@@ -122,7 +122,7 @@ describe('Processor: Grok', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GROK_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GROK_TYPE]).toEqual({
       field: 'test_grok_processor',

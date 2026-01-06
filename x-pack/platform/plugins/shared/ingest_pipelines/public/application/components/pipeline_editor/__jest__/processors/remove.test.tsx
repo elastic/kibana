@@ -63,7 +63,7 @@ describe('Processor: Remove', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REMOVE_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][REMOVE_TYPE]).toEqual({
       ...defaultRemoveParameters,
@@ -83,7 +83,7 @@ describe('Processor: Remove', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REMOVE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REMOVE_TYPE]).toEqual({
       ...defaultRemoveParameters,
       keep: 'field_1',

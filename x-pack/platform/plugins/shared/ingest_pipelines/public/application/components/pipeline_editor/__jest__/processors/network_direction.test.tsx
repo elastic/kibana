@@ -68,7 +68,7 @@ describe('Processor: Network Direction', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
       internal_networks: ['loopback'],
@@ -86,7 +86,7 @@ describe('Processor: Network Direction', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
       internal_networks_field: 'internal_networks_field',
@@ -109,7 +109,7 @@ describe('Processor: Network Direction', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
       internal_networks_field: 'internal_networks_field',
@@ -139,7 +139,7 @@ describe('Processor: Network Direction', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
       ignore_failure: true,

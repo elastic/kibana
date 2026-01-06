@@ -93,7 +93,7 @@ describe('Processor: Community id', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][COMMUNITY_ID_TYPE]).toEqual({
       ignore_failure: true,
       ignore_missing: false,
@@ -118,7 +118,7 @@ describe('Processor: Community id', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors).toHaveLength(0);
   });
@@ -132,7 +132,7 @@ describe('Processor: Community id', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors).toHaveLength(0);
   });
@@ -146,7 +146,7 @@ describe('Processor: Community id', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors).toHaveLength(0);
   });

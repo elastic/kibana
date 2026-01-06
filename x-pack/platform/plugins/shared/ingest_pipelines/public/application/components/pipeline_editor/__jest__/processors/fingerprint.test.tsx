@@ -64,7 +64,7 @@ describe('Processor: Fingerprint', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, FINGERPRINT_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][FINGERPRINT_TYPE]).toEqual({
       ...defaultFingerprintParameters,
       fields: ['user'],
@@ -92,7 +92,7 @@ describe('Processor: Fingerprint', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, FINGERPRINT_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][FINGERPRINT_TYPE]).toEqual({
       ...defaultFingerprintParameters,
       fields: ['user'],

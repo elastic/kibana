@@ -61,7 +61,7 @@ describe('Processor: Circle', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CIRCLE_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0].circle).toEqual({
       field: 'field_1',
@@ -90,7 +90,7 @@ describe('Processor: Circle', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CIRCLE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].circle).toEqual({
       field: 'field_1',
       error_distance: 10,

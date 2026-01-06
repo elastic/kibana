@@ -42,7 +42,7 @@ describe('Processor: Reroute', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({});
   });
 
@@ -56,7 +56,7 @@ describe('Processor: Reroute', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({
       destination: 'my-destination',
     });
@@ -80,7 +80,7 @@ describe('Processor: Reroute', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({
       dataset: ['nginx'],
       namespace: ['default'],
@@ -109,7 +109,7 @@ describe('Processor: Reroute', () => {
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
     // Verify that the "destination" parameter is set to '' (which is mapped to undefined) because "dataset" and "namespace" parameters are set
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({
       destination: undefined,
       dataset: ['nginx'],

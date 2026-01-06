@@ -66,7 +66,7 @@ describe('Processor: Dot Expander', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: '*',
     });
@@ -81,7 +81,7 @@ describe('Processor: Dot Expander', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: 'field.with.dot',
     });
@@ -103,7 +103,7 @@ describe('Processor: Dot Expander', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: 'field.notation',
       path: 'somepath',

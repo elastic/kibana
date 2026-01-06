@@ -72,7 +72,7 @@ describe('Processor: CSV', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CSV_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][CSV_TYPE]).toEqual({
       ...defaultCSVParameters,
       field: 'field_1',
@@ -96,7 +96,7 @@ describe('Processor: CSV', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CSV_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][CSV_TYPE]).toEqual({
       ...defaultCSVParameters,
       field: 'field_1',
@@ -133,7 +133,7 @@ describe('Processor: CSV', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CSV_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][CSV_TYPE]).toEqual({
       ...defaultCSVParameters,
       field: 'field_1',

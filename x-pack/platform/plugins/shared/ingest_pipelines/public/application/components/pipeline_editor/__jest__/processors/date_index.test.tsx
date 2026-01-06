@@ -57,7 +57,7 @@ describe('Processor: Date Index Name', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DATE_INDEX_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].date_index_name).toEqual({
       field: '@timestamp',
       date_rounding: 's',
@@ -88,7 +88,7 @@ describe('Processor: Date Index Name', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DATE_INDEX_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].date_index_name).toEqual({
       field: 'field_1',
       date_rounding: 'd',

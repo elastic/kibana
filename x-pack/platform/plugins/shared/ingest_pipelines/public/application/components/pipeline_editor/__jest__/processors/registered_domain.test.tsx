@@ -60,7 +60,7 @@ describe('Processor: Registered Domain', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       field: 'field_1',
       ...defaultRegisteredDomainParameters,
@@ -80,7 +80,7 @@ describe('Processor: Registered Domain', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       ...defaultRegisteredDomainParameters,
       field: 'field_1',
@@ -103,7 +103,7 @@ describe('Processor: Registered Domain', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       field: 'field_1',
       target_field: 'target_field',

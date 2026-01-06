@@ -19,6 +19,15 @@ interface ReqBody {
   pipeline: Pick<Pipeline, 'processors' | 'on_failure'>;
 }
 
+const hasStringBody = (value: unknown): value is { body: string } => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'body' in value &&
+    typeof (value as { body?: unknown }).body === 'string'
+  );
+};
+
 describe('Test pipeline', () => {
   let onUpdate: jest.Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -87,19 +96,11 @@ describe('Test pipeline', () => {
       // Verify request
       const latestRequest = postMock.mock.calls[postMock.mock.calls.length - 1] ?? [];
       const requestOptions = latestRequest[1];
-      const body =
-        typeof requestOptions === 'object' &&
-        requestOptions !== null &&
-        'body' in requestOptions &&
-        typeof (requestOptions as { body?: unknown }).body === 'string'
-          ? (requestOptions as { body: string }).body
-          : undefined;
-
-      if (typeof body !== 'string') {
+      if (!hasStringBody(requestOptions)) {
         throw new Error('Expected simulate request body to be a string');
       }
 
-      const requestBody: ReqBody = JSON.parse(body);
+      const requestBody: ReqBody = JSON.parse(requestOptions.body);
 
       const {
         documents: reqDocuments,

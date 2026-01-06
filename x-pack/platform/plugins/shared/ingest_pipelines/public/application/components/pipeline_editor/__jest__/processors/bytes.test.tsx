@@ -53,7 +53,7 @@ describe('Processor: Bytes', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
     });
@@ -75,7 +75,7 @@ describe('Processor: Bytes', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       target_field: 'target_field',

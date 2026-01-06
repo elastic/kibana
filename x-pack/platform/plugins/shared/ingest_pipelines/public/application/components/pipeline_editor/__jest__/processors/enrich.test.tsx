@@ -61,7 +61,7 @@ describe('Processor: Enrich', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, PROCESSOR_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][PROCESSOR_TYPE]).toEqual({
       field: 'field_1',
       policy_name: 'policy_1',
@@ -87,7 +87,7 @@ describe('Processor: Enrich', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, PROCESSOR_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][PROCESSOR_TYPE]).toEqual({
       field: 'field_1',
       policy_name: 'policy_1',

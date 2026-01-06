@@ -53,7 +53,7 @@ describe('Processor: Attachment', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, ATTACHMENT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][ATTACHMENT_TYPE]).toEqual({
       field: 'test_attachment_processor',
@@ -86,7 +86,7 @@ describe('Processor: Attachment', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, ATTACHMENT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][ATTACHMENT_TYPE]).toEqual({
       field: 'test_attachment_processor',

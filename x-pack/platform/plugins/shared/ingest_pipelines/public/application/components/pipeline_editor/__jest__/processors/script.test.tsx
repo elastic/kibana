@@ -54,7 +54,7 @@ describe('Processor: Script', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, SCRIPT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][SCRIPT_TYPE]).toEqual({
       source: 'ctx._source[params.sum_field]',

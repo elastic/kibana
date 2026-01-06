@@ -58,7 +58,7 @@ describe('Processor: Append', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].append).toEqual({
       field: 'field_1',
       value: ['Some_Value'],
@@ -81,7 +81,7 @@ describe('Processor: Append', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].append).toEqual({
       field: 'field_1',
       ignore_failure: true,
@@ -113,7 +113,7 @@ describe('Processor: Append', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][APPEND_TYPE]).toEqual({
       field: 'sample_field',
       value: ['{{{value_2}}}'],
@@ -139,7 +139,7 @@ describe('Processor: Append', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].append).toEqual({
       field: 'field_1',
       // eslint-disable-next-line prettier/prettier

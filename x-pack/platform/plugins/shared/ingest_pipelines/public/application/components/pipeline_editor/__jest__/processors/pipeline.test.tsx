@@ -52,7 +52,7 @@ describe('Processor: Pipeline', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, PIPELINE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][PIPELINE_TYPE]).toEqual({
       name: 'my-pipeline',
     });
@@ -71,7 +71,7 @@ describe('Processor: Pipeline', () => {
     fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
     await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, PIPELINE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][PIPELINE_TYPE]).toEqual({
       name: 'my-pipeline',
       ignore_missing_pipeline: true,
