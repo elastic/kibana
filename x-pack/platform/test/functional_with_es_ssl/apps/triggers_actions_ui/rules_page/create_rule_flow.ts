@@ -139,22 +139,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmModalConfirmButton');
       }
 
-      // Wait for automatic redirect back to rules page (not manual navigation)
+      // Get the rule ID for verification
+      const ruleId = await getRuleIdByName(ruleName);
+      objectRemover.add(ruleId, 'rule', 'alerting');
+
+      // Wait for automatic redirect to rule details page (not manual navigation)
       await retry.try(async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
-        if (!url.includes('/app/rules')) {
-          throw new Error(`Expected URL to contain '/app/rules' but got: ${url}`);
+        if (!url.includes(`/app/rules/rule/${ruleId}`)) {
+          throw new Error(`Expected URL to contain '/app/rules/rule/${ruleId}' but got: ${url}`);
         }
       });
 
-      // Verify we're on the rules page
-      const url = await browser.getCurrentUrl();
-      expect(url).to.contain('/app/rules');
+      // Verify we're on the rule details page by checking for rule details elements
+      await retry.try(async () => {
+        await testSubjects.existOrFail('ruleDetailsTitle');
+      });
 
-      // Track the created rule for cleanup
-      const ruleId = await getRuleIdByName(ruleName);
-      objectRemover.add(ruleId, 'rule', 'alerting');
+      // Verify the URL contains the rule details path
+      const url = await browser.getCurrentUrl();
+      expect(url).to.contain(`/app/rules/rule/${ruleId}`);
     });
   });
 };
