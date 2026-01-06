@@ -49,7 +49,6 @@ jobs:
       (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
-        && github.event.pull_request.draft == false
       )
     permissions:
       security-events: write
