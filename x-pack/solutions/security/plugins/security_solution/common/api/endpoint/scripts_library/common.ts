@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SCRIPT_TAGS } from '../../../endpoint/service/scripts_library/constants';
 import { validateNoDuplicateValues, validateNonEmptyString } from '../schema_utils';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../endpoint/constants';
 
@@ -34,3 +35,9 @@ export const ScriptPathToExecutableSchema = schema.string({
   minLength: 1,
   validate: validateNonEmptyString,
 });
+
+export const ScriptTagsSchema = schema.arrayOf(
+  // @ts-expect-error TS2769: No overload matches this call. (due to now `oneOf()` type is defined)
+  schema.oneOf(Object.keys(SCRIPT_TAGS).map((osType) => schema.literal(osType))),
+  { minSize: 1, validate: validateNoDuplicateValues }
+);
