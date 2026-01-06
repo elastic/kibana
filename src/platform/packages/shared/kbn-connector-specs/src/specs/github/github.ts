@@ -402,6 +402,31 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    getIssue: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        issue_number: z.number(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          issue_number: number;
+        };
+
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issue_number}`,
+          {
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
   },
 
   test: {

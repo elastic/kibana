@@ -1060,6 +1060,41 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getIssue action', () => {
+    it('should get an issue by number', async () => {
+      const mockResponse = {
+        data: {
+          number: 42,
+          title: 'Test Issue',
+          body: 'This is a test issue',
+          state: 'open',
+          labels: [{ name: 'bug', color: 'd73a4a' }],
+          assignees: [],
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-02T00:00:00Z',
+          html_url: 'https://github.com/owner/repo/issues/42',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getIssue.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        issue_number: 42,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues/42',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
