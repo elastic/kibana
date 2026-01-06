@@ -134,7 +134,6 @@ describe('getNormalizeCommonFields', () => {
             },
           },
           maintenanceWindows: ['mw-1', 'mw-2'],
-          spaces: ['default'],
         },
         namespace: 'test-namespace',
         version: '8.7.0',
@@ -178,7 +177,7 @@ describe('getNormalizeCommonFields', () => {
           max_attempts: 2,
           labels: {},
           maintenance_windows: ['mw-1', 'mw-2'],
-          spaces: ['default'],
+          spaces: [],
         },
       });
     }
@@ -204,7 +203,6 @@ describe('getNormalizeCommonFields', () => {
         locations: ['us_central'],
         schedule: 3,
         maintenanceWindows: ['mw-3'],
-        spaces: ['default', 'space1'],
       },
       namespace: 'test-namespace',
       version: '8.7.0',
@@ -248,7 +246,7 @@ describe('getNormalizeCommonFields', () => {
         max_attempts: 2,
         labels: {},
         maintenance_windows: ['mw-3'],
-        spaces: ['default', 'space1'],
+        spaces: [],
       },
     });
   });

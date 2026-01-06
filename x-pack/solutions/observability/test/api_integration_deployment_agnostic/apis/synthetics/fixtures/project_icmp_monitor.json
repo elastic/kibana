@@ -28,7 +28,7 @@
       "tags": "tag1,tag2",
       "privateLocations": [],
       "wait": "1m",
-      "hash": "ekrjelkjrelkjre"    
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": [ "dev" ],

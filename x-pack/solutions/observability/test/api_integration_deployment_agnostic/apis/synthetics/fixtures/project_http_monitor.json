@@ -84,7 +84,6 @@
       },
       "max_attempts": 2,
       "maintenance_windows": ["test-maintenance-window-1", "test-maintenance-window-2"]
-
     }
   ]
 }
