@@ -149,6 +149,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
           <FiltersSection
             dataView={dataView}
+            pageFilters={pageFilters}
             setStatusFilter={setStatusFilter}
             setPageFilters={setPageFilters}
             setPageFilterHandler={setPageFilterHandler}
