@@ -47,11 +47,11 @@ export const getSingleMetricViewerEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const services = await getServices(getStartServices);
       const subscriptions = new Subscription();
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
       const singleMetricManager = initializeSingleMetricViewerControls(
-        initialState.rawState,
+        initialState,
         titleManager.api
       );
 
@@ -60,12 +60,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...singleMetricManager.getLatestState(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...singleMetricManager.getLatestState(),
         };
       }
 
@@ -90,9 +87,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
           };
         },
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved) singleMetricManager.reinitializeState(lastSaved?.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) singleMetricManager.reinitializeState(lastSaved);
         },
       });
 
