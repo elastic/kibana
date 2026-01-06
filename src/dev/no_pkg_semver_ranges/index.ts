@@ -13,7 +13,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
 const YARN_LOCK_PATH = resolve(REPO_ROOT, 'yarn.lock');
-const FIELDS_TO_CHECK = ['dependencies', 'devDependencies'] as const;
+const DEPENDENCIES_FIELDS = ['dependencies', 'devDependencies'] as const;
+const RESOLUTIONS_FIELD = 'resolutions';
 
 export function checkSemverRanges(
   runOptions: {
@@ -53,12 +54,11 @@ export function checkSemverRanges(
     return null;
   };
 
-  type FieldName = (typeof FIELDS_TO_CHECK)[number];
-
   let totalFixes = 0;
+  type FieldName = (typeof DEPENDENCIES_FIELDS)[number];
   const fixesPerField: Partial<Record<FieldName, number>> = {};
 
-  for (const field of FIELDS_TO_CHECK) {
+  for (const field of DEPENDENCIES_FIELDS) {
     const deps = pkg[field];
     if (!deps || typeof deps !== 'object') continue;
 
@@ -98,6 +98,29 @@ export function checkSemverRanges(
         `[no-pkg-semver-ranges] Found ${totalFixes} version(s) ` +
           `with ^/~ in package.json (${fieldsSummary}). ` +
           `Run the script with --fix to automatically resolve them.`
+      );
+    }
+  }
+
+  if (pkg.resolutions && typeof pkg.resolutions === 'object') {
+    const resolutions = pkg.resolutions;
+    const resolutionsErrors = [];
+
+    for (const [name, version] of Object.entries(resolutions)) {
+      if (typeof version !== 'string') continue;
+      if (version.startsWith('^') || version.startsWith('~')) {
+        const depName = name.split('**/').pop()!;
+        const suggestedVersion = resolveVersionFromYarnLock(depName, version);
+        resolutionsErrors.push(`${name}: ${version} => installed: ${suggestedVersion ?? '?'}`);
+      }
+    }
+
+    if (resolutionsErrors.length > 0) {
+      throw new Error(
+        `[no-pkg-semver-ranges] Found ${resolutionsErrors.length} version(s) ` +
+          `with ^/~ in package.json's resolutions field:\n` +
+          resolutionsErrors.join('\n') +
+          `\n ^-- Please remove semver ranges and pin the resolutions manually.`
       );
     }
   }
