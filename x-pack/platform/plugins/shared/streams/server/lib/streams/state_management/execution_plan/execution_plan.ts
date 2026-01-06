@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy, orderBy } from 'lodash';
+import { groupBy } from 'lodash';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
@@ -363,15 +363,24 @@ export class ExecutionPlan {
       ...action,
       depth: action.stream.match(/\./g)?.length ?? 0,
     }));
-    return Promise.all(
-      orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action) =>
-        upsertIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          pipeline: action.request,
-        })
-      )
-    );
+
+    const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
+    const depths = Object.keys(actionsByDepth)
+      .map(Number)
+      .sort((a, b) => b - a); // Sort descending: deepest (children) first
+
+    // Process each depth level sequentially, with pipelines at the same depth in parallel
+    for (const depth of depths) {
+      await Promise.all(
+        actionsByDepth[depth].map((action) =>
+          upsertIngestPipeline({
+            esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+            logger: this.dependencies.logger,
+            pipeline: action.request,
+          })
+        )
+      );
+    }
   }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
