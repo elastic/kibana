@@ -277,7 +277,9 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    await chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+    );
   });
 
   it('appends promptId prompt content to the conversation system prompt', async () => {
@@ -310,7 +312,9 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    await chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+    );
   });
 
   it('passes promptId prompt content when persist=false', async () => {
@@ -344,7 +348,9 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    await chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+    );
   });
 
   it('returns the expected error when executeCustomLlmChain fails', async () => {
