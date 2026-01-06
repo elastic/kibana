@@ -116,7 +116,7 @@ const SummaryComponent: React.FC<Props> = ({
               <EuiButtonIcon
                 aria-label={ANONYMIZATION_ARIAL_LABEL}
                 data-test-subj="anonymizationSettings"
-                iconType="eye"
+                iconType="gear"
                 onClick={showAnonymizationModal}
                 size="s"
                 color="text"
