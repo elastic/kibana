@@ -77,9 +77,9 @@ You can set configurations that apply to all your connectors or use `xpack.actio
 To use the Jina Reader connector, you need an API key:
 
 1. Go to [Jina AI's website](https://jina.ai/reader).
-2. Scroll to API section, and go to API Key & Billing tab. 
+2. Scroll to the **API** section, and go to the **API Key & Billing** tab. 
 3. A free key may be generated for you upon visiting the page.
-4. Optionally sign up for an account or log in.
-5. Navigate to [Key Manager Page](https://jina.ai/api-dashboard/key-manager).
+4. Optionally, sign up for an account or log in.
+5. Navigate to the [Key Manager page](https://jina.ai/api-dashboard/key-manager).
 6. Generate or copy your API key.
 7. Use the API key to configure the connector in {{kib}}.
