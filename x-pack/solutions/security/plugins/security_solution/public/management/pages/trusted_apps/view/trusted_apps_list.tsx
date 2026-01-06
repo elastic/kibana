@@ -147,6 +147,10 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.trustedApps.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add trusted application' }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.trustedApps.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import trusted application list' }
+  ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.trustedApps.searchPlaceholderInfo',
     {

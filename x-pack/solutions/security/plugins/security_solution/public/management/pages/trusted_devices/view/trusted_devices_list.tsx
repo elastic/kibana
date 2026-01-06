@@ -163,6 +163,10 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Add trusted device',
     }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import trusted device list' }
+  ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.searchPlaceholderInfo',
     {

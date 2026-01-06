@@ -139,6 +139,10 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.endpointExceptions.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add endpoint exception' }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import endpoint exception list' }
+  ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.endpointExceptions.searchPlaceholderInfo',
     {

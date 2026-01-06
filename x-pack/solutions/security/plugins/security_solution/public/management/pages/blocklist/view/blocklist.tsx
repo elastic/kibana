@@ -131,6 +131,10 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add blocklist entry' }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import blocklist' }
+  ),
   searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
     defaultMessage: 'Search on the fields below: name, description, value',
   }),
