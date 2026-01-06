@@ -15,7 +15,6 @@ export const journey = new Journey({
     'x-pack/performance/kbn_archives/flights_no_map_dashboard',
     'x-pack/performance/kbn_archives/logs_no_map_dashboard',
   ],
-  ftrConfigPath: 'x-pack/performance/configs/http2_config.ts',
 })
   .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));

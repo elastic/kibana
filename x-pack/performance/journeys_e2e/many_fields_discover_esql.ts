@@ -11,7 +11,6 @@ import { subj } from '@kbn/test-subj-selector';
 export const journey = new Journey({
   kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['src/platform/test/functional/fixtures/es_archiver/many_fields'],
-  ftrConfigPath: 'x-pack/performance/configs/http2_config.ts',
 })
   .step('Go to Discover Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(

@@ -11,7 +11,6 @@ import { subj } from '@kbn/test-subj-selector';
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
-  ftrConfigPath: 'x-pack/performance/configs/http2_config.ts',
 })
 
   .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {

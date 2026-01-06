@@ -11,7 +11,6 @@ import { subj } from '@kbn/test-subj-selector';
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
   esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
-  ftrConfigPath: 'x-pack/performance/configs/http2_config.ts',
 })
   .step('Go to Visualize library landing page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(
