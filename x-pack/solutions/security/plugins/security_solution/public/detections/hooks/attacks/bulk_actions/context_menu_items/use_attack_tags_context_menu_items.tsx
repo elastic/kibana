@@ -17,9 +17,6 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-/**
- * Props for the useAttackTagsContextMenuItems hook
- */
 export interface UseAttackTagsContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
   /** Array of attack discoveries with tags */
   attacksWithTags: AttackWithTags[];

@@ -18,9 +18,6 @@ import { useApplyAttackTags } from '../apply_actions/use_apply_attack_tags';
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
-/**
- * Props for the useBulkAttackTagsItems hook
- */
 export interface UseBulkAttackTagsItemsProps {
   /** Optional callback when tags are updated */
   onTagsUpdate?: () => void;

@@ -25,9 +25,6 @@ import * as i18n from '../translations';
 import { useApplyAttackAssignees } from '../apply_actions/use_apply_attack_assignees';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
-/**
- * Props for the useBulkAttackAssigneesItems hook
- */
 export interface UseBulkAttackAssigneesItemsProps {
   /** Callback when assignees are updated */
   onAssigneesUpdate?: () => void;

@@ -18,9 +18,6 @@ import { useBulkAlertClosingReasonItems } from '../../../../../common/components
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
-/**
- * Props for the useBulkAttackWorkflowStatusItems hook
- */
 export interface UseBulkAttackWorkflowStatusItemsProps {
   /** Callback when workflow status is updated */
   onWorkflowStatusUpdate?: () => void;

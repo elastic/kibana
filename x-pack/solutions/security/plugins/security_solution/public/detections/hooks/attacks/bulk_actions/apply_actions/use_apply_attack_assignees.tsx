@@ -13,9 +13,6 @@ import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/u
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
 
-/**
- * Props for the applyAssignees function
- */
 interface ApplyAttackAssigneesProps extends BaseApplyAttackProps {
   /** Assignees to add or remove */
   assignees: AlertAssignees;

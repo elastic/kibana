@@ -11,7 +11,6 @@ import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/co
 
 import type { BulkAttackActionItems, BulkAttackContextMenuItems } from '../types';
 
-/** Props for the {@link transformBulkActionsToContextMenuItems} utility. */
 interface TransformBulkActionsToContextMenuItemsProps {
   /** Bulk action items and panels from bulk action hooks. */
   bulkActionItems: BulkAttackActionItems;

@@ -40,9 +40,6 @@ export const UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_AND_ALERTS_TEST_ID =
  */
 export type AttackActionType = 'workflow_status' | 'assignees' | 'tags';
 
-/**
- * Props for the UpdateAttacksModal component
- */
 export interface UpdateAttacksModalProps {
   /** Number of related detection alerts */
   alertsCount: number;

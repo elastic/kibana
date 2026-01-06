@@ -12,9 +12,6 @@ import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unifie
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
 
-/**
- * Props for the applyTags function
- */
 interface ApplyAttackTagsProps extends BaseApplyAttackProps {
   /** Tags to add or remove */
   tags: { tags_to_add: string[]; tags_to_remove: string[] };

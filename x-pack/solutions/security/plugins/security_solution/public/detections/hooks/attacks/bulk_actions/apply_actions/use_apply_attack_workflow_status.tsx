@@ -15,9 +15,6 @@ import { useSetUnifiedAlertsWorkflowStatus } from '../../../../../common/contain
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
 
-/**
- * Props for the applyWorkflowStatus function
- */
 interface ApplyAttackWorkflowStatusProps extends BaseApplyAttackProps {
   /** Workflow status to set */
   status: AlertWorkflowStatus;

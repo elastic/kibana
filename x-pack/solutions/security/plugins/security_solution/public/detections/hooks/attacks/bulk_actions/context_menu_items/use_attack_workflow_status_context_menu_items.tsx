@@ -16,9 +16,6 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-/**
- * Props for the useAttackWorkflowStatusContextMenuItems hook
- */
 export interface UseAttackWorkflowStatusContextMenuItemsProps
   extends BaseAttackContextMenuItemsProps {
   /** Array of attack discoveries with workflow status */

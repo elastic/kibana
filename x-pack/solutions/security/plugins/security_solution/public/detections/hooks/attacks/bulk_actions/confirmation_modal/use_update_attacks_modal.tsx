@@ -10,9 +10,6 @@ import { KibanaContextProvider, useKibana } from '../../../../../common/lib/kiba
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { UpdateAttacksModal } from './update_attacks_modal';
 
-/**
- * Props for the showModalIfNeeded function returned by useUpdateAttacksModal
- */
 export interface ShowUpdateAttacksModalProps {
   /** Number of related detection alerts */
   alertsCount: number;
