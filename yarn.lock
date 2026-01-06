@@ -9328,6 +9328,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/use-observable@link:src/platform/packages/shared/react/use_observable":
+  version "0.0.0"
+  uid ""
+
 "@kbn/use-tracked-promise@link:src/platform/packages/shared/kbn-use-tracked-promise":
   version "0.0.0"
   uid ""
