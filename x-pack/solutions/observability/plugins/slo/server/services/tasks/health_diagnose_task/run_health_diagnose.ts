@@ -1,0 +1,217 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { errors } from '@elastic/elasticsearch';
+import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { computeHealth, type SLOHealth } from '../../../domain/services/compute_health';
+import { HEALTH_INDEX_ALIAS } from '../../health_diagnose/health_index_installer';
+
+interface Dependencies {
+  esClient: ElasticsearchClient;
+  scopedClusterClient: IScopedClusterClient;
+  logger: Logger;
+  abortController: AbortController;
+}
+
+interface RunParams {
+  taskId: string;
+}
+
+interface SLO {
+  id: string;
+  revision: number;
+}
+
+interface HealthDocument {
+  taskId: string;
+  sloId: string;
+  revision: number;
+  isProblematic: boolean;
+  checkedAt: string;
+  health: SLOHealth['health'];
+}
+
+const COMPOSITE_BATCH_SIZE = 500;
+const BATCH_DELAY_MS = 500;
+const MAX_BATCHES = 100;
+const MAX_SLOS_PROCESSED = 10_000;
+
+export async function runHealthDiagnose(
+  params: RunParams,
+  dependencies: Dependencies
+): Promise<{ processed: number; problematic: number }> {
+  const { scopedClusterClient, logger } = dependencies;
+  const { taskId } = params;
+
+  let searchAfter: AggregationsCompositeAggregateKey | undefined;
+  let totalProcessed = 0;
+  let totalProblematic = 0;
+  let batchCount = 0;
+
+  try {
+    do {
+      batchCount++;
+      logger.debug(`Processing batch ${batchCount}`);
+
+      const { list, nextSearchAfter } = await fetchUniqueSloFromSummary(searchAfter, dependencies);
+      searchAfter = nextSearchAfter;
+
+      if (list.length === 0) {
+        logger.debug('No more SLOs to process');
+        break;
+      }
+
+      const healthResults = await computeHealth(
+        list.map((slo) => ({
+          id: slo.id,
+          revision: slo.revision,
+          name: `SLO ${slo.id}`, // We don't have the name, using placeholder
+          enabled: true, // Assume enabled for health check
+        })),
+        { scopedClusterClient }
+      );
+
+      const documents: HealthDocument[] = healthResults.map((result) => ({
+        taskId,
+        sloId: result.id,
+        revision: result.revision,
+        isProblematic: result.health.isProblematic,
+        checkedAt: new Date().toISOString(),
+        health: result.health,
+      }));
+
+      if (documents.length > 0) {
+        await bulkInsertHealthDocuments(documents, dependencies);
+        totalProcessed += documents.length;
+        totalProblematic += documents.filter((doc) => doc.isProblematic).length;
+      }
+
+      if (searchAfter) {
+        await delay(BATCH_DELAY_MS);
+      }
+
+      if (batchCount >= MAX_BATCHES) {
+        logger.debug(`Reached maximum number of batches (${MAX_BATCHES}), stopping`);
+        break;
+      }
+
+      if (totalProcessed >= MAX_SLOS_PROCESSED) {
+        logger.debug(`Reached maximum SLOs processed (${MAX_SLOS_PROCESSED}), stopping`);
+        break;
+      }
+    } while (searchAfter);
+  } catch (error) {
+    if (error instanceof errors.RequestAbortedError) {
+      logger.debug('Task aborted during execution');
+      throw error;
+    }
+    logger.error(`Error during health diagnose: ${error}`);
+    throw error;
+  }
+
+  logger.debug(
+    `Health diagnose completed: ${totalProcessed} processed, ${totalProblematic} problematic`
+  );
+  return { processed: totalProcessed, problematic: totalProblematic };
+}
+
+async function fetchUniqueSloFromSummary(
+  searchAfter: AggregationsCompositeAggregateKey | undefined,
+  dependencies: Dependencies
+): Promise<{
+  nextSearchAfter: AggregationsCompositeAggregateKey | undefined;
+  list: SLO[];
+}> {
+  const { logger, esClient, abortController } = dependencies;
+  logger.debug(
+    `Fetching unique SLO (id, revision) tuples from summary index after ${JSON.stringify(
+      searchAfter
+    )}`
+  );
+
+  const result = await esClient.search<
+    unknown,
+    {
+      id_revision: {
+        after_key: AggregationsCompositeAggregateKey;
+        buckets: Array<{
+          key: {
+            id: string;
+            revision: number;
+          };
+        }>;
+      };
+    }
+  >(
+    {
+      size: 0,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      aggs: {
+        id_revision: {
+          composite: {
+            size: COMPOSITE_BATCH_SIZE,
+            sources: [
+              {
+                id: {
+                  terms: {
+                    field: 'slo.id',
+                  },
+                },
+              },
+              {
+                revision: {
+                  terms: {
+                    field: 'slo.revision',
+                  },
+                },
+              },
+            ],
+            after: searchAfter,
+          },
+        },
+      },
+    },
+    { signal: abortController.signal }
+  );
+
+  const buckets = result.aggregations?.id_revision.buckets ?? [];
+  if (buckets.length === 0) {
+    return {
+      nextSearchAfter: undefined,
+      list: [],
+    };
+  }
+
+  return {
+    nextSearchAfter:
+      buckets.length < COMPOSITE_BATCH_SIZE
+        ? undefined
+        : result.aggregations?.id_revision.after_key,
+    list: buckets.map(({ key }) => ({
+      id: String(key.id),
+      revision: Number(key.revision),
+    })),
+  };
+}
+
+async function bulkInsertHealthDocuments(
+  documents: HealthDocument[],
+  dependencies: Dependencies
+): Promise<void> {
+  const { esClient, logger, abortController } = dependencies;
+  logger.debug(`Bulk inserting ${documents.length} health documents`);
+
+  const operations = documents.flatMap((doc) => [{ index: { _index: HEALTH_INDEX_ALIAS } }, doc]);
+
+  await esClient.bulk({ operations, refresh: false }, { signal: abortController.signal });
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
