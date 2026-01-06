@@ -8,7 +8,7 @@
  */
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
@@ -26,7 +26,6 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 import { ChromeService } from './chrome_service';
@@ -245,21 +244,7 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       // Render and assert that no error is thrown
-      render(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()));
-    });
-
-    it('renders chromeless header', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
-
-      chrome.setIsVisible(false);
-
-      render(
-        <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getLegacyHeaderComponentForFixedLayout()}
-        </KibanaRenderContextProvider>
-      );
-
-      expect(screen.getByTestId('kibanaHeaderChromeless')).toBeInTheDocument();
+      render(React.createElement(() => chrome.getClassicHeaderComponentForGridLayout()));
     });
   });
 

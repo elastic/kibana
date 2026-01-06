@@ -9,7 +9,7 @@
 
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
-export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
+export type LayoutFeatureFlag = 'grid';
 export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
 export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';
 
@@ -18,10 +18,8 @@ export const getLayoutVersion = (featureFlags: FeatureFlagsStart): LayoutFeature
     LAYOUT_FEATURE_FLAG_KEY,
     'grid'
   );
-  if (featureFlag !== 'legacy-fixed' && featureFlag !== 'grid') {
-    throw new Error(
-      `Invalid layout feature flag value: ${featureFlag}. Expected 'legacy-fixed' or 'grid'.`
-    );
+  if (featureFlag !== 'grid') {
+    throw new Error(`Invalid layout feature flag value: ${featureFlag}. Expected 'grid'.`);
   }
   return featureFlag;
 };

@@ -16,7 +16,6 @@ import { lazyObject } from '@kbn/lazy-object';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    getLegacyHeaderComponentForFixedLayout: jest.fn(),
     getClassicHeaderComponentForGridLayout: jest.fn(),
     getChromelessHeader: jest.fn(),
     getHeaderBanner: jest.fn(),

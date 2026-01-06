@@ -5,20 +5,17 @@ Layout service implementations for Kibana's Chrome application shell.
 ## Usage
 
 ```tsx
-import { LayoutService } from './layout_service';
 import { GridLayout } from './layouts/grid';
-import { LegacyFixedLayout } from './layouts/legacy-fixed';
 
-const layout = getLayoutVersion(featureFlags);
-const Layout = layout === 'grid' ? new GridLayout(deps) : new LegacyFixedLayout(deps);
+const layout = new GridLayout(deps);
+const Layout = layout.getComponent();
 
 ReactDOM.render(<Layout />, targetDomElement);
 ```
 
 ## Available Layouts
 
-- **`grid`**: Modern CSS Grid-based layout (WIP)
-- **`legacy-fixed`**: Traditional fixed layout (default)
+- **`grid`**: Modern CSS Grid-based layout
 
 ## Related
 

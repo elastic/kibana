@@ -23,7 +23,6 @@ import {
   takeUntil,
 } from 'rxjs';
 import { parse } from 'url';
-import useObservable from 'react-use/lib/useObservable';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
@@ -56,7 +55,6 @@ import type {
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
-import { Router } from '@kbn/shared-ux-router';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
@@ -72,7 +70,6 @@ import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
-import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
 import type { NavigationProps } from './ui/project/sidenav/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
@@ -346,30 +343,15 @@ export class ChromeService {
     }
 
     /**
-     * Classic header is a header for the "classic" navigation with all solutions
-     * It can be customized to be used with either legacy fixed layout or new grid layout.
-     * In fixed layout it is fixed to the top of the page, with display: fixed; and should be responsible for rendering the banner
-     *
-     * @param isFixed
-     * @param includeBanner
+     * Classic header is a header for the "classic" navigation with all solutions.
+     * Used with grid layout where header is not fixed and banner is rendered separately.
      */
-    const getClassicHeader = ({
-      isFixed,
-      includeBanner,
-    }: {
-      /**
-       * Whether the header should be fixed to the top of the page, with display: fixed;
-       */
-      isFixed: boolean;
-      /**
-       * Whether the header should be also responsible the top banner, which is displayed above the header
-       */
-      includeBanner: boolean;
-    }) => (
+    const getClassicHeader = () => (
       <Header
-        /* customizable header variations */
-        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
-        isFixed={isFixed}
+        /* In grid layout, banner is rendered separately by the layout service */
+        headerBanner$={null}
+        /* In grid layout, header is not fixed but inside grid's layout header cell */
+        isFixed={false}
         /* consistent header properties */
         isServerless={this.isServerless}
         loadingCount$={http.getLoadingCount$()}
@@ -424,37 +406,20 @@ export class ChromeService {
       onToggleCollapsed: setIsSideNavCollapsed,
     };
 
-    const getProjectHeader = ({
-      includeSideNav,
-      isFixed,
-      includeBanner,
-      includeAppMenu,
-    }: {
-      /**
-       * Whether the header should be fixed to the top of the page, with display: fixed;
-       */
-      isFixed: boolean;
-      /**
-       * Whether the header should be also responsible the top banner, which is displayed above the header
-       */
-      includeBanner: boolean;
-
-      /**
-       * Whether the header should include a side navigation
-       */
-      includeSideNav: boolean;
-
-      /**
-       * Whether the header should include the application subheader
-       */
-      includeAppMenu: boolean;
-    }) => (
+    /**
+     * Project header is a header for the "project" navigation (solution and serverless).
+     * Used with grid layout where header is not fixed, banner is rendered separately,
+     * side navigation is rendered separately, and app menu is rendered by the layout service.
+     */
+    const getProjectHeader = () => (
       <ProjectHeader
         isServerless={this.isServerless}
-        isFixed={isFixed}
+        /* In grid layout, header is not fixed but inside grid's layout header cell */
+        isFixed={false}
         application={application}
         globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-        actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
+        /* In grid layout, app menu is rendered by the layout service as part of the application slot */
+        actionMenu$={null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
         customBranding$={customBranding$}
@@ -465,73 +430,21 @@ export class ChromeService {
         navControlsCenter$={navControls.getCenter$()}
         navControlsRight$={navControls.getRight$()}
         loadingCount$={http.getLoadingCount$()}
-        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
+        /* In grid layout, banner is rendered separately by the layout service */
+        headerBanner$={null}
         homeHref$={projectNavigation.getProjectHome$()}
         docLinks={docLinks}
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
-      >
-        {includeSideNav && (
-          <Router history={application.history}>
-            <FixedLayoutProjectSideNav
-              isCollapsed$={this.isSideNavCollapsed$}
-              navProps={navProps}
-            />
-          </Router>
-        )}
-      </ProjectHeader>
+      />
     );
 
-    const getLegacyHeaderComponentForFixedLayout = () => {
-      const defaultChromeStyle = chromeStyleSubject$.getValue();
-
-      const HeaderComponent = () => {
-        // TODO: remove useObservable usage https://github.com/elastic/kibana/issues/225265
-        const isVisible = useObservable(this.isVisible$);
-        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
-
-        if (!isVisible) {
-          return (
-            <div data-test-subj="kibanaHeaderChromeless">
-              <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
-              <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
-            </div>
-          );
-        }
-
-        if (chromeStyle === undefined) return null;
-
-        // render header
-        if (chromeStyle === 'project') {
-          return getProjectHeader({
-            isFixed: true,
-            includeBanner: true,
-            includeSideNav: true,
-            includeAppMenu: true,
-          });
-        }
-
-        return getClassicHeader({ isFixed: true, includeBanner: true });
-      };
-
-      return <HeaderComponent />;
-    };
-
     const getClassicHeaderComponentForGridLayout = () => {
-      return getClassicHeader({ isFixed: false, includeBanner: false });
+      return getClassicHeader();
     };
 
     const getProjectHeaderComponentForGridLayout = () => {
-      return getProjectHeader({
-        // in grid layout the project side nav is rendered separately
-        includeSideNav: false,
-        // in grid layout the header is not fixed, but is inside grid's layout header cell
-        isFixed: false,
-        // in grid layout the layout is responsible for rendering the banner
-        includeBanner: false,
-        // in grid layout the application subheader is rendered by the layout service as part of the application slot
-        includeAppMenu: false,
-      });
+      return getProjectHeader();
     };
 
     const getProjectSideNavComponentForGridLayout = () => {
@@ -543,7 +456,6 @@ export class ChromeService {
     return {
       // TODO: this service does too much and doesn't have to compose these headers components.
       // let's get rid of this in the future https://github.com/elastic/kibana/issues/225264
-      getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
       getProjectSideNavComponentForGridLayout,

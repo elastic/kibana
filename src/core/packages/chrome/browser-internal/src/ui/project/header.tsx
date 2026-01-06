@@ -108,7 +108,6 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   actionMenu$?: Observable<MountPoint | undefined> | null;
   docLinks: DocLinksStart;
-  children: React.ReactNode;
   customBranding$: Observable<CustomBranding>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
@@ -213,7 +212,6 @@ const Logo = ({
 export const ProjectHeader = ({
   application,
   kibanaVersion,
-  children,
   prependBasePath,
   docLinks,
   customBranding$,
@@ -244,8 +242,6 @@ export const ProjectHeader = ({
             css={topBarStyles}
           >
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              {children}
-
               <EuiHeaderSectionItem>
                 <HeaderPageAnnouncer
                   breadcrumbs$={observables.breadcrumbs$}
