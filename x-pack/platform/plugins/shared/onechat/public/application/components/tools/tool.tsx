@@ -186,14 +186,14 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         buttonId: BUTTON_IDS.SAVE_AND_TEST,
       });
       if (mode === ToolFormMode.Create && response) {
-        deferNavigateToAgentBuilderUrl(appPaths.tools.details({ toolId: response.id }), {
+        deferNavigateToOnechatUrl(appPaths.tools.details({ toolId: response.id }), {
           [OPEN_TEST_FLYOUT_QUERY_PARAM]: 'true',
         });
       } else {
         handleTestTool();
       }
     },
-    [handleSave, handleTestTool, mode, deferNavigateToAgentBuilderUrl]
+    [handleSave, handleTestTool, mode, deferNavigateToOnechatUrl]
   );
 
   useEffect(() => {
