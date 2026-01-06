@@ -25,6 +25,7 @@ const _allowedExperimentalValues = {
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
   enableEsqlViewInstall: false,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
+  enableAgentRollback: false, // When enabled, agent upgrade rollback will be available in the API and UI.
 };
 
 /**
