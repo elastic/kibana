@@ -75,7 +75,7 @@ The EDOT Collector receives traces from Kibana via the HTTP exporter configured 
 
 The following options are available to load Knowledge bases:
 
-1. Restore snapshot from gcs-bucket, [documentation](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting), credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
+1. Restore the [snapshot](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting) from gcs-bucket, credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
    
 2. Use the [ETL pipeline](https://github.com/elastic/workchat-solution-ds-experiments/blob/main/src/experiments/elastic-etl/README.md) from the workchat-solution-ds-experiments repo maintained by Agent Builder DS team. **Recommended when restoring snapshot is not an option, e.g. serverless**. Takes approximately 30 minutes on Serverless Cloud, and about 1 hour for local ingestion.
 
