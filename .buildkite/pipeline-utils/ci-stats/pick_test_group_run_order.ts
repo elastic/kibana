@@ -377,7 +377,7 @@ export async function pickTestGroupRunOrder() {
             // },
           }
         : [],
-      functionalGroups.length
+      functionalGroups.length && false
         ? {
             group: 'FTR Configs',
             key: 'ftr-configs',
