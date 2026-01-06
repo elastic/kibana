@@ -50,7 +50,9 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 2. **Elasticsearch**: Start Elasticsearch with the CCM URL flag:
 
    ```bash
-   yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+   yarn es snapshot --license trial
+   # OR
+   yarn es serverless
    ```
 
 3. **Credentials**: The script will automatically detect Elasticsearch credentials from:
@@ -60,12 +62,9 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 ### Usage
 
 ```bash
-# Start Elasticsearch with CCM enabled
-yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
-
-# In a separate terminal, configure CCM 
+# In a separate terminal, configure CCM
 # Use --no-ssl for HTTP connections
 node scripts/eis.js
 ```
 
-The script will fetch the API key from Vault and configure Cloud Connected Mode in your local Elasticsearch instance.
+The script will fetch the API key and inference URL from Vault, configure the inference URL via Elasticsearch cluster settings, and set up Cloud Connected Mode in your local Elasticsearch instance.

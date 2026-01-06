@@ -16,6 +16,11 @@ interface ElasticsearchCredentials {
   password: string;
 }
 
+interface EisVaultData {
+  apiKey: string;
+  inferenceUrl: string;
+}
+
 interface ElasticsearchConnection {
   baseUrl: string;
   credentials: ElasticsearchCredentials;
@@ -106,8 +111,8 @@ async function getES(log: ToolingLog, ssl: boolean = true): Promise<Elasticsearc
   );
 }
 
-async function getEisApiKey(log: ToolingLog): Promise<string> {
-  log.debug('Fetching EIS API key from vault');
+async function getEisVaultData(log: ToolingLog): Promise<EisVaultData> {
+  log.debug('Fetching EIS data from vault');
 
   const secretPath = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
   const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
@@ -117,13 +122,64 @@ async function getEisApiKey(log: ToolingLog): Promise<string> {
       env: { VAULT_ADDR: vaultAddress },
     });
 
-    return apiKey.trim();
+    const { stdout: inferenceUrl } = await execa.command(
+      `vault read -field inference_url ${secretPath}`,
+      {
+        env: { VAULT_ADDR: vaultAddress },
+      }
+    );
+
+    return {
+      apiKey: apiKey.trim(),
+      inferenceUrl: inferenceUrl.trim(),
+    };
   } catch (error) {
     throw new Error(
-      'Failed to read EIS API key from vault. Please ensure you are logged in to vault (vault login --method oidc) and connected to VPN if needed. See https://docs.elastic.dev/vault',
+      'Failed to read EIS data from vault. Please ensure you are logged in to vault (vault login --method oidc) and connected to VPN if needed. See https://docs.elastic.dev/vault',
       { cause: error }
     );
   }
+}
+
+async function setInferenceUrl(
+  inferenceUrl: string,
+  es: ElasticsearchConnection,
+  log: ToolingLog
+): Promise<void> {
+  log.debug(`Setting inference URL to: ${inferenceUrl}`);
+
+  const esUrl = `${es.baseUrl}/_cluster/settings`;
+
+  const auth = Buffer.from(`${es.credentials.username}:${es.credentials.password}`).toString(
+    'base64'
+  );
+  const body = JSON.stringify({
+    persistent: {
+      'xpack.inference.elastic.url': inferenceUrl,
+    },
+  });
+
+  const { statusCode } = await httpRequest(
+    esUrl,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+      rejectUnauthorized: false,
+    },
+    body,
+    es.ssl
+  );
+
+  if (statusCode >= 200 && statusCode < 300) {
+    log.debug('Successfully set inference URL');
+    return;
+  }
+
+  throw new Error(`Failed to set inference URL: HTTP ${statusCode}`);
 }
 
 async function setCcmApiKey(
@@ -202,18 +258,17 @@ export async function ensureEis({ log, ssl = true }: { log: ToolingLog; ssl?: bo
   // Get Elasticsearch connection info
   const es = await getES(log, ssl);
 
-  // Get EIS API key from vault
-  const apiKey = await getEisApiKey(log);
+  // Get EIS data from vault
+  const { apiKey, inferenceUrl } = await getEisVaultData(log);
 
   // Set CCM API key in Elasticsearch
   await setCcmApiKey(apiKey, es, log);
 
+  // Set inference URL in Elasticsearch cluster settings
+  await setInferenceUrl(inferenceUrl, es, log);
+
   log.write('');
-  log.write(`${chalk.green('✔')} EIS API key successfully set in Cloud Connected Mode`);
-  log.write('');
-  const eisUrlFlag = chalk.cyan(
-    '-E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud'
-  );
-  log.write(`${chalk.yellow('⚠')} Remember: Elasticsearch must be started with ${eisUrlFlag}`);
+  log.write(`${chalk.green('✔')} Successfully configured Cloud Connected Mode for EIS`);
+  log.write(`${chalk.green('✔')} Inference URL: ${inferenceUrl}`);
   log.write('');
 }
