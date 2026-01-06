@@ -23,9 +23,11 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
         await privMonUtils.initPrivMonEngine();
 
-        const sources = await api.listEntitySources({ query: {} });
-        const names = sources.body.map((s: any) => s.name);
-        const syncMarkersIndices = sources.body.map((s: any) => s.integrations?.syncMarkerIndex);
+        const {
+          body: { sources },
+        } = await api.listEntitySources({ query: {} });
+        const names = sources.map((s: any) => s.name);
+        const syncMarkersIndices = sources.map((s: any) => s.integrations?.syncMarkerIndex);
         // confirm default sources have been created
         expect(names).toEqual(
           expect.arrayContaining([
