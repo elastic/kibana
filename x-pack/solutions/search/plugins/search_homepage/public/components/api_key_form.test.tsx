@@ -58,7 +58,7 @@ describe('ApiKeyForm', () => {
           url: {
             locators: {
               get: () => ({
-                useUrl: () => '/app/management/security/api_keys',
+                useUrl: () => '',
               }),
             },
           },
