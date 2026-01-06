@@ -47,6 +47,7 @@ export const convertTool = ({
       },
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
+      cleanHistory: tool.cleanHistory,
     };
   }
   if (!isBuiltinDefinition(definition)) {

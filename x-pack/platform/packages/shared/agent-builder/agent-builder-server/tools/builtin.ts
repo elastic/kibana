@@ -8,7 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type { ToolDefinition, ToolType, ToolResult } from '@kbn/agent-builder-common';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
@@ -69,6 +69,32 @@ export interface ToolAvailabilityConfig {
 }
 
 /**
+ * Result of cleaning a tool result for history.
+ * If the tool result should not be cleaned, return undefined.
+ */
+export interface CleanedHistoryResult {
+  /**
+   * A human-readable summary of what the tool did.
+   * This replaces the full tool result in conversation history.
+   */
+  summary: string;
+  /**
+   * Optional metadata to preserve for context.
+   * Should contain only essential information like IDs, types, versions.
+   */
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Function to clean a tool result for conversation history.
+ * Used to reduce context size by replacing large tool results with summaries.
+ *
+ * @param result - The tool result to clean
+ * @returns The cleaned result, or undefined if no cleaning should be applied
+ */
+export type ToolHistoryCleanerFn = (result: ToolResult) => CleanedHistoryResult | undefined;
+
+/**
  * Built-in tool, as registered as static tool.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
@@ -90,6 +116,13 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    * Refer to {@link ToolAvailabilityConfig}
    */
   availability?: ToolAvailabilityConfig;
+  /**
+   * Optional function to clean tool results for conversation history.
+   * When provided, this function will be called when processing conversation history
+   * to replace large tool results with compact summaries.
+   * This helps prevent context bloat in long conversations.
+   */
+  cleanHistory?: ToolHistoryCleanerFn;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> & {

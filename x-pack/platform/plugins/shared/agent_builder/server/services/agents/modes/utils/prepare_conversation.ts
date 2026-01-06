@@ -23,6 +23,12 @@ import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
 } from '@kbn/agent-builder-server/attachments';
+import type { ToolRegistry } from '../../../tools';
+import {
+  prepareAttachmentPresentation,
+  type AttachmentPresentation,
+} from './attachment_presentation';
+import { cleanToolCallHistory } from './clean_tool_history';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
@@ -50,6 +56,8 @@ export interface ProcessedConversation {
   attachmentTypes: ProcessedAttachmentType[];
   attachments: ProcessedAttachment[];
   attachmentStateManager: AttachmentStateManager;
+  /** Presentation configuration for versioned attachments (inline vs summary mode) */
+  versionedAttachmentPresentation?: AttachmentPresentation;
 }
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
@@ -64,11 +72,13 @@ export const prepareConversation = async ({
   nextInput,
   context,
   conversationAttachments,
+  toolRegistry,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
   conversationAttachments?: VersionedAttachment[];
+  toolRegistry?: ToolRegistry;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
@@ -78,8 +88,13 @@ export const prepareConversation = async ({
     attachmentsService,
     formatContext,
   });
+
+  const cleanedRounds = toolRegistry
+    ? await cleanToolCallHistory(previousRounds, toolRegistry)
+    : previousRounds;
+
   const processedRounds = await Promise.all(
-    previousRounds.map((round) => {
+    cleanedRounds.map((round) => {
       return prepareRound({ round, attachmentsService, formatContext });
     })
   );
@@ -104,12 +119,17 @@ export const prepareConversation = async ({
     })
   );
 
+  const versionedAttachmentPresentation = conversationAttachments
+    ? prepareAttachmentPresentation(conversationAttachments)
+    : undefined;
+
   return {
     nextInput: processedNextInput,
     previousRounds: processedRounds,
     attachmentTypes,
     attachments: allAttachments,
     attachmentStateManager,
+    versionedAttachmentPresentation,
   };
 };
 

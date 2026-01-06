@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -15,8 +16,7 @@ const attachmentReadSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to read'),
   version: z
     .number()
-    .int()
-    .positive()
+    .min(1)
     .optional()
     .describe('Specific version to read (defaults to current version)'),
 });
@@ -34,7 +34,7 @@ export const createAttachmentReadTool = ({
     'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
   schema: attachmentReadSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id: attachmentId, version }, _context) => {
+  handler: async ({ attachment_id: attachmentId, version }) => {
     const attachment = attachmentManager.get(attachmentId);
 
     if (!attachment) {
@@ -42,7 +42,7 @@ export const createAttachmentReadTool = ({
         results: [
           createErrorResult({
             message: `Attachment with ID '${attachmentId}' not found`,
-            metadata: { attachmentId },
+            metadata: { attachment_id: attachmentId },
           }),
         ],
       };
@@ -57,7 +57,7 @@ export const createAttachmentReadTool = ({
         results: [
           createErrorResult({
             message: `Version ${version} not found for attachment '${attachmentId}'`,
-            metadata: { attachmentId, version },
+            metadata: { attachment_id: attachmentId, version },
           }),
         ],
       };
@@ -70,10 +70,24 @@ export const createAttachmentReadTool = ({
           type: ToolResultType.other,
           data: {
             type: attachment.type,
+            version: versionData.version,
             data: versionData.data,
           },
         },
       ],
+    };
+  },
+  cleanHistory: (result) => {
+    if (!isOtherResult(result)) return undefined;
+    const data = result.data as Record<string, unknown>;
+
+    return {
+      summary: `Read ${data.type || 'attachment'} "${data.attachment_id}" v${data.version ?? '?'}`,
+      metadata: {
+        attachment_id: data.attachment_id,
+        type: data.type,
+        version: data.version,
+      },
     };
   },
 });

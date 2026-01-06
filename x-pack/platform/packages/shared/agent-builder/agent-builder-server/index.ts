@@ -51,6 +51,8 @@ export type {
   ToolAvailabilityConfig,
   InternalToolAvailabilityHandler,
   InternalToolDefinition,
+  CleanedHistoryResult,
+  ToolHistoryCleanerFn,
 } from './tools';
 export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {

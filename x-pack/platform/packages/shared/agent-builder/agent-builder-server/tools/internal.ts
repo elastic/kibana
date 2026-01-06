@@ -9,7 +9,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
-import type { ToolAvailabilityContext, ToolAvailabilityResult } from './builtin';
+import type { ToolAvailabilityContext, ToolAvailabilityResult, ToolHistoryCleanerFn } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
 /**
@@ -37,6 +37,12 @@ export interface InternalToolDefinition<
    * when specified, this will fully replace the description when converting to LLM tools.
    */
   getLlmDescription?: LlmDescriptionHandler<TConfig>;
+  /**
+   * Optional function to clean tool results for conversation history.
+   * When provided, this function will be called when processing conversation history
+   * to replace large tool results with compact summaries.
+   */
+  cleanHistory?: ToolHistoryCleanerFn;
 }
 
 export type InternalToolAvailabilityHandler = (
