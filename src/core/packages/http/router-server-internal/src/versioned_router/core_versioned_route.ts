@@ -146,10 +146,10 @@ export class CoreVersionedRoute implements VersionedRoute {
     let version;
     const maybeVersion = readVersion(req, this.enableQueryVersion);
     if (!maybeVersion) {
-      if (this.useDefaultStrategyForPath) {
+      if (this.useDefaultStrategyForPath || this.env.mode.dev) {
         version = this.getDefaultVersion();
-      } else if (!this.env.mode.dev && !this.isPublic) {
-        // When in production, we default internal routes to v1 to allow
+      } else if (!this.isPublic) {
+        // Default internal routes to 1 to allow
         // gracefully onboarding of un-versioned to versioned routes
         version = '1';
       }
