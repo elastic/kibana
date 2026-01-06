@@ -1101,8 +1101,8 @@ describe('esql query helpers', () => {
     it('should return false if the last STATS BY command does use a date column', () => {
       expect(
         hasDateBreakdown(
-          `TS index
-            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)
+          `TS index 
+            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
             | STATS sample = SAMPLE(count, 10) BY category`,
           [
             {
