@@ -25,5 +25,7 @@ export class ResourcesService {
       task.register();
       await task.schedule();
     }));
+  public install(types: EntityType[] = ALL_ENTITY_TYPES) {
+    this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
   }
 }
