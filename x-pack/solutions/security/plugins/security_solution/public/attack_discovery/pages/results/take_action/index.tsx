@@ -289,9 +289,7 @@ const TakeActionComponent: React.FC<Props> = ({
         attackDiscoveries.length === 1
           ? isAgentChatExperienceEnabled
             ? hasAgentBuilderPrivilege
-              ? [
-                  viewInAgentBuilderItem,
-                ]
+              ? [viewInAgentBuilderItem]
               : []
             : [
                 <EuiContextMenuItem
