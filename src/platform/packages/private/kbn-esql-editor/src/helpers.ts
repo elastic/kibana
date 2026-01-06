@@ -259,6 +259,10 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor .suggest-details .scrollbar {
+      display: none !important;
+    }
+
     .monaco-hover {
       display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
@@ -317,15 +321,21 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
+      // Suggestions must be rendered above flyouts
+      z-index: 1100 !important;
     }
 
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
+
     .suggest-details {
-      padding-left: ${theme.euiTheme.size.s};
+      padding-left: ${theme.euiTheme.size.m};
+      padding-right: ${theme.euiTheme.size.m};
+      text-align: justify;
     }
+
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
@@ -334,12 +344,15 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
 
-    // Modifies the height of the signature popup to make it fit under the page header.
-    // This is temprary until https://github.com/elastic/kibana/issues/245694 is resolved.
-    // This solution is succeptible to errors if the editor height or the page header height changes.
-    .parameter-hints-widget > .phwrapper {
-      max-height: 90px !important;
-      overflow: auto;
+    .suggest-details .rendered-markdown h1 {
+      display: block;
+      margin-top: ${theme.euiTheme.size.m};
+      font-size: ${theme.euiTheme.size.base};
+      font-weight: ${theme.euiTheme.font.weight.bold};
+    }
+
+    .suggest-details [data-code] {
+      overflow-x: auto !important;
     }
   `;
 };
