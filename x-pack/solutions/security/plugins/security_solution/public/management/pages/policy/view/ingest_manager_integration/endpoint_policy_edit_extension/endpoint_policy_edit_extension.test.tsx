@@ -118,12 +118,8 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
     ).not.toBeInTheDocument();
 
     // Other cards should still be visible
-    expect(
-      renderResult.getByTestId('trustedApps-fleet-integration-card')
-    ).toBeInTheDocument();
-    expect(
-      renderResult.getByTestId('eventFilters-fleet-integration-card')
-    ).toBeInTheDocument();
+    expect(renderResult.getByTestId('trustedApps-fleet-integration-card')).toBeInTheDocument();
+    expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toBeInTheDocument();
     expect(
       renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
     ).toBeInTheDocument();
