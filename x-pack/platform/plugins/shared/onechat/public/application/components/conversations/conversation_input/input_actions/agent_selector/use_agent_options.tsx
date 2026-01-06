@@ -6,11 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
