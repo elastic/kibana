@@ -30,7 +30,7 @@ export const cleanupEntityStore = async ({
   const spacePath = spaceId ? `/s/${spaceId}` : '';
   try {
     await supertest
-      .delete(`${spacePath}/api/entity_store/engines/generic?delete_data=true`)
+      .delete(`${spacePath}/api/entity_store/engines?delete_data=true`)
       .set('kbn-xsrf', 'xxxx')
       .expect(200);
     logger.debug(`Deleted entity store engine for space: ${spaceId || 'default'}`);
