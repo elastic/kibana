@@ -13,7 +13,7 @@ The Jina Reader connector communicates with the Jina API to turn any URL to mark
 
 ## Create connectors in {{kib}} [define-jina-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [jina-connector-configuration]
 
