@@ -11,7 +11,7 @@
         "label": "AIAgentConfirmationModal",
         "description": [],
         "signature": [
-          "({ onConfirm, onCancel, }: ",
+          "({ onConfirm, onCancel, docLinks, }: ",
           {
             "pluginId": "@kbn/ai-agent-confirmation-modal",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.AIAgentConfirmationModal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onConfirm,\n  onCancel,\n}",
+            "label": "{\n  onConfirm,\n  onCancel,\n  docLinks,\n}",
             "description": [],
             "signature": [
               {
@@ -94,6 +94,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-agent-confirmation-modal",
+            "id": "def-public.AIAgentConfirmationModalProps.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

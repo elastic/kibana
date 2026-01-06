@@ -175,28 +175,22 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
     telemetry,
   } = useKibana().services;
 
-  const encodedHostName = encodeURIComponent(hostName);
-
   const goToHostDetails = useCallback(
     (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: hostTab
-          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab, search)
-          : getHostDetailsUrl(encodedHostName, search),
+          ? getTabsOnHostDetailsUrl(hostName, hostTab, search)
+          : getHostDetailsUrl(hostName, search),
       });
     },
-    [encodedHostName, navigateToApp, search, hostTab]
+    [hostName, navigateToApp, search, hostTab]
   );
   const href = useMemo(
     () =>
-      formatUrl(
-        hostTab
-          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab)
-          : getHostDetailsUrl(encodedHostName)
-      ),
-    [formatUrl, encodedHostName, hostTab]
+      formatUrl(hostTab ? getTabsOnHostDetailsUrl(hostName, hostTab) : getHostDetailsUrl(hostName)),
+    [formatUrl, hostName, hostTab]
   );
 
   const onClick = useCallback(
@@ -341,7 +335,7 @@ const IpLinkComponent: React.FC<IpLinkComponentProps> = ({
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.network,
-    path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ipAddress)), flowTarget),
+    path: getNetworkDetailsUrl(encodeIpv6(ipAddress), flowTarget),
   });
 
   const onLinkClick = useCallback(
@@ -574,11 +568,9 @@ const ReputationLinkComponent: React.FC<{
       ipReputationLinksSetting
         ?.slice(0, allItemsLimit)
         .filter(
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           ({ url_template, name }) =>
             !isNil(url_template) && !isNil(name) && !isUrlInvalid(url_template)
         )
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         .map(({ name, url_template }: { name: string; url_template: string }) => ({
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),

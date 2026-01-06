@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -90,13 +92,11 @@ describe('kibana index telemetry', () => {
       count_alerts_total: 6,
       count_alerts_by_rule_type: {
         '__index-threshold': 1,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         logs__alert__document__count: 2,
         document__test__: 3,
       },
       count_ignored_fields_by_rule_type: {
         '__index-threshold': 0,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         logs__alert__document__count: 2,
         document__test__: 0,
       },

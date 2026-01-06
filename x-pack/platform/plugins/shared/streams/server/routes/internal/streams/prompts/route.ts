@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { PromptsConfigAttributes } from '../../../../lib/saved_objects/significant_events/promps_config_service';
-import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/promps_config_service';
+import type { PromptsConfigAttributes } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
+import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -28,6 +28,7 @@ export const setStreamsPromptRoute = createServerRoute({
     body: z.object({
       featurePromptOverride: z.string().optional(),
       significantEventsPromptOverride: z.string().optional(),
+      descriptionPromptOverride: z.string().optional(),
     }),
   }),
   handler: async ({
@@ -43,15 +44,11 @@ export const setStreamsPromptRoute = createServerRoute({
       soClient,
       logger,
     });
-    const { featurePromptOverride, significantEventsPromptOverride } = params.body;
 
-    if (!featurePromptOverride && !significantEventsPromptOverride) {
+    if (!Object.values(params.body ?? {}).some((value) => value?.length > 0)) {
       throw new StatusError('At least one prompt template must be provided', 400);
     }
-    const results = await promptsConfigService.upsertPrompt({
-      featurePromptOverride,
-      significantEventsPromptOverride,
-    });
+    const results = await promptsConfigService.upsertPrompt(params.body);
     return { results };
   },
 });

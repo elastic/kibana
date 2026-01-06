@@ -50,6 +50,7 @@
       "cloud",
       "profilingDataAccess",
       "observabilityAIAssistant",
+      "observabilityAgentBuilder",
       "licenseManagement",
       "serverless"
     ],
@@ -59,7 +60,6 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "controls",
       "fleet"
     ]
   }

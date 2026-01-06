@@ -59,17 +59,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         panelGroupByOrder.set(order, panelGroupTitle);
       }
 
-      expect(panelGroupByOrder.size).to.eql(4);
+      expect(panelGroupByOrder.size).to.eql(6);
 
       expect([...panelGroupByOrder.values()]).to.eql([
         'visualizationsGroup',
+        'controlsGroup',
         'annotation-and-navigationGroup',
         'mlGroup',
         'observabilityGroup',
+        'legacyGroup',
       ]);
 
       // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
-      expect(panelTypes.length).to.eql(21);
+      expect(panelTypes.length).to.eql(24);
     });
   });
 }

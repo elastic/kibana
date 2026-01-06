@@ -13,6 +13,7 @@ import { type ConnectorContractUnion } from '../..';
 import type { JsonModelSchema } from '../schema';
 import {
   BaseConnectorStepSchema,
+  DataSetStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -23,6 +24,7 @@ import {
   WaitStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
+  WorkflowSettingsSchema,
 } from '../schema';
 
 export function getStepId(stepName: string): string {
@@ -44,6 +46,7 @@ export function generateYamlSchemaFromConnectors(
     // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
     // We use the base schema (without transform) so we can extend it
     return WorkflowSchemaForAutocompleteBase.extend({
+      settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
     }).transform((data) => ({
       ...data,
@@ -107,6 +110,7 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      DataSetStepSchema,
       httpSchema,
       ...connectorSchemas,
     ]);
@@ -127,5 +131,6 @@ function generateStepSchemaForConnector(
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    ...(connector.configSchema && connector.configSchema.shape),
   });
 }
