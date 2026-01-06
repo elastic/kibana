@@ -25,8 +25,7 @@ const TIMESTAMP_FIELD = '@timestamp';
 export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props) => {
   // Creates our *initial* search source and set of attributes.
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
-  const [initialSerializedState, setInitialSerializedState] =
-    useState<SearchEmbeddableState>();
+  const [initialSerializedState, setInitialSerializedState] = useState<SearchEmbeddableState>();
 
   const [error, setError] = useState<Error | undefined>();
 

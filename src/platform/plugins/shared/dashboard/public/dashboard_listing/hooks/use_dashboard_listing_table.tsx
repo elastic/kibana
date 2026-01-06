@@ -119,13 +119,10 @@ export const useDashboardListingTable = ({
         return;
       }
       const { references, ...currentState } = dashboard.attributes;
-      await dashboardClient.update(
-        id,
-        {
-          ...currentState,
-          ...updatedState,
-        },
-      );
+      await dashboardClient.update(id, {
+        ...currentState,
+        ...updatedState,
+      });
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },

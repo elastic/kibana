@@ -14,9 +14,7 @@ import type { LinksEmbeddableState } from '../../common';
 import type { LinksState } from '../../server';
 import { loadFromLibrary } from '../content_management/load_from_library';
 
-export async function getPanelPlacement(
-  serializedState?: LinksEmbeddableState
-) {
+export async function getPanelPlacement(serializedState?: LinksEmbeddableState) {
   if (!serializedState) return {};
 
   let layout = LINKS_HORIZONTAL_LAYOUT;
@@ -25,7 +23,7 @@ export async function getPanelPlacement(
     const savedObjectId = (serializedState as { savedObjectId?: string }).savedObjectId;
     const linksState = savedObjectId
       ? await loadFromLibrary(savedObjectId)
-      : serializedState as LinksState;
+      : (serializedState as LinksState);
     if (linksState.layout) layout = linksState.layout;
     if (linksState.links) numLinks = linksState.links.length;
   } catch (error) {

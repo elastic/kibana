@@ -76,7 +76,7 @@ export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialControls: DashboardState['controlGroupInput'] | undefined,
-  trackPanel: ReturnType<typeof initializeTrackPanel>,
+  trackPanel: ReturnType<typeof initializeTrackPanel>
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -490,9 +490,7 @@ export function initializeLayoutManager(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
-              map((lastSaved) =>
-                deserializeLayout(lastSaved.panels, lastSaved.controlGroupInput)
-              ),
+              map((lastSaved) => deserializeLayout(lastSaved.panels, lastSaved.controlGroupInput)),
               tap(({ layout, childState }) => {
                 lastSavedChildState = childState;
                 lastSavedLayout = layout;

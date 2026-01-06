@@ -14,7 +14,7 @@ import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  controls: DashboardState['controlGroupInput'],
+  controls: DashboardState['controlGroupInput']
 ) {
   const childState: DashboardChildState = {};
   const layout: DashboardLayout = {

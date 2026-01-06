@@ -137,10 +137,7 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const {
-      panels,
-      controlGroupInput,
-    } = layoutManager.internalApi.serializeLayout();
+    const { panels, controlGroupInput } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
     return {

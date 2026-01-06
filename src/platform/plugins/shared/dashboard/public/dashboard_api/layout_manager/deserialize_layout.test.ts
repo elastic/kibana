@@ -52,7 +52,7 @@ describe('deserializeLayout', () => {
             config: { anotherValue: 1 },
           } as unknown as PinnedControlState,
         ],
-      },
+      }
     );
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {

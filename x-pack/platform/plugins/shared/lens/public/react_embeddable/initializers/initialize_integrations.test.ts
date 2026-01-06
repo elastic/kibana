@@ -44,7 +44,9 @@ describe('Dashboard services API', () => {
       });
       const serializedState = api.serializeState();
       // check the same 3 things as above
-      expect(serializedState).not.toEqual(expect.objectContaining({ attributes: expect.anything() }));
+      expect(serializedState).not.toEqual(
+        expect.objectContaining({ attributes: expect.anything() })
+      );
     });
 
     it('should remove the searchSessionId from the serializedState', async () => {

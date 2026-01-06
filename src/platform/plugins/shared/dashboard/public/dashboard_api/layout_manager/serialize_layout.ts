@@ -26,7 +26,7 @@ export function serializeLayout(
   const panels: DashboardState['panels'] = [];
   Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
     const config = childState[panelId] ?? {};
-    
+
     const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
       type,

@@ -31,9 +31,7 @@ import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import type { VisualizeRuntimeState, ExtraSavedObjectProperties } from './types';
 
-export const deserializeState = async (
-  state: VisualizeEmbeddableState | undefined
-) => {
+export const deserializeState = async (state: VisualizeEmbeddableState | undefined) => {
   if (!state)
     return {
       serializedVis: {
@@ -133,22 +131,22 @@ export const serializeState: (props: {
   // save by reference
   if (linkedToLibrary && id) {
     return {
-        ...(titles ? titles : {}),
-        ...dynamicActionsState,
-        ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
-        ...(timeRange ? { timeRange } : {}),
-        savedObjectId: id,
+      ...(titles ? titles : {}),
+      ...dynamicActionsState,
+      ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
+      ...(timeRange ? { timeRange } : {}),
+      savedObjectId: id,
     } as VisualizeByReferenceState;
   }
 
   return {
-      ...(titles ? titles : {}),
-      ...savedObjectProperties,
-      ...dynamicActionsState,
-      ...(timeRange ? { timeRange } : {}),
-      savedVis: {
-        ...serializedVis,
-        id,
-      },
+    ...(titles ? titles : {}),
+    ...savedObjectProperties,
+    ...dynamicActionsState,
+    ...(timeRange ? { timeRange } : {}),
+    savedVis: {
+      ...serializedVis,
+      id,
+    },
   } as VisualizeByValueState;
 };

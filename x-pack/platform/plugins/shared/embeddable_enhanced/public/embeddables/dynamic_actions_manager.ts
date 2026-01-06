@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EmbeddableApiContext,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, StateComparators } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';

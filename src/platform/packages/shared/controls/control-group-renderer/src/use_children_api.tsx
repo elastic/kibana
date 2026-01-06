@@ -41,9 +41,7 @@ export const useChildrenApi = (
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
-  const currentChildState$Ref = useRef(
-    new BehaviorSubject<{ [id: string]: object }>({})
-  );
+  const currentChildState$Ref = useRef(new BehaviorSubject<{ [id: string]: object }>({}));
   const lastSavedChildState$Ref = useRef(
     new BehaviorSubject<{ [id: string]: object }>({}) // derived from lastSavedState$Ref
   );

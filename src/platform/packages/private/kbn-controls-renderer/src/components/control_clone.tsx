@@ -30,10 +30,7 @@ export const ControlClone = ({
   const styles = useMemoCss(controlCloneStyles);
 
   const cloneTitle = useMemo(() => {
-    return (
-      (state as { title?: string }).title ||
-      (state as { fieldName?: string }).fieldName
-    );
+    return (state as { title?: string }).title || (state as { fieldName?: string }).fieldName;
   }, [state]);
 
   const widthStyle = useMemo(() => {
