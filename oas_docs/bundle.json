@@ -9262,6 +9262,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "key": {
@@ -9278,6 +9279,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -9420,6 +9422,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "key": {
@@ -9508,6 +9511,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "key": {
@@ -9736,6 +9740,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "key": {
@@ -9888,6 +9893,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "key": {
@@ -9976,6 +9982,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "key": {
@@ -10202,6 +10209,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "agentless": {
@@ -10289,6 +10297,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "has_fleet_server": {
@@ -10366,6 +10375,7 @@
                               ],
                               "type": "string"
                             },
+                            "maxItems": 3,
                             "type": "array"
                           },
                           "monitoring_http": {
@@ -10422,6 +10432,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               {
@@ -10434,6 +10445,7 @@
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 1000,
                                       "nullable": true,
                                       "type": "array"
                                     },
@@ -10465,6 +10477,7 @@
                                               "items": {
                                                 "type": "string"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             }
                                           },
@@ -10565,6 +10578,7 @@
                                                                   "items": {
                                                                     "type": "string"
                                                                   },
+                                                                  "maxItems": 100,
                                                                   "type": "array"
                                                                 }
                                                               },
@@ -10628,6 +10642,7 @@
                                                   ],
                                                   "type": "object"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               "type": {
@@ -10662,6 +10677,7 @@
                                             ],
                                             "type": "object"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -10696,12 +10712,14 @@
                                                             "items": {
                                                               "type": "string"
                                                             },
+                                                            "maxItems": 100,
                                                             "type": "array"
                                                           },
                                                           {
                                                             "items": {
                                                               "type": "number"
                                                             },
+                                                            "maxItems": 100,
                                                             "type": "array"
                                                           },
                                                           {
@@ -10748,12 +10766,14 @@
                                                       "items": {
                                                         "type": "string"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     },
                                                     {
                                                       "items": {
                                                         "type": "number"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     },
                                                     {
@@ -10849,6 +10869,7 @@
                                             ],
                                             "type": "object"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         "fips_compatible": {
@@ -10904,12 +10925,14 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "spaceIds": {
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "supports_agentless": {
@@ -10968,12 +10991,14 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
                                                 "items": {
                                                   "type": "number"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
@@ -11018,6 +11043,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               }
                             ]
@@ -11043,6 +11069,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "nullable": true,
                             "type": "array"
                           },
@@ -11056,6 +11083,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "status": {
@@ -11101,6 +11129,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -11244,6 +11273,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "agentless": {
@@ -11328,6 +11358,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "has_fleet_server": {
@@ -11401,6 +11432,7 @@
                       ],
                       "type": "string"
                     },
+                    "maxItems": 3,
                     "type": "array"
                   },
                   "monitoring_http": {
@@ -11472,6 +11504,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 100,
                     "nullable": true,
                     "type": "array"
                   },
@@ -11479,6 +11512,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "supports_agentless": {
@@ -11564,6 +11598,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "agentless": {
@@ -11651,6 +11686,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -11728,6 +11764,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 3,
                           "type": "array"
                         },
                         "monitoring_http": {
@@ -11784,6 +11821,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             {
@@ -11796,6 +11834,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 1000,
                                     "nullable": true,
                                     "type": "array"
                                   },
@@ -11827,6 +11866,7 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           }
                                         },
@@ -11927,6 +11967,7 @@
                                                                 "items": {
                                                                   "type": "string"
                                                                 },
+                                                                "maxItems": 100,
                                                                 "type": "array"
                                                               }
                                                             },
@@ -11990,6 +12031,7 @@
                                                 ],
                                                 "type": "object"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             "type": {
@@ -12024,6 +12066,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       {
@@ -12058,12 +12101,14 @@
                                                           "items": {
                                                             "type": "string"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
                                                           "items": {
                                                             "type": "number"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
@@ -12110,12 +12155,14 @@
                                                     "items": {
                                                       "type": "string"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
                                                     "items": {
                                                       "type": "number"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
@@ -12211,6 +12258,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       "fips_compatible": {
@@ -12266,12 +12314,14 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "spaceIds": {
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "supports_agentless": {
@@ -12330,12 +12380,14 @@
                                               "items": {
                                                 "type": "string"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
                                               "items": {
                                                 "type": "number"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
@@ -12380,6 +12432,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             }
                           ]
@@ -12405,6 +12458,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "nullable": true,
                           "type": "array"
                         },
@@ -12418,6 +12472,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "status": {
@@ -12554,6 +12609,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   },
                   "ignoreMissing": {
@@ -12632,6 +12688,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "agentless": {
@@ -12719,6 +12776,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "has_fleet_server": {
@@ -12796,6 +12854,7 @@
                               ],
                               "type": "string"
                             },
+                            "maxItems": 3,
                             "type": "array"
                           },
                           "monitoring_http": {
@@ -12852,6 +12911,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               {
@@ -12864,6 +12924,7 @@
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 1000,
                                       "nullable": true,
                                       "type": "array"
                                     },
@@ -12895,6 +12956,7 @@
                                               "items": {
                                                 "type": "string"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             }
                                           },
@@ -12995,6 +13057,7 @@
                                                                   "items": {
                                                                     "type": "string"
                                                                   },
+                                                                  "maxItems": 100,
                                                                   "type": "array"
                                                                 }
                                                               },
@@ -13058,6 +13121,7 @@
                                                   ],
                                                   "type": "object"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               "type": {
@@ -13092,6 +13156,7 @@
                                             ],
                                             "type": "object"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -13126,12 +13191,14 @@
                                                             "items": {
                                                               "type": "string"
                                                             },
+                                                            "maxItems": 100,
                                                             "type": "array"
                                                           },
                                                           {
                                                             "items": {
                                                               "type": "number"
                                                             },
+                                                            "maxItems": 100,
                                                             "type": "array"
                                                           },
                                                           {
@@ -13178,12 +13245,14 @@
                                                       "items": {
                                                         "type": "string"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     },
                                                     {
                                                       "items": {
                                                         "type": "number"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     },
                                                     {
@@ -13279,6 +13348,7 @@
                                             ],
                                             "type": "object"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         "fips_compatible": {
@@ -13334,12 +13404,14 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "spaceIds": {
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "supports_agentless": {
@@ -13398,12 +13470,14 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
                                                 "items": {
                                                   "type": "number"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
@@ -13448,6 +13522,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               }
                             ]
@@ -13473,6 +13548,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "nullable": true,
                             "type": "array"
                           },
@@ -13486,6 +13562,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "status": {
@@ -13531,6 +13608,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -13708,6 +13786,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   }
                 },
@@ -13755,6 +13834,7 @@
                                   },
                                   "type": "object"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "output": {
@@ -13811,6 +13891,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -13950,6 +14031,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "agentless": {
@@ -14037,6 +14119,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -14114,6 +14197,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 3,
                           "type": "array"
                         },
                         "monitoring_http": {
@@ -14170,6 +14254,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             {
@@ -14182,6 +14267,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 1000,
                                     "nullable": true,
                                     "type": "array"
                                   },
@@ -14213,6 +14299,7 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           }
                                         },
@@ -14313,6 +14400,7 @@
                                                                 "items": {
                                                                   "type": "string"
                                                                 },
+                                                                "maxItems": 100,
                                                                 "type": "array"
                                                               }
                                                             },
@@ -14376,6 +14464,7 @@
                                                 ],
                                                 "type": "object"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             "type": {
@@ -14410,6 +14499,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       {
@@ -14444,12 +14534,14 @@
                                                           "items": {
                                                             "type": "string"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
                                                           "items": {
                                                             "type": "number"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
@@ -14496,12 +14588,14 @@
                                                     "items": {
                                                       "type": "string"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
                                                     "items": {
                                                       "type": "number"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
@@ -14597,6 +14691,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       "fips_compatible": {
@@ -14652,12 +14747,14 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "spaceIds": {
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "supports_agentless": {
@@ -14716,12 +14813,14 @@
                                               "items": {
                                                 "type": "string"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
                                               "items": {
                                                 "type": "number"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
@@ -14766,6 +14865,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             }
                           ]
@@ -14791,6 +14891,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "nullable": true,
                           "type": "array"
                         },
@@ -14804,6 +14905,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "status": {
@@ -14990,6 +15092,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "agentless": {
@@ -15077,6 +15180,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "has_fleet_server": {
@@ -15150,6 +15254,7 @@
                       ],
                       "type": "string"
                     },
+                    "maxItems": 3,
                     "type": "array"
                   },
                   "monitoring_http": {
@@ -15221,6 +15326,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 100,
                     "nullable": true,
                     "type": "array"
                   },
@@ -15228,6 +15334,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "supports_agentless": {
@@ -15313,6 +15420,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "agentless": {
@@ -15400,6 +15508,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -15477,6 +15586,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 3,
                           "type": "array"
                         },
                         "monitoring_http": {
@@ -15533,6 +15643,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             {
@@ -15545,6 +15656,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 1000,
                                     "nullable": true,
                                     "type": "array"
                                   },
@@ -15576,6 +15688,7 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           }
                                         },
@@ -15676,6 +15789,7 @@
                                                                 "items": {
                                                                   "type": "string"
                                                                 },
+                                                                "maxItems": 100,
                                                                 "type": "array"
                                                               }
                                                             },
@@ -15739,6 +15853,7 @@
                                                 ],
                                                 "type": "object"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             "type": {
@@ -15773,6 +15888,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       {
@@ -15807,12 +15923,14 @@
                                                           "items": {
                                                             "type": "string"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
                                                           "items": {
                                                             "type": "number"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
@@ -15859,12 +15977,14 @@
                                                     "items": {
                                                       "type": "string"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
                                                     "items": {
                                                       "type": "number"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
@@ -15960,6 +16080,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       "fips_compatible": {
@@ -16015,12 +16136,14 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "spaceIds": {
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "supports_agentless": {
@@ -16079,12 +16202,14 @@
                                               "items": {
                                                 "type": "string"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
                                               "items": {
                                                 "type": "number"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
@@ -16129,6 +16254,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             }
                           ]
@@ -16154,6 +16280,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "nullable": true,
                           "type": "array"
                         },
@@ -16167,6 +16294,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "status": {
@@ -16302,6 +16430,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "totalAgents": {
@@ -16477,6 +16606,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "agentless": {
@@ -16564,6 +16694,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -16641,6 +16772,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 3,
                           "type": "array"
                         },
                         "monitoring_http": {
@@ -16697,6 +16829,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             {
@@ -16709,6 +16842,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 1000,
                                     "nullable": true,
                                     "type": "array"
                                   },
@@ -16740,6 +16874,7 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           }
                                         },
@@ -16840,6 +16975,7 @@
                                                                 "items": {
                                                                   "type": "string"
                                                                 },
+                                                                "maxItems": 100,
                                                                 "type": "array"
                                                               }
                                                             },
@@ -16903,6 +17039,7 @@
                                                 ],
                                                 "type": "object"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             "type": {
@@ -16937,6 +17074,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       {
@@ -16971,12 +17109,14 @@
                                                           "items": {
                                                             "type": "string"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
                                                           "items": {
                                                             "type": "number"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         },
                                                         {
@@ -17023,12 +17163,14 @@
                                                     "items": {
                                                       "type": "string"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
                                                     "items": {
                                                       "type": "number"
                                                     },
+                                                    "maxItems": 100,
                                                     "type": "array"
                                                   },
                                                   {
@@ -17124,6 +17266,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       "fips_compatible": {
@@ -17179,12 +17322,14 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "spaceIds": {
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "supports_agentless": {
@@ -17243,12 +17388,14 @@
                                               "items": {
                                                 "type": "string"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
                                               "items": {
                                                 "type": "number"
                                               },
+                                              "maxItems": 100,
                                               "type": "array"
                                             },
                                             {
@@ -17293,6 +17440,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             }
                           ]
@@ -17318,6 +17466,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "nullable": true,
                           "type": "array"
                         },
@@ -17331,6 +17480,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "status": {
@@ -17658,6 +17808,7 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 10,
                                           "type": "array"
                                         },
                                         "key": {
@@ -17828,6 +17979,7 @@
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "proxy_headers": {
@@ -17884,6 +18036,7 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 10,
                                           "type": "array"
                                         },
                                         "key": {
@@ -17914,6 +18067,7 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         "path": {
@@ -18023,6 +18177,7 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 10000,
                                     "type": "array"
                                   },
                                   "revision": {
@@ -18057,6 +18212,7 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 10000,
                                     "type": "array"
                                   },
                                   "type": {
@@ -18077,12 +18233,14 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             "namespaces": {
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "output_permissions": {
@@ -18104,6 +18262,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "proxy_headers": {
@@ -18161,6 +18320,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "service": {
@@ -18170,6 +18330,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 1000,
                                   "type": "array"
                                 },
                                 "pipelines": {
@@ -18180,18 +18341,21 @@
                                         "items": {
                                           "type": "string"
                                         },
+                                        "maxItems": 1000,
                                         "type": "array"
                                       },
                                       "processors": {
                                         "items": {
                                           "type": "string"
                                         },
+                                        "maxItems": 1000,
                                         "type": "array"
                                       },
                                       "receivers": {
                                         "items": {
                                           "type": "string"
                                         },
+                                        "maxItems": 1000,
                                         "type": "array"
                                       }
                                     },
@@ -18326,6 +18490,7 @@
                                 },
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "output": {
@@ -18452,6 +18617,7 @@
                   "items": {
                     "type": "string"
                   },
+                  "maxItems": 1000,
                   "type": "array"
                 },
                 {
@@ -18593,6 +18759,7 @@
                   "items": {
                     "type": "string"
                   },
+                  "maxItems": 10000,
                   "type": "array"
                 },
                 {
@@ -18636,6 +18803,7 @@
                   "properties": {
                     "dataPreview": {
                       "items": {},
+                      "maxItems": 1000,
                       "type": "array"
                     },
                     "items": {
@@ -18654,6 +18822,7 @@
                         },
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -18940,6 +19109,7 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 1000,
                                   "type": "array"
                                 }
                               },
@@ -18951,6 +19121,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "default_api_key": {
@@ -18974,6 +19145,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "default_api_key_id": {
@@ -19037,6 +19209,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "outputs": {
@@ -19063,6 +19236,7 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "type": {
@@ -19077,6 +19251,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "policy_id": {
@@ -19088,6 +19263,7 @@
                           },
                           "sort": {
                             "items": {},
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "status": {
@@ -19110,6 +19286,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "type": {
@@ -19135,6 +19312,7 @@
                               ],
                               "type": "string"
                             },
+                            "maxItems": 3,
                             "nullable": true,
                             "type": "array"
                           },
@@ -19142,6 +19320,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 1000,
                             "nullable": true,
                             "type": "array"
                           },
@@ -19238,6 +19417,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "nextSearchAfter": {
@@ -19336,6 +19516,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   }
                 },
@@ -19358,6 +19539,7 @@
                       "items": {
                         "type": "string"
                       },
+                      "maxItems": 1000,
                       "type": "array"
                     }
                   },
@@ -19515,6 +19697,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "nbAgentsAck": {
@@ -19594,6 +19777,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 1000,
                       "type": "array"
                     }
                   },
@@ -19683,6 +19867,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10000,
                           "type": "array"
                         },
                         "created_at": {
@@ -19702,6 +19887,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "rollout_duration_seconds": {
@@ -19796,6 +19982,7 @@
                       "items": {
                         "type": "string"
                       },
+                      "maxItems": 1000,
                       "type": "array"
                     }
                   },
@@ -19874,6 +20061,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       {
@@ -19933,6 +20121,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       }
                     },
@@ -20039,6 +20228,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       {
@@ -20153,6 +20343,7 @@
                       ],
                       "type": "string"
                     },
+                    "maxItems": 1,
                     "type": "array"
                   },
                   "agents": {
@@ -20161,6 +20352,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       {
@@ -20264,13 +20456,14 @@
                     "anyOf": [
                       {
                         "items": {
-                          "description": "KQL query string, leave empty to action all agents",
+                          "description": "list of agent IDs",
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       {
-                        "description": "list of agent IDs",
+                        "description": "KQL query string, leave empty to action all agents",
                         "type": "string"
                       }
                     ]
@@ -20385,6 +20578,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       {
@@ -20403,12 +20597,14 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "tagsToRemove": {
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   }
                 },
@@ -20506,6 +20702,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       {
@@ -20793,6 +20990,7 @@
                         ],
                         "type": "string"
                       },
+                      "maxItems": 1,
                       "type": "array"
                     },
                     "missing_requirements": {
@@ -20806,6 +21004,7 @@
                         ],
                         "type": "string"
                       },
+                      "maxItems": 5,
                       "type": "array"
                     },
                     "package_verification_key_id": {
@@ -20903,6 +21102,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -20988,6 +21188,7 @@
                       "items": {
                         "type": "string"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -21250,6 +21451,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               }
                             },
@@ -21261,6 +21463,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "default_api_key": {
@@ -21284,6 +21487,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "default_api_key_id": {
@@ -21347,6 +21551,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "outputs": {
@@ -21373,6 +21578,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "type": {
@@ -21387,6 +21593,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "policy_id": {
@@ -21398,6 +21605,7 @@
                         },
                         "sort": {
                           "items": {},
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "status": {
@@ -21420,6 +21628,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "type": {
@@ -21445,6 +21654,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 3,
                           "nullable": true,
                           "type": "array"
                         },
@@ -21452,6 +21662,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -21628,6 +21839,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "user_provided_metadata": {
@@ -21746,6 +21958,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               }
                             },
@@ -21757,6 +21970,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "default_api_key": {
@@ -21780,6 +21994,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "default_api_key_id": {
@@ -21843,6 +22058,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "outputs": {
@@ -21869,6 +22085,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "type": {
@@ -21883,6 +22100,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "policy_id": {
@@ -21894,6 +22112,7 @@
                         },
                         "sort": {
                           "items": {},
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "status": {
@@ -21916,6 +22135,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "type": {
@@ -21941,6 +22161,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 3,
                           "nullable": true,
                           "type": "array"
                         },
@@ -21948,6 +22169,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -22206,6 +22428,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10000,
                           "type": "array"
                         },
                         "created_at": {
@@ -22225,6 +22448,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "rollout_duration_seconds": {
@@ -22385,6 +22609,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       }
                     },
@@ -22593,6 +22818,7 @@
                       ],
                       "type": "string"
                     },
+                    "maxItems": 1,
                     "type": "array"
                   }
                 },
@@ -22876,6 +23102,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 1000,
                       "type": "array"
                     }
                   },
@@ -23075,6 +23302,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -23751,6 +23979,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 10000,
                             "type": "array"
                           },
                           "dataset": {
@@ -23820,6 +24049,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -23952,6 +24182,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "list": {
@@ -23998,6 +24229,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -24436,6 +24668,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   }
                 },
@@ -24493,6 +24726,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -24599,6 +24833,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 1000,
                       "type": "array"
                     }
                   },
@@ -24695,6 +24930,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "force": {
@@ -24817,6 +25053,7 @@
                           }
                         ]
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -24902,6 +25139,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "readMeData": {
@@ -25029,6 +25267,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -25132,6 +25371,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "conditions": {
@@ -25144,6 +25384,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 10,
                                     "type": "array"
                                   },
                                   "subscription": {
@@ -25169,6 +25410,7 @@
                               "additionalProperties": {},
                               "type": "object"
                             },
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "description": {
@@ -25190,6 +25432,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "fields": {
@@ -25205,6 +25448,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               }
                             },
@@ -25244,6 +25488,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "id": {
@@ -25297,6 +25542,7 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "type": "object"
@@ -25336,6 +25582,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "install_format_schema_version": {
@@ -25392,6 +25639,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "installed_kibana": {
@@ -25438,6 +25686,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "installed_kibana_space_id": {
@@ -25495,6 +25744,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "name": {
@@ -25504,6 +25754,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "previous_version": {
@@ -25584,6 +25835,7 @@
                               "additionalProperties": {},
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "readme": {
@@ -25648,6 +25900,7 @@
                               "additionalProperties": {},
                               "type": "object"
                             },
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "version": {
@@ -25662,6 +25915,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 1000,
                       "type": "array"
                     }
                   },
@@ -25858,6 +26112,7 @@
                           }
                         ]
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -25970,6 +26225,7 @@
                         }
                       ]
                     },
+                    "maxItems": 1000,
                     "minItems": 1,
                     "type": "array"
                   }
@@ -26082,6 +26338,7 @@
                                         }
                                       ]
                                     },
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "error": {},
@@ -26143,6 +26400,7 @@
                           }
                         ]
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -26236,6 +26494,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 1000,
                     "minItems": 1,
                     "type": "array"
                   }
@@ -26368,6 +26627,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "status": {
@@ -26463,6 +26723,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 1000,
                     "minItems": 1,
                     "type": "array"
                   },
@@ -26602,6 +26863,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "status": {
@@ -26706,6 +26968,7 @@
                   }
                 ]
               },
+              "maxItems": 10,
               "type": "array"
             }
           },
@@ -26760,6 +27023,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "description": {
@@ -26793,6 +27057,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "name": {
@@ -26816,6 +27081,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "searchAfter": {
@@ -26837,6 +27103,7 @@
                           {}
                         ]
                       },
+                      "maxItems": 2,
                       "type": "array"
                     },
                     "total": {
@@ -26907,6 +27174,7 @@
                       "items": {
                         "type": "string"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -27170,6 +27438,7 @@
                           }
                         ]
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -27305,12 +27574,14 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "asset_types": {
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "text": {
@@ -27322,6 +27593,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "assets": {
@@ -27332,6 +27604,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "conditions": {
@@ -27344,6 +27617,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "subscription": {
@@ -27369,6 +27643,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "description": {
@@ -27390,6 +27665,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "fields": {
@@ -27405,6 +27681,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             }
                           },
@@ -27448,6 +27725,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "installationInfo": {
@@ -27498,6 +27776,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "type": "object"
@@ -27537,6 +27816,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "install_format_schema_version": {
@@ -27593,6 +27873,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "installed_kibana": {
@@ -27639,6 +27920,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "installed_kibana_space_id": {
@@ -27696,6 +27978,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "name": {
@@ -27705,6 +27988,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "previous_version": {
@@ -27794,6 +28078,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "readme": {
@@ -27835,6 +28120,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "signature_path": {
@@ -27888,6 +28174,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "version": {
@@ -28143,6 +28430,7 @@
                           }
                         ]
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -28275,12 +28563,14 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "asset_types": {
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "text": {
@@ -28292,6 +28582,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "assets": {
@@ -28302,6 +28593,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "conditions": {
@@ -28314,6 +28606,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "subscription": {
@@ -28339,6 +28632,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "description": {
@@ -28360,6 +28654,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "fields": {
@@ -28375,6 +28670,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             }
                           },
@@ -28418,6 +28714,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "installationInfo": {
@@ -28468,6 +28765,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "type": "object"
@@ -28507,6 +28805,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "install_format_schema_version": {
@@ -28563,6 +28862,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "installed_kibana": {
@@ -28609,6 +28909,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "installed_kibana_space_id": {
@@ -28666,6 +28967,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "name": {
@@ -28675,6 +28977,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "previous_version": {
@@ -28764,6 +29067,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "readme": {
@@ -28805,6 +29109,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10,
                           "type": "array"
                         },
                         "signature_path": {
@@ -28858,6 +29163,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "version": {
@@ -29153,6 +29459,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 100,
                     "minItems": 1,
                     "type": "array"
                   }
@@ -29384,6 +29691,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   }
                 },
@@ -29420,6 +29728,7 @@
                     ],
                     "type": "object"
                   },
+                  "maxItems": 10000,
                   "type": "array"
                 }
               }
@@ -29641,6 +29950,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               "type": {
@@ -29653,6 +29963,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10000,
                           "type": "array"
                         }
                       },
@@ -29789,6 +30100,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "minItems": 1,
                             "type": "array"
                           },
@@ -29874,6 +30186,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "client_auth": {
@@ -29891,6 +30204,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "type": "array"
                               },
                               "es_key": {
@@ -29910,6 +30224,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -29996,6 +30311,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "minItems": 1,
                     "type": "array"
                   },
@@ -30081,6 +30397,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "client_auth": {
@@ -30098,6 +30415,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "es_key": {
@@ -30133,6 +30451,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10,
                           "minItems": 1,
                           "type": "array"
                         },
@@ -30218,6 +30537,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "client_auth": {
@@ -30235,6 +30555,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "es_key": {
@@ -30410,6 +30731,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10,
                           "minItems": 1,
                           "type": "array"
                         },
@@ -30495,6 +30817,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "client_auth": {
@@ -30512,6 +30835,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "es_key": {
@@ -30611,6 +30935,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "minItems": 1,
                     "type": "array"
                   },
@@ -30688,6 +31013,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "client_auth": {
@@ -30705,6 +31031,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "es_key": {
@@ -30739,6 +31066,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 10,
                           "minItems": 1,
                           "type": "array"
                         },
@@ -30824,6 +31152,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "client_auth": {
@@ -30841,6 +31170,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "type": "array"
                             },
                             "es_key": {
@@ -31445,6 +31775,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "ca_sha256": {
@@ -31464,6 +31795,7 @@
                                   "format": "uri",
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "minItems": 1,
                                 "type": "array"
                               },
@@ -31605,6 +31937,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 10,
                                     "type": "array"
                                   },
                                   "key": {
@@ -31647,6 +31980,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "ca_sha256": {
@@ -31666,6 +32000,7 @@
                                   "format": "uri",
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "minItems": 1,
                                 "type": "array"
                               },
@@ -31841,6 +32176,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 10,
                                     "type": "array"
                                   },
                                   "key": {
@@ -31889,6 +32225,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "ca_sha256": {
@@ -31907,6 +32244,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "minItems": 1,
                                 "type": "array"
                               },
@@ -32038,6 +32376,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 10,
                                     "type": "array"
                                   },
                                   "key": {
@@ -32076,6 +32415,7 @@
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "auth_type": {
@@ -32205,12 +32545,14 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "hosts": {
                                 "items": {
                                   "type": "string"
                                 },
+                                "maxItems": 10,
                                 "minItems": 1,
                                 "type": "array"
                               },
@@ -32474,6 +32816,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 10,
                                     "type": "array"
                                   },
                                   "key": {
@@ -32550,6 +32893,7 @@
                           }
                         ]
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -32638,6 +32982,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "ca_sha256": {
@@ -32657,6 +33002,7 @@
                           "format": "uri",
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -32798,6 +33144,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -32840,6 +33187,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "ca_sha256": {
@@ -32859,6 +33207,7 @@
                           "format": "uri",
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -33034,6 +33383,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -33082,6 +33432,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "ca_sha256": {
@@ -33100,6 +33451,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -33231,6 +33583,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -33269,6 +33622,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "auth_type": {
@@ -33398,12 +33752,14 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "hosts": {
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -33667,6 +34023,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -33762,6 +34119,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -33781,6 +34139,7 @@
                                 "format": "uri",
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -33922,6 +34281,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -33964,6 +34324,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -33983,6 +34344,7 @@
                                 "format": "uri",
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -34158,6 +34520,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -34206,6 +34569,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -34224,6 +34588,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -34355,6 +34720,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -34393,6 +34759,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "auth_type": {
@@ -34522,12 +34889,14 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "hosts": {
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -34791,6 +35160,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -35056,6 +35426,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -35075,6 +35446,7 @@
                                 "format": "uri",
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -35216,6 +35588,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -35258,6 +35631,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -35277,6 +35651,7 @@
                                 "format": "uri",
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -35452,6 +35827,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -35500,6 +35876,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -35518,6 +35895,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -35649,6 +36027,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -35687,6 +36066,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "auth_type": {
@@ -35816,12 +36196,14 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "hosts": {
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -36085,6 +36467,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -36243,6 +36626,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "ca_sha256": {
@@ -36262,6 +36646,7 @@
                           "format": "uri",
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -36401,6 +36786,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -36438,6 +36824,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "ca_sha256": {
@@ -36457,6 +36844,7 @@
                           "format": "uri",
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -36630,6 +37018,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -36673,6 +37062,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "ca_sha256": {
@@ -36691,6 +37081,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -36820,6 +37211,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -36853,6 +37245,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "auth_type": {
@@ -36982,12 +37375,14 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "hosts": {
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10,
                         "minItems": 1,
                         "type": "array"
                       },
@@ -37251,6 +37646,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 10,
                             "type": "array"
                           },
                           "key": {
@@ -37343,6 +37739,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -37362,6 +37759,7 @@
                                 "format": "uri",
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -37503,6 +37901,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -37545,6 +37944,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -37564,6 +37964,7 @@
                                 "format": "uri",
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -37739,6 +38140,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -37787,6 +38189,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "ca_sha256": {
@@ -37805,6 +38208,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -37936,6 +38340,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -37974,6 +38379,7 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "auth_type": {
@@ -38103,12 +38509,14 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "hosts": {
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 10,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -38372,6 +38780,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "key": {
@@ -38672,6 +39081,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 1000,
                             "nullable": true,
                             "type": "array"
                           },
@@ -38703,6 +39113,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   }
                                 },
@@ -38803,6 +39214,7 @@
                                                         "items": {
                                                           "type": "string"
                                                         },
+                                                        "maxItems": 100,
                                                         "type": "array"
                                                       }
                                                     },
@@ -38866,6 +39278,7 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "type": {
@@ -38900,6 +39313,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               {
@@ -38934,12 +39348,14 @@
                                                   "items": {
                                                     "type": "string"
                                                   },
+                                                  "maxItems": 100,
                                                   "type": "array"
                                                 },
                                                 {
                                                   "items": {
                                                     "type": "number"
                                                   },
+                                                  "maxItems": 100,
                                                   "type": "array"
                                                 },
                                                 {
@@ -38986,12 +39402,14 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           {
                                             "items": {
                                               "type": "number"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           {
@@ -39087,6 +39505,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "fips_compatible": {
@@ -39142,12 +39561,14 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "spaceIds": {
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "supports_agentless": {
@@ -39206,12 +39627,14 @@
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     {
                                       "items": {
                                         "type": "number"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     {
@@ -39256,6 +39679,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -39356,6 +39780,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "nullable": true,
                         "type": "array"
                       },
@@ -39462,6 +39887,7 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               }
                                             },
@@ -39525,6 +39951,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "type": {
@@ -39557,6 +39984,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "is_managed": {
@@ -39621,6 +40049,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "fips_compatible": {
@@ -39664,6 +40093,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "supports_agentless": {
@@ -39713,6 +40143,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "nullable": true,
                         "type": "array"
                       },
@@ -39757,12 +40188,14 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
                                           "items": {
                                             "type": "number"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -39809,12 +40242,14 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
                                     "items": {
                                       "type": "number"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
@@ -39890,6 +40325,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "fips_compatible": {
@@ -39948,12 +40384,14 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
                               "items": {
                                 "type": "number"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
@@ -40006,6 +40444,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -40037,6 +40476,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 }
                               },
@@ -40137,6 +40577,7 @@
                                                       "items": {
                                                         "type": "string"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     }
                                                   },
@@ -40200,6 +40641,7 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "type": {
@@ -40234,6 +40676,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
@@ -40268,12 +40711,14 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
                                                 "items": {
                                                   "type": "number"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
@@ -40320,12 +40765,14 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
                                           "items": {
                                             "type": "number"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -40421,6 +40868,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fips_compatible": {
@@ -40476,12 +40924,14 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "spaceIds": {
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "supports_agentless": {
@@ -40540,12 +40990,14 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
                                     "items": {
                                       "type": "number"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
@@ -40707,6 +41159,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   },
                   "ignoreMissing": {
@@ -40737,6 +41190,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 1000,
                             "nullable": true,
                             "type": "array"
                           },
@@ -40768,6 +41222,7 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   }
                                 },
@@ -40868,6 +41323,7 @@
                                                         "items": {
                                                           "type": "string"
                                                         },
+                                                        "maxItems": 100,
                                                         "type": "array"
                                                       }
                                                     },
@@ -40931,6 +41387,7 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "type": {
@@ -40965,6 +41422,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               {
@@ -40999,12 +41457,14 @@
                                                   "items": {
                                                     "type": "string"
                                                   },
+                                                  "maxItems": 100,
                                                   "type": "array"
                                                 },
                                                 {
                                                   "items": {
                                                     "type": "number"
                                                   },
+                                                  "maxItems": 100,
                                                   "type": "array"
                                                 },
                                                 {
@@ -41051,12 +41511,14 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           {
                                             "items": {
                                               "type": "number"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           {
@@ -41152,6 +41614,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "fips_compatible": {
@@ -41207,12 +41670,14 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "spaceIds": {
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "supports_agentless": {
@@ -41271,12 +41736,14 @@
                                       "items": {
                                         "type": "string"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     {
                                       "items": {
                                         "type": "number"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     {
@@ -41321,6 +41788,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -41419,6 +41887,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   }
                 },
@@ -41495,6 +41964,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "fips_compatible": {
@@ -41531,6 +42001,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 10000,
                         "type": "array"
                       },
                       "statusCode": {
@@ -41548,6 +42019,7 @@
                     ],
                     "type": "object"
                   },
+                  "maxItems": 10000,
                   "type": "array"
                 }
               }
@@ -41618,6 +42090,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   }
                 },
@@ -41668,6 +42141,7 @@
                     ],
                     "type": "object"
                   },
+                  "maxItems": 10000,
                   "type": "array"
                 }
               }
@@ -41738,6 +42212,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   },
                   "packageVersion": {
@@ -41847,6 +42322,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               "revision": {
@@ -41880,6 +42356,7 @@
                                   ],
                                   "type": "object"
                                 },
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               "type": {
@@ -41900,8 +42377,10 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 10000,
                           "type": "array"
                         },
+                        "maxItems": 1,
                         "type": "array"
                       },
                       "body": {
@@ -41927,6 +42406,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 1000,
                                   "nullable": true,
                                   "type": "array"
                                 },
@@ -41958,6 +42438,7 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         }
                                       },
@@ -42058,6 +42539,7 @@
                                                               "items": {
                                                                 "type": "string"
                                                               },
+                                                              "maxItems": 100,
                                                               "type": "array"
                                                             }
                                                           },
@@ -42121,6 +42603,7 @@
                                               ],
                                               "type": "object"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           "type": {
@@ -42155,6 +42638,7 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     {
@@ -42189,12 +42673,14 @@
                                                         "items": {
                                                           "type": "string"
                                                         },
+                                                        "maxItems": 100,
                                                         "type": "array"
                                                       },
                                                       {
                                                         "items": {
                                                           "type": "number"
                                                         },
+                                                        "maxItems": 100,
                                                         "type": "array"
                                                       },
                                                       {
@@ -42241,12 +42727,14 @@
                                                   "items": {
                                                     "type": "string"
                                                   },
+                                                  "maxItems": 100,
                                                   "type": "array"
                                                 },
                                                 {
                                                   "items": {
                                                     "type": "number"
                                                   },
+                                                  "maxItems": 100,
                                                   "type": "array"
                                                 },
                                                 {
@@ -42342,6 +42830,7 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "fips_compatible": {
@@ -42397,12 +42886,14 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "spaceIds": {
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "supports_agentless": {
@@ -42461,12 +42952,14 @@
                                             "items": {
                                               "type": "string"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           {
                                             "items": {
                                               "type": "number"
                                             },
+                                            "maxItems": 100,
                                             "type": "array"
                                           },
                                           {
@@ -42518,6 +43011,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 1000,
                                   "nullable": true,
                                   "type": "array"
                                 },
@@ -42546,6 +43040,7 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         }
                                       },
@@ -42573,6 +43068,7 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 10,
                                   "type": "array"
                                 },
                                 "force": {
@@ -42665,6 +43161,7 @@
                                                           "items": {
                                                             "type": "string"
                                                           },
+                                                          "maxItems": 100,
                                                           "type": "array"
                                                         }
                                                       },
@@ -42728,6 +43225,7 @@
                                           ],
                                           "type": "object"
                                         },
+                                        "maxItems": 100,
                                         "type": "array"
                                       },
                                       "type": {
@@ -42762,6 +43260,7 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "is_managed": {
@@ -42771,6 +43270,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "name": {
@@ -42832,6 +43332,7 @@
                                         ],
                                         "type": "object"
                                       },
+                                      "maxItems": 100,
                                       "type": "array"
                                     },
                                     "fips_compatible": {
@@ -42887,6 +43388,7 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "supports_agentless": {
@@ -42940,6 +43442,7 @@
                             }
                           ]
                         },
+                        "maxItems": 2,
                         "type": "array"
                       },
                       "hasErrors": {
@@ -42957,6 +43460,7 @@
                     ],
                     "type": "object"
                   },
+                  "maxItems": 10000,
                   "type": "array"
                 }
               }
@@ -43130,6 +43634,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -43161,6 +43666,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 }
                               },
@@ -43261,6 +43767,7 @@
                                                       "items": {
                                                         "type": "string"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     }
                                                   },
@@ -43324,6 +43831,7 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "type": {
@@ -43358,6 +43866,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
@@ -43392,12 +43901,14 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
                                                 "items": {
                                                   "type": "number"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
@@ -43444,12 +43955,14 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
                                           "items": {
                                             "type": "number"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -43545,6 +44058,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fips_compatible": {
@@ -43600,12 +44114,14 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "spaceIds": {
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "supports_agentless": {
@@ -43664,12 +44180,14 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
                                     "items": {
                                       "type": "number"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
@@ -43828,6 +44346,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 1000,
                         "nullable": true,
                         "type": "array"
                       },
@@ -43929,6 +44448,7 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               }
                                             },
@@ -43992,6 +44512,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "type": {
@@ -44024,6 +44545,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "is_managed": {
@@ -44087,6 +44609,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "fips_compatible": {
@@ -44130,6 +44653,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "supports_agentless": {
@@ -44178,6 +44702,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "nullable": true,
                         "type": "array"
                       },
@@ -44222,12 +44747,14 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
                                           "items": {
                                             "type": "number"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -44274,12 +44801,14 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
                                     "items": {
                                       "type": "number"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
@@ -44355,6 +44884,7 @@
                               ],
                               "type": "object"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "fips_compatible": {
@@ -44413,12 +44943,14 @@
                               "items": {
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
                               "items": {
                                 "type": "number"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
@@ -44470,6 +45002,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 1000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -44501,6 +45034,7 @@
                                   "items": {
                                     "type": "string"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 }
                               },
@@ -44601,6 +45135,7 @@
                                                       "items": {
                                                         "type": "string"
                                                       },
+                                                      "maxItems": 100,
                                                       "type": "array"
                                                     }
                                                   },
@@ -44664,6 +45199,7 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "type": {
@@ -44698,6 +45234,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             {
@@ -44732,12 +45269,14 @@
                                                 "items": {
                                                   "type": "string"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
                                                 "items": {
                                                   "type": "number"
                                                 },
+                                                "maxItems": 100,
                                                 "type": "array"
                                               },
                                               {
@@ -44784,12 +45323,14 @@
                                           "items": {
                                             "type": "string"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
                                           "items": {
                                             "type": "number"
                                           },
+                                          "maxItems": 100,
                                           "type": "array"
                                         },
                                         {
@@ -44885,6 +45426,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fips_compatible": {
@@ -44940,12 +45482,14 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "spaceIds": {
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "supports_agentless": {
@@ -45004,12 +45548,14 @@
                                     "items": {
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
                                     "items": {
                                       "type": "number"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   {
@@ -45199,6 +45745,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -45963,6 +46510,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "warning": {
@@ -46176,6 +46724,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "warning": {
@@ -46387,6 +46936,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 1,
                           "type": "array"
                         },
                         "prerelease_integrations_enabled": {
@@ -46537,6 +47087,7 @@
                       "format": "uri",
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   },
                   "prerelease_integrations_enabled": {
@@ -46593,6 +47144,7 @@
                             ],
                             "type": "string"
                           },
+                          "maxItems": 1,
                           "type": "array"
                         },
                         "prerelease_integrations_enabled": {
@@ -46733,6 +47285,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -46822,6 +47375,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "managed_by": {
@@ -46873,6 +47427,7 @@
                     "items": {
                       "type": "string"
                     },
+                    "maxItems": 10,
                     "type": "array"
                   }
                 },
@@ -46895,6 +47450,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "managed_by": {
@@ -46987,6 +47543,7 @@
                             "items": {
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "policy_id": {
@@ -47004,6 +47561,7 @@
                         ],
                         "type": "object"
                       },
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "page": {
@@ -47100,6 +47658,7 @@
                           "items": {
                             "type": "string"
                           },
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "policy_id": {

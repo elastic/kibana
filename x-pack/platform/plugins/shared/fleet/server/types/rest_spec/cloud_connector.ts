@@ -71,7 +71,8 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       packagePolicyCount: schema.number(),
       created_at: schema.string(),
       updated_at: schema.string(),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
