@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
 /**
@@ -24,6 +25,7 @@ export interface EndpointScript {
   /**
    * The URI relative to Kibana's base path + space if any) to download the script associated with this script entry */
   downloadUri: string;
+  tags: Array<keyof typeof SCRIPT_TAGS>;
   description?: string;
   instructions?: string;
   example?: string;

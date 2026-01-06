@@ -86,6 +86,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     instructions,
     requiresInput,
     pathToExecutable,
+    tags,
   }: Omit<CreateScriptRequestBody, 'file'>): ScriptsLibrarySavedObjectAttributes {
     const now = new Date().toISOString();
 
@@ -95,6 +96,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       example,
+      tags,
       id: '',
       file_id: '',
       file_size: 0,
@@ -120,6 +122,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       instructions,
       requires_input: requiresInput = false,
       path_to_executable: pathToExecutable = undefined,
+      tags = [],
       file_name: fileName,
       file_size: fileSize,
       file_hash_sha256: fileHash,
@@ -144,6 +147,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       instructions,
       example,
       pathToExecutable,
+      tags: tags as EndpointScript['tags'],
       createdBy,
       updatedBy,
       createdAt,

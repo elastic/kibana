@@ -24,7 +24,7 @@ const ScriptsLibraryAttributesSchemaV1 = schema.object({
   instructions: schema.maybe(schema.string()),
   example: schema.maybe(schema.string()),
   path_to_executable: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
   created_by: schema.string(),
   created_at: schema.string(),
   updated_by: schema.string(),
