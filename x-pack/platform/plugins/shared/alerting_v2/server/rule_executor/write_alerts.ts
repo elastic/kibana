@@ -85,6 +85,7 @@ export async function writeEsqlAlerts({
 
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
+  const source = 'internal';
   const operations: Array<Record<string, unknown>> = values.flatMap((valueRow, i) => {
     const row = valueRow;
     const rowDoc = rowToDocument(columns, row);
@@ -96,7 +97,10 @@ export async function writeEsqlAlerts({
       },
     });
 
-    const alertSeriesId = sha256(`${ruleId}|${spaceId}|${grouping.key}|${grouping.value}`);
+    // Include `source` in the tuple to prevent collisions when we later support external systems whose ids may overlap with internal rule ids.
+    const alertSeriesId = sha256(
+      `${source}|${ruleId}|${spaceId}|${grouping.key}|${grouping.value}`
+    );
     // Deterministic document id: hash(@timestamp + alert_series_id)
     const alertUuid = sha256(`${wroteAt}|${alertSeriesId}`);
 
@@ -111,7 +115,7 @@ export async function writeEsqlAlerts({
       data: rowDoc,
       status: 'breach',
       alert_series_id: alertSeriesId,
-      source: 'internal',
+      source,
       ...(ruleAttributes.tags?.length ? { tags: ruleAttributes.tags } : {}),
     };
 

@@ -12,7 +12,7 @@ import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attr
 import { ruleMappings } from './rule_mappings';
 import { ruleModelVersions } from './model_versions';
 
-export const RULE_SAVED_OBJECT_TYPE = 'alerting_esql_rule';
+export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 
 export function registerSavedObjects({
   savedObjects,
