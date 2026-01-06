@@ -897,6 +897,7 @@ export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agentIds: schema.arrayOf(schema.string()),
     fields: schema.arrayOf(schema.string()),
+    timezone: schema.string(),
     sort: schema.maybe(
       schema.object({
         field: schema.string(),

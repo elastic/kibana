@@ -25,7 +25,7 @@ export const generateReportHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostGenerateAgentsReportRequestSchema.body>
 > = async (context, request, response) => {
-  const { agentIds, fields, sort } = request.body;
+  const { agentIds, fields, timezone, sort } = request.body;
   const runtimeFieldsResult = await buildAgentStatusRuntimeField();
   const runtimeFields = runtimeFieldsResult.status.script?.source ?? 'emit("")';
   // const coreContext = await context.core;
@@ -35,10 +35,7 @@ export const generateReportHandler: FleetRequestHandler<
     throw new FleetError('Report generation is not ready');
   }
 
-  // TODO add browserTimezone as API param for use in here
-  // Get kibana version for version field
-  // As happens in src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts
-  const jobParams = getJobParams(agentIds, fields, runtimeFields, sort);
+  const jobParams = getJobParams(agentIds, fields, runtimeFields, timezone, sort);
 
   return response.ok({ body: { url: 'https://elastic.co' } });
 };
@@ -58,6 +55,7 @@ const getJobParams = (
   agentIds: string[],
   fields: string[],
   runtimeFields: string,
+  timezone: string,
   sortOptions?: { field?: string; direction?: string }
 ) => {
   const index = new DataView({
@@ -105,5 +103,7 @@ const getJobParams = (
     objectType: 'search',
     columns: fields,
     searchSource,
+    version: appContextService.getKibanaVersion(),
+    browserTimezone: timezone,
   };
 };
