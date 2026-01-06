@@ -65,6 +65,7 @@ export const initializeRelatedPanelsManager = (
         for (const uuid of appliesFilters) {
           const relatedPanels = [
             // Other filter-applying panels should be `related` to this panel as well
+            // TODO: Make this only true if useGlobalFilters is true
             ...Array.from(appliesFilters).filter((id) => id !== uuid),
             ...doesNotApplyFilters,
             ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
