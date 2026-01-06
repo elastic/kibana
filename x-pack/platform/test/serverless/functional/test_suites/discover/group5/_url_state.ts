@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discoverLink?.getAttribute('href')).to.contain('/app/discover#/');
         expect(await discoverLink?.getAttribute('href')).to.contain(
           '_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
-            "&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+            "&_a=(dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
         );
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter({
