@@ -141,7 +141,7 @@ describe('getLinksEmbeddableFactory', () => {
     const byRefState: LinksEmbeddableState = {
       title: 'my links',
       description: 'just a few links',
-      hidePanelTitles: false,
+      hide_title: false,
       savedObjectId: '123',
     };
 
@@ -161,7 +161,7 @@ describe('getLinksEmbeddableFactory', () => {
         rawState: {
           title: 'my links',
           description: 'just a few links',
-          hidePanelTitles: false,
+          hide_title: false,
           savedObjectId: '123',
         },
       });
@@ -176,7 +176,7 @@ describe('getLinksEmbeddableFactory', () => {
         rawState: {
           title: 'my links',
           description: 'just a few links',
-          hidePanelTitles: false,
+          hide_title: false,
           links: getLinks(),
           layout: 'vertical',
         },
@@ -188,7 +188,7 @@ describe('getLinksEmbeddableFactory', () => {
     const byValueState: LinksEmbeddableState = {
       description: 'just a few links',
       title: 'my links',
-      hidePanelTitles: true,
+      hide_title: true,
       links: getLinks(),
       layout: 'horizontal',
     };
@@ -210,7 +210,7 @@ describe('getLinksEmbeddableFactory', () => {
         rawState: {
           title: 'my links',
           description: 'just a few links',
-          hidePanelTitles: true,
+          hide_title: true,
           links: getLinks(),
           layout: 'horizontal',
         },
@@ -234,7 +234,7 @@ describe('getLinksEmbeddableFactory', () => {
         rawState: {
           title: 'my links',
           description: 'just a few links',
-          hidePanelTitles: true,
+          hide_title: true,
           savedObjectId: '333',
         },
       });

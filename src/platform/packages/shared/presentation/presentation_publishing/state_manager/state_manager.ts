@@ -21,6 +21,15 @@ type KeyToSubjectMap<StateType extends object> = {
   [Key in keyof StateType]?: SubjectOf<StateType>;
 };
 
+const snakeToCamel = (key: string): string => {
+  if (!/[_-]/.test(key)) {
+    return key;
+  }
+  return key.replace(/([-_][a-z])/gi, (keyPart) => {
+    return keyPart.toUpperCase().replace('-', '').replace('_', '');
+  });
+};
+
 /**
  * Initializes a composable state manager instance for a given state type.
  * @param initialState - The initial state of the state manager.
@@ -59,9 +68,10 @@ export const initializeStateManager = <StateType extends object>(
       }
     };
 
-    const capitalizedKey = (key as string).charAt(0).toUpperCase() + (key as string).slice(1);
+    const camelCaseKey = snakeToCamel(key as string);
+    const capitalizedKey = camelCaseKey.charAt(0).toUpperCase() + camelCaseKey.slice(1);
     acc[`set${capitalizedKey}`] = setter;
-    acc[`${key as string}$`] = subject;
+    acc[`${camelCaseKey as string}$`] = subject;
 
     allSubjects.push(subject);
     keyToSubjectMap[key] = subject;

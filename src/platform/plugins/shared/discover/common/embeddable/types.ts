@@ -34,23 +34,23 @@ type SearchEmbeddableBaseState = SerializedTimeRange &
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableByValueState = SearchEmbeddableBaseState & {
-  attributes: SavedSearchByValueAttributes;
-};
+export type SearchEmbeddableByValueState = SerializedTitles &
+  SearchEmbeddableBaseState & {
+    attributes: SavedSearchByValueAttributes;
+  };
 
-export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
-  savedObjectId: string;
-};
+export type SearchEmbeddableByReferenceState = SerializedTitles &
+  SearchEmbeddableBaseState & {
+    savedObjectId: string;
+  };
 
-export type SearchEmbeddableState = SerializedTitles &
-  (SearchEmbeddableByValueState | SearchEmbeddableByReferenceState);
+export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
 
-export type StoredSearchEmbeddableByValueState = SearchEmbeddableByValueState;
+export type StoredSearchEmbeddableByValueState = StoredTitles & SearchEmbeddableByValueState;
 
-export type StoredSearchEmbeddableByReferenceState = Omit<
-  SearchEmbeddableByReferenceState,
-  'nonPersistedDisplayOptions' | 'savedObjectId'
->;
+export type StoredSearchEmbeddableByReferenceState = StoredTitles &
+  Omit<SearchEmbeddableByReferenceState, 'nonPersistedDisplayOptions' | 'savedObjectId'>;
 
-export type StoredSearchEmbeddableState = StoredTitles &
-  (StoredSearchEmbeddableByValueState | StoredSearchEmbeddableByReferenceState);
+export type StoredSearchEmbeddableState =
+  | StoredSearchEmbeddableByValueState
+  | StoredSearchEmbeddableByReferenceState;

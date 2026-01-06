@@ -20,6 +20,20 @@ export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
 ) => boolean;
 
 /**
+ * A type that converts a single key from snake case to camel case.
+ */
+type SnakeToCamelCase<S extends string> = S extends `${infer P1}_${infer P2}${infer P3}`
+  ? `${P1}${Uppercase<P2>}${SnakeToCamelCase<P3>}`
+  : S;
+
+/**
+ * A utility type that recursively converts all keys in an object from snake_case to camelCase
+ */
+type ToCamelCase<T> = {
+  [K in keyof T as SnakeToCamelCase<string & K>]: T[K] extends object ? ToCamelCase<T[K]> : T[K];
+};
+
+/**
  * A type that maps each key in a state type to a definition of how it should be compared. If a custom
  * comparator is provided, return true if the values are equal, false otherwise.
  */
@@ -51,6 +65,6 @@ export interface StateManager<StateType extends object> {
     newState?: Partial<StateType>,
     comparators?: StateComparators<StateType>
   ) => void;
-  api: SettersOf<StateType> & SubjectsOf<StateType>;
+  api: SettersOf<ToCamelCase<StateType>> & SubjectsOf<ToCamelCase<StateType>>;
   anyStateChange$: Observable<void>;
 }

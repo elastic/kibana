@@ -49,8 +49,8 @@ export const initializeTitleManager = (initialTitlesState: SerializedTitles): Ti
     ...stateManager,
     api: {
       ...stateManager.api,
-      hideTitle$: stateManager.api.hide_title$,
-      setHideTitle: stateManager.api.setHide_title,
+      hideTitle$: stateManager.api.hideTitle$,
+      setHideTitle: stateManager.api.setHideTitle,
     },
   };
 };
