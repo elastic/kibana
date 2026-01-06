@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
   cleanupEntityStore,
@@ -333,9 +332,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       enrichmentConfigs.forEach((config) => {
         describe(config.name, () => {
-          const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
-          const enrichIndexName = `.enrich-${enrichPolicyName}`;
-
           before(async () => {
             // Clean up any leftover resources from previous runs
             await cleanupEntityStore({ supertest, logger });
