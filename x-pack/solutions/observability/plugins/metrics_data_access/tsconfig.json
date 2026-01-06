@@ -21,8 +21,8 @@
     "@kbn/alerting-plugin",
     "@kbn/ml-plugin",
     "@kbn/rule-registry-plugin",
-    "@kbn/observability-plugin",
     "@kbn/core-http-server",
+    "@kbn/observability-utils-common",
     "@kbn/datemath",
     "@kbn/es-types",
     "@kbn/es-query",
@@ -36,6 +36,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/router-utils",
-    "@kbn/chart-expressions-common"
+    "@kbn/chart-expressions-common",
+    "@kbn/observability-utils-common"
   ]
 }

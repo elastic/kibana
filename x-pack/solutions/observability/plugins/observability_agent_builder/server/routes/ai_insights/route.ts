@@ -6,9 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
+import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
+import { getLogAiInsights } from './get_log_ai_insights';
 import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
@@ -20,7 +21,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     security: {
       authz: {
-        requiredPrivileges: [apiPrivileges.readOnechat],
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
       },
     },
     params: t.type({
@@ -69,7 +70,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     security: {
       authz: {
-        requiredPrivileges: [apiPrivileges.readOnechat],
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
       },
     },
     params: t.type({
@@ -111,7 +112,48 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
   });
 
+  const logAiInsightsRoute = createObservabilityAgentBuilderServerRoute({
+    endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
+    options: {
+      access: 'internal',
+    },
+    security: {
+      authz: {
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
+      },
+    },
+    params: t.type({
+      body: t.type({
+        index: t.string,
+        id: t.string,
+      }),
+    }),
+    handler: async ({ request, core, dataRegistry, params }) => {
+      const { index, id } = params.body;
+
+      const [coreStart, startDeps] = await core.getStartServices();
+      const { inference } = startDeps;
+
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const inferenceClient = inference.getClient({ request });
+      const esClient = coreStart.elasticsearch.client.asScoped(request);
+
+      const { summary, context } = await getLogAiInsights({
+        index,
+        id,
+        inferenceClient,
+        connectorId,
+        request,
+        esClient,
+        dataRegistry,
+      });
+
+      return { summary, context };
+    },
+  });
+
   return {
+    ...logAiInsightsRoute,
     ...errorAiInsightsRoute,
     ...getAlertAiInsightRoute,
   };

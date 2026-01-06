@@ -19,13 +19,24 @@ const mockUseSpaceId = jest.fn();
 const mockUseStoredAssistantConnectorId = jest.fn();
 const mockUseAssistantAvailability = jest.fn();
 const mockUseFetchEntityDetailsHighlights = jest.fn();
+const mockUseHasEntityHighlightsLicense = jest.fn();
 
-jest.mock(
-  '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
-  () => ({
-    useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-  })
-);
+jest.mock('@kbn/elastic-assistant', () => ({
+  useAssistantContext: () => mockUseAssistantContext(),
+  useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
+  useLoadConnectors: () => mockUseLoadConnectors(),
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="assistant-provider">{children}</div>
+  ),
+  ConnectorSelectorInline: () => <div data-test-subj="connector-selector-inline" />,
+}));
+
+jest.mock('@kbn/elastic-assistant/impl/assistant_context', () => ({
+  useAssistantContextValue: jest.fn(() => ({
+    http: { post: jest.fn() },
+    settings: { client: { get: jest.fn() } },
+  })),
+}));
 
 jest.mock('../../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: () => mockUseAssistantAvailability(),
@@ -41,6 +52,26 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 
 jest.mock('../hooks/use_fetch_entity_details_highlights', () => ({
   useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
+}));
+
+jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
+  useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
+}));
+
+jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
+  useAskAiAssistant: () => ({
+    showAssistantOverlay: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(() => false),
+}));
+
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
+  useAgentBuilderAttachment: () => ({
+    openAgentBuilderFlyout: jest.fn(),
+  }),
 }));
 
 describe('EntityHighlights', () => {
@@ -101,6 +132,7 @@ describe('EntityHighlights', () => {
     mockUseStoredAssistantConnectorId.mockReturnValue(defaultStoredAssistantConnectorId);
     mockUseAssistantAvailability.mockReturnValue(defaultAssistantAvailability);
     mockUseFetchEntityDetailsHighlights.mockReturnValue(defaultFetchEntityDetailsHighlights);
+    mockUseHasEntityHighlightsLicense.mockReturnValue(true);
   });
 
   it('renders EntityHighlights with title and icon', () => {
@@ -108,7 +140,7 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    expect(screen.getByText('Entity highlights')).toBeInTheDocument();
+    expect(screen.getByText('Entity summary')).toBeInTheDocument();
     expect(screen.getByTestId('asset-criticality-selector')).toBeInTheDocument();
   });
 
@@ -119,11 +151,11 @@ describe('EntityHighlights', () => {
       isAssistantVisible: true,
     });
 
-    const { container } = render(<EntityHighlightsAccordion {...defaultProps} />, {
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 
   it('returns null when assistant is not enabled', () => {
@@ -133,11 +165,11 @@ describe('EntityHighlights', () => {
       isAssistantVisible: true,
     });
 
-    const { container } = render(<EntityHighlightsAccordion {...defaultProps} />, {
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 
   it('shows generate button when no assistant result and not loading', () => {
@@ -145,7 +177,7 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    const generateButton = screen.getByText('Generate AI highlights');
+    const generateButton = screen.getByText('Generate');
     expect(generateButton).toBeInTheDocument();
     expect(generateButton).not.toBeDisabled();
   });
@@ -155,13 +187,13 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    const generateButton = screen.getByText('Generate AI highlights');
+    const generateButton = screen.getByText('Generate');
     fireEvent.click(generateButton);
 
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
-  it('disables generate button when no connector ID is available', () => {
+  it('does not render generate button when no connector ID is available', () => {
     mockUseLoadConnectors.mockReturnValue({ data: [] });
     mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
 
@@ -169,8 +201,12 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    const generateButton = screen.getByRole('button', { name: 'Generate AI highlights' });
-    expect(generateButton).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No AI connector is configured. Please configure an AI connector to generate a summary.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows loading state with skeleton text and loading message', () => {
@@ -191,10 +227,18 @@ describe('EntityHighlights', () => {
 
   it('shows AI response when assistant result is available and not loading', () => {
     const mockAssistantResult = {
-      aiResponse:
-        '## Key Insights\n\n- User has high risk activity\n- Multiple failed login attempts',
+      response: {
+        highlights: [
+          {
+            title: 'Key Insights',
+            text: 'User has high risk activity\n- Multiple failed login attempts',
+          },
+        ],
+        recommendedActions: null,
+      },
       replacements: { anonymized_user: 'test-user' },
-      formattedEntitySummary: '{"user": "test-user"}',
+      summaryAsText: '{"user": "test-user"}',
+      generatedAt: Date.now(),
     };
 
     mockUseFetchEntityDetailsHighlights.mockReturnValue({
@@ -206,9 +250,9 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    expect(screen.getByText('Key Insights', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('Key Insights')).toBeInTheDocument();
     expect(screen.getByText('User has high risk activity', { exact: false })).toBeInTheDocument();
-    expect(screen.queryByText('Generate AI highlights')).not.toBeInTheDocument();
+    expect(screen.queryByText('Generate')).not.toBeInTheDocument();
   });
 
   it('handles missing anonymization fields gracefully', () => {
@@ -222,7 +266,7 @@ describe('EntityHighlights', () => {
     });
 
     // Component should still render without errors
-    expect(screen.getByText('Entity highlights')).toBeInTheDocument();
+    expect(screen.getByText('Entity summary')).toBeInTheDocument();
   });
 
   it('renders with custom space ID', () => {
@@ -234,7 +278,7 @@ describe('EntityHighlights', () => {
     });
 
     // Component should still render without errors
-    expect(screen.getByText('Entity highlights')).toBeInTheDocument();
+    expect(screen.getByText('Entity summary')).toBeInTheDocument();
   });
 
   it('handles null space ID', () => {
@@ -245,6 +289,16 @@ describe('EntityHighlights', () => {
     });
 
     // Component should still render without errors
-    expect(screen.getByText('Entity highlights')).toBeInTheDocument();
+    expect(screen.getByText('Entity summary')).toBeInTheDocument();
+  });
+
+  it('returns null when entity highlights license is not available', () => {
+    mockUseHasEntityHighlightsLicense.mockReturnValue(false);
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 });

@@ -188,6 +188,30 @@ export const summaryPanelQualityGoodText = i18n.translate(
   }
 );
 
+export const qualityIndicatorGoodTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorGoodTooltipText',
+  {
+    defaultMessage:
+      'All expected fields are present and values look healthy. No issues detected with ingestion or structure.',
+  }
+);
+
+export const qualityIndicatorDegradedTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorDegradedTooltipText',
+  {
+    defaultMessage:
+      'Some documents have missing or malformed fields. Ingestion is working but data may be incomplete or inconsistent.',
+  }
+);
+
+export const qualityIndicatorPoorTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorPoorTooltipText',
+  {
+    defaultMessage:
+      'More than 3% of documents have missing or malformed fields, or are failing ingestion.',
+  }
+);
+
 export const summaryPanelDatasetsActivityText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityText',
   {

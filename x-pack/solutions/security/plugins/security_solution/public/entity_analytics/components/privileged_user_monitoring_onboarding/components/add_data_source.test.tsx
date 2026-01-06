@@ -25,18 +25,26 @@ jest.mock('../../../../common/lib/kibana', () => {
 jest.mock('../hooks/use_integrations', () => ({
   useEntityAnalyticsIntegrations: jest.fn(() => [
     {
-      name: 'Okta',
-      version: '1.0.0',
-      title: 'Okta Integration',
-      description: 'Okta integration description',
-      icon: 'oktaIcon',
+      packageInfo: {
+        name: 'Okta',
+        version: '1.0.0',
+        title: 'Okta Integration',
+        description: 'Okta integration description',
+        icon: 'oktaIcon',
+        status: 'not_installed',
+      },
+      hasDataStreams: false,
     },
     {
-      name: 'Active Directory',
-      version: '1.0.0',
-      title: 'Active Directory Integration',
-      description: 'Active Directory integration description',
-      icon: 'adIcon',
+      packageInfo: {
+        name: 'Active Directory',
+        version: '1.0.0',
+        title: 'Active Directory Integration',
+        description: 'Active Directory integration description',
+        icon: 'adIcon',
+        status: 'not_installed',
+      },
+      hasDataStreams: false,
     },
   ]),
 }));

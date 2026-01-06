@@ -8,13 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { BoolQuery } from '@kbn/es-query';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { SectionContainer } from '../section_container';
 import { paths } from '../../../../../../common/locators/paths';
-import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../../../../common/constants';
+import { observabilityAlertFeatureIds } from '../../../../../../common/constants';
 import { ObservabilityAlertsTable } from '../../../../../components/alerts_table/alerts_table';
 import { getAlertSummaryTimeRange } from '../../../../../utils/alert_summary_widget';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';

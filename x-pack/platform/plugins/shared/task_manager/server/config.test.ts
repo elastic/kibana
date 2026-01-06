@@ -23,6 +23,10 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
+        },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
@@ -81,6 +85,10 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
+        },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
@@ -136,6 +144,10 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
         },
         "kibanas_per_partition": 2,
         "max_attempts": 3,

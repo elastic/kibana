@@ -7,9 +7,9 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
@@ -131,7 +131,7 @@ export const entityRiskScoreTool = (
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities.`,
+    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',

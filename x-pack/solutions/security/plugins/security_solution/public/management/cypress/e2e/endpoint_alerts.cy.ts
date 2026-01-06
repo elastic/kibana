@@ -19,6 +19,7 @@ import { login, ROLE } from '../tasks/login';
 // Failing: See https://github.com/elastic/kibana/issues/207529
 // Failing: See https://github.com/elastic/kibana/issues/207529
 // Failing: See https://github.com/elastic/kibana/issues/207529
+// Failing: See https://github.com/elastic/kibana/issues/207529
 describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
