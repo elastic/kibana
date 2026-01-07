@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
 import type { ReactElement } from 'react';
 import React, { Fragment } from 'react';
 
 import type { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
-import { EuiBadge, EuiBadgeGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
 
 export type HeaderBreadcrumbsBadgeProps = EuiBadgeProps & {
   badgeText: string;
@@ -25,15 +24,9 @@ export const HeaderBreadcrumbsBadges = ({
 }: {
   badges: HeaderBreadcrumbsBadgeProps[] | undefined;
 }) => {
-  const { euiTheme } = useEuiTheme();
   if (!badges || badges.length === 0) return null;
   return (
-    <EuiBadgeGroup
-      css={css`
-        margin-left: ${euiTheme.size.m};
-      `}
-      data-test-subj="header-breadcrumbs-badge-group"
-    >
+    <EuiBadgeGroup data-test-subj="header-breadcrumbs-badge-group">
       {badges.map(createBadge)}
     </EuiBadgeGroup>
   );
