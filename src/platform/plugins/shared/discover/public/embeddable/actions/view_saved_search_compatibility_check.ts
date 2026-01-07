@@ -23,7 +23,7 @@ import {
 import type { PublishesSavedSearch } from '../types';
 import { apiPublishesSavedSearch } from '../types';
 
-export type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
+type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
 export const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']

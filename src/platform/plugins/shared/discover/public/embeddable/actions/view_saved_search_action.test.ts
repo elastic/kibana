@@ -13,15 +13,15 @@ import { BehaviorSubject } from 'rxjs';
 
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
-import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import type { SearchEmbeddableApi } from '../types';
+import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import { SolutionType } from '../../context_awareness';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
 
-const compatibleEmbeddableApi = {
+const compatibleEmbeddableApi: SearchEmbeddableApi = {
   type: SEARCH_EMBEDDABLE_TYPE,
   savedSearch$: new BehaviorSubject({
     searchSource: { getField: jest.fn() },
