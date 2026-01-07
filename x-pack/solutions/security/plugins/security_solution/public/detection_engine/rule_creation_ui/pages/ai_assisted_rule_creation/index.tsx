@@ -36,6 +36,7 @@ import { useHeaderLinkBackStyles } from '../../../../common/components/header_pa
 import { AiAssistedRuleUpdates } from './agent_builder_updates';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { AiAssistedRuleInfo } from './ai_assisted_rule_info';
 const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [
     {
@@ -174,6 +175,8 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                       <EuiText>
                         <h3>{'Describe the rule you want to create'}</h3>
                       </EuiText>
+                      <EuiSpacer size="m" />
+                      <AiAssistedRuleInfo />
                       <EuiSpacer size="m" />
                       <EuiFlexItem grow={false}>
                         <ConnectorSelector
