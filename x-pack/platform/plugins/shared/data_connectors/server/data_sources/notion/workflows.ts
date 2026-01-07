@@ -6,7 +6,7 @@
  */
 export function generateSearchWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'Notion search'
+name: 'sources.notion.search'
 description: 'Search for pages or data sources that contain a given string in the title'
 enabled: true
 triggers:
@@ -21,7 +21,7 @@ inputs:
       - "data_source"
 steps:
   - name: search-page-by-title
-    type: notion.searchPageByTitle
+    type: notion.searchPageOrDSByTitle
     connector-id: ${stackConnectorId}
     with:
       query: "\${{inputs.query_string}}"
@@ -32,7 +32,7 @@ steps:
 
 export function generateQueryWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'Notion query data source'
+name: 'sources.notion.query_data_source'
 description: 'Given the ID of a data source, query information about its rows. By default it will fetch 10 items, unless you specify page_size or cursor. You can filter the results by specifying the \`filter\`, which is a string representation of the JSON that would be passed, as per documentation in https://developers.notion.com/reference/filter-data-source-entries'
 enabled: true
 triggers:
@@ -65,7 +65,7 @@ steps:
 
 export function generateGetPageWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'Notion get page'
+name: 'sources.notion.get_page'
 description: 'Given the ID of a Notion page, get metadata related to it'
 enabled: true
 triggers:
@@ -85,7 +85,7 @@ steps:
 
 export function generateGetDataSourceWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'Notion get data source'
+name: 'sources.notion.get_data_source'
 description: 'Given the ID of a data source, get information about its columns'
 enabled: true
 triggers:

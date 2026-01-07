@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,50 +17,45 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_EVALUATION_VALUE, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import type { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { ALERT_EVALUATION_VALUE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
+import type { GetSLOResponse } from '@kbn/slo-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ErrorRateChart } from '../../../slo/error_rate_chart';
 import type { TimeRange } from '../../../slo/error_rate_chart/use_lens_definition';
 import type { BurnRateAlert } from '../../types';
 import { getActionGroupWindow } from '../../utils/alert';
 import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
-import { getDataTimeRange } from '../../utils/time_range';
-
+import { getChartTimeRange } from '../../utils/time_range';
 function getAlertTimeRange(timeRange: { gte: string; lte?: string }): TimeRange {
   return {
     from: new Date(timeRange.gte),
     to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
   };
 }
-
 interface Props {
   alert: BurnRateAlert;
   slo?: GetSLOResponse;
   isLoading: boolean;
 }
-
 export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const {
     services: { http },
   } = useKibana();
-  const dataTimeRange = getDataTimeRange(alert);
+  const chartTimeRange = getChartTimeRange(alert);
   const actionGroupWindow = getActionGroupWindow(alert);
   // @ts-ignore
   const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
-
   if (isLoading) {
     return <EuiLoadingChart size="m" data-test-subj="loading" />;
   }
-
   if (!slo) {
     return null;
   }
-
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -93,7 +87,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              <span>{getLastDurationInUnit(dataTimeRange)}</span>
+              <span>{getLastDurationInUnit(chartTimeRange)}</span>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -116,7 +110,6 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                     </span>
                   </EuiText>
                 </EuiFlexItem>
-
                 <EuiFlexItem>
                   <EuiStat
                     title={`${numeral(burnRate).format('0.[00]')}x`}
@@ -150,7 +143,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
           <EuiFlexItem grow={5}>
             <ErrorRateChart
               slo={slo}
-              dataTimeRange={dataTimeRange}
+              dataTimeRange={chartTimeRange}
               alertTimeRange={alertTimeRange}
               threshold={actionGroupWindow!.burnRateThreshold}
               variant="danger"
