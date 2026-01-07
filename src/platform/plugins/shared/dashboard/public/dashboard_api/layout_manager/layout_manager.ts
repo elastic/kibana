@@ -61,7 +61,7 @@ import { coreServices, usageCollectionService } from '../../services/kibana_serv
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { areLayoutsEqual } from './are_layouts_equal';
+import { areControlsLayoutsEqual, arePanelLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
@@ -492,7 +492,10 @@ export function initializeLayoutManager(
         serializeLayout(layout$.value, currentChildState, subset),
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{ panels?: DashboardState['panels'] }> => {
+      ): Observable<{
+        panels?: DashboardState['panels'];
+        controlGroupInput?: DashboardState['controlGroupInput'];
+      }> => {
         return layout$.pipe(
           debounceTime(100),
           combineLatestWith(
@@ -507,9 +510,19 @@ export function initializeLayoutManager(
             )
           ),
           map(([currentLayout]) => {
-            if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
+            const panelsAreEqual = arePanelLayoutsEqual(lastSavedLayout, currentLayout);
+            const controlsAreEqual = areControlsLayoutsEqual(lastSavedLayout, currentLayout);
+            if (!(panelsAreEqual && controlsAreEqual)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              return serializeLayout(currentLayout, currentChildState);
+              const { panels, controlGroupInput, references } = serializeLayout(
+                currentLayout,
+                currentChildState
+              );
+              return {
+                ...(!panelsAreEqual && { panels }),
+                ...(!controlsAreEqual && { controlGroupInput }),
+                references,
+              };
             }
             return {};
           })
