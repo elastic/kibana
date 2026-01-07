@@ -11,7 +11,7 @@
         "label": "Navigation",
         "description": [],
         "signature": [
-          "({ activeItemId, isCollapsed: isCollapsedProp, items, logo, onItemClick, setWidth, sidePanelFooter, ...rest }: ",
+          "({ activeItemId, isCollapsed: isCollapsedProp, items, logo, onItemClick, onToggleCollapsed, setWidth, sidePanelFooter, ...rest }: ",
           "NavigationProps",
           ") => React.JSX.Element"
         ],
@@ -24,7 +24,7 @@
             "id": "def-public.Navigation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  activeItemId,\n  isCollapsed: isCollapsedProp,\n  items,\n  logo,\n  onItemClick,\n  setWidth,\n  sidePanelFooter,\n  ...rest\n}",
+            "label": "{\n  activeItemId,\n  isCollapsed: isCollapsedProp,\n  items,\n  logo,\n  onItemClick,\n  onToggleCollapsed,\n  setWidth,\n  sidePanelFooter,\n  ...rest\n}",
             "description": [],
             "signature": [
               "NavigationProps"
@@ -392,6 +392,40 @@
                   "MenuItem",
                   " | ",
                   "SecondaryMenuItem"
+                ],
+                "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.NavigationProps.onToggleCollapsed",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggleCollapsed",
+            "description": [
+              "\nCallback fired when the collapse button is toggled.\n\nThe collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject\nthat is persisted to localStorage. External consumers rely on this state."
+            ],
+            "signature": [
+              "(isCollapsed: boolean) => void"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-navigation",
+                "id": "def-public.NavigationProps.onToggleCollapsed.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isCollapsed",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
                 "deprecated": false,
