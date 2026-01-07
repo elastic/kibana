@@ -141,4 +141,14 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
       ? await this.getTaskManagerStart().schedule(taskInstance, { request })
       : await this.getTaskManagerStart().schedule(taskInstance);
   }
+
+  public async scheduleTaskAsInternalUser(params: ReportTaskParams) {
+    const taskInstance: SingleReportTaskInstance = {
+      taskType: REPORTING_EXECUTE_TYPE,
+      state: {},
+      params,
+    };
+
+    return await this.getTaskManagerStart().schedule(taskInstance);
+  }
 }

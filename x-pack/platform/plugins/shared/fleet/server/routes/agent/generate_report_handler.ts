@@ -13,6 +13,7 @@ import {
 } from '@kbn/data-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 
 import { getSortConfig, removeSOAttributes } from '../../../common';
 import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from '../../types';
@@ -26,10 +27,10 @@ export const generateReportHandler: FleetRequestHandler<
   TypeOf<typeof PostGenerateAgentsReportRequestSchema.body>
 > = async (context, request, response) => {
   const { agentIds, fields, timezone, sort } = request.body;
+  const logger = appContextService.getLogger();
   const runtimeFieldsResult = await buildAgentStatusRuntimeField();
   const runtimeFields = runtimeFieldsResult.status.script?.source ?? 'emit("")';
-  // const coreContext = await context.core;
-  // const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   const reporting = appContextService.getReportingStart();
   if (!reporting) {
     throw new FleetError('Report generation is not ready');
@@ -37,7 +38,25 @@ export const generateReportHandler: FleetRequestHandler<
 
   const jobParams = getJobParams(agentIds, fields, runtimeFields, timezone, sort);
 
-  return response.ok({ body: { url: 'https://elastic.co' } });
+  try {
+    const internalReportingService = reporting.getInternalGenerateReportService();
+
+    const report = await internalReportingService.enqueueJob('csv_searchsource', jobParams);
+
+    // Return the download URL
+    const { basePath } = (reporting as any).getServerInfo();
+    const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
+
+    return response.ok({
+      body: {
+        url: `${publicDownloadPath}/${report._id}`,
+        job: report.toApiJSON(),
+      },
+    });
+  } catch (error) {
+    logger.error(`Failed to generate report: ${error.message}`);
+    throw new FleetError(`Failed to generate report: ${error.message}`);
+  }
 };
 
 // TODO move this helper to a common location

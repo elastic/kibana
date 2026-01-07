@@ -365,6 +365,10 @@ export class ReportingCore {
     return await this.runSingleReportTask.scheduleTask(request, report);
   }
 
+  public async scheduleTaskAsInternalUser(report: ReportTaskParams) {
+    return await this.runSingleReportTask.scheduleTaskAsInternalUser(report);
+  }
+
   public async scheduleRecurringTask(
     request: KibanaRequest,
     report: ScheduledReportTaskParamsWithoutSpaceId

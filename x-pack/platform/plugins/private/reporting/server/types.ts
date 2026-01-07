@@ -39,12 +39,14 @@ import type {
   RawNotification,
   RawScheduledReport,
 } from './saved_objects/scheduled_report/schemas/latest';
+import { type InternalReportingService } from './services/internal_generate_report_service';
 
 /**
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
+  getInternalReportingService: () => InternalReportingService;
 }
 
 /**
