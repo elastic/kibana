@@ -8,6 +8,7 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { esClient } from './support/es_client';
+import { llmProxyPlugin } from './support/llm_proxy';
 
 export default defineCypressConfig({
   chromeWebSecurity: false,
@@ -33,6 +34,7 @@ export default defineCypressConfig({
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       esClient(on, config);
+      llmProxyPlugin(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');

@@ -1386,6 +1386,8 @@
       "@kbn/lint-ts-projects-cli/*": ["packages/kbn-lint-ts-projects-cli/*"],
       "@kbn/lists-plugin": ["x-pack/solutions/security/plugins/lists"],
       "@kbn/lists-plugin/*": ["x-pack/solutions/security/plugins/lists/*"],
+      "@kbn/llm-proxy-test-helper": ["src/platform/packages/shared/kbn-llm-proxy-test-helper"],
+      "@kbn/llm-proxy-test-helper/*": ["src/platform/packages/shared/kbn-llm-proxy-test-helper/*"],
       "@kbn/llm-tasks-plugin": ["x-pack/platform/plugins/shared/ai_infra/llm_tasks"],
       "@kbn/llm-tasks-plugin/*": ["x-pack/platform/plugins/shared/ai_infra/llm_tasks/*"],
       "@kbn/locator-examples-plugin": ["examples/locator_examples"],

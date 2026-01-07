@@ -1657,6 +1657,7 @@
     "@kbn/lazy-object": "link:src/platform/packages/shared/kbn-lazy-object",
     "@kbn/lint-packages-cli": "link:packages/kbn-lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",
+    "@kbn/llm-proxy-test-helper": "link:src/platform/packages/shared/kbn-llm-proxy-test-helper",
     "@kbn/managed-vscode-config": "link:packages/kbn-managed-vscode-config",
     "@kbn/managed-vscode-config-cli": "link:packages/kbn-managed-vscode-config-cli",
     "@kbn/management-storybook-config": "link:src/platform/packages/shared/kbn-management/storybook/config",

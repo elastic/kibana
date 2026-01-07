@@ -6,6 +6,7 @@
  */
 
 import './commands';
+import './llm_proxy_commands';
 import 'cypress-real-events/support';
 import registerCypressGrep from '@cypress/grep';
 import {
