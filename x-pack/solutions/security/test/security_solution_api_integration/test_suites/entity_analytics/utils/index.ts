@@ -11,3 +11,4 @@ export * from './asset_criticality';
 export * from './entity_store';
 export * from './elastic_asset_checker';
 export * from './entity_analytics';
+export * from './privilege_monitoring';
