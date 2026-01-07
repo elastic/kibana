@@ -15,13 +15,23 @@ import type {
   ConfirmationPrompt,
   ConfirmPromptDefinition,
   PromptResponseState,
+  PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { i18nBundles } from '../i18n';
 
-export const createPromptManager = (): PromptManager => {
+export const createPromptManager = ({
+  state,
+}: { state?: PromptStorageState } = {}): PromptManager => {
   const promptMap = new Map<string, PromptResponseState>();
+
+  // pre-fill the prompt map based on the current state
+  if (state) {
+    for (const [promptId, response] of Object.entries(state.responses)) {
+      promptMap.set(promptId, response);
+    }
+  }
 
   const checkConfirmationStatus = (promptId: string): ConfirmationInfo => {
     const prompt = promptMap.get(promptId);
@@ -30,9 +40,7 @@ export const createPromptManager = (): PromptManager => {
     }
     if (prompt.type === AgentPromptType.confirmation) {
       return {
-        status: prompt.response.confirmed
-          ? ConfirmationStatus.accepted
-          : ConfirmationStatus.rejected,
+        status: prompt.response.allow ? ConfirmationStatus.accepted : ConfirmationStatus.rejected,
       };
     }
     throw new Error('Trying to check confirmation status of non-confirmation prompt.');
@@ -69,26 +77,27 @@ export const createPromptManager = (): PromptManager => {
   };
 };
 
-export const initPromptManager = ({
-  promptManager,
+export const getAgentPromptStorageState = ({
   input,
   conversation,
 }: {
-  promptManager: PromptManager;
   input: ConverseInput;
   conversation?: Conversation;
-}) => {
-  if (conversation?.rounds.length) {
-    const lastRound = conversation.rounds[conversation.rounds.length - 1];
-    const interrupt = lastRound.pending_prompt;
-    const confirmed = (input.prompt_response?.confirmed as boolean) ?? false;
-    if (interrupt) {
-      promptManager.set(interrupt.id, {
-        ...interrupt,
-        response: { confirmed },
-      });
-    }
+}): PromptStorageState => {
+  const state: PromptStorageState = conversation?.prompt_storage ?? {
+    responses: {},
+  };
+
+  if (input.prompts) {
+    Object.entries(input.prompts).forEach(([promptId, response]) => {
+      state.responses[promptId] = {
+        type: AgentPromptType.confirmation,
+        response,
+      };
+    });
   }
+
+  return state;
 };
 
 export const toolConfirmationId = (toolId: string): string => `${toolId}.confirm`;

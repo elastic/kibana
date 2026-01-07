@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { PromptRequest, PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolType } from '@kbn/agent-builder-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
@@ -134,6 +134,10 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    */
   source?: 'agent' | 'user' | 'unknown';
   /**
+   * Optional prompt storage state to use for tool invocation.
+   */
+  promptState?: PromptStorageState;
+  /**
    * Optional event handler.
    */
   onEvent?: ToolEventHandlerFn;
@@ -161,12 +165,12 @@ export type RunInternalToolParams<TParams = Record<string, unknown>> = Omit<
  */
 export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
   RunToolParams<TParams>,
-  'request'
+  'request' | 'promptState'
 >;
 
 export type ScopedRunnerRunInternalToolParams<TParams = Record<string, unknown>> = Omit<
   RunInternalToolParams<TParams>,
-  'request'
+  'request' | 'promptState'
 >;
 
 /**

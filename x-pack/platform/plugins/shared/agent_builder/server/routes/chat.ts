@@ -67,8 +67,10 @@ export function registerChatRoutes({
         meta: { description: 'The user input message to send to the agent.' },
       })
     ),
-    confirm: schema.maybe(
-      schema.boolean({ meta: { description: 'Can be used to respond to a confirmation prompt.' } })
+    prompts: schema.maybe(
+      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
+        meta: { description: 'Can be used to respond to a confirmation prompt.' },
+      })
     ),
     attachments: schema.maybe(
       schema.arrayOf(
@@ -173,12 +175,10 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
-      confirm,
+      prompts,
       capabilities,
       browser_api_tools: browserApiTools,
     } = payload;
-
-    const promptResponse = confirm !== undefined ? { confirmed: confirm } : undefined;
 
     return chatService.converse({
       agentId,
@@ -189,7 +189,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: {
         message: input,
-        prompt_response: promptResponse,
+        prompts,
         attachments,
       },
       request,
