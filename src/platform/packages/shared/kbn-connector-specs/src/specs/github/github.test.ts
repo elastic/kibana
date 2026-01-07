@@ -1353,6 +1353,54 @@ index abc123..def456 100644
     });
   });
 
+  describe('getPullRequestReviews action', () => {
+    it('should get pull request reviews', async () => {
+      const mockResponse = {
+        data: [
+          {
+            id: 1,
+            user: {
+              login: 'reviewer1',
+              id: 123,
+            },
+            body: 'Looks good to me!',
+            state: 'APPROVED',
+            submitted_at: '2024-01-01T00:00:00Z',
+            commit_id: 'abc123',
+          },
+          {
+            id: 2,
+            user: {
+              login: 'reviewer2',
+              id: 456,
+            },
+            body: 'Please fix the formatting',
+            state: 'CHANGES_REQUESTED',
+            submitted_at: '2024-01-02T00:00:00Z',
+            commit_id: 'def456',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getPullRequestReviews.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/pulls/123/reviews',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
