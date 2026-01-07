@@ -7,9 +7,10 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '../../utils/retry';
+import { SLO_RESOURCES_VERSION } from '../../../common/constants';
 
-export const HEALTH_DATA_STREAM_NAME = '.slo-observability.health';
-export const HEALTH_INDEX_TEMPLATE_NAME = '.slo-observability.health';
+export const HEALTH_DATA_STREAM_NAME = 'slo-observability.health';
+export const HEALTH_INDEX_TEMPLATE_NAME = 'slo-observability.health@template';
 
 export class HealthIndexInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
@@ -36,6 +37,12 @@ export class HealthIndexInstaller {
         priority: 500,
         data_stream: {
           hidden: true,
+        },
+        _meta: {
+          description: 'Mappings for SLO rollup data',
+          version: SLO_RESOURCES_VERSION,
+          managed: true,
+          managed_by: 'observability',
         },
         template: {
           lifecycle: {

@@ -30,7 +30,7 @@ export const postHealthScanRoute = createSloServerRoute({
   options: { access: 'internal' },
   security: {
     authz: {
-      requiredPrivileges: ['slo_read'],
+      requiredPrivileges: ['slo_write'],
     },
   },
   params: postHealthScanParamsSchema,
@@ -116,7 +116,6 @@ export const getHealthScanRoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
-    const esClient = scopedClusterClient.asCurrentUser;
 
     const { scanId } = params.path;
     const { size = 100, problematic, allSpaces } = params.query ?? {};
@@ -133,43 +132,53 @@ export const getHealthScanRoute = createSloServerRoute({
       }
     }
 
-    const result = await esClient.search<HealthDocument>({
-      index: HEALTH_DATA_STREAM_NAME,
-      size,
-      query: {
-        bool: {
-          filter: [
-            { term: { scanId } },
-            ...(allSpaces ? [] : [{ term: { spaceId } }]),
-            ...(problematic ? [{ term: { isProblematic: problematic } }] : []),
-          ],
+    try {
+      const result = await scopedClusterClient.asCurrentUser.search<HealthDocument>({
+        index: HEALTH_DATA_STREAM_NAME,
+        size,
+        query: {
+          bool: {
+            filter: [
+              { term: { scanId } },
+              ...(allSpaces ? [] : [{ term: { spaceId } }]),
+              ...(problematic ? [{ term: { isProblematic: problematic } }] : []),
+            ],
+          },
         },
-      },
-      sort: [
-        { '@timestamp': 'desc' },
-        { scanId: 'desc' },
-        { spaceId: 'asc' },
-        { isProblematic: 'asc' },
-        { sloId: 'asc' },
-      ],
-      search_after: searchAfter,
-    });
+        sort: [
+          { '@timestamp': 'desc' },
+          { scanId: 'desc' },
+          { spaceId: 'asc' },
+          { isProblematic: 'asc' },
+          { sloId: 'asc' },
+        ],
+        search_after: searchAfter,
+      });
 
-    const hits = result.hits.hits;
-    const total =
-      typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
-    const lastHit = hits[hits.length - 1];
-    const nextSearchAfter = lastHit && hits.length === size ? lastHit.sort : undefined;
+      const hits = result.hits.hits;
+      const total =
+        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+      const lastHit = hits[hits.length - 1];
+      const nextSearchAfter = lastHit && hits.length === size ? lastHit.sort : undefined;
 
-    const results = hits
-      .map((hit) => hit._source)
-      .filter((source): source is HealthScanResultResponse => source !== undefined);
+      const results = hits
+        .map((hit) => hit._source)
+        .filter((source): source is HealthScanResultResponse => source !== undefined);
 
-    return {
-      results,
-      total,
-      searchAfter: nextSearchAfter,
-    };
+      return {
+        results,
+        total,
+        searchAfter: nextSearchAfter,
+      };
+    } catch (err) {
+      if (err.meta && err.meta.statusCode === 404) {
+        return {
+          results: [],
+          total: 0,
+        };
+      }
+      throw err;
+    }
   },
 });
 
@@ -192,82 +201,90 @@ export const listHealthScanRoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient } = await getScopedClients({ request, logger });
-    const esClient = scopedClusterClient.asCurrentUser;
 
     const { size = 10, searchAfter } = params?.query ?? {};
 
-    const result = await esClient.search({
-      index: HEALTH_DATA_STREAM_NAME,
-      size: 0,
-      aggs: {
-        scans: {
-          composite: {
-            size,
-            sources: [
-              {
-                scanId: {
-                  terms: {
-                    order: 'desc',
-                    field: 'scanId',
+    try {
+      const result = await scopedClusterClient.asCurrentUser.search({
+        index: HEALTH_DATA_STREAM_NAME,
+        size: 0,
+        aggs: {
+          scans: {
+            composite: {
+              size,
+              sources: [
+                {
+                  scanId: {
+                    terms: {
+                      order: 'desc',
+                      field: 'scanId',
+                    },
+                  },
+                },
+              ],
+              after: searchAfter ? { scanId: searchAfter } : undefined,
+            },
+            aggs: {
+              latest_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              problematic_count: {
+                filter: {
+                  term: {
+                    isProblematic: true,
                   },
                 },
               },
-            ],
-            after: searchAfter ? { scanId: searchAfter } : undefined,
-          },
-          aggs: {
-            latest_timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
-            problematic_count: {
-              filter: {
-                term: {
-                  isProblematic: true,
+              sorted: {
+                bucket_sort: {
+                  sort: [{ latest_timestamp: { order: 'desc' } }],
                 },
-              },
-            },
-            sorted: {
-              bucket_sort: {
-                sort: [{ latest_timestamp: { order: 'desc' } }],
               },
             },
           },
         },
-      },
-    });
+      });
 
-    interface ScanBucket {
-      key: { scanId: string };
-      doc_count: number;
-      latest_timestamp: { value: number; value_as_string: string };
-      problematic_count: { doc_count: number };
+      interface ScanBucket {
+        key: { scanId: string };
+        doc_count: number;
+        latest_timestamp: { value: number; value_as_string: string };
+        problematic_count: { doc_count: number };
+      }
+
+      const aggs = result.aggregations as
+        | {
+            scans: {
+              buckets: ScanBucket[];
+              after_key?: { scanId: string };
+            };
+          }
+        | undefined;
+
+      const buckets = aggs?.scans.buckets ?? [];
+      const afterKey = aggs?.scans.after_key;
+
+      const scans = buckets.map((bucket) => ({
+        scanId: bucket.key.scanId,
+        latestTimestamp: bucket.latest_timestamp.value_as_string,
+        total: bucket.doc_count,
+        problematic: bucket.problematic_count.doc_count,
+      }));
+
+      return {
+        scans,
+        searchAfter: afterKey ? afterKey.scanId : undefined,
+      };
+    } catch (err) {
+      if (err.meta && err.meta.statusCode === 404) {
+        return {
+          scans: [],
+        };
+      }
+      throw err;
     }
-
-    const aggs = result.aggregations as
-      | {
-          scans: {
-            buckets: ScanBucket[];
-            after_key?: { scanId: string };
-          };
-        }
-      | undefined;
-
-    const buckets = aggs?.scans.buckets ?? [];
-    const afterKey = aggs?.scans.after_key;
-
-    const scans = buckets.map((bucket) => ({
-      scanId: bucket.key.scanId,
-      latestTimestamp: bucket.latest_timestamp.value_as_string,
-      total: bucket.doc_count,
-      problematic: bucket.problematic_count.doc_count,
-    }));
-
-    return {
-      scans,
-      searchAfter: afterKey ? afterKey.scanId : undefined,
-    };
   },
 });
 

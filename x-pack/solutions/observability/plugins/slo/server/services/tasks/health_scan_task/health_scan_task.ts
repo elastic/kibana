@@ -80,16 +80,14 @@ export class HealthScanTask {
               }
 
               const [coreStart] = await core.getStartServices();
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
 
               const params = taskInstance.params as HealthScanTaskParams;
 
               try {
                 const result = await runHealthScan(
-                  { scanId: params.scanId, spaceId: params.spaceId },
+                  { scanId: params.scanId },
                   {
-                    esClient,
                     scopedClusterClient,
                     logger: this.logger,
                     abortController,

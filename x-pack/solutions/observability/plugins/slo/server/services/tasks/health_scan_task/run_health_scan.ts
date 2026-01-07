@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { computeHealth } from '../../../domain/services/compute_health';
@@ -15,7 +15,6 @@ import { HEALTH_DATA_STREAM_NAME } from '../../health_scan/health_index_installe
 import type { HealthDocument, SLO } from './types';
 
 interface Dependencies {
-  esClient: ElasticsearchClient;
   scopedClusterClient: IScopedClusterClient;
   logger: Logger;
   abortController: AbortController;
@@ -23,7 +22,6 @@ interface Dependencies {
 
 interface RunParams {
   scanId: string;
-  spaceId: string;
 }
 
 const COMPOSITE_BATCH_SIZE = 500;
@@ -36,7 +34,7 @@ export async function runHealthScan(
   dependencies: Dependencies
 ): Promise<{ processed: number; problematic: number }> {
   const { scopedClusterClient, logger } = dependencies;
-  const { scanId, spaceId } = params;
+  const { scanId } = params;
 
   let searchAfter: AggregationsCompositeAggregateKey | undefined;
   let totalProcessed = 0;
@@ -122,14 +120,14 @@ async function fetchUniqueSloFromSummary(
   nextSearchAfter: AggregationsCompositeAggregateKey | undefined;
   list: SLO[];
 }> {
-  const { logger, esClient, abortController } = dependencies;
+  const { logger, scopedClusterClient, abortController } = dependencies;
   logger.debug(
     `Fetching unique SLO (id, revision) tuples from summary index after ${JSON.stringify(
       searchAfter
     )}`
   );
 
-  const result = await esClient.search<
+  const result = await scopedClusterClient.asCurrentUser.search<
     unknown,
     {
       id_revision: {
@@ -207,7 +205,7 @@ async function bulkInsertHealthDocuments(
   documents: HealthDocument[],
   dependencies: Dependencies
 ): Promise<void> {
-  const { esClient, logger, abortController } = dependencies;
+  const { scopedClusterClient, logger, abortController } = dependencies;
   logger.debug(`Bulk inserting ${documents.length} health documents`);
 
   const operations = documents.flatMap((doc) => [
@@ -215,7 +213,10 @@ async function bulkInsertHealthDocuments(
     doc,
   ]);
 
-  await esClient.bulk({ operations, refresh: false }, { signal: abortController.signal });
+  await scopedClusterClient.asCurrentUser.bulk(
+    { operations, refresh: false },
+    { signal: abortController.signal }
+  );
 }
 
 function delay(ms: number): Promise<void> {
