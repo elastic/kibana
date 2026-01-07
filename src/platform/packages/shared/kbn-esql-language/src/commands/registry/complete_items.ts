@@ -13,6 +13,11 @@ import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 import { SuggestionCategory } from '../../shared/sorting/types';
+import {
+  ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  ESQL_NAMED_PARAMS_TYPE,
+} from '../definitions/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -70,25 +75,103 @@ export const allStarConstant: ISuggestionItem = {
   category: SuggestionCategory.CONSTANT_VALUE,
 };
 
-function buildValuePlaceholder(placeholderType: 'value' | 'default' = 'value'): ISuggestionItem {
+export function buildMapKeySuggestion(
+  paramName: string,
+  valueType: MapValueType = 'string',
+  options?: MapKeySuggestionOptions
+): ISuggestionItem {
+  const text = `"${paramName}": ${MAP_VALUE_SNIPPETS[valueType]}`;
+  const isSnippet = text.includes('$0');
+
   return withAutoSuggest({
-    label: i18n.translate('kbn-esql-language.esql.autocomplete.valuePlaceholderLabel', {
-      defaultMessage: 'Insert {placeholderType} placeholder',
-      values: { placeholderType },
-    }),
-    text: `"\${0:${placeholderType}}"`,
-    asSnippet: true,
+    label: paramName,
+    text,
+    asSnippet: isSnippet,
     kind: 'Constant',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.valuePlaceholderDetail', {
-      defaultMessage: 'Insert a {placeholderType} to describe the condition',
-      values: { placeholderType },
-    }),
-    category: SuggestionCategory.CONSTANT_VALUE,
+    detail: paramName,
+    ...(options?.filterText && { filterText: options.filterText }),
+    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
   });
 }
 
-export const valuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('value');
-export const defaultValuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('default');
+export type ConstantPlaceholderType = 'value' | 'number' | 'config' | 'default';
+
+export const PLACEHOLDER_CONFIG: Record<
+  ConstantPlaceholderType,
+  { snippet: string; matchTypes: readonly string[] }
+> = {
+  config: {
+    snippet: '{ $0 }',
+    matchTypes: [ESQL_NAMED_PARAMS_TYPE],
+  },
+  value: {
+    snippet: '"${0:value}"',
+    matchTypes: [...ESQL_STRING_TYPES, 'ip', 'version'],
+  },
+  number: {
+    snippet: '${0:0}',
+    matchTypes: [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
+  },
+  default: {
+    snippet: '"${0:default}"',
+    matchTypes: [],
+  },
+};
+
+export const valuePlaceholderConstant: ISuggestionItem = buildAddValuePlaceholder('value');
+export const defaultValuePlaceholderConstant: ISuggestionItem = buildAddValuePlaceholder('default');
+
+export function buildAddValuePlaceholder(
+  placeholderType: ConstantPlaceholderType,
+  options?: MapKeySuggestionOptions
+): ISuggestionItem {
+  const text = PLACEHOLDER_CONFIG[placeholderType].snippet;
+
+  return withAutoSuggest({
+    label: i18n.translate(
+      `kbn-esql-ast.esql.autocomplete.constantOnlyPlaceholder.${placeholderType}.label`,
+      {
+        defaultMessage: 'Insert {placeholderType} placeholder',
+        values: { placeholderType },
+      }
+    ),
+    text,
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
+      defaultMessage: 'Insert a {placeholderType} to describe the condition',
+      values: { placeholderType },
+    }),
+    category: SuggestionCategory.VALUE,
+    filterText: text,
+    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+  });
+}
+
+/** Finds the placeholder type that matches the given ES|QL types */
+export function findConstantPlaceholderType(
+  types: readonly string[]
+): ConstantPlaceholderType | undefined {
+  for (const placeholderType of Object.keys(PLACEHOLDER_CONFIG) as ConstantPlaceholderType[]) {
+    const { matchTypes } = PLACEHOLDER_CONFIG[placeholderType];
+
+    if (types.some((type) => matchTypes.includes(type))) {
+      return placeholderType;
+    }
+  }
+
+  return undefined;
+}
+
+export function buildMapValueCompleteItem(value: string): ISuggestionItem {
+  return {
+    label: value,
+    text: value,
+    kind: 'Constant',
+    detail: value,
+    category: SuggestionCategory.CONSTANT_VALUE,
+  };
+}
 
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
@@ -143,6 +226,24 @@ export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
   detail: 'Inference endpoint',
   sortText: '1',
 });
+
+// ================================
+// Map Expression Builders
+// ================================
+
+export type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+
+export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
+  string: '"$0"',
+  number: '',
+  boolean: '',
+  map: '{ $0 }',
+};
+
+export interface MapKeySuggestionOptions {
+  filterText?: string;
+  rangeToReplace?: { start: number; end: number };
+}
 
 export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '(FROM ...)',
