@@ -35,17 +35,6 @@ import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient } from '../../../../lib/utils/with_client';
 import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
 
-/**
- * Generates APM transactions with failures and errors for testing alert tools.
- *
- * @param options - Configuration options
- * @param options.range - Time range from synthtrace timerange()
- * @param options.apmEsClient - APM synthtrace client
- * @param options.serviceName - Service name(s) to generate data for (default: 'my-service')
- * @param options.environment - Environment name (default: 'production')
- * @param options.language - Agent language (default: 'go')
- * @returns Array of ScenarioReturnType for each service
- */
 export function generateApmErrorData({
   range,
   apmEsClient,

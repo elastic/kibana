@@ -36,16 +36,6 @@ import { withClient } from '../../../../lib/utils/with_client';
 import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
 import { generateApmErrorData } from '../get_alerts/apm_errors';
 
-/**
- * Generates simple log entries for testing data sources tools.
- *
- * @param options - Configuration options
- * @param options.range - Time range from synthtrace timerange()
- * @param options.logsEsClient - Logs synthtrace client
- * @param options.message - Log message (default: 'simple log message')
- * @param options.dataset - Dataset name (default: 'web.access')
- * @returns ScenarioReturnType with generated logs
- */
 export function generateSimpleLogsData({
   range,
   logsEsClient,
@@ -65,20 +55,6 @@ export function generateSimpleLogsData({
   return withClient(logsEsClient, simpleLogs);
 }
 
-/**
- * Generates data across Logs and APM data sources.
- * Used for testing the get_data_sources tool.
- * This is the same data that the API tests use.
- *
- * @param options - Configuration options
- * @param options.range - Time range from synthtrace timerange()
- * @param options.logsEsClient - Logs synthtrace client
- * @param options.apmEsClient - APM synthtrace client
- * @param options.serviceName - Service name for APM data (default: 'my-service')
- * @param options.environment - Environment for APM data (default: 'production')
- * @param options.language - Agent language for APM data (default: 'go')
- * @returns Array of ScenarioReturnType for logs and APM data
- */
 export function generateDataSourcesData({
   range,
   logsEsClient,
