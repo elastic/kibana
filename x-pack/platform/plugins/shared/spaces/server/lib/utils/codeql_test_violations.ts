@@ -12,7 +12,8 @@
 export function vulnerableHash(data: string): string {
   // VIOLATION: Using MD5 which is cryptographically broken
   const crypto = require('crypto');
-  // codeql[js/weak-cryptographic-algorithm,githubsecuritylab/weak-hashing]
+  // codeql[githubsecuritylab/weak-hashing] test ignore
+  // codeql[js/weak-cryptographic-algorithm]
   return crypto.createHash('md5').update(data).digest('hex');
 }
 
