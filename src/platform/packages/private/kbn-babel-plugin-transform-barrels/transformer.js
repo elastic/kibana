@@ -104,10 +104,12 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
             publicSubpath: exportInfo.publicSubpath,
           });
         }
+        // Use the traced export type to determine whether to generate default or named import
+        const isSourceDefault = exportInfo.type === 'default';
         newImports.get(exportInfo.path)?.specifiers.push({
           localName,
-          importedName: 'default',
-          isDefault: true,
+          importedName: isSourceDefault ? 'default' : exportInfo.localName,
+          isDefault: isSourceDefault,
         });
       } else {
         unchangedSpecifiers.push(specifier);

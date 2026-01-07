@@ -16,8 +16,8 @@ const fs = require('fs');
 
 /**
  * Cache for parsed file exports to avoid re-parsing the same file multiple times.
- * Maps filePath -> Map<exportName, { path: string, localName: string }>
- * @type {Map<string, Map<string, { path: string, localName: string }>>}
+ * Maps filePath -> Map<exportName, { path: string, localName: string, isDefault: boolean }>
+ * @type {Map<string, Map<string, { path: string, localName: string, isDefault: boolean }>>}
  */
 const exportSourceCache = new Map();
 
@@ -383,9 +383,15 @@ function parseBarrelExports(content, filePath) {
           // Identifier was imported - trace to actual source
           const found = findExportSource(importInfo.importedName, importInfo.path, new Set());
 
+          // Determine if source has default or named export
+          // If found.isDefault is true, source has default export; otherwise it's named
+          const isSourceDefault = found ? found.isDefault : importInfo.importedName === 'default';
+          /** @type {'default' | 'named'} */
+          const exportType = isSourceDefault ? 'default' : 'named';
+
           exports.default = {
             path: found ? found.path : importInfo.path,
-            type: /** @type {const} */ ('default'),
+            type: exportType,
             localName: found ? found.localName : importInfo.importedName,
             importedName: 'default',
           };
@@ -639,7 +645,7 @@ function extractDirectExports(content, filePath) {
  * @param {string} exportName - The export name to find
  * @param {string} filePath - File to search in
  * @param {Set<string>} [visited] - Visited files (prevent infinite loops)
- * @returns {{ path: string, localName: string } | null}
+ * @returns {{ path: string, localName: string, isDefault: boolean } | null}
  */
 function findExportSource(exportName, filePath, visited = new Set()) {
   if (visited.has(filePath)) return null;
@@ -665,10 +671,10 @@ function findExportSource(exportName, filePath, visited = new Set()) {
  *
  * @param {string} filePath - File to parse
  * @param {Set<string>} visited - Visited files (prevent infinite loops)
- * @returns {Map<string, { path: string, localName: string }>}
+ * @returns {Map<string, { path: string, localName: string, isDefault: boolean }>}
  */
 function parseAllFileExports(filePath, visited) {
-  /** @type {Map<string, { path: string, localName: string }>} */
+  /** @type {Map<string, { path: string, localName: string, isDefault: boolean }>} */
   const exports = new Map();
 
   let content;
@@ -706,8 +712,8 @@ function parseAllFileExports(filePath, visited) {
             if (found) {
               exports.set(expName, found);
             } else {
-              // Source file is the final destination
-              exports.set(expName, { path: resolved, localName });
+              // Source file is the final destination - named export
+              exports.set(expName, { path: resolved, localName, isDefault: false });
             }
           }
         }
@@ -736,7 +742,7 @@ function parseAllFileExports(filePath, visited) {
         }
 
         for (const name of names) {
-          exports.set(name, { path: filePath, localName: name });
+          exports.set(name, { path: filePath, localName: name, isDefault: false });
         }
       }
 
@@ -746,7 +752,7 @@ function parseAllFileExports(filePath, visited) {
           if (spec.type === 'ExportSpecifier') {
             const exported = spec.exported;
             const expName = exported.type === 'Identifier' ? exported.name : exported.value;
-            exports.set(expName, { path: filePath, localName: spec.local.name });
+            exports.set(expName, { path: filePath, localName: spec.local.name, isDefault: false });
           }
         }
       }
@@ -781,7 +787,7 @@ function parseAllFileExports(filePath, visited) {
           localName = /** @type {{ name: string }} */ (node.declaration.id).name;
         }
       }
-      exports.set('default', { path: filePath, localName });
+      exports.set('default', { path: filePath, localName, isDefault: true });
     },
   });
 

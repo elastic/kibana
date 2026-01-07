@@ -389,9 +389,10 @@ export default ESQLEditor;`
       const exports = barrelIndex[mainBarrelPath].exports;
 
       // Default should trace to editor.ts, not the barrel
+      // Type should be 'named' because editor.ts has a named export, not default
       expect(exports.default).toBeDefined();
       expect(exports.default.path).toBe(Path.join(tempDir, 'editor.ts'));
-      expect(exports.default.type).toBe('default');
+      expect(exports.default.type).toBe('named');
       expect(exports.default.localName).toBe('ESQLEditor');
     });
   });

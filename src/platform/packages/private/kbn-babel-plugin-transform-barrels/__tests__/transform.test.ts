@@ -126,6 +126,71 @@ describe('barrel transform plugin', () => {
 
       expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
     });
+
+    it('transforms default import to named import when source has named export', () => {
+      // This tests the fix for: import X from barrel → import { X } from source
+      // When barrel does: import { X } from './source'; export default X;
+      const HANDLEBARS_BARREL_PATH = '/test/src/handlebars/index.ts';
+
+      const barrelWithDefaultToNamed: TestBarrelIndex = {
+        [HANDLEBARS_BARREL_PATH]: {
+          packageName: '@kbn/handlebars',
+          packageRoot: '/test/src/handlebars',
+          exports: {
+            // Barrel has: import { Handlebars } from './src/handlebars'; export default Handlebars;
+            // Source has: export { Handlebars }; (named export, NOT default)
+            default: {
+              path: '/test/src/handlebars/src/handlebars.ts',
+              type: 'named', // Source has NAMED export, not default
+              localName: 'Handlebars',
+              importedName: 'default',
+              expectedPath: '@kbn/handlebars/src/handlebars',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `import Handlebars from './handlebars';`,
+        barrelIndex: barrelWithDefaultToNamed,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should generate NAMED import { Handlebars as Handlebars }, not default import
+      expect(result?.code).toContain('@kbn/handlebars/src/handlebars');
+      expect(result?.code).toMatch(/import\s*{\s*Handlebars\s*(as\s+Handlebars\s*)?\}/);
+      // Should NOT be a default import
+      expect(result?.code).not.toMatch(/import\s+Handlebars\s+from/);
+    });
+
+    it('preserves default import when source has default export', () => {
+      // Verify we didn't break the case where source DOES have a default export
+      const UTILS_BARREL_PATH = '/test/src/utils/index.ts';
+
+      const barrelWithTrueDefault: TestBarrelIndex = {
+        [UTILS_BARREL_PATH]: {
+          exports: {
+            default: {
+              path: '/test/src/utils/main.ts',
+              type: 'default', // Source has actual default export
+              localName: 'main',
+              importedName: 'default',
+              expectedPath: './utils/main',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `import main from './utils';`,
+        barrelIndex: barrelWithTrueDefault,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should remain as default import
+      expect(result?.code).toContain('./utils/main');
+      expect(result?.code).toMatch(/import\s+main\s+from\s+['"]\.\/utils\/main['"]/);
+    });
   });
 
   describe('unchanged imports', () => {
