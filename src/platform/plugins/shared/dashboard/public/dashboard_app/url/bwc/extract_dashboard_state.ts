@@ -65,7 +65,5 @@ export function extractDashboardState(
     }
   }
 
-  console.log({ dashboardState });
-
   return dashboardState;
 }

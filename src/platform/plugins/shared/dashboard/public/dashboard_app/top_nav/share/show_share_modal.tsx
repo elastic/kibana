@@ -164,8 +164,6 @@ export function ShowShareModal({
     references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
 
-  console.log({ unsavedDashboardState, unsavedDashboardStateForLocator });
-
   const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
