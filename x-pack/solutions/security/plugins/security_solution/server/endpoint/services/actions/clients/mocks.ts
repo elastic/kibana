@@ -24,6 +24,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ScriptsLibraryMock } from '../../scripts_library/mocks';
 import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -95,6 +96,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
+  const scriptsLibraryClientMock = ScriptsLibraryMock.getMockedClient();
 
   // TODO:PT refactor mock to instead use Mocked endpoint context and not the real class with mocked dependencies
   const endpointService = new EndpointAppContextService();
@@ -225,6 +227,9 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
 
   const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
   getInternalFleetServicesMock.mockReturnValue(fleetServices);
+
+  // Mock the Scripts Library client
+  jest.spyOn(endpointService, 'getScriptsLibraryClient').mockReturnValue(scriptsLibraryClientMock);
 
   return {
     esClient,

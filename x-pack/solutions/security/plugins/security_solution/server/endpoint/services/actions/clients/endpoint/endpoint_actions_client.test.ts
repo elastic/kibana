@@ -63,6 +63,9 @@ describe('EndpointActionsClient', () => {
     // @ts-expect-error mocking this for testing purposes
     classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
       true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
+      true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
