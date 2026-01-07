@@ -84,8 +84,6 @@ function getLocatorParams({
     'panels' | 'controlGroupInput' | 'references'
   >;
 
-  console.log('controlGroupInput', { panels, controlGroupInput });
-
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,

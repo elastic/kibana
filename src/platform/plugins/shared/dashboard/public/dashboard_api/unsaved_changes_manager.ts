@@ -99,7 +99,6 @@ export function initializeUnsavedChangesManager({
     projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
   ]).pipe(
     map(([settings, unifiedSearch, panels, projectRouting]) => {
-      console.log({ panels });
       return { ...settings, ...unifiedSearch, ...panels, ...projectRouting };
     })
   );
