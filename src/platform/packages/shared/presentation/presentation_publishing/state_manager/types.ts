@@ -50,11 +50,13 @@ export type CustomComparators<StateType> = {
 };
 
 export type SubjectsOf<T extends object> = {
-  [KeyType in keyof Required<T> as `${string & KeyType}$`]: PublishingSubject<T[KeyType]>;
+  [KeyType in keyof Required<ToCamelCase<T>> as `${string & KeyType}$`]: PublishingSubject<
+    T[KeyType]
+  >;
 };
 
 export type SettersOf<T extends object> = {
-  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: (
+  [KeyType in keyof Required<ToCamelCase<T>> as `set${Capitalize<string & KeyType>}`]: (
     value: T[KeyType]
   ) => void;
 };
@@ -65,6 +67,6 @@ export interface StateManager<StateType extends object> {
     newState?: Partial<StateType>,
     comparators?: StateComparators<StateType>
   ) => void;
-  api: SettersOf<ToCamelCase<StateType>> & SubjectsOf<ToCamelCase<StateType>>;
+  api: SettersOf<StateType> & SubjectsOf<StateType>;
   anyStateChange$: Observable<void>;
 }
