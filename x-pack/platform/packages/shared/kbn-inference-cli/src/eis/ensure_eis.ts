@@ -76,7 +76,7 @@ async function testCredentials(
     return statusCode === 200;
   } catch (error) {
     if (error.code === 'EPROTO') {
-      log.info(`Protocol mismatch detected — attempting to connect with ${ssl ? 'http' : 'https'}`);
+      log.debug('Protocol mismatch detected — attempting to connect with HTTP');
       throw new Error('Protocol mismatch error');
     }
 
@@ -84,11 +84,11 @@ async function testCredentials(
   }
 }
 
-async function getES(log: ToolingLog, ssl: boolean = true) {
+async function getES(log: ToolingLog) {
   log.debug('Determining Elasticsearch connection');
 
   const localhost = 'localhost:9200';
-  const protocols = ssl ? ['https', 'http'] : ['http', 'https'];
+  const protocols = ['https', 'http'];
 
   const envUsername = process.env.ES_USERNAME || process.env.ELASTICSEARCH_USERNAME;
   const envPassword = process.env.ES_PASSWORD || process.env.ELASTICSEARCH_PASSWORD;
@@ -113,7 +113,6 @@ async function getES(log: ToolingLog, ssl: boolean = true) {
   );
 
   for (const protocol of protocols) {
-    log.info(`Setting up Cloud Connected Mode for EIS (using ${protocol})`);
     const baseUrl = `${protocol}://${localhost}`;
 
     for (const credentials of credentialsToTry) {
@@ -219,9 +218,10 @@ async function setCcmApiKey(
   }
 }
 
-export async function ensureEis({ log, ssl = true }: { log: ToolingLog; ssl?: boolean }) {
+export async function ensureEis({ log }: { log: ToolingLog }) {
+  log.info('Setting up Cloud Connected Mode for EIS');
   // Get Elasticsearch connection info
-  const es = await getES(log, ssl);
+  const es = await getES(log);
 
   // Get EIS API key from vault
   const apiKey = await getEisApiKey(log);
