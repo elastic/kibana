@@ -14,17 +14,19 @@ export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.AGENT_POLICIES,
   validate: {},
-  handler: async ({ server }): Promise<AgentPolicyInfo[]> => {
-    return getAgentPoliciesAsInternalUser({ server, withAgentCount: true });
+  handler: async ({ server, spaceId }): Promise<AgentPolicyInfo[]> => {
+    return getAgentPoliciesAsInternalUser({ server, withAgentCount: true, spaceId });
   },
 });
 
 export const getAgentPoliciesAsInternalUser = async ({
   server,
   withAgentCount = false,
+  spaceId,
 }: {
   server: SyntheticsServerSetup;
   withAgentCount?: boolean;
+  spaceId: string;
 }) => {
   const soClient = server.coreStart.savedObjects.createInternalRepository();
   const esClient = server.coreStart.elasticsearch.client.asInternalUser;
@@ -37,6 +39,7 @@ export const getAgentPoliciesAsInternalUser = async ({
     kuery: 'ingest-agent-policies.is_managed : false',
     esClient,
     withAgentCount,
+    spaceId,
   });
 
   return agentPolicies.items.map((agentPolicy) => ({
@@ -46,5 +49,6 @@ export const getAgentPoliciesAsInternalUser = async ({
     status: agentPolicy.status,
     description: agentPolicy.description,
     namespace: agentPolicy.namespace,
+    spaceIds: agentPolicy.space_ids,
   }));
 };
