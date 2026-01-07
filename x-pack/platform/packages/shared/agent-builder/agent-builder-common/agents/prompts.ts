@@ -62,3 +62,10 @@ export type PromptRequest = ConfirmationPrompt;
 export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
   return prompt.type === AgentPromptType.confirmation;
 };
+
+export interface ConfirmationPromptResponseState {
+  type: AgentPromptType.confirmation;
+  response: ConfirmationPromptResponse;
+}
+
+export type PromptResponseState = ConfirmationPromptResponseState;

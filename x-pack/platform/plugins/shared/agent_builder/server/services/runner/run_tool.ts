@@ -22,9 +22,11 @@ import { createErrorResult } from '@kbn/agent-builder-server';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
 import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
+import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>>({
@@ -66,11 +68,28 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
   const manager = parentManager.createChild(context);
-  const { resultStore } = manager.deps;
+  const { resultStore, promptManager } = manager.deps;
 
   if (tool.confirmation && source === 'agent') {
-    // TODO
-    console.log('*** HELLO')
+    // TODO: need to update logic depending on "once" or "always"
+
+    if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
+      const { status: confirmStatus } = promptManager.getConfirmationStatus(
+        toolConfirmationId(tool.id)
+      );
+
+      if (confirmStatus === ConfirmationStatus.rejected) {
+        return {
+          results: [createErrorResult('User denied access to this tool.')],
+        };
+      }
+
+      if (confirmStatus === ConfirmationStatus.unprompted) {
+        return {
+          prompt: createToolConfirmationPrompt({ tool }),
+        };
+      }
+    }
   }
 
   const toolReturn = await withExecuteToolSpan(
