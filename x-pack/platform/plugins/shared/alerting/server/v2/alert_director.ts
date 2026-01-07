@@ -51,12 +51,8 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM ${ALERT_EVENTS_INDEX}
 
 // Query for:
 // pending -> active
-// recoverig -> inactive
-//
-// TODO: Can't time filter on transitions, can be in a given state for a while
-// Queries work without {timeFilter} but have this filter for performance reasons
+// recovering -> inactive
 export const DIRECTOR_ACTIVE_INACTIVE_QUERY = `FROM ${ALERT_TRANSITIONS_INDEX}
-  {timeFilter}
   | STATS
       last_tracked_state = LAST(end_state, @timestamp),
       last_transition = MAX(last_event_timestamp)
@@ -125,15 +121,17 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
 
   let lastStartForActiveAndInactiveQuery: number;
   async function runDirectorForActiveAndInactiveTransitions() {
-    const queryLookback = lastStartForActiveAndInactiveQuery
-      ? `| WHERE @timestamp > "${new Date(
-          lastStartForActiveAndInactiveQuery - ADDITIONAL_LOOKBACK_MS
-        ).toISOString()}"`
-      : '';
+    // const queryLookback = lastStartForActiveAndInactiveQuery
+    //   ? `| WHERE @timestamp > "${new Date(
+    //       lastStartForActiveAndInactiveQuery - ADDITIONAL_LOOKBACK_MS
+    //     ).toISOString()}"`
+    //   : '';
     lastStartForActiveAndInactiveQuery = Date.now();
     try {
       const result = await esClient.esql.query({
-        query: DIRECTOR_ACTIVE_INACTIVE_QUERY.replace('{timeFilter}', queryLookback),
+        // I think we need to lookback however long it takes to find active and recovering alerts
+        // query: DIRECTOR_ACTIVE_INACTIVE_QUERY.replace('{timeFilter}', queryLookback),
+        query: DIRECTOR_ACTIVE_INACTIVE_QUERY,
       });
       // eslint-disable-next-line no-console
       console.log(
