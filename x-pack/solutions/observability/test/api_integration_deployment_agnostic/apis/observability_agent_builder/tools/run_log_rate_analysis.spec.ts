@@ -7,18 +7,18 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import {
+  generateLogRateAnalysisSpikeData,
+  LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
+  LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
+  LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
+} from '@kbn/synthtrace';
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ErrorResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/run_log_rate_analysis/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import {
-  LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
-  LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
-  LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
-  createLogRateAnalysisSpikeData,
-} from '../utils/synthtrace_scenarios';
 
 interface RunLogRateAnalysisToolResult {
   type: ToolResultType.other;
@@ -51,7 +51,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
       logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-      await createLogRateAnalysisSpikeData({ logsSynthtraceEsClient });
+      await logsSynthtraceEsClient.clean();
+      const { client, generator } = generateLogRateAnalysisSpikeData({
+        logsEsClient: logsSynthtraceEsClient,
+      });
+      await client.index(generator);
     });
 
     after(async () => {
