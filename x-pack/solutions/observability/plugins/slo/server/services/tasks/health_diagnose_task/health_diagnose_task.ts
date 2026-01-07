@@ -101,7 +101,6 @@ export class HealthDiagnoseTask {
                 );
 
                 return {
-                  // Keep state for 1 hour for polling
                   runAt: new Date(Date.now() + 60 * 60 * 1000),
                   state: {
                     isDone: true,

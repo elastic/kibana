@@ -99,13 +99,14 @@ export async function runHealthDiagnose(
       logger.debug('Task aborted during execution');
       throw error;
     }
-    logger.error(`Error during health diagnose: ${error}`);
+    logger.debug(`Error during health diagnose: ${error}`);
     throw error;
   }
 
   logger.debug(
     `Health diagnose completed: ${totalProcessed} processed, ${totalProblematic} problematic`
   );
+
   return { processed: totalProcessed, problematic: totalProblematic };
 }
 

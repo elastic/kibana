@@ -43,8 +43,6 @@ export class HealthIndexInstaller {
           },
           settings: {
             auto_expand_replicas: '0-1',
-            'sort.field': ['@timestamp', 'taskId', 'isProblematic', 'sloId'],
-            'sort.order': ['desc', 'asc', 'asc', 'asc'],
           },
           mappings: {
             dynamic: false,
