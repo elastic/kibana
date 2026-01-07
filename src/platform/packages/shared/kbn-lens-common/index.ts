@@ -271,6 +271,7 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
+  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,

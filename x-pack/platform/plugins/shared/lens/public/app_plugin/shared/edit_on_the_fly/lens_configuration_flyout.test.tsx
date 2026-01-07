@@ -160,7 +160,6 @@ describe('LensEditConfigurationFlyout', () => {
             coreStart={mockCoreStart}
             startDependencies={startDependencies}
             closeFlyout={jest.fn()}
-            datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
             onApply={jest.fn()}
             onCancel={jest.fn()}
             {...propsOverrides}

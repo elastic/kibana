@@ -22,11 +22,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
 import { useIsDevMode } from '@kbn/react-env';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
-import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
+import {
+  EXPRESSION_BUILD_ERROR_ID,
+  getAbsoluteDateRange,
+  getActiveDatasourceIdFromDoc,
+} from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -46,7 +50,6 @@ export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
   startDependencies,
-  datasourceId,
   updatePanelState,
   updateSuggestion,
   setCurrentAttributes,
@@ -72,6 +75,9 @@ export function LensEditConfigurationFlyout({
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
+
+  // Derive datasourceId from attributes - this updates when converting between formBased and textBased
+  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);

@@ -16,12 +16,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
 import type {
+  TypedLensSerializedState,
   DatasourceMap,
   VisualizationMap,
   LensStoreDeps,
   LensDocument,
+  SupportedDatasourceId,
 } from '@kbn/lens-common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -160,7 +161,6 @@ export async function getEditLensConfiguration(
     updateSuggestion,
     closeFlyout,
     wrapInFlyout,
-    datasourceId,
     panelId,
     savedObjectId,
     dataLoading$,
@@ -186,8 +186,9 @@ export async function getEditLensConfiguration(
 
     // Derive datasourceId from currentAttributes so it updates when attributes change
     // (e.g., after converting from formBased to textBased)
-    const currentDatasourceId = (getActiveDatasourceIdFromDoc(currentAttributes) ||
-      datasourceId) as EditLensConfigurationProps['datasourceId'];
+    const currentDatasourceId = getActiveDatasourceIdFromDoc(
+      currentAttributes
+    ) as SupportedDatasourceId;
 
     // Derive canEditTextBasedQuery from currentAttributes so it updates after conversion
     const currentCanEditTextBasedQuery = isOfAggregateQueryType(currentAttributes.state.query);
@@ -238,7 +239,6 @@ export async function getEditLensConfiguration(
       updatePanelState,
       updateSuggestion,
       closeFlyout,
-      datasourceId: currentDatasourceId,
       coreStart,
       startDependencies,
       dataLoading$,

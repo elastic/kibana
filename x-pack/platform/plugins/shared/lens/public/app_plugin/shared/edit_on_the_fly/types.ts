@@ -45,8 +45,6 @@ export interface EditConfigPanelProps {
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
-  /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
-  datasourceId: 'formBased' | 'textBased';
   /** Embeddable output observable, useful for dashboard flyout  */
   dataLoading$?: PublishingSubject<boolean | undefined>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
@@ -102,7 +100,6 @@ export interface LayerConfigurationProps {
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
-  datasourceId: 'formBased' | 'textBased';
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
