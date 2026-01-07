@@ -236,17 +236,25 @@ export namespace PromQLBuilder {
         };
       };
 
+      /**
+       * Create a string literal.
+       *
+       * @param valueUnquoted - The unquoted string value (e.g., 'hello' not '"hello"')
+       * @param rawValue - Optional raw value as it appeared in source (used by parser).
+       *                   If not provided, the printer will handle quoting/escaping.
+       * @param fromParser - Optional parser fields
+       */
       export const string = (
-        value: string,
         valueUnquoted: string,
+        rawValue?: string,
         fromParser?: Partial<AstNodeParserFields>
       ): PromQLStringLiteral => {
         return {
           dialect: 'promql',
           type: 'literal',
           literalType: 'string',
-          name: value,
-          value,
+          name: rawValue ?? valueUnquoted,
+          value: rawValue ?? valueUnquoted,
           valueUnquoted,
           ...PromQLBuilder.parserFields(fromParser),
         };
