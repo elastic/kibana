@@ -104,12 +104,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should still detect changes without an explicit index', () => {
         expect(logChangePoints.length).to.be.greaterThan(0);
-        const change = logChangePoints.find((cp: ChangePoint) =>
+        const hasChange = logChangePoints.some((cp: ChangePoint) =>
           ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
             cp.changes?.type as string
           )
         );
-        expect(change).to.be.ok();
+        expect(hasChange).to.be(true);
       });
     });
 
@@ -131,12 +131,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should not detect changes when only stable info logs are included', () => {
-        const change = logChangePoints.find((cp: ChangePoint) =>
+        const hasChange = logChangePoints.some((cp: ChangePoint) =>
           ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
             cp.changes?.type
           )
         );
-        expect(change).to.be(undefined);
+        expect(hasChange).to.be(false);
       });
 
       it('should still detect stationary patterns in info logs', () => {
