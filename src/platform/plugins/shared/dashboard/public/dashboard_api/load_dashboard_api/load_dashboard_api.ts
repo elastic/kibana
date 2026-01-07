@@ -93,6 +93,13 @@ export async function loadDashboardApi({
     },
   });
 
+  const controlGroupInput = {
+    controls: lastSavedState.controlGroupInput?.controls ?? [],
+  };
+  (unsavedChanges?.controlGroupInput?.controls ?? []).forEach((control, index) => {
+    controlGroupInput.controls[index] = { ...controlGroupInput.controls[index], ...control };
+  });
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddables,
@@ -107,8 +114,7 @@ export async function loadDashboardApi({
       ],
       controlGroupInput: {
         controls: [
-          ...(lastSavedState.controlGroupInput?.controls ?? []),
-          ...(unsavedChanges?.controlGroupInput?.controls ?? []),
+          ...controlGroupInput.controls,
           ...(overrideState?.controlGroupInput?.controls ?? []),
         ],
       },

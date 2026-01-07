@@ -12,8 +12,8 @@ import {
   combineLatest,
   debounceTime,
   map,
-  Observable,
   tap,
+  type Observable,
   type Subject,
 } from 'rxjs';
 

@@ -29,10 +29,11 @@ export function serializeLayout(
   const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
   const controls: Array<
-    PinnedControlLayoutState & {
-      config: Required<DashboardState>['controlGroupInput']['controls'][number]['config'];
-    }
-  > = [];
+    | (PinnedControlLayoutState & {
+        config: Required<DashboardState>['controlGroupInput']['controls'][number]['config'];
+      })
+    | { order: number }
+  > = Array.from({ length: Object.keys(layout.controls).length }, (_, index) => ({ order: index }));
 
   childrenToSerialize.forEach((panelId) => {
     const config = childState[panelId]?.rawState ?? {};
@@ -55,13 +56,15 @@ export function serializeLayout(
         panels.push(panelState);
       }
     } else if (controlLayout) {
-      controls.push({
+      controls[controlLayout.order] = {
         uid: panelId,
         ...controlLayout,
         config,
-      });
+      };
     }
   });
+
+  console.log({ controls: [...controls] });
 
   return {
     panels: [...panels, ...Object.values(sections)],
