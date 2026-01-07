@@ -13,17 +13,18 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
-import type { TaskConfig } from './config';
+import type { EntityStoreTaskConfig } from './config';
 import type { TaskManager } from '../types';
 
 export abstract class EntityStoreTask {
+
+  protected name!: string;
+
   constructor(
     protected readonly taskManager: TaskManager,
-    protected readonly config: TaskConfig,
+    protected readonly config: EntityStoreTaskConfig,
     protected logger: Logger
   ) {}
-
-  public abstract get name(): string;
 
   public register(): void {
     (this.taskManager as TaskManagerSetupContract).registerTaskDefinitions({

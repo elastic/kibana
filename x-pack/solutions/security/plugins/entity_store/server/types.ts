@@ -25,7 +25,7 @@ export interface EntityStorePlugins {
 
 export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
-  getResourcesService: () => Promise<ResourcesService>;
+  getResourcesService: () => ResourcesService;
   getLogger: () => Logger;
 }
 

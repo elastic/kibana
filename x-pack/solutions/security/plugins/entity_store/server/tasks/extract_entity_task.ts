@@ -15,13 +15,11 @@ import { EntityStoreTask } from './entity_store_task';
 import type { TaskManager } from '../types';
 
 export class ExtractEntityTask extends EntityStoreTask {
+
   constructor(taskManager: TaskManager, logger: Logger, private readonly entityType: EntityType) {
     super(taskManager, TasksConfig[EntityStoreTaskType.Values.extractEntity], logger);
     this.entityType = entityType;
-  }
-
-  public get name(): string {
-    return `${this.config.type}:${this.entityType}`;
+    this.name = `${this.config.type}:${this.entityType}`;
   }
 
   protected async run(taskInstance: ConcreteTaskInstance): Promise<RunResult> {

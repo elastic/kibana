@@ -8,18 +8,16 @@
 import type { TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { EntityStoreTaskType } from './constants';
 
-export interface TaskConfig extends Partial<TaskRegisterDefinition> {
-  title: string;
+export interface EntityStoreTaskConfig extends Omit<TaskRegisterDefinition, 'createTaskRunner'> {
   type: string;
-  timeout: string;
   interval: string;
 }
 
-export const TasksConfig: Record<EntityStoreTaskType, TaskConfig> = {
-  [EntityStoreTaskType.Values.extractEntity]: {
-    title: 'Entity Store - Execute Entity Task',
-    type: 'entity_store:v2:extract_entity',
-    timeout: '25s',
-    interval: '30s',
-  },
+export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
+    [EntityStoreTaskType.Values.extractEntity]: {
+        title: 'Entity Store - Execute Entity Task',
+        type: 'entity_store:v2:extract_entity',
+        timeout: '25s',
+        interval: '30s',
+    }
 };
