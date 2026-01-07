@@ -18,6 +18,7 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getToolHandler as getExitSpanErrors } from '../../tools/get_exit_span_errors/handler';
+import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -91,6 +92,7 @@ const START_TIME_OFFSETS = {
   serviceSummary: 5,
   downstream: 24 * 60, // 24 hours
   errors: 15,
+  logs: 15,
   changePoints: 6 * 60, // 6 hours
 } as const;
 
@@ -184,7 +186,7 @@ async function fetchAlertContext({
         return null;
       }
     }),
-    // Direct handler: exit span errors
+    // exit span errors
     (async (): Promise<FetchResult | null> => {
       try {
         const start = getStart(START_TIME_OFFSETS.errors);
@@ -203,6 +205,27 @@ async function fetchAlertContext({
           : null;
       } catch (err) {
         logger.debug(`AI insight: exitSpanErrors failed: ${err}`);
+        return null;
+      }
+    })(),
+    // log categories
+    (async (): Promise<FetchResult | null> => {
+      try {
+        const start = getStart(START_TIME_OFFSETS.logs);
+        const result = await getLogCategories({
+          core,
+          logger,
+          esClient,
+          start,
+          end: alertStart,
+          terms: { 'service.name': serviceName },
+        });
+        const hasCategories =
+          (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
+          (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
+        return hasCategories ? { key: 'logCategories', start, data: result } : null;
+      } catch (err) {
+        logger.debug(`AI insight: logCategories failed: ${err}`);
         return null;
       }
     })(),
@@ -231,7 +254,7 @@ async function generateAlertSummary({
     Output shape (plain text):
     - Summary (1–2 sentences): What is likely happening and why it matters. If recovered, acknowledge and reduce urgency. If no strong signals, say "Inconclusive" and briefly note why.
     - Assessment: Most plausible explanation or "Inconclusive" if signals do not support a clear assessment.
-    - Related signals (top 3–5, each with provenance and relevance): For each item, include source (change points | exit span errors | errors | log rate | log categories | anomalies | service summary), timeframe near alert start, and relevance to alert scope as Direct | Indirect | Unrelated.
+    - Related signals (top 3–5, each with provenance and relevance): For each item, include source (change points | exit span errors | errors | log categories | anomalies | service summary), timeframe near alert start, and relevance to alert scope as Direct | Indirect | Unrelated.
     - Immediate actions (2–3): Concrete next checks or fixes an SRE can take now.
 
     Guardrails:
@@ -246,7 +269,7 @@ async function generateAlertSummary({
     1) Change points (service and exit‑span): sudden shifts in throughput/latency/failure; name impacted downstream services verbatim when present and whether propagation is likely.
     2) Exit span errors: failed outgoing calls to downstream services; strongest signal for identifying which dependency is failing in APM/service alerts.
     3) Errors: signatures enriched with downstream resource/name; summarize patterns without long stacks; tie to alert scope.
-    4) Logs: strongest log‑rate significant items and top categories; very short examples and implications; tie to alert scope.
+    4) Log categories: error patterns and exception messages from logs; very short examples and implications; tie to alert scope.
     5) Anomalies: note ML anomalies around alert time; multiple affected services may imply systemic issues.
     6) Service summary: only details that materially change interpretation (avoid re‑listing fields).
 

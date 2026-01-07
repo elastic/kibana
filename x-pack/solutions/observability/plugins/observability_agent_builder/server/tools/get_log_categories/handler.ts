@@ -39,13 +39,20 @@ export async function getToolHandler({
   terms?: Record<string, string>;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
-  const boolFilters = [
-    ...timeRangeFilter('@timestamp', {
-      ...getShouldMatchOrNotExistFilter(terms),
-      start: parseDatemath(start),
-      end: parseDatemath(end, { roundUp: true }),
-    }),
-    { exists: { field: 'message' } },
+  const baseFilters = timeRangeFilter('@timestamp', {
+    ...getShouldMatchOrNotExistFilter(terms),
+    start: parseDatemath(start),
+    end: parseDatemath(end, { roundUp: true }),
+  });
+
+  // Filters for standard logs with message field
+  const messageFilters = [...baseFilters, { exists: { field: 'message' } }];
+
+  // Filters for OTel exception logs (no message field, but has exception.message)
+  const exceptionFilters = [
+    ...baseFilters,
+    { exists: { field: 'exception.message' } },
+    { bool: { must_not: { exists: { field: 'message' } } } },
   ];
 
   const lowSeverityLogLevels = [
@@ -59,24 +66,49 @@ export async function getToolHandler({
     },
   ];
 
-  const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
+  const [highSeverityResult, lowSeverityCategories, exceptionResult] = await Promise.all([
     getFilteredLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must_not: lowSeverityLogLevels },
+      boolQuery: { filter: messageFilters, must_not: lowSeverityLogLevels },
       logger,
       categoryCount: 20,
       terms,
+      field: 'message',
     }),
     getFilteredLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must: lowSeverityLogLevels },
+      boolQuery: { filter: messageFilters, must: lowSeverityLogLevels },
       logger,
       categoryCount: 10,
       terms,
+      field: 'message',
+    }),
+    // OTel exception events - these are always high severity (no log.level, uses event_name: "exception")
+    getFilteredLogCategories({
+      esClient,
+      logsIndices,
+      boolQuery: { filter: exceptionFilters },
+      logger,
+      categoryCount: 10,
+      terms,
+      field: 'exception.message',
     }),
   ]);
+
+  // Combine regular high severity logs with OTel exception events
+  const mergedCategories = [
+    ...(highSeverityResult?.categories ?? []),
+    ...(exceptionResult?.categories ?? []),
+  ];
+  const highSeverityCategories =
+    mergedCategories.length > 0
+      ? {
+          categories: mergedCategories,
+          totalHits: (highSeverityResult?.totalHits ?? 0) + (exceptionResult?.totalHits ?? 0),
+        }
+      : undefined;
 
   return { highSeverityCategories, lowSeverityCategories };
 }
@@ -88,6 +120,7 @@ export async function getFilteredLogCategories({
   logger,
   categoryCount,
   terms,
+  field = 'message',
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
@@ -95,6 +128,7 @@ export async function getFilteredLogCategories({
   logger: Logger;
   categoryCount: number;
   terms: Record<string, string> | undefined;
+  field?: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -108,7 +142,9 @@ export async function getFilteredLogCategories({
 
   const totalHits = getTotalHits(countResponse);
   if (totalHits === 0) {
-    logger.debug('No log documents found for the given query.');
+    logger.debug(
+      `No log documents found for field "${field}", filter: ${JSON.stringify(boolQuery)}`
+    );
     return undefined;
   }
 
@@ -120,7 +156,7 @@ export async function getFilteredLogCategories({
   logger.debug(
     `Total log documents: ${totalHits}, using sampling probability: ${samplingProbability.toFixed(
       4
-    )} using filter: ${JSON.stringify(boolQuery)}`
+    )} for field "${field}", filter: ${JSON.stringify(boolQuery)}`
   );
 
   const response = await search({
@@ -134,7 +170,7 @@ export async function getFilteredLogCategories({
         aggs: {
           categories: {
             categorize_text: {
-              field: 'message',
+              field,
               size: categoryCount,
               min_doc_count: 1,
             },
@@ -143,7 +179,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: ['message', '@timestamp', ...Object.keys(terms ?? {})],
+                  fields: [field, '@timestamp', ...Object.keys(terms ?? {})],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },
