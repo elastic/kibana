@@ -266,13 +266,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           entitiesIndex: '.entities.v1.latest.security_*',
           useEnrichPolicy: true,
         },
-        {
-          name: 'via LOOKUP JOIN (v2)',
-          archivePath:
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2',
-          entitiesIndex: '.entities.v2.latest.security_*',
-          useEnrichPolicy: false,
-        },
+        // {
+        //   name: 'via LOOKUP JOIN (v2)',
+        //   archivePath:
+        //     'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2',
+        //   entitiesIndex: '.entities.v2.latest.security_*',
+        //   useEnrichPolicy: false,
+        // },
       ];
 
       enrichmentConfigs.forEach((config) => {
