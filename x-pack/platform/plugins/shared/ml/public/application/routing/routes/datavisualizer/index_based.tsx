@@ -26,7 +26,7 @@ export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_view_datavisualizer',
+  id: 'indexDataVisualizer',
   path: createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER),
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
     defaultMessage: 'Index Data Visualizer',
@@ -47,7 +47,7 @@ export const indexESQLBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_view_datavisualizer_esql',
+  id: 'esqlDataVisualizer',
   path: createPath(ML_PAGES.DATA_VISUALIZER_ESQL),
   title: i18n.translate('xpack.ml.dataVisualizer.esql.docTitle', {
     defaultMessage: 'Index Data Visualizer (ES|QL)',

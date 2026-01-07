@@ -84,23 +84,9 @@ export const i18nStrings = {
     overview: i18n.translate('securitySolutionPackages.navLinks.ml.overview', {
       defaultMessage: 'Overview',
     }),
-    dataVisualizer: {
-      title: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer', {
-        defaultMessage: 'Data visualizer',
-      }),
-      indexDataVisualizer: i18n.translate(
-        'securitySolutionPackages.navLinks.ml.dataVisualizer.indexDataVisualizer',
-        {
-          defaultMessage: 'Index data visualizer',
-        }
-      ),
-      fileUpload: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer.fileUpload', {
-        defaultMessage: 'File upload',
-      }),
-      dataDrift: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer.dataDrift', {
-        defaultMessage: 'Data drift',
-      }),
-    },
+    dataVisualizer: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer', {
+      defaultMessage: 'Data visualizer',
+    }),
     notifications: i18n.translate('securitySolutionPackages.navLinks.ml.notifications', {
       defaultMessage: 'Notifications',
     }),
