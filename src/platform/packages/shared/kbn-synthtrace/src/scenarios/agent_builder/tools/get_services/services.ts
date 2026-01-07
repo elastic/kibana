@@ -45,7 +45,7 @@ import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synth
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
 
 /**
- * Configuration for a APM service to generate
+ * Configuration for an APM service to generate
  */
 export interface ApmServiceConfig {
   name: string;
