@@ -15,7 +15,8 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { setHttpClient } from '../../../public/application/lib/api';
 
 export const WithAppDependencies =
-  (Component: any, httpSetup: HttpSetup) => (props: Record<string, unknown>) => {
+  <P extends Record<string, unknown>>(Component: React.ComponentType<P>, httpSetup: HttpSetup) =>
+  (props: P) => {
     setHttpClient(httpSetup);
 
     return (

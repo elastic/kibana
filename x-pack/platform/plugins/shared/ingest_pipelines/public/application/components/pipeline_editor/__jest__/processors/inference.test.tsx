@@ -5,108 +5,68 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const INFERENCE_TYPE = 'inference';
 
 describe('Processor: Script', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    // disable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-    // enable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    const { component, actions } = testBed;
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: INFERENCE_TYPE },
+    });
 
-    component.update();
-
-    // Open flyout to add new processor
-    actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await actions.addProcessorType(INFERENCE_TYPE);
+    await screen.findByTestId('addProcessorForm');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
-
     // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual([
-      'A deployment, an inference, or a model ID value is required.',
-    ]);
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    expect(
+      await screen.findByText('A deployment, an inference, or a model ID value is required.')
+    ).toBeInTheDocument();
   });
 
   test('accepts inference config and field maps that contains escaped characters', async () => {
-    const {
-      actions: { saveNewProcessor },
-      find,
-      form,
-      component,
-    } = testBed;
-
-    form.setInputValue('inferenceModelId.input', 'test_inference_processor');
-
-    await act(async () => {
-      find('inferenceConfig').simulate('change', {
-        jsonContent: '{"inf_conf_1":"""aaa"bbb""", "inf_conf_2": "aaa(bbb"}',
-      });
-
-      // advance timers to allow the form to validate
-      jest.advanceTimersByTime(0);
+    fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
+      target: { value: 'test_inference_processor' },
     });
-    component.update();
-
-    await act(async () => {
-      find('fieldMap').simulate('change', {
-        jsonContent: '{"field_map_1":"""aaa"bbb""", "field_map_2": "aaa(bbb"}',
-      });
-
-      // advance timers to allow the form to validate
-      jest.advanceTimersByTime(0);
+    fireEvent.change(screen.getByTestId('inferenceConfig'), {
+      target: { value: '{"inf_conf_1":"""aaa"bbb""", "inf_conf_2": "aaa(bbb"}' },
     });
-    component.update();
+    fireEvent.change(screen.getByTestId('fieldMap'), {
+      target: { value: '{"field_map_1":"""aaa"bbb""", "field_map_2": "aaa(bbb"}' },
+    });
 
     // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][INFERENCE_TYPE]).toEqual({
       model_id: 'test_inference_processor',
-      // eslint-disable-next-line prettier/prettier
-      inference_config: { inf_conf_1: 'aaa\"bbb', inf_conf_2: 'aaa(bbb' },
-      // eslint-disable-next-line prettier/prettier
-      field_map: { field_map_1: 'aaa\"bbb', field_map_2: 'aaa(bbb' },
+
+      inference_config: { inf_conf_1: 'aaa"bbb', inf_conf_2: 'aaa(bbb' },
+
+      field_map: { field_map_1: 'aaa"bbb', field_map_2: 'aaa(bbb' },
     });
   });
 });
