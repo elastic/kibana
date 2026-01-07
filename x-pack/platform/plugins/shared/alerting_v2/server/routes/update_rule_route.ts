@@ -13,10 +13,7 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
 
-import {
-  updateRuleDataSchema,
-  type UpdateRuleData,
-} from '../lib/rules_client';
+import { updateRuleDataSchema, type UpdateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 
