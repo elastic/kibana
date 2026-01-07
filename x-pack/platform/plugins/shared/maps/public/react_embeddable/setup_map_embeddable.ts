@@ -34,7 +34,9 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
             references: [],
           },
         },
-        true
+        {
+          displaySuccessMessage: true,
+        }
       );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
