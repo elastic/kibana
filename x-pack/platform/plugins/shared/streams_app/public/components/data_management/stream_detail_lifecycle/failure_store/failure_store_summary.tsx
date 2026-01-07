@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
@@ -25,28 +25,20 @@ interface FailureStoreSummaryProps {
 export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreSummaryProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const storageSize = useMemo(() => {
-    if (!stats?.size) return undefined;
-    return formatBytes(stats.size);
-  }, [stats]);
+  const storageSize = stats?.size ? formatBytes(stats.size) : undefined;
 
-  const retentionPeriod = useMemo(() => {
-    if (failureStoreConfig.retentionDisabled) {
-      return undefined;
-    }
-    return failureStoreConfig.customRetentionPeriod ?? failureStoreConfig.defaultRetentionPeriod;
-  }, [failureStoreConfig]);
+  const retentionPeriod = failureStoreConfig.retentionDisabled
+    ? undefined
+    : failureStoreConfig.customRetentionPeriod ?? failureStoreConfig.defaultRetentionPeriod;
 
-  const phases: LifecyclePhase[] = useMemo(() => {
-    return buildLifecyclePhases({
-      label: i18n.translate('xpack.streams.streamDetailLifecycle.failedIngest', {
-        defaultMessage: 'Failed ingest',
-      }),
-      color: euiTheme.colors.severity.danger,
-      size: storageSize,
-      retentionPeriod,
-    });
-  }, [euiTheme, storageSize, retentionPeriod]);
+  const phases: LifecyclePhase[] = buildLifecyclePhases({
+    label: i18n.translate('xpack.streams.streamDetailLifecycle.failedIngest', {
+      defaultMessage: 'Failed ingest',
+    }),
+    color: euiTheme.colors.severity.danger,
+    size: storageSize,
+    retentionPeriod,
+  });
 
   return <DataLifecycleSummary phases={phases} />;
 };

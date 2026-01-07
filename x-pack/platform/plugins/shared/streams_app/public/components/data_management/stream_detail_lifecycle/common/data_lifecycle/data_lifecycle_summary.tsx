@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -34,16 +34,14 @@ interface DataLifecycleSummaryProps {
 }
 
 export const DataLifecycleSummary = ({ phases, loading = false }: DataLifecycleSummaryProps) => {
-  const phasesWithPosition = useMemo(() => {
-    const isRetentionInfinite = !phases.some((p) => p.isDelete);
+  const isRetentionInfinite = !phases.some((p) => p.isDelete);
 
-    return phases.map((phase, index) => ({
-      ...phase,
-      isFirst: index === 0,
-      isLast: isRetentionInfinite ? index === phases.length - 1 : phase.isDelete,
-      hasNextPhase: index < phases.length - 1,
-    }));
-  }, [phases]);
+  const phasesWithPosition = phases.map((phase, index) => ({
+    ...phase,
+    isFirst: index === 0,
+    isLast: isRetentionInfinite ? index === phases.length - 1 : phase.isDelete,
+    hasNextPhase: index < phases.length - 1,
+  }));
 
   const showSkeleton = loading && phases.length === 0;
 
@@ -117,7 +115,7 @@ const LifecyclePhaseBar = ({
 
   const phaseColor = isDelete ? euiTheme.colors.borderBasePlain : color;
 
-  const borderRadius = useMemo(() => {
+  const getBorderRadius = () => {
     if (isDelete) {
       return hasNextPhase ? '0px' : '0px 4px 4px 0px';
     }
@@ -131,7 +129,7 @@ const LifecyclePhaseBar = ({
       return '0px 4px 4px 0px';
     }
     return '0px';
-  }, [isDelete, isFirst, isLast, hasNextPhase]);
+  };
 
   return (
     <>
@@ -143,7 +141,7 @@ const LifecyclePhaseBar = ({
           css={{
             backgroundColor: phaseColor,
             margin: '0',
-            borderRadius,
+            borderRadius: getBorderRadius(),
             borderRight:
               !isDelete && hasNextPhase
                 ? `1px solid ${euiTheme.colors.backgroundBasePlain}`

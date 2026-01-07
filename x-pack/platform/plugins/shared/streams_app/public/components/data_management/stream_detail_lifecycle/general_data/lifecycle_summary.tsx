@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -55,7 +55,7 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
     [streamsRepositoryClient, definition, isIlm]
   );
 
-  const phases: LifecyclePhase[] = useMemo(() => {
+  const getPhases = (): LifecyclePhase[] => {
     if (isIlm) {
       const phasesWithGrow = getILMRatios(ilmStatsValue);
       if (!phasesWithGrow) {
@@ -91,7 +91,7 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
     }
 
     return [];
-  }, [isIlm, isDsl, ilmStatsValue, ilmPhases, definition, stats, isServerless, euiTheme]);
+  };
 
-  return <DataLifecycleSummary phases={phases} loading={isIlm && ilmLoading} />;
+  return <DataLifecycleSummary phases={getPhases()} loading={isIlm && ilmLoading} />;
 };
