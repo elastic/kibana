@@ -56,11 +56,7 @@ export const selectHasRoutingChanges = createSelector(
 
     return routing.some((rule, index) => {
       const initialRule = initialRouting[index];
-      return (
-        rule.destination !== initialRule.destination ||
-        rule.status !== initialRule.status ||
-        !isEqual(rule.where, initialRule.where)
-      );
+      return !isEqual(rule, initialRule);
     });
   }
 );
