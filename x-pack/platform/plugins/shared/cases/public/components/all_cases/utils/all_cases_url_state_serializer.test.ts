@@ -125,13 +125,11 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "search": "%23123",
         "sortField": "createdAt",
         "sortOrder": "desc",
-        "to": "now",
       }
     `);
   });
