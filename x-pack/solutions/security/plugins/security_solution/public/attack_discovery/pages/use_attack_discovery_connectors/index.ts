@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import { ATTACK_DISCOVERY_CONNECTORS } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryConnectorsResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_connectors.gen';
 import { useQuery } from '@kbn/react-query';
 import { useCallback } from 'react';
 
@@ -14,14 +15,10 @@ interface UseAttackDiscoveryConnectorsProps {
   http: HttpSetup;
 }
 
-interface Payload {
-  connectorsNames: string[];
-}
-
 export function useAttackDiscoveryConnectors({ http }: UseAttackDiscoveryConnectorsProps) {
   const queryFn = useCallback(
     () =>
-      http.fetch<Payload>(ATTACK_DISCOVERY_CONNECTORS, {
+      http.fetch<GetAttackDiscoveryConnectorsResponse>(ATTACK_DISCOVERY_CONNECTORS, {
         method: 'GET',
       }),
     [http]
