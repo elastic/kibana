@@ -125,6 +125,10 @@ export type MSDefenderRunScriptActionRequestParams = TypeOf<
   typeof MSDefenderEndpointRunScriptActionRequestParamsSchema
 >;
 
+export type EndpointRunScriptActionRequestParams = DeepMutable<
+  TypeOf<typeof EndpointRunScriptActionRequestParamsSchema>
+>;
+
 export type RunScriptActionRequestBody<
   TParams extends RunScriptActionRequestParameters = RunScriptActionRequestParameters
 > = Omit<TypeOf<typeof RunScriptActionRequestSchema.body>, 'parameters'> & {
