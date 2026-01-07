@@ -449,25 +449,10 @@ export const RulesList = ({
   }, [ruleParamFilter]);
 
   useEffect(() => {
-    if (
-      searchFilter !== filters.searchText &&
-      !(searchFilter === '' && filters.searchText !== '' && !onSearchFilterChange)
-      // avoids search getting reset when filters are submitted and search state is not controlled
-    ) {
+    if (typeof searchFilter === 'string') {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
-  }, [searchFilter, filters.searchText, updateFilters, onSearchFilterChange]);
-
-  useEffect(() => {
-    if (filters.searchText !== inputText) {
-      setInputText(filters.searchText as string);
-    }
-  }, [filters.searchText]);
-
-  const onSearchPopulate = (value: string) => {
-    setInputText(value);
-    updateFilters({ filter: 'searchText', value });
-  };
+  }, [searchFilter]);
 
   useEffect(() => {
     if (typeFilter) {
@@ -599,6 +584,11 @@ export const RulesList = ({
 
   const onUnsnoozeRule = (rule: RuleTableItem, scheduleIds?: string[]) => {
     return unsnoozeRule({ http, id: rule.id, scheduleIds });
+  };
+
+  const onSearchPopulate = (value: string) => {
+    setInputText(value);
+    updateFilters({ filter: 'searchText', value });
   };
 
   const filterOptions = sortBy(Object.entries(groupRuleTypesByProducer())).map(
