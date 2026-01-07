@@ -54,6 +54,7 @@ export async function getSynthtraceClient<
     client: esClient,
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
+    concurrency: 4, // set a default concurrency to allign with EsArchiver
   });
 
   const clients = clientManager.getClients({

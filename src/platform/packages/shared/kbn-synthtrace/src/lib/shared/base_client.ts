@@ -72,8 +72,7 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
   constructor(options: SynthtraceEsClientOptions) {
     this.client = options.client;
     this.logger = options.logger;
-    // Default concurrency of 4 matches esArchiver best practices for optimal bulk indexing performance
-    this.concurrency = options.concurrency ?? 4;
+    this.concurrency = options.concurrency ?? 1;
     this.refreshAfterIndex = options.refreshAfterIndex ?? false;
     this.pipelineCallback = options.pipeline;
 
@@ -206,11 +205,7 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
         concurrency: this.concurrency,
         refresh: false,
         refreshOnCompletion: false,
-        // Reduced flushBytes from 250KB to 100KB for better batching with high document counts
-        // This creates smaller, more frequent batches which improves throughput
-        flushBytes: 100 * 1024,
-        // time-based flushing to ensure documents are flushed even if size threshold is not met
-        flushInterval: 1000,
+        flushBytes: 250000,
         datasource: stream,
         filter_path: 'errors,items.*.error,items.*.status',
         onDocument: (doc: ESDocumentWithOperation<TFields>) => {

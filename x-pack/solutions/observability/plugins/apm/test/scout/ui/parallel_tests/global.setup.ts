@@ -17,6 +17,8 @@ import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
+globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
+
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
