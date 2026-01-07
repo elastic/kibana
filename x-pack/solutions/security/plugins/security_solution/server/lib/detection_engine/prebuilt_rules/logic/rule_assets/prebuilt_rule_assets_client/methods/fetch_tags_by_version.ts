@@ -10,7 +10,8 @@ import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
-import { getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import { EXPECTED_MAX_TAGS } from '../../../../../rule_management/constants';
 
 /**
  * Fetches unique tags from prebuilt rule assets for specified rule versions.
@@ -23,8 +24,8 @@ export async function fetchTagsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
   versions: RuleVersionSpecifier[]
 ): Promise<string[]> {
-  const soIds = versions.map(
-    (version) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${version.rule_id}_${version.version}`
+  const soIds = versions.map((version) =>
+    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
   );
 
   const searchResult = await savedObjectsClient.search<
@@ -44,7 +45,9 @@ export async function fetchTagsByVersion(
       unique_tags: {
         terms: {
           field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`,
-          size: 10_000,
+          // "size" parameter is the maximum number of terms returned by the aggregation, default is 10.
+          // Setting it to a large number to ensure we get all tags.
+          size: EXPECTED_MAX_TAGS,
           order: { _key: 'asc' },
         },
       },

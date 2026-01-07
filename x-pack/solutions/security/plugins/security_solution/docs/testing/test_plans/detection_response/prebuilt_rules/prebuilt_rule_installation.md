@@ -786,9 +786,9 @@ When user calls the review installation endpoint with invalid value for <field>
 Then the endpoint should return a 400 error with the correct error message
 
 Examples:
-| field    | valid value                          |
-| page     | positive integer                     |
-| per_page | positive integer, max value is 10000 |
+| field    | invalid value                                   |
+| page     | empty string, 0, -1                             |
+| per_page | empty string, 0, -1, 10001 (max value is 10000) |
 ```
 
 
@@ -797,10 +797,10 @@ Examples:
 **Automation**: 1 integration test with mock rules.
 
 ```Gherkin
-Given <num_prebuilt_rule_assets> non-installed prebuilt rule assets exist in Kibana
-When user calls the review installation endpoint with <page> and <per_page> parameters
-And <page> * <per_page> is greater than N
-Then the endpoint should return an empty list of rules
+Given <num_prebuilt_rule_assets> non-installed prebuilt rule assets exist in Kibana  
+When user calls the review installation endpoint with <page> and <per_page> parameters  
+And <page> * <per_page> is greater than <num_prebuilt_rule_assets>  
+Then the endpoint should return an empty list  
 
 Examples:
 | num_prebuilt_rule_assets | page | per_page |

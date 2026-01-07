@@ -12,7 +12,7 @@ import type { PrebuiltRuleAssetsFilter } from '../../../../../../../common/api/d
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
 
-export function buildEsQueryFilter(
+export function prepareQueryDslFilter(
   ruleIds?: string[],
   filter?: PrebuiltRuleAssetsFilter
 ): ESFilter[] {
@@ -48,7 +48,7 @@ export function buildEsQueryFilter(
   return queryFilter;
 }
 
-export function buildEsQuerySort(sort?: PrebuiltRuleAssetsSort): Sort | undefined {
+export function prepareQueryDslSort(sort?: PrebuiltRuleAssetsSort): Sort | undefined {
   const soSortFields = {
     name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
     severity: `${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`,
@@ -68,4 +68,8 @@ export function getPrebuiltRuleAssetsSearchNamespace(
   savedObjectsClient: SavedObjectsClientContract
 ) {
   return [savedObjectsClient.getCurrentNamespace() ?? 'default'];
+}
+
+export function getPrebuiltRuleAssetSoId(ruleId: string, version: number): string {
+  return `${PREBUILT_RULE_ASSETS_SO_TYPE}:${ruleId}_${version}`;
 }

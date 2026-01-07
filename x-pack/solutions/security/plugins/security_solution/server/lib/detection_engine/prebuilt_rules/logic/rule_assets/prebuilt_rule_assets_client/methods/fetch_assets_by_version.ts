@@ -12,7 +12,7 @@ import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_r
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
-import { getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
 
 /**
  * Fetches prebuilt rule assets for specified rule versions.
@@ -33,8 +33,8 @@ export async function fetchAssetsByVersion(
     return [];
   }
 
-  const soIds = versions.map(
-    (version) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${version.rule_id}_${version.version}`
+  const soIds = versions.map((version) =>
+    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
   );
 
   const searchResult = await savedObjectsClient.search<
@@ -63,7 +63,7 @@ export async function fetchAssetsByVersion(
   // Ensure the order of the returned assets matches the order of the "versions" argument.
   const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
   for (const asset of ruleAssets) {
-    const key = `${PREBUILT_RULE_ASSETS_SO_TYPE}:${asset.rule_id}_${asset.version}`;
+    const key = getPrebuiltRuleAssetSoId(asset.rule_id, asset.version);
     ruleAssetsMap.set(key, asset);
   }
 

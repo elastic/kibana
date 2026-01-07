@@ -64,27 +64,32 @@ export const reviewRuleInstallationHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+    const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
     logger.debug(
-      `reviewRuleInstallationHandler: Found ${currentRuleVersions.length} currently installed prebuilt rules`
+      `reviewRuleInstallationHandler: Found ${installedRuleVersions.length} currently installed prebuilt rules`
     );
-    const currentRuleVersionsMap = new Map(
-      currentRuleVersions.map((version) => [version.rule_id, version])
+    const installedRuleVersionsMap = new Map(
+      installedRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const requestHasFilter = Boolean(filter && Object.keys(filter).length);
+    const requestHasFilter = Boolean(Object.keys(filter ?? {}).length);
 
     const installableVersions = await getInstallableRuleVersions(
       ruleAssetsClient,
       logger,
       mlAuthz,
-      currentRuleVersionsMap,
+      installedRuleVersionsMap,
       sort,
       filter
     );
 
     const installableVersionsWithoutFilter = requestHasFilter
-      ? await getInstallableRuleVersions(ruleAssetsClient, logger, mlAuthz, currentRuleVersionsMap)
+      ? await getInstallableRuleVersions(
+          ruleAssetsClient,
+          logger,
+          mlAuthz,
+          installedRuleVersionsMap
+        )
       : installableVersions;
 
     const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
@@ -127,37 +132,37 @@ async function getInstallableRuleVersions(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
   logger: Logger,
   mlAuthz: MlAuthz,
-  currentRuleVersionsMap: Map<string, RuleSummary>,
+  installedRuleVersionsMap: Map<string, RuleSummary>,
   sort?: PrebuiltRuleAssetsSort,
   filter?: PrebuiltRuleAssetsFilter
 ): Promise<BasicRuleInfo[]> {
-  const allLatestVersions = await ruleAssetsClient.fetchLatestVersions({
+  const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions({
     sort,
     filter,
   });
 
   logger.debug(
     `reviewRuleInstallationHandler: Fetched ${
-      allLatestVersions.length
+      latestRuleVersions.length
     } latest rule versions from assets ${filter ? 'WITH filter' : 'without filter'}`
   );
 
-  const nonInstalledLatestVersions = allLatestVersions.filter(
-    (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+  const nonInstalledLatestRuleVersions = latestRuleVersions.filter(
+    (latestVersion) => !installedRuleVersionsMap.has(latestVersion.rule_id)
   );
 
   logger.debug(
-    `reviewRuleInstallationHandler: ${nonInstalledLatestVersions.length} rules remaining after filtering installed rules`
+    `reviewRuleInstallationHandler: ${nonInstalledLatestRuleVersions.length} rules remaining after filtering installed rules`
   );
 
-  const installableVersions = await excludeLicenseRestrictedRules(
-    nonInstalledLatestVersions,
+  const installableRuleVersions = await excludeLicenseRestrictedRules(
+    nonInstalledLatestRuleVersions,
     mlAuthz
   );
 
   logger.debug(
-    `reviewRuleInstallationHandler: ${installableVersions.length} rules remaining after checking license restrictions`
+    `reviewRuleInstallationHandler: ${installableRuleVersions.length} rules remaining after checking license restrictions`
   );
 
-  return installableVersions;
+  return installableRuleVersions;
 }

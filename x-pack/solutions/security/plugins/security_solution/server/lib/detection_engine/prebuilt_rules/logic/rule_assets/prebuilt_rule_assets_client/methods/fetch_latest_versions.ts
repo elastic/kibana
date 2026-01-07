@@ -18,8 +18,9 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
 import {
-  buildEsQueryFilter,
-  buildEsQuerySort,
+  prepareQueryDslFilter,
+  prepareQueryDslSort,
+  getPrebuiltRuleAssetSoId,
   getPrebuiltRuleAssetsSearchNamespace,
 } from '../utils';
 
@@ -57,8 +58,8 @@ export async function fetchLatestVersions(
   );
 
   // Then, fetch the rule type for each latest version and sort the result.
-  const soIds = latestVersionSpecifiers.map(
-    (rule) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${rule.rule_id}_${rule.version}`
+  const soIds = latestVersionSpecifiers.map((rule) =>
+    getPrebuiltRuleAssetSoId(rule.rule_id, rule.version)
   );
   const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort);
 
@@ -88,7 +89,7 @@ async function fetchLatestVersionSpecifiers(
     size: 0,
     query: {
       bool: {
-        filter: buildEsQueryFilter(ruleIds, filter),
+        filter: prepareQueryDslFilter(ruleIds, filter),
       },
     },
     aggs: {
@@ -166,7 +167,7 @@ async function fetchVersionsBySoIds(
         _id: soIds,
       },
     },
-    sort: buildEsQuerySort(sort),
+    sort: prepareQueryDslSort(sort),
     _source: [
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,

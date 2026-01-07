@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 
+// API design document (internal): https://docs.google.com/document/d/1AYlt8wJMoLD-V_owAd4qL-h76IOVnfDCZ77VNmmf-Ks/edit?usp=sharing
 export type PrebuiltRuleAssetsFilter = z.infer<typeof PrebuiltRuleAssetsFilter>;
 export const PrebuiltRuleAssetsFilter = z.object({
   fields: z.object({
