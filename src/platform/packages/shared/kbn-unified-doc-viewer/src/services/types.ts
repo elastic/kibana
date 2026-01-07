@@ -10,6 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
@@ -49,12 +50,19 @@ export interface DocViewRenderProps {
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 
-export interface DocView {
+interface DocViewBase {
   id: string;
   order: number;
   title: string;
-  component: DocViewerComponent;
   enabled?: boolean;
 }
 
-export type DocViewFactory = () => DocView;
+interface DocViewWithComponent extends DocViewBase {
+  component: DocViewerComponent;
+}
+
+interface DocViewWithRenderFunction extends DocViewBase {
+  render: (props: DocViewRenderProps) => ReactElement;
+}
+
+export type DocView = DocViewWithComponent | DocViewWithRenderFunction;

@@ -9,13 +9,11 @@
 
 import React from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import type { DocViewRenderProps } from '../../types';
+import type { DocView, DocViewRenderProps } from '../../types';
 
 interface Props {
-  id: string;
+  docView: DocView;
   renderProps: DocViewRenderProps;
-  title: string;
-  component: React.ComponentType<DocViewRenderProps>;
 }
 
 /**
@@ -23,12 +21,14 @@ interface Props {
  * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
-export const DocViewerTab = (props: Props) => {
-  const { component: Component, renderProps, title } = props;
-
+export const DocViewerTab = ({ docView, renderProps }: Props) => {
   return (
-    <KibanaSectionErrorBoundary sectionName={title}>
-      <Component {...renderProps} />
+    <KibanaSectionErrorBoundary sectionName={docView.title}>
+      {'component' in docView ? (
+        <docView.component {...renderProps} />
+      ) : (
+        docView.render(renderProps)
+      )}
     </KibanaSectionErrorBoundary>
   );
 };
