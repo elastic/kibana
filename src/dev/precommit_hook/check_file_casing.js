@@ -13,6 +13,7 @@ import { dim } from 'chalk';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { matchesAnyGlob } from '../globs';
+import { PrecommitCheck } from './precommit_check';
 
 import {
   IGNORE_DIRECTORY_GLOBS,
@@ -139,4 +140,14 @@ export async function checkFileCasing(log, files) {
 
   await checkForKebabCase(log, files);
   await checkForSnakeCase(log, files);
+}
+
+export class FileCasingCheck extends PrecommitCheck {
+  constructor() {
+    super('File Casing');
+  }
+
+  async execute(log, files) {
+    await checkFileCasing(log, files);
+  }
 }
