@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { ecsFieldMap, ecsNestedFieldNames } from '@kbn/alerts-as-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { isPlainObject, isArray } from 'lodash';
@@ -113,6 +113,17 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   // if path consists of dot-notation, ensure each path within it is ECS compliant (object or flattened)
   if (path.includes('.') && !validateDottedPathInEcsMappings(path)) {
     return false;
+  }
+
+  // Check if this is a nested field - nested fields must contain objects, not primitives
+  // Note: nested fields are excluded from ecsFieldMap to prevent composite mapping conflicts,
+  // so we check against ecsNestedFieldNames separately
+  if (ecsNestedFieldNames.has(path)) {
+    // For nested fields, the value must be an object or an array of objects (not strings/primitives)
+    if (isArray(value)) {
+      return value.every((item) => isPlainObject(item));
+    }
+    return isPlainObject(value);
   }
 
   const isEcsField = getIsEcsField(path);

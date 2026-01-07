@@ -1060,10 +1060,6 @@ describe('es_query utils', () => {
             "searchPath": "dll.pe.go_import_hash",
           },
           Object {
-            "label": "dll.pe.go_imports",
-            "searchPath": "dll.pe.go_imports",
-          },
-          Object {
             "label": "dll.pe.go_imports_names_entropy",
             "searchPath": "dll.pe.go_imports_names_entropy",
           },
@@ -1084,10 +1080,6 @@ describe('es_query utils', () => {
             "searchPath": "dll.pe.import_hash",
           },
           Object {
-            "label": "dll.pe.imports",
-            "searchPath": "dll.pe.imports",
-          },
-          Object {
             "label": "dll.pe.imports_names_entropy",
             "searchPath": "dll.pe.imports_names_entropy",
           },
@@ -1106,30 +1098,6 @@ describe('es_query utils', () => {
           Object {
             "label": "dll.pe.product",
             "searchPath": "dll.pe.product",
-          },
-          Object {
-            "label": "dll.pe.sections",
-            "searchPath": "dll.pe.sections",
-          },
-          Object {
-            "label": "dll.pe.sections.entropy",
-            "searchPath": "dll.pe.sections.entropy",
-          },
-          Object {
-            "label": "dll.pe.sections.name",
-            "searchPath": "dll.pe.sections.name",
-          },
-          Object {
-            "label": "dll.pe.sections.physical_size",
-            "searchPath": "dll.pe.sections.physical_size",
-          },
-          Object {
-            "label": "dll.pe.sections.var_entropy",
-            "searchPath": "dll.pe.sections.var_entropy",
-          },
-          Object {
-            "label": "dll.pe.sections.virtual_size",
-            "searchPath": "dll.pe.sections.virtual_size",
           },
           Object {
             "label": "dns.answers",
@@ -1206,58 +1174,6 @@ describe('es_query utils', () => {
           Object {
             "label": "ecs.version",
             "searchPath": "ecs.version",
-          },
-          Object {
-            "label": "email.attachments",
-            "searchPath": "email.attachments",
-          },
-          Object {
-            "label": "email.attachments.file.extension",
-            "searchPath": "email.attachments.file.extension",
-          },
-          Object {
-            "label": "email.attachments.file.hash.cdhash",
-            "searchPath": "email.attachments.file.hash.cdhash",
-          },
-          Object {
-            "label": "email.attachments.file.hash.md5",
-            "searchPath": "email.attachments.file.hash.md5",
-          },
-          Object {
-            "label": "email.attachments.file.hash.sha1",
-            "searchPath": "email.attachments.file.hash.sha1",
-          },
-          Object {
-            "label": "email.attachments.file.hash.sha256",
-            "searchPath": "email.attachments.file.hash.sha256",
-          },
-          Object {
-            "label": "email.attachments.file.hash.sha384",
-            "searchPath": "email.attachments.file.hash.sha384",
-          },
-          Object {
-            "label": "email.attachments.file.hash.sha512",
-            "searchPath": "email.attachments.file.hash.sha512",
-          },
-          Object {
-            "label": "email.attachments.file.hash.ssdeep",
-            "searchPath": "email.attachments.file.hash.ssdeep",
-          },
-          Object {
-            "label": "email.attachments.file.hash.tlsh",
-            "searchPath": "email.attachments.file.hash.tlsh",
-          },
-          Object {
-            "label": "email.attachments.file.mime_type",
-            "searchPath": "email.attachments.file.mime_type",
-          },
-          Object {
-            "label": "email.attachments.file.name",
-            "searchPath": "email.attachments.file.name",
-          },
-          Object {
-            "label": "email.attachments.file.size",
-            "searchPath": "email.attachments.file.size",
           },
           Object {
             "label": "email.bcc.address",
@@ -1536,16 +1452,8 @@ describe('es_query utils', () => {
             "searchPath": "file.elf.creation_date",
           },
           Object {
-            "label": "file.elf.exports",
-            "searchPath": "file.elf.exports",
-          },
-          Object {
             "label": "file.elf.go_import_hash",
             "searchPath": "file.elf.go_import_hash",
-          },
-          Object {
-            "label": "file.elf.go_imports",
-            "searchPath": "file.elf.go_imports",
           },
           Object {
             "label": "file.elf.go_imports_names_entropy",
@@ -1596,72 +1504,12 @@ describe('es_query utils', () => {
             "searchPath": "file.elf.import_hash",
           },
           Object {
-            "label": "file.elf.imports",
-            "searchPath": "file.elf.imports",
-          },
-          Object {
             "label": "file.elf.imports_names_entropy",
             "searchPath": "file.elf.imports_names_entropy",
           },
           Object {
             "label": "file.elf.imports_names_var_entropy",
             "searchPath": "file.elf.imports_names_var_entropy",
-          },
-          Object {
-            "label": "file.elf.sections",
-            "searchPath": "file.elf.sections",
-          },
-          Object {
-            "label": "file.elf.sections.chi2",
-            "searchPath": "file.elf.sections.chi2",
-          },
-          Object {
-            "label": "file.elf.sections.entropy",
-            "searchPath": "file.elf.sections.entropy",
-          },
-          Object {
-            "label": "file.elf.sections.flags",
-            "searchPath": "file.elf.sections.flags",
-          },
-          Object {
-            "label": "file.elf.sections.name",
-            "searchPath": "file.elf.sections.name",
-          },
-          Object {
-            "label": "file.elf.sections.physical_offset",
-            "searchPath": "file.elf.sections.physical_offset",
-          },
-          Object {
-            "label": "file.elf.sections.physical_size",
-            "searchPath": "file.elf.sections.physical_size",
-          },
-          Object {
-            "label": "file.elf.sections.type",
-            "searchPath": "file.elf.sections.type",
-          },
-          Object {
-            "label": "file.elf.sections.var_entropy",
-            "searchPath": "file.elf.sections.var_entropy",
-          },
-          Object {
-            "label": "file.elf.sections.virtual_address",
-            "searchPath": "file.elf.sections.virtual_address",
-          },
-          Object {
-            "label": "file.elf.sections.virtual_size",
-            "searchPath": "file.elf.sections.virtual_size",
-          },
-          Object {
-            "label": "file.elf.segments",
-            "searchPath": "file.elf.segments",
-          },
-          Object {
-            "label": "file.elf.segments.sections",
-            "searchPath": "file.elf.segments.sections",
-          },
-          Object {
-            "label": "file.elf.segments.type",
-            "searchPath": "file.elf.segments.type",
           },
           Object {
             "label": "file.elf.shared_libraries",
@@ -1728,10 +1576,6 @@ describe('es_query utils', () => {
             "searchPath": "file.macho.go_import_hash",
           },
           Object {
-            "label": "file.macho.go_imports",
-            "searchPath": "file.macho.go_imports",
-          },
-          Object {
             "label": "file.macho.go_imports_names_entropy",
             "searchPath": "file.macho.go_imports_names_entropy",
           },
@@ -1748,40 +1592,12 @@ describe('es_query utils', () => {
             "searchPath": "file.macho.import_hash",
           },
           Object {
-            "label": "file.macho.imports",
-            "searchPath": "file.macho.imports",
-          },
-          Object {
             "label": "file.macho.imports_names_entropy",
             "searchPath": "file.macho.imports_names_entropy",
           },
           Object {
             "label": "file.macho.imports_names_var_entropy",
             "searchPath": "file.macho.imports_names_var_entropy",
-          },
-          Object {
-            "label": "file.macho.sections",
-            "searchPath": "file.macho.sections",
-          },
-          Object {
-            "label": "file.macho.sections.entropy",
-            "searchPath": "file.macho.sections.entropy",
-          },
-          Object {
-            "label": "file.macho.sections.name",
-            "searchPath": "file.macho.sections.name",
-          },
-          Object {
-            "label": "file.macho.sections.physical_size",
-            "searchPath": "file.macho.sections.physical_size",
-          },
-          Object {
-            "label": "file.macho.sections.var_entropy",
-            "searchPath": "file.macho.sections.var_entropy",
-          },
-          Object {
-            "label": "file.macho.sections.virtual_size",
-            "searchPath": "file.macho.sections.virtual_size",
           },
           Object {
             "label": "file.macho.symhash",
@@ -1840,10 +1656,6 @@ describe('es_query utils', () => {
             "searchPath": "file.pe.go_import_hash",
           },
           Object {
-            "label": "file.pe.go_imports",
-            "searchPath": "file.pe.go_imports",
-          },
-          Object {
             "label": "file.pe.go_imports_names_entropy",
             "searchPath": "file.pe.go_imports_names_entropy",
           },
@@ -1864,10 +1676,6 @@ describe('es_query utils', () => {
             "searchPath": "file.pe.import_hash",
           },
           Object {
-            "label": "file.pe.imports",
-            "searchPath": "file.pe.imports",
-          },
-          Object {
             "label": "file.pe.imports_names_entropy",
             "searchPath": "file.pe.imports_names_entropy",
           },
@@ -1886,30 +1694,6 @@ describe('es_query utils', () => {
           Object {
             "label": "file.pe.product",
             "searchPath": "file.pe.product",
-          },
-          Object {
-            "label": "file.pe.sections",
-            "searchPath": "file.pe.sections",
-          },
-          Object {
-            "label": "file.pe.sections.entropy",
-            "searchPath": "file.pe.sections.entropy",
-          },
-          Object {
-            "label": "file.pe.sections.name",
-            "searchPath": "file.pe.sections.name",
-          },
-          Object {
-            "label": "file.pe.sections.physical_size",
-            "searchPath": "file.pe.sections.physical_size",
-          },
-          Object {
-            "label": "file.pe.sections.var_entropy",
-            "searchPath": "file.pe.sections.var_entropy",
-          },
-          Object {
-            "label": "file.pe.sections.virtual_size",
-            "searchPath": "file.pe.sections.virtual_size",
           },
           Object {
             "label": "file.size",
@@ -2048,10 +1832,6 @@ describe('es_query utils', () => {
             "searchPath": "gen_ai.request.choice.count",
           },
           Object {
-            "label": "gen_ai.request.encoding_formats",
-            "searchPath": "gen_ai.request.encoding_formats",
-          },
-          Object {
             "label": "gen_ai.request.frequency_penalty",
             "searchPath": "gen_ai.request.frequency_penalty",
           },
@@ -2072,10 +1852,6 @@ describe('es_query utils', () => {
             "searchPath": "gen_ai.request.seed",
           },
           Object {
-            "label": "gen_ai.request.stop_sequences",
-            "searchPath": "gen_ai.request.stop_sequences",
-          },
-          Object {
             "label": "gen_ai.request.temperature",
             "searchPath": "gen_ai.request.temperature",
           },
@@ -2086,10 +1862,6 @@ describe('es_query utils', () => {
           Object {
             "label": "gen_ai.request.top_p",
             "searchPath": "gen_ai.request.top_p",
-          },
-          Object {
-            "label": "gen_ai.response.finish_reasons",
-            "searchPath": "gen_ai.response.finish_reasons",
           },
           Object {
             "label": "gen_ai.response.id",
@@ -2478,10 +2250,6 @@ describe('es_query utils', () => {
           Object {
             "label": "log.syslog.severity.name",
             "searchPath": "log.syslog.severity.name",
-          },
-          Object {
-            "label": "log.syslog.structured_data",
-            "searchPath": "log.syslog.structured_data",
           },
           Object {
             "label": "log.syslog.version",
@@ -2964,16 +2732,8 @@ describe('es_query utils', () => {
             "searchPath": "process.elf.creation_date",
           },
           Object {
-            "label": "process.elf.exports",
-            "searchPath": "process.elf.exports",
-          },
-          Object {
             "label": "process.elf.go_import_hash",
             "searchPath": "process.elf.go_import_hash",
-          },
-          Object {
-            "label": "process.elf.go_imports",
-            "searchPath": "process.elf.go_imports",
           },
           Object {
             "label": "process.elf.go_imports_names_entropy",
@@ -3024,72 +2784,12 @@ describe('es_query utils', () => {
             "searchPath": "process.elf.import_hash",
           },
           Object {
-            "label": "process.elf.imports",
-            "searchPath": "process.elf.imports",
-          },
-          Object {
             "label": "process.elf.imports_names_entropy",
             "searchPath": "process.elf.imports_names_entropy",
           },
           Object {
             "label": "process.elf.imports_names_var_entropy",
             "searchPath": "process.elf.imports_names_var_entropy",
-          },
-          Object {
-            "label": "process.elf.sections",
-            "searchPath": "process.elf.sections",
-          },
-          Object {
-            "label": "process.elf.sections.chi2",
-            "searchPath": "process.elf.sections.chi2",
-          },
-          Object {
-            "label": "process.elf.sections.entropy",
-            "searchPath": "process.elf.sections.entropy",
-          },
-          Object {
-            "label": "process.elf.sections.flags",
-            "searchPath": "process.elf.sections.flags",
-          },
-          Object {
-            "label": "process.elf.sections.name",
-            "searchPath": "process.elf.sections.name",
-          },
-          Object {
-            "label": "process.elf.sections.physical_offset",
-            "searchPath": "process.elf.sections.physical_offset",
-          },
-          Object {
-            "label": "process.elf.sections.physical_size",
-            "searchPath": "process.elf.sections.physical_size",
-          },
-          Object {
-            "label": "process.elf.sections.type",
-            "searchPath": "process.elf.sections.type",
-          },
-          Object {
-            "label": "process.elf.sections.var_entropy",
-            "searchPath": "process.elf.sections.var_entropy",
-          },
-          Object {
-            "label": "process.elf.sections.virtual_address",
-            "searchPath": "process.elf.sections.virtual_address",
-          },
-          Object {
-            "label": "process.elf.sections.virtual_size",
-            "searchPath": "process.elf.sections.virtual_size",
-          },
-          Object {
-            "label": "process.elf.segments",
-            "searchPath": "process.elf.segments",
-          },
-          Object {
-            "label": "process.elf.segments.sections",
-            "searchPath": "process.elf.segments.sections",
-          },
-          Object {
-            "label": "process.elf.segments.type",
-            "searchPath": "process.elf.segments.type",
           },
           Object {
             "label": "process.elf.shared_libraries",
@@ -3488,10 +3188,6 @@ describe('es_query utils', () => {
             "searchPath": "process.macho.go_import_hash",
           },
           Object {
-            "label": "process.macho.go_imports",
-            "searchPath": "process.macho.go_imports",
-          },
-          Object {
             "label": "process.macho.go_imports_names_entropy",
             "searchPath": "process.macho.go_imports_names_entropy",
           },
@@ -3508,40 +3204,12 @@ describe('es_query utils', () => {
             "searchPath": "process.macho.import_hash",
           },
           Object {
-            "label": "process.macho.imports",
-            "searchPath": "process.macho.imports",
-          },
-          Object {
             "label": "process.macho.imports_names_entropy",
             "searchPath": "process.macho.imports_names_entropy",
           },
           Object {
             "label": "process.macho.imports_names_var_entropy",
             "searchPath": "process.macho.imports_names_var_entropy",
-          },
-          Object {
-            "label": "process.macho.sections",
-            "searchPath": "process.macho.sections",
-          },
-          Object {
-            "label": "process.macho.sections.entropy",
-            "searchPath": "process.macho.sections.entropy",
-          },
-          Object {
-            "label": "process.macho.sections.name",
-            "searchPath": "process.macho.sections.name",
-          },
-          Object {
-            "label": "process.macho.sections.physical_size",
-            "searchPath": "process.macho.sections.physical_size",
-          },
-          Object {
-            "label": "process.macho.sections.var_entropy",
-            "searchPath": "process.macho.sections.var_entropy",
-          },
-          Object {
-            "label": "process.macho.sections.virtual_size",
-            "searchPath": "process.macho.sections.virtual_size",
           },
           Object {
             "label": "process.macho.symhash",
@@ -3624,16 +3292,8 @@ describe('es_query utils', () => {
             "searchPath": "process.parent.elf.creation_date",
           },
           Object {
-            "label": "process.parent.elf.exports",
-            "searchPath": "process.parent.elf.exports",
-          },
-          Object {
             "label": "process.parent.elf.go_import_hash",
             "searchPath": "process.parent.elf.go_import_hash",
-          },
-          Object {
-            "label": "process.parent.elf.go_imports",
-            "searchPath": "process.parent.elf.go_imports",
           },
           Object {
             "label": "process.parent.elf.go_imports_names_entropy",
@@ -3684,72 +3344,12 @@ describe('es_query utils', () => {
             "searchPath": "process.parent.elf.import_hash",
           },
           Object {
-            "label": "process.parent.elf.imports",
-            "searchPath": "process.parent.elf.imports",
-          },
-          Object {
             "label": "process.parent.elf.imports_names_entropy",
             "searchPath": "process.parent.elf.imports_names_entropy",
           },
           Object {
             "label": "process.parent.elf.imports_names_var_entropy",
             "searchPath": "process.parent.elf.imports_names_var_entropy",
-          },
-          Object {
-            "label": "process.parent.elf.sections",
-            "searchPath": "process.parent.elf.sections",
-          },
-          Object {
-            "label": "process.parent.elf.sections.chi2",
-            "searchPath": "process.parent.elf.sections.chi2",
-          },
-          Object {
-            "label": "process.parent.elf.sections.entropy",
-            "searchPath": "process.parent.elf.sections.entropy",
-          },
-          Object {
-            "label": "process.parent.elf.sections.flags",
-            "searchPath": "process.parent.elf.sections.flags",
-          },
-          Object {
-            "label": "process.parent.elf.sections.name",
-            "searchPath": "process.parent.elf.sections.name",
-          },
-          Object {
-            "label": "process.parent.elf.sections.physical_offset",
-            "searchPath": "process.parent.elf.sections.physical_offset",
-          },
-          Object {
-            "label": "process.parent.elf.sections.physical_size",
-            "searchPath": "process.parent.elf.sections.physical_size",
-          },
-          Object {
-            "label": "process.parent.elf.sections.type",
-            "searchPath": "process.parent.elf.sections.type",
-          },
-          Object {
-            "label": "process.parent.elf.sections.var_entropy",
-            "searchPath": "process.parent.elf.sections.var_entropy",
-          },
-          Object {
-            "label": "process.parent.elf.sections.virtual_address",
-            "searchPath": "process.parent.elf.sections.virtual_address",
-          },
-          Object {
-            "label": "process.parent.elf.sections.virtual_size",
-            "searchPath": "process.parent.elf.sections.virtual_size",
-          },
-          Object {
-            "label": "process.parent.elf.segments",
-            "searchPath": "process.parent.elf.segments",
-          },
-          Object {
-            "label": "process.parent.elf.segments.sections",
-            "searchPath": "process.parent.elf.segments.sections",
-          },
-          Object {
-            "label": "process.parent.elf.segments.type",
-            "searchPath": "process.parent.elf.segments.type",
           },
           Object {
             "label": "process.parent.elf.shared_libraries",
@@ -3840,10 +3440,6 @@ describe('es_query utils', () => {
             "searchPath": "process.parent.macho.go_import_hash",
           },
           Object {
-            "label": "process.parent.macho.go_imports",
-            "searchPath": "process.parent.macho.go_imports",
-          },
-          Object {
             "label": "process.parent.macho.go_imports_names_entropy",
             "searchPath": "process.parent.macho.go_imports_names_entropy",
           },
@@ -3860,40 +3456,12 @@ describe('es_query utils', () => {
             "searchPath": "process.parent.macho.import_hash",
           },
           Object {
-            "label": "process.parent.macho.imports",
-            "searchPath": "process.parent.macho.imports",
-          },
-          Object {
             "label": "process.parent.macho.imports_names_entropy",
             "searchPath": "process.parent.macho.imports_names_entropy",
           },
           Object {
             "label": "process.parent.macho.imports_names_var_entropy",
             "searchPath": "process.parent.macho.imports_names_var_entropy",
-          },
-          Object {
-            "label": "process.parent.macho.sections",
-            "searchPath": "process.parent.macho.sections",
-          },
-          Object {
-            "label": "process.parent.macho.sections.entropy",
-            "searchPath": "process.parent.macho.sections.entropy",
-          },
-          Object {
-            "label": "process.parent.macho.sections.name",
-            "searchPath": "process.parent.macho.sections.name",
-          },
-          Object {
-            "label": "process.parent.macho.sections.physical_size",
-            "searchPath": "process.parent.macho.sections.physical_size",
-          },
-          Object {
-            "label": "process.parent.macho.sections.var_entropy",
-            "searchPath": "process.parent.macho.sections.var_entropy",
-          },
-          Object {
-            "label": "process.parent.macho.sections.virtual_size",
-            "searchPath": "process.parent.macho.sections.virtual_size",
           },
           Object {
             "label": "process.parent.macho.symhash",
@@ -3924,10 +3492,6 @@ describe('es_query utils', () => {
             "searchPath": "process.parent.pe.go_import_hash",
           },
           Object {
-            "label": "process.parent.pe.go_imports",
-            "searchPath": "process.parent.pe.go_imports",
-          },
-          Object {
             "label": "process.parent.pe.go_imports_names_entropy",
             "searchPath": "process.parent.pe.go_imports_names_entropy",
           },
@@ -3948,10 +3512,6 @@ describe('es_query utils', () => {
             "searchPath": "process.parent.pe.import_hash",
           },
           Object {
-            "label": "process.parent.pe.imports",
-            "searchPath": "process.parent.pe.imports",
-          },
-          Object {
             "label": "process.parent.pe.imports_names_entropy",
             "searchPath": "process.parent.pe.imports_names_entropy",
           },
@@ -3970,30 +3530,6 @@ describe('es_query utils', () => {
           Object {
             "label": "process.parent.pe.product",
             "searchPath": "process.parent.pe.product",
-          },
-          Object {
-            "label": "process.parent.pe.sections",
-            "searchPath": "process.parent.pe.sections",
-          },
-          Object {
-            "label": "process.parent.pe.sections.entropy",
-            "searchPath": "process.parent.pe.sections.entropy",
-          },
-          Object {
-            "label": "process.parent.pe.sections.name",
-            "searchPath": "process.parent.pe.sections.name",
-          },
-          Object {
-            "label": "process.parent.pe.sections.physical_size",
-            "searchPath": "process.parent.pe.sections.physical_size",
-          },
-          Object {
-            "label": "process.parent.pe.sections.var_entropy",
-            "searchPath": "process.parent.pe.sections.var_entropy",
-          },
-          Object {
-            "label": "process.parent.pe.sections.virtual_size",
-            "searchPath": "process.parent.pe.sections.virtual_size",
           },
           Object {
             "label": "process.parent.pid",
@@ -4116,10 +3652,6 @@ describe('es_query utils', () => {
             "searchPath": "process.pe.go_import_hash",
           },
           Object {
-            "label": "process.pe.go_imports",
-            "searchPath": "process.pe.go_imports",
-          },
-          Object {
             "label": "process.pe.go_imports_names_entropy",
             "searchPath": "process.pe.go_imports_names_entropy",
           },
@@ -4140,10 +3672,6 @@ describe('es_query utils', () => {
             "searchPath": "process.pe.import_hash",
           },
           Object {
-            "label": "process.pe.imports",
-            "searchPath": "process.pe.imports",
-          },
-          Object {
             "label": "process.pe.imports_names_entropy",
             "searchPath": "process.pe.imports_names_entropy",
           },
@@ -4162,30 +3690,6 @@ describe('es_query utils', () => {
           Object {
             "label": "process.pe.product",
             "searchPath": "process.pe.product",
-          },
-          Object {
-            "label": "process.pe.sections",
-            "searchPath": "process.pe.sections",
-          },
-          Object {
-            "label": "process.pe.sections.entropy",
-            "searchPath": "process.pe.sections.entropy",
-          },
-          Object {
-            "label": "process.pe.sections.name",
-            "searchPath": "process.pe.sections.name",
-          },
-          Object {
-            "label": "process.pe.sections.physical_size",
-            "searchPath": "process.pe.sections.physical_size",
-          },
-          Object {
-            "label": "process.pe.sections.var_entropy",
-            "searchPath": "process.pe.sections.var_entropy",
-          },
-          Object {
-            "label": "process.pe.sections.virtual_size",
-            "searchPath": "process.pe.sections.virtual_size",
           },
           Object {
             "label": "process.pid",
@@ -5112,846 +4616,6 @@ describe('es_query utils', () => {
             "searchPath": "span.id",
           },
           Object {
-            "label": "threat.enrichments",
-            "searchPath": "threat.enrichments",
-          },
-          Object {
-            "label": "threat.enrichments.indicator",
-            "searchPath": "threat.enrichments.indicator",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.as.number",
-            "searchPath": "threat.enrichments.indicator.as.number",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.as.organization.name",
-            "searchPath": "threat.enrichments.indicator.as.organization.name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.confidence",
-            "searchPath": "threat.enrichments.indicator.confidence",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.description",
-            "searchPath": "threat.enrichments.indicator.description",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.email.address",
-            "searchPath": "threat.enrichments.indicator.email.address",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.accessed",
-            "searchPath": "threat.enrichments.indicator.file.accessed",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.attributes",
-            "searchPath": "threat.enrichments.indicator.file.attributes",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.digest_algorithm",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.digest_algorithm",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.exists",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.exists",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.flags",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.flags",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.signing_id",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.signing_id",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.status",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.status",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.subject_name",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.subject_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.team_id",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.team_id",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.thumbprint_sha256",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.thumbprint_sha256",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.timestamp",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.timestamp",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.trusted",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.trusted",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.code_signature.valid",
-            "searchPath": "threat.enrichments.indicator.file.code_signature.valid",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.created",
-            "searchPath": "threat.enrichments.indicator.file.created",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.ctime",
-            "searchPath": "threat.enrichments.indicator.file.ctime",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.device",
-            "searchPath": "threat.enrichments.indicator.file.device",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.directory",
-            "searchPath": "threat.enrichments.indicator.file.directory",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.drive_letter",
-            "searchPath": "threat.enrichments.indicator.file.drive_letter",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.architecture",
-            "searchPath": "threat.enrichments.indicator.file.elf.architecture",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.byte_order",
-            "searchPath": "threat.enrichments.indicator.file.elf.byte_order",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.cpu_type",
-            "searchPath": "threat.enrichments.indicator.file.elf.cpu_type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.creation_date",
-            "searchPath": "threat.enrichments.indicator.file.elf.creation_date",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.exports",
-            "searchPath": "threat.enrichments.indicator.file.elf.exports",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.go_import_hash",
-            "searchPath": "threat.enrichments.indicator.file.elf.go_import_hash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.go_imports",
-            "searchPath": "threat.enrichments.indicator.file.elf.go_imports",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.go_imports_names_entropy",
-            "searchPath": "threat.enrichments.indicator.file.elf.go_imports_names_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.go_imports_names_var_entropy",
-            "searchPath": "threat.enrichments.indicator.file.elf.go_imports_names_var_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.go_stripped",
-            "searchPath": "threat.enrichments.indicator.file.elf.go_stripped",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.abi_version",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.abi_version",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.class",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.class",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.data",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.data",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.entrypoint",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.entrypoint",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.object_version",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.object_version",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.os_abi",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.os_abi",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.type",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.header.version",
-            "searchPath": "threat.enrichments.indicator.file.elf.header.version",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.import_hash",
-            "searchPath": "threat.enrichments.indicator.file.elf.import_hash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.imports",
-            "searchPath": "threat.enrichments.indicator.file.elf.imports",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.imports_names_entropy",
-            "searchPath": "threat.enrichments.indicator.file.elf.imports_names_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.imports_names_var_entropy",
-            "searchPath": "threat.enrichments.indicator.file.elf.imports_names_var_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.chi2",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.chi2",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.entropy",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.flags",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.flags",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.name",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.physical_offset",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.physical_offset",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.physical_size",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.physical_size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.type",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.var_entropy",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.var_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.virtual_address",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.virtual_address",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.sections.virtual_size",
-            "searchPath": "threat.enrichments.indicator.file.elf.sections.virtual_size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.segments",
-            "searchPath": "threat.enrichments.indicator.file.elf.segments",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.segments.sections",
-            "searchPath": "threat.enrichments.indicator.file.elf.segments.sections",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.segments.type",
-            "searchPath": "threat.enrichments.indicator.file.elf.segments.type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.shared_libraries",
-            "searchPath": "threat.enrichments.indicator.file.elf.shared_libraries",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.elf.telfhash",
-            "searchPath": "threat.enrichments.indicator.file.elf.telfhash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.extension",
-            "searchPath": "threat.enrichments.indicator.file.extension",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.fork_name",
-            "searchPath": "threat.enrichments.indicator.file.fork_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.gid",
-            "searchPath": "threat.enrichments.indicator.file.gid",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.group",
-            "searchPath": "threat.enrichments.indicator.file.group",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.cdhash",
-            "searchPath": "threat.enrichments.indicator.file.hash.cdhash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.md5",
-            "searchPath": "threat.enrichments.indicator.file.hash.md5",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.sha1",
-            "searchPath": "threat.enrichments.indicator.file.hash.sha1",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.sha256",
-            "searchPath": "threat.enrichments.indicator.file.hash.sha256",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.sha384",
-            "searchPath": "threat.enrichments.indicator.file.hash.sha384",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.sha512",
-            "searchPath": "threat.enrichments.indicator.file.hash.sha512",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.ssdeep",
-            "searchPath": "threat.enrichments.indicator.file.hash.ssdeep",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.hash.tlsh",
-            "searchPath": "threat.enrichments.indicator.file.hash.tlsh",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.inode",
-            "searchPath": "threat.enrichments.indicator.file.inode",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.mime_type",
-            "searchPath": "threat.enrichments.indicator.file.mime_type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.mode",
-            "searchPath": "threat.enrichments.indicator.file.mode",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.mtime",
-            "searchPath": "threat.enrichments.indicator.file.mtime",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.name",
-            "searchPath": "threat.enrichments.indicator.file.name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.origin_referrer_url",
-            "searchPath": "threat.enrichments.indicator.file.origin_referrer_url",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.origin_url",
-            "searchPath": "threat.enrichments.indicator.file.origin_url",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.owner",
-            "searchPath": "threat.enrichments.indicator.file.owner",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.path",
-            "searchPath": "threat.enrichments.indicator.file.path",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.architecture",
-            "searchPath": "threat.enrichments.indicator.file.pe.architecture",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.company",
-            "searchPath": "threat.enrichments.indicator.file.pe.company",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.description",
-            "searchPath": "threat.enrichments.indicator.file.pe.description",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.file_version",
-            "searchPath": "threat.enrichments.indicator.file.pe.file_version",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.go_import_hash",
-            "searchPath": "threat.enrichments.indicator.file.pe.go_import_hash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.go_imports",
-            "searchPath": "threat.enrichments.indicator.file.pe.go_imports",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.go_imports_names_entropy",
-            "searchPath": "threat.enrichments.indicator.file.pe.go_imports_names_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.go_imports_names_var_entropy",
-            "searchPath": "threat.enrichments.indicator.file.pe.go_imports_names_var_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.go_stripped",
-            "searchPath": "threat.enrichments.indicator.file.pe.go_stripped",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.imphash",
-            "searchPath": "threat.enrichments.indicator.file.pe.imphash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.import_hash",
-            "searchPath": "threat.enrichments.indicator.file.pe.import_hash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.imports",
-            "searchPath": "threat.enrichments.indicator.file.pe.imports",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.imports_names_entropy",
-            "searchPath": "threat.enrichments.indicator.file.pe.imports_names_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.imports_names_var_entropy",
-            "searchPath": "threat.enrichments.indicator.file.pe.imports_names_var_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.original_file_name",
-            "searchPath": "threat.enrichments.indicator.file.pe.original_file_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.pehash",
-            "searchPath": "threat.enrichments.indicator.file.pe.pehash",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.product",
-            "searchPath": "threat.enrichments.indicator.file.pe.product",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.sections",
-            "searchPath": "threat.enrichments.indicator.file.pe.sections",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.sections.entropy",
-            "searchPath": "threat.enrichments.indicator.file.pe.sections.entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.sections.name",
-            "searchPath": "threat.enrichments.indicator.file.pe.sections.name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.sections.physical_size",
-            "searchPath": "threat.enrichments.indicator.file.pe.sections.physical_size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.sections.var_entropy",
-            "searchPath": "threat.enrichments.indicator.file.pe.sections.var_entropy",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.pe.sections.virtual_size",
-            "searchPath": "threat.enrichments.indicator.file.pe.sections.virtual_size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.size",
-            "searchPath": "threat.enrichments.indicator.file.size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.target_path",
-            "searchPath": "threat.enrichments.indicator.file.target_path",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.type",
-            "searchPath": "threat.enrichments.indicator.file.type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.uid",
-            "searchPath": "threat.enrichments.indicator.file.uid",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.alternative_names",
-            "searchPath": "threat.enrichments.indicator.file.x509.alternative_names",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.common_name",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.common_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.country",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.country",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.distinguished_name",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.distinguished_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.locality",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.locality",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.organization",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.organization",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.organizational_unit",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.organizational_unit",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.issuer.state_or_province",
-            "searchPath": "threat.enrichments.indicator.file.x509.issuer.state_or_province",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.not_after",
-            "searchPath": "threat.enrichments.indicator.file.x509.not_after",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.not_before",
-            "searchPath": "threat.enrichments.indicator.file.x509.not_before",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.public_key_algorithm",
-            "searchPath": "threat.enrichments.indicator.file.x509.public_key_algorithm",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.public_key_curve",
-            "searchPath": "threat.enrichments.indicator.file.x509.public_key_curve",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.public_key_exponent",
-            "searchPath": "threat.enrichments.indicator.file.x509.public_key_exponent",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.public_key_size",
-            "searchPath": "threat.enrichments.indicator.file.x509.public_key_size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.serial_number",
-            "searchPath": "threat.enrichments.indicator.file.x509.serial_number",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.signature_algorithm",
-            "searchPath": "threat.enrichments.indicator.file.x509.signature_algorithm",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.common_name",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.common_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.country",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.country",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.distinguished_name",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.distinguished_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.locality",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.locality",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.organization",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.organization",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.organizational_unit",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.organizational_unit",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.subject.state_or_province",
-            "searchPath": "threat.enrichments.indicator.file.x509.subject.state_or_province",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.file.x509.version_number",
-            "searchPath": "threat.enrichments.indicator.file.x509.version_number",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.first_seen",
-            "searchPath": "threat.enrichments.indicator.first_seen",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.city_name",
-            "searchPath": "threat.enrichments.indicator.geo.city_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.continent_code",
-            "searchPath": "threat.enrichments.indicator.geo.continent_code",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.continent_name",
-            "searchPath": "threat.enrichments.indicator.geo.continent_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.country_iso_code",
-            "searchPath": "threat.enrichments.indicator.geo.country_iso_code",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.country_name",
-            "searchPath": "threat.enrichments.indicator.geo.country_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.location",
-            "searchPath": "threat.enrichments.indicator.geo.location",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.name",
-            "searchPath": "threat.enrichments.indicator.geo.name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.postal_code",
-            "searchPath": "threat.enrichments.indicator.geo.postal_code",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.region_iso_code",
-            "searchPath": "threat.enrichments.indicator.geo.region_iso_code",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.region_name",
-            "searchPath": "threat.enrichments.indicator.geo.region_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.geo.timezone",
-            "searchPath": "threat.enrichments.indicator.geo.timezone",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.ip",
-            "searchPath": "threat.enrichments.indicator.ip",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.last_seen",
-            "searchPath": "threat.enrichments.indicator.last_seen",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.marking.tlp",
-            "searchPath": "threat.enrichments.indicator.marking.tlp",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.marking.tlp_version",
-            "searchPath": "threat.enrichments.indicator.marking.tlp_version",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.modified_at",
-            "searchPath": "threat.enrichments.indicator.modified_at",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.name",
-            "searchPath": "threat.enrichments.indicator.name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.port",
-            "searchPath": "threat.enrichments.indicator.port",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.provider",
-            "searchPath": "threat.enrichments.indicator.provider",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.reference",
-            "searchPath": "threat.enrichments.indicator.reference",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.data.bytes",
-            "searchPath": "threat.enrichments.indicator.registry.data.bytes",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.data.strings",
-            "searchPath": "threat.enrichments.indicator.registry.data.strings",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.data.type",
-            "searchPath": "threat.enrichments.indicator.registry.data.type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.hive",
-            "searchPath": "threat.enrichments.indicator.registry.hive",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.key",
-            "searchPath": "threat.enrichments.indicator.registry.key",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.path",
-            "searchPath": "threat.enrichments.indicator.registry.path",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.registry.value",
-            "searchPath": "threat.enrichments.indicator.registry.value",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.scanner_stats",
-            "searchPath": "threat.enrichments.indicator.scanner_stats",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.sightings",
-            "searchPath": "threat.enrichments.indicator.sightings",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.type",
-            "searchPath": "threat.enrichments.indicator.type",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.domain",
-            "searchPath": "threat.enrichments.indicator.url.domain",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.extension",
-            "searchPath": "threat.enrichments.indicator.url.extension",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.fragment",
-            "searchPath": "threat.enrichments.indicator.url.fragment",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.full",
-            "searchPath": "threat.enrichments.indicator.url.full",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.original",
-            "searchPath": "threat.enrichments.indicator.url.original",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.password",
-            "searchPath": "threat.enrichments.indicator.url.password",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.path",
-            "searchPath": "threat.enrichments.indicator.url.path",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.port",
-            "searchPath": "threat.enrichments.indicator.url.port",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.query",
-            "searchPath": "threat.enrichments.indicator.url.query",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.registered_domain",
-            "searchPath": "threat.enrichments.indicator.url.registered_domain",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.scheme",
-            "searchPath": "threat.enrichments.indicator.url.scheme",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.subdomain",
-            "searchPath": "threat.enrichments.indicator.url.subdomain",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.top_level_domain",
-            "searchPath": "threat.enrichments.indicator.url.top_level_domain",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.url.username",
-            "searchPath": "threat.enrichments.indicator.url.username",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.alternative_names",
-            "searchPath": "threat.enrichments.indicator.x509.alternative_names",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.common_name",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.common_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.country",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.country",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.distinguished_name",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.distinguished_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.locality",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.locality",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.organization",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.organization",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.organizational_unit",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.organizational_unit",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.issuer.state_or_province",
-            "searchPath": "threat.enrichments.indicator.x509.issuer.state_or_province",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.not_after",
-            "searchPath": "threat.enrichments.indicator.x509.not_after",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.not_before",
-            "searchPath": "threat.enrichments.indicator.x509.not_before",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.public_key_algorithm",
-            "searchPath": "threat.enrichments.indicator.x509.public_key_algorithm",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.public_key_curve",
-            "searchPath": "threat.enrichments.indicator.x509.public_key_curve",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.public_key_exponent",
-            "searchPath": "threat.enrichments.indicator.x509.public_key_exponent",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.public_key_size",
-            "searchPath": "threat.enrichments.indicator.x509.public_key_size",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.serial_number",
-            "searchPath": "threat.enrichments.indicator.x509.serial_number",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.signature_algorithm",
-            "searchPath": "threat.enrichments.indicator.x509.signature_algorithm",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.common_name",
-            "searchPath": "threat.enrichments.indicator.x509.subject.common_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.country",
-            "searchPath": "threat.enrichments.indicator.x509.subject.country",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.distinguished_name",
-            "searchPath": "threat.enrichments.indicator.x509.subject.distinguished_name",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.locality",
-            "searchPath": "threat.enrichments.indicator.x509.subject.locality",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.organization",
-            "searchPath": "threat.enrichments.indicator.x509.subject.organization",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.organizational_unit",
-            "searchPath": "threat.enrichments.indicator.x509.subject.organizational_unit",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.subject.state_or_province",
-            "searchPath": "threat.enrichments.indicator.x509.subject.state_or_province",
-          },
-          Object {
-            "label": "threat.enrichments.indicator.x509.version_number",
-            "searchPath": "threat.enrichments.indicator.x509.version_number",
-          },
-          Object {
-            "label": "threat.enrichments.matched.atomic",
-            "searchPath": "threat.enrichments.matched.atomic",
-          },
-          Object {
-            "label": "threat.enrichments.matched.field",
-            "searchPath": "threat.enrichments.matched.field",
-          },
-          Object {
-            "label": "threat.enrichments.matched.id",
-            "searchPath": "threat.enrichments.matched.id",
-          },
-          Object {
-            "label": "threat.enrichments.matched.index",
-            "searchPath": "threat.enrichments.matched.index",
-          },
-          Object {
-            "label": "threat.enrichments.matched.occurred",
-            "searchPath": "threat.enrichments.matched.occurred",
-          },
-          Object {
-            "label": "threat.enrichments.matched.type",
-            "searchPath": "threat.enrichments.matched.type",
-          },
-          Object {
             "label": "threat.feed.dashboard_id",
             "searchPath": "threat.feed.dashboard_id",
           },
@@ -6096,16 +4760,8 @@ describe('es_query utils', () => {
             "searchPath": "threat.indicator.file.elf.creation_date",
           },
           Object {
-            "label": "threat.indicator.file.elf.exports",
-            "searchPath": "threat.indicator.file.elf.exports",
-          },
-          Object {
             "label": "threat.indicator.file.elf.go_import_hash",
             "searchPath": "threat.indicator.file.elf.go_import_hash",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.go_imports",
-            "searchPath": "threat.indicator.file.elf.go_imports",
           },
           Object {
             "label": "threat.indicator.file.elf.go_imports_names_entropy",
@@ -6156,72 +4812,12 @@ describe('es_query utils', () => {
             "searchPath": "threat.indicator.file.elf.import_hash",
           },
           Object {
-            "label": "threat.indicator.file.elf.imports",
-            "searchPath": "threat.indicator.file.elf.imports",
-          },
-          Object {
             "label": "threat.indicator.file.elf.imports_names_entropy",
             "searchPath": "threat.indicator.file.elf.imports_names_entropy",
           },
           Object {
             "label": "threat.indicator.file.elf.imports_names_var_entropy",
             "searchPath": "threat.indicator.file.elf.imports_names_var_entropy",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections",
-            "searchPath": "threat.indicator.file.elf.sections",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.chi2",
-            "searchPath": "threat.indicator.file.elf.sections.chi2",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.entropy",
-            "searchPath": "threat.indicator.file.elf.sections.entropy",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.flags",
-            "searchPath": "threat.indicator.file.elf.sections.flags",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.name",
-            "searchPath": "threat.indicator.file.elf.sections.name",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.physical_offset",
-            "searchPath": "threat.indicator.file.elf.sections.physical_offset",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.physical_size",
-            "searchPath": "threat.indicator.file.elf.sections.physical_size",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.type",
-            "searchPath": "threat.indicator.file.elf.sections.type",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.var_entropy",
-            "searchPath": "threat.indicator.file.elf.sections.var_entropy",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.virtual_address",
-            "searchPath": "threat.indicator.file.elf.sections.virtual_address",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.sections.virtual_size",
-            "searchPath": "threat.indicator.file.elf.sections.virtual_size",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.segments",
-            "searchPath": "threat.indicator.file.elf.segments",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.segments.sections",
-            "searchPath": "threat.indicator.file.elf.segments.sections",
-          },
-          Object {
-            "label": "threat.indicator.file.elf.segments.type",
-            "searchPath": "threat.indicator.file.elf.segments.type",
           },
           Object {
             "label": "threat.indicator.file.elf.shared_libraries",
@@ -6336,10 +4932,6 @@ describe('es_query utils', () => {
             "searchPath": "threat.indicator.file.pe.go_import_hash",
           },
           Object {
-            "label": "threat.indicator.file.pe.go_imports",
-            "searchPath": "threat.indicator.file.pe.go_imports",
-          },
-          Object {
             "label": "threat.indicator.file.pe.go_imports_names_entropy",
             "searchPath": "threat.indicator.file.pe.go_imports_names_entropy",
           },
@@ -6360,10 +4952,6 @@ describe('es_query utils', () => {
             "searchPath": "threat.indicator.file.pe.import_hash",
           },
           Object {
-            "label": "threat.indicator.file.pe.imports",
-            "searchPath": "threat.indicator.file.pe.imports",
-          },
-          Object {
             "label": "threat.indicator.file.pe.imports_names_entropy",
             "searchPath": "threat.indicator.file.pe.imports_names_entropy",
           },
@@ -6382,30 +4970,6 @@ describe('es_query utils', () => {
           Object {
             "label": "threat.indicator.file.pe.product",
             "searchPath": "threat.indicator.file.pe.product",
-          },
-          Object {
-            "label": "threat.indicator.file.pe.sections",
-            "searchPath": "threat.indicator.file.pe.sections",
-          },
-          Object {
-            "label": "threat.indicator.file.pe.sections.entropy",
-            "searchPath": "threat.indicator.file.pe.sections.entropy",
-          },
-          Object {
-            "label": "threat.indicator.file.pe.sections.name",
-            "searchPath": "threat.indicator.file.pe.sections.name",
-          },
-          Object {
-            "label": "threat.indicator.file.pe.sections.physical_size",
-            "searchPath": "threat.indicator.file.pe.sections.physical_size",
-          },
-          Object {
-            "label": "threat.indicator.file.pe.sections.var_entropy",
-            "searchPath": "threat.indicator.file.pe.sections.var_entropy",
-          },
-          Object {
-            "label": "threat.indicator.file.pe.sections.virtual_size",
-            "searchPath": "threat.indicator.file.pe.sections.virtual_size",
           },
           Object {
             "label": "threat.indicator.file.size",

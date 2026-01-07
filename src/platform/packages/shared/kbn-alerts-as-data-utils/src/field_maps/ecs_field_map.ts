@@ -82,3 +82,16 @@ export const ecsFieldMap: FieldMap = Object.fromEntries(
 );
 
 export type EcsFieldMap = typeof ecsFieldMap;
+
+/**
+ * A Set containing the names of ECS fields that have type 'nested'.
+ * This is exported separately from ecsFieldMap because nested fields are excluded
+ * from ecsFieldMap to prevent Elasticsearch composite mapping conflicts, but some
+ * code (like traverseAndMutateDoc) still needs to know which fields are nested
+ * to properly validate alert documents.
+ */
+export const ecsNestedFieldNames: ReadonlySet<string> = new Set(
+  Object.entries(EcsFlat)
+    .filter(([_, value]) => value.type === 'nested')
+    .map(([key]) => key)
+);
