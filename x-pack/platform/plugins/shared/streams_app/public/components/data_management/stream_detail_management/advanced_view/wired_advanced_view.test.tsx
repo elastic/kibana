@@ -57,6 +57,13 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
 jest.mock('../../../../hooks/use_stream_features_api', () => ({
   useStreamFeaturesApi: () => ({
     identifyFeatures: jest.fn(),
+    getFeatureIdentificationTask: jest.fn().mockResolvedValue({ status: 'idle' }),
+    scheduleFeatureIdentificationTask: jest.fn(),
+    cancelFeatureIdentificationTask: jest.fn(),
+    acknowledgeFeatureIdentificationTask: jest.fn(),
+    addFeaturesToStream: jest.fn(),
+    removeFeaturesFromStream: jest.fn(),
+    upsertFeature: jest.fn(),
     abort: jest.fn(),
   }),
 }));
@@ -225,8 +232,6 @@ describe('WiredAdvancedView', () => {
 
       // Check the Feature identification panel title is rendered
       expect(screen.getByText('Feature identification')).toBeInTheDocument();
-      // Check the Identify features button is rendered
-      expect(screen.getByRole('button', { name: /identify features/i })).toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
