@@ -62,28 +62,23 @@ export const AiClassifyStepCommonDefinition: CommonStepDefinition<
   configSchema: ConfigSchema,
 };
 
+/**
+ * Builds a dynamic Zod schema for structured output based on AI classification step inputs.
+ */
 export function buildStructuredOutputSchema(
   params: z.infer<AiClassifyStepInputSchema>
 ): z.ZodObject {
-  const { allowMultipleCategories, includeRationale, categories, fallbackCategory } = params;
-
-  let categorySchema: z.ZodType = fallbackCategory
-    ? z.enum(categories.concat([fallbackCategory]))
-    : z.enum(categories);
-
-  if (!fallbackCategory) {
-    categorySchema = categorySchema.nullable();
-  }
+  const { allowMultipleCategories, includeRationale } = params;
 
   let shape: Record<string, z.ZodType> = {};
 
   if (allowMultipleCategories) {
     shape = {
-      categories: z.array(categorySchema),
+      categories: z.array(z.string()),
     };
   } else {
     shape = {
-      category: categorySchema,
+      category: z.string(),
     };
   }
 

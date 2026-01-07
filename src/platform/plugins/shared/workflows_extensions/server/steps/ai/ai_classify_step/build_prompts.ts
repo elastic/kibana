@@ -9,27 +9,74 @@
 
 import type { MessageFieldWithRole } from '@langchain/core/messages';
 
-export function buildSystemPart(params: {
+export function buildSystemPart(): MessageFieldWithRole[] {
+  return [
+    {
+      role: 'system',
+      content: `
+You are a specialized classification engine that categorizes data into predefined categories.
+
+# CRITICAL RULES:
+- Output ONLY valid JSON matching the exact format specified
+- Your response must be PLAIN JSON with NO formatting, NO code blocks, NO markdown
+- DO NOT wrap your response in \`\`\`json or \`\`\` blocks
+- DO NOT include any text before or after the JSON
+- The output must be a raw JSON string that can be parsed directly
+- Categories are case-sensitive and must match exactly as provided
+- Only use categories from the available categories list
+`.trim(),
+    },
+  ];
+}
+
+export function buildDataPart(input: unknown): MessageFieldWithRole[] {
+  const inputType = typeof input === 'object' ? 'json' : 'text';
+  let resolvedInput = input;
+
+  if (inputType === 'json') {
+    resolvedInput = JSON.stringify(input);
+  }
+
+  return [
+    {
+      role: 'user',
+      content: `# DATA TO CLASSIFY:
+\`\`\`${inputType}
+${resolvedInput}
+\`\`\`
+`.trim(),
+    },
+  ];
+}
+
+export function buildInstructionsPart(instructions: string | undefined): MessageFieldWithRole[] {
+  if (!instructions) {
+    return [];
+  }
+
+  return [
+    {
+      role: 'user',
+      content: `# ADDITIONAL CLASSIFICATION INSTRUCTIONS:
+${instructions}
+`,
+    },
+  ];
+}
+
+export function buildClassificationRequestPart(params: {
   categories: string[];
   allowMultipleCategories: boolean;
   fallbackCategory?: string;
   includeRationale: boolean;
-  jsonSchema: unknown;
 }): MessageFieldWithRole[] {
-  const { categories, allowMultipleCategories, fallbackCategory, includeRationale, jsonSchema } =
-    params;
-
-  const categoriesList = categories.map((cat) => `- ${cat}`).join('\n');
+  const { categories, allowMultipleCategories, fallbackCategory, includeRationale } = params;
 
   const classificationRules: string[] = [];
 
   if (fallbackCategory) {
     classificationRules.push(
       `If the input does not clearly match any defined category, use the fallback category: "${fallbackCategory}"`
-    );
-  } else {
-    classificationRules.push(
-      'If the input does not clearly match any defined category, use null JSON value (not "null" string)'
     );
   }
 
@@ -48,76 +95,16 @@ export function buildSystemPart(params: {
       'You MUST provide a clear, concise explanation in the "rationale" field explaining why you chose this category/categories'
     );
   }
-
   return [
     {
-      role: 'system',
-      content: `You are a specialized classification engine that categorizes data into predefined categories.
-
-EXPECTED OUTPUT SCHEMA:
-\`\`\`json
-${JSON.stringify(jsonSchema)}
-\`\`\`
-
+      role: 'user',
+      content: `
 AVAILABLE CATEGORIES:
-${categoriesList}
+${categories.map((cat) => `- ${cat}`).join('\n')}
 
 CLASSIFICATION RULES:
-${classificationRules.map((x) => x.trim()).join('\n-')}
-- Categories are case-sensitive and must match exactly as provided
-- Only use categories from the available categories list
-
-CRITICAL RULES:
-- Output ONLY valid JSON matching the exact format specified
-- Your response must be PLAIN JSON with NO formatting, NO code blocks, NO markdown
-- DO NOT wrap your response in \`\`\`json or \`\`\` blocks
-- DO NOT include any text before or after the JSON
-- The output must be a raw JSON string that can be parsed directly
-`,
-    },
-  ];
-}
-
-export function buildDataPart(input: unknown): MessageFieldWithRole[] {
-  const inputType = typeof input === 'object' ? 'json' : 'text';
-  let resolvedInput = input;
-
-  if (inputType === 'json') {
-    resolvedInput = JSON.stringify(input, null, 2);
-  }
-
-  return [
-    {
-      role: 'user',
-      content: `# Data to classify:
-\`\`\`${inputType}
-${resolvedInput}
-\`\`\`
-`,
-    },
-  ];
-}
-
-export function buildInstructionsPart(instructions: string | undefined): MessageFieldWithRole[] {
-  if (!instructions) {
-    return [];
-  }
-
-  return [
-    {
-      role: 'user',
-      content: `# Additional classification instructions:
-${instructions}
-`,
-    },
-  ];
-}
-
-export function buildClassificationRequestPart(): MessageFieldWithRole[] {
-  return [
-    {
-      role: 'user',
-      content: 'Classify the provided data and return ONLY the JSON response',
+${classificationRules.map((x) => x.trim()).join('\n- ')}
+`.trim(),
     },
   ];
 }

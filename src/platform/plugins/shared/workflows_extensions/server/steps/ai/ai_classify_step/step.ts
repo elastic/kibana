@@ -16,6 +16,7 @@ import {
   buildInstructionsPart,
   buildSystemPart,
 } from './build_prompts';
+import { validateModelResponse } from './validate_model_response';
 import {
   AiClassifyStepCommonDefinition,
   buildStructuredOutputSchema,
@@ -23,36 +24,6 @@ import {
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
-
-interface ClassificationResponse {
-  category?: string;
-  categories?: string[];
-  rationale?: string;
-}
-
-function parseModelResponse(content: string): ClassificationResponse {
-  // Remove markdown code blocks if present
-  let cleanContent = content.trim();
-  if (cleanContent.startsWith('```json')) {
-    cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
-  } else if (cleanContent.startsWith('```')) {
-    cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
-  }
-
-  try {
-    return JSON.parse(cleanContent);
-  } catch (error) {
-    throw new Error(`Failed to parse model response as JSON: ${error.message}`);
-  }
-}
-
-function validateModelResponse(response: unknown, schema: z.ZodType): void {
-  const safeParseResult = schema.safeParse(response);
-
-  if (safeParseResult.error) {
-    throw new Error(`Model returned invalid JSON. Message: ${safeParseResult.error}`);
-  }
-}
 
 export const aiClassifyStepDefinition = (
   coreSetup: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>
@@ -73,7 +44,7 @@ export const aiClassifyStepDefinition = (
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,
-          maxRetries: 2, // Allow retries for validation failures
+          maxRetries: 0, // Allow retries for validation failures
         },
       });
 
@@ -85,32 +56,34 @@ export const aiClassifyStepDefinition = (
         fallbackCategory,
         includeRationale = false,
       } = context.input;
-      const structuredOutputSchema = buildStructuredOutputSchema(context.input);
-      const jsonSchema = z.toJSONSchema(structuredOutputSchema);
+      const responseZodSchema = buildStructuredOutputSchema(context.input);
       const modelInput: MessageFieldWithRole[] = [
-        ...buildSystemPart({
+        ...buildSystemPart(),
+        ...buildDataPart(input),
+        ...buildClassificationRequestPart({
           categories,
           allowMultipleCategories,
           fallbackCategory,
           includeRationale,
-          jsonSchema,
         }),
-        ...buildDataPart(input),
         ...buildInstructionsPart(instructions),
-        ...buildClassificationRequestPart(),
       ];
 
-      const runnable = chatModel;
+      const modelResponse = await chatModel
+        .withStructuredOutput(z.toJSONSchema(responseZodSchema))
+        .invoke(modelInput, {
+          signal: context.abortSignal,
+        });
 
-      const modelResponse = await runnable.invoke(modelInput, {
-        signal: context.abortSignal,
+      validateModelResponse({
+        modelResponse,
+        schema: responseZodSchema,
+        expectedCategories: context.input.categories,
+        fallbackCategory: context.input.fallbackCategory,
       });
 
-      const parsedResponse = parseModelResponse(modelResponse.content as string);
-      validateModelResponse(parsedResponse, structuredOutputSchema);
-
       return {
-        output: parsedResponse,
+        output: modelResponse,
       };
     },
   });
