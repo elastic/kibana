@@ -21,7 +21,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   autoApplyFilters?: boolean;
 } {
   let pathToState = 'pinned_panels'; // >=9.3 controls exported under pinned_panels
-  let pathToControls = 'pinned_panels.controls';
+  let pathToControls = 'pinned_panels';
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // >8.16 to <=8.18 passed control group runtime state in with controlGroupState key
     pathToState = 'controlGroupState';
@@ -39,7 +39,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   }
 
   const controls = pathToControls ? get(state, pathToControls) : undefined;
-  let standardizedControls: ControlsGroupState['controls'] = [];
+  let standardizedControls: ControlsGroupState = [];
   if (Array.isArray(controls)) {
     // >8.18 controls are exported as an array without order
     standardizedControls = controls.map((control) => {
@@ -76,7 +76,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
             config,
           };
         }
-      }) as ControlsGroupState['controls'];
+      }) as ControlsGroupState;
   }
 
   const controlState = get(state, pathToState);
@@ -145,10 +145,6 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   return {
     autoApplyFilters:
       autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
-    pinned_panels: standardizedControls.length
-      ? {
-          controls: standardizedControls,
-        }
-      : undefined,
+    pinned_panels: standardizedControls.length ? standardizedControls : undefined,
   };
 }

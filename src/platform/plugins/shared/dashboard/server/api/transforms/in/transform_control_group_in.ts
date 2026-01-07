@@ -17,10 +17,9 @@ import { prefixReferencesFromPanel } from '../../../../common';
 import type { StoredControlState } from '../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) {
-  if (!controlGroupInput) return { references: [] };
+export function transformControlGroupIn(controls?: ControlsGroupState) {
+  if (!controls) return { references: [] };
 
-  const { controls } = controlGroupInput;
   let references: Reference[] = [];
   const updatedControls = Object.fromEntries(
     controls.map((controlState, index) => {

@@ -46,17 +46,15 @@ export function serializeLayout(
 
   return {
     panels: [...panels, ...Object.values(sections)],
-    pinned_panels: {
-      controls: Object.entries(layout.controls)
-        .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
-        .map(([id, control]) => {
-          return {
-            uid: id,
-            ...omit(control, 'order'),
-            config: childState[id].rawState,
-          } as ControlsGroupState['controls'][number];
-        }),
-    },
+    pinned_panels: Object.entries(layout.controls)
+      .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
+      .map(([id, control]) => {
+        return {
+          uid: id,
+          ...omit(control, 'order'),
+          config: childState[id].rawState,
+        } as ControlsGroupState[number];
+      }),
     references,
   };
 }

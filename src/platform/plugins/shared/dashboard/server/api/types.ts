@@ -25,4 +25,4 @@ export type GridData = TypeOf<typeof panelGridSchema>;
 export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
-export type DashboardControlsState = NonNullable<DashboardState['pinned_panels']>['controls'];
+export type DashboardControlsState = NonNullable<DashboardState['pinned_panels']>;

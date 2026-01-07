@@ -22,15 +22,12 @@ export function deserializeLayout(
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
-    controls: Object.values((controls ?? { controls: {} }).controls).reduce(
-      (prev, control, index) => {
-        const controlId = control.uid ?? v4();
-        const { width, grow, type, config } = control;
-        childState[controlId] = { rawState: config }; // push to child state
-        return { ...prev, [controlId]: { type, width, grow, order: index } };
-      },
-      {}
-    ),
+    controls: Object.values(controls ?? { controls: {} }).reduce((prev, control, index) => {
+      const controlId = control.uid ?? v4();
+      const { width, grow, type, config } = control;
+      childState[controlId] = { rawState: config }; // push to child state
+      return { ...prev, [controlId]: { type, width, grow, order: index } };
+    }, {}),
   };
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
