@@ -111,11 +111,9 @@ export function initializeUnsavedChangesManager({
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
     .subscribe(([viewMode, dashboardChanges, childrenWithUnsavedChanges]) => {
-      console.log({ dashboardChanges });
       const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
       const hasLayoutChanges = dashboardChanges.panels;
       const hasUnsavedChanges = hasDashboardChanges || Boolean(childrenWithUnsavedChanges.length);
-      console.log({ childrenWithUnsavedChanges, dashboardChanges });
 
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
@@ -131,22 +129,14 @@ export function initializeUnsavedChangesManager({
 
         // Backup latest state from children that have unsaved changes
         if (childrenWithUnsavedChanges.length || hasLayoutChanges) {
+          // get the serialized state for the panels that have actually changed
           const {
             panels: panelsWithUnsavedChanges = [],
             controlGroupInput: controlsWithUnsavedChanges = { controls: [] },
           } = layoutManager.internalApi.serializeLayout(childrenWithUnsavedChanges);
-
+          // get the full serialized state
           const { panels, controlGroupInput, references } =
             layoutManager.internalApi.serializeLayout();
-
-          console.log({
-            childrenWithUnsavedChanges,
-            panels,
-            panelsWithUnsavedChanges,
-            controlGroupInput,
-            controlsWithUnsavedChanges,
-            references,
-          });
 
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
