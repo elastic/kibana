@@ -8,6 +8,7 @@
 import { memoize } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStorePlugins,
@@ -23,6 +24,7 @@ interface EntityStoreApiRequestHandlerContextDeps {
   logger: Logger;
 }
 
+
 export async function createRequestHandlerContext({
   logger,
   context,
@@ -34,6 +36,8 @@ export async function createRequestHandlerContext({
   return {
     core: coreCtx,
     getLogger: memoize(() => logger),
-    getResourcesService: memoize(async () => new ResourcesService(logger, await getTaskManager(core, plugins)))
+    getResourcesService: memoize(
+      async () => new ResourcesService(logger, await getTaskManager(core, plugins))
+    ),
   };
 }

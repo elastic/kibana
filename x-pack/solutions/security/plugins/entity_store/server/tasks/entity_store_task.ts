@@ -12,7 +12,11 @@ import type { TaskConfig } from './config';
 import type { TaskManager } from '../types';
 
 export abstract class EntityStoreTask {
-  constructor(protected readonly taskManager: TaskManager, protected readonly config: TaskConfig, protected logger: Logger) { }
+  constructor(
+    protected readonly taskManager: TaskManager,
+    protected readonly config: TaskConfig,
+    protected logger: Logger
+  ) {}
 
   public abstract get name(): string;
 
@@ -52,7 +56,7 @@ export abstract class EntityStoreTask {
       this.logger = this.logger.get(taskInstance.id);
       return {
         run: async () => this.run(taskInstance),
-        cancel: async () => this.cancel()
+        cancel: async () => this.cancel(),
       };
     };
   }
