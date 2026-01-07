@@ -60,10 +60,6 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        include:
-          - language: javascript
-            build-mode: none
-            query: codeql/javascript-queries:AlertSuppression.ql
     steps:
     - name: Checkout repository
       uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0

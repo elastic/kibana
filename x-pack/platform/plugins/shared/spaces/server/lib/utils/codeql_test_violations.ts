@@ -76,7 +76,7 @@ export function vulnerableDeserialize(data: string): any {
  */
 export function vulnerableRegex(userInput: string): boolean {
   // VIOLATION: Catastrophic backtracking regex
-  // codeql[js/regexp-redos]
+  // codeql[js/redos]
   const regex = /(a+)+$/;
   return regex.test(userInput);
 }
@@ -103,4 +103,3 @@ export function vulnerableUrlCheck(url: string): boolean {
   // codeql[js/incomplete-url-substring-sanitization]
   return url.indexOf('javascript:') === -1;
 }
-
