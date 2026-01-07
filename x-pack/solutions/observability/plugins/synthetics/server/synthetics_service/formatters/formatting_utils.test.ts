@@ -244,15 +244,14 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual({});
   });
 
-  it(`should escape template literals using unicode for private location compatibility`, () => {
+  it(`should replace $ {} with adding $ in start for template literal`, () => {
     const value = inlineSourceFormatter(
       {
         [ConfigKey.SOURCE_INLINE]: 'const a = ${b}; const c = ${d}',
       },
       ConfigKey.SOURCE_INLINE
     );
-    // Uses unicode escape \u0024 for $ to prevent Elastic Agent from interpreting as policy variables
-    expect(value).toEqual('const a = \\u0024{b}; const c = \\u0024{d}');
+    expect(value).toEqual('const a = $${b}; const c = $${d}');
   });
 });
 

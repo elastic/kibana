@@ -32,7 +32,9 @@ export const createDataTableAction = {
       {
         panelType: DATA_TABLE_ID,
       },
-      true
+      {
+        displaySuccessMessage: true,
+      }
     );
   },
   getDisplayName: () =>
