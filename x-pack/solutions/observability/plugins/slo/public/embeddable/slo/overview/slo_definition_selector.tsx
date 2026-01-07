@@ -10,11 +10,12 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SearchSLODefinitionResponse } from '@kbn/slo-schema';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
+import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 
 interface Props {
-  onSelected: (slo: SLODefinitionResponse | undefined) => void;
+  onSelected: (slo: SearchSLODefinitionResponse | undefined) => void;
   hasError?: boolean;
 }
 
@@ -29,10 +30,15 @@ export function SloDefinitionSelector({ onSelected, hasError }: Props) {
   const [searchValue, setSearchValue] = useState<string>('');
   const search = searchValue.trim();
 
-  const { isLoading, data: definitionsData } = useFetchSloDefinitions({
-    name: search,
-    perPage: 100,
+  const { isLoading, data: definitionsData } = useFetchSloDefinitionsWithRemote({
+    search,
+    size: 100,
   });
+
+  // const { isLoading, data: definitionsData } = useFetchSloDefinitions({
+  //   name: search,
+  //   perPage: 100,
+  // });
 
   const options = useMemo(() => {
     return (
