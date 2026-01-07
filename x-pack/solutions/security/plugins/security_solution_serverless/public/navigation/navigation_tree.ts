@@ -33,8 +33,16 @@ const SOLUTION_NAME = i18n.translate(
 export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
-): Promise<NavigationTreeDefinition> => ({
-  body: [
+): Promise<NavigationTreeDefinition> => {
+  // `agentBuilder` capability key matches `AGENTBUILDER_FEATURE_ID` ('agentBuilder')
+  const agentBuilderCapabilities = services.application.capabilities as
+    | Record<string, { show?: boolean }>
+    | undefined;
+  const canAccessAgentBuilder =
+    chatExperience === AIChatExperience.Agent && agentBuilderCapabilities?.agentBuilder?.show === true;
+
+  return {
+    body: [
     {
       id: 'security_solution_home',
       link: securityLink(SecurityPageName.landing),
@@ -61,7 +69,7 @@ export const createNavigationTree = async (
       link: 'workflows',
       badgeType: 'techPreview' as const,
     },
-    ...(chatExperience === AIChatExperience.Agent
+    ...(canAccessAgentBuilder
       ? [
           {
             // TODO: update icon to 'robot' once it's available in EUI
@@ -145,4 +153,5 @@ export const createNavigationTree = async (
     },
     createManagementFooterItemsTree(chatExperience),
   ],
-});
+  };
+};
