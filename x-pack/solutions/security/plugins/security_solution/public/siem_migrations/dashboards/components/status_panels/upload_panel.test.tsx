@@ -27,7 +27,11 @@ const renderTestComponent = (props: ComponentProps<typeof UploadDashboardsPanel>
 
   return render(
     <IntlProvider locale="en">
-      <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+      <MigrationDataInputContextProvider
+        openFlyout={jest.fn()}
+        closeFlyout={jest.fn()}
+        isFlyoutOpen={false}
+      >
         <UploadDashboardsPanel {...finalProps} />
       </MigrationDataInputContextProvider>
     </IntlProvider>
