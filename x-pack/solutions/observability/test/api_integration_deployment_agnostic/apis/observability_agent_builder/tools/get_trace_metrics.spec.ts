@@ -944,6 +944,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(items).to.be.an('array');
         expect(items).to.have.length(0);
       });
+
+      it('defaults to service.name grouping when groupBy is an empty string', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            groupBy: '',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(4);
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('payment-service');
+        expect(groups).to.contain('user-service');
+        expect(groups).to.contain('order-service');
+        expect(groups).to.contain('notification-service');
+      });
     });
   });
 }
