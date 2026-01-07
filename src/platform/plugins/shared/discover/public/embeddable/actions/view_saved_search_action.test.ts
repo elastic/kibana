@@ -14,10 +14,9 @@ import { BehaviorSubject } from 'rxjs';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
+import type { SearchEmbeddableApi } from '../types';
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import { SolutionType } from '../../context_awareness';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import type { ViewSavedSearchActionApi } from './view_saved_search_compatibility_check';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
@@ -29,9 +28,8 @@ const compatibleEmbeddableApi = {
   } as unknown as SavedSearch),
   parentApi: {
     viewMode$: new BehaviorSubject('view'),
-    controlGroupApi$: new BehaviorSubject({} as unknown as ControlGroupRendererApi),
   },
-} as unknown as ViewSavedSearchActionApi;
+} as unknown as SearchEmbeddableApi;
 
 jest
   .spyOn(services.core.chrome, 'getActiveSolutionNavId$')

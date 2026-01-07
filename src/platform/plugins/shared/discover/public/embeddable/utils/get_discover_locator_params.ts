@@ -9,35 +9,45 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
-import type { PublishesSavedObjectId, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import {
+  apiHasSerializableState,
+  apiHasType,
+  apiHasUniqueId,
+  type HasParentApi,
+  type PublishesSavedObjectId,
+  type PublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { ESQLControlState } from '@kbn/esql-types';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import {
-  apiPublishesControlGroupApi,
-  type PublishesControlGroupApi,
-  type PublishesSavedSearch,
-} from '../types';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiPublishesControlsLayout } from '@kbn/controls-renderer';
+import { omit } from 'lodash';
+import { type PublishesSavedSearch } from '../types';
 import type { DiscoverAppLocatorParams } from '../../../common';
 
 export const getDiscoverLocatorParams = (
   api: PublishesSavedSearch &
-    Partial<PublishesSavedObjectId & PublishesUnifiedSearch & PublishesControlGroupApi>
+    Partial<PublishesSavedObjectId & PublishesUnifiedSearch & HasParentApi>
 ) => {
   const savedSearch = api.savedSearch$.getValue();
 
   const dataView = savedSearch?.searchSource.getField('index');
   const savedObjectId = api.savedObjectId$?.getValue();
+  const presentationContainer = apiIsPresentationContainer(api.parentApi)
+    ? api.parentApi
+    : undefined;
+
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),
-        esqlControls: apiPublishesControlGroupApi(api)
-          ? getEsqlControls(api.parentApi?.controlGroupApi$.getValue(), api.query$?.getValue())
+        esqlControls: presentationContainer
+          ? getEsqlControls(presentationContainer, api.query$?.getValue())
           : undefined,
         timeRange: savedSearch?.timeRange,
         refreshInterval: savedSearch?.refreshInterval,
@@ -53,35 +63,50 @@ export const getDiscoverLocatorParams = (
 };
 
 function getEsqlControls(
-  controlGroupApi: ControlGroupRendererApi | undefined,
+  presentationContainer: PresentationContainer,
   query: AggregateQuery | Query | undefined
-): (ControlPanelsState<ESQLControlState> & SerializableRecord) | undefined {
+) {
   if (!isOfAggregateQueryType(query)) return;
 
-  const serializedState = controlGroupApi?.serializeState?.();
-  if (!serializedState) return;
-
   const usedVariables = getESQLQueryVariables(query.esql);
+  const controlsLayout = apiPublishesControlsLayout(presentationContainer)
+    ? presentationContainer.layout$.getValue().controls
+    : {};
 
-  return serializedState.rawState.controls.reduce((acc, control) => {
-    if (!control.id) return acc;
-    if (control.type !== ESQL_CONTROL) return acc; // only include ESQL controls
-    if (!control.controlConfig) return acc;
+  const esqlControlState = Object.values(presentationContainer.children$.getValue()).reduce(
+    (acc: { [uuid: string]: Serializable }, api, index) => {
+      if (
+        !(
+          apiHasType(api) &&
+          api.type === ESQL_CONTROL &&
+          apiHasUniqueId(api) &&
+          apiHasSerializableState(api)
+        )
+      ) {
+        return acc;
+      }
 
-    const variableName =
-      'variableName' in control.controlConfig && (control.controlConfig.variableName as string);
-    if (!variableName) return acc;
+      const controlState = api.serializeState().rawState as ESQLControlState;
+      const variableName = 'variableName' in controlState && (controlState.variableName as string);
+      if (!variableName) return acc;
+      const isUsed = usedVariables.includes(variableName);
+      if (!isUsed) return acc;
 
-    const isUsed = usedVariables.includes(variableName);
-    if (!isUsed) return acc;
+      return {
+        ...acc,
+        [api.uuid]: {
+          type: api.type,
+          ...controlState,
+          ...(controlsLayout[api.uuid]
+            ? {
+                ...omit(controlsLayout[api.uuid], 'type'),
+              }
+            : { order: index }),
+        },
+      };
+    },
+    {}
+  );
 
-    return {
-      ...acc,
-      [control.id]: {
-        ...control.controlConfig,
-        type: control.type,
-        order: control.order,
-      },
-    };
-  }, {});
+  return esqlControlState as ControlPanelsState<ESQLControlState> & SerializableRecord;
 }

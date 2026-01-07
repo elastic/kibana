@@ -34,7 +34,6 @@ import type {
   DynamicActionsSerializedState,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type {
   EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
@@ -117,14 +116,3 @@ export const apiPublishesSavedSearch = (
 export interface HasTimeRange {
   hasTimeRange(): boolean;
 }
-
-export interface PublishesControlGroupApi {
-  parentApi?: { controlGroupApi$: BehaviorSubject<ControlGroupRendererApi> };
-}
-
-export const apiPublishesControlGroupApi = (
-  api: EmbeddableApiContext['embeddable']
-): api is PublishesControlGroupApi => {
-  const embeddable = api as PublishesControlGroupApi;
-  return Boolean(embeddable.parentApi && embeddable.parentApi.controlGroupApi$);
-};

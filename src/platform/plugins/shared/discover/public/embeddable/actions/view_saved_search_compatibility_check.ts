@@ -20,13 +20,10 @@ import {
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 
-import type { PublishesControlGroupApi, PublishesSavedSearch } from '../types';
+import type { PublishesSavedSearch } from '../types';
 import { apiPublishesSavedSearch } from '../types';
 
-export type ViewSavedSearchActionApi = CanAccessViewMode &
-  HasType &
-  PublishesSavedSearch &
-  PublishesControlGroupApi;
+export type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
 export const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']

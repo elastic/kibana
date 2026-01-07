@@ -121,15 +121,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addSavedSearch('ESQL control unlink test');
 
         // Unlink the saved search
-        await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+        await dashboardPanelActions.clickPanelActionByTitle(
+          'embeddablePanelAction-unlinkFromLibrary',
+          'ESQL control unlink test'
+        );
 
         // Save dashboard and go to view mode
         await dashboard.saveDashboard('ESQL control unlink test dashboard');
         await dashboard.switchToViewMode();
 
         // Go to discover from the panel
-        await dashboardPanelActions.clickPanelAction(
-          'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
+        await dashboardPanelActions.clickPanelActionByTitle(
+          'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH',
+          'ESQL control unlink test'
         );
 
         // Verify that we are in discover and the control exists
