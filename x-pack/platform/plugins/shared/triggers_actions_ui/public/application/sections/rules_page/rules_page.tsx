@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useEffect, useState } from 'react';
+import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -74,9 +74,14 @@ export const RulesPage = () => {
     }
   };
 
-  const { pathname, search, hash } = location;
+  // Use ref to store latest location to avoid recreating callbacks when search/hash changes
+  // Updating ref.current doesn't cause re-renders, so we can do it directly in render
+  const locationRef = useRef(location);
+  locationRef.current = location;
+
   const navigateToEditRuleForm = useCallback(
     (ruleId: string) => {
+      const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
       const returnApp = 'rules';
       navigateToApp('management', {
@@ -87,11 +92,12 @@ export const RulesPage = () => {
         },
       });
     },
-    [navigateToApp, pathname, search, hash]
+    [navigateToApp]
   );
 
   const navigateToCreateRuleForm = useCallback(
     (ruleTypeId: string) => {
+      const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
       const returnApp = 'rules';
       navigateToApp('management', {
@@ -102,7 +108,7 @@ export const RulesPage = () => {
         },
       });
     },
-    [navigateToApp, pathname, search, hash]
+    [navigateToApp]
   );
 
   const renderRulesList = useCallback(() => {

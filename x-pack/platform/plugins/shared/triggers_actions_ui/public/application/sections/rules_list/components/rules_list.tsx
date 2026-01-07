@@ -182,7 +182,6 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -248,6 +247,8 @@ export const RulesList = ({
       searchFilter,
       typeFilter,
     });
+
+  const [inputText, setInputText] = useState<string>(filters.searchText ?? searchFilter ?? '');
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -449,7 +450,11 @@ export const RulesList = ({
   }, [ruleParamFilter]);
 
   useEffect(() => {
-    if (typeof searchFilter === 'string') {
+    if (
+      typeof searchFilter === 'string' &&
+      searchFilter !== filters.searchText &&
+      searchFilter.trim() !== ''
+    ) {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
   }, [searchFilter]);
