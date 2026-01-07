@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 5
+                "stall_time_seconds": 30
               }
             ]
           }
