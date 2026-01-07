@@ -109,7 +109,7 @@
   },
   "dependencies": {
     "@a2a-js/sdk": "^0.3.4",
-    "@ai-sdk/langchain": "^1.0.102",
+    "@ai-sdk/langchain": "^1.0.106",
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
@@ -1247,7 +1247,7 @@
     "@xstate5/react": "npm:@xstate/react@^5.0.3",
     "@xyflow/react": "^12.9.3",
     "adm-zip": "^0.5.16",
-    "ai": "^5.0.102",
+    "ai": "^5.0.106",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "antlr4": "^4.13.2",
