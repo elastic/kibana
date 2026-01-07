@@ -64,6 +64,7 @@ export interface UnifiedDocViewerFlyoutProps {
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   initialTabId?: string;
+  onTabChange?: (tabId: string) => void;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -100,6 +101,7 @@ export function UnifiedDocViewerFlyout({
   onAddColumn,
   setExpandedDoc,
   initialTabId,
+  onTabChange,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -213,6 +215,7 @@ export function UnifiedDocViewerFlyout({
         docViewsRegistry={docViewsRegistry}
         decreaseAvailableHeightBy={euiTheme.base}
         initialTabId={initialTabId}
+        onTabChange={onTabChange}
       />
     ),
     [
@@ -229,6 +232,7 @@ export function UnifiedDocViewerFlyout({
       docViewsRegistry,
       euiTheme.base,
       initialTabId,
+      onTabChange,
     ]
   );
 

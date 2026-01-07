@@ -217,6 +217,9 @@ function DiscoverDocumentsComponent({
 
   const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
+  const setInitialDocViewerTabIdAction = useCurrentTabAction(
+    internalStateActions.setInitialDocViewerTabId
+  );
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       dispatch(
@@ -230,6 +233,13 @@ function DiscoverDocumentsComponent({
       }
     },
     [dispatch, setExpandedDocAction]
+  );
+
+  const onDocViewerTabChange = useCallback(
+    (tabId: string) => {
+      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
+    },
+    [dispatch, setInitialDocViewerTabIdAction]
   );
 
   const latestGrid = useLatest(grid);
@@ -339,6 +349,7 @@ function DiscoverDocumentsComponent({
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
+        onTabChange={onDocViewerTabChange}
       />
     ),
     [
@@ -351,6 +362,7 @@ function DiscoverDocumentsComponent({
       query,
       initialDocViewerTabId,
       docViewerExtensionActions,
+      onDocViewerTabChange,
     ]
   );
 

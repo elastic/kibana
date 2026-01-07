@@ -26,6 +26,7 @@ interface DocViewerInternalProps extends DocViewRenderProps {
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
+const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewer_tab_', '');
 
 /**
  * Rendering tabs with different views of 1 Elasticsearch hit in Discover.
@@ -34,7 +35,7 @@ const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
  * a `render` function.
  */
 export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
-  ({ docViews, initialTabId, ...renderProps }, ref) => {
+  ({ docViews, initialTabId, onTabChange, ...renderProps }, ref) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map(({ id, title, component }: DocView) => ({
@@ -73,8 +74,9 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
       (tab: EuiTabbedContentTab) => {
         setSelectedTabId(tab.id);
         setInitialTabId(tab.id); // Persist the selected tab in localStorage
+        onTabChange?.(getOriginalTabId(tab.id)); // Notify parent of tab change
       },
-      [setInitialTabId]
+      [setInitialTabId, onTabChange]
     );
 
     if (!tabs.length) {
