@@ -548,6 +548,7 @@ export class VisualizationsPlugin
       savedSearch,
       dataViews,
       inspector,
+      serverless,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -580,8 +581,10 @@ export class VisualizationsPlugin
       setSpaces(spaces);
       spaces.getActiveSpace$().subscribe((space) => {
         if (!space) return;
+        const isServerless = Boolean(serverless);
+        const isSolutionView = space.solution && space.solution !== 'classic';
         const visibleIn: AppDeepLinkLocations[] =
-          space.solution && space.solution !== 'classic' ? [] : ['globalSearch', 'sideNav'];
+          isServerless || isSolutionView ? [] : ['globalSearch', 'sideNav'];
         this.visibilityUpdater.next(() => ({ visibleIn }));
       });
     }
