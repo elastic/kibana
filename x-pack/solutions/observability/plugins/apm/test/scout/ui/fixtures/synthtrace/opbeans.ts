@@ -7,6 +7,7 @@
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange, generateLongId, generateShortId } from '@kbn/synthtrace-client';
 import { shuffle, compact } from 'lodash';
+import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
 import {
   ERROR_MESSAGE,
   PRODUCT_TRANSACTION_NAME,
@@ -112,9 +113,8 @@ export function opbeans({
       )
   );
 
-  // Lazily collect span links with a small limit to avoid timeouts
   // Pre-shuffle once to avoid expensive shuffle operations in the generator callback
-  let shuffledSpanLinks: Array<{ span: { id: string }; trace: { id: string } }> | null = null;
+  let shuffledSpanLinks: SpanLink[] | null = null;
   const getShuffledSpanLinks = () => {
     if (shuffledSpanLinks === null) {
       const events: ApmFields[] = [];

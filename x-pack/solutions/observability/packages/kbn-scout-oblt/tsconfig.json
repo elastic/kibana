@@ -17,6 +17,5 @@
     "@kbn/scout",
     "@kbn/data-forge",
     "@kbn/test",
-    "@kbn/profiling-plugin",
   ]
 }

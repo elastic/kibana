@@ -19,7 +19,7 @@ import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_error
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess'] },
+  { tag: ['@ess', '@svlOblt'] },
   async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
