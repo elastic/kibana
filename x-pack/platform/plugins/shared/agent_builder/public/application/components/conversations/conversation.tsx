@@ -50,16 +50,12 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const {
-    showScrollButton,
-    scrollToMostRecentRoundBottom,
-    scrollToMostRecentRoundTop,
-    stickToBottom,
-  } = useConversationScrollActions({
-    isResponseLoading,
-    conversationId: conversationId || '',
-    scrollContainer: scrollContainerRef.current,
-  });
+  const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
+    useConversationScrollActions({
+      isResponseLoading,
+      conversationId: conversationId || '',
+      scrollContainer: scrollContainerRef.current,
+    });
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
@@ -76,14 +72,27 @@ export const Conversation: React.FC<{}> = () => {
     ${fullWidthAndHeightStyles}
   `;
 
+  const scrollMaskHeight = euiTheme.size.l;
+
   // Necessary to position the scroll button absolute to the container.
   const scrollWrapperStyles = css`
     ${fullWidthAndHeightStyles}
     position: relative;
     min-height: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: ${scrollMaskHeight};
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
+    }
   `;
 
-  // TODO: Add custom mask for overflow scroll top and bottom
   const scrollableStyles = css`
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
@@ -98,7 +107,7 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   return (
-    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles}>
+    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
       <EuiFlexItem grow={true} css={scrollWrapperStyles}>
         <EuiFlexGroup
           direction="column"
@@ -110,7 +119,7 @@ export const Conversation: React.FC<{}> = () => {
             <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
+        {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
       <EuiFlexItem
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}

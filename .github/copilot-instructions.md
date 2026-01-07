@@ -9,7 +9,7 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 **Key Technologies:**
 
 - **Runtime:** Node.js (exact version required, check `.nvmrc` and `.node-version`)
-- **Package Manager:** Yarn ^1.22.19 (Yarn 2.0+ not supported)
+- **Package Manager:** Yarn 1.22.22
 - **Primary Languages:** TypeScript, JavaScript (React for frontend)
 - **Architecture:** Plugin-based with shared core platform
 
@@ -194,7 +194,7 @@ nvm use
 
 ### Package Manager - MANDATORY REQUIREMENT
 
-⚠️ **REQUIRED:** Yarn ^1.22.19 (Yarn 2.0+ is NOT supported)
+⚠️ **REQUIRED:** Yarn 1.22.22
 
 **Using wrong Yarn version WILL break bootstrap.**
 
