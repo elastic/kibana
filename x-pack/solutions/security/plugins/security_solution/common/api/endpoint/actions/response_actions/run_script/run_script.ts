@@ -67,11 +67,27 @@ const SentinelOneRunScriptActionRequestParamsSchema = schema.object({
   /**
    * The SentinelOne Script ID to be executed
    */
-  scriptId: getNonEmptyString('ScriptName'),
+  scriptId: getNonEmptyString('scriptId'),
   /**
    * Any input arguments for the selected script
    */
   scriptInput: schema.maybe(getNonEmptyString('scriptInput')),
+});
+
+const EndpointRunScriptActionRequestParamsSchema = schema.object({
+  /**
+   * The Script ID to be executed on the host (from the scripts library)
+   */
+  scriptId: getNonEmptyString('scriptId'),
+  /**
+   * Any input arguments for the selected script
+   */
+  scriptInput: schema.maybe(getNonEmptyString('scriptInput')),
+
+  /**
+   * Timeout for executing the script on the host
+   */
+  timeout: schema.maybe(schema.number({ min: 1 })),
 });
 
 export const RunScriptActionRequestSchema = {
@@ -89,7 +105,12 @@ export const RunScriptActionRequestSchema = {
           schema.siblingRef('agent_type'),
           'sentinel_one',
           SentinelOneRunScriptActionRequestParamsSchema,
-          schema.never()
+          schema.conditional(
+            schema.siblingRef('agent_type'),
+            'endpoint',
+            EndpointRunScriptActionRequestParamsSchema,
+            schema.never()
+          )
         )
       )
     ),
