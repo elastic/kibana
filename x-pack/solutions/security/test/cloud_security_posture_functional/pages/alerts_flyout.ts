@@ -9,11 +9,13 @@ import {
   waitForPluginInitialized,
   cleanupEntityStore,
   waitForEntityDataIndexed,
-  enableAssetInventory,
-  waitForEntityStoreReady,
   executeEnrichPolicy,
   waitForEnrichPolicyCreated,
   dataViewRouteHelpersFactory,
+  initEntityEnginesAndWait,
+  indexEntityData,
+  deleteEntityData,
+  ENTITY_STORE_TEST_DATA,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -300,20 +302,32 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             const dataView = dataViewRouteHelpersFactory(supertest);
             await dataView.create('security-solution');
 
-            // Enable asset inventory which creates the enrich policy
-            await enableAssetInventory({ supertest, logger });
-
-            // Wait for entity store engines to be fully started
-            // This ensures asyncSetup has completed - if it fails after creating
-            // the enrich policy, the error handler will delete everything
-            await waitForEntityStoreReady({ supertest, retry, logger });
+            // Initialize entity engine for 'generic' type and wait for it to be fully started
+            // This mirrors the approach used in entity store tests (EntityStoreUtils.initEntityEngineForEntityTypesAndWait)
+            await initEntityEnginesAndWait({
+              supertest,
+              retry,
+              logger,
+              entityTypes: ['generic'],
+            });
 
             await esArchiver.load(
               'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
             );
 
-            // Load entity data from the appropriate archive
-            await esArchiver.load(config.archivePath);
+            // Load entity data using ES client directly instead of esArchiver
+            // This avoids conflicts with internal/system indices that cause instability
+            if (config.useEnrichPolicy) {
+              await indexEntityData({
+                es,
+                logger,
+                indexName: '.entities.v1.latest.security_generic_default',
+                data: ENTITY_STORE_TEST_DATA,
+              });
+            } else {
+              // For v2 tests (if re-enabled), use esArchiver
+              await esArchiver.load(config.archivePath);
+            }
 
             // Wait for entity data to be fully indexed
             await waitForEntityDataIndexed({
@@ -333,6 +347,18 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           });
 
           after(async () => {
+            // Clean up entity data indexed via ES client
+            if (config.useEnrichPolicy) {
+              await deleteEntityData({
+                es,
+                logger,
+                indexName: '.entities.v1.latest.security_generic_default',
+              });
+            } else {
+              // For v2 tests (if re-enabled), unload esArchiver
+              await esArchiver.unload(config.archivePath);
+            }
+
             // Clean up entity store resources
             await cleanupEntityStore({ supertest, logger });
 
@@ -340,11 +366,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await kibanaServer.uiSettings.update({
               'securitySolution:enableAssetInventory': false,
             });
-
-            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
-            if (config.name === 'via LOOKUP JOIN (v2)') {
-              await esArchiver.unload(config.archivePath);
-            }
           });
 
           it('expanded flyout - entity enrichment for multiple generic targets - single target field', async () => {
