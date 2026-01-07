@@ -17,6 +17,7 @@ export const SNAPSHOT_NAME = 'my-test-snapshot';
 
 export const POLICY_EDIT = getPolicy({
   name: POLICY_NAME,
+  repository: REPOSITORY_NAME,
   retention: { minCount: 1 },
   config: { includeGlobalState: true, featureStates: ['kibana'] },
 });
