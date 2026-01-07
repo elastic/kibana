@@ -26,7 +26,11 @@ import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant
 import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
-import { CASES_CONNECTOR_SUB_ACTION, DEFAULT_MAX_OPEN_CASES } from '../../../../common/constants';
+import {
+  CASES_CONNECTOR_SUB_ACTION,
+  DEFAULT_MAX_OPEN_CASES,
+  MAX_OPEN_CASES,
+} from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
@@ -309,10 +313,12 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             <EuiFieldNumber
               fullWidth
               min={1}
-              max={DEFAULT_MAX_OPEN_CASES}
+              max={MAX_OPEN_CASES}
               step={1}
-              defaultValue={actionParams.subActionParams?.maximumCasesToOpen ?? 5}
-              data-test-subj="max-case-to-open-input"
+              defaultValue={
+                actionParams.subActionParams?.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES
+              }
+              data-test-subj="maximum-case-to-open-input"
               onChange={onChangeMaxCasesToOpend}
             />
           </EuiFormRow>
