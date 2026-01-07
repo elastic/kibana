@@ -170,7 +170,7 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
-  const relatedPanelsManager = initializeRelatedPanelsManager(layoutManager, esqlVariablesManager);
+  const relatedPanelsManager = initializeRelatedPanelsManager(trackPanel, layoutManager);
 
   const dashboardApi = {
     ...viewModeManager.api,
