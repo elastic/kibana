@@ -168,7 +168,11 @@ const checkEnrichPolicyExists = async (
       name: getEnrichPolicyId(spaceId),
     });
 
-    logger.debug(`Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${policies?.length} policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`);
+    logger.debug(
+      `Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${
+        policies?.length
+      } policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`
+    );
     return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
   } catch (error) {
     logger.error(`Error fetching enrich policy ${error.message}`);
