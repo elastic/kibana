@@ -12,7 +12,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
@@ -137,8 +137,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           })
         : undefined;
 
-    const initialQuery =
-      urlAppState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
+    const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
@@ -233,8 +232,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // then get an updated copy of the saved search with the applied initial state
     const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
-      savedSearch: persistedTabSavedSearch,
-      overrideDataView: dataView,
+      persistedTab,
+      dataView,
       services,
     });
 

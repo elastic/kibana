@@ -86,6 +86,10 @@ export class RequestAdapter extends EventEmitter {
     return Array.from(this.requests.values());
   }
 
+  public getRequestsSince(time: number): Request[] {
+    return Array.from(this.requests.values().filter((req) => req.startTime >= time));
+  }
+
   public getRequestEntries(): Array<[Request, RequestResponder]> {
     return this.getRequests()
       .map((req) => [req, this.responses.get(req)] as [Request, RequestResponder])

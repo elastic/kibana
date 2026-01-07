@@ -77,7 +77,9 @@ export class LinksPlugin
                 },
               },
             },
-            true
+            {
+              displaySuccessMessage: true,
+            }
           );
         },
         savedObjectType: LINKS_SAVED_OBJECT_TYPE,
@@ -149,7 +151,7 @@ export class LinksPlugin
       }
     );
 
-    plugins.dashboard.registerDashboardPanelSettings(
+    plugins.presentationUtil.registerPanelPlacementSettings(
       LINKS_EMBEDDABLE_TYPE,
       async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');

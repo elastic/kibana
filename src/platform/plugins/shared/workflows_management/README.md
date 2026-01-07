@@ -677,6 +677,8 @@ workflows_management/
 ```bash
 # Run unit tests
 yarn test:jest src/platform/plugins/shared/workflows_management
+# Running a specific test
+yarn test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
 
 # Run integration tests
 yarn test:jest_integration src/platform/plugins/shared/workflows_management
