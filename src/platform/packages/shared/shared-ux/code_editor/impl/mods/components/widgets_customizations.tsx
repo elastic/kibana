@@ -56,8 +56,11 @@ export const EditorWidgetsCustomizations: FC<
           if ($widgetNode) {
             // Save original position
             originalTopPosition = $widgetNode.style.top;
-            // Apply repositioned top to avoid header overlap
-            $widgetNode.style.top = `max(${originalTopPosition}, calc(var(--kbn-layout--application-top, 0px) + ${euiTheme.size.m}))`;
+            if (originalTopPosition) {
+              // Apply repositioned top to avoid header overlap
+              $widgetNode.style.top = `max(${originalTopPosition}, calc(var(--kbn-layout--application-top, 0px) + ${euiTheme.size.m}))`;
+            }
+
             // Make visible AFTER positioning is complete
             $widgetNode.style.removeProperty('visibility');
           }
