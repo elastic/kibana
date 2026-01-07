@@ -268,11 +268,11 @@ describe('utils', () => {
 
     it('returns the correct overrides for an incremental id search', () => {
       expect(getIncrementalIdSearchOverrides('#123')).toEqual({
-        searchFields: ['incremental_id.text'],
+        searchFields: ['cases.incremental_id.text'],
         search: '123',
       });
       expect(getIncrementalIdSearchOverrides('   #123   ')).toEqual({
-        searchFields: ['incremental_id.text'],
+        searchFields: ['cases.incremental_id.text'],
         search: '123',
       });
     });
