@@ -99,6 +99,7 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
           ${logicalCSS('height', '100%')}
         }
       `,
+      tooltipZIndex: fullScreenZIndex + 1,
     };
   }, [euiTheme]);
 
