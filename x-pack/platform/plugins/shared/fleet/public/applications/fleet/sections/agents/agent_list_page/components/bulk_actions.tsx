@@ -23,11 +23,13 @@ import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
   LICENSE_FOR_AGENT_MIGRATION,
+  LICENSE_FOR_AGENT_ROLLBACK,
 } from '../../../../../../../common/constants';
 import { getCommonTags } from '../utils';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { useExportCSV } from '../hooks/export_csv';
 import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
+import { AgentRollbackModal } from '../../components/agent_rollback_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -71,8 +73,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
+  const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+  const agentRollbackEnabled = ExperimentalFeaturesService.get().enableAgentRollback;
 
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -92,6 +96,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isMigrateModalOpen, setIsMigrateModalOpen] = useState<boolean>(false);
   const [isAgentPrivilegeChangeModalOpen, setIsAgentPrivilegeChangeModalOpen] =
     useState<boolean>(false);
+  const [isRollbackModalOpen, setIsRollbackModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
@@ -267,6 +272,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             },
             'data-test-subj': 'agentBulkActionsRestartUpgrade',
           },
+          ...(agentRollbackEnabled
+            ? [
+                {
+                  id: 'rollback-upgrade',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.rollbackUpgradeAgents"
+                      defaultMessage="Roll back upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  ),
+                  icon: 'clockCounter',
+                  disabled: !authz.fleet.allAgents || !doesLicenseAllowRollback,
+                  onClick: () => {
+                    setIsRollbackModalOpen(true);
+                  },
+                  'data-test-subj': 'agentBulkActionsRollbackUpgrade',
+                },
+              ]
+            : []),
         ],
       },
       // Maintenance and diagnostics submenu
@@ -338,6 +363,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     authz.fleet.allAgents,
     agentCount,
     isLicenceAllowingScheduleUpgrade,
+    agentRollbackEnabled,
+    doesLicenseAllowRollback,
     maintainanceItems,
     agentPrivilegeLevelChangeEnabled,
     isTagAddVisible,
@@ -458,6 +485,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             onSave={() => {
               setIsAgentPrivilegeChangeModalOpen(false);
               refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRollbackModalOpen && (
+        <EuiPortal>
+          <AgentRollbackModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRollbackModalOpen(false);
             }}
           />
         </EuiPortal>

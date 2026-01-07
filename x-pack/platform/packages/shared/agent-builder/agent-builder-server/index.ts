@@ -29,7 +29,6 @@ export type {
   AgentBuilderToolEvent,
   ToolEventHandlerFn,
   ToolEventEmitter,
-  ToolProgressEmitterFn,
   ToolResultStore,
   WritableToolResultStore,
   ToolPromptManager,

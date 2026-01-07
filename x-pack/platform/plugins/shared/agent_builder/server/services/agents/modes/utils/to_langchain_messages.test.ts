@@ -13,6 +13,7 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type {
   ProcessedAttachment,
   ProcessedConversation,
@@ -72,6 +73,7 @@ describe('conversationLangchainMessages', () => {
       previousRounds: [],
       attachments: [],
       attachmentTypes: [],
+      attachmentStateManager: createAttachmentStateManager([]),
       ...parts,
     };
   };
