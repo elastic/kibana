@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/logs-explorer-plugin'
   - '@kbn/observability-logs-explorer-plugin'
   - '@kbn/security-plugin-types-common'
+  - '@kbn/maintenance-windows-plugin'
 tags:
   - test-helper
   - package
