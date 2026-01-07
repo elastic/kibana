@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -95,6 +96,36 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
+
+  /**
+   * Get an observable of the current app menu configuration
+   */
+  getAppMenu$(): Observable<AppMenuConfig | undefined>;
+
+  /**
+   * Set the app menu configuration for the current application.
+   *
+   * @example
+   *```tsx
+   * import React, { useEffect } from 'react';
+   * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+   * import { useKibana } from '@kbn/kibana-react-plugin/public';
+   *
+   * interface Props {
+   *  config: AppMenuConfig;
+   *}
+   *
+   * const Example = ({ config }: Props) => {
+   *  const { chrome } = useKibana().services;
+   *
+   *  useEffect(() => {
+   *    chrome.setAppMenu(config);
+   *  }, [chrome.setAppMenu, config]);
+   *
+   *  return <div>Hello world!</div>;
+   * };
+   */
+  setAppMenu(config?: AppMenuConfig): void;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs
