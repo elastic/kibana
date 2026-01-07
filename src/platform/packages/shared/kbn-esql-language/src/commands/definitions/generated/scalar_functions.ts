@@ -889,9 +889,49 @@ const chunkDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'chunking_settings',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n'}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n'}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n'}, {name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.'}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n'}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n'}",
+          optional: true,
+          description:
+            'Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'text',
           optional: false,
           description: 'The input to chunk.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'chunking_settings',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n'}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n'}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n'}, {name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.'}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n'}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n'}",
+          optional: true,
+          description:
+            'Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.',
         },
       ],
       returnType: 'keyword',
@@ -3761,11 +3801,10 @@ const dateFormatDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'dateFormat',
+          name: 'date',
           type: 'date',
-          optional: true,
-          description:
-            "Date format (optional).  If no format is specified, the `yyyy-MM-dd'T'HH:mm:ss.SSSZ` format is used. If `null`, the function returns `null`.",
+          optional: false,
+          description: 'Date expression. If `null`, the function returns `null`.',
         },
       ],
       returnType: 'keyword',
@@ -3773,11 +3812,10 @@ const dateFormatDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'dateFormat',
+          name: 'date',
           type: 'date_nanos',
-          optional: true,
-          description:
-            "Date format (optional).  If no format is specified, the `yyyy-MM-dd'T'HH:mm:ss.SSSZ` format is used. If `null`, the function returns `null`.",
+          optional: false,
+          description: 'Date expression. If `null`, the function returns `null`.',
         },
       ],
       returnType: 'keyword',
@@ -3887,6 +3925,18 @@ const dateParseDefinition: FunctionDefinition = {
     {
       params: [
         {
+          name: 'dateString',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
           name: 'datePattern',
           type: 'keyword',
           optional: true,
@@ -3934,12 +3984,73 @@ const dateParseDefinition: FunctionDefinition = {
     {
       params: [
         {
+          name: 'dateString',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='locale', values=[standard], description='The locale to use when parsing the date, relevant when parsing month names or week days.'}",
+          optional: true,
+          description:
+            '(Optional) Additional options for date parsing, specifying time zone and locale as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
           name: 'datePattern',
           type: 'keyword',
           optional: true,
           description:
             'The date format. Refer to the {javadoc14}/java.base/java/time/format/DateTimeFormatter.html[`DateTimeFormatter` documentation] for the syntax. If `null`, the function returns `null`.',
         },
+        {
+          name: 'dateString',
+          type: 'text',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'datePattern',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The date format. Refer to the {javadoc14}/java.base/java/time/format/DateTimeFormatter.html[`DateTimeFormatter` documentation] for the syntax. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'dateString',
+          type: 'text',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='locale', values=[standard], description='The locale to use when parsing the date, relevant when parsing month names or week days.'}",
+          optional: true,
+          description:
+            '(Optional) Additional options for date parsing, specifying time zone and locale as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
         {
           name: 'dateString',
           type: 'text',
@@ -3980,10 +4091,87 @@ const dateParseDefinition: FunctionDefinition = {
         },
         {
           name: 'dateString',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='locale', values=[standard], description='The locale to use when parsing the date, relevant when parsing month names or week days.'}",
+          optional: true,
+          description:
+            '(Optional) Additional options for date parsing, specifying time zone and locale as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'dateString',
           type: 'text',
           optional: false,
           description:
             'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='locale', values=[standard], description='The locale to use when parsing the date, relevant when parsing month names or week days.'}",
+          optional: true,
+          description:
+            '(Optional) Additional options for date parsing, specifying time zone and locale as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'datePattern',
+          type: 'text',
+          optional: true,
+          description:
+            'The date format. Refer to the {javadoc14}/java.base/java/time/format/DateTimeFormatter.html[`DateTimeFormatter` documentation] for the syntax. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'dateString',
+          type: 'text',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'datePattern',
+          type: 'text',
+          optional: true,
+          description:
+            'The date format. Refer to the {javadoc14}/java.base/java/time/format/DateTimeFormatter.html[`DateTimeFormatter` documentation] for the syntax. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'dateString',
+          type: 'text',
+          optional: false,
+          description:
+            'Date expression as a string. If `null` or an empty string, the function returns `null`.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='locale', values=[standard], description='The locale to use when parsing the date, relevant when parsing month names or week days.'}",
+          optional: true,
+          description:
+            '(Optional) Additional options for date parsing, specifying time zone and locale as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -6223,11 +6411,10 @@ const logDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'base',
+          name: 'number',
           type: 'double',
-          optional: true,
-          description:
-            'Base of logarithm. If `null`, the function returns `null`. If not provided, this function returns the natural logarithm (base e) of a value.',
+          optional: false,
+          description: 'Numeric expression. If `null`, the function returns `null`.',
         },
       ],
       returnType: 'double',
@@ -6307,11 +6494,10 @@ const logDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'base',
+          name: 'number',
           type: 'integer',
-          optional: true,
-          description:
-            'Base of logarithm. If `null`, the function returns `null`. If not provided, this function returns the natural logarithm (base e) of a value.',
+          optional: false,
+          description: 'Numeric expression. If `null`, the function returns `null`.',
         },
       ],
       returnType: 'double',
@@ -6391,11 +6577,10 @@ const logDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'base',
+          name: 'number',
           type: 'long',
-          optional: true,
-          description:
-            'Base of logarithm. If `null`, the function returns `null`. If not provided, this function returns the natural logarithm (base e) of a value.',
+          optional: false,
+          description: 'Numeric expression. If `null`, the function returns `null`.',
         },
       ],
       returnType: 'double',
@@ -6475,11 +6660,10 @@ const logDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'base',
+          name: 'number',
           type: 'unsigned_long',
-          optional: true,
-          description:
-            'Base of logarithm. If `null`, the function returns `null`. If not provided, this function returns the natural logarithm (base e) of a value.',
+          optional: false,
+          description: 'Numeric expression. If `null`, the function returns `null`.',
         },
       ],
       returnType: 'double',
@@ -7577,12 +7761,14 @@ const matchPhraseDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Field that the query will target.',
+          fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
+          constantOnly: true,
         },
         {
           name: 'options',
@@ -7592,6 +7778,7 @@ const matchPhraseDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) MatchPhrase additional options as <<esql-function-named-params,function named parameters>>. See [`match_phrase`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) for more information.',
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -7603,12 +7790,14 @@ const matchPhraseDefinition: FunctionDefinition = {
           type: 'text',
           optional: false,
           description: 'Field that the query will target.',
+          fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
+          constantOnly: true,
         },
         {
           name: 'options',
@@ -7618,24 +7807,13 @@ const matchPhraseDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) MatchPhrase additional options as <<esql-function-named-params,function named parameters>>. See [`match_phrase`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) for more information.',
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.ROW,
-    Location.SORT,
-    Location.WHERE,
-    Location.STATS,
-    Location.STATS_BY,
-    Location.STATS_WHERE,
-    Location.STATS_TIMESERIES,
-    Location.COMPLETION,
-    Location.RERANK,
-    Location.JOIN,
-  ],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: ['FROM books\n| WHERE MATCH_PHRASE(author, "William Faulkner")'],
 };
 
@@ -10240,6 +10418,380 @@ const mvFirstDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const mvIntersectionDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'mv_intersection',
+  description: i18n.translate('kbn-esql-language.esql.definitions.mv_intersection', {
+    defaultMessage:
+      'Returns the values that appear in both input fields. Returns `null` if either field is null or if no values match.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'boolean',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'boolean',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'date',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'double',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'double',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_point',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_point',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_shape',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_shape',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohash',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geohash',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohex',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geohex',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geotile',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geotile',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'integer',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'integer',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'ip',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'ip',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'long',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'long',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'version',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'version',
+          optional: false,
+          description: 'Multivalue expression. If null, the function returns null.',
+        },
+      ],
+      returnType: 'version',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]\n| EVAL finalValue = MV_INTERSECTION(a, b)\n| KEEP finalValue',
+    'ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long\n| EVAL finalValue = MV_INTERSECTION(a, b)\n| KEEP finalValue',
+    'ROW a = [true, false, false, false], b = [false]\n| EVAL finalValue = MV_INTERSECTION(a, b)\n| KEEP finalValue',
+    'ROW a = [5.2, 10.5, 1.12345, 2.6928], b = [10.5, 2.6928]\n| EVAL finalValue = MV_INTERSECTION(a, b)\n| KEEP finalValue',
+    'ROW a = ["one", "two", "three", "four", "five"], b = ["one", "four"]\n| EVAL finalValue = MV_INTERSECTION(a, b)\n| KEEP finalValue',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const mvLastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_last',
@@ -11926,6 +12478,380 @@ const mvSumDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: ['ROW a=[3, 5, 6]\n| EVAL sum_a = MV_SUM(a)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const mvUnionDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'mv_union',
+  description: i18n.translate('kbn-esql-language.esql.definitions.mv_union', {
+    defaultMessage:
+      'Returns all unique values from the combined input fields (set union). Null values are treated as empty sets; returns `null` only if both fields are null.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'boolean',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'boolean',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'date',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'double',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'double',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohash',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geohash',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohex',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geohex',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geotile',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geotile',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'integer',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'integer',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'ip',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'ip',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'version',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'version',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'version',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = [true, false], b = [false]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = ["one", "two", "three"], b = ["two", "four"]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -15522,6 +16448,185 @@ const stIntersectsDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stNpointsDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_npoints',
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_npoints', {
+    defaultMessage: 'Counts the number of points in the supplied geometry.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL points = ST_NPOINTS(city_boundary)\n| KEEP abbrev, airport, points',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stSimplifyDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_simplify',
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_simplify', {
+    defaultMessage:
+      'Simplifies the input geometry by applying the Douglas-Peucker algorithm with a specified tolerance. Vertices that fall within the tolerance distance from the simplified shape are removed. Note that the resulting geometry may be invalid, even if the original input was valid.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"\n| EVAL simplified = ST_SIMPLIFY(TO_GEOSHAPE(wkt), 0.7)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const stWithinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_within',
@@ -15709,7 +16814,7 @@ const stXDefinition: FunctionDefinition = {
   name: 'st_x',
   description: i18n.translate('kbn-esql-language.esql.definitions.st_x', {
     defaultMessage:
-      'Extracts the `x` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `longitude` value.',
+      'Extracts the `x` coordinate from the supplied point.\nIf the point is of type `geo_point` this is equivalent to extracting the `longitude` value.',
   }),
   preview: false,
   alias: undefined,
@@ -15919,7 +17024,7 @@ const stYDefinition: FunctionDefinition = {
   name: 'st_y',
   description: i18n.translate('kbn-esql-language.esql.definitions.st_y', {
     defaultMessage:
-      'Extracts the `y` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `latitude` value.',
+      'Extracts the `y` coordinate from the supplied point.\nIf the point is of type `geo_point` this is equivalent to extracting the `latitude` value.',
   }),
   preview: false,
   alias: undefined,
@@ -16595,6 +17700,12 @@ const textEmbeddingDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Identifier of an existing inference endpoint the that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
+          hint: {
+            entityType: 'inference_endpoint',
+            constraints: {
+              task_type: 'text_embedding',
+            },
+          },
         },
       ],
       returnType: 'dense_vector',
@@ -16614,8 +17725,6 @@ const textEmbeddingDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: [
-    'ROW input="Who is Victor Hugo?"\n| EVAL embedding = TEXT_EMBEDDING("Who is Victor Hugo?", "test_dense_inference")',
-    'FROM dense_vector_text METADATA _score\n| EVAL query_embedding = TEXT_EMBEDDING("be excellent to each other", "test_dense_inference")\n| WHERE KNN(text_embedding_field, query_embedding)',
     'FROM dense_vector_text METADATA _score\n| WHERE KNN(text_embedding_field, TEXT_EMBEDDING("be excellent to each other", "test_dense_inference"))',
   ],
 };
@@ -18978,6 +20087,18 @@ const toStringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'histogram',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description:
@@ -19410,6 +20531,33 @@ const topSnippetsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n'}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.'}",
+          optional: true,
+          description:
+            '(Optional) TopSnippets additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'text',
           optional: false,
           description: 'The input to chunk.',
@@ -19420,6 +20568,33 @@ const topSnippetsDefinition: FunctionDefinition = {
           optional: false,
           description:
             'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n'}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.'}",
+          optional: true,
+          description:
+            '(Optional) TopSnippets additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
         },
       ],
       returnType: 'keyword',
@@ -19439,6 +20614,7 @@ const topSnippetsDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: [
+    'FROM books\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien")',
     'FROM books\n| WHERE MATCH(title, "Return")\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })',
   ],
 };
@@ -19786,7 +20962,6 @@ const vCosineDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_cosine', {
     defaultMessage: 'Calculates the cosine similarity between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19833,7 +21008,6 @@ const vDotProductDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_dot_product', {
     defaultMessage: 'Calculates the dot product between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19880,7 +21054,6 @@ const vHammingDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_hamming', {
     defaultMessage: 'Calculates the Hamming distance between two dense vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19927,7 +21100,6 @@ const vL1NormDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_l1_norm', {
     defaultMessage: 'Calculates the l1 norm between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19974,7 +21146,6 @@ const vL2NormDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_l2_norm', {
     defaultMessage: 'Calculates the l2 norm between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -20157,6 +21328,7 @@ export const scalarFunctionDefinitions = [
   mvCountDefinition,
   mvDedupeDefinition,
   mvFirstDefinition,
+  mvIntersectionDefinition,
   mvLastDefinition,
   mvMaxDefinition,
   mvMedianDefinition,
@@ -20167,6 +21339,7 @@ export const scalarFunctionDefinitions = [
   mvSliceDefinition,
   mvSortDefinition,
   mvSumDefinition,
+  mvUnionDefinition,
   mvZipDefinition,
   networkDirectionDefinition,
   nowDefinition,
@@ -20198,6 +21371,8 @@ export const scalarFunctionDefinitions = [
   stGeohexDefinition,
   stGeotileDefinition,
   stIntersectsDefinition,
+  stNpointsDefinition,
+  stSimplifyDefinition,
   stWithinDefinition,
   stXDefinition,
   stXmaxDefinition,
