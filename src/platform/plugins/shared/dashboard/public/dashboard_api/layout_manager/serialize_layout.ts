@@ -17,14 +17,14 @@ import type { DashboardSection } from '../../../server';
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState,
-  childrenIds: string[] = [] // used if you want to serialize a **subset** of the layout
+  childrenIds?: string[] // used if you want to serialize a **subset** of the layout
 ): Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
   });
 
-  const childrenToSerialize: string[] = childrenIds.length ? childrenIds : Object.keys(childState);
+  const childrenToSerialize: string[] = childrenIds ?? Object.keys(childState);
 
   const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
@@ -62,8 +62,6 @@ export function serializeLayout(
       });
     }
   });
-
-  console.log({ controls: [...controls] });
 
   return {
     panels: [...panels, ...Object.values(sections)],
