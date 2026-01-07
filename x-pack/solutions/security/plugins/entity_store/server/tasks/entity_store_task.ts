@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance, TaskManagerSetupContract, TaskManagerStartContract, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { TaskConfig } from './config';

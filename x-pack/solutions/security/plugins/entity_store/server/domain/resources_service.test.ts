@@ -9,7 +9,7 @@ import { ResourcesService } from './resources_service';
 import { EntityType } from './definitions/entity_type';
 import { ExtractEntityTask } from '../tasks/extract_entity_task';
 import type { TaskManager } from '../types';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 jest.mock('../tasks/extract_entity_task');
 
@@ -76,9 +76,7 @@ describe('ResourcesService', () => {
       const mockTask = {
         schedule: jest.fn().mockResolvedValue(undefined),
       };
-      mockExtractEntityTask.mockImplementationOnce(
-        () => mockTask as unknown as ExtractEntityTask
-      );
+      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
 
       await resourcesService.install(types);
 
@@ -133,13 +131,9 @@ describe('ResourcesService', () => {
       const mockTask = {
         schedule: jest.fn().mockRejectedValue(mockError),
       };
-      mockExtractEntityTask.mockImplementationOnce(
-        () => mockTask as unknown as ExtractEntityTask
-      );
+      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
 
-      await expect(resourcesService.install(types)).rejects.toThrow(
-        'Scheduling failed'
-      );
+      await expect(resourcesService.install(types)).rejects.toThrow('Scheduling failed');
 
       expect(mockTask.schedule).toHaveBeenCalledTimes(1);
     });
