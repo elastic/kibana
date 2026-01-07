@@ -17,7 +17,6 @@ import {
 } from './fields';
 
 export const systemStorageSettings = {
-  // Initially features were called systems, for backward compatibility we need to keep the same index name
   name: '.kibana_streams_systems',
   schema: {
     properties: {

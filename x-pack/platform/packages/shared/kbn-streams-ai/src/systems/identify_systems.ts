@@ -28,6 +28,8 @@ export interface IdentifySystemsOptions {
   signal: AbortSignal;
   featurePromptOverride?: string;
   descriptionPromptOverride?: string;
+  dropUnmapped?: boolean;
+  maxSteps?: number;
 }
 
 /**
@@ -48,9 +50,8 @@ export async function identifySystems({
   signal,
   featurePromptOverride,
   maxSteps: initialMaxSteps,
-}: IdentifySystemsOptions & {
-  maxSteps?: number;
-}): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
+  dropUnmapped,
+}: IdentifySystemsOptions): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
   logger.debug(`Identifying systems for stream ${stream.name}`);
 
   const analysis = await withSpan('describe_dataset_for_system_identification', () =>
@@ -77,7 +78,7 @@ export async function identifySystems({
           };
         }) ?? [],
       logger,
-      dropUnmapped: true,
+      dropUnmapped,
     })
   );
 
@@ -115,7 +116,7 @@ export async function identifySystems({
                 condition: system.filter as Condition,
               };
             }),
-            dropUnmapped: true,
+            dropUnmapped,
           });
 
           return {

@@ -34,7 +34,7 @@ interface Query {
  */
 export async function generateSignificantEvents({
   stream,
-  feature,
+  system,
   start,
   end,
   esClient,
@@ -46,7 +46,7 @@ export async function generateSignificantEvents({
   logger,
 }: {
   stream: Streams.all.Definition;
-  feature?: System;
+  system?: System;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -69,7 +69,7 @@ export async function generateSignificantEvents({
       end,
       esClient,
       index: stream.name,
-      filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
+      filter: system?.filter ? conditionToQueryDsl(system.filter) : undefined,
     })
   );
 
@@ -82,9 +82,9 @@ export async function generateSignificantEvents({
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: feature?.name || stream.name,
+        name: system?.name || stream.name,
         dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
-        description: feature?.description || stream.description,
+        description: system?.description || stream.description,
       },
       maxSteps: 4,
       prompt,

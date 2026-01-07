@@ -15,7 +15,7 @@ interface Params {
   connectorId: string;
   start: number;
   end: number;
-  feature?: System;
+  system?: System;
   sampleDocsSize?: number;
   // optional overrides for templates
   systemPromptOverride?: string;
@@ -32,7 +32,7 @@ export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
 ): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, feature, sampleDocsSize, systemPromptOverride } =
+  const { definition, connectorId, start, end, system, sampleDocsSize, systemPromptOverride } =
     params;
   const { inferenceClient, esClient, logger, signal } = dependencies;
 
@@ -47,7 +47,7 @@ export async function generateSignificantEventDefinitions(
     esClient,
     inferenceClient: boundInferenceClient,
     logger,
-    feature,
+    system,
     signal,
     sampleDocsSize,
     systemPromptOverride,
@@ -57,9 +57,7 @@ export async function generateSignificantEventDefinitions(
     queries: queries.map((query) => ({
       title: query.title,
       kql: query.kql,
-      feature: feature
-        ? { name: feature.name, filter: feature.filter, type: feature.type }
-        : undefined,
+      feature: system ? { name: system.name, filter: system.filter, type: system.type } : undefined,
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),
