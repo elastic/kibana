@@ -53,6 +53,7 @@ export const TypeSection = ({ mode }: TypeProps) => {
     return editableTypes.map((t) => ({
       value: t.value,
       inputDisplay: t.text,
+      'data-test-subj': `agentBuilderToolTypeOption-${t.value}`,
       dropdownDisplay: (
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>{t.text}</EuiFlexItem>
