@@ -41,25 +41,6 @@ export async function execute(
     log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
   }
 
-  if (!actionTypeId) {
-    throw new Error(`Failed to retrieve actionTypeId for action [${actionId}]`);
-  }
-
-  // Validate executor and params at the top of the method
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
-
-  if (!actionType.executor) {
-    throw new Error(
-      `Connector type "${actionTypeId}" does not have an execute function and cannot be executed.`
-    );
-  }
-
-  if (!actionType.validate.params) {
-    throw new Error(
-      `Connector type "${actionTypeId}" does not have a params validator and cannot be executed.`
-    );
-  }
-
   const additionalPrivileges = getActionKibanaPrivileges(
     context,
     actionTypeId,
