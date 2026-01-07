@@ -10,6 +10,7 @@ import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
+import { getPrebuiltRuleAssetsSearchNamespace } from '../utils';
 
 /**
  * Fetches unique tags from prebuilt rule assets for specified rule versions.
@@ -31,7 +32,7 @@ export async function fetchTagsByVersion(
     { unique_tags: AggregationsTermsAggregateBase<{ key: string; doc_count: number }> }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: ['default'],
+    namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     _source: false,
     size: 0,
     query: {
@@ -51,7 +52,7 @@ export async function fetchTagsByVersion(
   });
 
   const buckets = searchResult.aggregations?.unique_tags?.buckets || [];
-  invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+  invariant(Array.isArray(buckets), 'fetchTagsByVersion: expected buckets to be an array');
 
   const tags = buckets.map((bucket) => bucket.key);
   return tags;

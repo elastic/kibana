@@ -17,7 +17,11 @@ import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_s
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
-import { buildEsQueryFilter, buildEsQuerySort } from '../utils';
+import {
+  buildEsQueryFilter,
+  buildEsQuerySort,
+  getPrebuiltRuleAssetsSearchNamespace,
+} from '../utils';
 
 /**
  * Fetches the BasicRuleInfo for prebuilt rule assets: rule_id, version and type.
@@ -79,7 +83,7 @@ async function fetchLatestVersionSpecifiers(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: ['default'],
+    namespaces: [savedObjectsClient.getCurrentNamespace() ?? 'default'],
     _source: false,
     size: 0,
     query: {
@@ -115,13 +119,16 @@ async function fetchLatestVersionSpecifiers(
 
   const buckets = latestVersionSpecifiersResult.aggregations?.rules?.buckets;
 
-  invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+  invariant(
+    Array.isArray(buckets),
+    'fetchLatestVersionSpecifiers: expected buckets to be an array'
+  );
 
   const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.map((bucket) => {
     const hit = bucket.latest_version.hits.hits[0];
     const hitSource = hit?._source;
 
-    invariant(hitSource, 'Expected hit source to be defined');
+    invariant(hitSource, 'fetchLatestVersionSpecifiers: expected hit source to be defined');
 
     const soAttributes = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
     return {
@@ -143,7 +150,7 @@ async function fetchVersionsBySoIds(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: ['default'],
+    namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: MAX_PREBUILT_RULES_COUNT,
     runtime_mappings: {
       [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {

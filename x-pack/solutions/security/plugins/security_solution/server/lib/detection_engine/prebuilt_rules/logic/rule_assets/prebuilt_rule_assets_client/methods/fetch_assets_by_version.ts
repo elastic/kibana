@@ -12,6 +12,7 @@ import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_r
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
+import { getPrebuiltRuleAssetsSearchNamespace } from '../utils';
 
 /**
  * Fetches prebuilt rule assets for specified rule versions.
@@ -42,7 +43,7 @@ export async function fetchAssetsByVersion(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: ['default'],
+    namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: MAX_PREBUILT_RULES_COUNT,
     query: {
       terms: {

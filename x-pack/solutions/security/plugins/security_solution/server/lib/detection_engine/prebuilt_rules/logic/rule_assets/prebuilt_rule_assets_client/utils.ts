@@ -7,6 +7,7 @@
 
 import type { ESFilter } from '@kbn/es-types';
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
@@ -57,4 +58,14 @@ export function buildEsQuerySort(sort?: PrebuiltRuleAssetsSort): Sort | undefine
   return sort?.map((s) => {
     return { [soSortFields[s.field]]: s.order };
   });
+}
+
+/**
+ * `savedObjectsClient.search` method requires a non-empty "namespaces" parameter even if you want to search for space-agnostic SO types.
+ * This function returns the current namespace to be passed as "namespaces" parameter.
+ */
+export function getPrebuiltRuleAssetsSearchNamespace(
+  savedObjectsClient: SavedObjectsClientContract
+) {
+  return [savedObjectsClient.getCurrentNamespace() ?? 'default'];
 }

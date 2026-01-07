@@ -7,6 +7,9 @@
 
 import expect from 'expect';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
+import { RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -19,7 +22,10 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const spaces = getService('spaces');
+  const security = getService('security');
 
   describe('@ess @serverless @skipInServerlessMKI Review installation using mocked prebuilt rule assets', () => {
     beforeEach(async () => {
@@ -838,6 +844,68 @@ export default ({ getService }: FtrProviderContext): void => {
             tags: ['tag-a', 'tag-b'],
           }),
         ]);
+      });
+    });
+
+    describe('Spaces', () => {
+      const customSpaceId = 'custom-space-review-test';
+      const customUser = {
+        username: 'custom-space-user',
+        roleName: 'custom-space-role',
+        password: 'password123',
+      };
+
+      beforeEach(async () => {
+        // Create custom space
+        await spaces.create({
+          id: customSpaceId,
+          name: customSpaceId,
+          disabledFeatures: [],
+        });
+
+        // Create role with access only to custom space
+        await security.role.create(customUser.roleName, {
+          kibana: [
+            {
+              feature: {
+                [RULES_FEATURE_ID]: ['read'],
+              },
+              spaces: [customSpaceId],
+            },
+          ],
+        });
+
+        // Create user with that role
+        await security.user.create(customUser.username, {
+          password: customUser.password,
+          roles: [customUser.roleName],
+        });
+
+        // Create prebuilt rule assets
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+        ];
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+      });
+
+      afterEach(async () => {
+        // Cleanup: delete user, role, space
+        await security.user.delete(customUser.username);
+        await security.role.delete(customUser.roleName);
+        await spaces.delete(customSpaceId);
+      });
+
+      it('users without access to default space can use the endpoint', async () => {
+        const response = await supertestWithoutAuth
+          .post(addSpaceIdToPath('/', customSpaceId, REVIEW_RULE_INSTALLATION_URL))
+          .auth(customUser.username, customUser.password)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'securitySolution')
+          .send()
+          .expect(200);
+
+        expect(response.body.rules.length).toBe(1);
       });
     });
   });

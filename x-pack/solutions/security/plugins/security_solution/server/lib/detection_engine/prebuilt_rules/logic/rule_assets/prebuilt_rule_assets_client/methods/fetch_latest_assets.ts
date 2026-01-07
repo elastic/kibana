@@ -56,7 +56,7 @@ export async function fetchLatestAssets(
   });
 
   const buckets = findResult.aggregations?.rules?.buckets ?? [];
-  invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+  invariant(Array.isArray(buckets), 'fetchLatestAssets: expected buckets to be an array');
 
   const ruleAssets = buckets.map((bucket) => {
     const hit = bucket.latest_version.hits.hits[0];
