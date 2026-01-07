@@ -1088,7 +1088,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
-      casesPermissions: `${SECURITY_SOLUTION_DOCS}case-permissions.html`,
+      casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
     },
   });
 };
