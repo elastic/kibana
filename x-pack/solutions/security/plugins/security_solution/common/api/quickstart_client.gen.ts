@@ -289,6 +289,15 @@ import type {
   UpsertEntityResponse,
 } from './entity_analytics/entity_store/entities/upsert_entity.gen';
 import type {
+  GetResolutionRequestParamsInput,
+  GetResolutionResponse,
+} from './entity_analytics/entity_store/resolution/get_resolution.gen';
+import type {
+  LinkEntitiesRequestParamsInput,
+  LinkEntitiesRequestBodyInput,
+  LinkEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/link_entities.gen';
+import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
@@ -1882,6 +1891,22 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Returns the resolution status for an entity, including the resolution group members if resolved.
+
+    */
+  async getResolution(props: GetResolutionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetResolution`);
+    return this.kbnClient
+      .request<GetResolutionResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/{entityId}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
    */
   async getRiskEngineStatus() {
@@ -2347,6 +2372,28 @@ providing you with the most current and effective threat detection capabilities.
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Link two or more entities into a resolution group, indicating they represent the same real-world identity.
+
+**Behavior:**
+- If neither entity has a resolution → creates new resolution_id, writes documents
+- If one entity has a resolution → adds the other entities to that resolution
+- If entities have different resolutions → merges all into one resolution_id
+
+    */
+  async linkEntities(props: LinkEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API LinkEntities`);
+    return this.kbnClient
+      .request<LinkEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3521,6 +3568,9 @@ export interface GetPolicyResponseProps {
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
+export interface GetResolutionProps {
+  params: GetResolutionRequestParamsInput;
+}
 export interface GetRuleExecutionEventsProps {
   query: GetRuleExecutionEventsRequestQueryInput;
   params: GetRuleExecutionEventsRequestParamsInput;
@@ -3588,6 +3638,10 @@ export interface InstallPrepackedTimelinesProps {
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface LinkEntitiesProps {
+  params: LinkEntitiesRequestParamsInput;
+  body: LinkEntitiesRequestBodyInput;
 }
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;

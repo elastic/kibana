@@ -50,6 +50,7 @@ import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/pr
 import type { MlAuthz } from './lib/machine_learning/authz';
 import type { SiemMigrationClients } from './lib/siem_migrations/types';
 import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import type { EntityResolutionClient } from './lib/entity_analytics/entity_store/entity_resolution_client';
 
 export { AppClient };
 
@@ -79,6 +80,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getEntityStoreCrudClient: () => EntityStoreCrudClient;
+  getEntityResolutionClient: () => EntityResolutionClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;

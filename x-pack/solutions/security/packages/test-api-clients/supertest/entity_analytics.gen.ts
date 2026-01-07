@@ -57,11 +57,16 @@ import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
 import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type { GetResolutionRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/get_resolution.gen';
 import type {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+import type {
+  LinkEntitiesRequestParamsInput,
+  LinkEntitiesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/link_entities.gen';
 import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
@@ -400,6 +405,22 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Returns the resolution status for an entity, including the resolution group members if resolved.
+
+      */
+  getResolution(props: GetResolutionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/{entityId}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
    * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
    */
   getRiskEngineStatus(kibanaSpace: string = 'default') {
@@ -465,6 +486,28 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+      * Link two or more entities into a resolution group, indicating they represent the same real-world identity.
+
+**Behavior:**
+- If neither entity has a resolution → creates new resolution_id, writes documents
+- If one entity has a resolution → adds the other entities to that resolution
+- If entities have different resolutions → merges all into one resolution_id
+
+      */
+  linkEntities(props: LinkEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
   },
   /**
    * List entities records, paging, sorting and filtering as needed.
@@ -772,12 +815,19 @@ export interface GetEntitySourceProps {
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
 }
+export interface GetResolutionProps {
+  params: GetResolutionRequestParamsInput;
+}
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
 }
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
+}
+export interface LinkEntitiesProps {
+  params: LinkEntitiesRequestParamsInput;
+  body: LinkEntitiesRequestBodyInput;
 }
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;

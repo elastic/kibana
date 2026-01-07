@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Get Resolution
+paths:
+  /api/entity_store/resolution/{entityType}/{entityId}:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetResolution
+      summary: Get resolution status for an entity
+      description: >
+        Returns the resolution status for an entity, including the resolution group members if resolved.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The entity ID to get resolution status for
+      responses:
+        '200':
+          description: Resolution status returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - entity_id
+                properties:
+                  entity_id:
+                    type: string
+                    description: The entity ID queried
+                  resolution_id:
+                    type: string
+                    nullable: true
+                    description: The resolution ID if entity is resolved, null otherwise
+                  group_members:
+                    type: array
+                    items:
+                      type: string
+                    description: All entity IDs in the resolution group (empty if not resolved)
+                  '@timestamp':
+                    type: string
+                    nullable: true
+                    description: When this resolution was created
+        '404':
+          description: Entity not found in Entity Store
+        '503':
+          description: Engine not running

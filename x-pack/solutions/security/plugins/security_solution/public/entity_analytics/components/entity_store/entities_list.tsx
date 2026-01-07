@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { LinkEntitiesModal } from './components/link_entities_modal';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
 import { type RiskSeverity } from '../../../../common/search_strategy';
@@ -41,6 +42,10 @@ export const EntitiesList: React.FC = () => {
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
   const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
+  const [isLinkModalVisible, setIsLinkModalVisible] = useState(false);
+
+  const openLinkModal = useCallback(() => setIsLinkModalVisible(true), []);
+  const closeLinkModal = useCallback(() => setIsLinkModalVisible(false), []);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,
@@ -115,51 +120,72 @@ export const EntitiesList: React.FC = () => {
   );
 
   return (
-    <PaginatedTable
-      id={ENTITIES_LIST_TABLE_ID}
-      activePage={activePage}
-      columns={columns}
-      headerCount={data?.total ?? 0}
-      titleSize="s"
-      headerTitle={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
-        {
-          defaultMessage: 'Entities',
+    <>
+      <PaginatedTable
+        id={ENTITIES_LIST_TABLE_ID}
+        activePage={activePage}
+        columns={columns}
+        headerCount={data?.total ?? 0}
+        titleSize="s"
+        headerTitle={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
+          {
+            defaultMessage: 'Entities',
+          }
+        )}
+        headerTooltip={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip',
+          {
+            defaultMessage: 'Entity data can take a couple of minutes to appear',
+          }
+        )}
+        limit={limit}
+        loading={isLoading || isRefetching}
+        isInspect={false}
+        updateActivePage={setActivePage}
+        loadPage={noop} // It isn't necessary because the page loads when activePage changes
+        pageOfItems={data?.records ?? []}
+        setQuerySkip={setQuerySkip}
+        showMorePagesIndicator={false}
+        updateLimitPagination={setLimit}
+        totalCount={data?.total ?? 0}
+        itemsPerRow={rowItems}
+        sorting={sorting}
+        onChange={onSort}
+        headerFilters={
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <SeverityFilter
+                  selectedItems={selectedSeverities}
+                  onSelect={setSelectedSeverities}
+                />
+                <AssetCriticalityFilter
+                  selectedItems={selectedCriticalities}
+                  onChange={setSelectedCriticalities}
+                />
+                <EntitySourceFilter selectedItems={selectedSources} onChange={setSelectedSources} />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="link"
+                onClick={openLinkModal}
+                data-test-subj="linkEntitiesButton"
+                size="m"
+              >
+                {i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.linkEntitiesButton',
+                  {
+                    defaultMessage: 'Link Entities',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
-      )}
-      headerTooltip={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip',
-        {
-          defaultMessage: 'Entity data can take a couple of minutes to appear',
-        }
-      )}
-      limit={limit}
-      loading={isLoading || isRefetching}
-      isInspect={false}
-      updateActivePage={setActivePage}
-      loadPage={noop} // It isn't necessary because the page loads when activePage changes
-      pageOfItems={data?.records ?? []}
-      setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={false}
-      updateLimitPagination={setLimit}
-      totalCount={data?.total ?? 0}
-      itemsPerRow={rowItems}
-      sorting={sorting}
-      onChange={onSort}
-      headerFilters={
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
-              <SeverityFilter selectedItems={selectedSeverities} onSelect={setSelectedSeverities} />
-              <AssetCriticalityFilter
-                selectedItems={selectedCriticalities}
-                onChange={setSelectedCriticalities}
-              />
-              <EntitySourceFilter selectedItems={selectedSources} onChange={setSelectedSources} />
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
+      />
+      <LinkEntitiesModal visible={isLinkModalVisible} onClose={closeLinkModal} />
+    </>
   );
 };

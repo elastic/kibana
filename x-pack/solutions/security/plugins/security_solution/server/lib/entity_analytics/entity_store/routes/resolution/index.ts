@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from './common.gen';
-export * from './engine';
-export * from './entities';
-export * from './resolution';
+export { linkEntities } from './link_entities';
+export { getResolution } from './get_resolution';

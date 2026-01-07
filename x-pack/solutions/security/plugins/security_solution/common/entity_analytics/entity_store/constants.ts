@@ -13,6 +13,12 @@ export const ENTITY_STORE_URL = '/api/entity_store' as const;
 export const ENTITY_STORE_INTERNAL_PRIVILEGES_URL = `${ENTITY_STORE_URL}/privileges` as const;
 export const ENTITIES_URL = `${ENTITY_STORE_URL}/entities` as const;
 export const LIST_ENTITIES_URL = `${ENTITIES_URL}/list` as const;
+export const RESOLUTION_URL = `${ENTITY_STORE_URL}/resolution` as const;
+
+export const getLinkEntitiesUrl = (entityType: string) =>
+  `${RESOLUTION_URL}/${entityType}` as const;
+export const getResolutionUrl = (entityType: string, entityId: string) =>
+  `${RESOLUTION_URL}/${entityType}/${encodeURIComponent(entityId)}` as const;
 
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',

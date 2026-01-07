@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Link Entities (Resolution)
+paths:
+  /api/entity_store/resolution/{entityType}:
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: LinkEntities
+      summary: Link entities into a resolution group
+      description: >
+        Link two or more entities into a resolution group, indicating they represent the same real-world identity.
+
+
+        **Behavior:**
+
+        - If neither entity has a resolution → creates new resolution_id, writes documents
+
+        - If one entity has a resolution → adds the other entities to that resolution
+
+        - If entities have different resolutions → merges all into one resolution_id
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+      requestBody:
+        description: Entity IDs to link together
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entities
+              properties:
+                entities:
+                  type: array
+                  minItems: 2
+                  items:
+                    type: string
+                  description: Array of entity IDs to link (minimum 2)
+      responses:
+        '200':
+          description: Entities linked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - resolution_id
+                  - entities
+                  - created
+                  - updated
+                properties:
+                  resolution_id:
+                    type: string
+                    description: The resolution ID for the linked entities
+                  entities:
+                    type: array
+                    items:
+                      type: string
+                    description: All entity IDs in this resolution group
+                  created:
+                    type: integer
+                    description: Number of new resolution documents created
+                  updated:
+                    type: integer
+                    description: Number of existing resolution documents updated
+        '400':
+          description: Bad request - invalid entity IDs or fewer than 2 entities
+        '404':
+          description: Entity not found in Entity Store
+        '409':
+          description: Conflict - concurrent modification
+        '503':
+          description: Engine not running or resolution not enabled

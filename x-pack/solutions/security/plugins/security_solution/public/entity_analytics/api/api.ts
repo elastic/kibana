@@ -17,8 +17,10 @@ import type {
   EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
   FindAssetCriticalityRecordsResponse,
+  GetResolutionResponse,
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
+  LinkEntitiesResponse,
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
@@ -44,7 +46,9 @@ import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
+  getLinkEntitiesUrl,
   getPrivmonMonitoringSourceByIdUrl,
+  getResolutionUrl,
   LIST_ENTITIES_URL,
   MONITORING_ENGINE_INIT_URL,
   MONITORING_ENTITY_LIST_SOURCES_URL,
@@ -468,6 +472,35 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    /**
+     * Link multiple entities into a resolution group
+     */
+    const linkEntities = async (params: {
+      entityType: string;
+      entities: string[];
+      signal?: AbortSignal;
+    }): Promise<LinkEntitiesResponse> =>
+      http.fetch<LinkEntitiesResponse>(getLinkEntitiesUrl(params.entityType), {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify({ entities: params.entities }),
+        signal: params.signal,
+      });
+
+    /**
+     * Get resolution status for an entity
+     */
+    const fetchResolution = async (params: {
+      entityType: string;
+      entityId: string;
+      signal?: AbortSignal;
+    }): Promise<GetResolutionResponse> =>
+      http.fetch<GetResolutionResponse>(getResolutionUrl(params.entityType, params.entityId), {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal: params.signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -498,6 +531,8 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      linkEntities,
+      fetchResolution,
     };
   }, [http]);
 };

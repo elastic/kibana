@@ -44,6 +44,7 @@ import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_an
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import { EntityResolutionClient } from './lib/entity_analytics/entity_store/entity_resolution_client';
 
 export interface IRequestContextFactory {
   create(
@@ -342,6 +343,14 @@ export class RequestContextFactory implements IRequestContextFactory {
       getEntityStoreDataClient,
       getEntityStoreCrudClient: memoize(() => {
         return new EntityStoreCrudClient({
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          logger: options.logger,
+          dataClient: getEntityStoreDataClient(),
+        });
+      }),
+      getEntityResolutionClient: memoize(() => {
+        return new EntityResolutionClient({
           clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
           logger: options.logger,
