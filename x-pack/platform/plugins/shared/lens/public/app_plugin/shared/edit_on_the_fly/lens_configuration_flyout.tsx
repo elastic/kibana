@@ -306,17 +306,125 @@ export function LensEditConfigurationFlyout({
     return isDevMode && !textBasedMode;
   }, [isDevMode, textBasedMode]);
 
-  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
-    useEsqlConversion(
-      showConvertToEsqlButton,
-      { datasourceId, datasourceStates, layerIds, visualization, activeVisualization },
-      { framePublicAPI, coreStart, startDependencies }
-    );
+  const {
+    isConvertToEsqlButtonDisabled,
+    convertToEsqlButtonTooltip,
+    convertibleLayers,
+    buildTextBasedState,
+  } = useEsqlConversion(
+    showConvertToEsqlButton,
+    { datasourceId, datasourceStates, layerIds, visualization, activeVisualization },
+    { framePublicAPI, coreStart, startDependencies }
+  );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
+  const closeModal = useCallback(() => setIsModalVisible(false), []);
+  const showModal = useCallback(() => setIsModalVisible(true), []);
+
+  const handleConvertToEsql = useCallback(
+    ({ layersToConvert }: { layersToConvert: string[] }) => {
+      if (layersToConvert.length === 0 || !buildTextBasedState) {
+        closeModal();
+        return;
+      }
+
+      const conversionResult = buildTextBasedState(layersToConvert);
+      if (!conversionResult) {
+        closeModal();
+        return;
+      }
+
+      const { newDatasourceState, columnIdMapping } = conversionResult;
+
+      // Update visualization state to remap column IDs to new ES|QL field names
+      const visualizationState = visualization.state;
+      if (
+        visualizationState &&
+        typeof visualizationState === 'object' &&
+        'layers' in (visualizationState as Record<string, unknown>)
+      ) {
+        const updatedVisualizationState = JSON.parse(JSON.stringify(visualizationState));
+
+        if (Array.isArray(updatedVisualizationState.layers)) {
+          updatedVisualizationState.layers = updatedVisualizationState.layers.map(
+            (vizLayer: {
+              layerId?: string;
+              xAccessor?: string;
+              accessors?: string[];
+              splitAccessor?: string;
+            }) => {
+              if (!vizLayer.layerId || !layersToConvert.includes(vizLayer.layerId)) {
+                return vizLayer;
+              }
+
+              const updatedLayer = { ...vizLayer };
+
+              // Remap xAccessor (horizontal axis - typically the date histogram)
+              if (vizLayer.xAccessor && columnIdMapping[vizLayer.xAccessor]) {
+                updatedLayer.xAccessor = columnIdMapping[vizLayer.xAccessor];
+              }
+
+              // Remap accessors array (vertical axis - metrics)
+              if (Array.isArray(vizLayer.accessors)) {
+                updatedLayer.accessors = vizLayer.accessors.map(
+                  (accessor: string) => columnIdMapping[accessor] || accessor
+                );
+              }
+
+              // Remap splitAccessor if present
+              if (vizLayer.splitAccessor && columnIdMapping[vizLayer.splitAccessor]) {
+                updatedLayer.splitAccessor = columnIdMapping[vizLayer.splitAccessor];
+              }
+
+              return updatedLayer;
+            }
+          );
+        }
+
+        // Get the ES|QL query from the first converted layer
+        const firstLayerId = layersToConvert[0];
+        const esqlQuery = newDatasourceState.layers[firstLayerId]?.query;
+
+        // Build new attributes with textBased datasource
+        if (esqlQuery) {
+          const newAttributes: TypedLensSerializedState['attributes'] = {
+            ...attributes,
+            state: {
+              ...attributes.state,
+              query: esqlQuery,
+              datasourceStates: {
+                textBased: newDatasourceState,
+              },
+              visualization: updatedVisualizationState,
+            },
+          };
+
+          // Close modal first
+          closeModal();
+
+          // Update local attributes state - this triggers re-render of get_edit_lens_configuration
+          // which will derive the new datasourceId ('textBased') from the updated attributes
+          // and recreate the Redux store with the correct datasource
+          setCurrentAttributes?.(newAttributes);
+
+          // Also update the embeddable's attributes for persistence
+          updateSuggestion?.(newAttributes);
+          return;
+        }
+      }
+
+      closeModal();
+    },
+    [
+      attributes,
+      buildTextBasedState,
+      closeModal,
+      setCurrentAttributes,
+      updateSuggestion,
+      visualization.state,
+    ]
+  );
 
   if (isLoading) return null;
 
@@ -384,7 +492,6 @@ export function LensEditConfigurationFlyout({
             attributes={attributes}
             coreStart={coreStart}
             startDependencies={startDependencies}
-            datasourceId={datasourceId}
             hasPadding
             framePublicAPI={framePublicAPI}
             setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
@@ -520,7 +627,6 @@ export function LensEditConfigurationFlyout({
                     getUserMessages={getUserMessages}
                     coreStart={coreStart}
                     startDependencies={startDependencies}
-                    datasourceId={datasourceId}
                     framePublicAPI={framePublicAPI}
                     setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
                     updateSuggestion={updateSuggestion}
@@ -528,7 +634,6 @@ export function LensEditConfigurationFlyout({
                     closeFlyout={closeFlyout}
                     parentApi={parentApi}
                     panelId={panelId}
-                    canEditTextBasedQuery={canEditTextBasedQuery}
                     editorContainer={editorContainer.current || undefined}
                   />
                 </>
@@ -572,7 +677,7 @@ export function LensEditConfigurationFlyout({
             <ConvertToEsqlModal
               layers={convertibleLayers}
               onCancel={closeModal}
-              onConfirm={closeModal}
+              onConfirm={handleConvertToEsql}
             />
           ) : null}
         </>
