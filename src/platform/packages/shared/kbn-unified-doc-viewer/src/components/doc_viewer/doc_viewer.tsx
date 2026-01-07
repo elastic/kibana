@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useState, useEffect } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -58,6 +58,15 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
       initialTabId ? getFullTabId(initialTabId) : storedInitialTabId
     );
     const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined;
+
+    // Sync localStorage fallback to tab-specific state on mount
+    // This ensures the tab's initialDocViewerTabId is set even when falling back to localStorage
+    useEffect(() => {
+      if (!initialTabId && storedInitialTabId && onTabChange) {
+        onTabChange(getOriginalTabId(storedInitialTabId));
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useImperativeHandle(
       ref,
