@@ -27,3 +27,10 @@ export const withClient = <TFields extends Fields>(
 };
 
 export type ScenarioReturnType<TFields extends Fields> = ReturnType<typeof withClient<TFields>>;
+
+export async function indexAll(
+  scenarios: ScenarioReturnType<Fields> | ScenarioReturnType<Fields>[]
+): Promise<void> {
+  const scenarioArray = Array.isArray(scenarios) ? scenarios : [scenarios];
+  await Promise.all(scenarioArray.map(({ client, generator }) => client.index(generator)));
+}

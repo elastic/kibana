@@ -31,6 +31,7 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -354,30 +355,23 @@ export class CoreSystem {
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
       });
-      const rendering = this.rendering.start({
-        analytics,
-        executionContext,
-        i18n,
-        theme,
-        userProfile,
-        coreEnv: this.coreContext.env,
-      });
-
-      const notifications = this.notifications.start({
-        analytics,
-        overlays,
-        targetDomElement: notificationsTargetDomElement,
-        rendering,
-      });
 
       const featureFlags = await this.featureFlags.start();
+
+      // Temp hack: https://github.com/elastic/kibana/issues/247820
+      // Create a deferred promise for notifications to break circular dependency
+      // chrome -> rendering -> notifications -> chrome
+      let resolveNotifications: (notifications: NotificationsStart) => void;
+      const notificationsPromise = new Promise<NotificationsStart>((resolve) => {
+        resolveNotifications = resolve;
+      });
 
       const chrome = await this.chrome.start({
         application,
         docLinks,
         http,
         injectedMetadata,
-        notifications,
+        getNotifications: () => notificationsPromise,
         customBranding,
         i18n,
         theme,
@@ -387,6 +381,25 @@ export class CoreSystem {
         featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
+
+      const rendering = this.rendering.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        coreEnv: this.coreContext.env,
+        chrome,
+      });
+
+      const notifications = this.notifications.start({
+        analytics,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+        rendering,
+      });
+
+      resolveNotifications!(notifications);
 
       this.coreApp.start({
         application,
