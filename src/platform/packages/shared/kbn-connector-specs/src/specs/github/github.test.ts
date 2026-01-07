@@ -1273,6 +1273,40 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getPullRequestDiff action', () => {
+    it('should get pull request diff', async () => {
+      const mockDiff = `diff --git a/src/file.ts b/src/file.ts
+index abc123..def456 100644
+--- a/src/file.ts
++++ b/src/file.ts
+@@ -1,3 +1,3 @@
+-const oldCode = 'old';
++const newCode = 'new';
+ console.log('test');
+`;
+      const mockResponse = {
+        data: mockDiff,
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getPullRequestDiff.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/pulls/123',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3.diff',
+          },
+        }
+      );
+      expect(result).toEqual(mockDiff);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
