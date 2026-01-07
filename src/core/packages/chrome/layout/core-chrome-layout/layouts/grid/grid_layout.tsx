@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { map, combineLatest } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   ChromeLayout,
@@ -41,6 +41,8 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     /** The application top bar renders the app specific menu */
     /** we use it only in project style, because in classic it is included as part of the global header */
     applicationTopBarHeight: 48,
+    applicationMarginRight: 8,
+    applicationMarginBottom: 8,
     sidebarWidth: 0,
     footerHeight: 0,
     navigationWidth: 0,
@@ -78,7 +80,9 @@ export class GridLayout implements LayoutService {
 
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
-    const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
+    const hasAppMenu$ = combineLatest([application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
+      map(([menu, appMenu]) => !!menu || !!appMenu)
+    );
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 

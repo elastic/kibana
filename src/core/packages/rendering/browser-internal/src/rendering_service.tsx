@@ -40,6 +40,7 @@ export interface RenderingServiceContextDeps {
   userProfile: UserProfileService;
   chrome: InternalChromeStart;
   coreEnv: CoreEnv;
+  chrome: InternalChromeStart;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -60,7 +61,7 @@ export interface RenderingServiceInternalStart extends IRenderingService {
  * Renders all Core UI in a single React tree.
  *
  * @internalRemarks Currently this only renders Chrome UI. Notifications and
- * Overlays UI should be moved here as well.
+ * Overlays UI should be moved here as well (https://github.com/elastic/kibana/issues/247820).
  *
  * @internal
  */

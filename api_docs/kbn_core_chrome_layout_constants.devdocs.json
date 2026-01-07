@@ -179,7 +179,7 @@
         "label": "ApplicationVarName",
         "description": [],
         "signature": [
-          "\"application.content.right\" | \"application.content.width\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.height\" | \"application.topBar.right\" | \"application.topBar.width\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.height\" | \"application.bottomBar.right\" | \"application.bottomBar.width\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.height\""
+          "\"application.content.height\" | \"application.content.width\" | \"application.content.right\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.marginBottom\" | \"application.content.marginRight\" | \"application.topBar.height\" | \"application.topBar.width\" | \"application.topBar.right\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.marginBottom\" | \"application.topBar.marginRight\" | \"application.bottomBar.height\" | \"application.bottomBar.width\" | \"application.bottomBar.right\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.marginBottom\" | \"application.bottomBar.marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -194,7 +194,7 @@
         "label": "CSSVarName",
         "description": [],
         "signature": [
-          "\"application.right\" | \"application.width\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.height\" | \"footer.right\" | \"footer.width\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.height\" | \"header.right\" | \"header.width\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.height\" | \"banner.right\" | \"banner.width\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.height\" | \"navigation.right\" | \"navigation.width\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.height\" | \"sidebar.right\" | \"sidebar.width\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.height\" | \"application.content.right\" | \"application.content.width\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.height\" | \"application.topBar.right\" | \"application.topBar.width\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.height\" | \"application.bottomBar.right\" | \"application.bottomBar.width\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.height\""
+          "\"application.height\" | \"application.width\" | \"application.right\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.marginBottom\" | \"application.marginRight\" | \"banner.height\" | \"banner.width\" | \"banner.right\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.marginBottom\" | \"banner.marginRight\" | \"navigation.height\" | \"navigation.width\" | \"navigation.right\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.marginBottom\" | \"navigation.marginRight\" | \"footer.height\" | \"footer.width\" | \"footer.right\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.marginBottom\" | \"footer.marginRight\" | \"header.height\" | \"header.width\" | \"header.right\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.marginBottom\" | \"header.marginRight\" | \"sidebar.height\" | \"sidebar.width\" | \"sidebar.right\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.marginBottom\" | \"sidebar.marginRight\" | \"application.content.height\" | \"application.content.width\" | \"application.content.right\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.marginBottom\" | \"application.content.marginRight\" | \"application.topBar.height\" | \"application.topBar.width\" | \"application.topBar.right\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.marginBottom\" | \"application.topBar.marginRight\" | \"application.bottomBar.height\" | \"application.bottomBar.width\" | \"application.bottomBar.right\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.marginBottom\" | \"application.bottomBar.marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -209,7 +209,7 @@
         "label": "LayoutComponent",
         "description": [],
         "signature": [
-          "\"application\" | \"footer\" | \"header\" | \"banner\" | \"navigation\" | \"sidebar\""
+          "\"application\" | \"banner\" | \"navigation\" | \"footer\" | \"header\" | \"sidebar\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -224,7 +224,7 @@
         "label": "LayoutProperty",
         "description": [],
         "signature": [
-          "\"right\" | \"width\" | \"top\" | \"bottom\" | \"left\" | \"height\""
+          "\"height\" | \"width\" | \"right\" | \"top\" | \"bottom\" | \"left\" | \"marginBottom\" | \"marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -239,7 +239,7 @@
         "label": "LayoutVarName",
         "description": [],
         "signature": [
-          "\"application.right\" | \"application.width\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.height\" | \"footer.right\" | \"footer.width\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.height\" | \"header.right\" | \"header.width\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.height\" | \"banner.right\" | \"banner.width\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.height\" | \"navigation.right\" | \"navigation.width\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.height\" | \"sidebar.right\" | \"sidebar.width\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.height\""
+          "\"application.height\" | \"application.width\" | \"application.right\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.marginBottom\" | \"application.marginRight\" | \"banner.height\" | \"banner.width\" | \"banner.right\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.marginBottom\" | \"banner.marginRight\" | \"navigation.height\" | \"navigation.width\" | \"navigation.right\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.marginBottom\" | \"navigation.marginRight\" | \"footer.height\" | \"footer.width\" | \"footer.right\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.marginBottom\" | \"footer.marginRight\" | \"header.height\" | \"header.width\" | \"header.right\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.marginBottom\" | \"header.marginRight\" | \"sidebar.height\" | \"sidebar.width\" | \"sidebar.right\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.marginBottom\" | \"sidebar.marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -257,6 +257,23 @@
         ],
         "signature": [
           "string[]"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.SIDE_PANEL_CONTENT_GAP",
+        "type": "number",
+        "tags": [],
+        "label": "SIDE_PANEL_CONTENT_GAP",
+        "description": [
+          "\nThe gap (in pixels) between the secondary side navigation panel and the main app content."
+        ],
+        "signature": [
+          "8"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
         "deprecated": false,

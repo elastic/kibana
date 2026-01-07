@@ -11,8 +11,8 @@ import { css } from '@emotion/css';
 import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
-  type InjectedMetadataParams,
   InjectedMetadataService,
+  type InjectedMetadataParams,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
@@ -31,6 +31,7 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -45,17 +46,17 @@ import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { CoreInjectionService } from '@kbn/core-di-browser-internal';
+import { KBN_LOAD_MARKS } from './events';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
-  KBN_LOAD_MARKS,
+  LOAD_SETUP_DONE,
+  LOAD_START_DONE,
   KIBANA_LOADED_EVENT,
-  LOAD_BOOTSTRAP_START,
   LOAD_CORE_CREATED,
   LOAD_FIRST_NAV,
-  LOAD_SETUP_DONE,
+  LOAD_BOOTSTRAP_START,
   LOAD_START,
-  LOAD_START_DONE,
 } from './events';
-import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 /**
  * @internal
@@ -357,13 +358,20 @@ export class CoreSystem {
 
       const featureFlags = await this.featureFlags.start();
 
-      // TODO: notification hack due to a circular dependency between chrome -> rendering -> notifications -> chrome
-      let notificationsStartResolve: (value: InternalCoreStart['notifications']) => void = () => {};
+      // Temp hack: https://github.com/elastic/kibana/issues/247820
+      // Create a deferred promise for notifications to break circular dependency
+      // chrome -> rendering -> notifications -> chrome
+      let resolveNotifications: (notifications: NotificationsStart) => void;
+      const notificationsPromise = new Promise<NotificationsStart>((resolve) => {
+        resolveNotifications = resolve;
+      });
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
         http,
         injectedMetadata,
+        getNotifications: () => notificationsPromise,
         customBranding,
         i18n,
         theme,
@@ -371,11 +379,8 @@ export class CoreSystem {
         uiSettings,
         analytics,
         featureFlags,
-        notifications: () =>
-          new Promise((resolve) => {
-            notificationsStartResolve = resolve;
-          }),
       });
+      const deprecations = this.deprecations.start({ http });
 
       const rendering = this.rendering.start({
         analytics,
@@ -393,9 +398,8 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
         rendering,
       });
-      notificationsStartResolve(notifications);
 
-      const deprecations = this.deprecations.start({ http });
+      resolveNotifications!(notifications);
 
       this.coreApp.start({
         application,

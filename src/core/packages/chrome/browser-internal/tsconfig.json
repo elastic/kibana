@@ -65,8 +65,7 @@
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/shared-ux-feedback-snippet",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/core-chrome-sidebar",
-    "@kbn/shared-ux-utility",
+    "@kbn/core-chrome-app-menu-components",
     "@kbn/shared-ux-label-formatter",
   ],
   "exclude": [
