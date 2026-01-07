@@ -603,12 +603,13 @@ export const getValidSteps = (
       validSteps.push(step);
       return true;
     } else {
-      // Action step: check validity
-      if (isSchema(streamlangProcessorSchema, step)) {
-        validSteps.push(step);
-        return true;
+      // Action step: check schema validity
+      if (!isSchema(streamlangProcessorSchema, step)) {
+        return false;
       }
-      return false;
+
+      validSteps.push(step);
+      return true;
     }
   }
 
