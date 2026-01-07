@@ -50,22 +50,25 @@ export interface ExpressionContext {
 }
 
 export interface ExpressionContextOptions {
-  functionParameterContext?: FunctionParameterContext;
-  preferredExpressionType?: SupportedDataType;
-  addSpaceAfterFirstField?: boolean;
-  ignoredColumnsForEmptyExpression?: string[];
-  isCursorFollowedByComma?: boolean;
-  suggestFields?: boolean;
-  suggestFunctions?: boolean;
-  controlType?: ESQLVariableType;
-  addSpaceAfterOperator?: boolean;
-  openSuggestions?: boolean;
-  isInsideInList?: boolean; // Flag to indicate we're inside an IN operator list
+  functionParameterContext?: FunctionParameterContext; // Set when cursor is inside a function arg; drives param-aware types, commas, and enum values
+  preferredExpressionType?: SupportedDataType; // Expected return type for the whole expression; filters/ranks operators and operands (e.g., boolean in WHERE)
+  addSpaceAfterFirstField?: boolean; // Whether to append a space after inserting the first field of a top-level expression
+  ignoredColumnsForEmptyExpression?: string[]; // Field names to exclude when suggesting for an empty expression
+  isCursorFollowedByComma?: boolean; // Computed from the remaining query to avoid inserting an extra comma after the cursor
+  suggestFields?: boolean; // Allow field/column suggestions when not inside a function parameter
+  suggestFunctions?: boolean; // Allow function suggestions when not inside a function parameter
+  controlType?: ESQLVariableType; // Type of control variable (??/?) to suggest in empty expressions
+  addSpaceAfterOperator?: boolean; // Add a space after inserting operands or functions that follow an operator
+  openSuggestions?: boolean; // Reopen the suggestions popover after applying a completion
+  functionsToIgnore?: {
+    names: string[]; // Functions hidden for the current command/context
+    allowedInsideFunctions?: Record<string, string[]>; // Exceptions: keep fn visible when inside specific parent functions
+  };
+  parentFunctionNames?: string[]; // Internal loop-prevention stack built by in-function recursion to hide the current parent from suggestions
 }
 
 export interface FunctionParameterContext {
   paramDefinitions: FunctionParameter[];
-  functionsToIgnore: string[];
   // Flag to suggest comma after function parameters when more mandatory args exist
   hasMoreMandatoryArgs?: boolean;
   // Function definition for function-specific parameter handling (e.g., CASE function)
