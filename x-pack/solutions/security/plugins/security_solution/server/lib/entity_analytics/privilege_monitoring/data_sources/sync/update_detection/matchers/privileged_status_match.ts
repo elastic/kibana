@@ -7,87 +7,42 @@
 
 import { uniq } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import moment from 'moment';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import { buildPrivilegedSearchBody } from './queries';
-import type { PrivMonBulkUser } from '../../../../types';
+import { buildPrivilegedSearchBody } from '../queries';
 import { createSearchService } from '../../../../users/search';
-import { generateMonitoringLabels } from '../../generate_monitoring_labels';
-import { createSyncMarkersService } from '../sync_markers/sync_markers';
-export type AfterKey = Record<string, string> | undefined;
+import { generateMonitoringLabels } from './generate_monitoring_labels';
+import { createSyncMarkersService } from '../../sync_markers';
+import { isTimestampGreaterThan } from '../../utils';
+import type { PrivBucket, PrivMatchersAggregation, PrivTopHit } from '../types';
+import { PRIV_MATCHER_MODE_CONFIG } from '../types';
+import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../../types';
+import { createSyncMarkersStrategy } from '../sync_markers_strategy/sync_markers_strategy';
+import type { AfterKey } from '../../types';
 
-export interface PrivTopHitSource {
-  '@timestamp'?: string;
-  user?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    roles?: string[];
-    is_privileged?: boolean;
-  };
-}
-
-interface PrivTopHitFields {
-  'user.is_privileged'?: boolean[];
-}
-
-export interface PrivTopHit {
-  _index?: string;
-  _id?: string;
-  _source?: PrivTopHitSource;
-  fields?: PrivTopHitFields;
-}
-
-export interface PrivBucket {
-  key: { username: string };
-  doc_count: number;
-  latest_doc_for_user: {
-    hits: { hits: PrivTopHit[] };
-  };
-}
-
-export interface PrivMatchersAggregation {
-  privileged_user_status_since_last_run?: {
-    after_key?: AfterKey;
-    buckets: PrivBucket[];
-  };
-}
-
-const isTimestampGreaterThan = (date1: string, date2: string) => {
-  const m1 = moment(date1);
-  const m2 = moment(date2);
-  if (!m1.isValid()) return false;
-  if (!m2.isValid()) return true;
-  return m1.isAfter(m2);
-};
-
-export const createPatternMatcherService = (
-  dataClient: PrivilegeMonitoringDataClient,
-  soClient: SavedObjectsClientContract
-) => {
+export const createPatternMatcherService = ({
+  dataClient,
+  soClient,
+  sourceType,
+}: {
+  dataClient: PrivilegeMonitoringDataClient;
+  soClient: SavedObjectsClientContract;
+  sourceType: MonitoringEntitySyncType;
+}) => {
   const searchService = createSearchService(dataClient);
   const syncMarkerService = createSyncMarkersService(dataClient, soClient);
+
+  const syncMarkersStrategy = createSyncMarkersStrategy(
+    PRIV_MATCHER_MODE_CONFIG[sourceType],
+    syncMarkerService
+  );
 
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
-    /**
-     * Empty matchers policy: SAFE DEFAULT
-     * If no matchers are configured, we *cannot* infer privileged users.
-     * Return none and log a warning so UI can prompt configuration.
-     */
-    if (!source.matchers?.length) {
-      dataClient.log(
-        'info',
-        `No matchers for source id=${source.id ?? '(unknown)'}. Returning 0 privileged users`
-      );
-      return [];
-    }
-
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
     // the last processed user from previous task run.
-    const lastProcessedTimeStamp = await syncMarkerService.getLastProcessedMarker(source);
+    const lastProcessedTimeStamp = await syncMarkersStrategy.getLastProcessedMarker(source);
 
     let afterKey: AfterKey | undefined;
     let fetchMore = true;
@@ -101,7 +56,12 @@ export const createPatternMatcherService = (
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
-          ...buildPrivilegedSearchBody(source.matchers, lastProcessedTimeStamp, afterKey, pageSize),
+          ...buildPrivilegedSearchBody(
+            source.matchers ?? [],
+            syncMarkersStrategy.getSearchTimestamp(lastProcessedTimeStamp),
+            afterKey,
+            pageSize
+          ),
         });
 
         const aggregations = response.aggregations;
@@ -113,8 +73,11 @@ export const createPatternMatcherService = (
             aggregations,
             source
           );
-          // update running max timestamp seen
-          maxProcessedTimeStamp = maxTimestamp ?? maxProcessedTimeStamp;
+          // update running max timestamp seen (strategy handles timestamp-less mode)
+          maxProcessedTimeStamp = syncMarkersStrategy.pickLaterTimestamp(
+            maxProcessedTimeStamp,
+            maxTimestamp
+          );
 
           users.push(...privMonUsers);
         }
@@ -125,7 +88,7 @@ export const createPatternMatcherService = (
       }
 
       dataClient.log('info', `Found ${users.length} privileged users from matchers.`);
-      await syncMarkerService.updateLastProcessedMarker(source, maxProcessedTimeStamp);
+      await syncMarkersStrategy.updateLastProcessedMarker(source, maxProcessedTimeStamp);
       return users;
     } catch (error) {
       dataClient.log('error', `Error finding privileged users from matchers: ${error.message}`);
