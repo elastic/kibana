@@ -19,6 +19,7 @@ const postHealthDiagnoseParamsSchema = t.type({
 
 interface PostHealthDiagnoseResponse {
   taskId: string;
+  scheduledAt: string;
   status: 'scheduled' | 'pending' | 'done';
   processed?: number;
   problematic?: number;
@@ -38,6 +39,25 @@ const getHealthDiagnoseParamsSchema = t.type({
     }),
   ]),
 });
+
+const listHealthDiagnoseParamsSchema = t.partial({
+  query: t.partial({
+    size: toNumberRt,
+    searchAfter: t.string,
+  }),
+});
+
+interface HealthDiagnoseTaskSummary {
+  taskId: string;
+  latestTimestamp: string;
+  total: number;
+  problematic: number;
+}
+
+interface ListHealthDiagnoseResponse {
+  tasks: HealthDiagnoseTaskSummary[];
+  searchAfter?: string;
+}
 
 const healthDiagnoseResultResponseSchema = t.type({
   '@timestamp': dateRt,
@@ -60,5 +80,15 @@ interface GetHealthDiagnoseResponse {
   searchAfter?: Array<string | number | null | boolean>;
 }
 
-export { getHealthDiagnoseParamsSchema, postHealthDiagnoseParamsSchema };
-export type { GetHealthDiagnoseResponse, HealthDiagnoseResultResponse, PostHealthDiagnoseResponse };
+export {
+  getHealthDiagnoseParamsSchema,
+  listHealthDiagnoseParamsSchema,
+  postHealthDiagnoseParamsSchema,
+};
+export type {
+  GetHealthDiagnoseResponse,
+  HealthDiagnoseResultResponse,
+  HealthDiagnoseTaskSummary,
+  ListHealthDiagnoseResponse,
+  PostHealthDiagnoseResponse,
+};
