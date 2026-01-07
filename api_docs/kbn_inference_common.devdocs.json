@@ -2748,6 +2748,22 @@
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteResponse.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [
+              "\nModel effectively used, as specified by the response"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2911,12 +2927,28 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompletionTokenCount.thinking",
+            "type": "number",
+            "tags": [],
+            "label": "thinking",
+            "description": [
+              "\nThinking token count, if available"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ChatCompletionTokenCount.total",
             "type": "number",
             "tags": [],
             "label": "total",
             "description": [
-              "\nTotal token count"
+              "\nTotal token count (prompt + completion + thinking)"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
             "deprecated": false,
