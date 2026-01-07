@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { updateEsqlRuleDataSchema } from '../schemas';
-
-export type UpdateEsqlRuleData = TypeOf<typeof updateEsqlRuleDataSchema>;
+export { createRuleDataSchema } from './create_rule_data_schema';
+export { updateRuleDataSchema } from './update_rule_data_schema';

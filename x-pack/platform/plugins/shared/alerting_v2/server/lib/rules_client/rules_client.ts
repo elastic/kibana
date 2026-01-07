@@ -26,15 +26,8 @@ import {
   ensureRuleExecutorTaskScheduled,
   getRuleExecutorTaskId,
 } from '../../rule_executor/schedule';
-import type { EsqlRuleResponse } from '../../application/esql_rule/methods/create/types';
-import {
-  createEsqlRuleDataSchema,
-  type CreateEsqlRuleParams,
-} from '../../application/esql_rule/methods/create';
-import {
-  updateEsqlRuleDataSchema,
-  type UpdateEsqlRuleData,
-} from '../../application/esql_rule/methods/update';
+import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
+import type { CreateRuleParams, RuleResponse, UpdateRuleData } from './types';
 
 @injectable()
 export class RulesClient {
@@ -63,12 +56,12 @@ export class RulesClient {
     return this.security?.authc.getCurrentUser(this.request)?.username ?? null;
   }
 
-  public async createEsqlRule(params: CreateEsqlRuleParams): Promise<EsqlRuleResponse> {
+  public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const savedObjectsClient = this.getSavedObjectsClient();
     const { spaceId } = this.getSpaceContext();
 
     try {
-      createEsqlRuleDataSchema.validate(params.data);
+      createRuleDataSchema.validate(params.data);
     } catch (error) {
       throw Boom.badRequest(
         `Error validating create ES|QL rule data - ${(error as Error).message}`
@@ -137,18 +130,18 @@ export class RulesClient {
     return { id, ...ruleAttributes, scheduledTaskId };
   }
 
-  public async updateEsqlRule({
+  public async updateRule({
     id,
     data,
   }: {
     id: string;
-    data: UpdateEsqlRuleData;
-  }): Promise<EsqlRuleResponse> {
+    data: UpdateRuleData;
+  }): Promise<RuleResponse> {
     const savedObjectsClient = this.getSavedObjectsClient();
     const { spaceId } = this.getSpaceContext();
 
     try {
-      updateEsqlRuleDataSchema.validate(data);
+      updateRuleDataSchema.validate(data);
     } catch (error) {
       throw Boom.badRequest(
         `Error validating update ES|QL rule data - ${(error as Error).message}`

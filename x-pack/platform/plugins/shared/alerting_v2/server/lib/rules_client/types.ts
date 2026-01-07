@@ -6,16 +6,16 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { createEsqlRuleDataSchema } from './schemas';
+import type { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 
-export type CreateEsqlRuleData = TypeOf<typeof createEsqlRuleDataSchema>;
+export type CreateRuleData = TypeOf<typeof createRuleDataSchema>;
 
-export interface CreateEsqlRuleParams {
-  data: CreateEsqlRuleData;
+export interface CreateRuleParams {
+  data: CreateRuleData;
   options?: { id?: string };
 }
 
-export interface EsqlRuleResponse extends CreateEsqlRuleData {
+export interface RuleResponse extends CreateRuleData {
   id: string;
   scheduledTaskId: string | null;
   createdBy: string | null;
@@ -23,3 +23,5 @@ export interface EsqlRuleResponse extends CreateEsqlRuleData {
   updatedBy: string | null;
   updatedAt: string;
 }
+
+export type UpdateRuleData = TypeOf<typeof updateRuleDataSchema>;

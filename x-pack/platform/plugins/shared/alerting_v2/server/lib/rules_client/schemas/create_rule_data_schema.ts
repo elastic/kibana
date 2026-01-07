@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDuration } from '../../../../../lib/duration';
+import { validateDuration } from '../../duration';
 
-export const createEsqlRuleDataSchema = schema.object(
+export const createRuleDataSchema = schema.object(
   {
     name: schema.string({ minLength: 1, maxLength: 64 }),
     tags: schema.arrayOf(schema.string({ maxLength: 64 }), { defaultValue: [], maxSize: 100 }),

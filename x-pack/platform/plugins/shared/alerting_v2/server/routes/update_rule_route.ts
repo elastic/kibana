@@ -14,9 +14,9 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
 
 import {
-  updateEsqlRuleDataSchema,
-  type UpdateEsqlRuleData,
-} from '../application/esql_rule/methods/update';
+  updateRuleDataSchema,
+  type UpdateRuleData,
+} from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 
@@ -38,7 +38,7 @@ export class UpdateRuleRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: updateEsqlRuleDataSchema,
+      body: updateRuleDataSchema,
       params: updateRuleParamsSchema,
     },
   } as const;
@@ -48,7 +48,7 @@ export class UpdateRuleRoute {
     private readonly request: KibanaRequest<
       TypeOf<typeof updateRuleParamsSchema>,
       unknown,
-      UpdateEsqlRuleData
+      UpdateRuleData
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
@@ -56,7 +56,7 @@ export class UpdateRuleRoute {
 
   async handle() {
     try {
-      const updated = await this.rulesClient.updateEsqlRule({
+      const updated = await this.rulesClient.updateRule({
         id: this.request.params.id,
         data: this.request.body,
       });

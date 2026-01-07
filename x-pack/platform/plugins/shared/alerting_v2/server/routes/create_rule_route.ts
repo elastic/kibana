@@ -15,10 +15,7 @@ import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import {
-  createEsqlRuleDataSchema,
-  type CreateEsqlRuleData,
-} from '../application/esql_rule/methods/create';
+import { createRuleDataSchema, type CreateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 
@@ -40,7 +37,7 @@ export class CreateRuleRoute implements RouteHandler {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: createEsqlRuleDataSchema,
+      body: createRuleDataSchema,
       params: createRuleParamsSchema,
     },
   } as const;
@@ -51,7 +48,7 @@ export class CreateRuleRoute implements RouteHandler {
     private readonly request: KibanaRequest<
       TypeOf<typeof createRuleParamsSchema>,
       unknown,
-      CreateEsqlRuleData
+      CreateRuleData
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
@@ -59,7 +56,7 @@ export class CreateRuleRoute implements RouteHandler {
 
   async handle() {
     try {
-      const created = await this.rulesClient.createEsqlRule({
+      const created = await this.rulesClient.createRule({
         data: this.request.body,
         options: { id: this.request.params.id },
       });

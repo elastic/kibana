@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDuration } from '../../../../../lib/duration';
+import { validateDuration } from '../../duration';
 
-export const updateEsqlRuleDataSchema = schema.object(
+export const updateRuleDataSchema = schema.object(
   {
     name: schema.maybe(schema.string({ minLength: 1 })),
     tags: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),
@@ -19,5 +19,5 @@ export const updateEsqlRuleDataSchema = schema.object(
     lookbackWindow: schema.maybe(schema.string({ validate: validateDuration })),
     groupingKey: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );
