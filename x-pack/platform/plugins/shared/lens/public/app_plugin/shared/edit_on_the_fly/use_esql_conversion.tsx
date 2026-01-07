@@ -16,6 +16,7 @@ import type {
   TextBasedLayerColumn,
   TextBasedPrivateState,
   VisualizationState,
+  SupportedDatasourceId,
 } from '@kbn/lens-common';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -73,7 +74,7 @@ export const useEsqlConversion = (
     visualization,
     activeVisualization,
   }: {
-    datasourceId: 'formBased' | 'textBased';
+    datasourceId: SupportedDatasourceId;
     datasourceStates: DatasourceStates;
     layerIds: string[];
     visualization: VisualizationState;

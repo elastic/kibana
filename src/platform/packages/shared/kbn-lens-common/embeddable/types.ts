@@ -435,6 +435,9 @@ export interface StructuredDatasourceStates {
   textBased?: TextBasedPersistedState;
 }
 
+/** The supported datasource identifiers */
+export type SupportedDatasourceId = keyof StructuredDatasourceStates;
+
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
   Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
