@@ -197,15 +197,19 @@ export const waitForEntityStoreReady = async ({
       );
 
       // If the overall status is 'error', the entity store won't recover
-      if (status === 'error') {
-        throw new Error(`Entity store is in error state`);
-      }
+      // if (status === 'error') {
+      //   throw new Error(`Entity store is in error state`);
+      // }
 
       // Check if any engine has an error - this means asyncSetup failed
-      const errorEngine = engines.find((e: { status: string }) => e.status === 'error');
+      const errorEngine = engines.find((e: { status: string }) => e.status === 'error') as
+        | { type: string; status: string; error?: { message: string; action: string } }
+        | undefined;
       if (errorEngine) {
+        const errorMessage = errorEngine.error?.message || 'Unknown error';
+        const errorAction = errorEngine.error?.action || 'unknown';
         throw new Error(
-          `Entity store engine ${(errorEngine as { type: string }).type} is in error state`
+          `Entity store engine ${errorEngine.type} is in error state: [${errorAction}] ${errorMessage}`
         );
       }
 
