@@ -151,6 +151,7 @@ export function MonacoEditor({
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const _subscription = useRef<monaco.IDisposable | null>(null);
+  const _markersSubscription = useRef<monaco.IDisposable | null>(null);
 
   const __preventTriggerChangeEvent = useRef<boolean | null>(null);
 
@@ -225,10 +226,18 @@ export function MonacoEditor({
         overflowWidgetsDomNode: overflowWidgetsDomNode.current,
       });
 
-      monaco.editor.onDidChangeMarkers(() => {
-        let currentEditorModel: monaco.editor.ITextModel | null;
+      // Ensure we don't leak global marker listeners across mounts/unmounts.
+      // Leaked listeners can run after editor disposal and throw, which then gets caught
+      // by consumers' error boundaries (e.g. management settings fields).
+      _markersSubscription.current?.dispose();
+      _markersSubscription.current = monaco.editor.onDidChangeMarkers(() => {
+        const currentEditor = editor.current;
+        if (!currentEditor) {
+          return;
+        }
 
-        if (!editor.current || (currentEditorModel = editor.current?.getModel()) === null) {
+        const currentEditorModel = currentEditor.getModel();
+        if (!currentEditorModel || currentEditorModel.isDisposed()) {
           return;
         }
 
@@ -238,8 +247,7 @@ export function MonacoEditor({
 
         const hasErrors = markers.some((m) => m.severity === monaco.MarkerSeverity.Error);
 
-        const $editor = editor.current.getDomNode();
-
+        const $editor = currentEditor.getDomNode();
         if ($editor) {
           const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
           textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
@@ -318,9 +326,13 @@ export function MonacoEditor({
       if (editor.current) {
         handleEditorWillUnmount();
         editor.current.dispose();
+        editor.current = null;
       }
       if (_subscription.current) {
         _subscription.current.dispose();
+      }
+      if (_markersSubscription.current) {
+        _markersSubscription.current.dispose();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
