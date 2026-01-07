@@ -9,7 +9,7 @@
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiAppliesFilters } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, filter, map, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, of, startWith, switchMap } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -104,10 +104,8 @@ export const initializeRelatedPanelsManager = (
     })
   );
 
-  const esqlRelatedPanels$ = combineLatest([children$, focusedPanelId$]).pipe(
-    // Skip calculations if there is no focused panel
-    filter(([_, focusedPanelId]) => Boolean(focusedPanelId)),
-    switchMap(([children]) => {
+  const esqlChildren$ = children$.pipe(
+    switchMap((children) => {
       const esqlVariableChildren: Array<
         Observable<{ uuid: string; variable: ESQLControlVariable }>
       > = [];
@@ -125,10 +123,19 @@ export const initializeRelatedPanelsManager = (
         }
       }
 
-      return combineLatest([combineLatest(esqlVariableChildren), combineLatest(esqlQueryChildren)]);
-    }),
-    map(([esqlVariablesWithUUIDs, esqlQueries]) => {
+      return combineLatest([
+        esqlVariableChildren.length ? combineLatest(esqlVariableChildren) : of(undefined),
+        esqlQueryChildren.length ? combineLatest(esqlQueryChildren) : of(undefined),
+      ]);
+    })
+  );
+
+  const esqlRelatedPanels$ = combineLatest([esqlChildren$, focusedPanelId$]).pipe(
+    // Skip calculations if there is no focused panel
+    filter(([_, focusedPanelId]) => Boolean(focusedPanelId)),
+    map(([[esqlVariablesWithUUIDs, esqlQueries]]) => {
       const nextESQLRelatedPanels: Map<string, string[]> = new Map();
+      if (!esqlVariablesWithUUIDs || !esqlQueries) return nextESQLRelatedPanels;
 
       // For each panel with an ES|QL query, check if it has any variables, then create a map of which
       // panels publish these corresponding variables
