@@ -8,9 +8,19 @@
  */
 
 import type { ISuggestionItem } from '../../../registry/types';
-import { findFinalWord, withAutoSuggest } from './helpers';
+import {
+  buildAddValuePlaceholder,
+  buildMapKeySuggestion,
+  buildMapValueCompleteItem,
+  type MapValueType,
+} from '../../../registry/complete_items';
+import { findFinalWord } from './helpers';
 
-type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+// Strip quoted segments so foo(bar) inside strings doesn't get picked as a function
+export const DOUBLE_QUOTED_STRING_REGEX = /"([^"\\]|\\.)*"/g;
+// Extracts all object keys from "key": patterns in JSON-like syntax
+export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
+
 export interface MapParameterValues {
   type: MapValueType;
   suggestions?: ISuggestionItem[];
@@ -42,83 +52,125 @@ export type MapParameters = Record<string, MapParameterValues>;
  */
 export function getCommandMapExpressionSuggestions(
   innerText: string,
-  availableParameters: MapParameters
+  availableParameters: MapParameters,
+  includePlaceholder = false
 ): ISuggestionItem[] {
   const finalWord = findFinalWord(innerText);
 
-  // Check if we're inside a nested map by counting braces
-  const openBraces = (innerText.match(/\{/g) || []).length;
-  const closeBraces = (innerText.match(/\}/g) || []).length;
-  const nestingLevel = openBraces - closeBraces;
-
   // Return no suggestions if we're inside a nested map (nesting level > 1)
-  if (nestingLevel > 1) {
+  if (getMapNestingLevel(innerText) > 1) {
     return [];
   }
-
   // Suggest a parameter entry after { or after a comma or when opening quotes after those
   if (/{\s*"?$/i.test(innerText) || /,\s*"?$/.test(innerText)) {
-    const usedParams = new Set<string>();
-    const regex = /"([^"]+)"\s*:/g;
-    let match;
-    while ((match = regex.exec(innerText)) !== null) {
-      usedParams.add(match[1]);
-    }
-
+    const usedParams = new Set([...innerText.matchAll(OBJECT_KEYS_REGEX)].map(([, name]) => name));
     const availableParamNames = Object.keys(availableParameters).filter(
       (paramName) => !usedParams.has(paramName)
     );
 
-    return availableParamNames.map((paramName) => {
-      const valueSnippet = SNIPPET_BY_VALUE_TYPE[availableParameters[paramName].type];
-      return withAutoSuggest({
-        label: paramName,
-        kind: 'Constant',
-        asSnippet: true,
-        text: `"${paramName}": ${valueSnippet}`,
+    return availableParamNames.map((paramName) =>
+      buildMapKeySuggestion(paramName, availableParameters[paramName].type, {
         filterText: `"${paramName}`,
-        detail: paramName,
-        sortText: '1',
         rangeToReplace: {
           start: innerText.length - finalWord.length,
           end: innerText.length,
         },
-      });
-    });
+      })
+    );
   }
 
   // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
   if (/:\s*"?[^"]*$/i.test(innerText)) {
     const match = innerText.match(/"([^"]+)"\s*:\s*"?[^"]*$/);
     const paramName = match ? match[1] : undefined;
+    const paramConfig = paramName ? availableParameters[paramName] : undefined;
 
-    if (paramName && availableParameters[paramName]) {
-      const paramType = availableParameters[paramName].type;
-      return (
-        availableParameters[paramName].suggestions?.map((suggestion) => {
-          if (paramType === 'string') {
-            return {
+    if (paramConfig) {
+      const { type, suggestions = [] } = paramConfig;
+      const rangeToReplace = {
+        start: innerText.length - finalWord.length,
+        end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length,
+      };
+
+      const allSuggestions: ISuggestionItem[] = suggestions.map((suggestion) =>
+        type === 'string'
+          ? {
               ...suggestion,
               text: `"${suggestion.text}"`,
               filterText: `"${suggestion.text}"`,
-              rangeToReplace: {
-                start: innerText.length - finalWord.length,
-                end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length, // to also replace the closing quote and avoid duplicate end quotes.
-              },
-            };
-          } else {
-            return suggestion;
-          }
-        }) ?? []
+              rangeToReplace,
+            }
+          : suggestion
       );
+
+      const isEmptyValue = finalWord === '' || finalWord === '"';
+      if (includePlaceholder && type !== 'boolean' && isEmptyValue) {
+        const placeholderType = type === 'number' ? 'number' : 'value';
+        allSuggestions.push(buildAddValuePlaceholder(placeholderType, { rangeToReplace }));
+      }
+
+      return allSuggestions;
     }
   }
   return [];
 }
 
-const SNIPPET_BY_VALUE_TYPE: Record<MapValueType, string> = {
-  string: '"$0"',
-  number: '',
-  boolean: '',
-  map: '{ $0 }',
-};
+// ================================
+// Map Expression Utilities
+// ================================
+
+export function getMapNestingLevel(text: string): number {
+  // Ignore braces inside quoted strings and escaped braces
+  const sanitized = text
+    .replace(DOUBLE_QUOTED_STRING_REGEX, '')
+    .replace(/\\\{/g, '')
+    .replace(/\\\}/g, '');
+
+  const openBraces = (sanitized.match(/\{/g) || []).length;
+  const closeBraces = (sanitized.match(/\}/g) || []).length;
+
+  return openBraces - closeBraces;
+}
+
+/**
+ * Checks if the cursor is inside an unclosed map expression.
+ */
+export function isInsideMapExpression(text: string): boolean {
+  return getMapNestingLevel(text) > 0;
+}
+
+/**
+ * Parses a comma-separated values string and infers the type.
+ * Returns suggestions for each value.
+ */
+export function parseMapValues(values: string[]): {
+  type: MapValueType;
+  suggestions: ISuggestionItem[];
+} {
+  if (values.length === 0) {
+    return { type: 'string', suggestions: [] };
+  }
+
+  const type = inferMapValueType(values);
+  const suggestions = values.map((value) => buildMapValueCompleteItem(value));
+
+  return { type, suggestions };
+}
+
+/**
+ * Infers MapValueType from an array of value strings.
+ */
+function inferMapValueType(values: string[]): MapValueType {
+  const isBoolean = (val: string) => val.toLowerCase() === 'true' || val.toLowerCase() === 'false';
+  const isNumber = (val: string) => /^-?\d+(\.\d+)?$/.test(val);
+
+  if (values.every(isBoolean)) {
+    return 'boolean';
+  }
+
+  if (values.every(isNumber)) {
+    return 'number';
+  }
+
+  return 'string';
+}
