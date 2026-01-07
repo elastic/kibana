@@ -10,6 +10,7 @@
 import type { ISuggestionItem } from '../../../../../registry/types';
 import type { ExpressionPosition } from '../position';
 import type { ExpressionContext } from '../types';
+import { suggestAfterCast } from './after_cast';
 import { suggestAfterComplete } from './after_complete';
 import { suggestAfterNot } from './after_not';
 import { suggestAfterOperator } from './after_operator';
@@ -22,6 +23,7 @@ const handlers: Record<ExpressionPosition, (ctx: ExpressionContext) => Promise<I
     after_operator: suggestAfterOperator,
     after_complete: suggestAfterComplete,
     after_not: suggestAfterNot,
+    after_cast: suggestAfterCast,
     empty_expression: suggestForEmptyExpression,
   };
 
