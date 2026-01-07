@@ -60,6 +60,11 @@ components:
           type: object
           format: binary
           description: The script file upload
+        tags:
+          type: array
+          description: Tags to categorize the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptTags'
         description:
           type: string
           description: Description of the script and its purpose/functionality
