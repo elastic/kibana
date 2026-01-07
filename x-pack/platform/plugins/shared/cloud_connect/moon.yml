@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/core-analytics-browser'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod
