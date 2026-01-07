@@ -1181,6 +1181,48 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getPullRequest action', () => {
+    it('should get a pull request by number', async () => {
+      const mockResponse = {
+        data: {
+          number: 123,
+          title: 'Test Pull Request',
+          body: 'This is a test pull request',
+          state: 'open',
+          head: {
+            ref: 'feature-branch',
+            sha: 'abc123',
+          },
+          base: {
+            ref: 'main',
+            sha: 'def456',
+          },
+          merged: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-02T00:00:00Z',
+          html_url: 'https://github.com/owner/repo/pull/123',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getPullRequest.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/pulls/123',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
