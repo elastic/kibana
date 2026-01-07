@@ -412,3 +412,5 @@ export function supportsArithmeticOperations(type: string): boolean {
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
+
+export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;
