@@ -7,9 +7,9 @@
 
 import datemath from '@kbn/datemath';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import { MonitoringEntitySourceDescriptorClient } from '../../../../saved_objects';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
+import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 
 const FIRST_RUN_DEFAULT_RANGE = 'now-1M'; // on first run (update detection), look back over last month
 interface EventDoc {
