@@ -21,14 +21,20 @@ import { inject, injectable, optional } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
-import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import {
   ensureRuleExecutorTaskScheduled,
   getRuleExecutorTaskId,
-} from '../../../rule_executor/schedule';
-import type { EsqlRuleResponse } from '../methods/create/types';
-import { createEsqlRuleDataSchema, type CreateEsqlRuleParams } from '../methods/create';
-import { updateEsqlRuleDataSchema, type UpdateEsqlRuleData } from '../methods/update';
+} from '../../rule_executor/schedule';
+import type { EsqlRuleResponse } from '../../application/esql_rule/methods/create/types';
+import {
+  createEsqlRuleDataSchema,
+  type CreateEsqlRuleParams,
+} from '../../application/esql_rule/methods/create';
+import {
+  updateEsqlRuleDataSchema,
+  type UpdateEsqlRuleData,
+} from '../../application/esql_rule/methods/update';
 
 @injectable()
 export class RulesClient {

@@ -16,6 +16,7 @@ import type {
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup } from '@kbn/core-di-server';
 
+import { AlertingRetryService } from '../lib/services/retry_service/alerting_retry_service';
 import type { AlertingServerStartDependencies } from '../types';
 import { ALERT_EVENTS_INDEX } from './constants';
 import {
@@ -23,7 +24,6 @@ import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   alertsWrittenFieldsMappings,
 } from './resources';
-import { AlertingRetryService } from '../lib/retry_service/alerting_retry_service';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 

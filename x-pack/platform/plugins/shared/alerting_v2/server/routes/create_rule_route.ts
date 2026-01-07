@@ -19,7 +19,7 @@ import {
   createEsqlRuleDataSchema,
   type CreateEsqlRuleData,
 } from '../application/esql_rule/methods/create';
-import { RulesClient } from '../application/esql_rule/lib/rules_client';
+import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
