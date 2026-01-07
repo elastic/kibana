@@ -165,7 +165,7 @@
         "label": "AssistantScope",
         "description": [],
         "signature": [
-          "\"search\" | \"observability\" | \"all\""
+          "\"search\" | \"all\" | \"observability\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
         "deprecated": false,
