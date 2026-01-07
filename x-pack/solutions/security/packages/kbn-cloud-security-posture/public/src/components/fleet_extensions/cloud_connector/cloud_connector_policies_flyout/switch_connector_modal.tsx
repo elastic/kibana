@@ -205,10 +205,6 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
               <FormattedMessage
                 id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.noConnectorsMessage"
                 defaultMessage="There are no other cloud connectors with the same provider and account type."
-                values={{
-                  provider: provider.toUpperCase(),
-                  accountType: accountType || 'undefined',
-                }}
               />
             </p>
           </EuiCallOut>
