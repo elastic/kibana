@@ -307,7 +307,6 @@ const TakeActionComponent: React.FC<Props> = ({
       addToCaseDisabled,
       attackDiscoveries.length,
       hasAgentBuilderPrivilege,
-      isAddToChatDisabled,
       isAgentChatExperienceEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
