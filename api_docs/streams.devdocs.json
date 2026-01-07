@@ -1488,7 +1488,11 @@
               "section": "def-common.WiredIngest",
               "text": "WiredIngest"
             },
-            "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
+            "; }, undefined>; \"GET /internal/streams/_classic_status\": { endpoint: \"GET /internal/streams/_classic_status\"; handler: ServerRouteHandler<",
+            "StreamsRouteHandlerResources",
+            ", undefined, { can_manage: boolean; }>; security: ",
+            "RouteSecurity",
+            "; }; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
             ", undefined, { enabled: boolean | \"conflict\"; can_manage: boolean; }>; security: ",
             "RouteSecurity",
@@ -2909,6 +2913,24 @@
         },
         {
           "parentPluginId": "streams",
+          "id": "def-public.StreamsPluginStart.getClassicStatus",
+          "type": "Function",
+          "tags": [],
+          "label": "getClassicStatus",
+          "description": [],
+          "signature": [
+            "() => Promise<",
+            "ClassicStreamsStatus",
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "streams",
           "id": "def-public.StreamsPluginStart.enableWiredMode",
           "type": "Function",
           "tags": [],
@@ -4174,7 +4196,11 @@
             "section": "def-common.WiredIngest",
             "text": "WiredIngest"
           },
-          "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
+          "; }, undefined>; \"GET /internal/streams/_classic_status\": { endpoint: \"GET /internal/streams/_classic_status\"; handler: ServerRouteHandler<",
+          "StreamsRouteHandlerResources",
+          ", undefined, { can_manage: boolean; }>; security: ",
+          "RouteSecurity",
+          "; }; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
           ", undefined, { enabled: boolean | \"conflict\"; can_manage: boolean; }>; security: ",
           "RouteSecurity",

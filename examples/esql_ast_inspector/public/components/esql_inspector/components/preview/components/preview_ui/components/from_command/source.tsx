@@ -76,7 +76,9 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
                 </span>
               </EuiToolTip>
             ) : (
-              <>Source {index}</>
+              <span style={{ color: focusedNode === node ? 'rgb(7, 16, 31)' : 'inherit' }}>
+                Source {index}
+              </span>
             )
           }
         >

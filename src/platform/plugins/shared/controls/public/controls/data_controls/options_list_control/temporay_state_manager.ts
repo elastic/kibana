@@ -8,7 +8,8 @@
  */
 
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import type { OptionsListSelection, OptionsListSuggestions } from '../../../../common/options_list';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListSuggestions } from '../../../../common/options_list';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
 
 export interface TemporaryState {
