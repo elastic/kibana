@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import { deserializeLayout } from './deserialize_layout';
 
 describe('deserializeLayout', () => {
@@ -36,6 +37,22 @@ describe('deserializeLayout', () => {
           ],
         },
       ],
+      {
+        controls: [
+          {
+            uid: 'control1',
+            type: 'someType',
+            width: 'small',
+            grow: true,
+            config: { someValue: 'test' },
+          } as unknown as PinnedControlState,
+          {
+            uid: 'control2',
+            type: 'anotherType',
+            config: { anotherValue: 1 },
+          } as unknown as PinnedControlState,
+        ],
+      },
       () => []
     );
     expect(layout.panels).toMatchInlineSnapshot(`
@@ -72,6 +89,22 @@ describe('deserializeLayout', () => {
         },
       }
     `);
+    expect(layout.controls).toMatchInlineSnapshot(`
+      Object {
+        "control1": Object {
+          "grow": true,
+          "order": 0,
+          "type": "someType",
+          "width": "small",
+        },
+        "control2": Object {
+          "grow": undefined,
+          "order": 1,
+          "type": "anotherType",
+          "width": undefined,
+        },
+      }
+    `);
     expect(childState).toMatchInlineSnapshot(`
       Object {
         "1": Object {
@@ -85,6 +118,16 @@ describe('deserializeLayout', () => {
             "title": "panel Three",
           },
           "references": Array [],
+        },
+        "control1": Object {
+          "rawState": Object {
+            "someValue": "test",
+          },
+        },
+        "control2": Object {
+          "rawState": Object {
+            "anotherValue": 1,
+          },
         },
       }
     `);

@@ -5,16 +5,18 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
 import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { generateEsql } from '@kbn/onechat-genai-utils';
-import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
+import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { extractTextContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { VisualizationConfig } from './types';
 import {
   GENERATE_ESQL_NODE,
@@ -79,6 +81,7 @@ function getExistingEsqlQuery(config: VisualizationConfig | null): string | null
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
+  index: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType>(),
   schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
@@ -123,6 +126,7 @@ export const createVisualizationGraph = (
 
       const generateEsqlResponse = await generateEsql({
         nlQuery: nlQueryWithContext,
+        index: state.index,
         model,
         events,
         logger,
@@ -303,6 +307,10 @@ export const createVisualizationGraph = (
           validatedConfig = tagcloudStateSchemaESQL.validate(config);
         } else if (state.chartType === SupportedChartType.XY) {
           validatedConfig = xyStateSchema.validate(config);
+        } else if (state.chartType === SupportedChartType.RegionMap) {
+          validatedConfig = regionMapStateSchemaESQL.validate(config);
+        } else if (state.chartType === SupportedChartType.Heatmap) {
+          validatedConfig = heatmapStateSchemaESQL.validate(config);
         } else {
           throw new Error(`Unsupported chart type: ${state.chartType}`);
         }

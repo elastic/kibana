@@ -15,7 +15,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateMonitoringEntitySource"
+              type: object
+              required: [type, name]
+              additionalProperties: false
+              properties:
+                type:
+                  $ref: "#/components/schemas/MonitoringEntitySourceType"
+                name:
+                  type: string
+                indexPattern:
+                  type: string
+                enabled:
+                  type: boolean
+                matchers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Matcher'
+                filter:
+                  $ref: '#/components/schemas/Filter' 
       responses:
         "200":
           description: Entity source created successfully
@@ -58,7 +75,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MonitoringEntitySourceNoId"
+              $ref: "#/components/schemas/UpdateEntitySourceNoadditionalProps"
       responses:
         "200":
           description: Entity source updated successfully
@@ -99,6 +116,26 @@ paths:
           in: query
           schema:
             type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+        - name: sort_field
+          in: query
+          schema:
+            type: string
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
 
       responses:
         "200":
@@ -106,107 +143,39 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/MonitoringEntitySource"
+                type: object
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MonitoringEntitySource"
+                  page:
+                    type: integer
+                    minimum: 1
+                  per_page:
+                    type: integer
+                    minimum: 1
+                    maximum: 10000
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - sources
+                  - page
+                  - per_page
+                  - total
 components:
   schemas:
-    CreateMonitoringEntitySource:
-      type: object
-      required: [type, name]
-      properties:
-        type:
-          type: string
-        name:
-          type: string
-        managed:
-          type: boolean
-        indexPattern:
-          type: string
-        enabled:
-          type: boolean
-        error:
-          type: string
-        integrationName:
-          type: string
-        matchers:
-          type: array
-          items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                  
-              values:
-                type: array
-                items:
-                  type: string                
-        filter:
-          type: object
-          properties:
-            kuery:
-              oneOf:
-                - type: string
-                - type: object
-        integrations:
-            $ref: '#/components/schemas/Integrations'          
-
-    UpdatedMonitoringEntitySource:
-      type: object
-      properties:
-        type:
-          type: string
-        name:
-          type: string
-        managed:
-          type: boolean
-        indexPattern:
-          type: string
-        enabled:
-          type: boolean
-        error:
-          type: string
-        integrationName:
-          type: string
-        matchers:
-          type: array
-          items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                  
-              values:
-                type: array
-                items:
-                  type: string                
-        filter:
-          type: object
-          properties:
-            kuery:
-              oneOf:
-                - type: string
-                - type: object
-        integrations: 
-            $ref: '#/components/schemas/Integrations'
-
-    MonitoringEntitySourceProperties:
+    MonitoringEntitySourceType:
+      type: string
+      enum:
+        - index
+        - entity_analytics_integration
+    UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
         name:
           type: string
-        type:
-          type: string
-        managed:
-          type: boolean
         indexPattern:
           type: string
         integrationName:
@@ -218,14 +187,25 @@ components:
           items:
             $ref: '#/components/schemas/Matcher'
         filter:
-          type: object
-          properties:
-            kuery:
-              oneOf:
-              - type: string
-              - type: object
+          $ref: '#/components/schemas/Filter'
         integrations: 
           $ref: '#/components/schemas/Integrations'
+
+    UpdateEntitySourceNoadditionalProps:
+      allOf:
+      - $ref: '#/components/schemas/UpdateableMonitoringEntitySourceProperties'
+      - type: object
+        additionalProperties: false
+
+    MonitoringEntitySourceProperties:
+      allOf:
+      - $ref: '#/components/schemas/UpdateableMonitoringEntitySourceProperties'
+      - type: object
+        properties:
+          type:
+            $ref: "#/components/schemas/MonitoringEntitySourceType"
+          managed:
+            type: boolean
 
     Matcher:
       type: object
@@ -238,11 +218,27 @@ components:
           items:
             type: string
         values:
-          type: array
-          items:
-            type: string
+          description: >
+            Matcher values. Must be either an array of strings
+            (e.g. group or role names) or an array of booleans
+            (e.g. integration-derived flags like privileged_group_member).
+            Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                type: boolean
+    Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+            - type: object
 
-    MonitoringEntitySourceNoId:
+    MonitoringEntitySourceAttributes:
       allOf:
       - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
       - type: object

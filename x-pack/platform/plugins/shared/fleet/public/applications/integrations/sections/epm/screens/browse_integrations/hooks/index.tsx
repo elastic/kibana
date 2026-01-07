@@ -13,6 +13,8 @@ import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { ExtendedIntegrationCategory } from '../../home/category_facets';
 import type { IntegrationCardItem } from '../../home';
 
+import { useUrlFilters } from './url_filters';
+
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
 }: {
@@ -31,8 +33,6 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards: originalFilteredCards,
@@ -41,24 +41,45 @@ export function useBrowseIntegrationHook({
     setSelectedSubCategory,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
+  const urlFilters = useUrlFilters();
+
   const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+  const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
+
+  const sortedCards: IntegrationCardItem[] = useMemo(() => {
+    const sortKey = urlFilters.sort ?? 'recent-old';
+
+    if (sortKey === 'a-z') {
+      return [...originalFilteredCards].sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+    } else if (sortKey === 'z-a') {
+      return [...originalFilteredCards].sort((a, b) => {
+        return b.name.localeCompare(a.name);
+      });
+    } else {
+      // TODO implement recent-old and old-recent sorting when we have a date field
+      return originalFilteredCards;
+    }
+
+    return sortedCards;
+  }, [originalFilteredCards, urlFilters.sort]);
 
   const filteredCards = useMemo(() => {
     const searchResults = searchTerm
-      ? (localSearch?.search(searchTerm) as IntegrationCardItem[]).map(
+      ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
           (match) => match[searchIdField]
         ) ?? []
       : [];
 
     return searchTerm
-      ? originalFilteredCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
-      : originalFilteredCards;
-  }, [localSearch, searchTerm, originalFilteredCards]);
+      ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
+      : sortedCards;
+  }, [localSearch, searchTerm, sortedCards]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
       setCategory(id as ExtendedIntegrationCategory);
-      setSearchTerm('');
       setSelectedSubCategory(undefined);
       setUrlandPushHistory({
         searchString: '',
@@ -67,8 +88,10 @@ export function useBrowseIntegrationHook({
         onlyAgentless: onlyAgentlessFilter,
       });
     },
-    [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
+    [setCategory, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
   );
+
+  const onSortChange = useCallback((sortKey: string) => {}, []);
 
   return {
     initialSelectedCategory,
@@ -83,8 +106,6 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards,
@@ -92,5 +113,6 @@ export function useBrowseIntegrationHook({
     selectedSubCategory,
     setSelectedSubCategory,
     onCategoryChange,
+    onSortChange,
   };
 }
