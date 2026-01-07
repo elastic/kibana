@@ -6,7 +6,7 @@
 - **Tests:** `@x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
 - **Synthtrace Scenarios:** `@src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/`
 
-## How to validate Tools
+## How to Validate Tools
 
 ### Prerequisites
 
