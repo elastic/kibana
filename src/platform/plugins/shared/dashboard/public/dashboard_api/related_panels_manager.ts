@@ -9,11 +9,13 @@
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiAppliesFilters } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, filter, map, of, startWith, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, of, switchMap } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
+import { apiHasSectionId } from '@kbn/presentation-containers';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeTrackPanel } from './track_panel';
 
@@ -41,23 +43,63 @@ export const initializeRelatedPanelsManager = (
   layoutManager: ReturnType<typeof initializeLayoutManager>
 ) => {
   const { focusedPanelId$ } = trackPanel;
-  const { children$, layout$, getDashboardPanelFromId } = layoutManager.api;
+  const { children$, getDashboardPanelFromId } = layoutManager.api;
   const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
 
-  const filterRelatedPanels$ = combineLatest(
-    // Update on layout change to get the most recent sectionIds
-    [children$, focusedPanelId$, layout$]
-  ).pipe(
+  const childrenWithData$ = combineLatest([children$, focusedPanelId$]).pipe(
     // Skip calculations if there is no focused panel
-    filter(([_, focusedPanelId]) => Boolean(focusedPanelId)),
-    map(([children]) => {
+    filter(([, focusedPanelId]) => Boolean(focusedPanelId)),
+    switchMap(([children]) => {
+      const esqlVariableChildren: Array<
+        Observable<{ uuid: string; variable: ESQLControlVariable }>
+      > = [];
+      const esqlQueryChildren: Array<Observable<{ uuid: string; esql: string }>> = [];
+      const childrenWithSectionIds: Array<
+        Observable<{ sectionId?: string | typeof GLOBAL; child: DefaultEmbeddableApi }>
+      > = [];
+      for (const child of Object.values(children)) {
+        if (apiHasSectionId(child)) {
+          childrenWithSectionIds.push(
+            child.sectionId$.pipe(map((sectionId) => ({ sectionId: sectionId ?? GLOBAL, child })))
+          );
+        } else {
+          childrenWithSectionIds.push(of({ child }));
+        }
+
+        if (apiPublishesESQLQuery(child)) {
+          esqlQueryChildren.push(
+            child.query$.pipe(map(({ esql }) => ({ esql, uuid: child.uuid })))
+          );
+        } else if (apiPublishesESQLVariable(child)) {
+          esqlVariableChildren.push(
+            child.esqlVariable$.pipe(map((variable) => ({ variable, uuid: child.uuid })))
+          );
+        }
+      }
+
+      return combineLatest([
+        combineLatest(childrenWithSectionIds),
+        esqlVariableChildren.length ? combineLatest(esqlVariableChildren) : of(undefined),
+        esqlQueryChildren.length ? combineLatest(esqlQueryChildren) : of(undefined),
+      ]);
+    })
+  );
+
+  const childrenWithSectionIds$ = childrenWithData$.pipe(
+    map(([childrenWithSections]) => childrenWithSections)
+  );
+  const esqlVariablesWithUUIDs$ = childrenWithData$.pipe(map(([, variables]) => variables));
+  const esqlQueriesWithUUIDs$ = childrenWithData$.pipe(map(([, , queries]) => queries));
+
+  const filterRelatedPanels$ = childrenWithSectionIds$.pipe(
+    map((childrenWithSectionIds) => {
       const childrenBySectionAndFilterApplication = new Map<string | Symbol, SectionFilterEntry>();
 
-      for (const child of Object.values(children)) {
-        const layoutPanel = getDashboardPanelFromId(child.uuid);
-        if (!layoutPanel) continue;
-
-        const sectionId = layoutPanel.grid.sectionId ?? GLOBAL;
+      for (const { child, sectionId: publishedSectionId } of Object.values(
+        childrenWithSectionIds
+      )) {
+        const sectionId =
+          publishedSectionId ?? getDashboardPanelFromId(child.uuid)?.grid.sectionId ?? GLOBAL;
         const nextSectionEntry =
           childrenBySectionAndFilterApplication.get(sectionId) ?? getBlankSectionFilterEntry();
 
@@ -104,42 +146,14 @@ export const initializeRelatedPanelsManager = (
     })
   );
 
-  const esqlChildren$ = children$.pipe(
-    switchMap((children) => {
-      const esqlVariableChildren: Array<
-        Observable<{ uuid: string; variable: ESQLControlVariable }>
-      > = [];
-      const esqlQueryChildren: Array<Observable<{ uuid: string; esql: string }>> = [];
-
-      for (const child of Object.values(children)) {
-        if (apiPublishesESQLQuery(child)) {
-          esqlQueryChildren.push(
-            child.query$.pipe(map(({ esql }) => ({ esql, uuid: child.uuid })))
-          );
-        } else if (apiPublishesESQLVariable(child)) {
-          esqlVariableChildren.push(
-            child.esqlVariable$.pipe(map((variable) => ({ variable, uuid: child.uuid })))
-          );
-        }
-      }
-
-      return combineLatest([
-        esqlVariableChildren.length ? combineLatest(esqlVariableChildren) : of(undefined),
-        esqlQueryChildren.length ? combineLatest(esqlQueryChildren) : of(undefined),
-      ]);
-    })
-  );
-
-  const esqlRelatedPanels$ = combineLatest([esqlChildren$, focusedPanelId$]).pipe(
-    // Skip calculations if there is no focused panel
-    filter(([_, focusedPanelId]) => Boolean(focusedPanelId)),
-    map(([[esqlVariablesWithUUIDs, esqlQueries]]) => {
+  const esqlRelatedPanels$ = combineLatest([esqlVariablesWithUUIDs$, esqlQueriesWithUUIDs$]).pipe(
+    map(([esqlVariablesWithUUIDs, esqlQueriesWithUUIDs]) => {
       const nextESQLRelatedPanels: Map<string, string[]> = new Map();
-      if (!esqlVariablesWithUUIDs || !esqlQueries) return nextESQLRelatedPanels;
+      if (!esqlVariablesWithUUIDs || !esqlQueriesWithUUIDs) return nextESQLRelatedPanels;
 
       // For each panel with an ES|QL query, check if it has any variables, then create a map of which
       // panels publish these corresponding variables
-      for (const { esql, uuid } of esqlQueries) {
+      for (const { esql, uuid } of esqlQueriesWithUUIDs) {
         const variables = getESQLQueryVariables(esql);
         if (variables.length > 0) {
           const relatedPanelUUIDs = variables

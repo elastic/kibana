@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
+
 export interface IsDuplicable {
   isDuplicable: boolean;
 }
@@ -33,4 +35,16 @@ export interface IsPinnable {
 export const apiCanBePinned = (unknownApi: unknown | null): unknownApi is IsPinnable =>
   Boolean((unknownApi as IsPinnable).isPinnable);
 
-export type HasPanelCapabilities = IsExpandable & IsCustomizable & IsDuplicable & IsPinnable;
+export interface HasSectionId {
+  sectionId$: Observable<string | undefined>;
+}
+
+export const apiHasSectionId = (api: unknown): api is HasSectionId => {
+  return typeof (api as HasSectionId)?.sectionId$ !== 'undefined';
+};
+
+export type HasPanelCapabilities = IsExpandable &
+  IsCustomizable &
+  IsDuplicable &
+  IsPinnable &
+  HasSectionId;

@@ -17,14 +17,13 @@ import {
   filter,
   map,
   merge,
-  of,
   skip,
 } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -225,18 +224,13 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           hasSelections$.next(hasSelections);
         });
 
-      /** Output filters when selections and/or filter meta data changes */
-      const sectionId$ = apiHasSections(parentApi)
-        ? parentApi.getPanelSection$(uuid)
-        : of(undefined);
-
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,
         selectionsManager.api.exclude$,
-        sectionId$,
+        dataControlManager.api.sectionId$,
       ])
         .pipe(debounceTime(0))
         .subscribe(

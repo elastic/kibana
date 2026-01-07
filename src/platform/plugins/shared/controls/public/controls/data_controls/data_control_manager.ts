@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, merge, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, of, switchMap, tap } from 'rxjs';
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   titleComparators,
@@ -22,6 +23,7 @@ import { initializeStateManager } from '@kbn/presentation-publishing/state_manag
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
+import { apiHasSections } from '@kbn/presentation-containers';
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
@@ -201,6 +203,11 @@ export const initializeDataControlManager = async <EditorState extends object = 
     initialFilter ? [initialFilter] : undefined
   );
 
+  /** Output filters when selections and/or filter meta data changes */
+  const sectionId$ = (
+    apiHasSections(parentApi) ? parentApi.getPanelSection$(controlId) : of(undefined)
+  ) as PublishingSubject<string | undefined>;
+
   return {
     api: {
       ...titlesManager.api,
@@ -222,6 +229,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       isCustomizable: false,
       isDuplicable: true,
       isPinnable: true,
+      sectionId$,
     },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();

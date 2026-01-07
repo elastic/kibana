@@ -24,11 +24,13 @@ export {
   apiCanBeCustomized,
   apiCanBeExpanded,
   apiCanBePinned,
+  apiHasSectionId,
   type IsDuplicable,
   type IsExpandable,
   type IsCustomizable,
   type IsPinnable,
   type HasPanelCapabilities,
+  type HasSectionId,
 } from './interfaces/panel_capabilities';
 export { type CanAddNewSection, apiCanAddNewSection } from './interfaces/can_add_new_section';
 export {
