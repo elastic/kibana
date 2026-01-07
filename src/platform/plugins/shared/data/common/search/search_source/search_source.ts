@@ -155,7 +155,6 @@ export class SearchSource {
   private id: string = uniqueId('data_source');
   private shouldOverwriteDataViewType: boolean = false;
   private overwriteDataViewType?: string;
-  private shouldOverwriteTimezone: boolean = false;
   private overwriteTimezone?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
@@ -206,7 +205,6 @@ export class SearchSource {
    *
    */
   setOverwriteTimezone(timezone: string) {
-    this.shouldOverwriteTimezone = true;
     this.overwriteTimezone = timezone;
   }
 
@@ -1027,9 +1025,7 @@ export class SearchSource {
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
-      ...(this.shouldOverwriteTimezone && this.overwriteTimezone
-        ? { dateFormatTZ: this.overwriteTimezone }
-        : {}),
+      ...(this.overwriteTimezone ? { dateFormatTZ: this.overwriteTimezone } : {}),
     };
     return buildEsQuery(
       this.getDataView(index),

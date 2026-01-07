@@ -108,7 +108,6 @@ describe('saved_searches_utils', () => {
             "parent": undefined,
             "requestStartHandlers": Array [],
             "shouldOverwriteDataViewType": false,
-            "shouldOverwriteTimezone": false,
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],

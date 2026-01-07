@@ -162,6 +162,7 @@ describe('getExportSettings', () => {
     });
 
     // expect moment to guess the timezone if it's set to 'Browser'
+    // moment.guess mock will return 'America/New_York' and is defined here .../kbn-test/src/jest/setup/mocks.moment_timezone.js
     expect(
       await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger).then(
         ({ timezone }) => timezone
