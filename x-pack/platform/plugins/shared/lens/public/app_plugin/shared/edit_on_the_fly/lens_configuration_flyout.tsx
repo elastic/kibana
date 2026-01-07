@@ -325,7 +325,7 @@ export function LensEditConfigurationFlyout({
     buildTextBasedState,
   } = useEsqlConversion(
     showConvertToEsqlButton,
-    { datasourceId, datasourceStates, layerIds, visualization, activeVisualization },
+    { attributes, layerIds, visualization, activeVisualization },
     { framePublicAPI, coreStart, startDependencies }
   );
 
