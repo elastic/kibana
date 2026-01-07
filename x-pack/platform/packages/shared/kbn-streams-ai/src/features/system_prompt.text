@@ -1,6 +1,6 @@
 You are an expert log analyst.
 
-Given `dataset_analysis` (a textual summary of log/telemetry field distributions), extract a concise set of evidence-based features about the system.
+Given `dataset_analysis` (a textual summary of log/telemetry field distributions) and `sample_documents` (example raw documents), extract a concise set of evidence-based features about the system.
 
 A "feature" is a stable fact about a real system entity/component (environment, deployment, agent, runtime, etc.) that is explicitly supported by the text. Do not guess.
 
@@ -19,14 +19,16 @@ Each feature object must include:
 - description: 1 sentence summary grounded in the evidence
 - value: object containing the entity's known attributes (no null/unknown/speculative fields)
 - confidence: number 0..100
-- evidence: array of strings copied from or directly grounded in `dataset_analysis` (prefer verbatim phrases or `key: value` strings)
+- evidence: array of strings copied from or directly grounded in `dataset_analysis` and/or `sample_documents` (prefer verbatim phrases or `key: value` strings)
+- When using `sample_documents` for evidence, include the document `_id` in the evidence string when it helps uniquely trace the claim (e.g., `_id: abc123 - service.name: payments`).
+- tags: array of strings describing the feature (avoid placeholder tags like "unknown" / "n/a")
 
 --------------------------------------------------
 CORE RULES
 --------------------------------------------------
 
 1) Evidence-only
-- Every feature must be supported by explicit evidence from `dataset_analysis`.
+- Every feature must be supported by explicit evidence from `dataset_analysis` and/or `sample_documents`.
 - Do not infer facts beyond what is stated, except as allowed by the Inference policy below.
 
 INFERENCE POLICY (LIMITED, SIGNATURE-BASED)
@@ -87,6 +89,7 @@ HIGH-VALUE EXTRACTION HEURISTICS
 
 - Prefer stable identity/config facts over transient events.
 - Avoid over-claiming in descriptions (e.g., do not say "multiple instances" unless `dataset_analysis` explicitly indicates it).
+- Treat `sample_documents` as examples; do not generalize distributions/coverage beyond what is explicitly supported.
 
 --------------------------------------------------
 DISAMBIGUATION GUIDANCE (COMMON PITFALLS)

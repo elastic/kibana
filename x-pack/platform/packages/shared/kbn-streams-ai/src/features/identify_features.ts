@@ -6,6 +6,7 @@
  */
 
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
+import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { type BaseFeature, type Streams } from '@kbn/streams-schema';
@@ -39,12 +40,21 @@ export async function identifyFeatures({
 }> {
   logger.debug(`Identifying features for stream ${stream.name}`);
 
-  const analysis = await describeDataset({
-    start,
-    end,
-    esClient,
-    index: stream.name,
-  });
+  const [analysis, { hits: sampleDocuments }] = await Promise.all([
+    describeDataset({
+      start,
+      end,
+      esClient,
+      index: stream.name,
+    }),
+    getSampleDocuments({
+      esClient,
+      index: stream.name,
+      start,
+      end,
+      size: 10,
+    }),
+  ]);
 
   const response = await withSpan('invoke_prompt', () =>
     inferenceClient.prompt({
@@ -52,6 +62,7 @@ export async function identifyFeatures({
         dataset_analysis: JSON.stringify(
           formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: false })
         ),
+        sample_documents: JSON.stringify(sampleDocuments),
       },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt: prompt }),
       finalToolChoice: {
