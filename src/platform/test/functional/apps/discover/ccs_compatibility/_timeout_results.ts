@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
+  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -28,6 +29,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
+  async function openWarningInspector() {
+    await testSubjects.click('searchResponseWarningsViewDetails');
+
+    if (await testSubjects.exists('viewDetailsContextMenu')) {
+      await find.clickByButtonText('Table');
+    }
+
+    await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+  }
+
   describe('discover search CCS timeout', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
@@ -39,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await kibanaServer.uiSettings.update({ 'search:timeout': 5000 });
+      await kibanaServer.uiSettings.update({ 'search:timeout': 3000 });
     });
 
     after(async () => {
@@ -75,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 10
+                "stall_time_seconds": 5
               }
             ]
           }
@@ -136,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 10
+                "stall_time_seconds": 5
               }
             ]
           }
@@ -186,9 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(title).to.contain('Timed out');
 
         // View cluster details shows timed out
-        await testSubjects.click('searchResponseWarningsViewDetails');
-
-        await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        await openWarningInspector();
         const txt = await testSubjects.getVisibleText(
           'inspectorRequestClustersTableCell-Status-ftr-remote'
         );
