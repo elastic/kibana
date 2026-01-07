@@ -281,7 +281,11 @@ export class WorkflowsExecutionEnginePlugin
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
               // Check concurrency limits and apply collision strategy if needed
-              await this.checkConcurrencyIfNeeded(workflowExecution);
+              const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+              if (!canProceed) {
+                // Execution was dropped due to concurrency limit, skip running
+                return;
+              }
 
               if (!workflowExecution.id || !workflowExecution.spaceId) {
                 throw new Error('Workflow execution must have id and spaceId');
@@ -422,7 +426,13 @@ export class WorkflowsExecutionEnginePlugin
       );
 
       // Check concurrency limits and apply collision strategy if needed
-      await this.checkConcurrencyIfNeeded(workflowExecution);
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+      if (!canProceed) {
+        // Execution was dropped due to concurrency limit, return execution ID
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
@@ -460,7 +470,13 @@ export class WorkflowsExecutionEnginePlugin
       );
 
       // Check concurrency limits and apply collision strategy if needed
-      await this.checkConcurrencyIfNeeded(workflowExecution);
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+      if (!canProceed) {
+        // Execution was dropped due to concurrency limit, skip scheduling
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
 
       // Always schedule a task (never execute directly)
       const taskInstance = createTaskInstance(
@@ -649,20 +665,15 @@ export class WorkflowsExecutionEnginePlugin
    * Checks concurrency limits and applies collision strategy if needed.
    * This helper method consolidates the duplicated concurrency check logic.
    *
+   * For 'drop' strategy: if limit is exceeded, ConcurrencyManager marks execution as SKIPPED.
+   * For 'cancel-in-progress' strategy: ConcurrencyManager cancels old executions to make room.
+   *
    * @param workflowExecution - The workflow execution (might be partial)
+   * @returns Promise<boolean> - true if execution can proceed, false if it should be dropped
    */
   private async checkConcurrencyIfNeeded(
     workflowExecution: Partial<EsWorkflowExecution>
-  ): Promise<void> {
-    if (
-      !workflowExecution.workflowDefinition?.settings?.concurrency ||
-      !workflowExecution.concurrencyGroupKey ||
-      !workflowExecution.id ||
-      !workflowExecution.spaceId
-    ) {
-      return;
-    }
-
+  ): Promise<boolean> {
     // Guard check: ConcurrencyManager not initialized if task executes before start().
     // This should not occur in normal operation.
     // Execution will proceed without concurrency enforcement.
@@ -670,16 +681,33 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.warn(
         `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
       );
-      return;
+      return true;
+    }
+
+    if (
+      !workflowExecution.workflowDefinition?.settings?.concurrency ||
+      !workflowExecution.concurrencyGroupKey ||
+      !workflowExecution.id ||
+      !workflowExecution.spaceId
+    ) {
+      return true; // No concurrency settings, allow execution
     }
 
     try {
-      await this.concurrencyManager.checkConcurrency(
+      const canProceed = await this.concurrencyManager.checkConcurrency(
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,
         workflowExecution.spaceId
       );
+
+      if (!canProceed) {
+        this.logger.debug(
+          `Dropped workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}) due to concurrency limit`
+        );
+      }
+
+      return canProceed;
     } catch (error) {
       // Best-effort concurrency enforcement: log error but allow execution to proceed
       // This prevents a single cancellation failure from blocking new executions
@@ -690,6 +718,7 @@ export class WorkflowsExecutionEnginePlugin
       if (error instanceof Error) {
         this.logger.debug(`Concurrency enforcement error stack: ${error.stack}`);
       }
+      return true; // On error, allow execution to proceed
     }
   }
 }

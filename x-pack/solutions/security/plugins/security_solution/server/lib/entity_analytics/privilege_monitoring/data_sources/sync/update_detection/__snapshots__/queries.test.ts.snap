@@ -28,6 +28,7 @@ Object {
               Object {
                 "@timestamp": Object {
                   "order": "desc",
+                  "unmapped_type": "date",
                 },
               },
             ],
@@ -86,6 +87,7 @@ Object {
               Object {
                 "@timestamp": Object {
                   "order": "desc",
+                  "unmapped_type": "date",
                 },
               },
             ],
@@ -147,6 +149,7 @@ Object {
               Object {
                 "@timestamp": Object {
                   "order": "desc",
+                  "unmapped_type": "date",
                 },
               },
             ],

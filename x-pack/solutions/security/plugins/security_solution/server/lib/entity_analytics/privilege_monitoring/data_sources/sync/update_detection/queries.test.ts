@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Matcher } from '../../../../../../../../common/api/entity_analytics';
+import type { Matcher } from '../../../../../../../common/api/entity_analytics';
 import { buildPrivilegedSearchBody } from './queries';
 
 describe('Integration sync queries', () => {
