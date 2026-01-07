@@ -13,8 +13,8 @@ import type { Logger } from '@kbn/core/server';
 import { cloneDeep, get, has, isArray } from 'lodash';
 
 const getTimeFieldAccessorString = (metaField: string): string => `query.range['${metaField}']`;
-const getTimeFields = (filter: Filter) => {
-  const metaField = get(filter, 'meta.field');
+const getTimeFields = (filter: Filter, timeFieldName?: string) => {
+  const metaField: string | undefined = get(filter, 'meta.field') || timeFieldName;
   if (metaField) {
     const timeFieldAccessorString = getTimeFieldAccessorString(metaField);
     const timeFormat = get(filter, `${timeFieldAccessorString}.format`);
@@ -36,11 +36,13 @@ interface OverrideTimeRangeOpts {
   currentFilters: Filter[] | Filter | undefined;
   forceNow: string;
   logger: Logger;
+  timeFieldName?: string;
 }
 export const overrideTimeRange = ({
   currentFilters,
   forceNow,
   logger,
+  timeFieldName,
 }: OverrideTimeRangeOpts): Filter[] | undefined => {
   if (!currentFilters) {
     return;
@@ -77,7 +79,7 @@ export const overrideTimeRange = ({
       timeFormat: maybeTimeFieldFormat,
       timeGte: maybeTimeFieldGte,
       timeLte: maybeTimeFieldLte,
-    } = getTimeFields(filter);
+    } = getTimeFields(filter, timeFieldName);
 
     if (maybeTimeFieldFormat && maybeTimeFieldGte && maybeTimeFieldLte) {
       return isValidDateTime(maybeTimeFieldGte) && isValidDateTime(maybeTimeFieldLte);
@@ -88,7 +90,7 @@ export const overrideTimeRange = ({
   if (timeFilterIndex >= 0) {
     try {
       const timeFilter = cloneDeep(filters[timeFilterIndex]);
-      const { metaField, timeGte, timeLte } = getTimeFields(timeFilter);
+      const { metaField, timeGte, timeLte } = getTimeFields(timeFilter, timeFieldName);
       if (metaField) {
         const timeGteMs = Date.parse(timeGte);
         const timeLteMs = Date.parse(timeLte);
