@@ -89,6 +89,7 @@ dependsOn:
   - '@kbn/cypress-test-helper'
   - '@kbn/streams-schema'
   - '@kbn/data-quality'
+  - '@kbn/maintenance-windows-plugin'
 tags:
   - test-helper
   - package
