@@ -40,6 +40,8 @@ export const EditorWidgetsCustomizations: FC<
     'var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))'
   );
 
+  const repositionedWidgetOriginalTopPositionRecord = useRef<Record<string, string>>({});
+
   /**
    * @description Repositioning handlers for widgets of interest, assumes the widget has the the "onDidShow" and "onDidHide" methods,
    * See {@link https://github.com/elastic/kibana/issues/223981 | GitHub issue #223981} for the rationale behind this bug fix implementation
@@ -52,8 +54,6 @@ export const EditorWidgetsCustomizations: FC<
     ) => {
       // @ts-expect-error -- The "onDidShow" and "onDidHide" is not documented so we guard from possible changes in the underlying lib
       if (widget && widget.onDidShow && widget.onDidHide && enableSuggestWidgetRepositioning) {
-        let $widgetNode: HTMLElement | null = null;
-
         // Add the modifier className to the global style modifier class names record
         setGlobalStyleModifierClassNamesRecord((prevStyles) => ({
           ...prevStyles,
@@ -63,19 +63,26 @@ export const EditorWidgetsCustomizations: FC<
         }));
 
         // add the just declared modifier className on the widget to hide the widget by default
-        // so we might be able to correctly position the widget,
+        // if it exists so we might be able to correctly position the widget,
         // then make it visible
-        ($widgetNode = domNodeGetter(widget))?.classList?.add(modifierClassName);
+        domNodeGetter(widget)?.classList?.add(modifierClassName);
 
-        let originalTopPosition: string | null = null;
+        let originalTopPosition: string | undefined =
+          repositionedWidgetOriginalTopPositionRecord.current[modifierClassName];
 
         // @ts-expect-error -- "onDidShow" is defined at this point
         widget.onDidShow(() => {
+          let $widgetNode: HTMLElement | null = null;
           if (
             ($widgetNode = domNodeGetter(widget)) &&
             $widgetNode.classList.contains(modifierClassName)
           ) {
-            originalTopPosition = $widgetNode.style.top;
+            // persist the original top position of the widget outside of the widget's scope
+            // so that even the use effect runs that cleans out the value
+            // we'd be able to restore it properly
+            originalTopPosition = repositionedWidgetOriginalTopPositionRecord.current[
+              modifierClassName
+            ] = $widgetNode.style.top;
             $widgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset.current} + ${euiTheme.size.m}))`;
             $widgetNode.classList.remove(modifierClassName);
           }
@@ -83,6 +90,7 @@ export const EditorWidgetsCustomizations: FC<
 
         // @ts-expect-error -- "onDidHide" is defined at this point
         widget.onDidHide(() => {
+          let $widgetNode: HTMLElement | null = null;
           if (($widgetNode = domNodeGetter(widget))) {
             $widgetNode.classList.add(modifierClassName);
             $widgetNode.style.top = originalTopPosition ?? '';
