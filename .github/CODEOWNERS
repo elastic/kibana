@@ -607,7 +607,7 @@ src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui @elastic/kibana-core
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
-src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-team
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
@@ -659,6 +659,7 @@ src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
+src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
 src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops

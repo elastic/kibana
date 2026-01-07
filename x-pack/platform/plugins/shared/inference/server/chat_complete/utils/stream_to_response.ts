@@ -40,6 +40,7 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
           tokens: tokenEvent?.tokens,
           deanonymized_input: messageEvent.deanonymized_input,
           deanonymized_output: messageEvent.deanonymized_output,
+          model: tokenEvent?.model,
         };
       })
     )
