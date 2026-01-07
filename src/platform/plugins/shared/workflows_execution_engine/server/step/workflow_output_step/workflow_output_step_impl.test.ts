@@ -136,12 +136,12 @@ describe('WorkflowOutputStepImpl', () => {
 
       await impl.run();
 
-      // Verify that renderValueAccordingToContext was called with the raw template values
+      // Verify that renderValueAccordingToContext was called with type-preserving templates
       expect(
         mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
       ).toHaveBeenCalledWith({
-        result: '{{ steps.process_data.output.processed_message }}',
-        timestamp: '{{ steps.process_data.output.current_time }}',
+        result: '${{ steps.process_data.output.processed_message }}',
+        timestamp: '${{ steps.process_data.output.current_time }}',
       });
 
       // Verify that the rendered values are stored in the context
@@ -149,6 +149,84 @@ describe('WorkflowOutputStepImpl', () => {
       expect(mockExecution.context.output).toEqual({
         result: 'processed message value',
         timestamp: '2024-01-01T00:00:00Z',
+      });
+    });
+
+    it('should preserve types for numeric template expressions', async () => {
+      mockNode.configuration = {
+        ...mockNode.configuration,
+        with: {
+          count: '{{ steps.calculate.output.count }}',
+          total: '{{ steps.calculate.output.total }}',
+        },
+      };
+
+      // Mock to return actual numbers
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockReturnValue({
+          count: 42,
+          total: 100,
+        });
+
+      impl = new WorkflowOutputStepImpl(
+        mockNode,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await impl.run();
+
+      // Verify templates were converted to type-preserving syntax
+      expect(
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith({
+        count: '${{ steps.calculate.output.count }}',
+        total: '${{ steps.calculate.output.total }}',
+      });
+
+      const mockExecution = mockWorkflowRuntime.getWorkflowExecution();
+      expect(mockExecution.context.output).toEqual({
+        count: 42,
+        total: 100,
+      });
+      // Verify they are actual numbers, not strings
+      expect(typeof mockExecution.context.output.count).toBe('number');
+      expect(typeof mockExecution.context.output.total).toBe('number');
+    });
+
+    it('should NOT convert templates with literal text outside template expression', async () => {
+      mockNode.configuration = {
+        ...mockNode.configuration,
+        with: {
+          message: 'Result: {{ steps.calculate.output.count }}',
+          status: '{{ steps.calculate.output.status }} completed',
+        },
+      };
+
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockReturnValue({
+          message: 'Result: 42',
+          status: 'success completed',
+        });
+
+      impl = new WorkflowOutputStepImpl(
+        mockNode,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await impl.run();
+
+      // Verify templates were NOT converted (kept as regular {{ }} templates)
+      expect(
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith({
+        message: 'Result: {{ steps.calculate.output.count }}',
+        status: '{{ steps.calculate.output.status }} completed',
       });
     });
   });

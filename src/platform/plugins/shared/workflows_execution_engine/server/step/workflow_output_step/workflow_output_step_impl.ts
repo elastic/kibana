@@ -81,14 +81,58 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
+  /**
+   * Converts template expressions from {{ }} to ${{ }} format to preserve types.
+   * This is important for workflow outputs that need to maintain their original types
+   * (numbers, booleans, arrays, objects) rather than being converted to strings.
+   *
+   * Only converts when:
+   * 1. The entire value is a template expression (starts with {{ and ends with }})
+   * 2. There are no literal characters outside the template
+   *
+   * Examples:
+   * - "{{ steps.calc.output.count }}" -> "${{ steps.calc.output.count }}" (converted)
+   * - "Result: {{ steps.calc.output.count }}" -> unchanged (has literal text)
+   * - "{{ steps.calc.output.count }} items" -> unchanged (has literal text)
+   */
+  private convertToTypePreservingTemplates(obj: Record<string, unknown>): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        // Check if the entire string is a single template expression
+        if (
+          trimmed.startsWith('{{') &&
+          trimmed.endsWith('}}') &&
+          // Ensure there's only one {{ }} pair (no literal text outside)
+          trimmed.indexOf('{{') === 0 &&
+          trimmed.lastIndexOf('}}') === trimmed.length - 2
+        ) {
+          // Convert to type-preserving syntax
+          result[key] = `$${trimmed}`;
+        } else {
+          result[key] = value;
+        }
+      } else {
+        result[key] = value;
+      }
+    }
+
+    return result;
+  }
+
   async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
     await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
+    // Convert {{ }} to ${{ }} for type preservation in output values
+    // This ensures numbers, booleans, arrays, and objects maintain their types
+    const outputValuesWithPreservedTypes = this.convertToTypePreservingTemplates(step.with);
     // Render template variables in the output values
     const outputValues = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      step.with
+      outputValuesWithPreservedTypes
     ) as Record<string, unknown>;
 
     try {
