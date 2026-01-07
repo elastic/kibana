@@ -50,16 +50,13 @@ export const searchPrivilegeMonitoringIndicesRoute = (
         const query = request.query.searchQuery;
 
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const config = secSol.getConfig();
-        const maxUsersAllowed =
-          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
         const soClient = dataClient.getScopedSoClient(request, {
           includedHiddenTypes: [
             PrivilegeMonitoringApiKeyType.name,
             monitoringEntitySourceType.name,
           ],
         });
-        const service = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
+        const service = createDataSourcesService(dataClient, soClient);
         try {
           const indices = await service.searchPrivilegesIndices(query);
 
