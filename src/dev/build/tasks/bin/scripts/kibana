@@ -37,7 +37,7 @@ fi
 if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
   export LD_PRELOAD='/usr/lib/libjemalloc.so.2'
   if [ ! -f "$LD_PRELOAD" ]; then
-    echo "unable to find jemalloc"
+    echo "unable to find jemalloc at $LD_PRELOAD"
     exit 1
   fi
 fi
