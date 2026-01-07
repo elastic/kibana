@@ -331,25 +331,25 @@ export function LensEditConfigurationFlyout({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
       {showConvertToEsqlButton ? (
-        <EuiToolTip
-          position="top"
-          content={
-            isConvertToEsqlButtonDisabled ? (
-              <p>
-                {i18n.translate('xpack.lens.config.cannotConvertToEsqlDescription', {
-                  defaultMessage: 'This visualization cannot be converted to ES|QL',
-                })}
-              </p>
-            ) : (
-              <p>
-                {i18n.translate('xpack.lens.config.convertToEsqlDescription', {
-                  defaultMessage: 'Convert visualization to ES|QL',
-                })}
-              </p>
-            )
-          }
-        >
-          <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={
+              isConvertToEsqlButtonDisabled ? (
+                <p>
+                  {i18n.translate('xpack.lens.config.cannotConvertToEsqlDescription', {
+                    defaultMessage: 'This visualization cannot be converted to ES|QL',
+                  })}
+                </p>
+              ) : (
+                <p>
+                  {i18n.translate('xpack.lens.config.convertToEsqlDescription', {
+                    defaultMessage: 'Convert visualization to ES|QL',
+                  })}
+                </p>
+              )
+            }
+          >
             <EuiButtonIcon
               color="success"
               display="base"
@@ -363,8 +363,8 @@ export function LensEditConfigurationFlyout({
                 showModal();
               }}
             />
-          </EuiFlexItem>
-        </EuiToolTip>
+          </EuiToolTip>
+        </EuiFlexItem>
       ) : null}
     </>
   );
