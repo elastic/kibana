@@ -41,21 +41,21 @@ export async function suggestAfterCast(ctx: ExpressionContext): Promise<ISuggest
   });
 
   // Get the type of the value being casted
-  const sourceType = inlineCastNode
+  const typeBeingCasted = inlineCastNode
     ? getExpressionType(inlineCastNode.value, ctx.context?.columns)
     : undefined;
 
-  return getCastingTypesSuggestions(sourceType);
+  return getCastingTypesSuggestions(typeBeingCasted);
 }
 
 /**
  * Returns suggestions for inline casts.
  * If sourceType is provided, only returns casting types that can be applied to it.
  */
-export function getCastingTypesSuggestions(sourceType?: SupportedDataType): ISuggestionItem[] {
+export function getCastingTypesSuggestions(typeBeingCasted?: SupportedDataType): ISuggestionItem[] {
   let validCastingTypes: string[] = [];
 
-  if (sourceType) {
+  if (typeBeingCasted) {
     Object.entries(inlineCastsMapping).forEach(([castingType, fnName]) => {
       const castFunctionDef = getFunctionDefinition(fnName);
       if (!castFunctionDef) {
@@ -63,14 +63,14 @@ export function getCastingTypesSuggestions(sourceType?: SupportedDataType): ISug
       }
 
       // Don't suggest casting types that are equal to the source type, (don't suggest true::boolean)
-      if (sourceType === castFunctionDef.signatures[0].returnType) {
+      if (typeBeingCasted === castFunctionDef.signatures[0].returnType) {
         return;
       }
 
       // Only suggest casting types that can accept the source type
       const matchingSignatures = getMatchingSignatures(
         castFunctionDef.signatures,
-        [sourceType],
+        [typeBeingCasted],
         [false],
         true // accepts unknown
       );
