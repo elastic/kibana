@@ -168,7 +168,6 @@ export async function getEditLensConfiguration(
     updateByRefInput,
     navigateToLensEditor,
     displayFlyoutHeader,
-    canEditTextBasedQuery,
     isNewPanel,
     hidesSuggestions,
     onApply,
@@ -189,9 +188,6 @@ export async function getEditLensConfiguration(
     const currentDatasourceId = getActiveDatasourceIdFromDoc(
       currentAttributes
     ) as SupportedDatasourceId;
-
-    // Derive canEditTextBasedQuery from currentAttributes so it updates after conversion
-    const currentCanEditTextBasedQuery = isOfAggregateQueryType(currentAttributes.state.query);
 
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
@@ -248,7 +244,6 @@ export async function getEditLensConfiguration(
       updateByRefInput,
       navigateToLensEditor,
       displayFlyoutHeader,
-      canEditTextBasedQuery: currentCanEditTextBasedQuery,
       hidesSuggestions,
       setCurrentAttributes,
       isNewPanel,
