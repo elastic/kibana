@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { ESQLCommand } from '@kbn/esql-language';
-import { EsqlQuery, Walker } from '@kbn/esql-language';
+import { EsqlQuery, Parser, Walker } from '@kbn/esql-language';
 import type { ESQLProperNode } from '@kbn/esql-language/src/types';
 import type { Annotation } from '../annotations';
 import { highlight } from './helpers';
@@ -23,6 +23,7 @@ const defaultSrc = `FROM kibana_sample_data_logs, another_index
   | DROP count_4xx, count_rest, total_records
   | LIMIT 123`;
 
+const symbolicNames = Parser.create('').lexer.symbolicNames;
 export class EsqlInspectorState {
   public readonly src$ = new BehaviorSubject<string>(defaultSrc);
   public readonly query$ = new BehaviorSubject<EsqlQuery | null>(null);
@@ -31,7 +32,7 @@ export class EsqlInspectorState {
   public readonly from$ = new BehaviorSubject<ESQLCommand | null>(null);
   public readonly limit$ = new BehaviorSubject<ESQLCommand | null>(null);
   public readonly focusedNode$ = new BehaviorSubject<ESQLProperNode | null>(null);
-  public readonly pipeStatements$ = new BehaviorSubject<string[]>([]);
+  public readonly commands$ = new BehaviorSubject<string[]>([]);
 
   constructor() {
     this.src$.subscribe((src) => {
@@ -75,8 +76,8 @@ export class EsqlInspectorState {
         queryTokens.pop(); // Remove EOF token
         const groupedTokens = queryTokens.reduce<Array<typeof query.tokens>>(
           (acc, token) => {
-            if (token.type === 51) {
-              // PIPE
+            const symbol = symbolicNames[token.type];
+            if (symbol === 'PIPE') {
               acc.push([]);
             } else {
               acc[acc.length - 1].push(token);
@@ -88,12 +89,12 @@ export class EsqlInspectorState {
 
         const concatenatedStatements = groupedTokens?.map((tokens) =>
           tokens
-            .map((token) => token.text)
+            .map((token) => token.text.replaceAll('\n', ' ').replaceAll(/\s+/g, ' '))
             .join('')
             .trim()
         );
 
-        this.pipeStatements$.next(concatenatedStatements);
+        this.commands$.next(concatenatedStatements);
       }
     });
   }

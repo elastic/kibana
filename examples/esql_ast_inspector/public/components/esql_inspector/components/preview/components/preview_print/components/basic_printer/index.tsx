@@ -67,8 +67,8 @@ export const BasicPrinter: React.FC<BasicPrinterProps> = ({ src }) => {
               max={10}
               value={pipeTabValue}
               onChange={(e) => {
-                const v = Number(e.currentTarget.value);
-                setPipeTab(v);
+                const inputValue = Number(e.currentTarget.value);
+                setPipeTab(inputValue);
               }}
               showInput
               aria-label="Indentation before pipe"

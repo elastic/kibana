@@ -22,6 +22,8 @@ export interface WrappingPrinterProps {
   src: string;
 }
 
+const defaultIndent = ' ';
+
 export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
   const [lowercase, setLowercase] = React.useState(false);
   const [multiline, setMultiline] = React.useState(true);
@@ -30,9 +32,9 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
   const [tabValue, setTab] = React.useState(2);
   const [pipeTabValue, setPipeTab] = React.useState(2);
 
-  const indent = ' '.repeat(initialIndent);
-  const tab = ' '.repeat(tabValue);
-  const pipeTab = ' '.repeat(pipeTabValue);
+  const indent = defaultIndent.repeat(initialIndent);
+  const tab = defaultIndent.repeat(tabValue);
+  const pipeTab = defaultIndent.repeat(pipeTabValue);
 
   return (
     <EuiFlexGroup style={{ maxWidth: 1200 }} alignItems={'flexStart'}>
@@ -83,8 +85,8 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
             max={10}
             value={initialIndent}
             onChange={(e) => {
-              const v = Number(e.currentTarget.value);
-              setInitialIndent(v);
+              const inputValue = Number(e.currentTarget.value);
+              setInitialIndent(inputValue);
             }}
             showInput
             aria-label="Initial indentation"
@@ -97,8 +99,8 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
             max={10}
             value={tabValue}
             onChange={(e) => {
-              const v = Number(e.currentTarget.value);
-              setTab(v);
+              const inputValue = Number(e.currentTarget.value);
+              setTab(inputValue);
             }}
             showInput
             aria-label="Nested indentation"
@@ -111,8 +113,8 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
             max={10}
             value={pipeTabValue}
             onChange={(e) => {
-              const v = Number(e.currentTarget.value);
-              setPipeTab(v);
+              const inputValue = Number(e.currentTarget.value);
+              setPipeTab(inputValue);
             }}
             showInput
             aria-label="Indentation before pipe"
