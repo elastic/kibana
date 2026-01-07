@@ -4,5 +4,6 @@ steps:
     agents:
       machineType: n2-standard-8
       preemptible: true
+      spotZones: europe-west1-b,us-central1-a,us-central1-b,us-central1-c
     key: storybooks
     timeout_in_minutes: 80

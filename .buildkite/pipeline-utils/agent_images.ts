@@ -84,13 +84,15 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) 
   const additionalProps =
     {
       spot: { preemptible: true },
-      virt: { enableNestedVirtualization: true },
+      virt: { enableNestedVirtualization: true }
     }[addition] || {};
 
   return {
     ...getAgentImageConfig(),
     machineType: `${kind}-standard-${cores}`,
     ...(diskSizeGb ? { diskSizeGb } : {}),
+    spotZones:
+      'europe-west1-b,us-central1-a,us-central1-b,us-central1-c,northamerica-northeast2-a,northamerica-northeast2-b,southamerica-east1-b,southamerica-east1-c,asia-south2-a',
     ...additionalProps,
   };
 };
