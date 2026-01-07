@@ -10,9 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TopNavMenuItem } from './top_nav_menu_item';
+import { AppMenuItem } from './app_menu_item';
 
-describe('TopNavMenuItem', () => {
+describe('AppMenuItem', () => {
   const defaultProps = {
     label: 'elastic',
     run: jest.fn(),
@@ -29,20 +29,20 @@ describe('TopNavMenuItem', () => {
   });
 
   it('should render basic item', () => {
-    render(<TopNavMenuItem {...defaultProps} testId="test-button" />);
+    render(<AppMenuItem {...defaultProps} testId="test-button" />);
     expect(screen.getByTestId('test-button')).toBeInTheDocument();
     expect(screen.getByText('Elastic')).toBeInTheDocument();
   });
 
   it('should render as link when href is provided', () => {
-    render(<TopNavMenuItem {...defaultProps} href="http://elastic.co" testId="test-link" />);
+    render(<AppMenuItem {...defaultProps} href="http://elastic.co" testId="test-link" />);
     const link = screen.getByTestId('test-link');
     expect(link).toHaveAttribute('href', 'http://elastic.co');
   });
 
   it('should call run function when clicked', async () => {
     const user = userEvent.setup();
-    render(<TopNavMenuItem {...defaultProps} testId="test-button" />);
+    render(<AppMenuItem {...defaultProps} testId="test-button" />);
 
     await user.click(screen.getByTestId('test-button'));
 
@@ -50,14 +50,14 @@ describe('TopNavMenuItem', () => {
   });
 
   it('should render disabled item when disableButton is true', () => {
-    render(<TopNavMenuItem {...defaultProps} disableButton={true} testId="test-button" />);
+    render(<AppMenuItem {...defaultProps} disableButton={true} testId="test-button" />);
 
     expect(screen.getByTestId('test-button')).toBeDisabled();
   });
 
   it('should not call run when item is disabled', async () => {
     const user = userEvent.setup();
-    render(<TopNavMenuItem {...defaultProps} disableButton={true} testId="test-button" />);
+    render(<AppMenuItem {...defaultProps} disableButton={true} testId="test-button" />);
 
     await user.click(screen.getByTestId('test-button'));
 
@@ -76,7 +76,7 @@ describe('TopNavMenuItem', () => {
       items,
     };
 
-    render(<TopNavMenuItem {...propsWithItems} testId="test-button" />);
+    render(<AppMenuItem {...propsWithItems} testId="test-button" />);
 
     await user.click(screen.getByTestId('test-button'));
 
@@ -84,7 +84,7 @@ describe('TopNavMenuItem', () => {
   });
 
   it('should capitalize the label text', () => {
-    render(<TopNavMenuItem {...defaultProps} label="settings" testId="test-button" />);
+    render(<AppMenuItem {...defaultProps} label="settings" testId="test-button" />);
 
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });

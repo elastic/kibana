@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TopNavMenuBeta } from './top_nav_menu_beta';
-import type { TopNavMenuConfigBeta } from './types';
+import { AppMenuComponent } from './app_menu';
+import type { AppMenuConfig } from '../types';
 
 // Mock useIsWithinBreakpoints to control responsive behavior
 const mockUseIsWithinBreakpoints = jest.fn();
@@ -22,13 +22,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('TopNavMenuBeta', () => {
+describe('AppMenu', () => {
   const defaultItems = [
     { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
     { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'search', order: 2 },
   ];
 
-  const defaultConfig: TopNavMenuConfigBeta = {
+  const defaultConfig: AppMenuConfig = {
     items: defaultItems,
   };
 
@@ -43,31 +43,31 @@ describe('TopNavMenuBeta', () => {
 
   describe('rendering', () => {
     it('should return null when config is undefined', () => {
-      const { container } = render(<TopNavMenuBeta config={undefined} />);
+      const { container } = render(<AppMenuComponent config={undefined} />);
 
       expect(container).toBeEmptyDOMElement();
     });
 
     it('should return null when config has no items', () => {
-      const { container } = render(<TopNavMenuBeta config={{}} />);
+      const { container } = render(<AppMenuComponent config={{}} />);
 
       expect(container).toBeEmptyDOMElement();
     });
 
     it('should return null when visible is false', () => {
-      const { container } = render(<TopNavMenuBeta config={defaultConfig} visible={false} />);
+      const { container } = render(<AppMenuComponent config={defaultConfig} visible={false} />);
 
       expect(container).toBeEmptyDOMElement();
     });
 
     it('should render the top nav menu when config has items', () => {
-      render(<TopNavMenuBeta config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId('top-nav')).toBeInTheDocument();
     });
 
     it('should render menu items at xl breakpoint', () => {
-      render(<TopNavMenuBeta config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('TopNavMenuBeta', () => {
 
   describe('action items', () => {
     it('should render primary action item', () => {
-      const configWithPrimary: TopNavMenuConfigBeta = {
+      const configWithPrimary: AppMenuConfig = {
         primaryActionItem: {
           id: 'save',
           label: 'Save',
@@ -85,13 +85,13 @@ describe('TopNavMenuBeta', () => {
         },
       };
 
-      render(<TopNavMenuBeta config={configWithPrimary} />);
+      render(<AppMenuComponent config={configWithPrimary} />);
 
       expect(screen.getByText('Save')).toBeInTheDocument();
     });
 
     it('should render secondary action item', () => {
-      const configWithSecondary: TopNavMenuConfigBeta = {
+      const configWithSecondary: AppMenuConfig = {
         secondaryActionItem: {
           id: 'cancel',
           label: 'Cancel',
@@ -100,13 +100,13 @@ describe('TopNavMenuBeta', () => {
         },
       };
 
-      render(<TopNavMenuBeta config={configWithSecondary} />);
+      render(<AppMenuComponent config={configWithSecondary} />);
 
       expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
 
     it('should render both primary and secondary action items', () => {
-      const configWithBoth: TopNavMenuConfigBeta = {
+      const configWithBoth: AppMenuConfig = {
         primaryActionItem: {
           id: 'save',
           label: 'Save',
@@ -121,7 +121,7 @@ describe('TopNavMenuBeta', () => {
         },
       };
 
-      render(<TopNavMenuBeta config={configWithBoth} />);
+      render(<AppMenuComponent config={configWithBoth} />);
 
       expect(screen.getByText('Save')).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('TopNavMenuBeta', () => {
         return false;
       });
 
-      render(<TopNavMenuBeta config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
     });
@@ -143,7 +143,7 @@ describe('TopNavMenuBeta', () => {
     it('should render overflow button with all items at small breakpoint', () => {
       mockUseIsWithinBreakpoints.mockReturnValue(false);
 
-      render(<TopNavMenuBeta config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
     });
@@ -154,7 +154,7 @@ describe('TopNavMenuBeta', () => {
         return false;
       });
 
-      render(<TopNavMenuBeta config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();

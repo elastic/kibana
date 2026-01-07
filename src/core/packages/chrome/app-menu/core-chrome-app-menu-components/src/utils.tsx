@@ -15,25 +15,25 @@ import {
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { TopNavMenuPopoverActionButtons } from './top_nav_menu_popover_action_buttons';
+import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
-  TopNavMenuConfigBeta,
-  TopNavMenuItemCommon,
-  TopNavMenuPopoverItem,
-  TopNavMenuPrimaryActionItem,
-  TopNavMenuSecondaryActionItem,
+  AppMenuConfig,
+  AppMenuItemCommon,
+  AppMenuPopoverItem,
+  AppMenuPrimaryActionItem,
+  AppMenuSecondaryActionItem,
 } from './types';
-import { TOP_NAV_MENU_ITEM_LIMIT } from './constants';
+import { APP_MENU_ITEM_LIMIT } from './constants';
 
 /**
  * Calculate how many items can be displayed based on the presence of action buttons.
  */
-export const getDisplayedItemsAllowedAmount = (config: TopNavMenuConfigBeta) => {
+export const getDisplayedItemsAllowedAmount = (config: AppMenuConfig) => {
   const actionButtonsAmount = [config.primaryActionItem, config.secondaryActionItem].filter(
     Boolean
   ).length;
 
-  return TOP_NAV_MENU_ITEM_LIMIT - actionButtonsAmount;
+  return APP_MENU_ITEM_LIMIT - actionButtonsAmount;
 };
 
 /**
@@ -43,7 +43,7 @@ export const getShouldOverflow = ({
   config,
   displayedItemsAllowedAmount,
 }: {
-  config: TopNavMenuConfigBeta;
+  config: AppMenuConfig;
   displayedItemsAllowedAmount: number;
 }) => {
   if (!config.items) {
@@ -56,7 +56,7 @@ export const getShouldOverflow = ({
 /**
  * Split the items into displayed and overflow based on the configuration.
  */
-export const getTopNavItems = ({ config }: { config: TopNavMenuConfigBeta }) => {
+export const getAppMenuItems = ({ config }: { config: AppMenuConfig }) => {
   if (!config.items) {
     return {
       displayedItems: [],
@@ -87,15 +87,15 @@ export const getTopNavItems = ({ config }: { config: TopNavMenuConfigBeta }) => 
   };
 };
 
-export const isDisabled = (disableButton: TopNavMenuItemCommon['disableButton']) =>
+export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
 
 export const getTooltip = ({
   tooltipContent,
   tooltipTitle,
 }: {
-  tooltipContent?: TopNavMenuItemCommon['tooltipContent'];
-  tooltipTitle?: TopNavMenuItemCommon['tooltipTitle'];
+  tooltipContent?: AppMenuItemCommon['tooltipContent'];
+  tooltipTitle?: AppMenuItemCommon['tooltipTitle'];
 }) => {
   const content = isFunction(tooltipContent) ? tooltipContent() : tooltipContent;
   const title = isFunction(tooltipTitle) ? tooltipTitle() : tooltipTitle;
@@ -106,8 +106,8 @@ export const getTooltip = ({
   };
 };
 
-export const mapTopNavItemToPanelItem = (
-  item: TopNavMenuPopoverItem,
+export const mapAppMenuItemToPanelItem = (
+  item: AppMenuPopoverItem,
   childPanelId?: number
 ): EuiContextMenuPanelItemDescriptor => {
   const { content, title } = getTooltip({
@@ -151,16 +151,14 @@ export const getPopoverActionItems = ({
   primaryActionItem,
   secondaryActionItem,
 }: {
-  primaryActionItem?: TopNavMenuPrimaryActionItem;
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  primaryActionItem?: AppMenuPrimaryActionItem;
+  secondaryActionItem?: AppMenuSecondaryActionItem;
 }): EuiContextMenuPanelItemDescriptor[] => {
   if (!primaryActionItem && !secondaryActionItem) {
     return [];
   }
 
-  const isHidden = (
-    item: TopNavMenuPrimaryActionItem | TopNavMenuSecondaryActionItem | undefined
-  ) => {
+  const isHidden = (item: AppMenuPrimaryActionItem | AppMenuSecondaryActionItem | undefined) => {
     if (!item) return true;
 
     const isHiddenInMobile =
@@ -184,7 +182,7 @@ export const getPopoverActionItems = ({
     {
       key: 'action-items',
       renderItem: () => (
-        <TopNavMenuPopoverActionButtons
+        <AppMenuPopoverActionButtons
           primaryActionItem={primaryActionItem}
           secondaryActionItem={secondaryActionItem}
         />
@@ -202,9 +200,9 @@ export const getPopoverPanels = ({
   secondaryActionItem,
   startPanelId = 0,
 }: {
-  items: TopNavMenuPopoverItem[];
-  primaryActionItem?: TopNavMenuPrimaryActionItem;
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  items: AppMenuPopoverItem[];
+  primaryActionItem?: AppMenuPrimaryActionItem;
+  secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
@@ -212,7 +210,7 @@ export const getPopoverPanels = ({
   let currentPanelId = startPanelId;
 
   const processItems = (
-    itemsToProcess: TopNavMenuPopoverItem[],
+    itemsToProcess: AppMenuPopoverItem[],
     panelId: number,
     parentTitle?: string
   ) => {
@@ -228,9 +226,9 @@ export const getPopoverPanels = ({
         const childPanelId = currentPanelId;
 
         processItems(item.items, childPanelId, item.label);
-        panelItems.push(mapTopNavItemToPanelItem(item, childPanelId));
+        panelItems.push(mapAppMenuItemToPanelItem(item, childPanelId));
       } else {
-        panelItems.push(mapTopNavItemToPanelItem(item));
+        panelItems.push(mapAppMenuItemToPanelItem(item));
       }
 
       if (item.seperator === 'below') {

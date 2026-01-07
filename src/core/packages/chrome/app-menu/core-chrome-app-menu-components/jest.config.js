@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TOP_NAV_MENU_ITEM_LIMIT = 5;
-export const TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP = 2;
-export const TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT = 25;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/app-menu/core-chrome-app-menu-components'],
+};

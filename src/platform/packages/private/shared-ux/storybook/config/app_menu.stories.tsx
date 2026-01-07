@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
@@ -15,39 +15,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeader, EuiPageTemplate, useEuiTheme } fr
 import { UnifiedTabs, useNewTabProps, type TabItem } from '@kbn/unified-tabs';
 import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
 import { css } from '@emotion/react';
-import { TopNavMenuBeta } from './top_nav_menu_beta';
-import type { TopNavMenuConfigBeta } from './types';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
-// Hook to replace the tabs menu button icon with arrowDown for Storybook
-const useTabsMenuButtonIconOverride = () => {
-  useEffect(() => {
-    const arrowDownPath =
-      'M1.146 4.646a.5.5 0 01.708 0L8 10.793l6.146-6.147a.5.5 0 01.708.708l-6.5 6.5a.5.5 0 01-.708 0l-6.5-6.5a.5.5 0 010-.708z';
-
-    const observer = new MutationObserver(() => {
-      const button = document.querySelector(
-        '[data-test-subj="unifiedTabs_tabsBarMenuButton"] svg path'
-      );
-      if (button && button.getAttribute('d') !== arrowDownPath) {
-        button.setAttribute('d', arrowDownPath);
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // Initial check
-    const button = document.querySelector(
-      '[data-test-subj="unifiedTabs_tabsBarMenuButton"] svg path'
-    );
-    if (button) {
-      button.setAttribute('d', arrowDownPath);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-};
-
-interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuBeta> {
+interface AppMenuWrapperProps extends ComponentProps<typeof AppMenuComponent> {
   showTabs?: boolean;
 }
 
@@ -56,21 +27,18 @@ const VerticalRule = () => {
 
   return (
     <span
-      css={css`
-        width: ${euiTheme.border.width.thin};
-        height: 28px;
-        background-color: ${euiTheme.colors.borderBasePlain};
-      `}
+      style={{
+        width: euiTheme.border.width.thin,
+        height: '28px',
+        backgroundColor: euiTheme.colors.borderBasePlain,
+      }}
     />
   );
 };
 
-const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWrapperProps) => {
+const AppMenuWrapper = ({ showTabs = false, ...props }: AppMenuWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
-
-  // Replace tabs menu button icon with arrowDown
-  useTabsMenuButtonIconOverride();
 
   const [tabsState, setTabsState] = useState<{
     managedItems: TabItem[];
@@ -151,11 +119,11 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
           flex-shrink: 0;
         `}
       >
-        <TopNavMenuBeta {...props} />
+        <AppMenuComponent {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <TopNavMenuBeta {...props} />
+    <AppMenuComponent {...props} />
   );
 
   return (
@@ -179,9 +147,9 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
   );
 };
 
-const meta: Meta<TopNavMenuBetaWrapperProps> = {
-  title: 'Navigation/TopNavMenuBeta',
-  component: TopNavMenuBetaWrapper,
+const meta: Meta<AppMenuWrapperProps> = {
+  title: 'Navigation/AppMenu',
+  component: AppMenuWrapper,
   argTypes: {
     showTabs: {
       control: 'boolean',
@@ -201,7 +169,7 @@ const meta: Meta<TopNavMenuBetaWrapperProps> = {
   parameters: {
     docs: {
       description: {
-        component: 'TopNavMenuBeta is the new design of app menu.',
+        component: 'AppMenu is the new design of app menu.',
       },
     },
   },
@@ -209,9 +177,9 @@ const meta: Meta<TopNavMenuBetaWrapperProps> = {
 
 export default meta;
 
-type Story = StoryObj<TopNavMenuBetaWrapperProps>;
+type Story = StoryObj<AppMenuWrapperProps>;
 
-const dashboardEditModeConfig: TopNavMenuConfigBeta = {
+const dashboardEditModeConfig: AppMenuConfig = {
   items: [
     {
       run: action('exit-edit-clicked'),
@@ -395,7 +363,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
   },
 };
 
-const discoverConfig: TopNavMenuConfigBeta = {
+const discoverConfig: AppMenuConfig = {
   items: [
     {
       run: action('new-clicked'),

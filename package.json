@@ -308,6 +308,8 @@
     "@kbn/core-capabilities-common": "link:src/core/packages/capabilities/common",
     "@kbn/core-capabilities-server": "link:src/core/packages/capabilities/server",
     "@kbn/core-capabilities-server-internal": "link:src/core/packages/capabilities/server-internal",
+    "@kbn/core-chrome-app-menu": "link:src/core/packages/chrome/app-menu/core-chrome-app-menu",
+    "@kbn/core-chrome-app-menu-components": "link:src/core/packages/chrome/app-menu/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser": "link:src/core/packages/chrome/browser",
     "@kbn/core-chrome-browser-internal": "link:src/core/packages/chrome/browser-internal",
     "@kbn/core-chrome-layout": "link:src/core/packages/chrome/layout/core-chrome-layout",

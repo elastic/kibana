@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
 module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/guide.mdx',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-    '../app_menu.stories.tsx',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/app-menu/core-chrome-app-menu'],
 };

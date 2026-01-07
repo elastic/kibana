@@ -9,21 +9,21 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
-import { getTopNavItems } from './utils';
-import { TopNavMenuActionButton } from './top_nav_menu_action_button';
-import { TopNavMenuItem } from './top_nav_menu_item';
-import { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
-import type { TopNavMenuConfigBeta } from './types';
+import { getAppMenuItems } from '../utils';
+import { AppMenuActionButton } from './app_menu_action_button';
+import { AppMenuItem } from './app_menu_item';
+import { AppMenuOverflowButton } from './app_menu_overflow_button';
+import type { AppMenuConfig } from '../types';
 
-export interface TopNavMenuItemsProps {
-  config?: TopNavMenuConfigBeta;
+export interface AppMenuItemsProps {
+  config?: AppMenuConfig;
   visible?: boolean;
 }
 
-const hasNoItems = (config: TopNavMenuConfigBeta) =>
+const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 
-export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps) => {
+export const AppMenuComponent = ({ config, visible = true }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
@@ -43,7 +43,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
     className: 'kbnTopNavMenu__wrapper',
   };
 
-  const { displayedItems, overflowItems, shouldOverflow } = getTopNavItems({
+  const { displayedItems, overflowItems, shouldOverflow } = getAppMenuItems({
     config,
   });
 
@@ -56,7 +56,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
   };
 
   const primaryActionComponent = primaryActionItem ? (
-    <TopNavMenuActionButton
+    <AppMenuActionButton
       {...primaryActionItem}
       isPopoverOpen={openPopoverId === primaryActionItem.id}
       onPopoverToggle={() => {
@@ -67,7 +67,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
   ) : undefined;
 
   const secondaryActionComponent = secondaryActionItem ? (
-    <TopNavMenuActionButton
+    <AppMenuActionButton
       {...secondaryActionItem}
       isPopoverOpen={openPopoverId === secondaryActionItem.id}
       onPopoverToggle={() => {
@@ -80,7 +80,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
   if (isBetweenMandXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        <TopNavMenuOverflowButton
+        <AppMenuOverflowButton
           items={[...displayedItems, ...overflowItems]}
           isPopoverOpen={openPopoverId === showMoreButtonId}
           onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
@@ -97,7 +97,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
       <EuiHeaderLinks {...headerLinksProps}>
         {displayedItems?.length > 0 &&
           displayedItems.map((menuItem) => (
-            <TopNavMenuItem
+            <AppMenuItem
               key={menuItem.id}
               {...menuItem}
               isPopoverOpen={openPopoverId === menuItem.id}
@@ -106,7 +106,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
             />
           ))}
         {shouldOverflow && (
-          <TopNavMenuOverflowButton
+          <AppMenuOverflowButton
             items={overflowItems}
             isPopoverOpen={openPopoverId === showMoreButtonId}
             onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
@@ -121,7 +121,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
 
   return (
     <EuiHeaderLinks {...headerLinksProps}>
-      <TopNavMenuOverflowButton
+      <AppMenuOverflowButton
         items={[...displayedItems, ...overflowItems]}
         isPopoverOpen={openPopoverId === showMoreButtonId}
         secondaryActionItem={secondaryActionItem}

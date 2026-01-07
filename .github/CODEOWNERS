@@ -126,6 +126,8 @@ src/core/packages/capabilities/common @elastic/kibana-core
 src/core/packages/capabilities/server @elastic/kibana-core
 src/core/packages/capabilities/server-internal @elastic/kibana-core
 src/core/packages/capabilities/server-mocks @elastic/kibana-core
+src/core/packages/chrome/app-menu/core-chrome-app-menu @elastic/appex-sharedux
+src/core/packages/chrome/app-menu/core-chrome-app-menu-components @elastic/appex-sharedux
 src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
