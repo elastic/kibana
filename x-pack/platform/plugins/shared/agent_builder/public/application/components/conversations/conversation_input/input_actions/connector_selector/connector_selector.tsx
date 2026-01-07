@@ -101,7 +101,7 @@ const manageConnectorsAriaLabel = i18n.translate(
 );
 
 const ConnectorListFooter: React.FC = () => {
-  const { navigateToManageConnectors } = useNavigation();
+  const { manageConnectorsUrl } = useNavigation();
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
@@ -111,7 +111,7 @@ const ConnectorListFooter: React.FC = () => {
             iconType="gear"
             color="text"
             aria-label={manageConnectorsAriaLabel}
-            onClick={navigateToManageConnectors}
+            href={manageConnectorsUrl}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
