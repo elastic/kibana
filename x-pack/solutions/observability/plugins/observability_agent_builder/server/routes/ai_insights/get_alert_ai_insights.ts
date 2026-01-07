@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
+import { getToolHandler as getExitSpanErrors } from '../../tools/get_exit_span_errors/handler';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -34,6 +40,11 @@ export interface AlertDocForInsight {
 }
 
 interface GetAlertAiInsightParams {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   alertDoc: AlertDocForInsight;
   inferenceClient: InferenceClient;
   connectorId: string;
@@ -48,6 +59,8 @@ interface AlertAiInsightResult {
 }
 
 export async function getAlertAiInsight({
+  core,
+  plugins,
   alertDoc,
   inferenceClient,
   connectorId,
@@ -55,7 +68,14 @@ export async function getAlertAiInsight({
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
-  const relatedContext = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
+  const relatedContext = await fetchAlertContext({
+    core,
+    plugins,
+    alertDoc,
+    dataRegistry,
+    request,
+    logger,
+  });
   const summary = await generateAlertSummary({
     inferenceClient,
     connectorId,
@@ -67,7 +87,7 @@ export async function getAlertAiInsight({
 }
 
 // Time window offsets in minutes before alert start
-const TIME_WINDOWS = {
+const START_TIME_OFFSETS = {
   serviceSummary: 5,
   downstream: 24 * 60, // 24 hours
   errors: 15,
@@ -75,13 +95,15 @@ const TIME_WINDOWS = {
 } as const;
 
 async function fetchAlertContext({
+  core,
+  plugins,
   alertDoc,
   dataRegistry,
   request,
   logger,
 }: Pick<
   GetAlertAiInsightParams,
-  'alertDoc' | 'dataRegistry' | 'request' | 'logger'
+  'core' | 'plugins' | 'alertDoc' | 'dataRegistry' | 'request' | 'logger'
 >): Promise<string> {
   const serviceName = alertDoc?.['service.name'] ?? '';
   const serviceEnvironment = alertDoc?.['service.environment'] ?? '';
@@ -102,68 +124,92 @@ async function fetchAlertContext({
   const fetchConfigs = [
     {
       key: 'apmServiceSummary' as const,
-      window: TIME_WINDOWS.serviceSummary,
+      window: START_TIME_OFFSETS.serviceSummary,
       params: { serviceName, serviceEnvironment, transactionType },
     },
     {
       key: 'apmDownstreamDependencies' as const,
-      window: TIME_WINDOWS.downstream,
+      window: START_TIME_OFFSETS.downstream,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmErrors' as const,
-      window: TIME_WINDOWS.errors,
+      window: START_TIME_OFFSETS.errors,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmServiceChangePoints' as const,
-      window: TIME_WINDOWS.changePoints,
+      window: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
     },
     {
       key: 'apmExitSpanChangePoints' as const,
-      window: TIME_WINDOWS.changePoints,
+      window: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment },
     },
   ];
 
-  // Fire all fetches in parallel
-  const results = await Promise.allSettled(
-    fetchConfigs.map(async (config) => {
-      const start = getStart(config.window);
-      const data = await dataRegistry.getData(config.key, {
-        request,
-        ...config.params,
-        start,
-        end: alertStart,
-      });
-      return { config, data, start };
-    })
-  );
+  const [coreStart] = await core.getStartServices();
+  const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-  // Collect successful, non-empty results
-  const contextParts: string[] = [];
+  // Define all fetchers with a common interface
+  interface FetchResult {
+    key: string;
+    start: string;
+    data: unknown;
+  }
 
-  results.forEach((result, idx) => {
-    if (result.status === 'rejected') {
-      logger.debug(`AI insight: ${fetchConfigs[idx].key} failed: ${result.reason}`);
-      return;
-    }
+  // Helper to format context parts consistently
+  const formatContextPart = ({ key, start, data }: FetchResult) =>
+    `<${key}>\nTime window: ${start} to ${alertStart}\n\`\`\`json\n${JSON.stringify(
+      data,
+      null,
+      2
+    )}\n\`\`\`\n</${key}>`;
 
-    const { config, data, start } = result.value;
-    if (isEmpty(data)) {
-      return;
-    }
+  const allFetchers: Array<Promise<FetchResult | null>> = [
+    // Registry-based fetches
+    ...fetchConfigs.map(async (config): Promise<FetchResult | null> => {
+      try {
+        const start = getStart(config.window);
+        const data = await dataRegistry.getData(config.key, {
+          request,
+          ...config.params,
+          start,
+          end: alertStart,
+        });
+        return isEmpty(data) ? null : { key: config.key, start, data };
+      } catch (err) {
+        logger.debug(`AI insight: ${config.key} failed: ${err}`);
+        return null;
+      }
+    }),
+    // Direct handler: exit span errors
+    (async (): Promise<FetchResult | null> => {
+      try {
+        const start = getStart(START_TIME_OFFSETS.errors);
+        const result = await getExitSpanErrors({
+          core,
+          plugins,
+          logger,
+          esClient,
+          serviceName,
+          serviceEnvironment,
+          start,
+          end: alertStart,
+        });
+        return result.exitSpanErrors.length > 0
+          ? { key: 'exitSpanErrors', start, data: result }
+          : null;
+      } catch (err) {
+        logger.debug(`AI insight: exitSpanErrors failed: ${err}`);
+        return null;
+      }
+    })(),
+  ];
 
-    contextParts.push(
-      `<${config.key}>
-Time window: ${start} to ${alertStart}
-\`\`\`json
-${JSON.stringify(data, null, 2)}
-\`\`\`
-</${config.key}>`
-    );
-  });
+  const results = await Promise.all(allFetchers);
+  const contextParts = results.filter((r): r is FetchResult => r !== null).map(formatContextPart);
 
   return contextParts.length > 0 ? contextParts.join('\n\n') : 'No related signals available.';
 }
@@ -185,7 +231,7 @@ async function generateAlertSummary({
     Output shape (plain text):
     - Summary (1–2 sentences): What is likely happening and why it matters. If recovered, acknowledge and reduce urgency. If no strong signals, say "Inconclusive" and briefly note why.
     - Assessment: Most plausible explanation or "Inconclusive" if signals do not support a clear assessment.
-    - Related signals (top 3–5, each with provenance and relevance): For each item, include source (change points | errors | log rate | log categories | anomalies | service summary), timeframe near alert start, and relevance to alert scope as Direct | Indirect | Unrelated.
+    - Related signals (top 3–5, each with provenance and relevance): For each item, include source (change points | exit span errors | errors | log rate | log categories | anomalies | service summary), timeframe near alert start, and relevance to alert scope as Direct | Indirect | Unrelated.
     - Immediate actions (2–3): Concrete next checks or fixes an SRE can take now.
 
     Guardrails:
@@ -198,10 +244,11 @@ async function generateAlertSummary({
 
     Related signals hierarchy (use what exists, skip what doesn't):
     1) Change points (service and exit‑span): sudden shifts in throughput/latency/failure; name impacted downstream services verbatim when present and whether propagation is likely.
-    2) Errors: signatures enriched with downstream resource/name; summarize patterns without long stacks; tie to alert scope.
-    3) Logs: strongest log‑rate significant items and top categories; very short examples and implications; tie to alert scope.
-    4) Anomalies: note ML anomalies around alert time; multiple affected services may imply systemic issues.
-    5) Service summary: only details that materially change interpretation (avoid re‑listing fields).
+    2) Exit span errors: failed outgoing calls to downstream services; strongest signal for identifying which dependency is failing in APM/service alerts.
+    3) Errors: signatures enriched with downstream resource/name; summarize patterns without long stacks; tie to alert scope.
+    4) Logs: strongest log‑rate significant items and top categories; very short examples and implications; tie to alert scope.
+    5) Anomalies: note ML anomalies around alert time; multiple affected services may imply systemic issues.
+    6) Service summary: only details that materially change interpretation (avoid re‑listing fields).
 
     Recovery / false positives:
     - If recovered or normalizing, recommend light‑weight validation and watchful follow‑up.
