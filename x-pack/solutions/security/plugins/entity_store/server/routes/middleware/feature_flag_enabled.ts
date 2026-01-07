@@ -12,12 +12,10 @@ export const featureFlagEnabledMiddleware: Middleware = async (ctx, _req, res) =
   const logger = entityStoreCtx.logger.get('featureFlagMiddleware');
   const isEntityStoreV2Enabled = await entityStoreCtx.getFeatureFlags().isEntityStoreV2Enabled();
 
-  logger.debug('Install api called');
-
   if (!isEntityStoreV2Enabled) {
     logger.warn('Entity store v2 not enabled (feature flag not enabled)');
     return res.customError({
-      statusCode: 501,
+      statusCode: 403,
       body: {
         message: 'Entity store v2 not enabled (feature flag not enabled)',
       },

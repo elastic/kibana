@@ -46,14 +46,14 @@ describe('featureFlagEnabledMiddleware', () => {
     const result = await featureFlagEnabledMiddleware(mockCtx, mockReq, mockRes);
 
     expect(mockRes.customError).toHaveBeenCalledWith({
-      statusCode: 501,
+      statusCode: 403,
       body: {
         message: 'Entity store v2 not enabled (feature flag not enabled)',
       },
     });
 
     expect(result).toEqual({
-      status: 501,
+      status: 403,
       payload: {
         message: 'Entity store v2 not enabled (feature flag not enabled)',
       },
