@@ -126,7 +126,7 @@ const getFieldTypeLabel = (type: string): string => {
 interface FieldsBrowserPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectField: (fieldName: string) => void;
+  onSelectField: (fieldName: string, oldLength: number) => void;
   getColumnMap?: GetColumnMapFn;
   anchorElement?: HTMLElement;
 }
@@ -143,6 +143,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen && getColumnMap) {
@@ -199,13 +200,14 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
     return fields.map((field) => ({
       key: field.name,
       label: field.name,
+      checked: selectedFields.includes(field.name) ? ('on' as const) : undefined,
       prepend: <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />,
       data: {
         type: field.type,
         typeLabel: getFieldTypeLabel(field.type),
       },
     }));
-  }, [fields]);
+  }, [fields, selectedFields]);
 
   const filteredOptions = useMemo(() => {
     let filtered = options;
@@ -231,15 +233,21 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
 
   const handleSelectionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const selected = newOptions.find((o) => o.checked === 'on');
-      if (selected && selected.key) {
-        onSelectField(selected.key);
-        onClose();
-        setSearchValue('');
-        setSelectedTypes([]);
+      const newlySelected = newOptions
+        .filter((o) => o.checked === 'on')
+        .map((o) => o.key as string)
+        .filter(Boolean);
+      
+      const oldLength = selectedFields.join(',').length;
+      setSelectedFields(newlySelected);
+      
+      if (newlySelected) {
+        onSelectField(newlySelected.join(','), oldLength);
       }
+
+      setSelectedFields(newlySelected);
     },
-    [onSelectField, onClose]
+    [onSelectField, selectedFields]
   );
 
   const handleTypeFilterChange = useCallback((newOptions: EuiSelectableOption[]) => {
@@ -338,10 +346,6 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
         noMatchesMessage={i18n.translate('esqlEditor.fieldsBrowser.noMatches', {
           defaultMessage: 'No fields match your search',
         })}
-        singleSelection
-        listProps={{
-          showIcons: false,
-        }}
       >
         {(list, search) => (
           <div style={{ width: POPOVER_WIDTH, maxHeight: POPOVER_HEIGHT }}>

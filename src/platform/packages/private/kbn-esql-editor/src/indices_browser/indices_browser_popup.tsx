@@ -53,7 +53,7 @@ const getSourceTypeKey = (type?: string): string => {
 interface IndicesBrowserPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectIndex: (indexName: string) => void;
+  onSelectIndex: (indexName: string, oldLength: number) => void;
   core: CoreStart;
   getLicense?: () => Promise<ILicense | undefined>;
   anchorElement?: HTMLElement;
@@ -72,6 +72,7 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
+  const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -110,6 +111,7 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
     return sources.map((source) => ({
       key: source.name,
       label: source.name,
+      checked: selectedIndices.includes(source.name) ? ('on' as const) : undefined,
       append: (
         <EuiText size="xs" color="subdued">
           {getSourceTypeLabel(source.type)}
@@ -120,7 +122,7 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
         typeKey: getSourceTypeKey(source.type),
       },
     }));
-  }, [sources]);
+  }, [sources, selectedIndices]);
 
   const filteredOptions = useMemo(() => {
     let filtered = options;
@@ -146,15 +148,20 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
 
   const handleSelectionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const selected = newOptions.find((o) => o.checked === 'on');
-      if (selected && selected.key) {
-        onSelectIndex(selected.key);
-        onClose();
-        setSearchValue('');
-        setSelectedTypes([]);
+      const newlySelected = newOptions
+        .filter((o) => o.checked === 'on')
+        .map((o) => o.key as string)
+        .filter(Boolean);
+
+      const oldLength = selectedIndices.join(',').length;
+      
+      if (newlySelected) {
+        onSelectIndex(newlySelected.join(','), oldLength);
       }
+
+      setSelectedIndices(newlySelected);
     },
-    [onSelectIndex, onClose]
+    [onSelectIndex, selectedIndices]
   );
 
   const handleTypeFilterChange = useCallback((newOptions: EuiSelectableOption[]) => {
@@ -253,10 +260,6 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
         noMatchesMessage={i18n.translate('esqlEditor.indicesBrowser.noMatches', {
           defaultMessage: 'No data sources match your search',
         })}
-        singleSelection
-        listProps={{
-          showIcons: false,
-        }}
       >
         {(list, search) => (
           <div style={{ width: POPOVER_WIDTH, maxHeight: POPOVER_HEIGHT }}>

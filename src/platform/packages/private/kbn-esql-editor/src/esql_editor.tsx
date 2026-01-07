@@ -908,35 +908,31 @@ const ESQLEditorInternal = function ESQLEditor({
   }, []);
 
   const handleIndexSelect = useCallback(
-    (indexName: string) => {
+    (indexName: string, oldLength: number) => {
       if (editorRef.current && editorModel.current) {
         const position = editorRef.current.getPosition();
         if (position) {
-          const wordUntilPosition = editorModel.current.getWordUntilPosition(position);
           const range = {
             startLineNumber: position.lineNumber,
-            startColumn: wordUntilPosition.startColumn,
+            startColumn: position.column,
             endLineNumber: position.lineNumber,
-            endColumn: wordUntilPosition.endColumn,
+            endColumn: position.column + oldLength,
           };
           editorRef.current.executeEdits('indicesBrowser', [
             {
               range,
               text: indexName,
-              forceMoveMarkers: true,
             },
           ]);
-          // Move cursor after the inserted text
           editorRef.current.setPosition({
             lineNumber: position.lineNumber,
-            column: wordUntilPosition.startColumn + indexName.length,
+            column: position.column,
           });
           editorRef.current.focus();
         }
       }
-      closeIndicesBrowser();
     },
-    [closeIndicesBrowser]
+    []
   );
 
   const openFieldsBrowser = useCallback(async () => {
@@ -1004,35 +1000,31 @@ const ESQLEditorInternal = function ESQLEditor({
   }, []);
 
   const handleFieldSelect = useCallback(
-    (fieldName: string) => {
+    (fieldName: string, oldLength: number) => {
       if (editorRef.current && editorModel.current) {
         const position = editorRef.current.getPosition();
         if (position) {
-          const wordUntilPosition = editorModel.current.getWordUntilPosition(position);
           const range = {
             startLineNumber: position.lineNumber,
-            startColumn: wordUntilPosition.startColumn,
+            startColumn: position.column,
             endLineNumber: position.lineNumber,
-            endColumn: wordUntilPosition.endColumn,
+            endColumn: position.column + oldLength,
           };
           editorRef.current.executeEdits('fieldsBrowser', [
             {
               range,
               text: fieldName,
-              forceMoveMarkers: true,
             },
           ]);
-          // Move cursor after the inserted text
           editorRef.current.setPosition({
             lineNumber: position.lineNumber,
-            column: wordUntilPosition.startColumn + fieldName.length,
+            column: position.column,
           });
           editorRef.current.focus();
         }
       }
-      closeFieldsBrowser();
     },
-    [closeFieldsBrowser]
+    []
   );
 
   const suggestionProvider = useMemo(
