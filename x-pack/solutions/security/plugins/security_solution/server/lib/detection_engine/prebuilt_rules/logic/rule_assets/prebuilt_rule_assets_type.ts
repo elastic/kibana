@@ -53,6 +53,13 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
   mappings: prebuiltRuleAssetMappings,
   modelVersions: {
     '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
       changes: [
         {
           type: 'mappings_addition',
