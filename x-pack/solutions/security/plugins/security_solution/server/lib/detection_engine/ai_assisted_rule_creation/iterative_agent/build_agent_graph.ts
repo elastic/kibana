@@ -24,6 +24,7 @@ import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_d
 import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraphWithTool } from './sub_graphs/esql_with_tool/esql_query_graph';
 import { addScheduleNode } from './nodes/add_schedule';
+import { addMitreMappingsNode } from './nodes/add_mitre_mappings';
 
 export const BUILD_AGENT_NODE_NAMES = {
   PROCESS_KNOWLEDGE_BASE: 'processKnowledgeBase',
@@ -31,6 +32,7 @@ export const BUILD_AGENT_NODE_NAMES = {
   ESQL_QUERY_CREATION: 'esqlQueryCreation',
   GET_TAGS: 'getTags',
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
+  ADD_MITRE_MAPPINGS: 'addMitreMappings',
   ADD_SCHEDULE: 'addSchedule',
   ADD_DEFAULT_FIELDS_TO_RULES: 'addDefaultFieldsToRules',
 } as const;
@@ -39,6 +41,7 @@ const {
   ESQL_QUERY_CREATION,
   GET_TAGS,
   CREATE_RULE_NAME_AND_DESCRIPTION,
+  ADD_MITRE_MAPPINGS,
   ADD_SCHEDULE,
   ADD_DEFAULT_FIELDS_TO_RULES,
 } = BUILD_AGENT_NODE_NAMES;
@@ -92,12 +95,14 @@ export const getBuildAgent = async ({
     .addNode(ESQL_QUERY_CREATION, esqlQuerySubGraph)
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
+    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
     .addNode(ADD_DEFAULT_FIELDS_TO_RULES, addDefaultFieldsToRulesNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addEdge(START, ESQL_QUERY_CREATION)
     .addEdge(ESQL_QUERY_CREATION, GET_TAGS)
     .addEdge(GET_TAGS, CREATE_RULE_NAME_AND_DESCRIPTION)
-    .addEdge(CREATE_RULE_NAME_AND_DESCRIPTION, ADD_SCHEDULE)
+    .addEdge(CREATE_RULE_NAME_AND_DESCRIPTION, ADD_MITRE_MAPPINGS)
+    .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
     .addConditionalEdges(ADD_SCHEDULE, shouldAddDefaultFieldsToRule, {
       [ADD_DEFAULT_FIELDS_TO_RULES]: ADD_DEFAULT_FIELDS_TO_RULES,
       end: END,

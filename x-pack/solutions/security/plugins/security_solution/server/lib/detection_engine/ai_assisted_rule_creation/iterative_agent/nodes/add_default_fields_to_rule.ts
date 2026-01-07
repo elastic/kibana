@@ -31,7 +31,6 @@ export const addDefaultFieldsToRulesNode = ({
         actions: [],
         exceptions_list: [],
         false_positives: [],
-        threat: [],
         author: [],
         setup: '',
         max_signals: 100,

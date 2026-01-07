@@ -126,3 +126,54 @@ Based on the above, provide the schedule in the following JSON format:
     </query>`,
   ],
 ]);
+
+export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful assistant that analyzes user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
+
+Your task is to:
+1. Understand the intent and context of the user's security detection rule request
+2. Analyze the ES|QL query to identify what attack patterns it detects
+3. Consider the rule tags as additional context about the security domain, attack techniques, data sources, and threat types
+4. Select the most relevant MITRE ATT&CK tactics and techniques that match the detection scenario using your knowledge of the MITRE ATT&CK framework
+5. For each technique, include relevant subtechniques if applicable
+
+Guidelines:
+- Select 1-3 most relevant tactics (use tactic IDs like TA0001, TA0002, etc.)
+- For each tactic, select 1-5 relevant techniques (use technique IDs like T1078, T1059, etc.)
+- Include subtechniques when they are specifically relevant to the detection (use subtechnique IDs like T1078.001, T1059.001, etc.)
+- Focus on the primary attack patterns being detected
+- Consider the data sources and query logic when making selections
+- Use the provided tags to better understand the security context and threat landscape
+- Only select tactics and techniques that are directly relevant to what the rule detects
+- Use your knowledge of MITRE ATT&CK to select appropriate IDs
+
+Respond with a JSON object containing only the IDs:
+- "tactics": array of tactic IDs (strings like "TA0001", "TA0002")
+- "techniques": array of objects with "id" field and optional "subtechnique" array (subtechniques also only need "id")
+
+Format:
+{{
+  "tactics": ["TA0001", "TA0002"],
+  "techniques": [
+    {{
+      "id": "T1078",
+      "subtechnique": ["T1078.001"]
+    }},
+    {{
+      "id": "T1059"
+    }}
+  ]
+}}`,
+  ],
+  [
+    'human',
+    `
+    <query>
+      User request: {user_request}
+      ES|QL query: {esql_query}
+      Rule tags: {rule_tags}
+    </query>`,
+  ],
+]);
