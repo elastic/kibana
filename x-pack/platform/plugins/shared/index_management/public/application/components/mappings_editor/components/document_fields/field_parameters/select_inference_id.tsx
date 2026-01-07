@@ -206,7 +206,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     <>
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ minWidth: euiTheme.base * 19 }}>
           <EuiPopover
             button={
               <>
@@ -226,6 +226,8 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     iconType="arrowDown"
                     iconSide="right"
                     color="text"
+                    fullWidth
+                    contentProps={{ style: { justifyContent: 'space-between' } }}
                     data-test-subj="inferenceIdButton"
                     onClick={() => {
                       setIsInferencePopoverVisible((prev) => !prev);
@@ -370,7 +372,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                   'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
                   {
                     defaultMessage:
-                      'The referenced model for this inference endpoint will be started when adding this field.',
+                      'For models that use ML nodes, the referenced model will be started when adding this field.',
                   }
                 )}
               </p>

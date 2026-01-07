@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
+      const panelCountBefore = await dashboard.getPanelCount();
 
       await dashboardControls.openControlsMenu();
       const createESQLControlBtn = await testSubjects.find('esql-control-create-button');
@@ -61,6 +62,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await retry.try(async () => {
+        // Creating a control from the dropdown adds it directly to the pinned control group, not as a panel
+        // Expect control group to be visible, and no additional panels to be created
+        expect(await dashboard.getPanelCount()).to.be(panelCountBefore);
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
         expect(controlGroupVisible).to.be(true);
       });

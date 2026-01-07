@@ -32,7 +32,7 @@ interface GridColumnProps {
   showCardLabels?: boolean;
   scrollElementId?: string;
   emptyStateStyles?: Record<string, string>;
-  columnCount?: 2 | 3;
+  columnCount?: 1 | 2 | 3;
   gutterSize?: 's' | 'm';
 }
 
