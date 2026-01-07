@@ -78,9 +78,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(change?.timeSeries?.[0]).to.have.property('y');
       });
 
-      it('should detect no change patterns in logs', () => {
-        const stationary = logChangePoints.find((cp: ChangePoint) =>
-          ['stationary', 'indeterminable', 'non_stationary'].includes(cp.changes?.type)
+      it('should detect stationary patterns in logs', () => {
+        const stationary = logChangePoints.find(
+          (cp: ChangePoint) => cp.changes?.type === 'stationary'
         );
         expect(stationary).to.be.ok();
         expect(stationary).not.to.have.property('timeSeries');
@@ -140,10 +140,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should still detect stationary patterns in info logs', () => {
-        const stationary = logChangePoints.find((cp: ChangePoint) =>
-          ['stationary', 'indeterminable', 'non_stationary'].includes(cp.changes?.type)
+        const stationary = logChangePoints.some(
+          (cp: ChangePoint) => cp.changes?.type === 'stationary'
         );
-        expect(stationary).to.be.ok();
+        expect(stationary).to.be(true);
       });
     });
   });
