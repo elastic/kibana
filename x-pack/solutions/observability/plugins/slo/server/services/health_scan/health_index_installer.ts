@@ -49,6 +49,7 @@ export class HealthIndexInstaller {
             properties: {
               '@timestamp': { type: 'date' },
               scanId: { type: 'keyword' },
+              spaceId: { type: 'keyword' },
               sloId: { type: 'keyword' },
               revision: { type: 'integer' },
               isProblematic: { type: 'boolean' },

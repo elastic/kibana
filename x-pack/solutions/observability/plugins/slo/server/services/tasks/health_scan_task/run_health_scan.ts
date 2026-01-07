@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { keyBy } from 'lodash';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { computeHealth } from '../../../domain/services/compute_health';
 import { HEALTH_DATA_STREAM_NAME } from '../../health_scan/health_index_installer';
@@ -22,6 +23,7 @@ interface Dependencies {
 
 interface RunParams {
   scanId: string;
+  spaceId: string;
 }
 
 const COMPOSITE_BATCH_SIZE = 500;
@@ -34,7 +36,7 @@ export async function runHealthScan(
   dependencies: Dependencies
 ): Promise<{ processed: number; problematic: number }> {
   const { scopedClusterClient, logger } = dependencies;
-  const { scanId } = params;
+  const { scanId, spaceId } = params;
 
   let searchAfter: AggregationsCompositeAggregateKey | undefined;
   let totalProcessed = 0;
@@ -54,6 +56,8 @@ export async function runHealthScan(
         break;
       }
 
+      const listById = keyBy(list, (slo) => slo.id);
+
       const healthResults = await computeHealth(
         list.map((slo) => ({
           id: slo.id,
@@ -68,6 +72,7 @@ export async function runHealthScan(
       const documents: HealthDocument[] = healthResults.map((result) => ({
         '@timestamp': now,
         scanId,
+        spaceId: listById[result.id]?.spaceId ?? 'default',
         sloId: result.id,
         revision: result.revision,
         isProblematic: result.health.isProblematic,
@@ -131,6 +136,7 @@ async function fetchUniqueSloFromSummary(
         after_key: AggregationsCompositeAggregateKey;
         buckets: Array<{
           key: {
+            spaceId: string;
             id: string;
             revision: number;
           };
@@ -146,6 +152,13 @@ async function fetchUniqueSloFromSummary(
           composite: {
             size: COMPOSITE_BATCH_SIZE,
             sources: [
+              {
+                spaceId: {
+                  terms: {
+                    field: 'spaceId',
+                  },
+                },
+              },
               {
                 id: {
                   terms: {
@@ -183,6 +196,7 @@ async function fetchUniqueSloFromSummary(
         ? undefined
         : result.aggregations?.id_revision.after_key,
     list: buckets.map(({ key }) => ({
+      spaceId: String(key.spaceId),
       id: String(key.id),
       revision: Number(key.revision),
     })),

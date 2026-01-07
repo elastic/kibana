@@ -87,7 +87,7 @@ export class HealthScanTask {
 
               try {
                 const result = await runHealthScan(
-                  { scanId: params.scanId },
+                  { scanId: params.scanId, spaceId: params.spaceId },
                   {
                     esClient,
                     scopedClusterClient,

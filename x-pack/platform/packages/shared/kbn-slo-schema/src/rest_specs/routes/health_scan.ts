@@ -36,6 +36,7 @@ const getHealthScanParamsSchema = t.type({
       size: toNumberRt,
       searchAfter: t.string,
       problematic: toBooleanRt,
+      allSpaces: toBooleanRt,
     }),
   ]),
 });
@@ -62,6 +63,7 @@ interface ListHealthScanResponse {
 const healthScanResultResponseSchema = t.type({
   '@timestamp': dateRt,
   scanId: t.string,
+  spaceId: t.string,
   sloId: t.string,
   revision: t.number,
   isProblematic: t.boolean,

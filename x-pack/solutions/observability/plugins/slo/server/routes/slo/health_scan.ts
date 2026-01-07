@@ -115,11 +115,11 @@ export const getHealthScanRoute = createSloServerRoute({
   }): Promise<GetHealthScanResultsResponse> => {
     await assertPlatinumLicense(plugins);
 
-    const { scopedClusterClient } = await getScopedClients({ request, logger });
+    const { scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
     const esClient = scopedClusterClient.asCurrentUser;
 
     const { scanId } = params.path;
-    const { size = 100, problematic } = params.query ?? {};
+    const { size = 100, problematic, allSpaces } = params.query ?? {};
 
     let searchAfter;
     if (params.query?.searchAfter) {
@@ -140,6 +140,7 @@ export const getHealthScanRoute = createSloServerRoute({
         bool: {
           filter: [
             { term: { scanId } },
+            ...(allSpaces ? [] : [{ term: { spaceId } }]),
             ...(problematic ? [{ term: { isProblematic: problematic } }] : []),
           ],
         },
@@ -147,6 +148,7 @@ export const getHealthScanRoute = createSloServerRoute({
       sort: [
         { '@timestamp': 'desc' },
         { scanId: 'desc' },
+        { spaceId: 'asc' },
         { isProblematic: 'asc' },
         { sloId: 'asc' },
       ],
