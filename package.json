@@ -1336,7 +1336,7 @@
     "jsdom": "20.0.1",
     "json-schema-to-ts": "3.1.1",
     "json-stable-stringify": "1.0.1",
-    "json-stringify-pretty-compact": "1.2.0",
+    "json-stringify-pretty-compact": "4.0.0",
     "json-stringify-safe": "5.0.1",
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
