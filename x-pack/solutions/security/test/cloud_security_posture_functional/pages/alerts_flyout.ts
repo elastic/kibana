@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
     });
 
-    it.skip('expanded flyout - filter by node', async () => {
+    it('expanded flyout - filter by node', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
@@ -187,7 +187,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await timelinePage.waitForEvents();
     });
 
-    it.skip('expanded flyout - show alert details', async () => {
+    it('expanded flyout - show alert details', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
@@ -226,7 +226,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
     });
 
-    it.skip('show related alerts', async () => {
+    it('show related alerts', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
