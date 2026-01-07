@@ -8,7 +8,7 @@
 import { curry } from 'lodash';
 
 import type {
-  ActionTypeWithExecutor as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';

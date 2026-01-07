@@ -21,7 +21,7 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
-  ActionTypeWithExecutor,
+  ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
 } from './types';

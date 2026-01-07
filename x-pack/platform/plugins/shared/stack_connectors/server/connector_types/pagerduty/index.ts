@@ -9,7 +9,7 @@ import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type {
-  ActionTypeWithExecutor as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,

@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
 import type {
-  ActionTypeWithExecutor as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
