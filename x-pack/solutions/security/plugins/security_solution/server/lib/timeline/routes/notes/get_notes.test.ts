@@ -17,6 +17,7 @@ import { NOTE_URL } from '../../../../../common/constants';
 import type { GetNotesRequestQuery } from '../../../../../common/api/timeline';
 import { mockGetCurrentUser } from '../../__mocks__/import_timelines';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
+import { AssociatedFilter } from '../../../../../common/notes/constants';
 
 const getAllNotesRequest = (query?: GetNotesRequestQuery) =>
   requestMock.create({
@@ -170,5 +171,105 @@ describe('get notes route', () => {
       notes: mockSavedObjectIdNotes,
       totalCount: mockSavedObjectIdNotes.length,
     });
+  });
+
+  test('should only return notes attached to both timeline and alert', async () => {
+    const timelineId = 'b831446a-d446-4582-aa82-5cd0329311f7';
+    const mockNotesFromDb = [
+      {
+        // Note attached to both timeline AND alert - should be INCLUDED
+        id: uuidv4(),
+        timelineId,
+        eventId: 'e5435a7dce314692909b2742dc4431b5494043e697bcc4c96ff4e9eb89581de0',
+        note: 'note attached to timeline and alert',
+        created: 1767795503452,
+        createdBy: 'elastic',
+        updated: 1767795503452,
+        updatedBy: 'elastic',
+      },
+      {
+        // Investigation guide - has timeline but NO eventId field - should be EXCLUDED
+        id: uuidv4(),
+        timelineId,
+        // eventId is undefined (field missing)
+        note: 'investigation guide without eventId',
+        created: 1767624890170,
+        createdBy: 'elastic',
+        updated: 1767624890170,
+        updatedBy: 'elastic',
+      },
+      {
+        // Note with empty eventId - should be EXCLUDED
+        id: uuidv4(),
+        timelineId,
+        eventId: '',
+        note: 'note with empty eventId',
+        created: 1767795454234,
+        createdBy: 'elastic',
+        updated: 1767795454234,
+        updatedBy: 'elastic',
+      },
+    ];
+
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockNotesFromDb,
+      totalCount: mockNotesFromDb.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({
+        associatedFilter: AssociatedFilter.documentAndSavedObject,
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+
+    expect(response.body.notes).toHaveLength(1);
+    expect(response.body.notes[0].note).toEqual('note attached to timeline and alert');
+    expect(response.body.totalCount).toEqual(1);
+  });
+
+  test('should only return notes with valid eventId and no timeline', async () => {
+    const mockNotesFromDb = [
+      {
+        // Note attached to alert only - should be INCLUDED
+        id: uuidv4(),
+        timelineId: '',
+        eventId: 'alert-id-123',
+        note: 'note attached to alert only',
+        created: 1767624879923,
+        createdBy: 'elastic',
+        updated: 1767624879923,
+        updatedBy: 'elastic',
+      },
+      {
+        // Orphan note with no eventId - should be EXCLUDED
+        id: uuidv4(),
+        timelineId: '',
+        // eventId is undefined
+        note: 'orphan note without eventId',
+        created: 1767624890170,
+        createdBy: 'elastic',
+        updated: 1767624890170,
+        updatedBy: 'elastic',
+      },
+    ];
+
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockNotesFromDb,
+      totalCount: mockNotesFromDb.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({ associatedFilter: AssociatedFilter.documentOnly }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+
+    expect(response.body.notes).toHaveLength(1);
+    expect(response.body.notes[0].note).toEqual('note attached to alert only');
+    expect(response.body.totalCount).toEqual(1);
   });
 });
