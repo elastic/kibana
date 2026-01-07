@@ -1218,6 +1218,11 @@ components:
           type: array
         requiresInput:
           type: boolean
+        tags:
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
+          type: array
         updatedAt:
           format: date-time
           type: string
@@ -1231,6 +1236,20 @@ components:
         - linux
         - macos
         - windows
+      type: string
+    EndpointScriptTags:
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
       type: string
     Execute:
       allOf:
