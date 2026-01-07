@@ -283,6 +283,96 @@ describe('searchByCodeownerTool', () => {
       expect(parsedResult.matchingFiles[0]).not.toContain('/repo/root');
       expect(parsedResult.matchingFiles[0]).toBe('src/file1.ts');
     });
+
+    it('handles CODEOWNERS file with empty lines', async () => {
+      setupMocks({
+        matchingFiles: ['src/file1.ts'],
+        codeowners: `
+# Comment line
+
+/src @elastic/kibana-core
+
+# Another comment
+        `.trim(),
+      });
+
+      const result = await searchByCodeownerTool.handler({
+        searchTerm: 'TODO',
+        team: '@elastic/kibana-core',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBe(1);
+    });
+
+    it('handles CODEOWNERS file with malformed lines', async () => {
+      setupMocks({
+        matchingFiles: ['src/file1.ts'],
+        codeowners: `
+/src @elastic/kibana-core
+malformed-line-without-team
+/another/path
+        `.trim(),
+      });
+
+      const result = await searchByCodeownerTool.handler({
+        searchTerm: 'TODO',
+        team: '@elastic/kibana-core',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should still work, ignoring malformed lines
+      expect(parsedResult.totalMatchingFiles).toBe(1);
+    });
+
+    it('handles missing CODEOWNERS file gracefully', async () => {
+      (mockedFs.readFileSync as jest.Mock).mockImplementation(() => {
+        throw new Error('File not found');
+      });
+
+      (mockedFs.statSync as jest.Mock).mockReturnValue({
+        isDirectory: () => true,
+        isFile: () => false,
+      });
+
+      mockExecFileAsync.mockResolvedValue({
+        stdout: '',
+        stderr: '',
+      });
+
+      const result = await searchByCodeownerTool.handler({
+        searchTerm: 'TODO',
+        team: '@elastic/kibana-core',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should return empty results when CODEOWNERS doesn't exist
+      expect(parsedResult.totalMatchingFiles).toBe(0);
+      expect(parsedResult.totalScannedFiles).toBe(0);
+    });
+
+    it('handles paths that do not exist in getTeamPaths', async () => {
+      setupMocks({
+        matchingFiles: [],
+        codeowners: '/nonexistent/path @elastic/kibana-core',
+      });
+
+      (mockedFs.statSync as jest.Mock).mockImplementation((dirPath: string) => {
+        if (dirPath.includes('nonexistent')) {
+          throw new Error('Path does not exist');
+        }
+        return { isDirectory: () => true, isFile: () => false };
+      });
+
+      const result = await searchByCodeownerTool.handler({
+        searchTerm: 'TODO',
+        team: '@elastic/kibana-core',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should skip nonexistent paths
+      expect(parsedResult.totalScannedFiles).toBe(0);
+    });
   });
 
   describe('tool definition', () => {

@@ -38,12 +38,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
@@ -117,7 +113,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file-upload-usage-collection-telemetry": "d6d7e6f366e33ec93a4996229e44d32aea97e04f696259b9915c0d21001ff698",
         "fileShare": "5f3b4cb0a3aa1d3b03f31b2f0741baa548068f2ec478b8632ef4f02cb65f2b75",
         "fleet-agent-policies": "af6f62b94ebe1d2afdca07679baccf5549b8c582e1fb8239e3e08466003eb3cf",
-        "fleet-cloud-connector": "db9da5cbe76dbb8e057e01ce0375de7a1431167002535389c2a412cb425b5e7f",
+        "fleet-cloud-connector": "2c5a7ce89066411f95076192007d57495a9fa1647e3b584b60397a0183854a28",
         "fleet-fleet-server-host": "edbc06c4a73586e7820549ab481244989af89ba9191b002cce97d0843a01008e",
         "fleet-message-signing-keys": "67aecd34e081183b2a99cc1451583977e4ad918074dc5b1579cc4b23750d3829",
         "fleet-package-policies": "1d077144b3fc05276bc3c857e2d0a5777488b5b44a25dba8fdbcabef9cb3401a",
@@ -166,7 +162,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "9d54f733fb2bd08978c7059d71e77741574dc2616823745501742d34816a408c",
         "rules-settings": "436a36535b5d57ea1f7cbaaa37887ed5ddac8c3dea30c9fd98b3931ae87dfe1a",
         "sample-data-telemetry": "4c102e89bdcaee1ccc887d1709c7e176c05f25b4c5ac14c3d013b58fbfd806ac",
-        "search": "431e34cbf3aadc050c4f5e23e2e13da977d1d37468f3651499d722c207723c4c",
+        "search": "c85e16bcb3b1973b0592cade64b1440333fc9fc8802fe9d2c4c120cc6f153b81",
         "search-session": "95e62da1c06afde503c7d12efebc7df2102b9cb8bead1f50ca5c6ab8f4b67c26",
         "search-telemetry": "c152fc7e66d5ac7907e81c0926be9c219a15181e10b418b2fbb86bab2760627c",
         "search_playground": "97895cb5356dd7dad771b6d72b5c236c7c229c012545d56bf6e849984512c9b1",
@@ -691,6 +687,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-cloud-connector|global: 0776625e5c0d6c5435809f1d60ed060f3714e6b4",
         "fleet-cloud-connector|mappings: ae1041da6901b2d16614abcf84fc7e2b4613a5e3",
         "fleet-cloud-connector|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "fleet-cloud-connector|10.3.0: 7793f0cb93de7d148e584d1b082d040145c7767c00db579e3eca71a616b93f88",
         "fleet-cloud-connector|10.2.0: bfcc33415a6e8e8c8c4efc325a80d2d831ccf6934d0245b5c7eca50f162ae9ca",
         "fleet-cloud-connector|10.1.0: 6c7c23ef8e3ac208a04e9d783ad0969330ed3d6ba8e8e0741325a64004e4597e",
         "==============================================================================================",
@@ -1051,6 +1048,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search|global: ce649a79d99c5ff5eb68d544635428ef87946d84",
         "search|mappings: 432d4dfdb5a33ce29d00ccdcfcda70d7c5f94b52",
         "search|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
+        "search|10.10.0: 2267369c36edf6d7a2ebafe7028171610687672921e7d79b796acb287199897f",
         "search|10.9.0: 557d8a40f3cd758fb4da9afba44e827a8c18b63ba140af871cf4a815f8e5e869",
         "search|10.8.0: 76274f35cc139d5e208236bb92c859dd29e27ade181950a9f0bc3e95220c86dc",
         "search|10.7.0: 03bcc899ac7be8e0a88520ae8fc091fc6ea37b231848dcbc0119b7425f36dd0e",
@@ -1350,7 +1348,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file-upload-usage-collection-telemetry": "10.0.0",
         "fileShare": "10.0.0",
         "fleet-agent-policies": "10.2.0",
-        "fleet-cloud-connector": "10.2.0",
+        "fleet-cloud-connector": "10.3.0",
         "fleet-fleet-server-host": "10.2.0",
         "fleet-message-signing-keys": "10.0.0",
         "fleet-package-policies": "10.7.0",
@@ -1399,7 +1397,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "10.4.0",
         "rules-settings": "10.1.0",
         "sample-data-telemetry": "10.0.0",
-        "search": "10.9.0",
+        "search": "10.10.0",
         "search-session": "10.0.0",
         "search-telemetry": "10.0.0",
         "search_playground": "10.1.0",
@@ -1503,7 +1501,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file-upload-usage-collection-telemetry": "0.0.0",
         "fileShare": "0.0.0",
         "fleet-agent-policies": "10.2.0",
-        "fleet-cloud-connector": "10.2.0",
+        "fleet-cloud-connector": "10.3.0",
         "fleet-fleet-server-host": "10.2.0",
         "fleet-message-signing-keys": "0.0.0",
         "fleet-package-policies": "10.7.0",
@@ -1552,7 +1550,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "10.4.0",
         "rules-settings": "10.1.0",
         "sample-data-telemetry": "0.0.0",
-        "search": "10.9.0",
+        "search": "10.10.0",
         "search-session": "8.6.0",
         "search-telemetry": "7.12.0",
         "search_playground": "10.1.0",

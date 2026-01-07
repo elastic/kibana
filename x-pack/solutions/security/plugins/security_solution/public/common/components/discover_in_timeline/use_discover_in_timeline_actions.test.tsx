@@ -163,7 +163,7 @@ describe('useDiscoverInTimelineActions', () => {
             breakdownField: 'customBreakDownField',
             columns: ['default_column'],
             filters: [customFilter],
-            grid: undefined,
+            grid: {},
             hideAggregatedPreview: undefined,
             hideChart: true,
             dataSource: {

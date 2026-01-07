@@ -136,16 +136,16 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
             "plugin": "ml",
@@ -430,30 +430,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
           },
           {
             "plugin": "slo",
@@ -773,16 +749,16 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
             "plugin": "ml",
@@ -1067,30 +1043,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
           },
           {
             "plugin": "slo",
@@ -1410,16 +1362,16 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
             "plugin": "ml",
@@ -1704,30 +1656,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
           },
           {
             "plugin": "slo",
