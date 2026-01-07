@@ -319,16 +319,12 @@ export function LensEditConfigurationFlyout({
     return isDevMode && !textBasedMode;
   }, [isDevMode, textBasedMode]);
 
-  const {
-    isConvertToEsqlButtonDisabled,
-    convertToEsqlButtonTooltip,
-    convertibleLayers,
-    buildTextBasedState,
-  } = useEsqlConversion(
-    showConvertToEsqlButton,
-    { attributes, layerIds, visualization, activeVisualization },
-    { framePublicAPI, coreStart, startDependencies }
-  );
+  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
+    useEsqlConversion(
+      showConvertToEsqlButton,
+      { datasourceId, layerIds, visualization, activeVisualization },
+      { framePublicAPI, coreStart, startDependencies }
+    );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -337,16 +333,14 @@ export function LensEditConfigurationFlyout({
 
   const handleConvertToEsql = useCallback(
     ({ layersToConvert }: { layersToConvert: string[] }) => {
-      // TODO: handle case where buildTextBasedState is undefined
-      if (!buildTextBasedState) {
-        return;
-      }
-
       const newAttributes = convertToEsql({
         layersToConvert,
         attributes,
         visualizationState: visualization.state,
-        buildTextBasedState,
+        datasourceStates,
+        framePublicAPI,
+        coreStart,
+        startDependencies,
       });
 
       closeModal();
@@ -363,9 +357,12 @@ export function LensEditConfigurationFlyout({
     },
     [
       attributes,
-      buildTextBasedState,
       closeModal,
+      coreStart,
+      datasourceStates,
+      framePublicAPI,
       setCurrentAttributes,
+      startDependencies,
       updateSuggestion,
       visualization.state,
     ]
