@@ -107,6 +107,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   private getScoutConfigCategory(configPath: string): ScoutTestRunConfigCategory {
+    // match scout or scout_* directory
     const pattern = /scout(?:_[^/]+)?\/(api|ui)\//;
     const match = configPath.match(pattern);
     if (match) {
