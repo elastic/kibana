@@ -21,17 +21,14 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useUpdateWorkflowStatusAction } from '../../../../detections/hooks/attacks/actions/use_update_status_action';
 import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useViewInAiAssistant } from '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
-import { UpdateAlertsModal } from './update_alerts_modal';
-import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
-import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
@@ -53,14 +50,9 @@ const TakeActionComponent: React.FC<Props> = ({
   replacements,
   setSelectedAttackDiscoveries,
 }) => {
-  const [pendingAction, setPendingAction] = useState<'open' | 'acknowledged' | 'closed' | null>(
-    null
-  );
-
   const {
     services: { cases },
   } = useKibana();
-  const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canUserCreateAndReadCases = useCallback(
@@ -110,64 +102,21 @@ const TakeActionComponent: React.FC<Props> = ({
     [attackDiscoveries]
   );
 
-  const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
-  const { mutateAsync: updateAlertStatus } = useUpdateAlertsStatus();
-
-  /**
-   * Called by the modal when the user confirms the action,
-   * or directly when the user selects an action in EASE.
-   */
-  const onConfirm = useCallback(
-    async ({
-      updateAlerts,
-      workflowStatus,
-    }: {
-      updateAlerts: boolean;
-      workflowStatus: 'open' | 'acknowledged' | 'closed';
-    }) => {
-      setPendingAction(null);
-
-      await attackDiscoveryBulk({
-        ids: attackDiscoveryIds,
-        kibanaAlertWorkflowStatus: workflowStatus,
-      });
-
-      if (updateAlerts && alertIds.length > 0) {
-        const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
-
-        await updateAlertStatus({
-          ids: originalAlertIds,
-          kibanaAlertWorkflowStatus: workflowStatus,
-        });
-      }
-
-      setSelectedAttackDiscoveries({});
-      refetchFindAttackDiscoveries?.();
-    },
-    [
-      alertIds,
-      attackDiscoveryBulk,
-      attackDiscoveryIds,
-      refetchFindAttackDiscoveries,
-      replacements,
-      setSelectedAttackDiscoveries,
-      updateAlertStatus,
-    ]
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds({ alertIds, replacements }),
+    [alertIds, replacements]
   );
-
-  const onUpdateWorkflowStatus = useCallback(
-    async (workflowStatus: 'open' | 'acknowledged' | 'closed') => {
-      closePopover();
-
-      setPendingAction(workflowStatus);
-
-      if (hasSearchAILakeConfigurations) {
-        // there's no modal for EASE, so we call onConfirm directly
-        onConfirm({ updateAlerts: false, workflowStatus });
-      }
-    },
-    [closePopover, hasSearchAILakeConfigurations, onConfirm]
-  );
+  const currentWorkflowStatus = useMemo(() => {
+    const isSingleAttackDiscovery = attackDiscoveries.length === 1;
+    const firstAttackDiscovery = isSingleAttackDiscovery ? attackDiscoveries[0] : null;
+    const isAlert = firstAttackDiscovery && isAttackDiscoveryAlert(firstAttackDiscovery);
+    return isAlert ? firstAttackDiscovery.alertWorkflowStatus : null;
+  }, [attackDiscoveries]);
+  const { actionItems, confirmationModal } = useUpdateWorkflowStatusAction({
+    attackDiscoveryIds,
+    alertIds: originalAlertIds,
+    currentWorkflowStatus,
+  });
 
   const onClickAddToNewCase = useCallback(async () => {
     closePopover();
@@ -298,56 +247,22 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const allItems = useMemo(() => {
-    const isSingleAttackDiscovery = attackDiscoveries.length === 1;
-    const firstAttackDiscovery = isSingleAttackDiscovery ? attackDiscoveries[0] : null;
-    const isAlert = firstAttackDiscovery && isAttackDiscoveryAlert(firstAttackDiscovery);
+    const workflowStatusActions = actionItems.map(({ title, onClick }) => (
+      <EuiContextMenuItem
+        data-test-subj={title}
+        key={title}
+        onClick={() => {
+          onClick?.();
+          setSelectedAttackDiscoveries({});
+          refetchFindAttackDiscoveries?.();
+        }}
+      >
+        {title}
+      </EuiContextMenuItem>
+    ));
 
-    const isOpen = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'open';
-    const isAcknowledged = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'acknowledged';
-    const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
-
-    const markAsOpenItem = !isOpen
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsOpen"
-            key="markAsOpen"
-            onClick={() => onUpdateWorkflowStatus('open')}
-          >
-            {i18n.MARK_AS_OPEN}
-          </EuiContextMenuItem>,
-        ]
-      : [];
-
-    const markAsAcknowledgedItem = !isAcknowledged
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsAcknowledged"
-            key="markAsAcknowledged"
-            onClick={() => onUpdateWorkflowStatus('acknowledged')}
-          >
-            {i18n.MARK_AS_ACKNOWLEDGED}
-          </EuiContextMenuItem>,
-        ]
-      : [];
-
-    const markAsClosedItem = !isClosed
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsClosed"
-            key="markAsClosed"
-            onClick={() => onUpdateWorkflowStatus('closed')}
-          >
-            {i18n.MARK_AS_CLOSED}
-          </EuiContextMenuItem>,
-        ]
-      : [];
-
-    return [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem, ...items].flat();
-  }, [attackDiscoveries, items, onUpdateWorkflowStatus]);
-
-  const onCloseOrCancel = useCallback(() => {
-    setPendingAction(null);
-  }, []);
+    return [...workflowStatusActions, ...items].flat();
+  }, [actionItems, items, refetchFindAttackDiscoveries, setSelectedAttackDiscoveries]);
 
   return (
     <>
@@ -363,16 +278,7 @@ const TakeActionComponent: React.FC<Props> = ({
         <EuiContextMenuPanel size="s" items={allItems} />
       </EuiPopover>
 
-      {pendingAction != null && !hasSearchAILakeConfigurations && (
-        <UpdateAlertsModal
-          alertsCount={alertIds.length}
-          attackDiscoveriesCount={attackDiscoveryIds.length}
-          onCancel={onCloseOrCancel}
-          onClose={onCloseOrCancel}
-          onConfirm={onConfirm}
-          workflowStatus={pendingAction}
-        />
-      )}
+      {confirmationModal}
     </>
   );
 };
