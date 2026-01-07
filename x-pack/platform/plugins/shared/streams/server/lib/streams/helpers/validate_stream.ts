@@ -31,6 +31,7 @@ import {
   isNotCondition,
   isOrCondition,
   isConditionBlock,
+  isConditionComplete,
   extractFieldsFromMathExpression,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
@@ -95,6 +96,12 @@ function checkFieldName(fieldName: string) {
 }
 
 function validateCondition(condition: Condition) {
+  // Check if the condition is complete (all required values filled)
+  // This catches incomplete range conditions, empty fields, etc.
+  if (!isConditionComplete(condition)) {
+    throw new MalformedStreamError('Condition is incomplete: all required values must be filled');
+  }
+
   if (isAndCondition(condition)) {
     condition.and.forEach(validateCondition);
   } else if (isOrCondition(condition)) {

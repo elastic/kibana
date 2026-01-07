@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 // Default parameter values automatically added to the registered domain processor when saved
 const defaultRegisteredDomainParameters = {
@@ -21,63 +20,47 @@ const REGISTERED_DOMAIN_TYPE = 'registered_domain';
 
 describe('Processor: Registered Domain', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    testBed.component.update();
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: REGISTERED_DOMAIN_TYPE },
+    });
 
-    // Open flyout to add new processor
-    testBed.actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await testBed.actions.addProcessorType(REGISTERED_DOMAIN_TYPE);
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
   });
 
   test('saves with default parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       field: 'field_1',
       ...defaultRegisteredDomainParameters,
@@ -85,21 +68,19 @@ describe('Processor: Registered Domain', () => {
   });
 
   test('should still send ignore_missing:false when the toggle is disabled', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
 
     // Disable ignore missing toggle
-    form.toggleEuiSwitch('ignoreMissingSwitch.input');
+    fireEvent.click(within(screen.getByTestId('ignoreMissingSwitch')).getByTestId('input'));
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       ...defaultRegisteredDomainParameters,
       field: 'field_1',
@@ -108,21 +89,21 @@ describe('Processor: Registered Domain', () => {
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
 
     // Set optional parameteres
-    form.setInputValue('targetField.input', 'target_field');
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'target_field' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       field: 'field_1',
       target_field: 'target_field',

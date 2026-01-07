@@ -19,6 +19,8 @@ import type { ILicense } from '@kbn/licensing-types';
 
 import type { BreadcrumbService } from './application/services/breadcrumbs';
 
+export type { IndexLifecycleManagementPluginStart } from '@kbn/index-lifecycle-management-common-shared';
+
 export interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
