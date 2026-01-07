@@ -250,14 +250,11 @@ label_to_areas:
   "Feature:SharingURLs": "Sharing"
   
 # Product-specific label blockers (optional)
-# Maps product IDs to lists of labels that prevent changelog creation for that product
+# Maps product IDs to lists of pull request labels that prevent changelog creation for that product
 # If you run the changelog add command with the --prs option and a PR has any of these labels, the changelog is not created
-product_label_blockers:
-  kibana:
-    - "release_note:skip"
-    - "reverted"
-    - "backport"
-  cloud-serverless:
+# Product IDs can be comma-separated to share the same list of labels across multiple products
+add_blockers:
+  kibana,cloud-serverless:
     - "release_note:skip"
     - "reverted"
     - "backport"
