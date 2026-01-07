@@ -7,25 +7,29 @@
 
 import { z } from '@kbn/zod';
 import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability, normalizePanels } from '../utils';
+import { checkDashboardToolsAvailability, normalizePanels, buildMarkdownPanel } from '../utils';
 
 const updateDashboardSchema = z.object({
   id: z.string().describe('The ID of the dashboard to update.'),
   title: z.string().optional().describe('The updated title of the dashboard.'),
   description: z.string().optional().describe('The updated description of the dashboard.'),
   panels: z
-    .unknown()
-    .optional()
+    .array(z.unknown())
     .describe('An array of panel configurations (PanelJSON or lens_tool_artifact) to update.'),
+  markdownContent: z
+    .string()
+    .describe(
+      'Markdown content for a summary panel displayed at the top of the dashboard. This tool replaces the existing markdown summary with this content.'
+    ),
 });
 
 export const updateDashboardTool = (
@@ -43,15 +47,19 @@ export const updateDashboardTool = (
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Update an existing dashboard with new title, description, or panels.
+    description: `Update an existing dashboard by replacing its markdown summary and visualization panels.
 
 This tool will:
-1. Accept a dashboard ID and optional fields to update (title, description, panels)
-2. Update the dashboard with the provided configuration
-3. Return the updated dashboard information`,
+1. Accept a dashboard ID, required fields (panels, markdownContent), and optional fields (title, description)
+2. Build a markdown summary panel at the top
+3. Replace the dashboard's panels with the markdown summary panel followed by the provided visualization panels
+4. Return the updated dashboard information`,
     schema: updateDashboardSchema,
     tags: [],
-    handler: async ({ id, title, description, panels, ...rest }, { logger, request, esClient }) => {
+    handler: async (
+      { id, title, description, panels, markdownContent },
+      { logger, request, esClient, resultStore }
+    ) => {
       try {
         const coreContext = {
           savedObjects: { client: savedObjects.getScopedClient(request) },
@@ -66,14 +74,18 @@ This tool will:
         // First, read the existing dashboard to get current values
         const existingDashboard = await dashboard.client.read(requestHandlerContext, id);
 
-        const normalizedPanels =
-          panels !== undefined ? normalizePanels(panels as unknown[]) : undefined;
+        const markdownPanel = buildMarkdownPanel(markdownContent);
+        const yOffset = markdownPanel.grid.h;
+        const normalizedPanels = normalizePanels(panels, yOffset, resultStore);
+        const updatedPanels = [markdownPanel, ...normalizedPanels];
 
-        // Merge existing data with provided updates
+        // Merge existing data with provided updates. Dashboard update is a full replace, so we
+        // must start from the existing dashboard state and then apply changes.
         const updateData = {
+          ...existingDashboard.data,
           title: title ?? existingDashboard.data.title,
           description: description ?? existingDashboard.data.description,
-          panels: normalizedPanels ?? existingDashboard.data.panels,
+          panels: updatedPanels,
         };
 
         // Update dashboard using the Dashboard plugin's client

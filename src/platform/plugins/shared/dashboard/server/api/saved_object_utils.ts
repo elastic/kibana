@@ -9,10 +9,9 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
-import { transformDashboardOut, transformReferencesOut } from './transforms';
+import { transformDashboardOut } from './transforms';
 
 export function getDashboardMeta(
   savedObject:
@@ -41,13 +40,11 @@ export function getDashboardCRUResponseBody(
   operation: 'create' | 'read' | 'update' | 'search'
 ) {
   let dashboardState: DashboardState;
-  let references: Reference[];
   try {
     dashboardState = transformDashboardOut(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
-    references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
@@ -56,7 +53,12 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
-      ...(references.length && { references }),
+      ...(savedObject?.accessControl && {
+        access_control: {
+          access_mode: savedObject.accessControl.accessMode,
+          owner: savedObject.accessControl.owner,
+        },
+      }),
     },
     meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,

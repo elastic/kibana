@@ -21,9 +21,11 @@
     "@kbn/data-views-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/controls-plugin",
     "@kbn/shared-ux-router",
     "@kbn/presentation-publishing",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/control-group-renderer",
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-util-plugin"
   ]
 }

@@ -700,7 +700,7 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"hidden\" | \"auto\" | \"bands\""
+              "\"auto\" | \"hidden\" | \"bands\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -714,7 +714,7 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"custom\" | \"auto\""
+              "\"none\" | \"auto\" | \"custom\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1176,7 +1176,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1252,7 +1252,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1274,7 +1274,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -1328,7 +1328,7 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"hidden\" | \"auto\" | \"bands\""
+          "\"auto\" | \"hidden\" | \"bands\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,

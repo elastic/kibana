@@ -16,6 +16,7 @@ type OnboardingPageId = 'onboarding';
 type RuleDetailsPageId = 'rule_details';
 type RulesListPageId = 'rules_list';
 type SloPageId = 'slos';
+type StreamsPageId = 'streams';
 type SyntheticsPageId = 'synthetics';
 
 export type Key =
@@ -28,6 +29,7 @@ export type Key =
   | `${RuleDetailsPageId}`
   | `${RulesListPageId}`
   | `${SloPageId}`
+  | `${StreamsPageId}`
   | `${SyntheticsPageId}`;
 
 export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;

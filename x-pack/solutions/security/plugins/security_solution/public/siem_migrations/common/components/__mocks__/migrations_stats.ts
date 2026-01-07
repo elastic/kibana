@@ -20,6 +20,7 @@ export const getMigrationsStatsMock = (): MigrationTaskStats[] => {
         error: null,
         total_execution_time_ms: 339976,
       },
+      vendor: 'splunk',
       id: '1',
       items: {
         total: 7,
@@ -49,6 +50,7 @@ export const getMigrationsStatsMock = (): MigrationTaskStats[] => {
         completed: 0,
         failed: 0,
       },
+      vendor: 'qradar',
       created_at: '2025-10-01T13:45:05.216Z',
       last_updated_at: '2025-10-01T13:45:05.216Z',
     },
