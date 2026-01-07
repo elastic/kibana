@@ -10,14 +10,16 @@ import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   GrokProcessor,
+  LowercaseProcessor,
   MathProcessor,
   ProcessorType,
   ReplaceProcessor,
+  StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
-  StreamlangConditionBlockWithUIAttributes,
+  TrimProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -29,8 +31,8 @@ import {
 import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -40,18 +42,21 @@ import type {
   ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
+  ConditionBlockFormState,
   ConvertFormState,
   DateFormState,
   DissectFormState,
   DropFormState,
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
+  LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
-  ConditionBlockFormState,
+  TrimFormState,
+  UppercaseFormState,
 } from './types';
 
 /**
@@ -66,6 +71,9 @@ export const SPECIALISED_TYPES = [
   'set',
   'replace',
   'drop_document',
+  'uppercase',
+  'lowercase',
+  'trim',
 ];
 
 interface FormStateDependencies {
@@ -215,6 +223,30 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
+  action: 'uppercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultLowercaseProcessorFormState = (): LowercaseFormState => ({
+  action: 'lowercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultTrimProcessorFormState = (): TrimFormState => ({
+  action: 'trim' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -243,6 +275,9 @@ const defaultProcessorFormStateByType: Record<
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
+  uppercase: defaultUppercaseProcessorFormState,
+  lowercase: defaultLowercaseProcessorFormState,
+  trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -283,7 +318,10 @@ export const getFormStateFromActionStep = (
     step.action === 'set' ||
     step.action === 'convert' ||
     step.action === 'replace' ||
-    step.action === 'math'
+    step.action === 'math' ||
+    step.action === 'uppercase' ||
+    step.action === 'lowercase' ||
+    step.action === 'trim'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -487,6 +525,52 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as MathProcessor,
+      };
+    }
+
+    if (formState.action === 'uppercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'uppercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        },
+      };
+    }
+
+    if (formState.action === 'lowercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'lowercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as LowercaseProcessor,
+      };
+    }
+
+    if (formState.action === 'trim') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'trim',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as TrimProcessor,
       };
     }
 

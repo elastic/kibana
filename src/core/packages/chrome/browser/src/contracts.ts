@@ -25,6 +25,13 @@ import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
 
 /**
+ * ChromeSetup exposes APIs available during the setup phase.
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ChromeSetup {}
+
+/**
  * ChromeStart allows plugins to customize the global chrome header UI and
  * enrich the UX with additional information about the current location of the
  * browser.
