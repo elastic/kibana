@@ -388,6 +388,98 @@ describe('WorkflowOutputStepImpl', () => {
       expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.failStep).not.toHaveBeenCalled();
     });
+
+    it('should validate array outputs correctly', async () => {
+      const mockExecution = mockWorkflowRuntime.getWorkflowExecution();
+      mockExecution.workflowDefinition = {
+        name: 'test-workflow',
+        version: '1',
+        enabled: true,
+        triggers: [],
+        steps: [],
+        outputs: [
+          {
+            name: 'processed_items',
+            type: 'array',
+            required: true,
+          },
+          {
+            name: 'count',
+            type: 'number',
+            required: true,
+          },
+        ] as WorkflowOutput[],
+      };
+
+      mockNode.configuration = {
+        ...mockNode.configuration,
+        with: {
+          processed_items: ['apple', 'banana', 'cherry'],
+          count: 3,
+        },
+      };
+
+      impl = new WorkflowOutputStepImpl(
+        mockNode,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await impl.run();
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.failStep).not.toHaveBeenCalled();
+    });
+
+    it('should validate array outputs with template expressions', async () => {
+      const mockExecution = mockWorkflowRuntime.getWorkflowExecution();
+      mockExecution.workflowDefinition = {
+        name: 'test-workflow',
+        version: '1',
+        enabled: true,
+        triggers: [],
+        steps: [],
+        outputs: [
+          {
+            name: 'processed_items',
+            type: 'array',
+            required: true,
+          },
+          {
+            name: 'count',
+            type: 'number',
+            required: true,
+          },
+        ] as WorkflowOutput[],
+      };
+
+      mockNode.configuration = {
+        ...mockNode.configuration,
+        with: {
+          processed_items: '{{ inputs.items }}',
+          count: '{{ inputs.items.length }}',
+        },
+      };
+
+      // Mock the template rendering to return actual array
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockReturnValue({
+          processed_items: ['apple', 'banana', 'cherry'],
+          count: 3,
+        });
+
+      impl = new WorkflowOutputStepImpl(
+        mockNode,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await impl.run();
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.failStep).not.toHaveBeenCalled();
+    });
   });
 
   describe('logging', () => {

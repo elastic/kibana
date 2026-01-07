@@ -38,23 +38,12 @@ function makeOutputValidator(outputs: WorkflowOutput[]) {
             : z.enum(output.options as [string, ...string[]]).optional();
           break;
         case 'array': {
-          const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
           const { minItems, maxItems } = output;
-          const applyConstraints = (
-            schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
-          ) => {
-            let s = schema;
-            if (minItems != null) s = s.min(minItems);
-            if (maxItems != null) s = s.max(maxItems);
-            return s;
-          };
-          const arr = z.union(
-            arraySchemas.map(applyConstraints) as [
-              z.ZodArray<z.ZodString>,
-              z.ZodArray<z.ZodNumber>,
-              z.ZodArray<z.ZodBoolean>
-            ]
-          );
+          // Create an array that accepts any primitive type (string, number, boolean)
+          let arr = z.array(z.union([z.string(), z.number(), z.boolean()]));
+          // Apply constraints
+          if (minItems != null) arr = arr.min(minItems);
+          if (maxItems != null) arr = arr.max(maxItems);
           acc[output.name] = output.required ? arr : arr.optional();
           break;
         }

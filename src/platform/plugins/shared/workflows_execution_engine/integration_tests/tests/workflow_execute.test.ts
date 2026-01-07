@@ -390,31 +390,18 @@ steps:
       expect(executeStepExecutions.length).toBe(1);
       expect(executeStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
       const output = executeStepExecutions[0].output as Record<string, unknown>;
+      // Output should contain only the child workflow's output fields
       expect(output).toEqual({
+        result: 'success',
+        data: { message: 'Hello from child' },
+      });
+      // Verify step state contains execution metadata
+      const state = executeStepExecutions[0].state as Record<string, unknown>;
+      expect(state).toEqual({
         workflowId: 'child-workflow-id',
         executionId: childWorkflowExecutionId,
-        awaited: true,
-        status: ExecutionStatus.COMPLETED,
-        output: {
-          result: 'success',
-          data: { message: 'Hello from child' },
-        },
         startedAt: expect.any(String),
-        completedAt: expect.any(String),
       });
-      // Verify timing fields are valid ISO strings
-      expect(typeof output.startedAt).toBe('string');
-      expect(typeof output.completedAt).toBe('string');
-      expect(new Date(output.startedAt as string).toISOString()).toBe(output.startedAt);
-      expect(new Date(output.completedAt as string).toISOString()).toBe(output.completedAt);
-      // Verify completedAt is after or equal to startedAt
-      expect(new Date(output.completedAt as string).getTime()).toBeGreaterThanOrEqual(
-        new Date(output.startedAt as string).getTime()
-      );
-      // Verify startedAt matches the child execution's startedAt
-      expect(output.startedAt).toBe(childExecution.startedAt);
-      // Verify completedAt matches the child execution's finishedAt
-      expect(output.completedAt).toBe(childExecution.finishedAt);
     });
 
     it('should continue polling if child workflow is still running', async () => {
