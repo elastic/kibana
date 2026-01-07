@@ -32,7 +32,6 @@ export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
   const {
     services: {
       application: { capabilities },
-      pricing,
     },
   } = useKibana();
   const licenseService = useLicense();
@@ -41,22 +40,12 @@ export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
     const agentBuilderCapabilities = capabilities[AGENTBUILDER_FEATURE_ID];
     const hasAgentBuilderPrivilege = agentBuilderCapabilities?.show === true;
     const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
-    const activeProduct = pricing?.getActiveProduct?.();
-
-    /**
-     * Serverless uses pricing tiers (`complete`/`essentials`/`search_ai_lake`) to represent entitlements.
-     * In that case, prefer pricing tier checks over Elasticsearch license types.
-     */
-    const hasValidAgentBuilderLicense =
-      activeProduct?.type === 'security'
-        ? activeProduct.tier === 'complete' || activeProduct.tier === 'search_ai_lake'
-        : licenseService.isEnterprise();
 
     return {
       isAgentBuilderEnabled: hasAgentBuilderPrivilege && isAgentChatExperienceEnabled,
       hasAgentBuilderPrivilege,
       isAgentChatExperienceEnabled,
-      hasValidAgentBuilderLicense,
+      hasValidAgentBuilderLicense: licenseService.isEnterprise(),
     };
-  }, [capabilities, chatExperience, licenseService, pricing]);
+  }, [capabilities, chatExperience, licenseService]);
 };
