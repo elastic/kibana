@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { DatasourceStates, FormBasedLayer, FramePublicAPI } from '@kbn/lens-common';
 import { partition } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
