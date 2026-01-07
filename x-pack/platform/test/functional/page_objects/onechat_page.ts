@@ -338,7 +338,9 @@ export class OneChatPageObject extends FtrService {
   }
 
   async selectToolType(type: Exclude<ToolType, ToolType.builtin>) {
-    await this.testSubjects.selectValue('agentBuilderToolTypeSelect', type);
+    // EuiSuperSelect requires clicking the button to open the dropdown, then clicking the option
+    await this.testSubjects.click('agentBuilderToolTypeSelect');
+    await this.testSubjects.click(`agentBuilderToolTypeOption-${type}`);
   }
 
   async setToolDescription(description: string) {
