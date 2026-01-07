@@ -86,7 +86,8 @@ export function getPosition(
     return 'after_operator';
   }
 
-  if (isLiteral(expressionRoot)) {
+  // Literals and map expressions are complete expressions
+  if (isLiteral(expressionRoot) || expressionRoot.type === 'map') {
     return 'after_complete';
   }
 
