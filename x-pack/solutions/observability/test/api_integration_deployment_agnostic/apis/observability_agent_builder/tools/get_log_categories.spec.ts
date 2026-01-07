@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import { type LogsSynthtraceEsClient, generateLogCategoriesData } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_categories/get_log_categories';
+import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_categories/tool';
 import { first } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticLogsWithCategories } from '../utils/synthtrace_scenarios';
 
 const SERVICE_NAME = 'payment-service';
 const START = 'now-15m';
@@ -20,6 +20,7 @@ const END = 'now';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -29,10 +30,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-      ({ logsSynthtraceEsClient } = await createSyntheticLogsWithCategories({
-        getService,
+      logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+      await logsSynthtraceEsClient.clean();
+
+      const range = timerange(START, END);
+      const { client, generator } = generateLogCategoriesData({
+        range,
+        logsEsClient: logsSynthtraceEsClient,
         serviceName: SERVICE_NAME,
-      }));
+      });
+
+      await client.index(generator);
     });
 
     after(async () => {

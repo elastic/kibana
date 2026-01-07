@@ -33,6 +33,7 @@ import {
   getInferenceEndpoints,
   getEditorExtensions,
   fixESQLQueryWithVariables,
+  prettifyQuery,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -258,6 +259,16 @@ const ESQLEditorInternal = function ESQLEditor({
     [onQuerySubmit, onQueryUpdate, telemetryService]
   );
 
+  const onPrettifyQuery = useCallback(() => {
+    const qs = editorRef.current?.getValue();
+    if (qs) {
+      const prettyCode = prettifyQuery(qs);
+      if (qs !== prettyCode) {
+        onQueryUpdate(prettyCode);
+      }
+    }
+  }, [onQueryUpdate]);
+
   const onCommentLine = useCallback(() => {
     const currentSelection = editorRef?.current?.getSelection();
     const startLineNumber = currentSelection?.startLineNumber;
@@ -343,9 +354,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
     const { lineNumber, column } = position;
     const lineContent = model.getLineContent(lineNumber);
-    const charBeforeCursor = column > 1 ? lineContent[column - 2] : '';
+    const spaceHasBeenTyped = column > 1 && lineContent[column - 2] === ' ';
+    const inlineCastHasBeenTyped = lineContent.substring(0, column - 1).endsWith('::');
 
-    if (charBeforeCursor === ' ') {
+    if (spaceHasBeenTyped || inlineCastHasBeenTyped) {
       triggerSuggestions();
     }
   }, [triggerSuggestions]);
@@ -1103,7 +1115,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor);
+                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onPrettifyQuery);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
@@ -1214,7 +1226,7 @@ const ESQLEditorInternal = function ESQLEditor({
         code={code}
         onErrorClick={onErrorClick}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
-        updateQuery={onQueryUpdate}
+        onPrettifyQuery={onPrettifyQuery}
         detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}

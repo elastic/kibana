@@ -280,7 +280,11 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const { assetIds } = request.body;
   const savedObjectsClient = coreContext.savedObjects.getClient({
-    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate, KibanaSavedObjectType.alert],
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.alert,
+      KibanaSavedObjectType.sloTemplate,
+    ],
   });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(
@@ -759,7 +763,13 @@ export const rollbackAvailableCheckHandler: FleetRequestHandler<
   const { pkgName } = request.params;
 
   try {
-    const body: RollbackAvailableCheckResponse = await rollbackAvailableCheck(pkgName);
+    const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
+      { name: pkgName },
+    ]);
+    const body: RollbackAvailableCheckResponse = await rollbackAvailableCheck(
+      pkgName,
+      packagePolicyIdsForCurrentUser[pkgName]
+    );
     return response.ok({ body });
   } catch (error) {
     const reason = `Failed to check if rollback is available for ${pkgName} integration`;
@@ -774,7 +784,7 @@ export const bulkRollbackAvailableCheckHandler: FleetRequestHandler = async (
   response
 ) => {
   try {
-    const body: BulkRollbackAvailableCheckResponse = await bulkRollbackAvailableCheck();
+    const body: BulkRollbackAvailableCheckResponse = await bulkRollbackAvailableCheck(request);
     return response.ok({ body });
   } catch (error) {
     const reason = `Failed to check if rollback is available for installed integrations`;
