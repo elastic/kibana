@@ -54,6 +54,8 @@ const getTemplateRowByName = (templateName: string): HTMLElement => {
  * Actions for interacting with the index templates tab.
  */
 export const createIndexTemplatesTabActions = () => {
+  let lastRowActionsButton: HTMLButtonElement | null = null;
+
   const clickReloadButton = () => {
     fireEvent.click(screen.getByTestId('reloadButton'));
   };
@@ -66,7 +68,8 @@ export const createIndexTemplatesTabActions = () => {
       system: 3,
     };
     // Click the view button to open the filter popover
-    fireEvent.click(screen.getByTestId('viewButton'));
+    const viewButton = screen.getByTestId('viewButton');
+    fireEvent.click(viewButton);
     await waitFor(() => {
       expect(screen.getAllByTestId('filterItem').length).toBeGreaterThan(0);
     });
@@ -76,6 +79,18 @@ export const createIndexTemplatesTabActions = () => {
     await waitFor(() => {
       expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
     });
+
+    // The filter popover can remain open after selection; close it to avoid leaking
+    // popover state across tests (late async updates can cause act() warnings).
+    const filterList = screen.queryByTestId('filterList');
+    if (filterList?.getAttribute('data-popover-open') === 'true') {
+      fireEvent.click(viewButton);
+      await waitFor(() => {
+        expect(screen.queryByTestId('filterList')?.getAttribute('data-popover-open')).not.toBe(
+          'true'
+        );
+      });
+    }
   };
 
   const clickTemplateAt = async (index: number, isLegacy = false) => {
@@ -115,6 +130,7 @@ export const createIndexTemplatesTabActions = () => {
     if (!actionsButton)
       throw new Error('Expected an actions popover toggle button in the table row');
 
+    lastRowActionsButton = actionsButton;
     fireEvent.click(actionsButton);
 
     // Wait until the expected menu item exists in an open popover panel
@@ -134,6 +150,21 @@ export const createIndexTemplatesTabActions = () => {
 
     const menu = await new EuiPopoverPanelTestHarness().findContextMenuContainingItem(label);
     await menu.clickMenuItemAndWaitForClose(label);
+  };
+
+  const closeOpenActionMenu = async () => {
+    const panel = new EuiPopoverPanelTestHarness().getTopOpenPanel();
+    if (!panel) return;
+
+    // Prefer clicking the same toggle button again (most reliable) instead of relying on Escape.
+    if (lastRowActionsButton) {
+      fireEvent.click(lastRowActionsButton);
+    } else {
+      fireEvent.keyDown(document.body, { key: 'Escape', code: 'Escape' });
+    }
+    await waitFor(() => {
+      expect(new EuiPopoverPanelTestHarness().getTopOpenPanel()).toBeNull();
+    });
   };
 
   const selectDetailsTab = async (
@@ -170,6 +201,7 @@ export const createIndexTemplatesTabActions = () => {
     clickActionMenu,
     findActionButton,
     clickTemplateAction,
+    closeOpenActionMenu,
     selectDetailsTab,
   };
 };

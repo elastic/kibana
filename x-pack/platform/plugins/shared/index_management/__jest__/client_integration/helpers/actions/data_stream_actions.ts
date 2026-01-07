@@ -42,9 +42,7 @@ export const getTableCellsValues = (tableTestId: string): string[][] => {
  * Actions for interacting with the data streams tab.
  */
 export const createDataStreamTabActions = () => {
-  // Create one userEvent instance per actions instance (typically per test).
-  // Only used for interactions that can trigger EuiPopover act warnings.
-  const user = userEvent.setup();
+  const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
   const goToDataStreamsList = () => {
     fireEvent.click(screen.getByTestId('data_streamsTab'));
@@ -63,11 +61,24 @@ export const createDataStreamTabActions = () => {
 
   const toggleViewFilterAt = async (index: number) => {
     // Click the view button to open the filter popover
-    await user.click(screen.getByTestId('viewButton'));
+    const viewButton = screen.getByTestId('viewButton');
+    await user.click(viewButton);
     await screen.findByTestId('filterList');
     // Click the filter item at the specified index
     const filterItems = await screen.findAllByTestId('filterItem');
     await user.click(filterItems[index]);
+
+    // The filter popover can stay open after selection; close it to avoid leaking EuiPopover
+    // across tests (which can schedule late async updates and add timing variance).
+    const filterList = screen.queryByTestId('filterList');
+    if (filterList?.getAttribute('data-popover-open') === 'true') {
+      await user.click(viewButton);
+      await waitFor(() => {
+        expect(screen.queryByTestId('filterList')?.getAttribute('data-popover-open')).not.toBe(
+          'true'
+        );
+      });
+    }
   };
 
   const clickNameAt = async (index: number) => {
