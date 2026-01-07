@@ -6,7 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type ApmSynthtraceEsClient,
+  generateServicesData,
+  type ServiceConfig,
+} from '@kbn/synthtrace';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
@@ -20,7 +25,6 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
-import { createSyntheticApmData } from '../utils/synthtrace_scenarios/create_synthetic_apm_data';
 
 const SERVICE_NAME = 'service-a';
 const SERVICE_NAME_2 = 'service-b';
@@ -36,6 +40,7 @@ const USER_PROMPT = 'List my services in the last 15 minutes';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   let llmProxy: LlmProxy;
   let connectorId: string;
@@ -56,12 +61,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-          getService,
-          serviceName: [SERVICE_NAME, SERVICE_NAME_2],
-          environment: ENVIRONMENT,
-          language: 'nodejs',
-        }));
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+
+        const testServices: ServiceConfig[] = [
+          {
+            name: SERVICE_NAME,
+            environment: ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 1, // 100% error rate to match original test
+          },
+          {
+            name: SERVICE_NAME_2,
+            environment: ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 1,
+          },
+        ];
+
+        const range = timerange(START, END);
+        const { client, generator } = generateServicesData({
+          range,
+          apmEsClient: apmSynthtraceEsClient,
+          services: testServices,
+        });
+
+        await client.index(generator);
 
         setupToolCallThenAnswer({
           llmProxy,
@@ -131,12 +162,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           await apmSynthtraceEsClient.clean();
 
-          ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-            getService,
-            serviceName: SERVICE_NAME_3,
-            environment: ENVIRONMENT_2,
-            language: 'nodejs',
-          }));
+          const stagingServices: ServiceConfig[] = [
+            {
+              name: SERVICE_NAME_3,
+              environment: ENVIRONMENT_2,
+              agentName: 'nodejs',
+              transactionName: 'GET /api',
+              transactionType: 'request',
+              duration: 50,
+              errorRate: 1,
+            },
+          ];
+
+          const range = timerange(START, END);
+          const { client, generator } = generateServicesData({
+            range,
+            apmEsClient: apmSynthtraceEsClient,
+            services: stagingServices,
+          });
+
+          await client.index(generator);
 
           setupToolCallThenAnswer({
             llmProxy,

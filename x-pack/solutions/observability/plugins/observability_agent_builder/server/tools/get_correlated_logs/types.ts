@@ -7,16 +7,16 @@
 
 import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
-export interface LogSequence<T = Record<string, unknown>> {
+export interface LogSequence {
   correlation: AnchorLog['correlation'];
-  logs: T[];
+  logs: Record<string, unknown>[];
   isTruncated?: boolean;
 }
 
-export interface GetCorrelatedLogsToolResult<T = Record<string, unknown>> {
+export interface GetCorrelatedLogsToolResult {
   type: ToolResultType.other;
   data: {
-    sequences: LogSequence<T>[];
+    sequences: LogSequence[];
     message?: string;
   };
 }
