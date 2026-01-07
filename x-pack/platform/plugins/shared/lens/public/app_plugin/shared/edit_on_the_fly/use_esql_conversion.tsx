@@ -9,7 +9,6 @@ import { useMemo } from 'react';
 import { partition } from 'lodash';
 
 import type {
-  DatasourceStates,
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
@@ -17,6 +16,7 @@ import type {
   TextBasedPrivateState,
   VisualizationState,
   SupportedDatasourceId,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,8 @@ import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
+import { useLensSelector } from '../../../state_management';
+import { getActiveDatasourceIdFromDoc } from '../../../utils';
 
 interface EsqlConversionResult {
   esql: string;
@@ -68,14 +70,12 @@ const getEsqlConversionDisabledSettings = (
 export const useEsqlConversion = (
   showConvertToEsqlButton: boolean,
   {
-    datasourceId,
-    datasourceStates,
+    attributes,
     layerIds,
     visualization,
     activeVisualization,
   }: {
-    datasourceId: SupportedDatasourceId;
-    datasourceStates: DatasourceStates;
+    attributes: TypedLensSerializedState['attributes'];
     layerIds: string[];
     visualization: VisualizationState;
     activeVisualization: unknown;
@@ -90,6 +90,12 @@ export const useEsqlConversion = (
     startDependencies: LensPluginStartDependencies;
   }
 ): EsqlConversionDisabledSettings => {
+  // Derive datasourceId and textBasedMode from attributes
+  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
+
+  // Get datasourceStates from Redux
+  const { datasourceStates } = useLensSelector((state) => state.lens);
+
   return useMemo(() => {
     if (!showConvertToEsqlButton) {
       return getEsqlConversionDisabledSettings();
