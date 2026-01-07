@@ -27,7 +27,8 @@
     "@kbn/core-di",
     "@kbn/core-di-server",
     "@kbn/esql-utils",
-    "@kbn/response-ops-retry-service"
+    "@kbn/response-ops-retry-service",
+    "@kbn/esql-language"
   ],
   "exclude": [
     "target/**/*"
