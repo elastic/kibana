@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance, TaskManagerSetupContract, TaskManagerStartContract, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { TaskConfig } from './config';
@@ -17,30 +17,13 @@ export abstract class EntityStoreTask {
   public abstract get name(): string;
 
   public register(): void {
-    const taskName = this.name;
-    this.logger.info(`Registering task ${taskName}`);
-
-    try {
-      this.taskManager.registerTaskDefinitions({
-        [taskName]: {
-          title: this.config.title,
-          timeout: this.config.timeout,
-          createTaskRunner: this.createRunnerFactory(),
-        },
-      });
-    } catch (e) {
-      if (
-        e instanceof Error &&
-        e.message.includes('is already defined') &&
-        e.message.includes(taskName)
-      ) {
-        this.logger.warn(`Task ${taskName} is already registered`);
-        return;
-      }
-
-      this.logger.error(`Error registering task ${taskName}: ${e}`);
-      throw e;
-    }
+    (this.taskManager as TaskManagerSetupContract).registerTaskDefinitions({
+      [this.name]: {
+        title: this.config.title,
+        timeout: this.config.timeout,
+        createTaskRunner: this.createRunnerFactory(),
+      },
+    });
   }
 
   public async schedule(): Promise<void> {
@@ -48,7 +31,7 @@ export abstract class EntityStoreTask {
     const interval = this.config.interval;
 
     try {
-      await this.taskManager.ensureScheduled({
+      await (this.taskManager as TaskManagerStartContract).ensureScheduled({
         id: taskName,
         taskType: taskName,
         schedule: {

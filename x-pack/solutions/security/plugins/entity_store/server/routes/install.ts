@@ -37,9 +37,8 @@ export function registerInstall(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const logger = entityStoreCtx.getLogger();
         const resourcesService = await entityStoreCtx.getResourcesService();
-
         logger.debug('Install api called');
-        resourcesService.install(req.body.entityType);
+        await resourcesService.install(req.body.entityType);
 
         return res.ok({
           body: {

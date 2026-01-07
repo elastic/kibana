@@ -17,7 +17,7 @@ import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { ResourcesService } from './domain/resources_service';
 
-export type TaskManager = TaskManagerSetupContract & TaskManagerStartContract;
+export type TaskManager = TaskManagerSetupContract | TaskManagerStartContract;
 
 export interface EntityStorePlugins {
   taskManager: TaskManager;

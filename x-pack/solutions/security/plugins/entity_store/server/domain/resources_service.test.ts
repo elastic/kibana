@@ -9,7 +9,7 @@ import { ResourcesService } from './resources_service';
 import { EntityType } from './definitions/entity_type';
 import { ExtractEntityTask } from '../tasks/extract_entity_task';
 import type { TaskManager } from '../types';
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 
 jest.mock('../tasks/extract_entity_task');
 
@@ -36,16 +36,15 @@ describe('ResourcesService', () => {
 
     mockExtractEntityTask = ExtractEntityTask as jest.MockedClass<typeof ExtractEntityTask>;
 
-    resourcesService = new ResourcesService(mockLogger);
+    resourcesService = new ResourcesService(mockLogger, mockTaskManager);
   });
 
   describe('install', () => {
-    // Verifies that install creates, registers, and schedules a task for each entity type provided
-    it('should register and schedule tasks for each entity type', async () => {
+    // Verifies that install creates and schedules a task for each entity type provided
+    it('should create and schedule tasks for each entity type', async () => {
       const types = [EntityType.Values.user, EntityType.Values.host];
       const mockTaskInstances = types.map((type) => {
         const mockTask = {
-          register: jest.fn(),
           schedule: jest.fn().mockResolvedValue(undefined),
         };
         mockExtractEntityTask.mockImplementationOnce(
@@ -54,7 +53,7 @@ describe('ResourcesService', () => {
         return mockTask;
       });
 
-      await resourcesService.install(types, mockTaskManager);
+      await resourcesService.install(types);
 
       expect(mockExtractEntityTask).toHaveBeenCalledTimes(types.length);
       types.forEach((type, index) => {
@@ -67,10 +66,6 @@ describe('ResourcesService', () => {
       });
 
       mockTaskInstances.forEach((mockTask) => {
-        expect(mockTask.register).toHaveBeenCalledTimes(1);
-      });
-
-      mockTaskInstances.forEach((mockTask) => {
         expect(mockTask.schedule).toHaveBeenCalledTimes(1);
       });
     });
@@ -79,12 +74,13 @@ describe('ResourcesService', () => {
     it('should handle single entity type', async () => {
       const types = [EntityType.Values.service];
       const mockTask = {
-        register: jest.fn(),
         schedule: jest.fn().mockResolvedValue(undefined),
       };
-      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
+      mockExtractEntityTask.mockImplementationOnce(
+        () => mockTask as unknown as ExtractEntityTask
+      );
 
-      await resourcesService.install(types, mockTaskManager);
+      await resourcesService.install(types);
 
       expect(mockExtractEntityTask).toHaveBeenCalledTimes(1);
       expect(mockExtractEntityTask).toHaveBeenCalledWith(
@@ -92,7 +88,6 @@ describe('ResourcesService', () => {
         mockLogger,
         EntityType.Values.service
       );
-      expect(mockTask.register).toHaveBeenCalledTimes(1);
       expect(mockTask.schedule).toHaveBeenCalledTimes(1);
     });
 
@@ -106,7 +101,6 @@ describe('ResourcesService', () => {
       ];
       const mockTaskInstances = types.map(() => {
         const mockTask = {
-          register: jest.fn(),
           schedule: jest.fn().mockResolvedValue(undefined),
         };
         mockExtractEntityTask.mockImplementationOnce(
@@ -115,11 +109,10 @@ describe('ResourcesService', () => {
         return mockTask;
       });
 
-      await resourcesService.install(types, mockTaskManager);
+      await resourcesService.install(types);
 
       expect(mockExtractEntityTask).toHaveBeenCalledTimes(types.length);
       mockTaskInstances.forEach((mockTask) => {
-        expect(mockTask.register).toHaveBeenCalledTimes(1);
         expect(mockTask.schedule).toHaveBeenCalledTimes(1);
       });
     });
@@ -128,29 +121,9 @@ describe('ResourcesService', () => {
     it('should handle empty types array', async () => {
       const types: EntityType[] = [];
 
-      await resourcesService.install(types, mockTaskManager);
+      await resourcesService.install(types);
 
       expect(mockExtractEntityTask).not.toHaveBeenCalled();
-    });
-
-    // Ensures registration errors bubble up to caller for proper error handling
-    it('should propagate errors from task registration', async () => {
-      const types = [EntityType.Values.user];
-      const mockError = new Error('Registration failed');
-      const mockTask = {
-        register: jest.fn().mockImplementation(() => {
-          throw mockError;
-        }),
-        schedule: jest.fn(),
-      };
-      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
-
-      await expect(resourcesService.install(types, mockTaskManager)).rejects.toThrow(
-        'Registration failed'
-      );
-
-      expect(mockTask.register).toHaveBeenCalledTimes(1);
-      expect(mockTask.schedule).not.toHaveBeenCalled();
     });
 
     // Ensures scheduling errors bubble up to caller for proper error handling
@@ -158,21 +131,21 @@ describe('ResourcesService', () => {
       const types = [EntityType.Values.user];
       const mockError = new Error('Scheduling failed');
       const mockTask = {
-        register: jest.fn(),
         schedule: jest.fn().mockRejectedValue(mockError),
       };
-      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
+      mockExtractEntityTask.mockImplementationOnce(
+        () => mockTask as unknown as ExtractEntityTask
+      );
 
-      await expect(resourcesService.install(types, mockTaskManager)).rejects.toThrow(
+      await expect(resourcesService.install(types)).rejects.toThrow(
         'Scheduling failed'
       );
 
-      expect(mockTask.register).toHaveBeenCalledTimes(1);
       expect(mockTask.schedule).toHaveBeenCalledTimes(1);
     });
 
-    // Confirms that multiple tasks are registered and scheduled concurrently for better performance
-    it('should execute registration and scheduling in parallel for multiple types', async () => {
+    // Confirms that multiple tasks are scheduled concurrently for better performance
+    it('should execute scheduling in parallel for multiple types', async () => {
       const types = [EntityType.Values.user, EntityType.Values.host];
       const schedulePromises: Array<Promise<void>> = [];
       const mockTaskInstances = types.map(() => {
@@ -183,7 +156,6 @@ describe('ResourcesService', () => {
         schedulePromises.push(schedulePromise);
 
         const mockTask = {
-          register: jest.fn(),
           schedule: jest.fn().mockReturnValue(schedulePromise),
         };
         mockExtractEntityTask.mockImplementationOnce(
@@ -192,11 +164,7 @@ describe('ResourcesService', () => {
         return { mockTask, resolveSchedule: resolveSchedule! };
       });
 
-      const installPromise = resourcesService.install(types, mockTaskManager);
-
-      mockTaskInstances.forEach(({ mockTask }) => {
-        expect(mockTask.register).toHaveBeenCalledTimes(1);
-      });
+      const installPromise = resourcesService.install(types);
 
       mockTaskInstances.forEach(({ mockTask }) => {
         expect(mockTask.schedule).toHaveBeenCalledTimes(1);
