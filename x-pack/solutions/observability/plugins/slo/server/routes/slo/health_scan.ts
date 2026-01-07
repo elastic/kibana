@@ -6,35 +6,35 @@
  */
 
 import {
-  getHealthDiagnoseParamsSchema,
-  listHealthDiagnoseParamsSchema,
-  postHealthDiagnoseParamsSchema,
-  type GetHealthDiagnoseResponse,
-  type HealthDiagnoseResultResponse,
-  type ListHealthDiagnoseResponse,
-  type PostHealthDiagnoseResponse,
+  getHealthScanParamsSchema,
+  listHealthScanParamsSchema,
+  postHealthScanParamsSchema,
+  type GetHealthScanResultsResponse,
+  type HealthScanResultResponse,
+  type ListHealthScanResponse,
+  type PostHealthScanResponse,
 } from '@kbn/slo-schema';
 import { v7 } from 'uuid';
-import { HEALTH_DATA_STREAM_NAME } from '../../services/health_diagnose/health_index_installer';
+import { HEALTH_DATA_STREAM_NAME } from '../../services/health_scan/health_index_installer';
 import {
-  HEALTH_DIAGNOSE_TASK_TYPE,
-  type HealthDiagnoseTaskParams,
-  type HealthDiagnoseTaskState,
-} from '../../services/tasks/health_diagnose_task/health_diagnose_task';
-import type { HealthDocument } from '../../services/tasks/health_diagnose_task/types';
+  HEALTH_SCAN_TASK_TYPE,
+  type HealthScanTaskParams,
+  type HealthScanTaskState,
+} from '../../services/tasks/health_scan_task/health_scan_task';
+import type { HealthDocument } from '../../services/tasks/health_scan_task/types';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
-export const postHealthDiagnoseRoute = createSloServerRoute({
-  endpoint: 'POST /internal/observability/slos/_health/diagnose',
+export const postHealthScanRoute = createSloServerRoute({
+  endpoint: 'POST /internal/observability/slos/_health/scans',
   options: { access: 'internal' },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: postHealthDiagnoseParamsSchema,
-  handler: async ({ request, params, plugins }): Promise<PostHealthDiagnoseResponse> => {
+  params: postHealthScanParamsSchema,
+  handler: async ({ request, params, plugins }): Promise<PostHealthScanResponse> => {
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
 
@@ -46,7 +46,7 @@ export const postHealthDiagnoseRoute = createSloServerRoute({
         bool: {
           filter: [
             { range: { 'task.scheduledAt': { gte: 'now-1h' } } },
-            { term: { 'task.taskType': HEALTH_DIAGNOSE_TASK_TYPE } },
+            { term: { 'task.taskType': HEALTH_SCAN_TASK_TYPE } },
           ],
         },
       },
@@ -54,12 +54,12 @@ export const postHealthDiagnoseRoute = createSloServerRoute({
 
     if (recentTasks.docs.length > 0 && !force) {
       const recentTask = recentTasks.docs[0];
-      const state = recentTask.state as HealthDiagnoseTaskState;
-      const taskParams = recentTask.params as HealthDiagnoseTaskParams;
+      const state = recentTask.state as HealthScanTaskState;
+      const taskParams = recentTask.params as HealthScanTaskParams;
 
       if (state.isDone) {
         return {
-          taskId: taskParams.taskId,
+          scanId: taskParams.scanId,
           scheduledAt: recentTask.scheduledAt.toISOString(),
           status: 'done',
           processed: recentTask.state.processed,
@@ -69,56 +69,56 @@ export const postHealthDiagnoseRoute = createSloServerRoute({
       }
 
       return {
-        taskId: taskParams.taskId,
+        scanId: taskParams.scanId,
         scheduledAt: recentTask.scheduledAt.toISOString(),
         status: 'pending',
       };
     }
 
-    const taskId = v7();
+    const scanId = v7();
     const scheduledAt = new Date(Date.now() + 3 * 1000);
     await taskManager.ensureScheduled(
       {
-        id: taskId,
-        taskType: HEALTH_DIAGNOSE_TASK_TYPE,
+        id: scanId,
+        taskType: HEALTH_SCAN_TASK_TYPE,
         scope: ['observability', 'slo'],
         state: { isDone: false },
         runAt: scheduledAt,
-        params: { taskId } satisfies HealthDiagnoseTaskParams,
+        params: { scanId } satisfies HealthScanTaskParams,
       },
       { request }
     );
 
     return {
-      taskId,
+      scanId,
       scheduledAt: scheduledAt.toISOString(),
       status: 'scheduled',
     };
   },
 });
 
-export const getHealthDiagnoseRoute = createSloServerRoute({
-  endpoint: 'GET /internal/observability/slos/_health/diagnose/{taskId}',
+export const getHealthScanRoute = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/_health/scans/{scanId}',
   options: { access: 'internal' },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: getHealthDiagnoseParamsSchema,
+  params: getHealthScanParamsSchema,
   handler: async ({
     request,
     params,
     plugins,
     getScopedClients,
     logger,
-  }): Promise<GetHealthDiagnoseResponse> => {
+  }): Promise<GetHealthScanResultsResponse> => {
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient } = await getScopedClients({ request, logger });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { taskId } = params.path;
+    const { scanId } = params.path;
     const { size = 100, problematic } = params.query ?? {};
 
     let searchAfter;
@@ -139,14 +139,14 @@ export const getHealthDiagnoseRoute = createSloServerRoute({
       query: {
         bool: {
           filter: [
-            { term: { taskId } },
+            { term: { scanId } },
             ...(problematic ? [{ term: { isProblematic: problematic } }] : []),
           ],
         },
       },
       sort: [
         { '@timestamp': 'desc' },
-        { taskId: 'desc' },
+        { scanId: 'desc' },
         { isProblematic: 'asc' },
         { sloId: 'asc' },
       ],
@@ -161,7 +161,7 @@ export const getHealthDiagnoseRoute = createSloServerRoute({
 
     const results = hits
       .map((hit) => hit._source)
-      .filter((source): source is HealthDiagnoseResultResponse => source !== undefined);
+      .filter((source): source is HealthScanResultResponse => source !== undefined);
 
     return {
       results,
@@ -171,22 +171,22 @@ export const getHealthDiagnoseRoute = createSloServerRoute({
   },
 });
 
-export const listHealthDiagnoseRoute = createSloServerRoute({
-  endpoint: 'GET /internal/observability/slos/_health/diagnose',
+export const listHealthScanRoute = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/_health/scans',
   options: { access: 'internal' },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: listHealthDiagnoseParamsSchema,
+  params: listHealthScanParamsSchema,
   handler: async ({
     request,
     params,
     plugins,
     getScopedClients,
     logger,
-  }): Promise<ListHealthDiagnoseResponse> => {
+  }): Promise<ListHealthScanResponse> => {
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient } = await getScopedClients({ request, logger });
@@ -198,20 +198,20 @@ export const listHealthDiagnoseRoute = createSloServerRoute({
       index: HEALTH_DATA_STREAM_NAME,
       size: 0,
       aggs: {
-        tasks: {
+        scans: {
           composite: {
             size,
             sources: [
               {
-                taskId: {
+                scanId: {
                   terms: {
                     order: 'desc',
-                    field: 'taskId',
+                    field: 'scanId',
                   },
                 },
               },
             ],
-            after: searchAfter ? { taskId: searchAfter } : undefined,
+            after: searchAfter ? { scanId: searchAfter } : undefined,
           },
           aggs: {
             latest_timestamp: {
@@ -236,8 +236,8 @@ export const listHealthDiagnoseRoute = createSloServerRoute({
       },
     });
 
-    interface TaskBucket {
-      key: { taskId: string };
+    interface ScanBucket {
+      key: { scanId: string };
       doc_count: number;
       latest_timestamp: { value: number; value_as_string: string };
       problematic_count: { doc_count: number };
@@ -245,32 +245,32 @@ export const listHealthDiagnoseRoute = createSloServerRoute({
 
     const aggs = result.aggregations as
       | {
-          tasks: {
-            buckets: TaskBucket[];
-            after_key?: { taskId: string };
+          scans: {
+            buckets: ScanBucket[];
+            after_key?: { scanId: string };
           };
         }
       | undefined;
 
-    const buckets = aggs?.tasks.buckets ?? [];
-    const afterKey = aggs?.tasks.after_key;
+    const buckets = aggs?.scans.buckets ?? [];
+    const afterKey = aggs?.scans.after_key;
 
-    const tasks = buckets.map((bucket) => ({
-      taskId: bucket.key.taskId,
+    const scans = buckets.map((bucket) => ({
+      scanId: bucket.key.scanId,
       latestTimestamp: bucket.latest_timestamp.value_as_string,
       total: bucket.doc_count,
       problematic: bucket.problematic_count.doc_count,
     }));
 
     return {
-      tasks,
-      searchAfter: afterKey ? afterKey.taskId : undefined,
+      scans,
+      searchAfter: afterKey ? afterKey.scanId : undefined,
     };
   },
 });
 
-export const healthDiagnoseRoutes = {
-  ...postHealthDiagnoseRoute,
-  ...listHealthDiagnoseRoute,
-  ...getHealthDiagnoseRoute,
+export const healthScanRoutes = {
+  ...postHealthScanRoute,
+  ...listHealthScanRoute,
+  ...getHealthScanRoute,
 };

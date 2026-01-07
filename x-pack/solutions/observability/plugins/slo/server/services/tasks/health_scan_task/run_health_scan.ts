@@ -10,7 +10,7 @@ import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/l
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { computeHealth } from '../../../domain/services/compute_health';
-import { HEALTH_DATA_STREAM_NAME } from '../../health_diagnose/health_index_installer';
+import { HEALTH_DATA_STREAM_NAME } from '../../health_scan/health_index_installer';
 import type { HealthDocument, SLO } from './types';
 
 interface Dependencies {
@@ -21,7 +21,7 @@ interface Dependencies {
 }
 
 interface RunParams {
-  taskId: string;
+  scanId: string;
 }
 
 const COMPOSITE_BATCH_SIZE = 500;
@@ -29,12 +29,12 @@ const BATCH_DELAY_MS = 500;
 const MAX_BATCHES = 100;
 const MAX_SLOS_PROCESSED = 10_000;
 
-export async function runHealthDiagnose(
+export async function runHealthScan(
   params: RunParams,
   dependencies: Dependencies
 ): Promise<{ processed: number; problematic: number }> {
   const { scopedClusterClient, logger } = dependencies;
-  const { taskId } = params;
+  const { scanId } = params;
 
   let searchAfter: AggregationsCompositeAggregateKey | undefined;
   let totalProcessed = 0;
@@ -67,7 +67,7 @@ export async function runHealthDiagnose(
       const now = new Date().toISOString();
       const documents: HealthDocument[] = healthResults.map((result) => ({
         '@timestamp': now,
-        taskId,
+        scanId,
         sloId: result.id,
         revision: result.revision,
         isProblematic: result.health.isProblematic,
@@ -99,12 +99,12 @@ export async function runHealthDiagnose(
       logger.debug('Task aborted during execution');
       throw error;
     }
-    logger.debug(`Error during health diagnose: ${error}`);
+    logger.debug(`Error during health scan: ${error}`);
     throw error;
   }
 
   logger.debug(
-    `Health diagnose completed: ${totalProcessed} processed, ${totalProblematic} problematic`
+    `Health scan completed: ${totalProcessed} processed, ${totalProblematic} problematic`
   );
 
   return { processed: totalProcessed, problematic: totalProblematic };

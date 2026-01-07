@@ -33,7 +33,7 @@ import { repairSLORoute } from './repair_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
 import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
-import { healthDiagnoseRoutes } from './health_diagnose';
+import { healthScanRoutes } from './health_scan';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -68,6 +68,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOInstancesRoute,
     ...getSLOTemplateRoute,
     ...findSLOTemplatesRoute,
-    ...healthDiagnoseRoutes,
+    ...healthScanRoutes,
   };
 };

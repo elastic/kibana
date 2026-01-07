@@ -9,10 +9,10 @@ import { errors } from '@elastic/elasticsearch';
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
-import { runHealthDiagnose } from './run_health_diagnose';
+import { runHealthScan } from './run_health_scan';
 
-export const HEALTH_DIAGNOSE_TASK_TYPE = 'slo:health-diagnose-task';
-export const HEALTH_DIAGNOSE_TASK_VERSION = '1.0.0';
+export const HEALTH_SCAN_TASK_TYPE = 'slo:health-scan-task';
+export const HEALTH_SCAN_TASK_VERSION = '1.0.0';
 
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
@@ -21,47 +21,47 @@ interface TaskSetupContract {
   config: SLOConfig;
 }
 
-export interface HealthDiagnoseTaskState {
+export interface HealthScanTaskState {
   isDone: boolean;
   processed?: number;
   problematic?: number;
   error?: string;
 }
 
-export interface HealthDiagnoseTaskParams {
-  taskId: string;
+export interface HealthScanTaskParams {
+  scanId: string;
 }
 
-export class HealthDiagnoseTask {
+export class HealthScanTask {
   private logger: Logger;
   private config: SLOConfig;
 
   constructor(setupContract: TaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
-    this.logger = logFactory.get(HEALTH_DIAGNOSE_TASK_TYPE);
+    this.logger = logFactory.get(HEALTH_SCAN_TASK_TYPE);
     this.config = config;
 
-    this.logger.debug('Registering health diagnose task with [5m] timeout');
+    this.logger.debug('Registering health scan task with [5m] timeout');
 
     taskManager.registerTaskDefinitions({
-      [HEALTH_DIAGNOSE_TASK_TYPE]: {
-        title: 'SLO health diagnose task',
+      [HEALTH_SCAN_TASK_TYPE]: {
+        title: 'SLO health scan task',
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
           return {
             run: async () => {
-              if (!this.config.healthDiagnoseTaskEnabled) {
-                this.logger.debug('Health diagnose task is disabled');
+              if (!this.config.healthScanTaskEnabled) {
+                this.logger.debug('Health scan task is disabled');
                 return {
                   state: {
                     isDone: true,
                     error: 'Task is disabled',
-                  } satisfies HealthDiagnoseTaskState,
+                  } satisfies HealthScanTaskState,
                 };
               }
 
-              this.logger.debug('Starting health diagnose task');
+              this.logger.debug('Starting health scan task');
 
               if (!fakeRequest) {
                 this.logger.debug('fakeRequest is not defined');
@@ -69,11 +69,11 @@ export class HealthDiagnoseTask {
                   state: {
                     isDone: true,
                     error: 'fakeRequest is not defined',
-                  } satisfies HealthDiagnoseTaskState,
+                  } satisfies HealthScanTaskState,
                 };
               }
 
-              const state = taskInstance.state as HealthDiagnoseTaskState;
+              const state = taskInstance.state as HealthScanTaskState;
               if (state.isDone) {
                 // Task was done in previous run, keeping ephemeral state for the user
                 return;
@@ -83,11 +83,11 @@ export class HealthDiagnoseTask {
               const esClient = coreStart.elasticsearch.client.asInternalUser;
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
 
-              const params = taskInstance.params as HealthDiagnoseTaskParams;
+              const params = taskInstance.params as HealthScanTaskParams;
 
               try {
-                const result = await runHealthDiagnose(
-                  { taskId: params.taskId },
+                const result = await runHealthScan(
+                  { scanId: params.scanId },
                   {
                     esClient,
                     scopedClusterClient,
@@ -97,7 +97,7 @@ export class HealthDiagnoseTask {
                 );
 
                 this.logger.debug(
-                  `Health diagnose task completed: ${result.processed} processed, ${result.problematic} problematic`
+                  `Health scan task completed: ${result.processed} processed, ${result.problematic} problematic`
                 );
 
                 return {
@@ -106,27 +106,27 @@ export class HealthDiagnoseTask {
                     isDone: true,
                     processed: result.processed,
                     problematic: result.problematic,
-                  } satisfies HealthDiagnoseTaskState,
+                  } satisfies HealthScanTaskState,
                 };
               } catch (err) {
                 if (err instanceof errors.RequestAbortedError) {
-                  this.logger.warn(`Health diagnose task aborted due to timeout: ${err}`);
+                  this.logger.warn(`Health scan task aborted due to timeout: ${err}`);
                   return {
                     runAt: new Date(Date.now() + 60 * 60 * 1000),
                     state: {
                       isDone: true,
                       error: 'Task aborted due to timeout',
-                    } satisfies HealthDiagnoseTaskState,
+                    } satisfies HealthScanTaskState,
                   };
                 }
 
-                this.logger.error(`Health diagnose task error: ${err}`);
+                this.logger.error(`Health scan task error: ${err}`);
                 return {
                   runAt: new Date(Date.now() + 60 * 60 * 1000),
                   state: {
                     isDone: true,
                     error: err.message,
-                  } satisfies HealthDiagnoseTaskState,
+                  } satisfies HealthScanTaskState,
                 };
               }
             },

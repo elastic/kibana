@@ -8,7 +8,7 @@ import { dateRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { transformHealthSchema } from '../../schema/health';
 
-const postHealthDiagnoseParamsSchema = t.type({
+const postHealthScanParamsSchema = t.type({
   body: t.union([
     t.undefined,
     t.partial({
@@ -17,8 +17,8 @@ const postHealthDiagnoseParamsSchema = t.type({
   ]),
 });
 
-interface PostHealthDiagnoseResponse {
-  taskId: string;
+interface PostHealthScanResponse {
+  scanId: string;
   scheduledAt: string;
   status: 'scheduled' | 'pending' | 'done';
   processed?: number;
@@ -26,9 +26,9 @@ interface PostHealthDiagnoseResponse {
   error?: string;
 }
 
-const getHealthDiagnoseParamsSchema = t.type({
+const getHealthScanParamsSchema = t.type({
   path: t.type({
-    taskId: t.string,
+    scanId: t.string,
   }),
   query: t.union([
     t.undefined,
@@ -40,28 +40,28 @@ const getHealthDiagnoseParamsSchema = t.type({
   ]),
 });
 
-const listHealthDiagnoseParamsSchema = t.partial({
+const listHealthScanParamsSchema = t.partial({
   query: t.partial({
     size: toNumberRt,
     searchAfter: t.string,
   }),
 });
 
-interface HealthDiagnoseTaskSummary {
-  taskId: string;
+interface HealthScanSummary {
+  scanId: string;
   latestTimestamp: string;
   total: number;
   problematic: number;
 }
 
-interface ListHealthDiagnoseResponse {
-  tasks: HealthDiagnoseTaskSummary[];
+interface ListHealthScanResponse {
+  scans: HealthScanSummary[];
   searchAfter?: string;
 }
 
-const healthDiagnoseResultResponseSchema = t.type({
+const healthScanResultResponseSchema = t.type({
   '@timestamp': dateRt,
-  taskId: t.string,
+  scanId: t.string,
   sloId: t.string,
   revision: t.number,
   isProblematic: t.boolean,
@@ -72,23 +72,19 @@ const healthDiagnoseResultResponseSchema = t.type({
   }),
 });
 
-type HealthDiagnoseResultResponse = t.OutputOf<typeof healthDiagnoseResultResponseSchema>;
+type HealthScanResultResponse = t.OutputOf<typeof healthScanResultResponseSchema>;
 
-interface GetHealthDiagnoseResponse {
-  results: HealthDiagnoseResultResponse[];
+interface GetHealthScanResultsResponse {
+  results: HealthScanResultResponse[];
   total: number;
   searchAfter?: Array<string | number | null | boolean>;
 }
 
-export {
-  getHealthDiagnoseParamsSchema,
-  listHealthDiagnoseParamsSchema,
-  postHealthDiagnoseParamsSchema,
-};
+export { getHealthScanParamsSchema, listHealthScanParamsSchema, postHealthScanParamsSchema };
 export type {
-  GetHealthDiagnoseResponse,
-  HealthDiagnoseResultResponse,
-  HealthDiagnoseTaskSummary,
-  ListHealthDiagnoseResponse,
-  PostHealthDiagnoseResponse,
+  GetHealthScanResultsResponse,
+  HealthScanResultResponse,
+  HealthScanSummary,
+  ListHealthScanResponse,
+  PostHealthScanResponse,
 };

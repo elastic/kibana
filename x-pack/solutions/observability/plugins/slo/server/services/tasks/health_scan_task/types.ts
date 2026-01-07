@@ -14,7 +14,7 @@ export interface SLO {
 
 export interface HealthDocument {
   '@timestamp': string;
-  taskId: string;
+  scanId: string;
   sloId: string;
   revision: number;
   isProblematic: boolean;

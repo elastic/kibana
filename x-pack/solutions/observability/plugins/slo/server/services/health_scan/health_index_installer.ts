@@ -16,11 +16,11 @@ export class HealthIndexInstaller {
 
   public async install(): Promise<void> {
     try {
-      this.logger.debug('Installing SLO health diagnose resources');
+      this.logger.debug('Installing SLO health scan resources');
 
       await this.createOrUpdateIndexTemplate();
     } catch (err) {
-      this.logger.error(`Error while installing SLO health diagnose resources: ${err}`);
+      this.logger.error(`Error while installing SLO health scan resources: ${err}`);
     }
   }
 
@@ -48,7 +48,7 @@ export class HealthIndexInstaller {
             dynamic: false,
             properties: {
               '@timestamp': { type: 'date' },
-              taskId: { type: 'keyword' },
+              scanId: { type: 'keyword' },
               sloId: { type: 'keyword' },
               revision: { type: 'integer' },
               isProblematic: { type: 'boolean' },
