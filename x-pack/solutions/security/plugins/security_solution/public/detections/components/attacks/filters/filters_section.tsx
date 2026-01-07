@@ -21,6 +21,11 @@ export interface FiltersSectionProps {
    */
   dataView: DataView;
   /**
+   * Page filters for the alerts page
+   */
+  pageFilters: Filter[] | undefined;
+  /**
+  /**
    * Callback to set the page filter handler for the alerts page to allow a refresh after the table has reloaded
    */
   setPageFilterHandler: Dispatch<SetStateAction<FilterGroupHandler | undefined>>;
@@ -38,14 +43,25 @@ export interface FiltersSectionProps {
  * UI section of the attacks page that renders the page filters
  */
 export const FiltersSection = memo(
-  ({ dataView, setPageFilterHandler, setPageFilters, setStatusFilter }: FiltersSectionProps) => {
+  ({
+    dataView,
+    pageFilters,
+    setPageFilterHandler,
+    setPageFilters,
+    setStatusFilter,
+  }: FiltersSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
     );
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
-    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+    const topLevelFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+    const filters = useMemo(
+      () => [...topLevelFilters, ...(pageFilters ?? [])],
+      [topLevelFilters, pageFilters]
+    );
 
     const { to, from } = useGlobalTime();
 

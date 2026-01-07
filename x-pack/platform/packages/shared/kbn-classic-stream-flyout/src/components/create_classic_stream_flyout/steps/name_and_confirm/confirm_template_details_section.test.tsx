@@ -12,7 +12,7 @@ import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
 import { ConfirmTemplateDetailsSection } from './confirm_template_details_section';
-import type { IlmPolicyFetcher } from '../../../../utils';
+import type { IlmPolicyFetcher, SimulatedTemplateFetcher } from '../../../../utils';
 
 const createMockTemplate = (overrides: Partial<IndexTemplate> = {}): IndexTemplate => ({
   name: 'test-template',
@@ -35,17 +35,28 @@ const createMockIlmPolicy = (phases: PolicyFromES['policy']['phases'] = {}): Pol
   },
 });
 
+const createMockSimulatedTemplate = (mode: string = 'standard', ilmPolicyName?: string) => ({
+  template: {
+    settings: {
+      index: {
+        mode,
+        ...(ilmPolicyName ? { lifecycle: { name: ilmPolicyName } } : {}),
+      },
+    },
+  },
+});
+
 const renderComponent = (
   template: IndexTemplate,
   getIlmPolicy?: IlmPolicyFetcher,
-  showDataRetention = true
+  getSimulatedTemplate?: SimulatedTemplateFetcher
 ) => {
   return render(
     <IntlProvider>
       <ConfirmTemplateDetailsSection
         template={template}
         getIlmPolicy={getIlmPolicy}
-        showDataRetention={showDataRetention}
+        getSimulatedTemplate={getSimulatedTemplate}
       />
     </IntlProvider>
   );
@@ -112,95 +123,137 @@ describe('ConfirmTemplateDetailsSection', () => {
   });
 
   describe('index mode display', () => {
-    it('displays Standard index mode by default', () => {
+    it('displays Standard index mode by default from simulated template', async () => {
       const template = createMockTemplate();
-      const { getByText } = renderComponent(template);
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
-      expect(getByText('Index mode')).toBeInTheDocument();
-      expect(getByText('Standard')).toBeInTheDocument();
+      const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+      await findByText('Index mode');
+      await findByText('Standard');
     });
 
-    it('displays Standard index mode when explicitly set', () => {
-      const template = createMockTemplate({ indexMode: 'standard' });
-      const { getByText } = renderComponent(template);
+    it('displays LogsDB index mode from simulated template', async () => {
+      const template = createMockTemplate();
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('logsdb'));
 
-      expect(getByText('Standard')).toBeInTheDocument();
+      const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+      await findByText('LogsDB');
     });
 
-    it('displays LogsDB index mode', () => {
-      const template = createMockTemplate({ indexMode: 'logsdb' });
-      const { getByText } = renderComponent(template);
+    it('displays Lookup index mode from simulated template', async () => {
+      const template = createMockTemplate();
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('lookup'));
 
-      expect(getByText('LogsDB')).toBeInTheDocument();
+      const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+      await findByText('Lookup');
     });
 
-    it('displays Lookup index mode', () => {
-      const template = createMockTemplate({ indexMode: 'lookup' });
-      const { getByText } = renderComponent(template);
+    it('displays Time series index mode from simulated template', async () => {
+      const template = createMockTemplate();
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('time_series'));
 
-      expect(getByText('Lookup')).toBeInTheDocument();
+      const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+      await findByText('Time series');
     });
 
-    it('displays Time series index mode', () => {
-      const template = createMockTemplate({ indexMode: 'time_series' });
-      const { getByText } = renderComponent(template);
+    it('does not display index mode when getSimulatedTemplate is not provided', () => {
+      const template = createMockTemplate();
+      const { queryByText } = renderComponent(template);
 
-      expect(getByText('Time series')).toBeInTheDocument();
+      expect(queryByText('Index mode')).not.toBeInTheDocument();
     });
   });
 
   describe('retention display', () => {
-    describe('ILM policy retention', () => {
-      it('displays ILM policy name with badge', () => {
-        const template = createMockTemplate({ ilmPolicy: { name: 'my-ilm-policy' } });
-        const { getByText } = renderComponent(template);
+    describe('ILM policy retention from simulated template', () => {
+      it('displays ILM policy name with badge from simulated template', async () => {
+        const template = createMockTemplate();
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createMockSimulatedTemplate('standard', 'my-ilm-policy'));
 
-        expect(getByText('Retention')).toBeInTheDocument();
-        expect(getByText('my-ilm-policy')).toBeInTheDocument();
-        expect(getByText('ILM')).toBeInTheDocument();
+        const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+        await findByText('Retention');
+        await findByText('my-ilm-policy');
+        await findByText('ILM');
       });
 
-      it('does not display retention when no ILM policy or lifecycle', () => {
-        const template = createMockTemplate({
-          ilmPolicy: undefined,
-          lifecycle: undefined,
-        });
-        const { queryByText } = renderComponent(template);
+      it('does not display ILM retention when simulated template has no ILM policy', async () => {
+        const template = createMockTemplate({ lifecycle: undefined });
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
+        const { findByText, queryByText } = renderComponent(
+          template,
+          undefined,
+          mockGetSimulatedTemplate
+        );
+
+        await findByText('Index mode');
         expect(queryByText('Retention')).not.toBeInTheDocument();
+        expect(queryByText('ILM')).not.toBeInTheDocument();
       });
     });
 
-    describe('data retention (lifecycle)', () => {
-      it('displays data retention when lifecycle is present', () => {
+    describe('data retention fallback (lifecycle from template)', () => {
+      it('displays data retention from template when simulated template has no ILM policy', async () => {
         const template = createMockTemplate({
           lifecycle: { enabled: true, value: 30, unit: 'd' },
         });
-        const { getByText } = renderComponent(template);
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
-        expect(getByText('Retention')).toBeInTheDocument();
-        expect(getByText('30d')).toBeInTheDocument();
+        const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+        await findByText('Retention');
+        await findByText('30d');
       });
 
-      it('displays data retention with different units', () => {
+      it('displays data retention with different units', async () => {
         const template = createMockTemplate({
           lifecycle: { enabled: true, value: 2, unit: 'h' },
         });
-        const { getByText } = renderComponent(template);
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
-        expect(getByText('2h')).toBeInTheDocument();
+        const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+        await findByText('2h');
       });
 
-      it('prefers ILM policy over lifecycle when both present', () => {
+      it('prefers ILM policy from simulated template over lifecycle from template', async () => {
         const template = createMockTemplate({
-          ilmPolicy: { name: 'my-policy' },
           lifecycle: { enabled: true, value: 30, unit: 'd' },
         });
-        const { getByText, queryByText } = renderComponent(template);
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createMockSimulatedTemplate('standard', 'my-policy'));
 
-        expect(getByText('my-policy')).toBeInTheDocument();
-        expect(getByText('ILM')).toBeInTheDocument();
-        expect(queryByText('30 days')).not.toBeInTheDocument();
+        const { findByText, queryByText } = renderComponent(
+          template,
+          undefined,
+          mockGetSimulatedTemplate
+        );
+
+        await findByText('my-policy');
+        await findByText('ILM');
+        expect(queryByText('30d')).not.toBeInTheDocument();
       });
     });
   });
@@ -243,18 +296,29 @@ describe('ConfirmTemplateDetailsSection', () => {
   });
 
   describe('ILM policy fetching', () => {
-    it('fetches ILM policy when template has ILM policy and getIlmPolicy is provided', async () => {
+    // ILM policy is fetched based on ilmPolicyName from simulated template
+    const createSimulatedTemplateWithIlm = (policyName: string) =>
+      createMockSimulatedTemplate('standard', policyName);
+
+    it('fetches ILM policy when simulated template has ILM policy and getIlmPolicy is provided', async () => {
       const mockGetIlmPolicy = jest.fn().mockResolvedValue(
         createMockIlmPolicy({
           hot: { actions: {} },
           warm: { min_age: '7d', actions: {} },
         })
       );
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-      const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-      const { findByText, container } = renderComponent(template, mockGetIlmPolicy);
+      const template = createMockTemplate();
+      const { findByText, container } = renderComponent(
+        template,
+        mockGetIlmPolicy,
+        mockGetSimulatedTemplate
+      );
 
-      // Wait for fetch to complete (loading spinner disappears and phases are rendered)
+      // Wait for fetch to complete
       await waitFor(() => {
         expect(mockGetIlmPolicy).toHaveBeenCalledWith('test-policy', expect.any(AbortSignal));
         expect(container.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
@@ -262,21 +326,30 @@ describe('ConfirmTemplateDetailsSection', () => {
       await findByText(/Hot/i);
     });
 
-    it('does not fetch ILM policy when template has no ILM policy', () => {
+    it('does not fetch ILM policy when simulated template has no ILM policy', async () => {
       const mockGetIlmPolicy = jest.fn();
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
-      const template = createMockTemplate({ ilmPolicy: undefined });
-      renderComponent(template, mockGetIlmPolicy);
+      const template = createMockTemplate();
+      renderComponent(template, mockGetIlmPolicy, mockGetSimulatedTemplate);
 
+      await waitFor(() => {
+        expect(mockGetSimulatedTemplate).toHaveBeenCalled();
+      });
       expect(mockGetIlmPolicy).not.toHaveBeenCalled();
     });
 
-    it('does not fetch ILM policy when getIlmPolicy is not provided', () => {
-      const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-      // Render without getIlmPolicy - should not throw
-      const { getByText } = renderComponent(template);
+    it('does not fetch ILM policy when getIlmPolicy is not provided', async () => {
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-      expect(getByText('test-policy')).toBeInTheDocument();
+      const template = createMockTemplate();
+      const { findByText } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+      await findByText('test-policy');
     });
 
     describe('loading state', () => {
@@ -286,9 +359,16 @@ describe('ConfirmTemplateDetailsSection', () => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 1000);
           });
         });
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { container, unmount } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { container, unmount } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         await waitFor(() => {
           expect(mockGetIlmPolicy).toHaveBeenCalled();
@@ -305,9 +385,16 @@ describe('ConfirmTemplateDetailsSection', () => {
         const mockGetIlmPolicy = jest
           .fn()
           .mockResolvedValue(createMockIlmPolicy({ hot: { actions: {} } }));
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { container, findByText } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { container, findByText } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         // Wait for phases to be displayed
         await findByText(/Hot/i);
@@ -327,9 +414,16 @@ describe('ConfirmTemplateDetailsSection', () => {
             cold: { min_age: '30d', actions: {} },
           })
         );
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { findByText } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { findByText } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         await findByText(/Hot until 7d/i);
         await findByText(/Warm until 30d/i);
@@ -342,20 +436,34 @@ describe('ConfirmTemplateDetailsSection', () => {
             hot: { actions: {} },
           })
         );
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { findByText } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { findByText } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         await findByText(/Hot indefinitely/i);
       });
 
       it('does not display phases when policy has no phases', async () => {
         const mockGetIlmPolicy = jest.fn().mockResolvedValue(createMockIlmPolicy({}));
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { queryByText, container } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { queryByText, container } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
-        // Wait for loading to complete (spinner disappears)
+        // Wait for loading to complete
         await waitFor(() => {
           expect(mockGetIlmPolicy).toHaveBeenCalled();
           expect(container.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
@@ -370,18 +478,32 @@ describe('ConfirmTemplateDetailsSection', () => {
     describe('error handling', () => {
       it('shows error message when ILM policy fetch fails', async () => {
         const mockGetIlmPolicy = jest.fn().mockRejectedValue(new Error('Network error'));
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { findByText } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { findByText } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         await findByText(/There was an error while loading the ILM policy phases/i);
       });
 
       it('does not crash and displays policy name on error', async () => {
         const mockGetIlmPolicy = jest.fn().mockRejectedValue(new Error('Network error'));
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { findByText, getByText } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { findByText, getByText } = renderComponent(
+          template,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         await findByText(/There was an error while loading the ILM policy phases/i);
 
@@ -400,9 +522,12 @@ describe('ConfirmTemplateDetailsSection', () => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 1000);
           });
         });
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { unmount } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { unmount } = renderComponent(template, mockGetIlmPolicy, mockGetSimulatedTemplate);
 
         await waitFor(() => {
           expect(mockGetIlmPolicy).toHaveBeenCalled();
@@ -421,9 +546,12 @@ describe('ConfirmTemplateDetailsSection', () => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 10000);
           });
         });
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { unmount } = renderComponent(template, mockGetIlmPolicy);
+        const template = createMockTemplate();
+        const { unmount } = renderComponent(template, mockGetIlmPolicy, mockGetSimulatedTemplate);
 
         await waitFor(() => {
           expect(mockGetIlmPolicy).toHaveBeenCalled();
@@ -441,24 +569,36 @@ describe('ConfirmTemplateDetailsSection', () => {
         const mockGetIlmPolicy = jest
           .fn()
           .mockResolvedValue(createMockIlmPolicy({ hot: { actions: {} } }));
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('policy-1'));
 
-        const template1 = createMockTemplate({ ilmPolicy: { name: 'policy-1' } });
-        const { rerender, container, findByText } = renderComponent(template1, mockGetIlmPolicy);
+        const template1 = createMockTemplate({ name: 'template-1' });
+        const { rerender, container, findByText } = renderComponent(
+          template1,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
-        // Wait for first fetch to complete (loading spinner disappears)
+        // Wait for first fetch to complete
         await waitFor(() => {
           expect(mockGetIlmPolicy).toHaveBeenCalledWith('policy-1', expect.any(AbortSignal));
           expect(container.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
         });
 
         mockGetIlmPolicy.mockClear();
+        mockGetSimulatedTemplate.mockResolvedValue(createSimulatedTemplateWithIlm('policy-2'));
 
-        // Change to a different template - wrap in act to handle synchronous state update
+        // Change to a different template
         await act(async () => {
-          const template2 = createMockTemplate({ ilmPolicy: { name: 'policy-2' } });
+          const template2 = createMockTemplate({ name: 'template-2' });
           rerender(
             <IntlProvider>
-              <ConfirmTemplateDetailsSection template={template2} getIlmPolicy={mockGetIlmPolicy} />
+              <ConfirmTemplateDetailsSection
+                template={template2}
+                getIlmPolicy={mockGetIlmPolicy}
+                getSimulatedTemplate={mockGetSimulatedTemplate}
+              />
             </IntlProvider>
           );
         });
@@ -474,11 +614,11 @@ describe('ConfirmTemplateDetailsSection', () => {
       it('aborts previous fetch when policy name changes', async () => {
         let firstSignal: AbortSignal | undefined;
         let secondSignal: AbortSignal | undefined;
-        let callCount = 0;
+        let ilmCallCount = 0;
 
         const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
-          callCount++;
-          if (callCount === 1) {
+          ilmCallCount++;
+          if (ilmCallCount === 1) {
             firstSignal = signal;
           } else {
             secondSignal = signal;
@@ -487,20 +627,33 @@ describe('ConfirmTemplateDetailsSection', () => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 10000);
           });
         });
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('policy-1'));
 
-        const template1 = createMockTemplate({ ilmPolicy: { name: 'policy-1' } });
-        const { rerender, unmount } = renderComponent(template1, mockGetIlmPolicy);
+        const template1 = createMockTemplate({ name: 'template-1' });
+        const { rerender, unmount } = renderComponent(
+          template1,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         await waitFor(() => {
           expect(mockGetIlmPolicy).toHaveBeenCalledTimes(1);
           expect(firstSignal).toBeDefined();
         });
 
+        mockGetSimulatedTemplate.mockResolvedValue(createSimulatedTemplateWithIlm('policy-2'));
+
         // Change to a different template
-        const template2 = createMockTemplate({ ilmPolicy: { name: 'policy-2' } });
+        const template2 = createMockTemplate({ name: 'template-2' });
         rerender(
           <IntlProvider>
-            <ConfirmTemplateDetailsSection template={template2} getIlmPolicy={mockGetIlmPolicy} />
+            <ConfirmTemplateDetailsSection
+              template={template2}
+              getIlmPolicy={mockGetIlmPolicy}
+              getSimulatedTemplate={mockGetSimulatedTemplate}
+            />
           </IntlProvider>
         );
 
@@ -514,28 +667,42 @@ describe('ConfirmTemplateDetailsSection', () => {
         unmount();
       });
 
-      it('clears policy data when template changes to one without ILM', async () => {
+      it('clears policy data when simulated template changes to one without ILM', async () => {
         const mockGetIlmPolicy = jest.fn().mockResolvedValue(
           createMockIlmPolicy({
             hot: { actions: {} },
             warm: { min_age: '7d', actions: {} },
           })
         );
+        const mockGetSimulatedTemplate = jest
+          .fn()
+          .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
-        const template1 = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-        const { rerender, findByText, queryByText } = renderComponent(template1, mockGetIlmPolicy);
+        const template1 = createMockTemplate({ name: 'template-1' });
+        const { rerender, findByText, queryByText } = renderComponent(
+          template1,
+          mockGetIlmPolicy,
+          mockGetSimulatedTemplate
+        );
 
         // Wait for phases to be displayed
         await findByText(/Hot until 7d/i);
 
+        // Change simulated template to not have ILM
+        mockGetSimulatedTemplate.mockResolvedValue(createMockSimulatedTemplate('standard'));
+
         // Change to template without ILM
         const template2 = createMockTemplate({
-          ilmPolicy: undefined,
+          name: 'template-2',
           lifecycle: { enabled: true, value: 30, unit: 'd' },
         });
         rerender(
           <IntlProvider>
-            <ConfirmTemplateDetailsSection template={template2} getIlmPolicy={mockGetIlmPolicy} />
+            <ConfirmTemplateDetailsSection
+              template={template2}
+              getIlmPolicy={mockGetIlmPolicy}
+              getSimulatedTemplate={mockGetSimulatedTemplate}
+            />
           </IntlProvider>
         );
 
@@ -547,83 +714,81 @@ describe('ConfirmTemplateDetailsSection', () => {
     });
   });
 
-  describe('showDataRetention prop', () => {
-    it('hides ILM policy retention when showDataRetention is false', () => {
-      const template = createMockTemplate({ ilmPolicy: { name: 'my-ilm-policy' } });
-      const { queryByText } = renderComponent(template, undefined, false);
+  describe('simulated template fetching', () => {
+    it('calls getSimulatedTemplate with template name', async () => {
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
-      expect(queryByText('Retention')).not.toBeInTheDocument();
-      expect(queryByText('my-ilm-policy')).not.toBeInTheDocument();
-      expect(queryByText('ILM')).not.toBeInTheDocument();
-    });
-
-    it('hides lifecycle data retention when showDataRetention is false', () => {
-      const template = createMockTemplate({
-        lifecycle: { enabled: true, value: 30, unit: 'd' },
-      });
-      const { queryByText } = renderComponent(template, undefined, false);
-
-      expect(queryByText('Retention')).not.toBeInTheDocument();
-      expect(queryByText('30d')).not.toBeInTheDocument();
-    });
-
-    it('does not call getIlmPolicy when showDataRetention is false', () => {
-      const mockGetIlmPolicy = jest.fn().mockResolvedValue(createMockIlmPolicy({}));
-      const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-      renderComponent(template, mockGetIlmPolicy, false);
-
-      expect(mockGetIlmPolicy).not.toHaveBeenCalled();
-    });
-
-    it('still displays other template details when showDataRetention is false', () => {
-      const template = createMockTemplate({
-        version: 5,
-        indexMode: 'logsdb',
-        ilmPolicy: { name: 'hidden-policy' },
-        composedOf: ['component-1', 'component-2'],
-      });
-      const { getByText, queryByText } = renderComponent(template, undefined, false);
-
-      // Version should be visible
-      expect(getByText('Version')).toBeInTheDocument();
-      expect(getByText('5')).toBeInTheDocument();
-
-      // Index mode should be visible
-      expect(getByText('Index mode')).toBeInTheDocument();
-      expect(getByText('LogsDB')).toBeInTheDocument();
-
-      // Component templates should be visible
-      expect(getByText('Component templates')).toBeInTheDocument();
-      expect(getByText('component-1')).toBeInTheDocument();
-      expect(getByText('component-2')).toBeInTheDocument();
-
-      // Retention should be hidden
-      expect(queryByText('Retention')).not.toBeInTheDocument();
-      expect(queryByText('hidden-policy')).not.toBeInTheDocument();
-    });
-
-    it('shows retention when showDataRetention is true (default)', () => {
-      const template = createMockTemplate({ ilmPolicy: { name: 'visible-policy' } });
-      const { getByText } = renderComponent(template, undefined, true);
-
-      expect(getByText('Retention')).toBeInTheDocument();
-      expect(getByText('visible-policy')).toBeInTheDocument();
-      expect(getByText('ILM')).toBeInTheDocument();
-    });
-
-    it('calls getIlmPolicy when showDataRetention is true', async () => {
-      const mockGetIlmPolicy = jest.fn().mockResolvedValue(
-        createMockIlmPolicy({
-          hot: { actions: {} },
-        })
-      );
-      const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
-      const { findByText } = renderComponent(template, mockGetIlmPolicy, true);
+      const template = createMockTemplate({ name: 'my-template' });
+      renderComponent(template, undefined, mockGetSimulatedTemplate);
 
       await waitFor(() => {
-        expect(mockGetIlmPolicy).toHaveBeenCalledWith('test-policy', expect.any(AbortSignal));
+        expect(mockGetSimulatedTemplate).toHaveBeenCalledWith(
+          'my-template',
+          expect.any(AbortSignal)
+        );
       });
-      await findByText(/Hot/i);
+    });
+
+    it('shows error message when simulated template fetch fails', async () => {
+      const mockGetSimulatedTemplate = jest.fn().mockRejectedValue(new Error('Network error'));
+
+      const template = createMockTemplate();
+      const { findByText, queryByText } = renderComponent(
+        template,
+        undefined,
+        mockGetSimulatedTemplate
+      );
+
+      await findByText(/There was an error while loading index mode and data retention info/i);
+      expect(queryByText('Index mode')).not.toBeInTheDocument();
+    });
+
+    it('shows loading state while fetching simulated template', async () => {
+      const mockGetSimulatedTemplate = jest.fn().mockImplementation(() => {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(createMockSimulatedTemplate('standard')), 1000);
+        });
+      });
+
+      const template = createMockTemplate();
+      const { container, unmount, findByText } = renderComponent(
+        template,
+        undefined,
+        mockGetSimulatedTemplate
+      );
+
+      // Loading state should show
+      await findByText('Loading…');
+
+      // Loading spinner should be visible
+      const spinner = container.querySelector('.euiLoadingSpinner');
+      expect(spinner).toBeInTheDocument();
+
+      unmount();
+    });
+
+    it('aborts simulated template fetch on unmount', async () => {
+      let capturedSignal: AbortSignal | undefined;
+      const mockGetSimulatedTemplate = jest.fn().mockImplementation((templateName, signal) => {
+        capturedSignal = signal;
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(createMockSimulatedTemplate('standard')), 10000);
+        });
+      });
+
+      const template = createMockTemplate();
+      const { unmount } = renderComponent(template, undefined, mockGetSimulatedTemplate);
+
+      await waitFor(() => {
+        expect(mockGetSimulatedTemplate).toHaveBeenCalled();
+        expect(capturedSignal).toBeDefined();
+      });
+
+      unmount();
+
+      expect(capturedSignal?.aborted).toBe(true);
     });
   });
 
@@ -635,59 +800,85 @@ describe('ConfirmTemplateDetailsSection', () => {
           warm: { min_age: '7d', actions: {} },
         })
       );
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('logsdb', 'comprehensive-policy'));
 
       const template = createMockTemplate({
         version: 3,
-        indexMode: 'logsdb',
-        ilmPolicy: { name: 'comprehensive-policy' },
         composedOf: ['component-a', 'component-b', 'component-c'],
       });
 
-      const { getByText, findByText } = renderComponent(template, mockGetIlmPolicy);
+      const { findByText } = renderComponent(template, mockGetIlmPolicy, mockGetSimulatedTemplate);
 
-      // Version
-      expect(getByText('Version')).toBeInTheDocument();
-      expect(getByText('3')).toBeInTheDocument();
+      // Wait for simulated template data to load first
+      await findByText('Index mode');
+      await findByText('LogsDB');
 
-      // Index mode
-      expect(getByText('Index mode')).toBeInTheDocument();
-      expect(getByText('LogsDB')).toBeInTheDocument();
+      // Version (available after loading completes)
+      await findByText('Version');
+      await findByText('3');
 
       // Retention
-      expect(getByText('Retention')).toBeInTheDocument();
-      expect(getByText('comprehensive-policy')).toBeInTheDocument();
-      expect(getByText('ILM')).toBeInTheDocument();
+      await findByText('Retention');
+      await findByText('comprehensive-policy');
+      await findByText('ILM');
 
       // Phases
       await findByText(/Hot until 7d/i);
       await findByText(/Warm indefinitely/i);
 
       // Component templates
-      expect(getByText('Component templates')).toBeInTheDocument();
-      expect(getByText('component-a')).toBeInTheDocument();
-      expect(getByText('component-b')).toBeInTheDocument();
-      expect(getByText('component-c')).toBeInTheDocument();
+      await findByText('Component templates');
+      await findByText('component-a');
+      await findByText('component-b');
+      await findByText('component-c');
     });
 
-    it('displays minimal template details correctly', () => {
+    it('displays minimal template details correctly', async () => {
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('standard'));
+
       const template = createMockTemplate({
         version: undefined,
-        indexMode: undefined,
-        ilmPolicy: undefined,
         lifecycle: undefined,
         composedOf: undefined,
       });
 
-      const { getByText, queryByText } = renderComponent(template);
+      const { queryByText, findByText } = renderComponent(
+        template,
+        undefined,
+        mockGetSimulatedTemplate
+      );
 
-      // Only index mode should be present (defaults to Standard)
-      expect(getByText('Index mode')).toBeInTheDocument();
-      expect(getByText('Standard')).toBeInTheDocument();
+      // Wait for simulated template data - only index mode should be present
+      await findByText('Index mode');
+      await findByText('Standard');
 
       // These should not be present
       expect(queryByText('Version')).not.toBeInTheDocument();
       expect(queryByText('Retention')).not.toBeInTheDocument();
       expect(queryByText('Component templates')).not.toBeInTheDocument();
+    });
+
+    it('displays only version and component templates without getSimulatedTemplate', () => {
+      const template = createMockTemplate({
+        version: 5,
+        composedOf: ['component-1'],
+      });
+
+      const { getByText, queryByText } = renderComponent(template);
+
+      // Version and component templates should be present
+      expect(getByText('Version')).toBeInTheDocument();
+      expect(getByText('5')).toBeInTheDocument();
+      expect(getByText('Component templates')).toBeInTheDocument();
+      expect(getByText('component-1')).toBeInTheDocument();
+
+      // Index mode and retention require simulated template
+      expect(queryByText('Index mode')).not.toBeInTheDocument();
+      expect(queryByText('Retention')).not.toBeInTheDocument();
     });
   });
 });

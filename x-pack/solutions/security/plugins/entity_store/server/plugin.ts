@@ -6,8 +6,10 @@
  */
 
 import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
-
-import { defineRoutes } from './routes';
+import { registerRoutes } from './routes';
+import type { EntityStoreRequestHandlerContext } from './types';
+import { createRequestHandlerContext } from './request_context_factory';
+import { PLUGIN_ID } from '../common';
 
 export class EntityStorePlugin implements Plugin {
   private readonly logger: Logger;
@@ -17,13 +19,20 @@ export class EntityStorePlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger })
+    );
 
-    // Register server side APIs
-    defineRoutes(router, this.logger);
+    registerRoutes(router);
   }
 
-  public start() {}
+  public start() {
+    this.logger.info('Initializing plugin');
+  }
 
-  public stop() {}
+  public stop() {
+    this.logger.info('Stopping plugin');
+  }
 }

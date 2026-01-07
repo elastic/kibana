@@ -43,7 +43,9 @@ export function createAddErrorBudgetPanelAction(
             panelType: SLO_ERROR_BUDGET_ID,
             serializedState: { rawState: initialState },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();
