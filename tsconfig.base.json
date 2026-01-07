@@ -1768,6 +1768,8 @@
       "@kbn/remote-clusters-plugin/*": ["x-pack/platform/plugins/private/remote_clusters/*"],
       "@kbn/rendering-plugin": ["src/platform/test/plugin_functional/plugins/rendering_plugin"],
       "@kbn/rendering-plugin/*": ["src/platform/test/plugin_functional/plugins/rendering_plugin/*"],
+      "@kbn/renovate-reviewer-sync": ["packages/kbn-renovate-reviewer-sync"],
+      "@kbn/renovate-reviewer-sync/*": ["packages/kbn-renovate-reviewer-sync/*"],
       "@kbn/repo-file-maps": ["packages/kbn-repo-file-maps"],
       "@kbn/repo-file-maps/*": ["packages/kbn-repo-file-maps/*"],
       "@kbn/repo-info": ["src/platform/packages/shared/kbn-repo-info"],
