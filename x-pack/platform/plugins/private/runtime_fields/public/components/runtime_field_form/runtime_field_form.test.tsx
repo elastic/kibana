@@ -5,51 +5,49 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import '../../__jest__/setup_environment';
-import type { TestBed } from '../../test_utils';
-import { registerTestBed } from '../../test_utils';
 import type { RuntimeField } from '../../types';
 import type { Props, FormState } from './runtime_field_form';
 import { RuntimeFieldForm } from './runtime_field_form';
 
-const setup = (props?: Props) =>
-  registerTestBed(RuntimeFieldForm, {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-  })(props) as TestBed;
-
-const links = {
+const links: Props['links'] = {
   runtimePainless: 'https://jestTest.elastic.co/to-be-defined.html',
 };
 
+const renderComponent = (props: Partial<Props> = {}) =>
+  render(
+    <I18nProvider>
+      <RuntimeFieldForm links={links} {...props} />
+    </I18nProvider>
+  );
+
 describe('Runtime field form', () => {
-  let testBed: TestBed;
   let onChange: jest.Mock<Props['onChange']> = jest.fn();
 
-  const lastOnChangeCall = (): FormState[] => onChange.mock.calls[onChange.mock.calls.length - 1];
+  const lastOnChangeCall = (): FormState =>
+    onChange.mock.calls[onChange.mock.calls.length - 1][0] as FormState;
 
   beforeEach(() => {
     onChange = jest.fn();
   });
 
   test('should render expected 3 fields (name, returnType, script)', () => {
-    testBed = setup({ links });
-    const { exists } = testBed;
+    renderComponent();
 
-    expect(exists('nameField')).toBe(true);
-    expect(exists('typeField')).toBe(true);
-    expect(exists('scriptField')).toBe(true);
+    expect(screen.getByLabelText('Name field')).toBeInTheDocument();
+    expect(screen.getByTestId('typeField')).toBeInTheDocument();
+    expect(screen.getByTestId('scriptField')).toBeInTheDocument();
   });
 
   test('should have a link to learn more about painless syntax', () => {
-    testBed = setup({ links });
-    const { exists, find } = testBed;
+    renderComponent();
 
-    expect(exists('painlessSyntaxLearnMoreLink')).toBe(true);
-    expect(find('painlessSyntaxLearnMoreLink').props().href).toBe(links.runtimePainless);
+    const link = screen.getByTestId('painlessSyntaxLearnMoreLink');
+    expect(link).toHaveAttribute('href', links.runtimePainless);
   });
 
   test('should accept a "defaultValue" prop', () => {
@@ -58,12 +56,11 @@ describe('Runtime field form', () => {
       type: 'date',
       script: { source: 'test=123' },
     };
-    testBed = setup({ defaultValue, links });
-    const { find } = testBed;
+    renderComponent({ defaultValue });
 
-    expect(find('nameField.input').props().value).toBe(defaultValue.name);
-    expect(find('typeField').props().value).toBe(defaultValue.type);
-    expect(find('scriptField').props().value).toBe(defaultValue.script.source);
+    expect(screen.getByLabelText('Name field')).toHaveValue(defaultValue.name);
+    expect(screen.getByTestId('typeField')).toHaveValue(defaultValue.type);
+    expect(screen.getByTestId('scriptField')).toHaveValue(defaultValue.script.source);
   });
 
   test('should accept an "onChange" prop to forward the form state', async () => {
@@ -72,24 +69,26 @@ describe('Runtime field form', () => {
       type: 'date',
       script: { source: 'test=123' },
     };
-    testBed = setup({ onChange, defaultValue, links });
+    renderComponent({ onChange, defaultValue });
 
-    expect(onChange).toHaveBeenCalled();
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
 
-    let lastState = lastOnChangeCall()[0];
+    let lastState = lastOnChangeCall();
     expect(lastState.isValid).toBe(undefined);
     expect(lastState.isSubmitted).toBe(false);
     expect(lastState.submit).toBeDefined();
 
-    let data;
+    let data!: RuntimeField;
     await act(async () => {
       ({ data } = await lastState.submit());
     });
     expect(data).toEqual(defaultValue);
 
     // Make sure that both isValid and isSubmitted state are now "true"
-    lastState = lastOnChangeCall()[0];
-    expect(lastState.isValid).toBe(true);
-    expect(lastState.isSubmitted).toBe(true);
+    await waitFor(() => {
+      lastState = lastOnChangeCall();
+      expect(lastState.isValid).toBe(true);
+      expect(lastState.isSubmitted).toBe(true);
+    });
   });
 });
