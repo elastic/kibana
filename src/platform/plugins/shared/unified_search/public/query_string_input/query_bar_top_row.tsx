@@ -14,8 +14,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { EMPTY, delay, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
-import { throttle, debounce } from 'lodash';
-
+import { throttle } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
@@ -530,6 +529,7 @@ export const QueryBarTopRow = React.memo(
       dateRangeFrom: draftDateRangeFrom,
       dateRangeTo: draftDateRangeTo,
     } = props;
+
     const draft = useMemo(
       () =>
         onDraftChange && draftIsDirty
@@ -549,20 +549,9 @@ export const QueryBarTopRow = React.memo(
       ]
     );
 
-    const onDraftChangeDebounced = useMemo(
-      () => (onDraftChange ? debounce(onDraftChange, 300) : undefined),
-      [onDraftChange]
-    );
-
     useEffect(() => {
-      onDraftChangeDebounced?.(draft);
-    }, [onDraftChangeDebounced, draft]);
-
-    useEffect(() => {
-      return () => {
-        onDraftChangeDebounced?.flush(); // immediately invoke pending debounced calls on unmount
-      };
-    }, [onDraftChangeDebounced]);
+      onDraftChange?.(draft);
+    }, [onDraftChange, draft]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);

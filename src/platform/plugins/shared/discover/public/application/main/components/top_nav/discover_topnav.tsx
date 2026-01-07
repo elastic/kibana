@@ -24,7 +24,6 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
-  useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -65,10 +64,15 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
-  const query = useAppStateSelector((state) => state.query);
-  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-
-  const timeRange = useCurrentTabSelector((tab) => tab.dataRequestParams.timeRangeAbsolute);
+  const { tabId, query, esqlVariables, timeRange, searchDraftUiState, esqlEditorUiState } =
+    useCurrentTabSelector((state) => ({
+      tabId: state.id,
+      query: state.appState.query,
+      esqlVariables: state.esqlVariables,
+      timeRange: state.dataRequestParams.timeRangeAbsolute,
+      searchDraftUiState: state.uiState.searchDraft,
+      esqlEditorUiState: state.uiState.esqlEditor,
+    }));
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -233,30 +237,28 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
-  const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
-  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
-  const onSearchDraftChange = useCallback(
-    (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
+  const onSearchDraftChange = useMemo(() => {
+    // console.log('Creating onSearchDraftChange for tab:', tabId);
+    return (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
-        setSearchDraftUiState({
+        internalStateActions.setSearchDraftUiState({
+          tabId,
           searchDraftUiState: newSearchDraftUiState,
         })
       );
-    },
-    [dispatch, setSearchDraftUiState]
-  );
+    };
+  }, [dispatch, tabId]);
 
-  const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
-  const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
   const onEsqlEditorInitialStateChange = useCallback(
     (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
       dispatch(
-        setEsqlEditorUiState({
+        internalStateActions.setESQLEditorUiState({
+          tabId,
           esqlEditorUiState: newEsqlEditorUiState,
         })
       );
     },
-    [dispatch, setEsqlEditorUiState]
+    [dispatch, tabId]
   );
 
   const shouldHideDefaultDataviewPicker =

@@ -493,7 +493,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         };
 
-        const draftQuery0 = 'from logstash-* | sort @timestamp desc | limit 50 // run this';
+        const draftQuery0 =
+          'from logstash-* | sort @timestamp desc | limit 50 // edit and run this';
         await expectState(defaultQuery, false);
         await monacoEditor.setCodeEditorValue(draftQuery0);
         await expectState(draftQuery0, true);
