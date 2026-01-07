@@ -161,86 +161,6 @@ export const executeEnrichPolicy = async ({
 };
 
 /**
- * Helper to wait for entity store engines to be fully started
- * This ensures asyncSetup has completed (not just enrich policy creation)
- * Critical: asyncSetup can fail after creating the enrich policy, and the
- * error handler will delete everything including the enrich policy
- */
-export const waitForEntityStoreReady = async ({
-  supertest,
-  retry,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'supertest' | 'retry' | 'logger'> & { spaceId?: string }) => {
-  const spacePath = spaceId ? `/s/${spaceId}` : '';
-  const spaceLabel = spaceId || 'default';
-  logger.debug(`Waiting for entity store engines to be fully started for space: ${spaceLabel}`);
-
-  await retry.waitForWithTimeout('entity store engines to be started', 120000, async () => {
-    try {
-      const response = await supertest
-        .get(`${spacePath}/api/entity_store/status`)
-        .query({ include_components: true })
-        .set('kbn-xsrf', 'xxxx');
-
-      if (response.status !== 200) {
-        logger.debug(`Entity store status check failed with status: ${response.status}`);
-        return false;
-      }
-
-      const { status, engines = [] } = response.body;
-      const engineStatuses = engines
-        .map((e: { status: string; type: string }) => `${e.type}:${e.status}`)
-        .join(', ');
-      logger.debug(
-        `Entity store status: ${status}, engines: ${engines.length}, engine statuses: ${engineStatuses}`
-      );
-
-      // If the overall status is 'error', the entity store won't recover
-      // if (status === 'error') {
-      //   throw new Error(`Entity store is in error state`);
-      // }
-
-      // Check if any engine has an error - this means asyncSetup failed
-      const errorEngine = engines.find((e: { status: string }) => e.status === 'error') as
-        | { type: string; status: string; error?: { message: string; action: string } }
-        | undefined;
-      if (errorEngine) {
-        const errorMessage = errorEngine.error?.message || 'Unknown error';
-        const errorAction = errorEngine.error?.action || 'unknown';
-        throw new Error(
-          `Entity store engine ${errorEngine.type} is in error state: [${errorAction}] ${errorMessage}`
-        );
-      }
-
-      // Need at least the generic engine to be started
-      // The 'started' status means asyncSetup completed successfully
-      const genericEngine = engines.find((e: { type: string }) => e.type === 'generic');
-      if (!genericEngine) {
-        logger.debug('Generic engine not found yet');
-        return false;
-      }
-
-      if ((genericEngine as { status: string }).status === 'started') {
-        logger.debug('Entity store generic engine is fully started');
-        return true;
-      }
-
-      logger.debug(
-        `Generic engine status is ${(genericEngine as { status: string }).status}, waiting...`
-      );
-      return false;
-    } catch (e) {
-      if (e.message?.includes('error state')) {
-        throw e; // Re-throw error state exceptions to fail fast
-      }
-      logger.debug(`Error checking entity store status: ${e.message}`);
-      return false;
-    }
-  });
-};
-
-/**
  * Entity type for entity store engines
  */
 export type EntityType = 'user' | 'host' | 'service' | 'generic';
@@ -415,41 +335,6 @@ export const initEntityEnginesWithRetry = async ({
       }
     }
   }
-};
-
-/**
- * Helper to bulk index entity data directly using ES client
- * This avoids using esArchiver for internal/system indices which causes instability
- */
-export const indexEntityData = async ({
-  es,
-  logger,
-  indexName,
-  data,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'logger'> & {
-  indexName: string;
-  data: Array<{ id: string; source: Record<string, unknown> }>;
-}) => {
-  logger.debug(`Indexing ${data.length} entity documents to ${indexName}`);
-
-  const operations = data.flatMap((doc) => [
-    { index: { _index: indexName, _id: doc.id } },
-    doc.source,
-  ]);
-
-  const response = await es.bulk({
-    operations,
-    refresh: true,
-  });
-
-  if (response.errors) {
-    const errorItems = response.items.filter((item) => item.index?.error);
-    logger.error(`Bulk index errors: ${JSON.stringify(errorItems)}`);
-    throw new Error(`Failed to index entity data: ${JSON.stringify(errorItems)}`);
-  }
-
-  logger.debug(`Successfully indexed ${data.length} entity documents`);
-  return response;
 };
 
 /**

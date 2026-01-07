@@ -26,11 +26,11 @@ import {
   result,
   dataViewRouteHelpersFactory,
   cleanupEntityStore,
-  enableAssetInventory,
-  waitForEntityStoreReady,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
   installCloudAssetInventoryPackage,
+  initEntityEnginesWithRetry,
+  waitForEntityDataIndexed,
 } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 
@@ -990,13 +990,24 @@ export default function (providerContext: FtrProviderContext) {
             let customSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
             before(async () => {
+              // Clean up any leftover resources from previous runs
               await cleanupEntityStore({ supertest, logger }); // default space
               await cleanupEntityStore({ supertest, logger, spaceId: customNamespaceId }); // test space
 
-              // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
-              if (config.name === 'via LOOKUP JOIN (v2)') {
-                await esArchiver.unload(config.archivePath);
-              }
+              // Clean up leftover entity data from previous runs using ES client
+              // Note: esArchiver.unload causes instability with internal indices, so we use ES client directly
+              await es.deleteByQuery({
+                index: '.entities.v1.latest.security_*',
+                query: { match_all: {} },
+                conflicts: 'proceed',
+                ignore_unavailable: true,
+              });
+              await es.deleteByQuery({
+                index: '.entities.v2.latest.security_*',
+                query: { match_all: {} },
+                conflicts: 'proceed',
+                ignore_unavailable: true,
+              });
 
               await spacesService.delete(customNamespaceId);
               // Create a test space
@@ -1007,7 +1018,7 @@ export default function (providerContext: FtrProviderContext) {
                 disabledFeatures: [],
               });
 
-              // enable asset inventory in both default and test spaces
+              // Enable asset inventory setting in both default and test spaces
               await kibanaServer.uiSettings.update({
                 'securitySolution:enableAssetInventory': true,
               });
@@ -1016,57 +1027,74 @@ export default function (providerContext: FtrProviderContext) {
                 { space: customNamespaceId }
               );
 
-              // initialize security-solution-default data-view
+              // Initialize security-solution-default data-view
               dataView = dataViewRouteHelpersFactory(supertest);
               await dataView.create('security-solution');
 
-              // initialize security-solution-test data-view
+              // Initialize security-solution-test data-view
               customSpaceDataView = dataViewRouteHelpersFactory(supertest, customNamespaceId);
               await customSpaceDataView.create('security-solution');
 
-              // Enable asset inventory - this creates and executes the enrich policy
-              await enableAssetInventory({ supertest, logger });
-              await enableAssetInventory({ supertest, logger, spaceId: customNamespaceId });
-
-              // Wait for entity store engines to be fully started in both spaces
-              // This ensures asyncSetup has completed - if it fails after creating
-              // the enrich policy, the error handler will delete everything
-              await waitForEntityStoreReady({ supertest, retry, logger });
-              await waitForEntityStoreReady({
+              // Initialize entity engine for 'generic' type and wait for it to be fully started
+              // Uses retry logic to handle transient failures - if engine enters error state, it cleans up and retries
+              await initEntityEnginesWithRetry({
                 supertest,
                 retry,
                 logger,
+                entityTypes: ['generic'],
+              });
+              await initEntityEnginesWithRetry({
+                supertest,
+                retry,
+                logger,
+                entityTypes: ['generic'],
                 spaceId: customNamespaceId,
               });
 
-              // Load entity data from the appropriate archive
+              // Load entity data using esArchiver
               await esArchiver.load(config.archivePath);
-              // Wait for entity data to be indexed before proceeding
-              await retry.waitFor('entity data to be indexed', async () => {
-                const response = await es.count({
-                  index: config.entitiesIndex,
-                });
-                // 8 entities in default space (3 original + 5 for multi-target test) + 4 in test space = 12 total
-                return response.count === 12;
+
+              // Wait for entity data to be fully indexed
+              await waitForEntityDataIndexed({
+                es,
+                logger,
+                retry,
+                entitiesIndex: config.entitiesIndex,
+                expectedCount: 12,
               });
 
-              // Only setup ENRICH policy for v1 tests
+              // Only execute enrich policy for v1 tests
               if (config.useEnrichPolicy) {
                 // Wait for enrich policy to be created
                 await waitForEnrichPolicyCreated({ es, retry, logger });
                 await waitForEnrichPolicyCreated({ es, retry, logger, spaceId: customNamespaceId });
 
-                // Explicitly execute enrich policies to ensure they have the latest entity data
+                // Execute enrich policies to pick up entity data
                 await executeEnrichPolicy({ es, retry, logger });
                 await executeEnrichPolicy({ es, retry, logger, spaceId: customNamespaceId });
               }
+
               await installCloudAssetInventoryPackage({ supertest, logger });
             });
 
             after(async () => {
+              // Clean up entity data using ES client instead of esArchiver.unload
+              // esArchiver.unload causes instability with internal indices
+              const entityIndex = config.useEnrichPolicy
+                ? '.entities.v1.latest.security_generic_*'
+                : '.entities.v2.latest.security_generic_*';
+              await es.deleteByQuery({
+                index: entityIndex,
+                query: { match_all: {} },
+                conflicts: 'proceed',
+                ignore_unavailable: true,
+              });
+
+              // Clean up entity store resources
               await cleanupEntityStore({ supertest, logger }); // default space
               await cleanupEntityStore({ supertest, logger, spaceId: customNamespaceId }); // test space
 
+              // Disable asset inventory setting
               await kibanaServer.uiSettings.update({
                 'securitySolution:enableAssetInventory': false,
               });
@@ -1074,11 +1102,6 @@ export default function (providerContext: FtrProviderContext) {
                 { 'securitySolution:enableAssetInventory': false },
                 { space: customNamespaceId }
               );
-
-              // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
-              if (config.name === 'via LOOKUP JOIN (v2)') {
-                await esArchiver.unload(config.archivePath);
-              }
 
               await dataView.delete('security-solution');
               await customSpaceDataView.delete('security-solution');

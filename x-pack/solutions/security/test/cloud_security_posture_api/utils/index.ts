@@ -12,12 +12,8 @@ export {
   waitForEntityDataIndexed,
   enableAssetInventory,
   waitForEnrichPolicyCreated,
-  waitForEntityStoreReady,
   executeEnrichPolicy,
   installCloudAssetInventoryPackage,
-  initEntityEngine,
-  initEntityEnginesAndWait,
   initEntityEnginesWithRetry,
-  indexEntityData,
 } from './entity_store';
 export type { EntityStoreHelpersDeps, EntityType } from './entity_store';
