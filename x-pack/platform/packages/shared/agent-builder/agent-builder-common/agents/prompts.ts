@@ -49,7 +49,7 @@ export interface ConfirmPromptDefinition {
 }
 
 export interface ConfirmationPromptResponse {
-  allow: boolean; // TODO: or status
+  allow: boolean;
 }
 
 export type PromptResponse = ConfirmationPromptResponse;

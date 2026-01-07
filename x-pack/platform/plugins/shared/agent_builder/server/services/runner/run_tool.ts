@@ -18,6 +18,7 @@ import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
 } from '@kbn/agent-builder-server/runner';
+import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -64,7 +65,12 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn> => {
-  const { tool, toolParams, toolCallId = 'unknown', source = 'unknown' } = toolExecutionParams;
+  const {
+    tool,
+    toolParams,
+    toolCallId = generateFakeToolCallId(),
+    source = 'unknown',
+  } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
   const manager = parentManager.createChild(context);
