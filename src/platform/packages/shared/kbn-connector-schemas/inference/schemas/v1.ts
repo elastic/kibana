@@ -19,9 +19,7 @@ export const ConfigSchema = z
     provider: z.string(),
     taskType: z.string(),
     inferenceId: z.string(),
-    service_settings: z.object({}).passthrough().default({}),
-    task_settings: z.object({}).passthrough().default({}),
-    // providerConfig: z.object({}).passthrough().default({}), // need to make a v2 config schema?
+    providerConfig: z.object({}).passthrough().default({}),
     taskTypeConfig: z.object({}).passthrough().default({}),
     contextWindowLength: z.coerce.number().optional(),
     headers: z.record(z.string(), z.string()).optional(),

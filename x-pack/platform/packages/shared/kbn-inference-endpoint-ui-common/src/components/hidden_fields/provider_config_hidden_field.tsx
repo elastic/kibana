@@ -23,7 +23,7 @@ export const ProviderServiceSettingsHiddenField: React.FC<ProviderConfigHiddenFi
   isSubmitting,
 }) => (
   <UseField
-    path="config.service_settings"
+    path="config.providerConfig.service_settings"
     component={HiddenField}
     config={{
       validations: [
@@ -41,12 +41,12 @@ export const ProviderServiceSettingsHiddenField: React.FC<ProviderConfigHiddenFi
 );
 
 export const ProviderTaskSettingsHiddenField: React.FC<ProviderConfigHiddenFieldProps> = ({
-  requiredProviderFormFields, // need to just send task settings? or can we check within the validator?
+  requiredProviderFormFields,
   setRequiredProviderFormFields,
   isSubmitting,
 }) => (
   <UseField
-    path="config.task_settings"
+    path="config.providerConfig.task_settings"
     component={HiddenField}
     config={{
       validations: [

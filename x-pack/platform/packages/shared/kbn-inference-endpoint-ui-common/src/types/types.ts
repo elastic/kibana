@@ -34,7 +34,7 @@ interface ProviderServiceSettings {
   [key: string]: unknown;
 }
 
-interface ProviderTaskSettings {
+export interface ProviderTaskSettings {
   adaptive_allocations?: AdaptiveAllocations;
   max_number_of_allocations?: number;
   headers?: Record<string, string>;
@@ -46,8 +46,10 @@ export interface Config {
   taskTypeConfig?: Record<string, unknown>;
   inferenceId: string;
   provider: string;
-  service_settings?: ProviderServiceSettings;
-  task_settings?: ProviderTaskSettings;
+  providerConfig: {
+    service_settings: ProviderServiceSettings;
+    task_settings?: ProviderTaskSettings;
+  };
   contextWindowLength?: number;
   temperature?: number;
   headers?: Map;

@@ -74,6 +74,8 @@ export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
 
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
+export const SERVICE_SETTINGS = 'service_settings';
+export const TASK_SETTINGS = 'task_settings';
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
@@ -91,12 +93,10 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
           type: FieldType.INTEGER,
           updatable: true,
+          location: SERVICE_SETTINGS,
         },
       },
     ],
     serverlessOnly: true,
   },
 };
-
-export const SERVICE_SETTINGS = 'service_settings';
-export const TASK_SETTINGS = 'task_settings';

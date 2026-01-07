@@ -7,6 +7,8 @@
 
 export interface InferenceConnectorProviderConfig {
   [key: string]: unknown;
+  service_settings?: Record<string, unknown>;
+  task_settings?: Record<string, unknown>;
   max_number_of_allocations?: number;
   adaptive_allocations?: { max_number_of_allocations?: number };
 }

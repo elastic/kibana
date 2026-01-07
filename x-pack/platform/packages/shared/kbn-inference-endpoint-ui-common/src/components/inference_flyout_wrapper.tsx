@@ -25,72 +25,88 @@ import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+import { ServiceProviderKeys } from '../constants';
 
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
+// This serializer is used to transform the saved object data before sending it to be displayed in the form
 const formDeserializer = (data: InferenceEndpoint) => {
-  if (
-    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
-    data.config?.headers
-  ) {
-    const { headers, ...restConfig } = data.config;
-    const maxAllocations =
-      data.config.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+  const { headers, ...restConfig } = data.config;
+  const taskSettings = restConfig.providerConfig?.task_settings ?? {};
+  const { max_tokens: maxTokens, ...restTaskSettings } = taskSettings;
+  const maxAllocations =
+    restConfig?.providerConfig?.task_settings?.adaptive_allocations?.max_number_of_allocations ??
+    restConfig?.providerConfig?.adaptive_allocations?.max_number_of_allocations;
 
-    return {
-      ...data,
-      config: {
-        ...restConfig,
-        providerConfig: {
-          ...(data.config.providerConfig as InferenceEndpoint['config']['providerConfig']),
+  return {
+    ...data,
+    config: {
+      ...restConfig,
+      providerConfig: {
+        service_settings: {
+          ...(restConfig.providerConfig?.service_settings ?? restConfig.providerConfig),
           ...(headers ? { headers } : {}),
           ...(maxAllocations
             ? // remove the adaptive_allocations from the data config as form does not expect it
               { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
             : {}),
+          // Until 'location' field changes are in, move max_tokens to service_settings as form expects it
+          ...(maxTokens ? { max_tokens: maxTokens } : {}),
         },
+        task_settings: restTaskSettings,
       },
-    };
-  }
-
-  return data;
+    },
+  };
 };
 
 // This serializer is used to transform the form data before sending it to the server
 export const formSerializer = (formData: InferenceEndpoint) => {
-  const providerConfig = formData.config?.providerConfig as
-    | InferenceEndpoint['config']['providerConfig']
-    | undefined;
-  if (formData && providerConfig) {
-    const {
-      max_number_of_allocations: maxAllocations,
-      headers,
-      ...restProviderConfig
-    } = providerConfig || {};
+  const serviceSettings = formData.config?.providerConfig?.service_settings ?? {};
+  const taskSettings = formData.config?.providerConfig?.task_settings ?? {};
 
+  const {
+    max_number_of_allocations: maxAllocations,
+    headers,
+    max_tokens,
+    ...restServiceSettings
+  } = serviceSettings;
+
+  if (formData && (serviceSettings || taskSettings)) {
     return {
       ...formData,
       config: {
         ...formData.config,
         providerConfig: {
-          ...restProviderConfig,
-          ...(maxAllocations
-            ? {
-                adaptive_allocations: {
-                  enabled: true,
-                  min_number_of_allocations: MIN_ALLOCATIONS,
-                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
-                },
-                // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
-                num_threads: DEFAULT_NUM_THREADS,
-              }
-            : {}),
+          service_settings: {
+            ...restServiceSettings,
+            ...(maxAllocations
+              ? {
+                  adaptive_allocations: {
+                    enabled: true,
+                    min_number_of_allocations: MIN_ALLOCATIONS,
+                    ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+                  },
+                  // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+                  num_threads: DEFAULT_NUM_THREADS,
+                }
+              : {}),
+          },
+          // NOTE: These updates to task_settings are a temporary workaround for anthropic max_tokens handling and any service with headers until the services endpoint is updated to include the 'location' field which indicates where the config fields go.
+          // For max_tokens, anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
+          // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
+          task_settings: {
+            ...taskSettings,
+            ...(headers ? { headers } : {}),
+            ...(formData.config?.provider === ServiceProviderKeys.anthropic && max_tokens
+              ? { max_tokens }
+              : {}),
+          },
         },
-        ...(headers ? { headers } : {}),
       },
     };
   }
+
   return formData;
 };
 
@@ -133,8 +149,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         inferenceId: inferenceEndpoint?.config.inferenceId ?? '',
         taskType: inferenceEndpoint?.config.taskType ?? '',
         provider: inferenceEndpoint?.config.provider ?? '',
-        service_settings: inferenceEndpoint?.config.service_settings ?? {},
-        task_settings: inferenceEndpoint?.config.task_settings ?? {},
+        providerConfig: inferenceEndpoint?.config.providerConfig,
         contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
         headers: inferenceEndpoint?.config?.headers,
         temperature: inferenceEndpoint?.config.temperature ?? undefined,
