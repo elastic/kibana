@@ -152,13 +152,18 @@ export function LensEditConfigurationFlyout({
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
+      // Use the datasourceId from the previous attributes, not the current one
+      // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
+      const previousDatasourceId = getActiveDatasourceIdFromDoc(
+        previousAttrs
+      ) as SupportedDatasourceId;
       if (previousAttrs.visualizationType === visualization.activeId) {
-        const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
-          ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-              previousAttrs.state.datasourceStates[datasourceId],
+        const currentDatasourceState = datasourceMap[previousDatasourceId].injectReferencesToLayers
+          ? datasourceMap[previousDatasourceId]?.injectReferencesToLayers?.(
+              previousAttrs.state.datasourceStates[previousDatasourceId],
               previousAttrs.references
             )
-          : previousAttrs.state.datasourceStates[datasourceId];
+          : previousAttrs.state.datasourceStates[previousDatasourceId];
         updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
       } else {
         updateSuggestion?.(previousAttrs);
@@ -177,7 +182,6 @@ export function LensEditConfigurationFlyout({
     visualization.activeId,
     savedObjectId,
     datasourceMap,
-    datasourceId,
     updatePanelState,
     updateSuggestion,
     updateByRefInput,
