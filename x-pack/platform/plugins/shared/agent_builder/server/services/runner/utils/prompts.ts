@@ -19,6 +19,7 @@ import type {
 } from '@kbn/agent-builder-common/agents/prompts';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
 import { i18nBundles } from '../i18n';
 
 export const createPromptManager = ({
@@ -107,16 +108,32 @@ export const getAgentPromptStorageState = ({
   return state;
 };
 
-export const toolConfirmationId = (toolId: string): string => `${toolId}.confirm`;
+export const toolConfirmationId = ({
+  toolId,
+  toolCallId,
+  policyMode,
+}: {
+  toolId: string;
+  toolCallId: string;
+  policyMode?: ToolConfirmationPolicyMode;
+}): string => {
+  let confirmationId = `tools.${toolId}.confirmation`;
+  if (policyMode === 'always') {
+    confirmationId += `.${toolCallId}`;
+  }
+  return confirmationId;
+};
 
 export const createToolConfirmationPrompt = ({
+  confirmationId,
   tool,
 }: {
+  confirmationId: string;
   tool: InternalToolDefinition;
 }): ConfirmationPrompt => {
   return {
     type: AgentPromptType.confirmation,
-    id: toolConfirmationId(tool.id),
+    id: confirmationId,
     title: i18nBundles.toolConfirmation.title,
     message: i18nBundles.toolConfirmation.message(tool.id),
     confirm_text: i18nBundles.toolConfirmation.confirmText,

@@ -64,19 +64,21 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn> => {
-  const { tool, toolParams, source = 'unknown' } = toolExecutionParams;
+  const { tool, toolParams, toolCallId = 'unknown', source = 'unknown' } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
   const manager = parentManager.createChild(context);
   const { resultStore, promptManager } = manager.deps;
 
+  // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
-    // TODO: need to update logic depending on "once" or "always"
-
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
-      const { status: confirmStatus } = promptManager.getConfirmationStatus(
-        toolConfirmationId(tool.id)
-      );
+      const confirmationId = toolConfirmationId({
+        toolId: tool.id,
+        toolCallId,
+        policyMode: tool.confirmation.askUser,
+      });
+      const { status: confirmStatus } = promptManager.getConfirmationStatus(confirmationId);
 
       if (confirmStatus === ConfirmationStatus.rejected) {
         return {
@@ -86,7 +88,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
       if (confirmStatus === ConfirmationStatus.unprompted) {
         return {
-          prompt: createToolConfirmationPrompt({ tool }),
+          prompt: createToolConfirmationPrompt({ confirmationId, tool }),
         };
       }
     }
