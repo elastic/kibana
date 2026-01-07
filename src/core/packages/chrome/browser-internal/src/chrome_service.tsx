@@ -59,6 +59,7 @@ import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser/src';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
 // import { handleEuiDevProviderWarning } from './handle_eui_dev_provider_warning';
@@ -75,6 +76,7 @@ import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
 import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
 import type { NavigationProps } from './ui/project/sidenav/types';
+import { HeaderBreadcrumbsBadges } from './ui/header/header_breadcrumbs_badges';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -209,6 +211,9 @@ export class ChromeService {
     const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
       []
     );
+    const breadcrumbsBadgesExtension$ = new BehaviorSubject<
+      ChromeBreadcrumbsAppendExtension | undefined
+    >(undefined);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
@@ -279,6 +284,16 @@ export class ChromeService {
       breadcrumbs$.next([]);
       badge$.next(undefined);
       appMenu$.next(undefined);
+
+      // Remove badges extension from breadcrumbsAppendExtensions
+      const currentBadgesExtension = breadcrumbsBadgesExtension$.getValue();
+      if (currentBadgesExtension) {
+        breadcrumbsAppendExtensions$.next(
+          breadcrumbsAppendExtensions$.getValue().filter((ext) => ext !== currentBadgesExtension)
+        );
+      }
+      breadcrumbsBadgesExtension$.next(undefined);
+
       docTitle.reset();
     });
 
@@ -627,6 +642,30 @@ export class ChromeService {
               .filter((ext) => ext !== breadcrumbsAppendExtension)
           );
         };
+      },
+
+      setBreadcrumbsBadges: (badges: ChromeBreadcrumbsBadge[]) => {
+        // Remove previous badges extension if it exists
+        const currentBadgesExtension = breadcrumbsBadgesExtension$.getValue();
+        if (currentBadgesExtension) {
+          breadcrumbsAppendExtensions$.next(
+            breadcrumbsAppendExtensions$.getValue().filter((ext) => ext !== currentBadgesExtension)
+          );
+        }
+
+        // Add new badges extension if badges provided
+        if (badges.length > 0) {
+          const newBadgesExtension: ChromeBreadcrumbsAppendExtension = {
+            content: mountReactNode(<HeaderBreadcrumbsBadges badges={badges} />),
+          };
+          breadcrumbsBadgesExtension$.next(newBadgesExtension);
+          breadcrumbsAppendExtensions$.next([
+            ...breadcrumbsAppendExtensions$.getValue(),
+            newBadgesExtension,
+          ]);
+        } else {
+          breadcrumbsBadgesExtension$.next(undefined);
+        }
       },
 
       getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),

@@ -20,7 +20,7 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
 
@@ -138,6 +138,25 @@ export interface ChromeStart {
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
   ): () => void;
+
+  /**
+   * Set badges to be displayed in the breadcrumbs area.
+   * The badges will always be displayed as the last extension in the breadcrumbs.
+   *
+   * @param badges - Array of badge configurations to display
+   *
+   * @example
+   * ```tsx
+   * chrome.setBreadcrumbsBadges([
+   *   {
+   *     badgeText: 'Beta',
+   *     color: 'hollow',
+   *     toolTipProps: { content: 'This feature is in beta' }
+   *   }
+   * ]);
+   * ```
+   */
+  setBreadcrumbsBadges(badges: ChromeBreadcrumbsBadge[]): void;
 
   /**
    * Get an observable of the current custom nav link
