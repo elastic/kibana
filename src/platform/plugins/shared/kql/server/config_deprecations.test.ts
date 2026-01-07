@@ -38,7 +38,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
 
 describe('Config Deprecations', () => {
   it('does not report deprecations for default configurationc', () => {
-    const configFirstStep = { unifiedSearch: { autocomplete: { valueSuggestions: {} } } };
+    const configFirstStep = { data: { autocomplete: { valueSuggestions: {} } } };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(configFirstStep));
     expect(migrated).toEqual(configFirstStep);
     expect(messages).toHaveLength(0);
@@ -76,9 +76,9 @@ describe('Config Deprecations', () => {
     `);
   });
 
-  it('renames unifiedSearch.autocomplete.querySuggestions.enabled to kql.autocomplete.querySuggestions.enabled', () => {
+  it('renames data.autocomplete.querySuggestions.enabled to kql.autocomplete.querySuggestions.enabled', () => {
     const config = {
-      unifiedSearch: {
+      data: {
         autocomplete: {
           querySuggestions: {
             enabled: false,
@@ -87,18 +87,18 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.unifiedSearch?.autocomplete.querySuggestions.enabled).not.toBeDefined();
+    expect(migrated.data?.autocomplete.querySuggestions.enabled).not.toBeDefined();
     expect(migrated.kql.autocomplete.querySuggestions.enabled).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"unifiedSearch.autocomplete.querySuggestions.enabled\\" has been replaced by \\"kql.autocomplete.querySuggestions.enabled\\"",
+        "Setting \\"data.autocomplete.querySuggestions.enabled\\" has been replaced by \\"kql.autocomplete.querySuggestions.enabled\\"",
       ]
     `);
   });
 
-  it('renames unifiedSearch.autocomplete.valueSuggestions.enabled to kql.autocomplete.valueSuggestions.enabled', () => {
+  it('renames data.autocomplete.valueSuggestions.enabled to kql.autocomplete.valueSuggestions.enabled', () => {
     const config = {
-      unifiedSearch: {
+      data: {
         autocomplete: {
           valueSuggestions: {
             enabled: false,
@@ -107,18 +107,18 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.unifiedSearch?.autocomplete.valueSuggestions.enabled).not.toBeDefined();
+    expect(migrated.data?.autocomplete.valueSuggestions.enabled).not.toBeDefined();
     expect(migrated.kql.autocomplete.valueSuggestions.enabled).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"unifiedSearch.autocomplete.valueSuggestions.enabled\\" has been replaced by \\"kql.autocomplete.valueSuggestions.enabled\\"",
+        "Setting \\"data.autocomplete.valueSuggestions.enabled\\" has been replaced by \\"kql.autocomplete.valueSuggestions.enabled\\"",
       ]
     `);
   });
 
-  it('renames unifiedSearch.autocomplete.valueSuggestions.tiers to kql.autocomplete.valueSuggestions.tiers', () => {
+  it('renames data.autocomplete.valueSuggestions.tiers to kql.autocomplete.valueSuggestions.tiers', () => {
     const config = {
-      unifiedSearch: {
+      data: {
         autocomplete: {
           valueSuggestions: {
             tiers: [],
@@ -127,11 +127,11 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.unifiedSearch?.autocomplete.valueSuggestions.tiers).not.toBeDefined();
+    expect(migrated.data?.autocomplete.valueSuggestions.tiers).not.toBeDefined();
     expect(migrated.kql.autocomplete.valueSuggestions.tiers).toEqual([]);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"unifiedSearch.autocomplete.valueSuggestions.tiers\\" has been replaced by \\"kql.autocomplete.valueSuggestions.tiers\\"",
+        "Setting \\"data.autocomplete.valueSuggestions.tiers\\" has been replaced by \\"kql.autocomplete.valueSuggestions.tiers\\"",
       ]
     `);
   });

@@ -13,6 +13,11 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
   renameFromRoot,
 }) => [
   renameFromRoot(
+    'data.autocomplete.valueSuggestions.terminateAfter',
+    'kql.autocomplete.valueSuggestions.terminateAfter',
+    { level: 'warning' }
+  ),
+  renameFromRoot(
     'unifiedSearch.autocomplete.valueSuggestions.terminateAfter',
     'kql.autocomplete.valueSuggestions.terminateAfter',
     { level: 'warning' }
@@ -21,6 +26,18 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
     'kibana.autocompleteTerminateAfter',
     'kql.autocomplete.valueSuggestions.terminateAfter',
     { level: 'warning' }
+  ),
+  renameFromRoot(
+    'unifiedSearch.autocomplete.valueSuggestions.terminateAfter',
+    'kql.autocomplete.valueSuggestions.terminateAfter',
+    { level: 'warning' }
+  ),
+  renameFromRoot(
+    'data.autocomplete.valueSuggestions.timeout',
+    'kql.autocomplete.valueSuggestions.timeout',
+    {
+      level: 'warning',
+    }
   ),
   renameFromRoot(
     'unifiedSearch.autocomplete.valueSuggestions.timeout',
@@ -33,6 +50,20 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
     level: 'warning',
   }),
   renameFromRoot(
+    'unifiedSearch.autocomplete.valueSuggestions.timeout',
+    'kql.autocomplete.valueSuggestions.timeout',
+    {
+      level: 'warning',
+    }
+  ),
+  renameFromRoot(
+    'data.autocomplete.querySuggestions.enabled',
+    'kql.autocomplete.querySuggestions.enabled',
+    {
+      level: 'warning',
+    }
+  ),
+  renameFromRoot(
     'unifiedSearch.autocomplete.querySuggestions.enabled',
     'kql.autocomplete.querySuggestions.enabled',
     {
@@ -40,8 +71,22 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
     }
   ),
   renameFromRoot(
+    'data.autocomplete.valueSuggestions.enabled',
+    'kql.autocomplete.valueSuggestions.enabled',
+    {
+      level: 'warning',
+    }
+  ),
+  renameFromRoot(
     'unifiedSearch.autocomplete.valueSuggestions.enabled',
     'kql.autocomplete.valueSuggestions.enabled',
+    {
+      level: 'warning',
+    }
+  ),
+  renameFromRoot(
+    'data.autocomplete.valueSuggestions.tiers',
+    'kql.autocomplete.valueSuggestions.tiers',
     {
       level: 'warning',
     }
