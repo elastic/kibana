@@ -9,6 +9,7 @@ import { take } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { useMemo } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { buildEntityNameFilter, EntityType } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
@@ -35,7 +36,10 @@ export const usePrivilegedUsersTableData = (
   currentPage: number,
   toggleStatus: boolean
 ) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    core: { uiSettings },
+  } = useKibana().services;
   const privilegedUsersTableQuery = getPrivilegedUsersQuery(
     spaceId,
     currentPage * DEFAULT_PAGE_SIZE + 1 // we add 1 so that we know if there are more results to show
@@ -55,6 +59,7 @@ export const usePrivilegedUsersTableData = (
       return getESQLResults({
         esqlQuery: privilegedUsersTableQuery,
         search: data.search.search,
+        timezone: uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ),
         filter: filterQueryWithoutTimerange,
       });
     },

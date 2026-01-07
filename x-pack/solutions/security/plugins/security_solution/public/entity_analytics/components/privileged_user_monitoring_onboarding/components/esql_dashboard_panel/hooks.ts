@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 
 import { isLeft } from 'fp-ts/Either';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
@@ -23,7 +24,10 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
   tableQuery: EsqlQueryOrInvalidFields
 ) => {
   const filterQuery = useEsqlGlobalFilterQuery();
-  const { data } = useKibana().services;
+  const {
+    data,
+    core: { uiSettings },
+  } = useKibana().services;
 
   const {
     isInitialLoading,
@@ -45,6 +49,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
         search: data.search.search,
         signal,
         filter: filterQuery,
+        timezone: uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ),
       });
     },
     {

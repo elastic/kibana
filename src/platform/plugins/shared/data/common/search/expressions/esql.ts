@@ -54,7 +54,6 @@ type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
-  timezone?: string;
   timeField?: string;
   locale?: string;
 
@@ -108,14 +107,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'An ES|QL query.',
         }),
       },
-      timezone: {
-        aliases: ['tz'],
-        types: ['string'],
-        help: i18n.translate('data.search.esql.timezone.help', {
-          defaultMessage:
-            'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
-        }),
-      },
       timeField: {
         aliases: ['timeField'],
         types: ['string'],
@@ -159,15 +150,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     fn(
       input,
-      {
-        query,
-        timezone,
-        timeField,
-        locale,
-        titleForInspector,
-        descriptionForInspector,
-        ignoreGlobalFilters,
-      },
+      { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
@@ -193,10 +176,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
           const params: ESQLSearchParams = {
             query: fixedQuery,
-            time_zone:
-              esQueryConfigs.dateFormatTZ && !timezone
-                ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
-                : timezone,
+            time_zone: esQueryConfigs.dateFormatTZ
+              ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
+              : 'UTC',
             locale,
             include_execution_metadata: true,
           };
