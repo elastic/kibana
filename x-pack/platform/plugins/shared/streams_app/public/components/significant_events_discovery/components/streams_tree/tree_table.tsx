@@ -35,6 +35,7 @@ import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
 import {
   ACTIONS_COLUMN_HEADER,
+  FEATURES_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
   QUERIES_COLUMN_HEADER,
@@ -52,6 +53,7 @@ import {
   filterStreamsByQuery,
   shouldComposeTree,
 } from './utils';
+import { FeaturesColumn } from './features_column';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -332,6 +334,12 @@ export function StreamsTreeTable({
               </EuiFlexGroup>
             );
           },
+        },
+        {
+          name: FEATURES_COLUMN_HEADER,
+          width: '120px',
+          align: 'left',
+          render: (item: TableRow) => <FeaturesColumn streamName={item.stream.name} />,
         },
         {
           name: QUERIES_COLUMN_HEADER,

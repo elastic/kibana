@@ -48,7 +48,7 @@ export function SignificantEventsTable({
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
+  const { featuresByName, refreshFeatures } = useStreamFeatures(definition.name);
 
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const maxYValue = useMemo(

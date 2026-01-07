@@ -33,7 +33,7 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
     features: existingFeatures,
     refreshFeatures,
     featuresLoading,
-  } = useStreamFeatures(definition);
+  } = useStreamFeatures(definition.name);
 
   const [isLoading, setIsLoading] = useState(false);
 

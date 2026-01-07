@@ -52,7 +52,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     return niceTimeFormatter([timeState.start, timeState.end]);
   }, [timeState.start, timeState.end]);
 
-  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
+  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
   const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
   const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
   const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
