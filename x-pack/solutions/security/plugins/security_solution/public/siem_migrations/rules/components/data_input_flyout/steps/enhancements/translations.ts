@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ENHANCEMENTS_DATA_INPUT_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.enhancements.title',
-  { defaultMessage: 'Add enhancements' }
+  { defaultMessage: 'Add enhancements (Optional)' }
 );
 
 export const ENHANCEMENT_TYPE_LABEL = i18n.translate(
@@ -60,5 +60,13 @@ export const ENHANCEMENTS_INSTRUCTIONS = i18n.translate(
   {
     defaultMessage:
       'You have an option to upload additional data to enhance already uploaded rules. Enhancement are generally part of core rule data but are sometimes available in a separate file. Today with only support MITRE ATT&CK mappings as enhancements.',
+  }
+);
+
+export const ENHANCEMENTS_HELPER_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.enhancements.helperText',
+  {
+    defaultMessage:
+      'You will not be able to add enhancements if you close this flyout. Please add enhancement now for better translation results.',
   }
 );

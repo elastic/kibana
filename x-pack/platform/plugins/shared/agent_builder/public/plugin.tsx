@@ -14,7 +14,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { docLinks } from '../common/doc_links';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -24,14 +23,17 @@ import {
   AttachmentsService,
   ChatService,
   ConversationsService,
+  DocLinksService,
   NavigationService,
   ToolsService,
+  EventsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
-import { registerWorkflowSteps } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
+import { createPublicEventsContract } from './services/events';
+import { registerWorkflowSteps } from './step_types';
 import type {
   ConfigSchema,
   AgentBuilderPluginSetup,
@@ -100,12 +102,13 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
-    docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService();
-    const chatService = new ChatService({ http });
+    const eventsService = new EventsService();
+    const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -120,10 +123,12 @@ export class AgentBuilderPlugin
       attachmentsService,
       chatService,
       conversationsService,
+      docLinksService,
       navigationService,
       toolsService,
       startDependencies,
       accessChecker,
+      eventsService,
     };
 
     this.internalServices = internalServices;
@@ -161,6 +166,7 @@ export class AgentBuilderPlugin
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
+      events: createPublicEventsContract({ eventsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // set config until flyout is next opened
         this.conversationFlyoutActiveConfig = config;
