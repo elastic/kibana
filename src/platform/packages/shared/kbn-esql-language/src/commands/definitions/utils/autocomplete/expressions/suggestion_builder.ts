@@ -61,14 +61,15 @@ export class SuggestionBuilder {
 
   addFunctions(options?: {
     types?: FunctionParameterType[];
-    ignoredFunctions?: string[];
     addComma?: boolean;
     addSpaceAfterFunction?: boolean;
     openSuggestions?: boolean;
     constantGeneratingOnly?: boolean;
+    excludeParentFunctions?: boolean;
   }): this {
     const types = options?.types ?? ['any'];
-    const ignored = options?.ignoredFunctions ?? [];
+    const excludeParentFunctions = options?.excludeParentFunctions ?? false;
+    const ignored = this.resolveIgnoredFunctions(excludeParentFunctions);
     const addSpaceAfterFunction = options?.addSpaceAfterFunction;
     const openSuggestions = options?.openSuggestions;
     const constantGeneratingOnly = options?.constantGeneratingOnly ?? false;
@@ -158,5 +159,34 @@ export class SuggestionBuilder {
 
   build(): ISuggestionItem[] {
     return this.suggestions;
+  }
+
+  /**
+   * Returns functions to exclude from suggestions by merging two sources:
+   * 1. Command-level ignored functions (e.g., EVAL hides match_phrase)
+   *    - Applies exceptions: if current parent function is in allowedInsideFunctions, the function is not ignored
+   * 2. Parent function names for recursion prevention (e.g., ABS inside ABS)
+   *    - Only included when excludeParentFunctions=true
+   */
+  private resolveIgnoredFunctions(excludeParentFunctions: boolean): string[] {
+    const {
+      functionsToIgnore,
+      parentFunctionNames = [],
+      functionParameterContext,
+    } = this.context.options;
+    const parentFn = functionParameterContext?.functionDefinition?.name?.toLowerCase();
+
+    const isAllowedInsideParent = (fn: string) =>
+      parentFn &&
+      functionsToIgnore?.allowedInsideFunctions?.[fn]?.some((f) => f.toLowerCase() === parentFn);
+
+    const commandIgnored =
+      functionsToIgnore?.names.filter((fn) => !isAllowedInsideParent(fn)) ?? [];
+
+    if (!excludeParentFunctions) {
+      return commandIgnored;
+    }
+
+    return [...new Set([...commandIgnored, ...parentFunctionNames])];
   }
 }
