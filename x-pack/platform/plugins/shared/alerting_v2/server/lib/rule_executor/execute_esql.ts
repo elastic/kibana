@@ -12,8 +12,8 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { catchError, filter, lastValueFrom, map, throwError } from 'rxjs';
 import { hasStartEndParams } from '@kbn/esql-utils';
-import type { RuleSavedObjectAttributes } from '../saved_objects/schemas/rule_saved_object_attributes';
-import { parseDurationToMs } from '../lib/duration';
+import type { RuleSavedObjectAttributes } from '../../saved_objects/schemas/rule_saved_object_attributes';
+import { parseDurationToMs } from '../duration';
 
 export const getEsqlQuery = (
   params: ExecuteRuleParams,

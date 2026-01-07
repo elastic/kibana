@@ -18,12 +18,12 @@ import { CoreSetup } from '@kbn/core-di-server';
 
 import { AlertingRetryService } from './retry_service/alerting_retry_service';
 import type { AlertingServerStartDependencies } from '../../types';
-import { ALERT_EVENTS_INDEX } from '../../rule_executor/constants';
+import { ALERT_EVENTS_INDEX } from '../rule_executor/constants';
 import {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   alertsWrittenFieldsMappings,
-} from '../../rule_executor/resources';
+} from '../rule_executor/resources';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 

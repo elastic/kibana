@@ -22,10 +22,7 @@ import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
-import {
-  ensureRuleExecutorTaskScheduled,
-  getRuleExecutorTaskId,
-} from '../../rule_executor/schedule';
+import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 import type { CreateRuleParams, RuleResponse, UpdateRuleData } from './types';
 

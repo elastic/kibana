@@ -9,16 +9,16 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 
-import type { PluginConfig } from '../config';
-import type { AlertingServerStartDependencies } from '../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { RuleSavedObjectAttributes } from '../saved_objects';
-import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
+import type { PluginConfig } from '../../config';
+import type { AlertingServerStartDependencies } from '../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import { spaceIdToNamespace } from '../space_id_to_namespace';
 import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
 import { ALERT_EVENTS_INDEX } from './constants';
 import { writeEsqlAlerts } from './write_alerts';
-import type { AlertingResourcesService } from '../lib/services/alerting_resources_service';
+import type { AlertingResourcesService } from '../services/alerting_resources_service';
 
 export function createRuleExecutorTaskRunner({
   logger,

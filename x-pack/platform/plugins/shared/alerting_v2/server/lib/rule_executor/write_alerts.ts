@@ -11,7 +11,7 @@ import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import stringify from 'json-stable-stringify';
 
-import type { RuleSavedObjectAttributes } from '../saved_objects';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');

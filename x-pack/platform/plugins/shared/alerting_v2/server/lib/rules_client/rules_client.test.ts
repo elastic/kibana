@@ -25,10 +25,7 @@ jest.mock('../../rule_executor/schedule', () => ({
   getRuleExecutorTaskId: jest.fn(),
 }));
 
-import {
-  ensureRuleExecutorTaskScheduled,
-  getRuleExecutorTaskId,
-} from '../../rule_executor/schedule';
+import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 
 const ensureRuleExecutorTaskScheduledMock = ensureRuleExecutorTaskScheduled as jest.MockedFunction<
   typeof ensureRuleExecutorTaskScheduled
