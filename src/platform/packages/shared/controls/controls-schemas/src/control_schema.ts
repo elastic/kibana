@@ -8,47 +8,35 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  CONTROL_WIDTH_LARGE,
-  CONTROL_WIDTH_MEDIUM,
-  CONTROL_WIDTH_SMALL,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-constants';
-
-export const controlWidthSchema = schema.oneOf(
-  [
-    schema.literal(CONTROL_WIDTH_SMALL),
-    schema.literal(CONTROL_WIDTH_MEDIUM),
-    schema.literal(CONTROL_WIDTH_LARGE),
-  ],
-  {
-    defaultValue: DEFAULT_CONTROL_WIDTH,
-    meta: { description: 'Minimum width of the control panel in the control group.' },
-  }
-);
+import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
-    type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-    controlConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    id: schema.maybe(
-      schema.string({
-        meta: { description: 'The unique ID of the control.' },
-      })
+    title: schema.maybe(
+      schema.string({ meta: { description: 'A human-readable title for the control' } })
     ),
-    order: schema.number({
-      meta: {
-        description: 'The order of the control panel in the control group.',
-      },
-    }),
-    width: schema.maybe(controlWidthSchema),
-    grow: schema.maybe(
-      schema.boolean({
-        defaultValue: DEFAULT_CONTROL_GROW,
-        meta: { description: 'Expand width of the control panel to fit available space.' },
-      })
+    description: schema.maybe(
+      schema.string({ meta: { description: 'A description for the control' } })
     ),
   },
   { unknowns: 'allow' }
 );
+
+export const dataControlSchema = controlSchema.extends({
+  dataViewId: schema.string({
+    meta: { description: 'The ID of the data view that the control is tied to' }, // this will generate a reference
+  }),
+  fieldName: schema.string({
+    meta: { description: 'The name of the field in the data view that the control is tied to' },
+  }),
+  useGlobalFilters: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
+    })
+  ),
+  ignoreValidations: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_IGNORE_VALIDATIONS,
+    })
+  ),
+});

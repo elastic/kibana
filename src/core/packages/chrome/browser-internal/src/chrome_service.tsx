@@ -53,6 +53,7 @@ import type {
   NavigationTreeDefinition,
   SolutionId,
 } from '@kbn/core-chrome-browser';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
@@ -73,7 +74,6 @@ import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
 import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
-import { SideNavCollapseButton } from './ui/project/sidenav/collapse_button';
 import type { NavigationProps } from './ui/project/sidenav/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
@@ -212,6 +212,7 @@ export class ChromeService {
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
+    const appMenu$ = new BehaviorSubject<AppMenuConfig | undefined>(undefined);
     // ChromeStyle is set to undefined by default, which means that no header will be rendered until
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
@@ -277,6 +278,7 @@ export class ChromeService {
       helpExtension$.next(undefined);
       breadcrumbs$.next([]);
       badge$.next(undefined);
+      appMenu$.next(undefined);
       docTitle.reset();
     });
 
@@ -396,6 +398,7 @@ export class ChromeService {
         navControlsRight$={navControls.getRight$()}
         navControlsExtension$={navControls.getExtension$()}
         customBranding$={customBranding$}
+        appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
       />
     );
 
@@ -422,6 +425,7 @@ export class ChromeService {
       dataTestSubj$: activeDataTestSubj$,
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       feedbackUrlParams$,
+      onToggleCollapsed: setIsSideNavCollapsed,
     };
 
     const getProjectHeader = ({
@@ -455,6 +459,7 @@ export class ChromeService {
         application={application}
         globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
         actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
+        appMenu$={includeAppMenu ? appMenu$.pipe(takeUntil(this.stop$)) : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
         customBranding$={customBranding$}
@@ -471,19 +476,13 @@ export class ChromeService {
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
       >
-        {includeSideNav ? (
+        {includeSideNav && (
           <Router history={application.history}>
             <FixedLayoutProjectSideNav
               isCollapsed$={this.isSideNavCollapsed$}
-              toggle={setIsSideNavCollapsed}
               navProps={navProps}
             />
           </Router>
-        ) : (
-          <SideNavCollapseButton
-            isCollapsed={this.isSideNavCollapsed$}
-            toggle={setIsSideNavCollapsed}
-          />
         )}
       </ProjectHeader>
     );
@@ -569,7 +568,13 @@ export class ChromeService {
         );
       },
       getProjectAppMenuComponent: () => {
-        return <AppMenuBar appMenuActions$={application.currentActionMenu$} isFixed={false} />;
+        return (
+          <AppMenuBar
+            appMenuActions$={application.currentActionMenu$}
+            appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
+            isFixed={false}
+          />
+        );
       },
 
       // chrome APIs
@@ -597,6 +602,12 @@ export class ChromeService {
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
       setBreadcrumbs: setClassicBreadcrumbs,
+
+      getAppMenu$: () => appMenu$.pipe(takeUntil(this.stop$)),
+
+      setAppMenu: (config?: AppMenuConfig) => {
+        appMenu$.next(config);
+      },
 
       getBreadcrumbsAppendExtensions$: () =>
         breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$)),
