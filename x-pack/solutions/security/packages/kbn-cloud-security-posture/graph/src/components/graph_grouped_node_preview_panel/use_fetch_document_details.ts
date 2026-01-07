@@ -14,6 +14,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildEsQuery } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-service';
 import {
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
@@ -48,6 +51,12 @@ export interface UseFetchDocumentDetailsParams {
     refetchOnWindowFocus?: boolean;
     /** Keep previous data flag (defaults false) */
     keepPreviousData?: boolean;
+    /** KQL query for filtering */
+    query?: Query;
+    /** Filters for filtering */
+    filters?: Filter[];
+    /** Time range for filtering */
+    timeRange?: TimeRange;
   };
 }
 
@@ -69,25 +78,69 @@ export const buildDocumentsRequest = (
   dataViewId: DataView['id'],
   ids: string[],
   pageIndex: number,
-  pageSize: number
-) => ({
-  index: dataViewId,
-  size: pageSize,
-  from: pageIndex * pageSize,
-  ignore_unavailable: true,
-  track_total_hits: true,
-  query: {
-    bool: {
-      filter: [
-        {
-          terms: {
-            'event.id': ids,
+  pageSize: number,
+  esQuery?: unknown,
+  timeRange?: TimeRange
+) => {
+  const baseQuery = {
+    index: dataViewId,
+    size: pageSize,
+    from: pageIndex * pageSize,
+    ignore_unavailable: true,
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              'event.id': ids,
+            },
           },
-        },
-      ],
+        ],
+      },
     },
-  },
-});
+  };
+
+  // Add time range filter if provided
+  if (timeRange) {
+    baseQuery.query.bool.filter.push({
+      range: {
+        '@timestamp': {
+          gte: timeRange.from,
+          lte: timeRange.to,
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+  }
+
+  // Merge with user's query if provided
+  if (esQuery && typeof esQuery === 'object' && 'bool' in esQuery) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userQuery = esQuery as any;
+    if (userQuery.bool?.filter) {
+      baseQuery.query.bool.filter.push(...userQuery.bool.filter);
+    }
+    if (userQuery.bool?.must) {
+      if (!baseQuery.query.bool.must) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (baseQuery.query.bool as any).must = [];
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (baseQuery.query.bool as any).must.push(...userQuery.bool.must);
+    }
+    if (userQuery.bool?.should) {
+      if (!baseQuery.query.bool.should) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (baseQuery.query.bool as any).should = [];
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (baseQuery.query.bool as any).should.push(...userQuery.bool.should);
+    }
+  }
+
+  return baseQuery;
+};
 
 /**
  * Normalizes a value to an array of strings.
@@ -133,6 +186,7 @@ export const useFetchDocumentDetails = <_Source = unknown>({
   const missingDataView = !dataViewId;
   const {
     data: dataService,
+    uiSettings,
     notifications: { toasts },
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
 
@@ -142,6 +196,31 @@ export const useFetchDocumentDetails = <_Source = unknown>({
     [ids]
   );
 
+  // Build ES query from user's KQL query and filters
+  const esQuery = useMemo(() => {
+    if (!options.query && !options.filters?.length) {
+      return undefined;
+    }
+
+    try {
+      // Create a minimal dataView spec for buildEsQuery
+      const dataViewSpec = {
+        id: dataViewId,
+        title: dataViewId,
+        fields: [],
+      } as unknown as DataView;
+
+      return buildEsQuery(
+        dataViewSpec,
+        options.query ? [options.query] : [],
+        options.filters || [],
+        getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
+      );
+    } catch (err) {
+      return undefined;
+    }
+  }, [dataViewId, options.query, options.filters, uiSettings]);
+
   const queryKey = useMemo(
     () => [
       'useFetchDocumentDetails',
@@ -149,8 +228,20 @@ export const useFetchDocumentDetails = <_Source = unknown>({
       normalizedIds.join(','),
       options.pageIndex,
       options.pageSize,
+      options.query?.query || '',
+      JSON.stringify(options.filters || []),
+      options.timeRange?.from || '',
+      options.timeRange?.to || '',
     ],
-    [dataViewId, normalizedIds, options.pageIndex, options.pageSize]
+    [
+      dataViewId,
+      normalizedIds,
+      options.pageIndex,
+      options.pageSize,
+      options.query,
+      options.filters,
+      options.timeRange,
+    ]
   );
 
   const queryClient = useQueryClient();
@@ -166,7 +257,9 @@ export const useFetchDocumentDetails = <_Source = unknown>({
           dataViewId,
           normalizedIds,
           options.pageIndex,
-          options.pageSize
+          options.pageSize,
+          esQuery,
+          options.timeRange
         ),
       });
       const response = await lastValueFrom(search$);

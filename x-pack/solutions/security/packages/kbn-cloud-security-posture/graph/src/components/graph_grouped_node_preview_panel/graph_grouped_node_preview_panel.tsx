@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type FC } from 'react';
+import React, { memo, useMemo, useState, useEffect, useCallback, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
 import { usePagination } from './use_pagination';
 import type { EntityItem, EntityOrEventItem } from './components/grouped_item/types';
@@ -54,6 +58,8 @@ export interface GraphGroupedNodePreviewPanelProps {
   documentIds: string[];
   // entities data reused from graph
   entityItems: EntityItem[];
+  // timerange from graph investigation
+  timeRange: TimeRange;
 }
 
 interface PaginatedData {
@@ -119,15 +125,72 @@ const useContentMetadata = (
   }, [docMode, items]);
 };
 
+const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
+
 /**
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ docMode, dataViewId, documentIds, entityItems }) => {
+  ({ docMode, dataViewId, documentIds, entityItems, timeRange }) => {
+    const {
+      services: { data: dataService },
+    } = useKibana();
+
+    // Search state management
+    const [searchQuery, setSearchQuery] = useState<Query>(EMPTY_QUERY);
+    const [searchFilters, setSearchFilters] = useState<Filter[]>([]);
+    const [dataView, setDataView] = useState<DataView | null>(null);
+    const [isDataViewLoading, setIsDataViewLoading] = useState(false);
+
+    // Fetch DataView for grouped-events mode
+    useEffect(() => {
+      if (docMode === 'grouped-events' && dataViewId) {
+        setIsDataViewLoading(true);
+        dataService?.dataViews
+          .get(dataViewId)
+          .then((dv) => {
+            setDataView(dv);
+            setIsDataViewLoading(false);
+          })
+          .catch(() => {
+            setIsDataViewLoading(false);
+          });
+      }
+    }, [docMode, dataViewId, dataService]);
+
     // Initialize pagination state with localStorage persistence
     // - For 'grouped-entities': Pass entityItems.length to enable client-side pagination validation
     // - For 'grouped-events': Pass 0 since events use server-side pagination (handled by useFetchDocumentDetails)
-    const pagination = usePagination(docMode === 'grouped-entities' ? entityItems.length : 0);
+
+    // Client-side filtering for grouped-entities
+    const filteredEntityItems = useMemo(() => {
+      if (docMode !== 'grouped-entities') {
+        return entityItems;
+      }
+
+      const queryText = searchQuery.query.trim().toLowerCase();
+      if (!queryText) {
+        return entityItems;
+      }
+
+      return entityItems.filter((item) => {
+        const searchableText = [item.id, item.label, item.type, item.subType]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return searchableText.includes(queryText);
+      });
+    }, [docMode, entityItems, searchQuery]);
+
+    const pagination = usePagination(
+      docMode === 'grouped-entities' ? filteredEntityItems.length : 0
+    );
+
+    // Reset pagination when search changes
+    useEffect(() => {
+      pagination.goToPage(0);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchQuery, searchFilters]);
 
     const { data, isLoading, refresh } = useFetchDocumentDetails({
       dataViewId,
@@ -136,13 +199,38 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         pageIndex: pagination.state.pageIndex,
         pageSize: pagination.state.pageSize,
         enabled: docMode === 'grouped-events',
+        query: docMode === 'grouped-events' ? searchQuery : undefined,
+        filters: docMode === 'grouped-events' ? searchFilters : undefined,
+        timeRange: docMode === 'grouped-events' ? timeRange : undefined,
       },
     });
 
-    const { items, totalHits } = usePaginatedData(docMode, entityItems, pagination.state, data);
+    const { items, totalHits } = usePaginatedData(
+      docMode,
+      filteredEntityItems,
+      pagination.state,
+      data
+    );
     const { icon, groupedItemsType } = useContentMetadata(docMode, items);
 
-    if (isLoading) {
+    // Search callbacks
+    const onQuerySubmit = useCallback(
+      (payload: { query?: Query }, isUpdate?: boolean) => {
+        if (payload.query) {
+          setSearchQuery(payload.query);
+        }
+        if (!isUpdate && docMode === 'grouped-events') {
+          refresh();
+        }
+      },
+      [docMode, refresh]
+    );
+
+    const onFiltersUpdated = useCallback((newFilters: Filter[]) => {
+      setSearchFilters(newFilters);
+    }, []);
+
+    if (isLoading || isDataViewLoading) {
       return <LoadingBody />;
     }
 
@@ -151,13 +239,37 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     }
 
     return (
-      <ContentBody
-        items={items}
-        totalHits={totalHits}
-        icon={icon}
-        groupedItemsType={groupedItemsType}
-        pagination={pagination}
-      />
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <SearchBar<Query>
+            showFilterBar={true}
+            showDatePicker={true}
+            showAutoRefreshOnly={false}
+            showSaveQuery={false}
+            showQueryInput={true}
+            disableQueryLanguageSwitcher={true}
+            isLoading={isLoading}
+            isAutoRefreshDisabled={true}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            query={searchQuery}
+            indexPatterns={dataView ? [dataView] : undefined}
+            filters={searchFilters}
+            submitButtonStyle={'iconOnly'}
+            onFiltersUpdated={onFiltersUpdated}
+            onQuerySubmit={onQuerySubmit}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ContentBody
+            items={items}
+            totalHits={totalHits}
+            icon={icon}
+            groupedItemsType={groupedItemsType}
+            pagination={pagination}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

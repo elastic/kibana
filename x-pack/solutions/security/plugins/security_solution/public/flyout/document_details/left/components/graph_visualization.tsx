@@ -103,7 +103,7 @@ export const GraphVisualization: React.FC = memo(() => {
   );
 
   const onOpenEventPreview = useCallback(
-    (node: NodeViewModel) => {
+    (node: NodeViewModel, currentTimeRange: TimeRange) => {
       const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
@@ -158,6 +158,7 @@ export const GraphVisualization: React.FC = memo(() => {
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
             docMode,
+            timeRange: currentTimeRange,
             entityItems: (node.documentsData as NodeDocumentDataModel[])
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
               .map((doc) => ({
@@ -171,6 +172,8 @@ export const GraphVisualization: React.FC = memo(() => {
           },
         });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
+        console.log("graphTimeRange1 ", graphTimeRange);
+
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -180,6 +183,7 @@ export const GraphVisualization: React.FC = memo(() => {
             banner: GROUP_PREVIEW_BANNER,
             docMode,
             dataViewId: dataViewIndexPattern,
+            timeRange: currentTimeRange,
             documentIds: (node.documentsData as NodeDocumentDataModel[])
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
               .map((doc) => doc.event?.id),
