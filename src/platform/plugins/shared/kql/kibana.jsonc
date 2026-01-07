@@ -6,6 +6,7 @@
   "visibility": "shared",
   "plugin": {
     "id": "kql",
+    "configPath": "unifiedSearch",
     "server": true,
     "browser": true,
     "optionalPlugins": [
