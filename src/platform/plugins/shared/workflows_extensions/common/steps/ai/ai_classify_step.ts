@@ -68,10 +68,12 @@ export const AiClassifyStepCommonDefinition: CommonStepDefinition<
  */
 export function buildStructuredOutputSchema(
   params: z.infer<AiClassifyStepInputSchema>
-): z.ZodObject {
+): typeof OutputSchema {
   const { allowMultipleCategories, includeRationale } = params;
 
-  let shape: Record<string, z.ZodType> = {};
+  let shape: Record<string, z.ZodType> = {
+    metadata: z.record(z.string(), z.any()),
+  };
 
   if (allowMultipleCategories) {
     shape = {
@@ -87,5 +89,5 @@ export function buildStructuredOutputSchema(
     shape.rationale = z.string();
   }
 
-  return z.object(shape);
+  return z.object(shape) as typeof OutputSchema;
 }
