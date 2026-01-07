@@ -33,6 +33,8 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: ['ksc-789'],
       workflowIds: ['workflow-1', 'workflow-2'],
       toolIds: ['tool-1'],
+      createdAt: undefined,
+      updatedAt: undefined,
     });
   });
 
@@ -59,6 +61,8 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: [],
       workflowIds: [],
       toolIds: [],
+      createdAt: undefined,
+      updatedAt: undefined,
     });
   });
 
@@ -85,6 +89,8 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: ['ksc-1'],
       workflowIds: [],
       toolIds: [],
+      createdAt: undefined,
+      updatedAt: undefined,
     });
   });
 
@@ -111,6 +117,38 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: ['ksc-1', 'ksc-2', 'ksc-3'],
       workflowIds: ['wf-1'],
       toolIds: ['t-1', 't-2'],
+      createdAt: undefined,
+      updatedAt: undefined,
+    });
+  });
+
+  it('should include timestamps when provided by Saved Objects', () => {
+    const savedObject: SavedObject<DataConnectorAttributes> = {
+      id: 'connector-with-timestamps',
+      type: 'data_connector',
+      references: [],
+      created_at: '2025-01-07T10:00:00.000Z',
+      updated_at: '2025-01-07T12:30:00.000Z',
+      attributes: {
+        name: 'Timestamped Connector',
+        type: 'notion',
+        workflowIds: [],
+        toolIds: [],
+        kscIds: ['ksc-123'],
+      },
+    };
+
+    const result = convertSOtoAPIResponse(savedObject);
+
+    expect(result).toEqual({
+      id: 'connector-with-timestamps',
+      name: 'Timestamped Connector',
+      type: 'notion',
+      stackConnectors: ['ksc-123'],
+      workflowIds: [],
+      toolIds: [],
+      createdAt: '2025-01-07T10:00:00.000Z',
+      updatedAt: '2025-01-07T12:30:00.000Z',
     });
   });
 });

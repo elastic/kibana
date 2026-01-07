@@ -10,7 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type {
@@ -147,13 +147,9 @@ export async function createConnectorAndRelatedResources(
   }
 
   // Create the data connector saved object
-  const now = new Date().toISOString();
-  logger.info(`Creating ${DATA_CONNECTOR_SAVED_OBJECT_TYPE} SO at ${now}`);
   const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
     name,
     type,
-    createdAt: now,
-    updatedAt: now,
     workflowIds,
     toolIds,
     kscIds: [stackConnector.id],
@@ -406,7 +402,6 @@ export async function deleteConnectorAndRelatedResources(
       kscIds: deletionResult.failedKscIds,
       toolIds: deletionResult.failedToolIds,
       workflowIds: deletionResult.failedWorkflowIds,
-      updatedAt: new Date().toISOString(),
     };
 
     await savedObjectsClient.update(

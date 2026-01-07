@@ -16,6 +16,8 @@ export interface DataConnectorAPIResponse {
   stackConnectors: string[];
   agentTools: string[];
   workflows: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function convertSOtoAPIResponse(
@@ -28,6 +30,8 @@ export function convertSOtoAPIResponse(
     stackConnectors: savedObject.attributes.kscIds,
     agentTools: savedObject.attributes.toolIds,
     workflows: savedObject.attributes.workflowIds,
+    createdAt: savedObject.created_at,
+    updatedAt: savedObject.updated_at,
   };
 }
 

@@ -30,4 +30,6 @@ export interface ActiveSource {
   workflowIds: string[];
   toolIds: string[];
   usedBy?: Agent[]; // Agents using this source (future)
+  createdAt?: string; // Auto-populated by Saved Objects
+  updatedAt?: string; // Auto-populated by Saved Objects
 }
