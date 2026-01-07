@@ -50,7 +50,6 @@ export abstract class EntityStoreTask {
         params: {},
         state: {},
       });
-      this.logger.info(`Task ${taskName} scheduled successfully with interval ${interval}`);
     } catch (e) {
       this.logger.error(`Error scheduling task ${taskName}: ${e}`);
       throw e;

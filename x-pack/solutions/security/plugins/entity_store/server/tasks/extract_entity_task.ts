@@ -23,8 +23,6 @@ export class ExtractEntityTask extends EntityStoreTask {
   }
 
   protected async run(taskInstance: ConcreteTaskInstance): Promise<RunResult> {
-    this.logger.info(`Executing entity task for entity type ${this.entityType}`);
-
     // Read the current state from the previous run (or default empty object)
     const currentState = taskInstance.state || {};
     const runs = currentState.runs || 0;
@@ -39,8 +37,6 @@ export class ExtractEntityTask extends EntityStoreTask {
         runs: runs + 1,
         entityType: this.entityType,
       };
-
-      this.logger.info(`Completed successfully. Total runs: ${updatedState.runs}`);
 
       return {
         state: updatedState,
