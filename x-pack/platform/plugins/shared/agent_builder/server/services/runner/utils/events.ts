@@ -12,7 +12,10 @@ import type {
   ToolEventEmitter,
   ToolEventHandlerFn,
 } from '@kbn/agent-builder-server';
-import type { InternalToolProgressEvent } from '@kbn/agent-builder-server/runner';
+import type {
+  InternalToolUiEvent,
+  InternalToolProgressEvent,
+} from '@kbn/agent-builder-server/runner/events';
 import { ChatEventType } from '@kbn/agent-builder-common';
 
 /**
@@ -60,12 +63,23 @@ export const createToolEventEmitter = ({
       };
       eventHandler(event);
     },
+    sendUiEvent: (eventName, data) => {
+      const event: InternalToolUiEvent = {
+        type: ChatEventType.toolUi,
+        data: {
+          custom_event: eventName,
+          data,
+        },
+      };
+      eventHandler(event);
+    },
   };
 };
 
-const createNoopToolEventEmitter = () => {
+const createNoopToolEventEmitter = (): ToolEventEmitter => {
   return {
     reportProgress: () => {},
+    sendUiEvent: () => {},
   };
 };
 

@@ -9,3 +9,4 @@ export { formatAgentBuilderErrorMessage } from './base/errors';
 export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';
 export type { AgentsServiceStartContract } from './agents';
 export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
+export type { EventsServiceStartContract, BrowserChatEvent } from './events';

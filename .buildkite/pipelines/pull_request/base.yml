@@ -24,7 +24,7 @@ steps:
     agents:
       machineType: n2-standard-8
       preemptible: true
-      diskSizeGb: 150
+      diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
