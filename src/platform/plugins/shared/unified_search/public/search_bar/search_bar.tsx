@@ -281,8 +281,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   private prefillWithInitialDraftState = (state: SearchBarState<QT>): SearchBarState<QT> => {
     const { draft, query } = this.props;
 
-    console.log('Prefilling with draft state:', { draft: draft?.query, query });
-
     if (!draft) {
       return state;
     }
