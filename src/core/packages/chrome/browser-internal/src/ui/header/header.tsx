@@ -17,8 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
-import React, { createRef, useState } from 'react';
+import React, { createRef, useState, useMemo } from 'react';
 import type { Observable } from 'rxjs';
+import { map, EMPTY } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
@@ -33,8 +35,10 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { HeaderAppMenu } from './header_app_menu';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -74,6 +78,7 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   isFixed: boolean;
+  appMenu$: Observable<AppMenuConfig | undefined>;
 }
 
 export function Header({
@@ -93,6 +98,15 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
+
+  const hasBeta$ = useMemo(
+    () =>
+      observables.appMenu$?.pipe(
+        map((config) => !!config && !!config.items && config.items.length > 0)
+      ) ?? EMPTY,
+    [observables.appMenu$]
+  );
+  const hasBetaConfig = useObservable(hasBeta$, false);
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
@@ -208,7 +222,11 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderActionMenu mounter={headerActionMenuMounter} />
+                {hasBetaConfig ? (
+                  <HeaderAppMenu config={observables.appMenu$} />
+                ) : (
+                  <HeaderActionMenu mounter={headerActionMenuMounter} />
+                )}
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -33,49 +34,56 @@ describe('RuntimeFieldsPlugin', () => {
   });
 
   test('should return a handler to load the runtime field editor', async () => {
-    const setupApi = await plugin.setup(coreSetup, {});
+    const setupApi = plugin.setup(coreSetup, {});
     expect(setupApi.loadEditor).toBeDefined();
   });
 
   test('once it is loaded it should expose a handler to open the editor', async () => {
-    const setupApi = await plugin.setup(coreSetup, {});
+    const setupApi = plugin.setup(coreSetup, {});
     const response = await setupApi.loadEditor();
     expect(response.openEditor).toBeDefined();
   });
 
   test('should call core.overlays.openFlyout when opening the editor', async () => {
-    const openFlyout = jest.fn();
     const onSaveSpy = jest.fn();
 
-    const mockCore = {
-      overlays: {
-        openFlyout,
-      },
-      uiSettings: {},
-      theme: themeServiceMock.createStartContract(),
-    };
-    coreSetup.getStartServices = async () => [mockCore] as any;
-    const setupApi = await plugin.setup(coreSetup, {});
+    const coreStart = coreMock.createStart();
+    const openFlyout = jest.spyOn(coreStart.overlays, 'openFlyout');
+
+    // RuntimeFieldsPlugin expects theme in start services.
+    coreStart.theme = themeServiceMock.createStartContract();
+
+    const startPlugins = {} as StartPlugins;
+    const pluginStart = {} as PluginStart;
+    coreSetup.getStartServices = async () => [coreStart, startPlugins, pluginStart];
+    const setupApi = plugin.setup(coreSetup, {});
     const { openEditor } = await setupApi.loadEditor();
 
     openEditor({ onSave: onSaveSpy });
 
     expect(openFlyout).toHaveBeenCalled();
 
-    const [[arg]] = openFlyout.mock.calls;
-    expect(arg.props.children.type).toBe(RuntimeFieldEditorFlyoutContent);
+    const [[mountPoint]] = openFlyout.mock.calls;
+    const maybeElement: unknown = mountPoint;
+    expect(React.isValidElement(maybeElement)).toBe(true);
+
+    const provider = maybeElement as React.ReactElement<{ children?: unknown }>;
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.
     // Note: we are testing implementation details, if we change or rename the "onSave" prop on
     // the component, we will need to update this test accordingly.
-    expect(arg.props.children.props.onSave).toBeDefined();
-    arg.props.children.props.onSave();
+    expect(React.isValidElement(provider.props.children)).toBe(true);
+    const flyout = provider.props.children as React.ReactElement<{ onSave?: () => void }>;
+
+    expect(flyout.type).toBe(RuntimeFieldEditorFlyoutContent);
+    expect(flyout.props.onSave).toBeDefined();
+    flyout.props.onSave?.();
     expect(onSaveSpy).toHaveBeenCalled();
   });
 
   test('should return a handler to close the flyout', async () => {
-    const setupApi = await plugin.setup(coreSetup, {});
+    const setupApi = plugin.setup(coreSetup, {});
     const { openEditor } = await setupApi.loadEditor();
 
     const closeEditorHandler = openEditor({ onSave: noop });
