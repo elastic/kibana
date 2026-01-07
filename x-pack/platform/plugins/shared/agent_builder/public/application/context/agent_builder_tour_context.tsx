@@ -62,15 +62,16 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.agentSelector.content', {
       defaultMessage:
-        'I’m here to help with your questions. Pick a different agent or customize a new one anytime.',
+        "An agent's behavior is defined by its custom instructions and available tools. Switch agents when you need different capabilities for your tasks.",
     }),
   },
   llmSelector: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.title', {
-      defaultMessage: 'You’re using this model 🧠',
+      defaultMessage: 'Select your LLM 🧠',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.content', {
-      defaultMessage: 'I’ll answer using this LLM. Switch to another model you have setup.',
+      defaultMessage:
+        'Your agent uses this model to generate responses. Switch LLMs to prioritize faster responses, lower costs, or more complex reasoning.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
@@ -84,19 +85,19 @@ const labels = {
   // },
   conversationsHistory: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.title', {
-      defaultMessage: 'Your conversations 💬',
+      defaultMessage: 'Browse your conversations 💬',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.content', {
-      defaultMessage: 'Come back to earlier chats or jump between them from here.',
+      defaultMessage: 'Find all your previous conversations here.',
     }),
   },
   conversationActions: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.title', {
-      defaultMessage: 'Additional actions ⚙️',
+      defaultMessage: 'Jump to key actions ⚙️',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.content', {
       defaultMessage:
-        'Access conversation actions, agent controls, and management settings from here.',
+        'This menu is your hub for key management actions. You can quickly access important pages from here.',
     }),
   },
   closeTour: i18n.translate('xpack.agentBuilder.agentBuilderTour.closeTour', {

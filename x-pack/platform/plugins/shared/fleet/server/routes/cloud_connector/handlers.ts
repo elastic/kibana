@@ -171,7 +171,9 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
   TypeOf<typeof DeleteCloudConnectorRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
+  const coreContext = await context.core;
   const { internalSoClient } = fleetContext;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const cloudConnectorId = request.params.cloudConnectorId;
   const force = request.query.force || false;
   const logger = appContextService
@@ -180,7 +182,12 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
 
   try {
     logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
-    const result = await cloudConnectorService.delete(internalSoClient, cloudConnectorId, force);
+    const result = await cloudConnectorService.delete(
+      internalSoClient,
+      esClient,
+      cloudConnectorId,
+      force
+    );
     logger.info(`Successfully deleted cloud connector ${cloudConnectorId}`);
     const body: DeleteCloudConnectorResponse = {
       id: result.id,

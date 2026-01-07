@@ -35,8 +35,8 @@ log.info(response.output);
 
 Running a recipe:
 
-```
-$ yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
+```bash
+yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
 ```
 
 ## EIS
@@ -45,11 +45,12 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 
 ### Prerequisites
 
-1. **Vault Access**: Make sure you have configured Vault to point at Elastic's [Infra Vault](https://docs.elastic.dev/vault/infra-vault/home) server and that you're logged in via `vault login -method=okta`. The script will fetch the EIS API key from `secret/kibana-issues/dev/inference/kibana-eis-ccm`.
+1. **Vault Access**: Make sure you have configured Vault to point at Elastic's [Infra Vault](https://docs.elastic.dev/vault#infra-vault) server and that you're logged in via `vault login --method oidc`. The script will fetch the EIS API key from `secret/kibana-issues/dev/inference/kibana-eis-ccm`.
 
 2. **Elasticsearch**: Start Elasticsearch with the CCM URL flag:
+
    ```bash
-   yarn es snapshot -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+   yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
    ```
 
 3. **Credentials**: The script will automatically detect Elasticsearch credentials from:
@@ -60,9 +61,10 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 
 ```bash
 # Start Elasticsearch with CCM enabled
-yarn es snapshot -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
 
-# In a separate terminal, configure CCM
+# In a separate terminal, configure CCM 
+# Use --no-ssl for HTTP connections
 node scripts/eis.js
 ```
 

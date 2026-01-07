@@ -310,36 +310,6 @@ export const topNavStrings = {
   },
 };
 
-export const getControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.controlsButtonTitle', {
-    defaultMessage: 'Controls',
-  });
-
-export const getAddControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Control',
-  });
-
-export const getAddESQLControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
-    defaultMessage: 'Variable control',
-  });
-
-export const getEditControlGroupButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
-    defaultMessage: 'Settings',
-  });
-
-export const getOnlyOneTimeSliderControlMsg = () =>
-  i18n.translate('dashboard.editingToolbar.onlyOneTimeSliderControlMsg', {
-    defaultMessage: 'Control group already contains time slider control.',
-  });
-
-export const getAddTimeSliderControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
-    defaultMessage: 'Time slider control',
-  });
-
 export const contentEditorFlyoutStrings = {
   readonlyReason: {
     accessControl: i18n.translate('dashboard.contentEditorFlyout.readonlyReason.accessControl', {

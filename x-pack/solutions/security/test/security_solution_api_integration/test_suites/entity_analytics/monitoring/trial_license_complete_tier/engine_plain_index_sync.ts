@@ -57,15 +57,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should soft delete user when they are removed', async () => {
+        // add user to incoming index, for monitoring source
         await indexSyncUtils.addUsersToIndex(['user1', 'user2']);
-
         await indexSyncUtils.createEntitySourceForIndex();
-
+        // users from internal index
         const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
+
+        // find user1 in internal index
         const user1Before = privMonUtils.findUser(usersBefore, 'user1');
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
+        // delete from incoming index (tatooine-privileged-users)
         await indexSyncUtils.deleteUserFromIndex('user1');
-        // add a new user so we know when the task completes
+        // add a new user so we know when the task completes - tatooine-privileged-users now has only 'user2' and 'user3'
         await indexSyncUtils.addUsersToIndex(['user3']);
 
         const usersAfter = await privMonUtils.scheduleEngineAndWaitForUserCount(3);

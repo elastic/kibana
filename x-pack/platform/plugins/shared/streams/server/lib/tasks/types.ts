@@ -5,39 +5,68 @@
  * 2.0.
  */
 
-interface PersistedTaskBase {
+export type TaskStatus =
+  | 'not_started'
+  | 'in_progress'
+  | 'completed'
+  | 'acknowledged'
+  | 'failed'
+  | 'being_canceled'
+  | 'canceled';
+
+interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
   type: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'failed';
+  status: TaskStatus;
   stream: string;
   space: string;
   created_at: string;
+  task: {
+    params: TParams;
+  };
 }
 
-interface NotStartedTask extends PersistedTaskBase {
+interface NotStartedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
   status: 'not_started';
 }
-interface InProgressTask extends PersistedTaskBase {
+interface InProgressTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
   status: 'in_progress';
 }
-interface CompletedTask<TPayload extends {}> extends PersistedTaskBase {
+interface BeingCanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
+  status: 'being_canceled';
+}
+interface CanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
+  status: 'canceled';
+}
+interface CompletedTask<TParams extends {} = {}, TPayload extends {} = {}>
+  extends PersistedTaskBase<TParams> {
   status: 'completed';
-  task: {
+  task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
-interface FailedTask extends PersistedTaskBase {
+interface AcknowledgedTask<TParams extends {} = {}, TPayload extends {} = {}>
+  extends PersistedTaskBase<TParams> {
+  status: 'acknowledged';
+  task: PersistedTaskBase<TParams>['task'] & {
+    payload: TPayload;
+  };
+}
+interface FailedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
   status: 'failed';
-  task: {
+  task: PersistedTaskBase<TParams>['task'] & {
     error: string;
   };
 }
 
-export type PersistedTask<TPayload extends {} = {}> =
-  | NotStartedTask
-  | InProgressTask
-  | CompletedTask<TPayload>
-  | FailedTask;
+export type PersistedTask<TParams extends {} = {}, TPayload extends {} = {}> =
+  | NotStartedTask<TParams>
+  | InProgressTask<TParams>
+  | CompletedTask<TParams, TPayload>
+  | AcknowledgedTask<TParams, TPayload>
+  | FailedTask<TParams>
+  | BeingCanceledTask<TParams>
+  | CanceledTask<TParams>;
 
 export type TaskParams<TParams extends {} = {}> = TParams & {
   _task: PersistedTask;

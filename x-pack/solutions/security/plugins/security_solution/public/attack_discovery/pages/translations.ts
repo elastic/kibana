@@ -27,3 +27,10 @@ export const SHOW_ANONYMIZED_LABEL = i18n.translate(
     defaultMessage: 'Show anonymized values',
   }
 );
+
+export const ANONYMIZATION_ARIAL_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.anonymizationArialLabel',
+  {
+    defaultMessage: 'Anonymization',
+  }
+);

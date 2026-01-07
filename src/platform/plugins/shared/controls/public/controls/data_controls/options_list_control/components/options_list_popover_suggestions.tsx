@@ -16,8 +16,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
@@ -64,7 +64,7 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
     componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.allowExpensiveQueries$
   );
 
   const listRef = useRef<HTMLDivElement>(null);

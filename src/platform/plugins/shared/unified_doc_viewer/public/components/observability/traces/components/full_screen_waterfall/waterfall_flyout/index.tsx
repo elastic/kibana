@@ -113,7 +113,13 @@ export function WaterfallFlyout({
           </EuiTitle>
         </EuiSkeletonTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        css={css`
+          & .euiFlyoutBody__overflow {
+            overflow-y: hidden;
+          }
+        `}
+      >
         {loading || !hit ? (
           <EuiSkeletonText lines={5} />
         ) : (

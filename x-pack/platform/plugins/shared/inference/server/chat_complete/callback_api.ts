@@ -12,6 +12,7 @@ import {
   createInferenceRequestError,
   getConnectorFamily,
   getConnectorProvider,
+  getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
@@ -155,6 +156,7 @@ export function createChatCompleteCallbackApi({
                   tools,
                   toolChoice,
                   model: {
+                    id: modelName ?? getConnectorDefaultModel(connector),
                     family: getConnectorFamily(connector),
                     provider: getConnectorProvider(connector),
                   },

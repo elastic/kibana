@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-  DataControlApi,
-} from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlPanelsState,
+  type ControlGroupRendererApi,
+  type ControlGroupRuntimeState,
+} from '@kbn/control-group-renderer';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
+import type { DataControlApi } from '@kbn/controls-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -56,9 +57,7 @@ export const ControlsContent = ({
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
-      chainingSystem: 'HIERARCHICAL',
-      labelPosition: 'oneLine',
-      initialChildControlState: controlPanels,
+      initialChildControlState: controlPanels as ControlPanelsState,
     };
 
     return { initialState: initialInput };
@@ -76,6 +75,7 @@ export const ControlsContent = ({
         maybePanelId: replaceable.key,
         serializedState: {
           rawState: {
+            id: replaceable.key,
             ...replaceable.control,
             dataViewId: dataView?.id,
           },
@@ -90,22 +90,20 @@ export const ControlsContent = ({
 
       controlGroupAPI.current = controlGroup;
 
-      controlGroup.untilInitialized().then(() => {
-        subscriptions.current.add(
-          controlGroup.children$.subscribe((children) => {
-            Object.keys(children).map((childId) => {
-              const child = children[childId] as DataControlApi;
+      subscriptions.current.add(
+        controlGroup.children$.subscribe((children) => {
+          Object.keys(children).map((childId) => {
+            const child = children[childId] as DataControlApi;
 
-              child.CustomPrependComponent = () => (
-                <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
-              );
-            });
-          })
-        );
-      });
+            child.CustomPrependComponent = () => (
+              <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
+            );
+          });
+        })
+      );
 
       subscriptions.current.add(
-        controlGroup.filters$.subscribe((newFilters = []) => {
+        controlGroup.appliedFilters$.subscribe((newFilters = []) => {
           onFiltersChange(newFilters);
         })
       );

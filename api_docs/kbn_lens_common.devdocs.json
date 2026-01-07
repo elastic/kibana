@@ -4611,7 +4611,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4619,7 +4619,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4627,7 +4627,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4635,7 +4635,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4643,7 +4643,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4651,7 +4651,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4659,7 +4659,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4667,7 +4667,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7146,25 +7146,25 @@
               "Observable",
               "<any> | undefined; readonly value: Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
               "> | undefined; error: (err: any) => void; forEach: { (next: (value: Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
               "> | undefined) => void): Promise<void>; (next: (value: Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7172,17 +7172,17 @@
               "Operator",
               "<any, Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
               "> | undefined> | undefined; complete: () => void; getValue: () => Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7190,9 +7190,9 @@
               "Observable",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7200,9 +7200,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7212,9 +7212,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7226,9 +7226,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7242,9 +7242,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7260,9 +7260,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7280,9 +7280,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7302,9 +7302,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7326,9 +7326,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7352,9 +7352,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7380,9 +7380,9 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7410,9 +7410,9 @@
               "Observer",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7420,9 +7420,9 @@
               "Operator",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7432,9 +7432,9 @@
               "Observable",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7442,17 +7442,17 @@
               "Observer",
               "<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
               "> | undefined>> | ((value: Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7460,9 +7460,9 @@
               "Subscription",
               "; (next?: ((value: Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -7470,25 +7470,25 @@
               "Subscription",
               "; }; toPromise: { (): Promise<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
               "> | undefined>; (PromiseCtor: PromiseConstructor): Promise<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
               "> | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibControlsPluginApi",
+                "docId": "kibKbnControlGroupRendererPluginApi",
                 "section": "def-public.ControlGroupRendererApi",
                 "text": "ControlGroupRendererApi"
               },
@@ -10348,7 +10348,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>"
+              "<object, object>[]>"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
             "deprecated": false,
@@ -11202,7 +11202,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11210,7 +11210,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11218,7 +11218,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11226,7 +11226,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11234,7 +11234,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11242,7 +11242,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11250,7 +11250,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11258,7 +11258,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -26776,7 +26776,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -26784,7 +26784,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -27649,7 +27649,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; }"
+          "<object, object>[]>; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "deprecated": false,
@@ -27886,15 +27886,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -27918,7 +27910,15 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; esqlVariables?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -27942,7 +27942,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29136,15 +29136,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29168,7 +29160,15 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; esqlVariables?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -29192,7 +29192,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29501,7 +29501,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; }"
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "deprecated": false,
@@ -30277,7 +30277,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -30285,7 +30285,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -31081,7 +31081,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; } & ",
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -31287,7 +31287,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -31295,7 +31295,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -34082,15 +34082,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -34114,7 +34106,15 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; esqlVariables?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -34138,7 +34138,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -34347,7 +34347,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -34355,7 +34355,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",

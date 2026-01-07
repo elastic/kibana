@@ -80,7 +80,7 @@ export class SyncGlobalParamsPrivateLocationsTask {
 
         const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
         if (allPrivateLocations.length > 0) {
-          await this.deployPackagePolicies.syncPackagePolicies({
+          await this.deployPackagePolicies.syncAllPackagePolicies({
             allPrivateLocations,
             soClient,
             encryptedSavedObjects,

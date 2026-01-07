@@ -81,6 +81,7 @@ function getExistingEsqlQuery(config: VisualizationConfig | null): string | null
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
+  index: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType>(),
   schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
@@ -125,6 +126,7 @@ export const createVisualizationGraph = (
 
       const generateEsqlResponse = await generateEsql({
         nlQuery: nlQueryWithContext,
+        index: state.index,
         model,
         events,
         logger,

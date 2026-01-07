@@ -28,6 +28,7 @@ describe('Customize panel action', () => {
         parentApi: {},
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
+        isCustomizable: true,
       },
     };
   });

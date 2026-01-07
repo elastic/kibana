@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
+      await dashboardControls.deleteAllPinnedControls();
       await dashboard.clickQuickSave();
     });
 
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
           'animals-*'
         );
-        await dashboardControls.deleteAllControls();
+        await dashboardControls.deleteAllPinnedControls();
       });
     });
 
@@ -133,7 +133,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newTitle = 'wow! Animal sounds?';
         await dashboardControls.editExistingControl(secondId);
         await dashboardControls.controlEditorSetTitle(newTitle);
-        await dashboardControls.controlEditorSetWidth('small');
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
 

@@ -57,6 +57,7 @@ export interface DocLinks {
     readonly indexManagement: string;
     readonly cloudConnect: string;
     readonly connectToAutoops: string;
+    readonly deploymentSignup: string;
   };
   readonly console: {
     readonly guide: string;
@@ -719,6 +720,10 @@ export interface DocLinks {
   readonly indexManagement: {
     readonly componentTemplate: string;
     readonly indexAlias: string;
+  };
+  readonly subscriptions: string;
+  readonly cases: {
+    readonly casesPermissions: string;
   };
 }
 

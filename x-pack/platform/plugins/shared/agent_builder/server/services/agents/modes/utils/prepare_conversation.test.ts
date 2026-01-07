@@ -118,7 +118,7 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         attachments: [],
         attachmentTypes: [],
         nextInput: {
@@ -127,6 +127,7 @@ describe('prepareConversation', () => {
         },
         previousRounds: [],
       });
+      expect(result.attachmentStateManager).toBeDefined();
 
       expect(mockAttachmentsService.getTypeDefinition).not.toHaveBeenCalled();
     });

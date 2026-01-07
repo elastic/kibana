@@ -113,8 +113,6 @@ test.describe('Streams list view - classic stream creation', { tag: ['@ess', '@s
       // Step 1: Select template
       await selectClassicStreamTemplate(flyout, templateName);
 
-      await flyout.getByTestId('nextButton').click();
-
       // Step 2: Name and confirm (fill the single wildcard part)
       const wildcardInput = flyout.getByTestId('streamNameInput-wildcard-0');
       await expect(wildcardInput).toBeVisible();

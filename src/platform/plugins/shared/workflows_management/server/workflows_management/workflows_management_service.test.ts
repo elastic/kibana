@@ -82,6 +82,7 @@ describe('WorkflowsService', () => {
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       delete: jest.fn().mockResolvedValue({ _id: 'test-id' }),
+      bulk: jest.fn().mockResolvedValue({ items: [] }),
     } as any;
 
     mockLogger = loggerMock.create();
@@ -1193,14 +1194,27 @@ steps:
           total: { value: 1 },
         },
       } as any);
-      mockEsClient.index.mockResolvedValue({ _id: 'test-workflow-id' } as any);
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          {
+            index: {
+              _id: 'test-workflow-id',
+              status: 200,
+            },
+          },
+        ],
+      } as any);
 
-      await service.deleteWorkflows(['test-workflow-id'], 'default');
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default');
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.workflows-workflows',
-          allow_no_indices: true,
           query: {
             bool: {
               must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
@@ -1209,18 +1223,16 @@ steps:
           size: 1,
         })
       );
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'test-workflow-id',
-          index: '.workflows-workflows',
-          document: expect.objectContaining({
-            enabled: false,
-            deleted_at: expect.any(Date),
-          }),
-          refresh: 'wait_for',
-          require_alias: true,
-        })
-      );
+      // Verify bulk was called with correct structure
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('.workflows-workflows');
+      expect(bulkCall.operations).toBeDefined();
+      expect(bulkCall.operations).toHaveLength(2); // metadata + document
+      expect(bulkCall.operations![0]).toEqual({ index: { _id: 'test-workflow-id' } });
+      expect(bulkCall.operations![1]).toMatchObject({
+        enabled: false,
+        deleted_at: expect.any(Date),
+      });
     });
 
     it('should handle not found workflows gracefully', async () => {
@@ -1231,7 +1243,60 @@ steps:
         },
       } as any);
 
-      await expect(service.deleteWorkflows(['non-existent-id'], 'default')).resolves.not.toThrow();
+      const result = await service.deleteWorkflows(['non-existent-id'], 'default');
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
+    });
+
+    it('should handle partial failures when deleting multiple workflows', async () => {
+      const mockWorkflowDocument2 = {
+        _id: 'workflow-2',
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: 'Test Workflow 2',
+        },
+      };
+
+      // Mock search to return both workflows
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ ...mockWorkflowDocument, _id: 'workflow-1' }, mockWorkflowDocument2],
+          total: { value: 2 },
+        },
+      } as any);
+
+      // Mock bulk operation where one succeeds and one fails
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          {
+            index: {
+              _id: 'workflow-1',
+              status: 200,
+            },
+          },
+          {
+            index: {
+              _id: 'workflow-2',
+              status: 500,
+              error: {
+                reason: 'Database error',
+              },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await service.deleteWorkflows(['workflow-1', 'workflow-2'], 'default');
+
+      expect(result).toEqual({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'workflow-2', error: 'Database error' }],
+      });
     });
   });
 

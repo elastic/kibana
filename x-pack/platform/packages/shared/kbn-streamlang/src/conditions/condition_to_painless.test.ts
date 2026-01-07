@@ -70,6 +70,24 @@ const operatorConditionAndResults = [
     result:
       "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof Number && $('http.response.status_code', null) >= 200 && $('http.response.status_code', null) < 300) || ($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) >= 200 && Float.parseFloat($('http.response.status_code', null)) < 300)))",
   },
+  // Range with ISO date strings (for parity with ES|QL which also handles as string comparison)
+  {
+    condition: {
+      field: '@timestamp',
+      range: { gte: '2024-01-01T00:00:00Z', lt: '2024-12-31T23:59:59Z' },
+    },
+    result:
+      "($('@timestamp', null) !== null && (($('@timestamp', null) instanceof Number && String.valueOf($('@timestamp', null)).compareTo(\"2024-01-01T00:00:00Z\") >= 0 && String.valueOf($('@timestamp', null)).compareTo(\"2024-12-31T23:59:59Z\") < 0) || ($('@timestamp', null) instanceof String && $('@timestamp', null).compareTo(\"2024-01-01T00:00:00Z\") >= 0 && $('@timestamp', null).compareTo(\"2024-12-31T23:59:59Z\") < 0)))",
+  },
+  // Range with string numeric values (should be parsed as numbers)
+  {
+    condition: {
+      field: 'http.response.status_code',
+      range: { gte: '200', lt: '300' },
+    },
+    result:
+      "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof Number && $('http.response.status_code', null) >= 200 && $('http.response.status_code', null) < 300) || ($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) >= 200 && Float.parseFloat($('http.response.status_code', null)) < 300)))",
+  },
 ];
 
 describe('conditionToPainless', () => {
@@ -78,6 +96,41 @@ describe('conditionToPainless', () => {
       operatorConditionAndResults.forEach((setup) => {
         test(JSON.stringify(setup.condition), () => {
           expect(conditionToStatement(setup.condition)).toEqual(setup.result);
+        });
+      });
+
+      describe('range with date math expressions', () => {
+        test('range with now-based date math (now-1d)', () => {
+          const condition = {
+            field: '@timestamp',
+            range: { gte: 'now-1d', lt: 'now' },
+          };
+          const result = conditionToStatement(condition);
+          // Should contain Painless date math evaluation code
+          expect(result).toContain('System.currentTimeMillis()');
+          expect(result).toContain('Instant.ofEpochMilli');
+          expect(result).toContain('compareTo');
+        });
+
+        test('range with date math rounding (now/d)', () => {
+          const condition = {
+            field: '@timestamp',
+            range: { gte: 'now-1d/d', lt: 'now/d' },
+          };
+          const result = conditionToStatement(condition);
+          // Should contain time-based rounding code (not calendar units)
+          expect(result).toContain('System.currentTimeMillis()');
+        });
+
+        test('range with anchored date math (date||+1d)', () => {
+          const condition = {
+            field: '@timestamp',
+            range: { gte: '2024-01-01||+1d', lt: '2024-01-31||+1d' },
+          };
+          const result = conditionToStatement(condition);
+          // Should contain Instant.parse for anchored dates
+          expect(result).toContain('Instant.parse');
+          expect(result).toContain('compareTo');
         });
       });
 

@@ -110,7 +110,7 @@
             "section": "def-public.ActionDefinition",
             "text": "ActionDefinition"
           },
-          "<Context>) => ",
+          "<Context, {}>) => ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -118,7 +118,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>"
+          "<Context, object>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
         "deprecated": false,
@@ -127,7 +127,7 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.createAction.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "action",
             "description": [],
@@ -139,7 +139,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>"
+              "<Context, {}>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
             "deprecated": false,
@@ -167,7 +167,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context> extends Partial<",
+          "<Context, ActionExtension> extends Partial<",
           {
             "pluginId": "@kbn/ui-actions-browser",
             "scope": "common",
@@ -626,321 +626,20 @@
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.ActionDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "ActionDefinition",
-        "description": [
-          "\nA convenience interface used to register an action."
-        ],
-        "signature": [
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.ActionDefinition",
-            "text": "ActionDefinition"
-          },
-          "<Context> extends Partial<",
-          {
-            "pluginId": "@kbn/ui-actions-browser",
-            "scope": "common",
-            "docId": "kibKbnUiActionsBrowserPluginApi",
-            "section": "def-common.Presentable",
-            "text": "Presentable"
-          },
-          "<",
-          "ActionDefinitionContext",
-          "<Context>>>"
-        ],
-        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nID of the action that uniquely identifies this action in the actions registry."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.type",
-            "type": "string",
+            "id": "def-public.Action.extension",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "type",
-            "description": [
-              "\nID of the factory for this action. Used to construct dynamic actions."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.isCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "isCompatible",
-            "description": [
-              "\nReturns a promise that resolves to true if this item is compatible given\nthe context and should be displayed to user, otherwise resolves to false."
-            ],
-            "signature": [
-              "((context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<boolean>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.isCompatible.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.execute",
-            "type": "Function",
-            "tags": [],
-            "label": "execute",
-            "description": [
-              "\nExecutes the action."
-            ],
-            "signature": [
-              "(context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<void>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.execute.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.shouldAutoExecute",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldAutoExecute",
-            "description": [
-              "\nDetermines if action should be executed automatically,\nwithout first showing up in context menu.\nfalse by default."
-            ],
-            "signature": [
-              "((context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<boolean>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.shouldAutoExecute.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.getHref",
-            "type": "Function",
-            "tags": [],
-            "label": "getHref",
-            "description": [
-              "\nThis method should return a link if this item can be clicked on. The link\nis used to navigate user if user middle-clicks it or Ctrl + clicks or\nright-clicks and selects \"Open in new tab\"."
-            ],
-            "signature": [
-              "((context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<string | undefined>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.getHref.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.disabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabled",
-            "description": [
-              "\naction is disabled or not\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.showNotification",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showNotification",
-            "description": [
-              "\nDetermines if notification should be shown in menu for that action\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.getCompatibilityChangesSubject",
-            "type": "Function",
-            "tags": [],
-            "label": "getCompatibilityChangesSubject",
+            "label": "extension",
             "description": [],
             "signature": [
-              "((context: Context) => ",
-              "Observable",
-              "<undefined> | undefined) | undefined"
+              "ActionExtension | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.getCompatibilityChangesSubject.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "Context"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "an Observable that emits when this action's compatibility should be recalculated."
-            ]
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.couldBecomeCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "couldBecomeCompatible",
-            "description": [
-              "\nDetermines if action could become compatible given the context. If present,\nit should be much more lenient than `isCompatible` and return true if there\nis any chance that `isCompatible` could return true in the future."
-            ],
-            "signature": [
-              "((context: Context) => boolean) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.couldBecomeCompatible.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "Context"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1618,6 +1317,43 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.ActionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionDefinition",
+        "description": [
+          "\nA convenience interface used to register an action."
+        ],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
+            "text": "Presentable"
+          },
+          "<",
+          "ActionDefinitionContext",
+          "<Context>>> & { extension?: ActionExtension | undefined; } & { readonly id: string; readonly type?: string | undefined; isCompatible?(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<boolean>; execute(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<void>; shouldAutoExecute?(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<boolean>; getHref?(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<string | undefined>; disabled?: boolean | undefined; showNotification?: boolean | undefined; getCompatibilityChangesSubject?: ((context: Context) => ",
+          "Observable",
+          "<undefined> | undefined) | undefined; couldBecomeCompatible?: ((context: Context) => boolean) | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.ActionExecutionContext",
         "type": "Type",
         "tags": [],
@@ -1670,7 +1406,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context> & Required<Pick<",
+          "<Context, object> & Required<Pick<",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -1678,7 +1414,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
+          "<Context, object>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
@@ -1998,7 +1734,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>) => ",
+        "<Context, {}>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2006,7 +1742,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2014,7 +1750,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2022,7 +1758,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2030,7 +1766,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>>) => void; }"
+        "<any, {}>>) => void; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
       "deprecated": false,
@@ -2064,7 +1800,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>) => ",
+        "<Context, {}>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2072,7 +1808,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2080,7 +1816,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2088,7 +1824,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2096,7 +1832,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>>) => void; readonly getAction: (id: string) => Promise<",
+        "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2104,7 +1840,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+        "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2112,7 +1848,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+        "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2120,7 +1856,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+        "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",

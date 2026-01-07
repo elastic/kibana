@@ -31,6 +31,12 @@ const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+    ),
   existingConfig: z
     .string()
     .optional()
@@ -80,7 +86,7 @@ This tool will:
     },
     tags: [],
     handler: async (
-      { query: nlQuery, chartType, esql, existingConfig },
+      { query: nlQuery, index, chartType, esql, existingConfig },
       { esClient, modelProvider, logger, events }
     ) => {
       try {
@@ -120,6 +126,7 @@ This tool will:
 
         const finalState = await graph.invoke({
           nlQuery,
+          index,
           chartType: selectedChartType,
           schema,
           existingConfig,

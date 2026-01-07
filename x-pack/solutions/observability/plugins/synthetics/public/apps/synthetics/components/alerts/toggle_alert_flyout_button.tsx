@@ -64,6 +64,7 @@ export const ToggleAlertFlyoutButton = () => {
     },
     {
       id: 1,
+      title: STATUS_RULE_NAME,
       items: [
         {
           name: CREATE_STATUS_RULE,
@@ -92,6 +93,7 @@ export const ToggleAlertFlyoutButton = () => {
     },
     {
       id: 2,
+      title: TLS_RULE_NAME,
       items: [
         {
           name: CREATE_TLS_RULE_NAME,

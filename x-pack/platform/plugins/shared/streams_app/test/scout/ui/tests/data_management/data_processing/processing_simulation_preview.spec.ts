@@ -268,4 +268,65 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
       });
     }
   });
+
+  test('should update the simulation preview with processed values from uppercase, lowercase and trim processors', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Uppercase processor uppercases the input.type field
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Uppercase');
+    await pageObjects.streams.fillProcessorFieldInput('input.type');
+    await pageObjects.streams.clickSaveProcessor();
+
+    let updatedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(updatedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'input.type',
+        rowIndex,
+        value: 'LOGS',
+      });
+    }
+
+    // Lowercase processor lowercases the input.type field
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Lowercase');
+    await pageObjects.streams.fillProcessorFieldInput('input.type');
+    await pageObjects.streams.clickSaveProcessor();
+
+    updatedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(updatedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'input.type',
+        rowIndex,
+        value: 'logs',
+      });
+    }
+
+    // Trim processor trims a field
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Set');
+    await pageObjects.streams.fillProcessorFieldInput('attributes.trim_test_field', {
+      isCustomValue: true,
+    });
+    await page.locator('input[name="value"]').fill('   test message   ');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Trim');
+    await pageObjects.streams.fillProcessorFieldInput('attributes.trim_test_field');
+    await pageObjects.streams.clickSaveProcessor();
+
+    updatedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(updatedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'attributes.trim_test_field',
+        rowIndex,
+        value: 'test message',
+      });
+    }
+  });
 });

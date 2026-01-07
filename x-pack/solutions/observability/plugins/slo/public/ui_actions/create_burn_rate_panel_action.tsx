@@ -46,7 +46,9 @@ export function createBurnRatePanelAction(
             panelType: SLO_BURN_RATE_EMBEDDABLE_ID,
             serializedState: { rawState: initialState },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

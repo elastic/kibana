@@ -43,6 +43,36 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'uppercase') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.uppercaseProcessorDescription',
+        {
+          defaultMessage: 'Uppercases the value of "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
+    } else if (step.action === 'lowercase') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.lowercaseProcessorDescription',
+        {
+          defaultMessage: 'Lowercases the value of "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
+    } else if (step.action === 'trim') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.trimProcessorDescription',
+        {
+          defaultMessage: 'Trims whitespace from "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
     } else if (step.action === 'rename') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.renameProcessorDescription',

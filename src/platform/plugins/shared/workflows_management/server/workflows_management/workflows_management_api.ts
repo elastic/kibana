@@ -52,6 +52,15 @@ export interface GetWorkflowsParams {
   _full?: boolean;
 }
 
+export interface DeleteWorkflowsResponse {
+  total: number;
+  deleted: number;
+  failures: Array<{
+    id: string;
+    error: string;
+  }>;
+}
+
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
   stepExecutionId?: string;
@@ -170,7 +179,7 @@ export class WorkflowsManagementApi {
     workflowIds: string[],
     spaceId: string,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<DeleteWorkflowsResponse> {
     return this.workflowsService.deleteWorkflows(workflowIds, spaceId);
   }
 

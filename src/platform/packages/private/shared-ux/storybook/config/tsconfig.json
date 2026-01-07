@@ -9,10 +9,13 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/storybook",
+    "@kbn/unified-tabs",
+    "@kbn/core-chrome-app-menu-components",
   ],
   "exclude": [
     "target/**/*",

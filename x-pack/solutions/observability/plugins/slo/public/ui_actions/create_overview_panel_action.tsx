@@ -46,7 +46,9 @@ export function createOverviewPanelAction(
               rawState: initialState,
             },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

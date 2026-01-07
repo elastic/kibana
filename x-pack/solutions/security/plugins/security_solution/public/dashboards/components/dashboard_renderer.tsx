@@ -19,6 +19,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -48,7 +49,10 @@ const DashboardRendererComponent = ({
   filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
-  onDashboardContainerLoaded?: (dashboardContainer: DashboardApi) => void;
+  onDashboardContainerLoaded?: (
+    dashboardContainer: DashboardApi,
+    internalApi: DashboardInternalApi
+  ) => void;
   query?: Query;
   savedObjectId: string | undefined;
   timeRange: {

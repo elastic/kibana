@@ -79,17 +79,10 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
 
-  const panels = dashboardInternalApi.serializeLayout() as Pick<
+  const { panels, controlGroupInput, references } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'references'
+    'panels' | 'controlGroupInput' | 'references'
   >;
-
-  const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
-
-  const combinedReferences = [
-    ...(panels?.references ?? []),
-    ...(controlGroupReferences ?? []),
-  ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
@@ -111,7 +104,7 @@ function getLocatorParams({
         }
       : undefined,
     controlGroupInput,
-    panels: panels?.panels,
-    references: combinedReferences,
+    panels,
+    references: (references ?? []) as unknown as DashboardState['references'] & SerializableRecord,
   };
 }

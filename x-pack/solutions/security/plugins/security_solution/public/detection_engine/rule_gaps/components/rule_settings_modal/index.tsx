@@ -71,6 +71,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
         title: i18n.AUTO_GAP_FILL_TOAST_TITLE,
         text: i18n.AUTO_GAP_FILL_TOAST_TEXT,
       });
+      onClose();
     } catch (err) {
       addError(err, { title: i18n.AUTO_GAP_FILL_TOAST_TITLE });
     }

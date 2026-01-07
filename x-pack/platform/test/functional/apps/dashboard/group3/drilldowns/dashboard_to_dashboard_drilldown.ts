@@ -293,7 +293,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cleanFiltersAndControls = async (dashboardName: string) => {
           await dashboard.loadDashboardInEditMode(dashboardName);
           await filterBar.removeAllFilters();
-          await dashboardControls.deleteAllControls();
+          await dashboardControls.deleteAllPinnedControls();
           await dashboard.clickQuickSave();
         };
 

@@ -297,7 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.submitQuery();
       // check the error state
       await header.waitUntilLoadingHasFinished();
-      const errors = await testSubjects.findAll('embeddableStackError');
+      const errors = await testSubjects.findAll('embeddableError');
       expect(errors.length).to.be(1);
       // now remove the query
       await queryBar.setQuery('');

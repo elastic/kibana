@@ -24,7 +24,6 @@ export {
   type AgentBuilderToolEvent,
   type ToolEventHandlerFn,
   type ToolEventEmitter,
-  type ToolProgressEmitterFn,
   type InternalToolProgressEvent,
 } from './events';
 export type {

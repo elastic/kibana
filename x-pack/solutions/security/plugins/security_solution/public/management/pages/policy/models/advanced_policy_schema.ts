@@ -1350,6 +1350,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.fanotify.enable_ns_jumping',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.enable_ns_jumping',
+      {
+        defaultMessage:
+          'Enter the mount namespace of processes when they generate fanotify events. For 9.2 and earlier, default: false. For 9.3 and later, default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.context_manipulation_detection',
     first_supported_version: '8.4',
     documentation: i18n.translate(

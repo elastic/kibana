@@ -8,6 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { unflattenObject } from '@kbn/object-utils';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { pickBy, identity } from 'lodash';
@@ -22,6 +23,7 @@ interface ElasticsearchConfig {
 interface KibanaServerConfig {
   host: string;
   port: number;
+  basePath: string;
 }
 
 interface KibanaConfig {
@@ -41,10 +43,11 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   let serverConfigValues = {};
 
   if (fs.existsSync(configPathToUse)) {
-    const config = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
+    const loaded = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
       string,
       any
     >;
+    const config = unflattenObject(loaded);
     esConfigValues = config.elasticsearch || {};
     serverConfigValues = config.server || {};
   } else {
@@ -82,6 +85,7 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   const serverConfig = {
     host: 'localhost',
     port: 5601,
+    basePath: '',
     ...serverConfigValues,
     ...serverEnvOverrides,
   };

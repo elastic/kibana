@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { useKibana } from '../../..';
@@ -205,12 +204,10 @@ export const UrlSyncedAlertsSearchBar = ({
               title: '.alerts-*',
             }}
             spaceId={spaceId}
-            chainingSystem="HIERARCHICAL"
             controlsUrlState={filterControls}
             filters={controlFilters}
             onFiltersChange={onControlFiltersChange}
             storageKey={filterControlsStorageKey}
-            ControlGroupRenderer={ControlGroupRenderer}
             services={{
               http,
               notifications,

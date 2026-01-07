@@ -37,7 +37,7 @@ export interface DashboardRendererProps {
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
-  onApiAvailable?: (api: DashboardApi) => void;
+  onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
 }
 
 export function DashboardRenderer({
@@ -88,7 +88,7 @@ export function DashboardRenderer({
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.(results.api);
+        onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
         if (!canceled) setError(err);

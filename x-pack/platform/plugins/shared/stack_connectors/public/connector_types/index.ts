@@ -80,10 +80,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
   connectorTypeRegistry.register(getXSOARConnectorType());
-
-  if (ExperimentalFeaturesService.get().agentBuilderExternalMcpOn) {
-    connectorTypeRegistry.register(getMcpConnectorType());
-  }
+  connectorTypeRegistry.register(getMcpConnectorType());
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());

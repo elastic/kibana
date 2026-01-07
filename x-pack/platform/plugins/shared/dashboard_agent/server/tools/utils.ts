@@ -6,7 +6,6 @@
  */
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
@@ -17,6 +16,13 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 
+import type {
+  ToolAvailabilityContext,
+  ToolAvailabilityResult,
+  ToolResultStore,
+} from '@kbn/agent-builder-server';
+import { isToolResultId } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
@@ -84,7 +90,8 @@ export const filterOutMarkdownPanels = (
  */
 export const normalizePanels = (
   panels: unknown[] | undefined,
-  yOffset: number = 0
+  yOffset: number = 0,
+  resultStore?: ToolResultStore
 ): DashboardPanel[] => {
   const panelConfigs = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
@@ -92,7 +99,7 @@ export const normalizePanels = (
   let currentY = yOffset;
 
   for (const panel of panelConfigs) {
-    const config = panel as LensApiSchemaType;
+    const config = resolveLensConfig(panel, resultStore);
     const w = getPanelWidth(config.type);
 
     // Check if panel fits in current row, if not move to next row
@@ -109,6 +116,46 @@ export const normalizePanels = (
   }
 
   return dashboardPanels;
+};
+
+export const resolveLensConfig = (
+  panel: unknown,
+  resultStore?: ToolResultStore
+): LensApiSchemaType => {
+  if (typeof panel === 'string') {
+    if (!isToolResultId(panel)) {
+      throw new Error(
+        `Invalid panel reference "${panel}". Expected a tool_result_id from a previous visualization tool call.`
+      );
+    }
+    if (!resultStore || !resultStore.has(panel)) {
+      throw new Error(`Panel reference "${panel}" was not found in the tool result store.`);
+    }
+
+    const result = resultStore.get(panel);
+    if (result.type !== ToolResultType.visualization) {
+      throw new Error(
+        `Provided tool_result_id "${panel}" is not a visualization result (got "${result.type}").`
+      );
+    }
+
+    const visualization = result.data.visualization;
+    if (!visualization || typeof visualization !== 'object') {
+      throw new Error(
+        `Visualization result "${panel}" does not contain a valid visualization config.`
+      );
+    }
+
+    return visualization as LensApiSchemaType;
+  }
+
+  if (typeof panel !== 'object' || panel === null || !('type' in panel)) {
+    throw new Error(
+      `Invalid panel configuration. Expected a Lens API config object with a "type" property.`
+    );
+  }
+
+  return panel as LensApiSchemaType;
 };
 
 const buildLensPanelFromApi = (

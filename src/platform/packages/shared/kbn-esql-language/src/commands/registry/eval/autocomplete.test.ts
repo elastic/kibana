@@ -26,7 +26,11 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../definitions/all_operators';
-import { valuePlaceholderConstant, defaultValuePlaceholderConstant } from '../complete_items';
+import {
+  valuePlaceholderConstant,
+  defaultValuePlaceholderConstant,
+  PLACEHOLDER_CONFIG,
+} from '../complete_items';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
@@ -259,8 +263,16 @@ describe('EVAL Autocomplete', () => {
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedDoubleIntegerFields.map((name) => ({ label: name, text: name }))
     );
-    await evalExpectSuggestions('from a | eval a=round(doubleField, ', [], mockCallbacks);
-    await evalExpectSuggestions('from a | eval round(doubleField, ', [], mockCallbacks);
+    await evalExpectSuggestions(
+      'from a | eval a=round(doubleField, ',
+      [PLACEHOLDER_CONFIG.number.snippet],
+      mockCallbacks
+    );
+    await evalExpectSuggestions(
+      'from a | eval round(doubleField, ',
+      [PLACEHOLDER_CONFIG.number.snippet],
+      mockCallbacks
+    );
     const expectedAny = getFieldNamesByType('any');
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedAny.map((name) => ({ label: name, text: name }))
@@ -593,6 +605,40 @@ describe('EVAL Autocomplete', () => {
           defaultValuePlaceholderConstant.text,
         ]
       );
+    });
+  });
+
+  describe('MATCH_PHRASE inside SCORE', () => {
+    it('suggests string placeholder for constantOnly query parameter', async () => {
+      const expectedFields = getFieldNamesByType(['text', 'keyword']);
+
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval SCORE(MATCH_PHRASE(textField, ',
+        ['"${0:value}"'],
+        mockCallbacks
+      );
+    });
+
+    it('suggests map params for incomplete options map without pipe/comma', async () => {
+      await evalExpectSuggestions('from a | eval SCORE(MATCH_PHRASE(agent, "value", {', [
+        '"zero_terms_query": "$0"',
+        '"boost": ',
+        '"analyzer": "$0"',
+        '"slop": ',
+      ]);
+    });
+
+    it('ignores function-like tokens inside strings when detecting map params', async () => {
+      await evalExpectSuggestions('from a | eval SCORE(MATCH_PHRASE(agent, "foo(bar)", {', [
+        '"zero_terms_query": "$0"',
+        '"boost": ',
+        '"analyzer": "$0"',
+        '"slop": ',
+      ]);
     });
   });
 });

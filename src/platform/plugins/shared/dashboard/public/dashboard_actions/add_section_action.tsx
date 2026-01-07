@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { CanAddNewSection } from '@kbn/presentation-containers';
@@ -42,22 +42,7 @@ export class AddSectionAction implements Action<EmbeddableApiContext> {
   }
 
   public readonly MenuItem = () => {
-    return (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="s">{this.getDisplayName()}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiBadge color="accent">
-            {i18n
-              .translate('dashboard.collapsibleSection.newBadge', {
-                defaultMessage: 'New',
-              })
-              .toLocaleUpperCase()}
-          </EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <EuiText size="s">{this.getDisplayName()}</EuiText>;
   };
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable);

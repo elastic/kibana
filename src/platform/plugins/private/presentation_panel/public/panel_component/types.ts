@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HasPanelCapabilities } from '@kbn/presentation-containers';
 import type {
   CanLockHoverActions,
   HasParentApi,
@@ -65,6 +66,8 @@ export interface PresentationPanelInternalProps<
    *       logic, then this could be removed.
    */
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
+
+  hidePanelChrome?: boolean;
 }
 
 /**
@@ -81,7 +84,8 @@ export interface DefaultPresentationPanelApi
         PublishesDisabledActionIds &
         HasParentApi &
         CanLockHoverActions &
-        CanOverrideHoverActions
+        CanOverrideHoverActions &
+        HasPanelCapabilities
     > {}
 
 export type PresentationPanelProps<
@@ -91,7 +95,16 @@ export type PresentationPanelProps<
   Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
 };
 
-export type QuickActionIds = [string?, string?, string?, string?, string?, string?];
+export type QuickActionIds = [
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?
+];
 
 type ActionViewMode = Extract<ViewMode, 'view' | 'edit'>;
 

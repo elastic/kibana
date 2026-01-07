@@ -2832,15 +2832,7 @@
             "section": "def-common.ApiServicesFixture",
             "text": "ApiServicesFixture"
           },
-          "; } & { samlAuth: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SamlAuth",
-            "text": "SamlAuth"
-          },
-          "; preCreateSecurityIndexes: void; } & { uiSettings: ",
+          "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & { kbnUrl: ",
           {

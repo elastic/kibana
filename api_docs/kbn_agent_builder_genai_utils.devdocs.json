@@ -6822,7 +6822,7 @@
         "label": "relevanceSearch",
         "description": [],
         "signature": [
-          "({ term, target, size, model, esClient, }: { term: string; target: string; size?: number | undefined; model: ",
+          "({ term, target, size, model, esClient, logger, }: { term: string; target: string; size?: number | undefined; model: ",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -6832,6 +6832,14 @@
           },
           "; esClient: ",
           "ElasticsearchClient",
+          "; logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
           "; }) => Promise<",
           "PerformMatchSearchResponse",
           ">"
@@ -6845,7 +6853,7 @@
             "id": "def-server.relevanceSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  term,\n  target,\n  size = 10,\n  model,\n  esClient,\n}",
+            "label": "{\n  term,\n  target,\n  size = 10,\n  model,\n  esClient,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
             "deprecated": false,
@@ -7902,6 +7910,26 @@
                   "; xpack: ",
                   "default",
                   "; }"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
+                "id": "def-server.relevanceSearch.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
                 "deprecated": false,

@@ -222,7 +222,6 @@ export const interactiveModeMachine = setup({
       if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
         return;
       }
-
       const { simulationMode, selectedConditionId } = context;
 
       if (simulationMode === 'partial' && selectWhetherAnyProcessorBeforePersisted(context)) {

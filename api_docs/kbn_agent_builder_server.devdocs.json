@@ -438,6 +438,22 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentHandlerContext.attachmentStateManager",
+            "type": "Object",
+            "tags": [],
+            "label": "attachmentStateManager",
+            "description": [
+              "\nAttachment state manager to manage conversation attachments during execution."
+            ],
+            "signature": [
+              "AttachmentStateManager"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.AgentHandlerContext.promptManager",
             "type": "Object",
             "tags": [],

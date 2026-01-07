@@ -90,9 +90,6 @@
         "tags": [],
         "label": "MOCK_IDP_UIAM_SERVICE_INTERNAL_URL",
         "description": [],
-        "signature": [
-          "\"http://uiam:8080\""
-        ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -105,9 +102,6 @@
         "tags": [],
         "label": "MOCK_IDP_UIAM_SERVICE_URL",
         "description": [],
-        "signature": [
-          "\"http://localhost:8080\""
-        ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

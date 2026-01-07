@@ -16,7 +16,7 @@ describe('formatPageFilterSearchParam', () => {
       selectedOptions: ['test_user'],
       existsSelected: true,
       exclude: true,
-      hideActionBar: true,
+      displaySettings: { hideActionBar: true },
     };
 
     expect(formatPageFilterSearchParam([filter])).toEqual([filter]);
@@ -34,7 +34,7 @@ describe('formatPageFilterSearchParam', () => {
         fieldName: 'user.name',
         existsSelected: false,
         exclude: false,
-        hideActionBar: false,
+        displaySettings: { hideActionBar: false },
       },
     ]);
   });

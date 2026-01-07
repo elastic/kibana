@@ -127,10 +127,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
+          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, useMargins, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;

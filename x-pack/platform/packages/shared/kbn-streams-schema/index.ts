@@ -20,6 +20,8 @@ export {
   routingDefinitionListSchema,
 } from './src/models/ingest/routing';
 
+export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
+export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';

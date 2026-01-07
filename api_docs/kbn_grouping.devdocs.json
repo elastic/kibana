@@ -415,15 +415,9 @@
           "EuiContextMenuPanelId",
           " | undefined; }))))[]; panels: ",
           "EuiContextMenuPanelDescriptor",
-          "[]; }) | undefined; renderChildComponent: (groupFilter: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; groupingLevel?: number | undefined; additionalToolbarControls?: JSX.Element[] | undefined; itemsPerPage: number; onGroupClose: () => void; }"
+          "[]; }) | undefined; renderChildComponent: ",
+          "GroupChildComponentRenderer",
+          "<T>; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; groupingLevel?: number | undefined; additionalToolbarControls?: JSX.Element[] | undefined; itemsPerPage: number; onGroupClose: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
         "deprecated": false,
