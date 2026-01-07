@@ -36,6 +36,7 @@ export type LinkId =
   | 'dataVisualizer'
   | 'fileUpload'
   | 'indexDataVisualizer'
+  | 'indexDataVisualizerPage'
   | 'settings'
   | 'calendarSettings'
   | 'calendarSettings'

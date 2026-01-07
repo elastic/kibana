@@ -226,7 +226,7 @@ function createDeepLinks(
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
       };
     },
-    getIndexDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
+    getIndexDataVisualizerPageDeepLink: (): AppDeepLink<LinkId> => {
       return {
         id: 'indexDataVisualizerPage',
         title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
@@ -257,7 +257,7 @@ function createDeepLinks(
         path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
       };
     },
-    getDataDriftDeepLink: (): AppDeepLink<LinkId> => {
+    getDataDriftPageDeepLink: (): AppDeepLink<LinkId> => {
       return {
         id: 'dataDriftPage',
         title: i18n.translate('xpack.ml.deepLink.dataDrift', {
