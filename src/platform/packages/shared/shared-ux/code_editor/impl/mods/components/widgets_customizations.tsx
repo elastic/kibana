@@ -71,7 +71,10 @@ export const EditorWidgetsCustomizations: FC<
 
         // @ts-expect-error -- "onDidShow" is defined at this point
         widget.onDidShow(() => {
-          if ($widgetNode) {
+          if (
+            ($widgetNode = domNodeGetter(widget)) &&
+            $widgetNode.classList.contains(modifierClassName)
+          ) {
             originalTopPosition = $widgetNode.style.top;
             $widgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset.current} + ${euiTheme.size.m}))`;
             $widgetNode.classList.remove(modifierClassName);
@@ -80,7 +83,7 @@ export const EditorWidgetsCustomizations: FC<
 
         // @ts-expect-error -- "onDidHide" is defined at this point
         widget.onDidHide(() => {
-          if ($widgetNode) {
+          if (($widgetNode = domNodeGetter(widget))) {
             $widgetNode.classList.add(modifierClassName);
             $widgetNode.style.top = originalTopPosition ?? '';
           }

@@ -209,8 +209,8 @@ export function MonacoEditor({
     if (containerElement.current && overflowWidgetsDomNode.current) {
       // add the monaco class name to the overflow widgets dom node so that styles,
       // for it's widgets still apply
-      overflowWidgetsDomNode.current?.classList.add('monaco-editor');
-      overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
+      overflowWidgetsDomNode.current.classList.add('monaco-editor');
+      overflowWidgetsDomNode.current.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
 
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };
