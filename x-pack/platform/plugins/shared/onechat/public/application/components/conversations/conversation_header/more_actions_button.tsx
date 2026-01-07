@@ -77,7 +77,7 @@ const fullscreenLabels = {
     defaultMessage: 'Delete',
   }),
   genAiSettings: i18n.translate('xpack.onechat.conversationActions.genAiSettings', {
-    defaultMessage: 'Gen AI Settings',
+    defaultMessage: 'GenAI Settings',
   }),
   externalLinkAriaLabel: i18n.translate('xpack.onechat.conversationActions.externalLinkAriaLabel', {
     defaultMessage: 'Open in new tab',
