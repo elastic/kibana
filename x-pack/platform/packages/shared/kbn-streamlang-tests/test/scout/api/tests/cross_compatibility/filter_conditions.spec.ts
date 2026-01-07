@@ -970,63 +970,56 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     );
   });
 
-  apiTest(
-    'should handle single-element arrays in filter conditions',
-    async ({ testBed, esql }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'set',
-            to: 'attributes.matched',
-            value: 'yes',
-            where: {
-              field: 'attributes.tag',
-              eq: 'important',
-            },
-          } as SetProcessor,
-        ],
-      };
+  apiTest('should handle single-element arrays in filter conditions', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.matched',
+          value: 'yes',
+          where: {
+            field: 'attributes.tag',
+            eq: 'important',
+          },
+        } as SetProcessor,
+      ],
+    };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
 
-      const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };
-      const docs = [
-        { attributes: { tag: ['important'] } }, // single-element array - should match
-        { attributes: { tag: 'important' } }, // regular string - should match
-        { attributes: { tag: ['other'] } }, // single-element array - should NOT match
-        { attributes: { tag: 'other' } }, // regular string - should NOT match
-      ];
+    const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };
+    const docs = [
+      { attributes: { tag: ['important'] } }, // single-element array - should match
+      { attributes: { tag: 'important' } }, // regular string - should match
+      { attributes: { tag: ['other'] } }, // single-element array - should NOT match
+      { attributes: { tag: 'other' } }, // regular string - should NOT match
+    ];
 
-      await testBed.ingest('ingest-single-array', docs, processors);
-      const ingestResult = await testBed.getDocsOrdered('ingest-single-array');
+    await testBed.ingest('ingest-single-array', docs, processors);
+    const ingestResult = await testBed.getDocsOrdered('ingest-single-array');
 
-      await testBed.ingest('esql-single-array', [mappingDoc, ...docs]);
-      const esqlResult = await esql.queryOnIndex('esql-single-array', query);
+    await testBed.ingest('esql-single-array', [mappingDoc, ...docs]);
+    const esqlResult = await esql.queryOnIndex('esql-single-array', query);
 
-      // Single-element array ['important'] should match like 'important'
-      expect(ingestResult[0].attributes).toStrictEqual(
-        expect.objectContaining({ matched: 'yes' })
-      );
-      expect(ingestResult[1].attributes).toStrictEqual(
-        expect.objectContaining({ matched: 'yes' })
-      );
-      expect(ingestResult[2].attributes).not.toHaveProperty('matched');
-      expect(ingestResult[3].attributes).not.toHaveProperty('matched');
+    // Single-element array ['important'] should match like 'important'
+    expect(ingestResult[0].attributes).toStrictEqual(expect.objectContaining({ matched: 'yes' }));
+    expect(ingestResult[1].attributes).toStrictEqual(expect.objectContaining({ matched: 'yes' }));
+    expect(ingestResult[2].attributes).not.toHaveProperty('matched');
+    expect(ingestResult[3].attributes).not.toHaveProperty('matched');
 
-      // ES|QL should produce the same results
-      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
-        expect.objectContaining({ 'attributes.matched': 'yes' })
-      );
-      expect(esqlResult.documentsOrdered[2]).toStrictEqual(
-        expect.objectContaining({ 'attributes.matched': 'yes' })
-      );
-      expect(esqlResult.documentsOrdered[3]).toStrictEqual(
-        expect.objectContaining({ 'attributes.matched': null })
-      );
-      expect(esqlResult.documentsOrdered[4]).toStrictEqual(
-        expect.objectContaining({ 'attributes.matched': null })
-      );
-    }
-  );
+    // ES|QL should produce the same results
+    expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': 'yes' })
+    );
+    expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': 'yes' })
+    );
+    expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': null })
+    );
+    expect(esqlResult.documentsOrdered[4]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': null })
+    );
+  });
 });
