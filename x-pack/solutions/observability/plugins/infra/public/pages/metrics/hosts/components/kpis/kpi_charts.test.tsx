@@ -25,12 +25,30 @@ jest.mock('../../hooks/use_after_loaded_state');
 jest.mock('../../../../../hooks/use_reload_request_time');
 jest.mock('../../../../../containers/metrics_source');
 jest.mock('../../../../../components/asset_details', () => ({
-  HostKpiCharts: () => <div data-test-subj="hostKpiCharts">HostKpiCharts</div>,
+  HostKpiCharts: ({ error, hostNodesLength, loading }: any) => {
+    const { shouldLoadCharts } = jest.requireActual('../../hooks/use_hosts_view');
+    if (!shouldLoadCharts({ loading, error, hostNodesLength })) {
+      const HOST_KPI_CHARTS_COUNT = 4;
+      return (
+        <>
+          {Array.from({ length: HOST_KPI_CHARTS_COUNT }).map((_, index) => (
+            <div key={index} data-test-subj="chartPlaceholder">
+              {error ? (
+                <div>{error.message}</div>
+              ) : hostNodesLength === 0 ? (
+                <div>No results found</div>
+              ) : null}
+            </div>
+          ))}
+        </>
+      );
+    }
+    return <div data-test-subj="hostKpiCharts">HostKpiCharts</div>;
+  },
 }));
 
 // Import after mocking
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { HOST_KPI_CHARTS_COUNT } from '../../../../../components/asset_details/hooks/use_host_metrics_charts';
 
 const mockUseHostsViewContext = useHostsViewContext as jest.MockedFunction<
   typeof useHostsViewContext
@@ -106,7 +124,7 @@ describe('KpiCharts', () => {
   });
 
   describe('when there is an error', () => {
-    it('should render KpiPlaceholder with error state', () => {
+    it('should render ChartPlaceholder with error state', () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: false,
@@ -115,12 +133,12 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      // KpiPlaceholder renders HOST_KPI_CHARTS_COUNT length placeholder panels
-      expect(screen.getAllByText('Unable to load KPIs')).toHaveLength(HOST_KPI_CHARTS_COUNT);
+      // ChartPlaceholder renders 4 length placeholder panels
+      expect(screen.getAllByText('API error')).toHaveLength(4);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
 
-    it('should render KpiPlaceholder when error exists even with hosts', () => {
+    it('should render ChartPlaceholder when error exists even with hosts', () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [{ name: 'host-1' }, { name: 'host-2' }],
         loading: false,
@@ -129,13 +147,13 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      expect(screen.getAllByText('Unable to load KPIs')).toHaveLength(HOST_KPI_CHARTS_COUNT);
+      expect(screen.getAllByText('API error')).toHaveLength(4);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
   });
 
   describe('when there is no data', () => {
-    it('should render KpiPlaceholder with no data state when not loading and no hosts', () => {
+    it('should render ChartPlaceholder with no data state when not loading and no hosts', () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: false,
@@ -144,14 +162,14 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      // KpiPlaceholder renders HOST_KPI_CHARTS_COUNT length placeholder panels
-      expect(screen.getAllByText('No data available')).toHaveLength(HOST_KPI_CHARTS_COUNT);
+      // ChartPlaceholder renders 4 length placeholder panels
+      expect(screen.getAllByText('No results found')).toHaveLength(4);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
   });
 
   describe('when loading', () => {
-    it('should render HostKpiCharts when loading even with no hosts', () => {
+    it('should render ChartPlaceholder when loading even with no hosts', () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: true,
@@ -160,8 +178,10 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      expect(screen.getByTestId('hostKpiCharts')).toBeInTheDocument();
-      expect(screen.queryByText('No data available')).not.toBeInTheDocument();
+      // When loading is true, shouldLoadCharts returns false, so ChartPlaceholder is shown
+      expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
+      // ChartPlaceholder shows "No results found" when isEmpty is true
+      expect(screen.getAllByText('No results found')).toHaveLength(4);
     });
   });
 
@@ -176,8 +196,7 @@ describe('KpiCharts', () => {
       renderKpiCharts();
 
       expect(screen.getByTestId('hostKpiCharts')).toBeInTheDocument();
-      expect(screen.queryByText('Unable to load KPIs')).not.toBeInTheDocument();
-      expect(screen.queryByText('No data available')).not.toBeInTheDocument();
+      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
     });
   });
 });

@@ -105,7 +105,7 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(screen.getByText('Unable to load chart')).toBeInTheDocument();
+      expect(screen.getByText('API error')).toBeInTheDocument();
       expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
     });
 
@@ -118,7 +118,7 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(screen.getByText('Unable to load chart')).toBeInTheDocument();
+      expect(screen.getByText('API error')).toBeInTheDocument();
       expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
     });
 
@@ -131,11 +131,7 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(
-        screen.getByText(
-          'There was an error loading the hosts data. Try adjusting your filters or time range.'
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText('API error')).toBeInTheDocument();
     });
   });
 
@@ -149,29 +145,13 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(screen.getByText('No data available')).toBeInTheDocument();
+      expect(screen.getByText('No results found')).toBeInTheDocument();
       expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
-    });
-
-    it('should display no data message body', async () => {
-      mockUseHostsViewContext.mockReturnValue({
-        hostNodes: [],
-        loading: false,
-        error: undefined,
-      });
-
-      await renderChart();
-
-      expect(
-        screen.getByText(
-          'No hosts match your current search criteria. Try adjusting your filters or time range.'
-        )
-      ).toBeInTheDocument();
     });
   });
 
   describe('when loading', () => {
-    it('should render LensChart when loading even with no hosts', async () => {
+    it('should render ChartPlaceholder when loading even with no hosts', async () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: true,
@@ -180,8 +160,9 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(screen.getByTestId('lensChart')).toBeInTheDocument();
-      expect(screen.queryByText('No data available')).not.toBeInTheDocument();
+      // When loading, shouldLoadCharts returns false, so ChartPlaceholder is shown
+      expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
+      // ChartPlaceholder shows loading state (no text, just loading indicator)
     });
   });
 
@@ -196,8 +177,8 @@ describe('Chart', () => {
       await renderChart();
 
       expect(screen.getByTestId('lensChart')).toBeInTheDocument();
-      expect(screen.queryByText('Unable to load chart')).not.toBeInTheDocument();
-      expect(screen.queryByText('No data available')).not.toBeInTheDocument();
+      expect(screen.queryByText('API error')).not.toBeInTheDocument();
+      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
     });
 
     it('should render LensChart when loading with existing hosts', async () => {
@@ -209,7 +190,7 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(screen.getByTestId('lensChart')).toBeInTheDocument();
+      expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
     });
   });
 });

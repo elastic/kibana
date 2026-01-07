@@ -5,85 +5,85 @@
  * 2.0.
  */
 
-import { shouldNotLoadCharts } from './use_hosts_view';
+import { shouldLoadCharts } from './use_hosts_view';
 
-describe('shouldNotLoadCharts', () => {
+describe('shouldLoadCharts', () => {
   describe('when error is present', () => {
-    it('should return true when error is a string', () => {
+    it('should return false when error is a string', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: 'Some error',
           hostNodesLength: 5,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should return true when error is an Error object', () => {
+    it('should return false when error is an Error object', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: new Error('API error'),
           hostNodesLength: 5,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should return true when error is an object', () => {
+    it('should return false when error is an object', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: { message: 'Error occurred' },
           hostNodesLength: 5,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should return true when error is present even if loading is true', () => {
+    it('should return false when error is present even if loading is true', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: true,
           error: 'Error',
           hostNodesLength: 5,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should return true when error is present even if hostNodesLength is 0', () => {
+    it('should return false when error is present even if hostNodesLength is 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: 'Error',
           hostNodesLength: 0,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
   });
 
   describe('when error is falsy', () => {
-    it('should return true when not loading and hostNodesLength is 0', () => {
+    it('should return false when not loading and hostNodesLength is 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: null,
           hostNodesLength: 0,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should return true when not loading and hostNodesLength is 0 (error is undefined)', () => {
+    it('should return false when not loading and hostNodesLength is 0 (error is undefined)', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: undefined,
           hostNodesLength: 0,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('should return false when loading and hostNodesLength is 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: true,
           error: null,
           hostNodesLength: 0,
@@ -91,29 +91,29 @@ describe('shouldNotLoadCharts', () => {
       ).toBe(false);
     });
 
-    it('should return false when not loading and hostNodesLength is greater than 0', () => {
+    it('should return true when not loading and hostNodesLength is greater than 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: null,
           hostNodesLength: 1,
         })
-      ).toBe(false);
+      ).toBe(true);
     });
 
-    it('should return false when not loading and hostNodesLength is greater than 0 (multiple hosts)', () => {
+    it('should return true when not loading and hostNodesLength is greater than 0 (multiple hosts)', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: null,
           hostNodesLength: 10,
         })
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it('should return false when loading and hostNodesLength is greater than 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: true,
           error: null,
           hostNodesLength: 5,
@@ -121,24 +121,24 @@ describe('shouldNotLoadCharts', () => {
       ).toBe(false);
     });
 
-    it('should return true when error is empty string, not loading, and hostNodesLength is 0', () => {
+    it('should return false when error is empty string, not loading, and hostNodesLength is 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: '',
           hostNodesLength: 0,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should return false when error is empty string and hostNodesLength is greater than 0', () => {
+    it('should return true when error is empty string and hostNodesLength is greater than 0', () => {
       expect(
-        shouldNotLoadCharts({
+        shouldLoadCharts({
           loading: false,
           error: '',
           hostNodesLength: 5,
         })
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 });
