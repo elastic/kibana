@@ -91,7 +91,7 @@ const AgentListFooter: React.FC = () => {
             iconType="gear"
             color="text"
             aria-label={manageAgentsAriaLabel}
-            href={manageAgentsHref}
+            {...(manageAgents ? { href: manageAgentsHref } : { disabled: true })}
           >
             <FormattedMessage
               id="xpack.onechat.conversationInput.agentSelector.manageAgents"
