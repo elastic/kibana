@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateDuration } from '../../duration';
+import { validateEsqlQuery } from '../validators';
 
 export const createRuleDataSchema = schema.object(
   {
@@ -14,7 +15,7 @@ export const createRuleDataSchema = schema.object(
     tags: schema.arrayOf(schema.string({ maxLength: 64 }), { defaultValue: [], maxSize: 100 }),
     schedule: schema.string({ validate: validateDuration }),
     enabled: schema.boolean({ defaultValue: true }),
-    esql: schema.string({ minLength: 1, maxLength: 10000 }),
+    esql: schema.string({ minLength: 1, maxLength: 10000, validate: validateEsqlQuery }),
     timeField: schema.string({ minLength: 1, maxLength: 128, defaultValue: '@timestamp' }),
     lookbackWindow: schema.string({ validate: validateDuration }),
     groupingKey: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 16 }),
