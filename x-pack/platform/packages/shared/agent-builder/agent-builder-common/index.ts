@@ -121,6 +121,8 @@ export {
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,
+  type ToolUiEventData,
+  type ToolUiEvent,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
