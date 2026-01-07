@@ -56,7 +56,9 @@ async function getPreferredDocumentSource({
   if (kqlFilter) {
     kueryParts.push(kqlFilter);
   }
-  kueryParts.push(`${groupBy}: *`);
+  if (groupBy) {
+    kueryParts.push(`${groupBy}: *`);
+  }
   const kuery = kueryParts.join(' AND ');
 
   const documentSources = await apmDataAccessServices.getDocumentSources({
@@ -98,7 +100,7 @@ export async function getTraceMetrics({
     apmDataAccessServices,
     start,
     end,
-    groupBy,
+    groupBy: groupBy || SERVICE_NAME,
     kqlFilter,
   });
 
@@ -125,7 +127,7 @@ export async function getTraceMetrics({
     aggs: {
       groups: {
         terms: {
-          field: groupBy,
+          field: groupBy || SERVICE_NAME,
           size: MAX_NUMBER_OF_GROUPS,
         },
         aggs: {
