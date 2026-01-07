@@ -353,6 +353,68 @@ describe('barrel transform plugin', () => {
     });
   });
 
+  describe('locally-defined default exports (no infinite recursion)', () => {
+    // When a barrel has a locally-defined default export (e.g., export default function() {}),
+    // it is NOT included in the barrel index. This test verifies that importing such a default
+    // leaves the import unchanged and doesn't cause infinite recursion.
+    const CASES_CONTEXT_BARREL_PATH = '/test/src/cases_context/index.ts';
+
+    it('leaves default imports unchanged when default is not in barrel index', () => {
+      // Barrel has only named exports - no 'default' because it's locally defined
+      // This is what the scanner produces for: export { namedExport } from './source'; export default function() {}
+      const barrelWithLocalDefault: TestBarrelIndex = {
+        [CASES_CONTEXT_BARREL_PATH]: {
+          exports: {
+            namedExport: {
+              path: '/test/src/cases_context/source.ts',
+              type: 'named',
+              localName: 'namedExport',
+              importedName: 'namedExport',
+              expectedPath: './cases_context/source',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `import CasesProvider from './cases_context';`,
+        barrelIndex: barrelWithLocalDefault,
+        filename: '/test/src/app.ts',
+      });
+
+      // Should be unchanged - default not in barrel index, no infinite recursion
+      expect(result?.code).toMatch(/from ['"]\.\/cases_context['"]/);
+      expect(result?.code).toContain('CasesProvider');
+    });
+
+    it('transforms named imports while leaving default import from same barrel unchanged', () => {
+      const barrelWithLocalDefault: TestBarrelIndex = {
+        [CASES_CONTEXT_BARREL_PATH]: {
+          exports: {
+            namedExport: {
+              path: '/test/src/cases_context/source.ts',
+              type: 'named',
+              localName: 'namedExport',
+              importedName: 'namedExport',
+              expectedPath: './cases_context/source',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `import CasesProvider, { namedExport } from './cases_context';`,
+        barrelIndex: barrelWithLocalDefault,
+        filename: '/test/src/app.ts',
+      });
+
+      // Named import should be transformed
+      expect(result?.code).toContain('./cases_context/source');
+      // Default import should remain pointing to barrel (not transformed)
+      expect(result?.code).toMatch(/from ['"]\.\/cases_context['"]/);
+    });
+  });
+
   describe('internal package transformations with packageName', () => {
     // Simulates @kbn/* packages which have packageName set in the barrel index
     // When packageName is present, transforms should use package paths, not relative

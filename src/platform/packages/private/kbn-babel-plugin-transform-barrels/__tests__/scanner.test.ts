@@ -240,7 +240,7 @@ export default function defaultFn() {}`
 export default class MyClass {}`
       );
 
-      // Create barrel that directly exports a default
+      // Create barrel that directly exports a default (locally defined)
       await Fsp.writeFile(
         Path.join(tempDir, 'index.ts'),
         `export { namedExport } from './source';
@@ -252,7 +252,7 @@ export default function barrelDefault() { return 'default'; }`
       await Fsp.rm(tempDir, { recursive: true, force: true });
     });
 
-    it('captures export default declarations in barrel files', async () => {
+    it('does NOT capture locally-defined default exports', async () => {
       const barrelIndex = await buildBarrelIndex(tempDir);
 
       const mainBarrelPath = Path.join(tempDir, 'index.ts');
@@ -260,11 +260,11 @@ export default function barrelDefault() { return 'default'; }`
 
       const exports = barrelIndex[mainBarrelPath].exports;
 
-      // Should capture the default export
-      expect(exports.default).toBeDefined();
-      expect(exports.default.type).toBe('default');
-      expect(exports.default.localName).toBe('barrelDefault');
-      expect(exports.default.path).toBe(mainBarrelPath);
+      // Locally-defined default should NOT be in exports (can't transform)
+      expect(exports.default).toBeUndefined();
+
+      // Named re-export should still work
+      expect(exports.namedExport).toBeDefined();
     });
   });
 
@@ -354,6 +354,45 @@ __exportStar(require("./operators"), exports);`
 
       expect(exports.reduce).toBeDefined();
       expect(exports.reduce.path).toBe(Path.join(tempDir, 'operators.ts'));
+    });
+  });
+
+  describe('import then export default handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-import-default-test-'));
+
+      // Source file with named export
+      await Fsp.writeFile(
+        Path.join(tempDir, 'editor.ts'),
+        `export const ESQLEditor = () => {};`
+      );
+
+      // Barrel that imports then exports as default
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `import { ESQLEditor } from './editor';
+export default ESQLEditor;`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('traces import-then-export-default to source file', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Default should trace to editor.ts, not the barrel
+      expect(exports.default).toBeDefined();
+      expect(exports.default.path).toBe(Path.join(tempDir, 'editor.ts'));
+      expect(exports.default.type).toBe('default');
+      expect(exports.default.localName).toBe('ESQLEditor');
     });
   });
 });

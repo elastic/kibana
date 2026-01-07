@@ -283,7 +283,35 @@ function parseBarrelExports(content, filePath) {
   /** @type {Record<string, string>} */
   const requireMap = {};
 
+  // ESM: track imports to resolve re-exported defaults
+  // e.g., import { ESQLEditor } from './src/esql_editor'; export default ESQLEditor;
+  /** @type {Record<string, { path: string, importedName: string }>} */
+  const importMap = {};
+
   traverse(ast, {
+    // Track ESM imports for resolving export default of imported identifiers
+    ImportDeclaration(nodePath) {
+      const node = nodePath.node;
+      const sourcePath = node.source.value;
+      const resolvedPath = resolveModulePath(sourcePath, barrelDir);
+
+      if (!resolvedPath) return;
+
+      for (const specifier of node.specifiers) {
+        if (specifier.type === 'ImportSpecifier') {
+          // import { Foo } or import { Foo as Bar }
+          const localName = specifier.local.name;
+          const imported = specifier.imported;
+          const importedName = imported.type === 'Identifier' ? imported.name : imported.value;
+          importMap[localName] = { path: resolvedPath, importedName };
+        } else if (specifier.type === 'ImportDefaultSpecifier') {
+          // import Foo from './source'
+          importMap[specifier.local.name] = { path: resolvedPath, importedName: 'default' };
+        }
+        // Skip ImportNamespaceSpecifier (import * as X)
+      }
+    },
+
     // Handle: export { Foo, Bar as Baz } from './source'
     ExportNamedDeclaration(nodePath) {
       const node = nodePath.node;
@@ -341,28 +369,30 @@ function parseBarrelExports(content, filePath) {
     },
 
     // Handle: export default ...
+    // Only captures re-exported imports (e.g., import X from './X'; export default X;)
+    // Skips locally-defined defaults (can't transform - no other source to point to)
     ExportDefaultDeclaration(nodePath) {
       const node = nodePath.node;
-      let localName = 'default';
 
-      if (node.declaration) {
-        const decl = node.declaration;
-        if (decl.type === 'Identifier') {
-          localName = decl.name;
-        } else if (
-          (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
-          decl.id
-        ) {
-          localName = decl.id.name;
+      // Only handle identifiers that were imported from elsewhere
+      if (node.declaration && node.declaration.type === 'Identifier') {
+        const identifierName = node.declaration.name;
+        const importInfo = importMap[identifierName];
+
+        if (importInfo) {
+          // Identifier was imported - trace to actual source
+          const found = findExportSource(importInfo.importedName, importInfo.path, new Set());
+
+          exports.default = {
+            path: found ? found.path : importInfo.path,
+            type: /** @type {const} */ ('default'),
+            localName: found ? found.localName : importInfo.importedName,
+            importedName: 'default',
+          };
         }
+        // If not in importMap, it's locally defined - skip (can't transform)
       }
-
-      exports.default = {
-        path: filePath,
-        type: /** @type {const} */ ('default'),
-        localName: localName,
-        importedName: 'default',
-      };
+      // Function/class declarations are locally defined - skip
     },
 
     // CommonJS: var X = require('./path')
