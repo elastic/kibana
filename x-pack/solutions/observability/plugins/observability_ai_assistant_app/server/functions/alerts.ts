@@ -16,7 +16,7 @@ import {
   AlertConsumers,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import {
   GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
   ALERTS_FUNCTION_NAME,

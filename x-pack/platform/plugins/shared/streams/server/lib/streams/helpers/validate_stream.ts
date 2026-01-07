@@ -15,6 +15,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  MathProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
   RemoveProcessor,
@@ -30,6 +31,8 @@ import {
   isNotCondition,
   isOrCondition,
   isConditionBlock,
+  isConditionComplete,
+  extractFieldsFromMathExpression,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
@@ -93,6 +96,12 @@ function checkFieldName(fieldName: string) {
 }
 
 function validateCondition(condition: Condition) {
+  // Check if the condition is complete (all required values filled)
+  // This catches incomplete range conditions, empty fields, etc.
+  if (!isConditionComplete(condition)) {
+    throw new MalformedStreamError('Condition is incomplete: all required values must be filled');
+  }
+
   if (isAndCondition(condition)) {
     condition.and.forEach(validateCondition);
   } else if (isOrCondition(condition)) {
@@ -139,6 +148,14 @@ const actionStepValidators: {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
       checkFieldName(step.to);
+    }
+  },
+  math: (step: MathProcessor) => {
+    checkFieldName(step.to);
+    // Also validate field references in the expression
+    const expressionFields = extractFieldsFromMathExpression(step.expression);
+    for (const field of expressionFields) {
+      checkFieldName(field);
     }
   },
   // fields referenced in manual ingest pipelines are not validated here because

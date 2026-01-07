@@ -50,6 +50,7 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
 import { DropProcessorForm } from './drop_document';
+import { MathProcessorForm } from './math';
 import { ProcessorContextProvider } from './processor_context';
 import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
@@ -70,7 +71,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
     )
   );
 
-  const typeValidationErrors = useStreamEnrichmentSelector((snapshot) => {
+  const validationErrors = useStreamEnrichmentSelector((snapshot) => {
     const errors = selectValidationErrors(snapshot.context);
     return errors.get(step.customIdentifier) || [];
   });
@@ -97,7 +98,12 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const isConfigured = useSelector(stepRef, (snapshot) => snapshot.matches('configured'));
   const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
-  const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
+  const canSaveStateMachine = useSelector(stepRef, (snapshot) =>
+    snapshot.can({ type: 'step.save' })
+  );
+
+  const hasConditionError = 'where' in methods.formState.errors;
+  const canSave = canSaveStateMachine && !hasConditionError;
 
   const hasStepChanges = useSelector(
     stepRef,
@@ -145,6 +151,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
                 {type === 'set' && <SetProcessorForm />}
                 {type === 'drop_document' && <DropProcessorForm />}
+                {type === 'math' && <MathProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}
@@ -155,7 +162,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               <EuiFlexItem grow={false}>
                 {canDelete && (
                   <EuiButton
-                    data-test-subj="streamsAppProcessorConfigurationButton"
+                    data-test-subj="streamsAppProcessorConfigurationDeleteButton"
                     data-stream-type={streamType}
                     color="danger"
                     onClick={handleDelete}
@@ -206,21 +213,21 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {typeValidationErrors.length > 0 && (
+            {validationErrors.length > 0 && (
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut
                   announceOnMount
                   title={i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.typeValidationErrors.title',
-                    { defaultMessage: 'Type validation errors' }
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    { defaultMessage: 'Validation errors' }
                   )}
                   color="danger"
                   iconType="warning"
                   size="s"
                 >
                   <ul>
-                    {typeValidationErrors.map((error, index: number) => (
+                    {validationErrors.map((error, index: number) => (
                       <li key={index}>{error.message}</li>
                     ))}
                   </ul>

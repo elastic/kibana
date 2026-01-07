@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { htmlIdGenerator } from '@elastic/eui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   GrokProcessor,
+  MathProcessor,
   ProcessorType,
   ReplaceProcessor,
   StreamlangDSL,
@@ -48,6 +47,7 @@ import type {
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
   ManualIngestPipelineFormState,
+  MathFormState,
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
@@ -62,6 +62,7 @@ export const SPECIALISED_TYPES = [
   'date',
   'dissect',
   'grok',
+  'math',
   'set',
   'replace',
   'drop_document',
@@ -214,6 +215,15 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultMathProcessorFormState = (): MathFormState => ({
+  action: 'math' as const,
+  expression: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: false,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -231,6 +241,7 @@ const defaultProcessorFormStateByType: Record<
   drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
@@ -271,7 +282,8 @@ export const getFormStateFromActionStep = (
     step.action === 'drop_document' ||
     step.action === 'set' ||
     step.action === 'convert' ||
-    step.action === 'replace'
+    step.action === 'replace' ||
+    step.action === 'math'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -462,6 +474,22 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'math') {
+      const { expression, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'math',
+          expression,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as MathProcessor,
+      };
+    }
+
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
@@ -574,12 +602,13 @@ export const getValidSteps = (
       validSteps.push(step);
       return true;
     } else {
-      // Action step: check validity
-      if (isSchema(streamlangProcessorSchema, step)) {
-        validSteps.push(step);
-        return true;
+      // Action step: check schema validity
+      if (!isSchema(streamlangProcessorSchema, step)) {
+        return false;
       }
-      return false;
+
+      validSteps.push(step);
+      return true;
     }
   }
 

@@ -29,7 +29,7 @@ function getVisibility(
   isServerless?: boolean
 ) {
   // If AI Agents are enabled, hide the nav control
-  // OnechatNavControl will be used instead
+  // AgentBuilderNavControl will be used instead
   if (chatExperience === AIChatExperience.Agent) {
     return false;
   }
@@ -69,10 +69,8 @@ export function useIsNavControlVisible({
   const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
-    const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    );
+    const chatExperience$ =
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const appSubscription = combineLatest([
       currentAppId$,

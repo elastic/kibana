@@ -187,7 +187,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<C>, \"isCompatible\">"
+          "<C, object>, \"isCompatible\">"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
@@ -881,7 +881,7 @@
           "CellActionsMode",
           "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
           "IconType",
-          " | undefined; extraActionsColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; extraActionsColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
@@ -904,7 +904,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; } & { children?: React.ReactNode; }"
+          "<object, object>[]>; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,

@@ -13,6 +13,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { VisParams } from '@kbn/visualizations-common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 import type {
   CoreStart,
@@ -121,6 +122,7 @@ export interface VisualizeServices extends CoreStart {
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
   contentManagement: ContentManagementPublicStart;
+  cps?: CPSPluginStart;
 }
 
 export interface VisInstance {

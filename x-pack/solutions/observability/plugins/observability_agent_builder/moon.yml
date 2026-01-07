@@ -19,13 +19,13 @@ project:
     sourceRoot: x-pack/solutions/observability/plugins/observability_agent_builder
 dependsOn:
   - '@kbn/core'
-  - '@kbn/onechat-common'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/apm-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/logs-data-access-plugin'
   - '@kbn/zod'
-  - '@kbn/onechat-server'
+  - '@kbn/agent-builder-server'
   - '@kbn/security-plugin'
   - '@kbn/es-query'
   - '@kbn/core-elasticsearch-server'
@@ -33,7 +33,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/rule-registry-plugin'
-  - '@kbn/observability-plugin'
+  - '@kbn/observability-shared-plugin'
   - '@kbn/core-http-server'
   - '@kbn/data-views-plugin'
   - '@kbn/metrics-data-access-plugin'
@@ -43,18 +43,42 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
-  - '@kbn/inference-plugin'
-  - '@kbn/logging'
-  - '@kbn/inference-common'
+  - '@kbn/std'
+  - '@kbn/spaces-plugin'
   - '@kbn/management-settings-ids'
+  - '@kbn/logging'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/discover-shared-plugin'
+  - '@kbn/i18n'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
+  - '@kbn/observability-nav-icons'
+  - '@kbn/server-route-repository-client'
+  - '@kbn/agent-builder-browser'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
+    - public/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

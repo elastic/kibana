@@ -13,6 +13,7 @@ import type {
   DropDocumentProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   ReplaceProcessor,
   SetProcessor,
   StreamlangConditionBlockWithUIAttributes,
@@ -36,6 +37,7 @@ export type ConvertFormState = ConvertProcessor;
 export type ReplaceFormState = ReplaceProcessor;
 
 export type SetFormState = SetProcessor;
+export type MathFormState = MathProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -45,7 +47,8 @@ export type SpecialisedFormState =
   | ManualIngestPipelineFormState
   | ConvertFormState
   | ReplaceFormState
-  | SetFormState;
+  | SetFormState
+  | MathFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;

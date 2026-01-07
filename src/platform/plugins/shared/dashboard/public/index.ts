@@ -10,9 +10,12 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
-export { PanelPlacementStrategy } from './plugin_constants';
 export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/page_bundle_constants';
-export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
+export type {
+  DashboardApi,
+  DashboardInternalApi,
+  DashboardCreationOptions,
+} from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';

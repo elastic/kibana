@@ -55,6 +55,7 @@ import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
+  DeleteWorkflowsResponse,
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
@@ -468,47 +469,74 @@ export class WorkflowsService {
     }
   }
 
-  public async deleteWorkflows(ids: string[], spaceId: string): Promise<void> {
+  public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
     if (!this.workflowStorage) {
       throw new Error('WorkflowsService not initialized');
     }
 
     const now = new Date();
+    const failures: Array<{ id: string; error: string }> = [];
+    const client = this.workflowStorage.getClient();
 
-    // Soft delete by setting deleted_at timestamp
-    for (const id of ids) {
+    // Bulk fetch all workflows in a single search call
+    const searchResponse = await client.search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    // Build bulk operations for all found workflows
+    const bulkOperations = searchResponse.hits.hits.map((hit) => ({
+      index: {
+        _id: hit._id,
+        document: {
+          ...hit._source,
+          deleted_at: now,
+          enabled: false,
+        },
+      },
+    }));
+
+    // Bulk update all found workflows in a single call
+    if (bulkOperations.length > 0) {
       try {
-        // Check if workflow exists and belongs to the correct space
-        const searchResponse = await this.workflowStorage.getClient().search({
-          query: {
-            bool: {
-              must: [{ ids: { values: [id] } }, { term: { spaceId } }],
-            },
-          },
-          size: 1,
-          track_total_hits: false,
+        const bulkResponse = await client.bulk({
+          operations: bulkOperations,
         });
 
-        if (searchResponse.hits.hits.length > 0) {
-          const existingDocument = searchResponse.hits.hits[0];
-          const updatedData = {
-            ...existingDocument._source,
-            deleted_at: now,
-            enabled: false,
-          };
-
-          await this.workflowStorage.getClient().index({
-            id,
-            document: updatedData,
-          });
-        }
+        // Process bulk response to track successes and failures
+        bulkResponse.items.forEach((item) => {
+          const operation = item.index;
+          if (operation?.error) {
+            failures.push({
+              id: operation._id ?? 'unknown',
+              error:
+                typeof operation.error === 'object' && 'reason' in operation.error
+                  ? operation.error.reason ?? JSON.stringify(operation.error)
+                  : JSON.stringify(operation.error),
+            });
+          }
+        });
       } catch (error) {
-        if (error.statusCode !== 404) {
-          throw error;
-        }
-        // Ignore not found errors for soft delete
+        // If the entire bulk operation fails, mark all as failed
+        bulkOperations.forEach((op) => {
+          failures.push({
+            id: op.index._id ?? 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
       }
     }
+
+    return {
+      total: ids.length,
+      deleted: ids.length - failures.length,
+      failures,
+    };
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {

@@ -54,3 +54,9 @@ export const MAX_COMMITS_TO_CHECK = 50;
 
 export const TYPES_DIRECTORY_GLOB = '**/target/types';
 export const TYPE_CHECK_CONFIG_GLOB = '**/tsconfig*.type_check.json';
+
+/**
+ * Files that should be hashed and checked for cache invalidation.
+ * If any of these files change, the cache should be invalidated.
+ */
+export const CACHE_INVALIDATION_FILES = ['yarn.lock', '.nvmrc', '.node-version'];

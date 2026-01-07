@@ -12,14 +12,11 @@ import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
+import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
   upsertFeature: (feature: Feature) => Promise<void>;
-  identifyFeatures: (
-    connectorId: string,
-    to: string,
-    from: string
-  ) => Promise<IdentifiedFeaturesEvent>;
+  identifyFeatures: (connectorId: string) => Promise<IdentifiedFeaturesEvent>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
@@ -40,7 +37,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string, to: string, from: string) => {
+    identifyFeatures: async (connectorId: string) => {
+      const { from, to } = getLast24HoursTimeRange();
       const events$ = streamsRepositoryClient.stream(
         'POST /internal/streams/{name}/features/_identify',
         {
@@ -49,8 +47,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
             path: { name: definition.name },
             query: {
               connectorId,
-              to,
               from,
+              to,
             },
           },
         }
