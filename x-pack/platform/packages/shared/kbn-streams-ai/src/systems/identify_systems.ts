@@ -92,7 +92,7 @@ export async function identifySystems({
           description: stream.description || 'This stream has no description.',
         },
         dataset_analysis: JSON.stringify(
-          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: true })
+          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
         ),
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
