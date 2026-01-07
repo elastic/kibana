@@ -68,7 +68,7 @@ import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import type { InternalChromeStart } from './types';
+import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
@@ -161,9 +161,10 @@ export class ChromeService {
 
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
 
-  public setup({ analytics }: SetupDeps) {
+  public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
+    return {};
   }
 
   public async start({
