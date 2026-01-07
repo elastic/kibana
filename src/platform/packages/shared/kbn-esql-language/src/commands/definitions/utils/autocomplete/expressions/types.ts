@@ -60,7 +60,6 @@ export interface ExpressionContextOptions {
   controlType?: ESQLVariableType; // Type of control variable (??/?) to suggest in empty expressions
   addSpaceAfterOperator?: boolean; // Add a space after inserting operands or functions that follow an operator
   openSuggestions?: boolean; // Reopen the suggestions popover after applying a completion
-  isInsideInList?: boolean; // Internal flag for IN/NOT IN list handling when operator helpers detect a list context
   functionsToIgnore?: {
     names: string[]; // Functions hidden for the current command/context
     allowedInsideFunctions?: Record<string, string[]>; // Exceptions: keep fn visible when inside specific parent functions

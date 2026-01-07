@@ -13,6 +13,11 @@ import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 import { SuggestionCategory } from '../../shared/sorting/types';
+import {
+  ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  ESQL_NAMED_PARAMS_TYPE,
+} from '../definitions/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -97,15 +102,15 @@ export const PLACEHOLDER_CONFIG: Record<
 > = {
   config: {
     snippet: '{ $0 }',
-    matchTypes: ['function_named_parameters'],
+    matchTypes: [ESQL_NAMED_PARAMS_TYPE],
   },
   value: {
     snippet: '"${0:value}"',
-    matchTypes: ['keyword', 'text', 'ip', 'version'],
+    matchTypes: [...ESQL_STRING_TYPES, 'ip', 'version'],
   },
   number: {
     snippet: '${0:0}',
-    matchTypes: ['integer', 'long', 'double', 'unsigned_long'],
+    matchTypes: [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
   },
   default: {
     snippet: '"${0:default}"',
