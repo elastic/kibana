@@ -209,12 +209,11 @@ export class ESQLService extends FtrService {
     await this.retry.try(async () => {
       await this.triggerSuggestions(editorSubjId);
 
-      const suggestions = await this.findService.allByCssSelector(
-        '.monaco-editor .suggest-widget .monaco-list-row'
-      );
+      const editorSuggestions = await this.monacoEditor.getCodeEditorSuggestWidget();
+      const suggestionItems = await editorSuggestions.findAllByClassName('monaco-list-row');
 
       let suggestionToSelect;
-      for (const suggestion of suggestions) {
+      for (const suggestion of suggestionItems) {
         if ((await suggestion.getVisibleText()).includes(label)) {
           suggestionToSelect = suggestion;
           break;
