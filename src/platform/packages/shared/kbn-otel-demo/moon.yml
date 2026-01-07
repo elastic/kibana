@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/repo-info'
+  - '@kbn/object-utils'
 tags:
   - shared-server
   - package

@@ -20,6 +20,9 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  UppercaseProcessor,
+  TrimProcessor,
+  LowercaseProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -99,6 +102,24 @@ export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
   { where: 'if' }
 >;
 
+// Uppercase
+export type IngestPipelineUppercaseProcessor = RenameFieldsAndRemoveAction<
+  UppercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Lowercase
+export type IngestPipelineLowercaseProcessor = RenameFieldsAndRemoveAction<
+  LowercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Trim
+export type IngestPipelineTrimProcessor = RenameFieldsAndRemoveAction<
+  TrimProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -118,4 +139,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineUppercaseProcessor
+  | IngestPipelineLowercaseProcessor
+  | IngestPipelineTrimProcessor
   | IngestPipelineManualIngestPipelineProcessor;
