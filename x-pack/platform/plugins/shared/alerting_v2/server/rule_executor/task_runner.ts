@@ -16,17 +16,20 @@ import type { RuleSavedObjectAttributes } from '../saved_objects';
 import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
 import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
-import { ensureAlertsDataStream, ensureAlertsResources } from './resources';
+import { ALERT_EVENTS_INDEX } from './constants';
 import { writeEsqlAlerts } from './write_alerts';
+import type { AlertingResourcesService } from './alerting_resources_service';
 
 export function createRuleExecutorTaskRunner({
   logger,
   coreStartServices,
   config,
+  resourcesService,
 }: {
   logger: Logger;
   coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>;
   config: PluginConfig;
+  resourcesService: AlertingResourcesService;
 }) {
   return ({ taskInstance, abortController, fakeRequest }: RunContext) => {
     return {
@@ -42,6 +45,9 @@ export function createRuleExecutorTaskRunner({
         }
 
         const params = taskInstance.params as RuleExecutorTaskParams;
+        // Wait for the plugin-wide resource initialization started during plugin setup.
+        await resourcesService.waitUntilReady();
+
         const [coreStart, pluginsStart] = await coreStartServices;
 
         const namespace: string | undefined = spaceIdToNamespace(
@@ -100,14 +106,7 @@ export function createRuleExecutorTaskRunner({
         );
 
         const esClient = coreStart.elasticsearch.client.asInternalUser;
-        await ensureAlertsResources({
-          logger,
-          esClient,
-        });
-        const targetDataStream = await ensureAlertsDataStream({
-          logger,
-          esClient,
-        });
+        const targetDataStream = ALERT_EVENTS_INDEX;
 
         const scheduledAt = taskInstance.scheduledAt;
         const scheduledTimestamp =

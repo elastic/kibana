@@ -26,7 +26,8 @@
     "@kbn/search-types",
     "@kbn/core-di",
     "@kbn/core-di-server",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/response-ops-retry-service"
   ],
   "exclude": [
     "target/**/*"

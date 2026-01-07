@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ContainerModule } from 'inversify';
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup, PluginInitializer, Route } from '@kbn/core-di-server';
+import type { CoreStart, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-
+import { ContainerModule } from 'inversify';
+import { RulesClient } from './application/esql_rule/lib/rules_client';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
-import { registerSavedObjects } from './saved_objects';
-import { initializeRuleExecutorTaskDefinition } from './rule_executor';
+import { AlertingRetryService } from './lib/retry_service';
+import { registerFeaturePrivileges } from './lib/security/privileges';
 import { CreateRuleRoute } from './routes/create_rule_route';
 import { UpdateRuleRoute } from './routes/update_rule_route';
-import { registerFeaturePrivileges } from './lib/security/privileges';
-import { RulesClient } from './application/esql_rule/lib/rules_client';
+import { initializeRuleExecutorTaskDefinition } from './rule_executor';
+import { AlertingResourcesService } from './rule_executor/alerting_resources_service';
+import { registerSavedObjects } from './saved_objects';
+import type { AlertingServerStartDependencies } from './types';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
@@ -31,6 +33,10 @@ export const module = new ContainerModule(({ bind }) => {
 
   // Request-scoped rules client
   bind(RulesClient).toSelf().inRequestScope();
+
+  // Singleton services
+  bind(AlertingRetryService).toSelf().inSingletonScope();
+  bind(AlertingResourcesService).toSelf().inSingletonScope();
 
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);
@@ -51,13 +57,21 @@ export const module = new ContainerModule(({ bind }) => {
     // Task type registration
     const taskManagerSetup = container.get(PluginSetup<TaskManagerSetupContract>('taskManager'));
     const getStartServices = container.get(CoreSetup('getStartServices')) as () => Promise<
-      [unknown, unknown, unknown]
+      [CoreStart, AlertingServerStartDependencies, unknown]
     >;
+    const startServices = getStartServices();
+
+    const resourcesService = container.get(AlertingResourcesService);
+    resourcesService.startInitialization({
+      enabled: alertingConfig.enabled,
+    });
+
     initializeRuleExecutorTaskDefinition(
       logger,
       taskManagerSetup,
-      getStartServices() as any,
-      alertingConfig
+      startServices,
+      alertingConfig,
+      resourcesService
     );
   });
 });
