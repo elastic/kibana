@@ -26,19 +26,19 @@ export const DEFAULT_PALETTE: PaletteOutput<CustomPaletteParams> = {
     ...defaultPaletteParams,
     stops: [
       {
-        color: '#24c292',
+        color: '',
         stop: 0,
       },
       {
-        color: '#aee8d2',
+        color: '',
         stop: 25,
       },
       {
-        color: '#ffc9c2',
+        color: '',
         stop: 50,
       },
       {
-        color: '#f6726a',
+        color: '',
         stop: 75,
       },
     ],

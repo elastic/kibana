@@ -17,6 +17,38 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import type { GaugeVisualizationState } from './constants';
 import { DEFAULT_PALETTE } from './constants';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+
+const stops = [
+  {
+    color: 'blue',
+    stop: 0,
+  },
+  {
+    color: 'red',
+    stop: 25,
+  },
+  {
+    color: 'yellow',
+    stop: 50,
+  },
+  {
+    color: 'green',
+    stop: 75,
+  },
+];
+const MOCKED_DEFAULT_COLOR_PALETTE = {
+  ...DEFAULT_PALETTE,
+  params: {
+    ...DEFAULT_PALETTE.params,
+    stops,
+  },
+};
+
+jest.mock('@kbn/coloring', () => ({
+  ...jest.requireActual('@kbn/coloring'),
+  applyPaletteParams: jest.fn().mockReturnValue(stops),
+}));
 
 const metricColumn = {
   columnId: 'metric-column',
@@ -38,6 +70,8 @@ const bucketColumn = {
   },
 };
 
+const paletteService = chartPluginMock.createPaletteRegistry();
+
 describe('gauge suggestions', () => {
   describe('rejects suggestions', () => {
     test('when currently active and unchanged data', () => {
@@ -54,6 +88,7 @@ describe('gauge suggestions', () => {
           layerType: LayerTypes.DATA,
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
+        paletteService,
       };
       expect(getSuggestions(unchangedSuggestion)).toHaveLength(0);
     });
@@ -70,6 +105,7 @@ describe('gauge suggestions', () => {
           layerType: LayerTypes.DATA,
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
+        paletteService,
       };
       expect(getSuggestions(bucketAndMetricSuggestion)).toEqual([]);
     });
@@ -91,6 +127,7 @@ describe('gauge suggestions', () => {
             ticksPosition: 'auto',
           } as GaugeVisualizationState,
           keptLayerIds: ['first'],
+          paletteService,
         })
       ).toHaveLength(0);
     });
@@ -108,6 +145,7 @@ describe('gauge suggestions', () => {
             layerType: LayerTypes.DATA,
           } as GaugeVisualizationState,
           keptLayerIds: ['first'],
+          paletteService,
         })
       ).toEqual([]);
     });
@@ -131,6 +169,7 @@ describe('gauge suggestions', () => {
             layerType: LayerTypes.DATA,
           } as GaugeVisualizationState,
           keptLayerIds: ['first'],
+          paletteService,
         })
       ).toEqual([]);
     });
@@ -152,12 +191,13 @@ describe('shows suggestions', () => {
           layerType: LayerTypes.DATA,
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
+        paletteService,
       })
     ).toEqual([
       {
         state: {
           colorMode: 'palette',
-          palette: DEFAULT_PALETTE,
+          palette: MOCKED_DEFAULT_COLOR_PALETTE,
           layerId: 'first',
           layerType: LayerTypes.DATA,
           shape: GaugeShapes.HORIZONTAL_BULLET,
@@ -179,7 +219,7 @@ describe('shows suggestions', () => {
         score: 0.5,
         state: {
           colorMode: 'palette',
-          palette: DEFAULT_PALETTE,
+          palette: MOCKED_DEFAULT_COLOR_PALETTE,
           layerId: 'first',
           layerType: 'data',
           metricAccessor: 'metric-column',
@@ -207,12 +247,13 @@ describe('shows suggestions', () => {
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
         subVisualizationId: GaugeShapes.VERTICAL_BULLET,
+        paletteService,
       })
     ).toEqual([
       {
         state: {
           colorMode: 'palette',
-          palette: DEFAULT_PALETTE,
+          palette: MOCKED_DEFAULT_COLOR_PALETTE,
           layerType: LayerTypes.DATA,
           shape: GaugeShapes.VERTICAL_BULLET,
           metricAccessor: 'metric-column',
@@ -233,7 +274,7 @@ describe('shows suggestions', () => {
         score: 0.1,
         state: {
           colorMode: 'palette',
-          palette: DEFAULT_PALETTE,
+          palette: MOCKED_DEFAULT_COLOR_PALETTE,
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',
@@ -250,7 +291,7 @@ describe('shows suggestions', () => {
         score: 0.5,
         state: {
           colorMode: 'palette',
-          palette: DEFAULT_PALETTE,
+          palette: MOCKED_DEFAULT_COLOR_PALETTE,
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',
@@ -267,7 +308,7 @@ describe('shows suggestions', () => {
         score: 0.1,
         state: {
           colorMode: 'palette',
-          palette: DEFAULT_PALETTE,
+          palette: MOCKED_DEFAULT_COLOR_PALETTE,
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',

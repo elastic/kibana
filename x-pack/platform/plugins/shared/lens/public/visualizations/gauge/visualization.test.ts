@@ -14,6 +14,30 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { GaugeVisualizationState } from './constants';
 
+const stops = [
+  {
+    color: 'blue',
+    stop: 0,
+  },
+  {
+    color: 'red',
+    stop: 25,
+  },
+  {
+    color: 'yellow',
+    stop: 50,
+  },
+  {
+    color: 'green',
+    stop: 75,
+  },
+];
+
+jest.mock('@kbn/coloring', () => ({
+  ...jest.requireActual('@kbn/coloring'),
+  applyPaletteParams: jest.fn().mockReturnValue(stops),
+}));
+
 function exampleState(): GaugeVisualizationState {
   return {
     layerId: 'test-layer',
@@ -33,6 +57,7 @@ describe('gauge', () => {
 
   beforeEach(() => {
     frame = createMockFramePublicAPI();
+    jest.restoreAllMocks();
   });
 
   describe('#intialize', () => {
@@ -44,7 +69,13 @@ describe('gauge', () => {
         labelMajorMode: 'auto',
         ticksPosition: 'auto',
         colorMode: 'palette',
-        palette: DEFAULT_PALETTE,
+        palette: {
+          ...DEFAULT_PALETTE,
+          params: {
+            ...DEFAULT_PALETTE.params,
+            stops,
+          },
+        },
       });
     });
 
