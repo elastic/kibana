@@ -61,7 +61,7 @@ export const aiPromptStepDefinition = (
           }
         );
 
-        const modelResponse = await runnable.invoke(modelInput, {
+        const invocationResult = await runnable.invoke(modelInput, {
           signal: context.abortSignal,
         });
         return {
@@ -70,20 +70,20 @@ export const aiPromptStepDefinition = (
           // so we only return the content here, but looking ahead we might have response_metadata returned,
           // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
-            content: modelResponse.parsed.response,
-            metadata: modelResponse.raw.response_metadata,
+            content: invocationResult.parsed.response,
+            metadata: invocationResult.raw.response_metadata,
           },
         };
       }
 
-      const modelResponse = await chatModel.invoke(modelInput, {
+      const invocationResult = await chatModel.invoke(modelInput, {
         signal: context.abortSignal,
       });
 
       return {
         output: {
-          content: modelResponse.content,
-          metadata: modelResponse.response_metadata,
+          content: invocationResult.content,
+          metadata: invocationResult.response_metadata,
         },
       };
     },

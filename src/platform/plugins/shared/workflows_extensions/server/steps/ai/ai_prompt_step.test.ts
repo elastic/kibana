@@ -77,15 +77,15 @@ describe('aiPromptStepDefinition', () => {
 
     // Mock step handler context
     mockContext = {
-      config: {},
+      config: {
+        'connector-id': 'test-connector-id',
+      },
       input: {
         prompt: 'Test prompt',
-        connectorId: 'test-connector-id',
         temperature: 0.7,
       },
       rawInput: {
         prompt: 'Test prompt',
-        connectorId: 'test-connector-id',
         temperature: 0.7,
       },
       contextManager: mockContextManager,
@@ -208,6 +208,10 @@ describe('aiPromptStepDefinition', () => {
       it('should handle missing connectorId in input', async () => {
         const contextWithoutConnectorId = {
           ...mockContext,
+          config: {
+            ...mockContext.config,
+            'connector-id': undefined,
+          },
           input: {
             prompt: 'Test prompt',
             temperature: 0.5,
@@ -254,22 +258,32 @@ describe('aiPromptStepDefinition', () => {
           },
         };
 
-        mockRunnable.invoke.mockResolvedValue(mockStructuredResponse);
+        mockRunnable.invoke.mockResolvedValue({
+          parsed: mockStructuredResponse,
+          raw: {
+            response_metadata: { tokens_used: 150 },
+          },
+        });
 
         const result = await handler(contextWithSchema);
 
-        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith({
-          type: 'object',
-          properties: {
-            response: {
-              type: 'object',
-              properties: {
-                summary: { type: 'string' },
-                sentiment: { type: 'string' },
+        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith(
+          {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'object',
+                properties: {
+                  summary: { type: 'string' },
+                  sentiment: { type: 'string' },
+                },
               },
             },
           },
-        });
+          {
+            includeRaw: true,
+          }
+        );
 
         expect(mockRunnable.invoke).toHaveBeenCalledWith(
           [{ role: 'user', content: 'Test prompt' }],
@@ -282,6 +296,7 @@ describe('aiPromptStepDefinition', () => {
               summary: 'This is a summary',
               sentiment: 'positive',
             },
+            metadata: { tokens_used: 150 },
           },
         });
 
@@ -305,24 +320,32 @@ describe('aiPromptStepDefinition', () => {
           response: ['item1', 'item2', 'item3'],
         };
 
-        mockRunnable.invoke.mockResolvedValue(mockStructuredResponse);
-
-        const result = await handler(contextWithArraySchema);
-
-        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith({
-          type: 'object',
-          properties: {
-            response: {
-              type: 'array',
-              items: { type: 'string' },
-            },
+        mockRunnable.invoke.mockResolvedValue({
+          parsed: mockStructuredResponse,
+          raw: {
+            response_metadata: { tokens_used: 150 },
           },
         });
 
-        expect(result).toEqual({
-          output: {
-            content: ['item1', 'item2', 'item3'],
+        const result = await handler(contextWithArraySchema);
+
+        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith(
+          {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+            },
           },
+          { includeRaw: true }
+        );
+
+        expect(result).toEqual({
+          output: expect.objectContaining({
+            content: ['item1', 'item2', 'item3'],
+          }),
         });
       });
     });
