@@ -6,5 +6,17 @@
  */
 
 export type { DataCatalog } from './data_catalog';
-export type { DataTypeDefinition } from './data_type';
+export type {
+  DataTypeDefinition,
+  WorkflowInfo,
+  WorkflowReference,
+  WorkflowsConfig,
+} from './data_type';
+export type { WorkflowRegistry, RegistryWorkflow } from './workflow_registry';
 export { createDataCatalog } from './data_catalog';
+export {
+  loadWorkflowsFromDirectory,
+  resolveWorkflowsDir,
+  loadWorkflows,
+} from './workflow_loader';
+export { loadWorkflowsFromRegistry } from './workflow_registry';

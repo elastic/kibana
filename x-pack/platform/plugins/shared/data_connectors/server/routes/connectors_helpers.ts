@@ -11,6 +11,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { WorkflowRegistry } from '@kbn/data-sources-registry-plugin/server';
+import { loadWorkflows } from '@kbn/data-sources-registry-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type {
@@ -76,6 +78,11 @@ interface CreateConnectorAndResourcesParams {
   actions: DataConnectorsServerStartDependencies['actions'];
   dataConnectorTypeDef: DataTypeDefinition;
   agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
+  /**
+   * Optional workflow registry for loading workflows from a third-party source.
+   * Required if the data connector uses registry-based workflows.
+   */
+  workflowRegistry?: WorkflowRegistry;
 }
 
 /**
@@ -95,6 +102,7 @@ export async function createConnectorAndRelatedResources(
     actions,
     dataConnectorTypeDef,
     agentBuilder,
+    workflowRegistry,
   } = params;
 
   // Create stack connector - for now our spec only supports the case
@@ -115,7 +123,14 @@ export async function createConnectorAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataConnectorTypeDef.generateWorkflows(stackConnector.id);
+
+  // Load workflows
+  const workflowInfos = await loadWorkflows(
+    dataConnectorTypeDef.workflows,
+    workflowRegistry,
+    stackConnector.id
+  );
+
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data connector '${name}'`);
