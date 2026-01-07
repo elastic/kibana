@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
@@ -18,16 +17,17 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { DEFAULT_ATTACKS_PAGE_FILTERS } from '../../../../../common/constants';
 
 const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
-    hideActionBar: true,
     persist: true,
-    hideExists: true,
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
   },
 ];
 
@@ -93,8 +93,6 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
 
   return (
     <AlertFilterControls
-      chainingSystem="HIERARCHICAL"
-      ControlGroupRenderer={ControlGroupRenderer}
       controlsUrlState={filterControlsUrlState}
       dataViewSpec={customDataViewSpec}
       defaultControls={DEFAULT_ATTACKS_PAGE_FILTERS}

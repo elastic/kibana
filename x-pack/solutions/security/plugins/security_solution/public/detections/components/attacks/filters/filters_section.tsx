@@ -68,23 +68,28 @@ export const FiltersSection = memo(
     );
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
-    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-
-    const { to, from } = useGlobalTime();
-
+    const topLevelFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
     const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
       TableId.alertsOnAlertsPage
     );
 
-    const topLevelFilters = useMemo(() => {
+    const filters = useMemo(() => {
       return [
-        ...filters,
+        ...topLevelFilters,
         ...(pageFilters ?? []),
         ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...buildAlertAssigneesFilter(assignees),
       ];
-    }, [filters, pageFilters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, assignees]);
+    }, [
+      topLevelFilters,
+      pageFilters,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+      assignees,
+    ]);
+
+    const { to, from } = useGlobalTime();
 
     const onFilterControlsChange = useCallback(
       (newFilters: Filter[]) => {
@@ -117,7 +122,7 @@ export const FiltersSection = memo(
 
     return (
       <PageFilters
-        filters={topLevelFilters}
+        filters={filters}
         onFiltersChange={onFilterControlsChange}
         query={query}
         timeRange={pageFiltersTimeRange}
