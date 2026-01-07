@@ -1807,6 +1807,56 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isConditionComplete",
+        "type": "Function",
+        "tags": [],
+        "label": "isConditionComplete",
+        "description": [
+          "\nChecks if a condition is complete and ready to be used.\nA condition is complete if:\n- It's undefined (optional conditions)\n- It has a non-empty field\n- Its value is complete based on operator type:\n  - Range: both lower and upper bounds are filled\n  - Boolean (exists): any boolean is valid\n  - String/Number: value is not empty"
+        ],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isConditionComplete.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.isDateProcessorDefinition",
         "type": "Function",
         "tags": [],
@@ -2463,7 +2513,7 @@
         "tags": [],
         "label": "validateStreamlang",
         "description": [
-          "\nValidates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.\n\nThis validates that:\n- All generated fields are properly namespaced (contain at least one dot)\n- Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes\n- Processors don't modify reserved/system fields\n- Fields are used with compatible types\n- Processor-specific values are valid (expressions, patterns, date formats etc.)\n"
+          "\nValidates a Streamlang DSL for condition completeness, processor values, and (for wired streams)\nnamespacing requirements, reserved field usage, and type safety.\n\nFor ALL streams, this validates that:\n- Conditions are complete (all required values filled, range conditions have both bounds)\n- Processor-specific values are valid (expressions, patterns, date formats etc.)\n\nFor WIRED streams only (streamType: 'wired'), this additionally validates that:\n- All generated fields are properly namespaced (contain at least one dot)\n- Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes\n- Processors don't modify reserved/system fields\n- Fields are used with compatible types\n"
         ],
         "signature": [
           "(streamlangDSL: ",
@@ -2525,7 +2575,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- Validation options (reservedFields)"
+              "- Validation options (reservedFields, streamType)"
             ],
             "signature": [
               {
@@ -5009,6 +5059,20 @@
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationOptions.streamType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "streamType",
+            "description": [],
+            "signature": [
+              "\"classic\" | \"wired\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7435,6 +7499,17 @@
             "type": "string",
             "tags": [],
             "label": "exists",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.range",
+            "type": "string",
+            "tags": [],
+            "label": "range",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
             "deprecated": false,
