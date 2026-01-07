@@ -343,6 +343,7 @@ export const identifySystemsRoute = createServerRoute({
         systems,
         signal,
         descriptionPrompt: descriptionPromptOverride,
+        dropUnmapped: true,
       })
     ).pipe(
       map(({ systems: identifiedSystems, tokensUsed }) => {

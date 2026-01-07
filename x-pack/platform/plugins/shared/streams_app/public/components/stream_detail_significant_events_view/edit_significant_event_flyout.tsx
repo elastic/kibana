@@ -13,6 +13,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
   refreshDefinition,
@@ -47,6 +48,7 @@ export const EditSignificantEventFlyout = ({
 }) => {
   const {
     core: { notifications },
+    services: { telemetryClient },
   } = useKibana();
 
   const { upsertQuery, bulk } = useSignificantEventsApi({
@@ -68,6 +70,8 @@ export const EditSignificantEventFlyout = ({
       query={queryToEdit}
       aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
+        const streamType = getStreamTypeFromDefinition(definition.stream);
+
         switch (data.type) {
           case 'single':
             await upsertQuery(data.query).then(
@@ -81,6 +85,12 @@ export const EditSignificantEventFlyout = ({
 
                 onCloseFlyout();
                 refresh();
+
+                telemetryClient.trackSignificantEventsCreated({
+                  count: 1,
+                  stream_name: definition.stream.name,
+                  stream_type: streamType,
+                });
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -109,6 +119,12 @@ export const EditSignificantEventFlyout = ({
 
                 setIsEditFlyoutOpen(false);
                 refresh();
+
+                telemetryClient.trackSignificantEventsCreated({
+                  count: data.queries.length,
+                  stream_name: definition.stream.name,
+                  stream_type: streamType,
+                });
               },
               (error) => {
                 notifications.showErrorDialog({

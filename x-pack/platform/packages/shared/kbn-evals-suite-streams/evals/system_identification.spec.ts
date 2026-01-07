@@ -250,6 +250,7 @@ evaluate.describe('Streams systems identification', { tag: '@svlOblt' }, () => {
             logger,
             stream,
             signal: new AbortController().signal,
+            dropUnmapped: true,
           });
 
           const systemsWithAnalysis = await Promise.all(
