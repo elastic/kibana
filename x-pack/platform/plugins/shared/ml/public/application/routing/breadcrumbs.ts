@@ -151,6 +151,13 @@ export const LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:logRateAnalysis',
 });
 
+export const LOG_RATE_ANALYSIS_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.logRateAnalysisBreadcrumbLabel', {
+    defaultMessage: 'Log Rate Analysis',
+  }),
+  href: '/aiops/log_rate_analysis',
+  deepLinkId: 'ml:logRateAnalysisPage',
+});
 export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
     defaultMessage: 'Log Pattern Analysis',
@@ -159,6 +166,13 @@ export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:logPatternAnalysis',
 });
 
+export const LOG_PATTERN_ANALYSIS_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
+    defaultMessage: 'Log Pattern Analysis',
+  }),
+  href: '/aiops/log_categorization',
+  deepLinkId: 'ml:logPatternAnalysisPage',
+});
 export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
     defaultMessage: 'Change Point Detection',
@@ -167,12 +181,28 @@ export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:changePointDetections',
 });
 
+export const CHANGE_POINT_DETECTION_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
+    defaultMessage: 'Change Point Detection',
+  }),
+  href: '/aiops/change_point_detection',
+  deepLinkId: 'ml:changePointDetectionsPage',
+});
+
 export const DATA_DRIFT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
     defaultMessage: 'Data Drift',
   }),
   href: '/data_drift_index_select',
   deepLinkId: 'ml:dataDrift',
+});
+
+export const DATA_DRIFT_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
+    defaultMessage: 'Data Drift',
+  }),
+  href: '/data_drift',
+  deepLinkId: 'ml:dataDriftPage',
 });
 
 export const DATA_DRIFT_INDEX_SELECT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -199,13 +229,17 @@ type ManagementBreadcrumb = keyof typeof managementBreadcrumbs;
 const breadcrumbs = {
   ML_BREADCRUMB,
   DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
+  DATA_DRIFT_PAGE,
   DATA_VISUALIZER_BREADCRUMB,
   AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS,
   AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
   AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION,
   LOG_RATE_ANALYSIS,
+  LOG_RATE_ANALYSIS_PAGE,
   LOG_PATTERN_ANALYSIS,
+  LOG_PATTERN_ANALYSIS_PAGE,
   CHANGE_POINT_DETECTION,
+  CHANGE_POINT_DETECTION_PAGE,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 
