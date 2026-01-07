@@ -328,6 +328,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.dismissCallout();
 
       // Test grouped entity nodes: Add filter to show all CreateRole events
       // This creates a graph where the target entity (projects/your-project-id/roles/customRole)
@@ -348,16 +349,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       if (labelNodeId) {
         // The target node (projects/your-project-id/roles/customRole) is connected to multiple actors
-        // This node should only show "View entity details" action when it represents grouped entities
+        // When it represents a grouped entity, it should only show "View entity details" action
         const targetNodeId = expandedFlyoutGraph.extractTargetIdFromLabelNode(labelNodeId);
         if (targetNodeId) {
           await expandedFlyoutGraph.toggleNodeExpandButton(targetNodeId);
-          await expandedFlyoutGraph.assertAllEntityActionsVisible();
+          await expandedFlyoutGraph.assertOnlyEntityDetailsActionVisible();
           await expandedFlyoutGraph.toggleNodeExpandButton(targetNodeId);
         }
 
-        // Pick one of the actor nodes (which should be a single entity)
-        // This node should show all actions
+        // Pick one of the actor nodes (which are also part of a grouped set)
+        // These nodes should also only show "View entity details" action when they represent grouped entities
         const actorNodeId = expandedFlyoutGraph.extractActorIdFromLabelNode(labelNodeId);
         if (actorNodeId) {
           await expandedFlyoutGraph.toggleNodeExpandButton(actorNodeId);
