@@ -3018,7 +3018,6 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           previewId,
           size: 10,
-          sort: ['data_stream.namespace'],
         });
 
         // Should get alerts from all namespaces when filter is not configured

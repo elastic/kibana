@@ -31,8 +31,12 @@ describe('getDataStreamNamespaceFilter', () => {
       {
         meta: { negate: false },
         query: {
-          terms: {
-            'data_stream.namespace': ['namespace1'],
+          bool: {
+            filter: {
+              terms: {
+                'data_stream.namespace': ['namespace1'],
+              },
+            },
           },
         },
       },
@@ -49,8 +53,12 @@ describe('getDataStreamNamespaceFilter', () => {
       {
         meta: { negate: false },
         query: {
-          terms: {
-            'data_stream.namespace': ['namespace1', 'namespace2'],
+          bool: {
+            filter: {
+              terms: {
+                'data_stream.namespace': ['namespace1', 'namespace2'],
+              },
+            },
           },
         },
       },

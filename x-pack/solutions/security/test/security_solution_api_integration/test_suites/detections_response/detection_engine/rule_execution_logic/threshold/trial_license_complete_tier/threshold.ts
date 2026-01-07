@@ -827,7 +827,6 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           previewId,
           size: 10,
-          sort: ['data_stream.namespace'],
         });
 
         // Should only get alerts from namespace1 and namespace2, not namespace3
