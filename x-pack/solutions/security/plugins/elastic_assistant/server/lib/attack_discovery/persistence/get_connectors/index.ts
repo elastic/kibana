@@ -12,13 +12,26 @@ import { type AttackDiscoveryAlertDocument } from '../../schedules/types';
 export const getConnectors = async ({
   esClient,
   spaceId,
+  from,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
+  from?: string;
 }) => {
+  const query: estypes.QueryDslQueryContainer | undefined = from
+    ? {
+        range: {
+          '@timestamp': {
+            gte: from,
+          },
+        },
+      }
+    : undefined;
+
   const result = await esClient.search<AttackDiscoveryAlertDocument>({
     index: `.alerts-security.attack.discovery.alerts-${spaceId}`,
     size: 0,
+    query,
     aggs: {
       distinct_values: {
         terms: {

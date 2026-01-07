@@ -10,6 +10,14 @@ paths:
       operationId: GetAttackDiscoveryConnectors
       description: Get the list of connectors used to generate attack discoveries. It includes also deleted connectors.
       summary: Get the list of connectors used to generate attack discoveries. It includes also deleted connectors.
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Timestamp in RFC 3339 format
+          schema:
+            type: string
+            format: date-time
       responses:
         200:
           description: Successful response
@@ -39,8 +47,8 @@ paths:
                   error:
                     type: string
                     description: Error type
-                    example: "Bad Request"
+                    example: 'Bad Request'
                   message:
                     type: string
                     description: Human-readable error message
-                    example: "Invalid size parameter. Must be a positive number."
+                    example: 'Invalid size parameter. Must be a positive number.'

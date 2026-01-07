@@ -354,9 +354,15 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     return result?.generations[0];
   };
 
-  public getConnectors = async ({ spaceId }: { spaceId: string }): Promise<string[]> => {
+  public getConnectors = async ({
+    spaceId,
+    from,
+  }: {
+    spaceId: string;
+    from?: string;
+  }): Promise<string[]> => {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    return getConnectors({ spaceId, esClient });
+    return getConnectors({ spaceId, esClient, from });
   };
 }

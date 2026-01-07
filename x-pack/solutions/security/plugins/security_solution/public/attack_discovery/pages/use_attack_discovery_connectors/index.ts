@@ -13,18 +13,25 @@ import { useCallback } from 'react';
 
 interface UseAttackDiscoveryConnectorsProps {
   http: HttpSetup;
+  from?: string;
 }
 
-export function useAttackDiscoveryConnectors({ http }: UseAttackDiscoveryConnectorsProps) {
-  const queryFn = useCallback(
-    () =>
-      http.fetch<GetAttackDiscoveryConnectorsResponse>(ATTACK_DISCOVERY_CONNECTORS, {
+export function useAttackDiscoveryConnectors({ http, from }: UseAttackDiscoveryConnectorsProps) {
+  const queryFn = useCallback(async () => {
+    const { connectorsNames } = await http.fetch<GetAttackDiscoveryConnectorsResponse>(
+      ATTACK_DISCOVERY_CONNECTORS,
+      {
         method: 'GET',
-      }),
-    [http]
-  );
+        query: {
+          from,
+        },
+      }
+    );
 
-  return useQuery(['useAttackDiscoveryConnectors'], {
+    return connectorsNames;
+  }, [http, from]);
+
+  return useQuery(['useAttackDiscoveryConnectors', from], {
     queryFn,
   });
 }

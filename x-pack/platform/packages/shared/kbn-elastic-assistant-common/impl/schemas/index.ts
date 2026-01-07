@@ -60,6 +60,11 @@ export {
 } from './attack_discovery/routes/public/get/find_attack_discoveries_route.gen';
 
 export {
+  GetAttackDiscoveryConnectorsRequestQuery,
+  GetAttackDiscoveryConnectorsResponse,
+} from './attack_discovery/routes/public/get/get_connectors.gen';
+
+export {
   PostAttackDiscoveryBulkRequestBody,
   PostAttackDiscoveryBulkResponse,
 } from './attack_discovery/routes/public/post/post_attack_discovery_bulk_route.gen';

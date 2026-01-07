@@ -22,6 +22,7 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAttackDiscoveryConnectors } from '../../../attack_discovery/pages/use_attack_discovery_connectors';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -78,9 +79,8 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     inferenceEnabled,
     settings,
   });
-
-  const { data } = useAttackDiscoveryConnectors({ http });
-  const aiConnectorNames = data?.connectorsNames;
+  const { from } = useGlobalTime();
+  const { data: aiConnectorNames } = useAttackDiscoveryConnectors({ http, from });
 
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);

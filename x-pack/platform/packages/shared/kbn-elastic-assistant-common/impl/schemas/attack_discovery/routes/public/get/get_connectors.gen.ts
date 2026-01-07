@@ -16,6 +16,19 @@
 
 import { z } from '@kbn/zod';
 
+export type GetAttackDiscoveryConnectorsRequestQuery = z.infer<
+  typeof GetAttackDiscoveryConnectorsRequestQuery
+>;
+export const GetAttackDiscoveryConnectorsRequestQuery = z.object({
+  /**
+   * Timestamp in RFC 3339 format
+   */
+  from: z.string().datetime().optional(),
+});
+export type GetAttackDiscoveryConnectorsRequestQueryInput = z.input<
+  typeof GetAttackDiscoveryConnectorsRequestQuery
+>;
+
 export type GetAttackDiscoveryConnectorsResponse = z.infer<
   typeof GetAttackDiscoveryConnectorsResponse
 >;

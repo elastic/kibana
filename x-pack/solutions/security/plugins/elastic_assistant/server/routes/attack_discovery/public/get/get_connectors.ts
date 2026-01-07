@@ -7,7 +7,12 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { API_VERSIONS, ATTACK_DISCOVERY_CONNECTORS } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ATTACK_DISCOVERY_CONNECTORS,
+  GetAttackDiscoveryConnectorsRequestQuery,
+} from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../../helpers';
 import { buildResponse } from '../../../../lib/build_response';
@@ -30,13 +35,8 @@ export const getConnectorsRoute = (
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          response: {
-            200: {
-              body: {
-                // TODO: replace this with proper code
-                custom: () => ({ value: 'ok' }),
-              },
-            },
+          request: {
+            query: buildRouteValidationWithZod(GetAttackDiscoveryConnectorsRequestQuery),
           },
         },
       },
@@ -70,7 +70,10 @@ export const getConnectorsRoute = (
         }
 
         try {
-          const connectorsNames = await dataClient.getConnectors({ spaceId });
+          const connectorsNames = await dataClient.getConnectors({
+            spaceId,
+            from: request.query.from,
+          });
 
           return response.ok({
             body: {
