@@ -12,7 +12,6 @@ import { EntityType } from '../domain/definitions/entity_type';
 import type { EntityStorePluginRouter } from '../types';
 import { wrapMiddlewares } from './middleware';
 
-type BodySchema = z.infer<typeof bodySchema>;
 const bodySchema = z.object({
   entityType: z.array(EntityType).optional(),
 });
