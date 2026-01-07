@@ -125,10 +125,15 @@ export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
 export interface ESQLCommandSummary {
   /**
-   * A list of columns names which were newly created by the
-   * STATS command.
+   * A list of columns names which were newly created by
+   * each command.
    */
   newColumns: Set<string>;
+  /**
+   * A list of metadata columns created by the FROM and TS commands
+   * We are separating them here to be able to treat them differently in some contexts
+   */
+  metadataColumns?: Set<string>;
 }
 
 export interface ESQLPolicy {
