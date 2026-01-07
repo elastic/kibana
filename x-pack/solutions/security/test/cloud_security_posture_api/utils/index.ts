@@ -17,8 +17,7 @@ export {
   installCloudAssetInventoryPackage,
   initEntityEngine,
   initEntityEnginesAndWait,
+  initEntityEnginesWithRetry,
   indexEntityData,
-  deleteEntityData,
-  ENTITY_STORE_TEST_DATA,
 } from './entity_store';
 export type { EntityStoreHelpersDeps, EntityType } from './entity_store';

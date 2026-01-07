@@ -9,11 +9,10 @@ import {
   waitForPluginInitialized,
   cleanupEntityStore,
   waitForEntityDataIndexed,
-  enableAssetInventory,
-  waitForEntityStoreReady,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
   dataViewRouteHelpersFactory,
+  initEntityEnginesWithRetry,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -339,12 +338,20 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             // Clean up any leftover resources from previous runs
             await cleanupEntityStore({ supertest, logger });
 
-            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
-            if (config.name === 'via LOOKUP JOIN (v2)') {
-              await esArchiver.unload(
-                'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
-              );
-            }
+            // Clean up leftover entity data from previous runs using ES client
+            // Note: esArchiver.unload causes instability with internal indices, so we use ES client directly
+            await es.deleteByQuery({
+              index: '.entities.v1.latest.security_*',
+              query: { match_all: {} },
+              conflicts: 'proceed',
+              ignore_unavailable: true,
+            });
+            await es.deleteByQuery({
+              index: '.entities.v2.latest.security_*',
+              query: { match_all: {} },
+              conflicts: 'proceed',
+              ignore_unavailable: true,
+            });
 
             // Enable asset inventory setting
             await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
@@ -353,15 +360,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             const dataView = dataViewRouteHelpersFactory(supertest);
             await dataView.create('security-solution');
 
-            // Enable asset inventory which creates the enrich policy
-            await enableAssetInventory({ supertest, logger });
+            // Initialize entity engine for 'generic' type and wait for it to be fully started
+            // Uses retry logic to handle transient failures - if engine enters error state, it cleans up and retries
+            await initEntityEnginesWithRetry({
+              supertest,
+              retry,
+              logger,
+              entityTypes: ['generic'],
+            });
 
-            // Wait for entity store engines to be fully started
-            // This ensures asyncSetup has completed - if it fails after creating
-            // the enrich policy, the error handler will delete everything
-            await waitForEntityStoreReady({ supertest, retry, logger });
-
-            // Load entity data from the appropriate archive
+            // Load entity data using esArchiver
             await esArchiver.load(config.archivePath);
 
             // Wait for entity data to be fully indexed
@@ -382,6 +390,18 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           });
 
           after(async () => {
+            // Clean up entity data using ES client instead of esArchiver.unload
+            // esArchiver.unload causes instability with internal indices
+            const entityIndex = config.useEnrichPolicy
+              ? '.entities.v1.latest.security_generic_default'
+              : '.entities.v2.latest.security_generic_default';
+            await es.deleteByQuery({
+              index: entityIndex,
+              query: { match_all: {} },
+              conflicts: 'proceed',
+              ignore_unavailable: true,
+            });
+
             // Clean up entity store resources
             await cleanupEntityStore({ supertest, logger });
 
@@ -389,11 +409,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await kibanaServer.uiSettings.update({
               'securitySolution:enableAssetInventory': false,
             });
-
-            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
-            if (config.name === 'via LOOKUP JOIN (v2)') {
-              await esArchiver.unload(config.archivePath);
-            }
           });
 
           it('expanded flyout - entity enrichment for multiple actors and targets', async () => {

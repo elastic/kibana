@@ -12,10 +12,7 @@ import {
   executeEnrichPolicy,
   waitForEnrichPolicyCreated,
   dataViewRouteHelpersFactory,
-  initEntityEnginesAndWait,
-  indexEntityData,
-  deleteEntityData,
-  ENTITY_STORE_TEST_DATA,
+  initEntityEnginesWithRetry,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -290,10 +287,20 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               conflicts: 'proceed',
             });
 
-            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
-            if (config.name === 'via LOOKUP JOIN (v2)') {
-              await esArchiver.unload(config.archivePath);
-            }
+            // Clean up leftover entity data from previous runs using ES client
+            // Note: esArchiver.unload causes instability with internal indices, so we use ES client directly
+            await es.deleteByQuery({
+              index: '.entities.v1.latest.security_*',
+              query: { match_all: {} },
+              conflicts: 'proceed',
+              ignore_unavailable: true,
+            });
+            await es.deleteByQuery({
+              index: '.entities.v2.latest.security_*',
+              query: { match_all: {} },
+              conflicts: 'proceed',
+              ignore_unavailable: true,
+            });
 
             // Enable asset inventory setting
             await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
@@ -303,8 +310,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await dataView.create('security-solution');
 
             // Initialize entity engine for 'generic' type and wait for it to be fully started
-            // This mirrors the approach used in entity store tests (EntityStoreUtils.initEntityEngineForEntityTypesAndWait)
-            await initEntityEnginesAndWait({
+            // Uses retry logic to handle transient failures - if engine enters error state, it cleans up and retries
+            await initEntityEnginesWithRetry({
               supertest,
               retry,
               logger,
@@ -315,19 +322,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
             );
 
-            // Load entity data using ES client directly instead of esArchiver
-            // This avoids conflicts with internal/system indices that cause instability
-            if (config.useEnrichPolicy) {
-              await indexEntityData({
-                es,
-                logger,
-                indexName: '.entities.v1.latest.security_generic_default',
-                data: ENTITY_STORE_TEST_DATA,
-              });
-            } else {
-              // For v2 tests (if re-enabled), use esArchiver
-              await esArchiver.load(config.archivePath);
-            }
+            // Load entity data using esArchiver
+            await esArchiver.load(config.archivePath);
 
             // Wait for entity data to be fully indexed
             await waitForEntityDataIndexed({
@@ -347,17 +343,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           });
 
           after(async () => {
-            // Clean up entity data indexed via ES client
-            if (config.useEnrichPolicy) {
-              await deleteEntityData({
-                es,
-                logger,
-                indexName: '.entities.v1.latest.security_generic_default',
-              });
-            } else {
-              // For v2 tests (if re-enabled), unload esArchiver
-              await esArchiver.unload(config.archivePath);
-            }
+            // Clean up entity data using ES client instead of esArchiver.unload
+            // esArchiver.unload causes instability with internal indices
+            const entityIndex = config.useEnrichPolicy
+              ? '.entities.v1.latest.security_generic_default'
+              : '.entities.v2.latest.security_generic_default';
+            await es.deleteByQuery({
+              index: entityIndex,
+              query: { match_all: {} },
+              conflicts: 'proceed',
+              ignore_unavailable: true,
+            });
 
             // Clean up entity store resources
             await cleanupEntityStore({ supertest, logger });

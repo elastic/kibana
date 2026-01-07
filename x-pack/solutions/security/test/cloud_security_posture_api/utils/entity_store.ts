@@ -354,6 +354,70 @@ export const initEntityEnginesAndWait = async ({
 };
 
 /**
+ * Helper to initialize entity engines with retry logic on failure
+ * This mirrors the robust pattern used in entity store API integration tests (infra/setup.ts)
+ * If initialization fails (engine enters error state), it cleans up and retries
+ */
+export const initEntityEnginesWithRetry = async ({
+  supertest,
+  retry,
+  logger,
+  entityTypes,
+  spaceId,
+  maxRetries = 3,
+}: Pick<EntityStoreHelpersDeps, 'supertest' | 'retry' | 'logger'> & {
+  entityTypes: EntityType[];
+  spaceId?: string;
+  maxRetries?: number;
+}) => {
+  const spaceLabel = spaceId || 'default';
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    logger.debug(
+      `Initializing entity engines for types ${entityTypes.join(
+        ', '
+      )} in space: ${spaceLabel} (attempt ${attempt}/${maxRetries})`
+    );
+
+    try {
+      await initEntityEnginesAndWait({
+        supertest,
+        retry,
+        logger,
+        entityTypes,
+        spaceId,
+      });
+
+      logger.debug(
+        `Entity engines initialized successfully for types: ${entityTypes.join(
+          ', '
+        )} in space: ${spaceLabel}`
+      );
+      return; // Success - exit the retry loop
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warning(
+        `Entity engine initialization failed (attempt ${attempt}/${maxRetries}): ${errorMessage}`
+      );
+
+      if (attempt < maxRetries) {
+        // Clean up before retrying
+        logger.debug(`Cleaning up entity store before retry...`);
+        await cleanupEntityStore({ supertest, logger, spaceId });
+
+        // Small delay before retry to allow cleanup to complete
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } else {
+        // Last attempt failed - throw the error
+        throw new Error(
+          `Entity engine initialization failed after ${maxRetries} attempts. Last error: ${errorMessage}`
+        );
+      }
+    }
+  }
+};
+
+/**
  * Helper to bulk index entity data directly using ES client
  * This avoids using esArchiver for internal/system indices which causes instability
  */
@@ -387,330 +451,6 @@ export const indexEntityData = async ({
   logger.debug(`Successfully indexed ${data.length} entity documents`);
   return response;
 };
-
-/**
- * Helper to delete entity data indexed via ES client
- */
-export const deleteEntityData = async ({
-  es,
-  logger,
-  indexName,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'logger'> & { indexName: string }) => {
-  logger.debug(`Deleting entity data from ${indexName}`);
-
-  try {
-    await es.deleteByQuery({
-      index: indexName,
-      query: { match_all: {} },
-      conflicts: 'proceed',
-      refresh: true,
-    });
-    logger.debug(`Successfully deleted entity data from ${indexName}`);
-  } catch (e) {
-    // Index might not exist, which is fine
-    logger.debug(`Error deleting entity data: ${e.message}`);
-  }
-};
-
-/**
- * Entity test data for v1 entity store tests
- * This data is indexed directly via ES client instead of using esArchiver
- * to avoid conflicts with internal/system indices
- */
-export const ENTITY_STORE_TEST_DATA = [
-  {
-    id: '1',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'api-service@your-project-id.iam.gserviceaccount.com',
-        name: 'ApiServiceAccount',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005',
-        sub_type: 'GCP Service Account',
-        type: 'Service',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      service: {
-        id: 'api-service@your-project-id.iam.gserviceaccount.com',
-        name: 'ApiServiceAccount',
-      },
-    },
-  },
-  {
-    id: '2',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'us-central1',
-        service: { name: 'GCP Compute' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'host-instance-1',
-        name: 'HostInstance1',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005',
-        sub_type: 'GCP Compute Instance',
-        type: 'Host',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      host: { id: 'host-instance-1', name: 'HostInstance1' },
-    },
-  },
-  {
-    id: '3',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'us-east1',
-        service: { name: 'GCP Compute' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'host-instance-2',
-        name: 'HostInstance2',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005',
-        sub_type: 'GCP Compute Instance',
-        type: 'Host',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      host: { id: 'host-instance-2', name: 'HostInstance2' },
-    },
-  },
-  {
-    id: '4',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/serviceAccounts/target-service-1@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetService1',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005',
-        sub_type: 'GCP Service Account',
-        type: 'Service',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      service: {
-        id: 'projects/your-project-id/serviceAccounts/target-service-1@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetService1',
-      },
-    },
-  },
-  {
-    id: '5',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/serviceAccounts/target-service-2@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetService2',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005',
-        sub_type: 'GCP Service Account',
-        type: 'Service',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      service: {
-        id: 'projects/your-project-id/serviceAccounts/target-service-2@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetService2',
-      },
-    },
-  },
-  {
-    id: '6',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/serviceAccounts/target-service-3@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetService3',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005',
-        sub_type: 'GCP Service Account',
-        type: 'Service',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      service: {
-        id: 'projects/your-project-id/serviceAccounts/target-service-3@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetService3',
-      },
-    },
-  },
-  {
-    id: '7',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP Storage' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/buckets/target-bucket-1',
-        name: 'TargetBucket1',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_bucket-default-2025.07.16-000005',
-        sub_type: 'GCP Storage Bucket',
-        type: 'Storage',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-    },
-  },
-  {
-    id: '8',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP Storage' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/buckets/target-bucket-2',
-        name: 'TargetBucket2',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_bucket-default-2025.07.16-000005',
-        sub_type: 'GCP Storage Bucket',
-        type: 'Storage',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-    },
-  },
-  {
-    id: '9',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/serviceAccounts/target-multi-service-1@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetMultiService1',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005',
-        sub_type: 'GCP Service Account',
-        type: 'Service',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      service: {
-        id: 'projects/your-project-id/serviceAccounts/target-multi-service-1@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetMultiService1',
-      },
-    },
-  },
-  {
-    id: '10',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'projects/your-project-id/serviceAccounts/target-multi-service-2@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetMultiService2',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005',
-        sub_type: 'GCP Service Account',
-        type: 'Service',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      service: {
-        id: 'projects/your-project-id/serviceAccounts/target-multi-service-2@your-project-id.iam.gserviceaccount.com',
-        name: 'TargetMultiService2',
-      },
-    },
-  },
-  {
-    id: '11',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'multi-actor-1@example.com',
-        name: 'MultiActor1',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005',
-        sub_type: 'GCP IAM User',
-        type: 'Identity',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      user: { id: 'multi-actor-1@example.com', name: 'MultiActor1' },
-    },
-  },
-  {
-    id: '12',
-    source: {
-      '@timestamp': '2025-07-20T17:26:09.361Z',
-      cloud: {
-        account: { id: 'your-project-id', name: 'your-project-name' },
-        provider: 'gcp',
-        region: 'global',
-        service: { name: 'GCP IAM' },
-      },
-      entity: {
-        EngineMetadata: { Type: 'generic' },
-        id: 'multi-actor-2@example.com',
-        name: 'MultiActor2',
-        source:
-          '.ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005',
-        sub_type: 'GCP IAM User',
-        type: 'Identity',
-      },
-      event: { ingested: '2025-07-20T17:27:13.583Z' },
-      user: { id: 'multi-actor-2@example.com', name: 'MultiActor2' },
-    },
-  },
-];
 
 /**
  * Helper to install cloud asset inventory package
