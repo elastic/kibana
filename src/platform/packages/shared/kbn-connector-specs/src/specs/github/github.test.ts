@@ -1441,6 +1441,84 @@ index abc123..def456 100644
     });
   });
 
+  describe('listBranches action', () => {
+    it('should list branches without pagination', async () => {
+      const mockResponse = {
+        data: [
+          {
+            name: 'main',
+            commit: {
+              sha: 'abc123',
+              url: 'https://api.github.com/repos/owner/repo/commits/abc123',
+            },
+            protected: false,
+          },
+          {
+            name: 'develop',
+            commit: {
+              sha: 'def456',
+              url: 'https://api.github.com/repos/owner/repo/commits/def456',
+            },
+            protected: false,
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listBranches.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/branches',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list branches with pagination', async () => {
+      const mockResponse = {
+        data: [
+          {
+            name: 'feature-branch',
+            commit: {
+              sha: 'ghi789',
+              url: 'https://api.github.com/repos/owner/repo/commits/ghi789',
+            },
+            protected: false,
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listBranches.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        page: 2,
+        perPage: 10,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/branches',
+        {
+          params: {
+            page: 2,
+            per_page: 10,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {

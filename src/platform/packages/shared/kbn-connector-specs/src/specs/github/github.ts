@@ -619,6 +619,46 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    listBranches: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        page: z.coerce.number().optional(),
+        perPage: z.coerce.number().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          page?: number;
+          perPage?: number;
+        };
+
+        const params: {
+          page?: number;
+          per_page?: number;
+        } = {};
+
+        if (typedInput.page !== undefined) {
+          params.page = typedInput.page;
+        }
+        if (typedInput.perPage !== undefined) {
+          params.per_page = typedInput.perPage;
+        }
+
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/branches`,
+          {
+            ...(Object.keys(params).length > 0 ? { params } : {}),
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
   },
 
   test: {
