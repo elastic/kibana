@@ -70,8 +70,6 @@ export interface EditConfigPanelProps {
   navigateToLensEditor?: () => void;
   /** If set to true it displays a header on the flyout */
   displayFlyoutHeader?: boolean;
-  /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
-  canEditTextBasedQuery?: boolean;
   /** The flyout is used for adding a new panel by scratch */
   isNewPanel?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
@@ -111,7 +109,6 @@ export interface LayerConfigurationProps {
   parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
 }
 

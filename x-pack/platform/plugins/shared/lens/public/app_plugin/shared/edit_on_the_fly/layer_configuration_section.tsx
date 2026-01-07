@@ -32,7 +32,6 @@ export function LayerConfiguration({
   parentApi,
   panelId,
   closeFlyout,
-  canEditTextBasedQuery,
   editorContainer,
 }: LayerConfigurationProps) {
   // Derive whether we're in text-based mode from the query type
@@ -75,7 +74,7 @@ export function LayerConfiguration({
     parentApi,
     panelId,
     closeFlyout,
-    canEditTextBasedQuery,
+    canEditTextBasedQuery: isTextBasedMode,
     editorContainer,
   };
   return (

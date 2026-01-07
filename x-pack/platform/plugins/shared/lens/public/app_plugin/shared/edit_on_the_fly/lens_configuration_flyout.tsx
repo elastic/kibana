@@ -61,7 +61,6 @@ export function LensEditConfigurationFlyout({
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
-  canEditTextBasedQuery,
   isNewPanel,
   hidesSuggestions,
   onApply: onApplyCallback,
@@ -78,6 +77,9 @@ export function LensEditConfigurationFlyout({
 
   // Derive datasourceId from attributes - this updates when converting between formBased and textBased
   const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
+
+  // Derive whether we can edit text-based queries from the query type
+  const canEditTextBasedQuery = isOfAggregateQueryType(attributes.state.query);
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -506,7 +508,6 @@ export function LensEditConfigurationFlyout({
             closeFlyout={closeFlyout}
             parentApi={parentApi}
             panelId={panelId}
-            canEditTextBasedQuery={canEditTextBasedQuery}
           />
         </FlyoutWrapper>
       </>

@@ -135,7 +135,6 @@ export function prepareInlineEditPanel(
             : undefined
         }
         displayFlyoutHeader
-        canEditTextBasedQuery={isTextBasedLanguage(currentState)}
         isNewPanel={panelManagementApi.isNewPanel()}
         onCancel={() => {
           panelManagementApi.onStopEditing(

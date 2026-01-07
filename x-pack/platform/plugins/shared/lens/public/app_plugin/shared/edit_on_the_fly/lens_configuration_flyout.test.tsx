@@ -282,16 +282,8 @@ describe('LensEditConfigurationFlyout', () => {
     });
   });
 
-  it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
+  it('should not display the editor if query is not text based', async () => {
     await renderConfigFlyout({
-      canEditTextBasedQuery: false,
-    });
-    expect(screen.queryByTestId('ESQLEditor')).toBeNull();
-  });
-
-  it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
-    await renderConfigFlyout({
-      canEditTextBasedQuery: true,
       attributes: {
         ...lensAttributes,
         state: {
@@ -306,18 +298,26 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.queryByTestId('ESQLEditor')).toBeNull();
   });
 
-  it('should not display the suggestions if hidesSuggestions prop is true', async () => {
+  it('should not display the suggestions if hidesSuggestions prop is true and query is not ES|QL', async () => {
     await renderConfigFlyout({
       hidesSuggestions: true,
+      attributes: {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          query: {
+            type: 'kql',
+            query: '',
+          } as unknown as Query,
+        },
+      },
     });
     expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
-  it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {
+  it('should display the suggestions if query is ES|QL', async () => {
     await renderConfigFlyout(
-      {
-        canEditTextBasedQuery: true,
-      },
+      {},
       {
         esql: 'from index1 | limit 10',
       }
@@ -326,10 +326,8 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
-  it('should display the ES|QL results table if canEditTextBasedQuery prop is true', async () => {
-    await renderConfigFlyout({
-      canEditTextBasedQuery: true,
-    });
+  it('should display the ES|QL results table if query is ES|QL', async () => {
+    await renderConfigFlyout({});
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
 
