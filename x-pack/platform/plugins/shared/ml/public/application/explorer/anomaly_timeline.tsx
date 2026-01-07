@@ -404,7 +404,7 @@ export const AnomalyTimeline: FC = () => {
       };
 
       const state = {
-        serializedState: { embeddableInput },
+        serializedState: embeddableInput,
         type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
       };
 
