@@ -80,6 +80,10 @@ paths:
     post:
       summary: Create saved objects
       operationId: bulkCreateSavedObjects
+      description: |
+        Create multiple Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -117,6 +121,8 @@ paths:
       operationId: bulkDeleteSavedObjects
       description: |
         WARNING: When you delete a saved object, it cannot be recovered.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. There is currently no alternative API for all use cases supported by this API. Once alternative APIs are provided in a future Elastic version, it will be possible to migrate away from this API.
       deprecated: true
       tags:
         - saved objects
@@ -154,6 +160,10 @@ paths:
     post:
       summary: Get saved objects
       operationId: bulkGetSavedObjects
+      description: |
+        Retrieve multiple Kibana saved objects by identifier.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -187,6 +197,8 @@ paths:
       deprecated: true
       description: |
         Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       tags:
         - saved objects
       parameters:
@@ -217,7 +229,10 @@ paths:
     post:
       summary: Update saved objects
       operationId: bulkUpdateSavedObjects
-      description: Update the attributes for multiple Kibana saved objects.
+      description: |
+        Update the attributes for multiple Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -249,7 +264,10 @@ paths:
     get:
       summary: Search for saved objects
       operationId: findSavedObjects
-      description: Retrieve a paginated set of Kibana saved objects.
+      description: |
+        Retrieve a paginated set of Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -472,7 +490,10 @@ paths:
     post:
       summary: Create a saved object
       operationId: createSavedObject
-      description: Create a Kibana saved object with a randomly generated identifier.
+      description: |
+        Create a Kibana saved object with a randomly generated identifier.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -516,7 +537,10 @@ paths:
     get:
       summary: Get a saved object
       operationId: getSavedObject
-      description: Retrieve a single Kibana saved object by identifier.
+      description: |
+        Retrieve a single Kibana saved object by identifier.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -539,7 +563,10 @@ paths:
     post:
       summary: Create a saved object
       operationId: createSavedObjectId
-      description: Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
+      description: |
+        Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -583,7 +610,10 @@ paths:
     put:
       summary: Update a saved object
       operationId: updateSavedObject
-      description: Update the attributes for Kibana saved objects.
+      description: |
+        Update the attributes for Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       deprecated: true
       tags:
         - saved objects
@@ -622,6 +652,8 @@ paths:
       operationId: resolveSavedObject
       description: |
         Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       deprecated: true
       tags:
         - saved objects
