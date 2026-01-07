@@ -16,10 +16,8 @@ const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 jest.mock('../../dashboard_client', () => ({
   dashboardClient: {
-    create: (dashboardState: DashboardState) =>
-      mockCreate(dashboardState),
-    update: (id: string, dashboardState: DashboardState) =>
-      mockUpdate(id, dashboardState),
+    create: (dashboardState: DashboardState) => mockCreate(dashboardState),
+    update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
   },
 }));
 
