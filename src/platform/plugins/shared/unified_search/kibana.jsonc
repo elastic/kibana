@@ -15,7 +15,7 @@
     "browser": true,
     "server": false,
     "configPath": [
-      "unifiedSearch"
+      "unifiedSearchDeprecatedSettings"
     ],
     "requiredPlugins": [
       "dataViews",
