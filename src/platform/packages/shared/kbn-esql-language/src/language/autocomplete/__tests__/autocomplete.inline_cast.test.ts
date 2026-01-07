@@ -24,7 +24,7 @@ const fieldsToTest = fields.filter(
 );
 
 describe('Inline Cast Autocomplete Suggestions', () => {
-  it.each(fieldsToTest)('suggests casting types for $name field', async (field) => {
+  it.each(fieldsToTest)('suggests casting types for $name', async (field) => {
     const { assertSuggestions } = await setup('^');
     await assertSuggestions(
       `FROM index_a | WHERE ${field.name}::^`,
