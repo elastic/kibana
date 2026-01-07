@@ -19,6 +19,11 @@ export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
 });
 
+// Maybe we can define specific schema for metadata in the future
+// For now it's a record with string keys and any values
+// Because langchain returns it this format
+export const MetadataSchema = z.record(z.string(), z.any());
+
 /**
  * Input schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
@@ -34,19 +39,20 @@ export const InputSchema = z.object({
 export function getStructuredOutputSchema(contentSchema: z.ZodType) {
   return z.object({
     content: contentSchema,
+    metadata: MetadataSchema,
   });
 }
 
-const stringOutputSchema = z.object({
+const StringOutputSchema = z.object({
   content: z.string(),
-  metadata: z.record(z.string(), z.any()),
+  metadata: MetadataSchema,
 });
 
 /**
  * Output schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = z.union([stringOutputSchema, getStructuredOutputSchema(z.unknown())]);
+export const OutputSchema = z.union([StringOutputSchema, getStructuredOutputSchema(z.unknown())]);
 
 export type AiPromptStepConfigSchema = typeof ConfigSchema;
 export type AiPromptStepInputSchema = typeof InputSchema;
