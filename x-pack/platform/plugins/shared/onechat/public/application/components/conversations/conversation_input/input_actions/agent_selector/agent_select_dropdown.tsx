@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
@@ -78,6 +79,7 @@ const AgentSelectPopoverButton: React.FC<{
 };
 
 const AgentListFooter: React.FC = () => {
+  const { manageAgents } = useUiPrivileges();
   const { createOnechatUrl } = useNavigation();
   const createAgentHref = createOnechatUrl(appPaths.agents.new);
   const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
@@ -89,7 +91,7 @@ const AgentListFooter: React.FC = () => {
             iconType="gear"
             color="text"
             aria-label={manageAgentsAriaLabel}
-            href={manageAgentsHref}
+            {...(manageAgents ? { href: manageAgentsHref } : { disabled: true })}
           >
             <FormattedMessage
               id="xpack.onechat.conversationInput.agentSelector.manageAgents"
@@ -98,7 +100,11 @@ const AgentListFooter: React.FC = () => {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton iconType="plus" aria-label={createAgentAriaLabel} href={createAgentHref}>
+          <EuiButton
+            iconType="plus"
+            aria-label={createAgentAriaLabel}
+            {...(manageAgents ? { href: createAgentHref } : { disabled: true })}
+          >
             <FormattedMessage
               id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
               defaultMessage="New"
