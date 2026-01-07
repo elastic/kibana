@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -19,8 +20,9 @@ import {
   EuiSpacer,
   EuiTablePagination,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
@@ -49,10 +51,6 @@ const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
   return iconComponent;
 };
 
-const getDeleteMenuItemStyle = (theme: UseEuiTheme) => ({
-  color: theme.euiTheme.colors.danger,
-});
-
 const ActionsCell: React.FC<{
   source: ActiveSource;
   onReconnect?: (source: ActiveSource) => void;
@@ -60,6 +58,7 @@ const ActionsCell: React.FC<{
   onDelete?: (source: ActiveSource) => void;
   disabled?: boolean;
 }> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const button = (
@@ -78,7 +77,9 @@ const ActionsCell: React.FC<{
     <EuiContextMenuItem
       key="delete"
       icon={<EuiIcon type="trash" color="danger" />}
-      css={getDeleteMenuItemStyle}
+      css={css({
+        color: euiTheme.colors.danger,
+      })}
       onClick={() => {
         setIsPopoverOpen(false);
         onDelete?.(source);
