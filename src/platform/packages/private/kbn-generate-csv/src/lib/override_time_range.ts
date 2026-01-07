@@ -12,8 +12,14 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger } from '@kbn/core/server';
 import { cloneDeep, get, has, isArray } from 'lodash';
 
+interface TimeFields {
+  metaField?: string;
+  timeFormat?: string;
+  timeGte?: string;
+  timeLte?: string;
+}
 const getTimeFieldAccessorString = (metaField: string): string => `query.range['${metaField}']`;
-const getTimeFields = (filter: Filter, timeFieldName?: string) => {
+const getTimeFields = (filter: Filter, timeFieldName?: string): TimeFields => {
   const metaField: string | undefined = get(filter, 'meta.field') || timeFieldName;
   if (metaField) {
     const timeFieldAccessorString = getTimeFieldAccessorString(metaField);
@@ -91,7 +97,7 @@ export const overrideTimeRange = ({
     try {
       const timeFilter = cloneDeep(filters[timeFilterIndex]);
       const { metaField, timeGte, timeLte } = getTimeFields(timeFilter, timeFieldName);
-      if (metaField) {
+      if (metaField && timeGte && timeLte) {
         const timeGteMs = Date.parse(timeGte);
         const timeLteMs = Date.parse(timeLte);
         const timeDiffMs = timeLteMs - timeGteMs;
