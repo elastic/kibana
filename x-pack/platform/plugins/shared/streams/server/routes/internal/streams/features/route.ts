@@ -19,6 +19,7 @@ import type { IdentifiedFeaturesEvent } from './types';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
+import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -134,7 +135,12 @@ export const identifyFeaturesRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
     }),
@@ -160,7 +166,7 @@ export const identifyFeaturesRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -168,14 +174,18 @@ export const identifyFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
-    const [stream, connector, { featurePromptOverride }] = await Promise.all([
+    const [stream, { featurePromptOverride }] = await Promise.all([
       streamsClient.getStream(name),
-      inferenceClient.getConnectorById(connectorId),
       new PromptsConfigService({ soClient, logger }).getPrompt(),
     ]);
 
-    const esClient = scopedClusterClient.asCurrentUser;
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+    const esClient = scopedClusterClient.asCurrentUser;
     const signal = getRequestAbortSignal(request);
 
     return from(
@@ -204,7 +214,8 @@ export const identifyFeaturesRoute = createServerRoute({
           tokensUsed,
         };
       }),
-      catchError((error: Error) => {
+      catchError(async (error: Error) => {
+        const connector = await inferenceClient.getConnectorById(connectorId);
         throw createConnectorSSEError(error, connector);
       })
     );
