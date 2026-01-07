@@ -99,6 +99,13 @@ export const isParameterType = (str: string | undefined): str is FunctionParamet
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
   str !== 'unsupported' && (str === 'unknown' || str === 'any' || dataTypes.includes(str));
 
+export const parameterHintEntityTypes = ['inference_endpoint'] as const;
+export type ParameterHintEntityType = (typeof parameterHintEntityTypes)[number];
+export interface ParameterHint {
+  entityType: ParameterHintEntityType;
+  constraints?: Record<string, string>;
+}
+
 export interface FunctionParameter {
   name: string;
   type: FunctionParameterType;
@@ -129,8 +136,11 @@ export interface FunctionParameter {
    */
   supportsMultiValues?: boolean;
 
-  /** Additional hint information for the parameter */
-  hint?: unknown;
+  /**
+   * Provides information that is useful for getting parameter values from external sources.
+   * For example, an inference endpoint
+   */
+  hint?: ParameterHint;
 }
 
 export interface ElasticsearchCommandDefinition {
@@ -241,6 +251,14 @@ export interface ValidationErrors {
   unknownSetting: {
     message: string;
     type: { name: string };
+  };
+  unknownCastingType: {
+    message: string;
+    type: { castType: string };
+  };
+  invalidInlineCast: {
+    message: string;
+    type: { castType: string; valueType: string };
   };
   functionNotAllowedHere: {
     message: string;
@@ -394,3 +412,5 @@ export function supportsArithmeticOperations(type: string): boolean {
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
+
+export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;
