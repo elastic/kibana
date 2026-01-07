@@ -117,6 +117,7 @@ export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   modelProvider: ModelProviderMock;
   toolsService: ToolsServiceStartMock;
   agentsService: AgentsServiceStartMock;
+  promptManager: PromptManagerMock;
   logger: MockedLogger;
   request: KibanaRequest;
 }
