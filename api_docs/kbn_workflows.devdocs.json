@@ -7248,6 +7248,30 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.TerminalExecutionStatuses",
+        "type": "Object",
+        "tags": [],
+        "label": "TerminalExecutionStatuses",
+        "description": [],
+        "signature": [
+          "readonly ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.ExecutionStatus",
+            "text": "ExecutionStatus"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }
