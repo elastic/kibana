@@ -29,7 +29,9 @@ export function registerUserStatusPrivilegeRoutes({
         },
       },
       validate: {
-        body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+        body: schema.maybe(
+          schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.string()))
+        ),
         params: paramsSchema,
       },
     },
