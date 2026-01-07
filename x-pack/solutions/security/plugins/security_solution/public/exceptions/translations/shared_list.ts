@@ -240,6 +240,13 @@ export const IMPORT_PROMPT = i18n.translate(
   }
 );
 
+export const IMPORT_FILE_PICKER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsFilePickerAriaLabel',
+  {
+    defaultMessage: 'Select exception list files to import',
+  }
+);
+
 export const RULES = i18n.translate('xpack.securitySolution.exceptionsTable.rulesCountLabel', {
   defaultMessage: 'Rules',
 });
@@ -394,3 +401,9 @@ export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_EXPORT_BUTTON = i18n.translate(
     defaultMessage: 'Export',
   }
 );
+
+export const EXCEPTION_LIST_CARD_ACTIONS_ARIA_LABEL = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.listCardActionsAriaLabel', {
+    values: { listName },
+    defaultMessage: 'Actions for {listName}',
+  });

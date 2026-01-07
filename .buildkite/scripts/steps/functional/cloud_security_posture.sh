@@ -13,4 +13,9 @@ cd x-pack/solutions/security/test/security_solution_cypress
 
 set +e
 
-yarn cypress:cloud_security_posture:run:ess; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:cloud_security_posture:run:ess; status=$?; yarn junit:merge || :
+
+# Scout reporter
+upload_scout_cypress_events "Cypress tests"
+
+exit $status
