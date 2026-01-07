@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-renovate-reviewer-sync
+  description: Opens a PR if renovate reviewer drift is detected for managed rules
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-renovate-reviewer-sync'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / renovate reviewer sync
+      description: Opens a PR if renovate reviewer drift is detected for managed rules
+    spec:
+      env:
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+      allow_rebuilds: false
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/renovate_reviewer_sync.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      schedules:
+        Weekly build:
+          cronline: 0 0 * * 1 America/New_York
+          message: Weekly build
+          branch: main
+      tags:
+        - kibana
