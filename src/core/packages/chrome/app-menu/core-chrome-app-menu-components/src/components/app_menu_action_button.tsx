@@ -14,25 +14,25 @@ import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT,
-  TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
-} from './constants';
-import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
-import { TopNavMenuPopover } from './top_nav_menu_popover';
+  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
+  APP_MENU_NOTIFICATION_INDICATOR_TOP,
+} from '../constants';
+import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { AppMenuPopover } from './app_menu_popover';
 import type {
-  TopNavMenuPrimaryActionItem,
-  TopNavMenuSecondaryActionItem,
-  TopNavMenuSplitButtonProps,
-} from './types';
+  AppMenuPrimaryActionItem,
+  AppMenuSecondaryActionItem,
+  AppMenuSplitButtonProps,
+} from '../types';
 
-type TopNavMenuActionButtonProps = (TopNavMenuPrimaryActionItem | TopNavMenuSecondaryActionItem) & {
+type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActionItem) & {
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
   popoverAnchorPosition?: PopoverAnchorPosition;
 };
 
-export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
+export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   const {
@@ -70,7 +70,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     items: splitButtonItems,
     run: splitButtonRun,
     ...otherSplitButtonProps
-  } = splitButtonProps || ({} as TopNavMenuSplitButtonProps);
+  } = splitButtonProps || ({} as AppMenuSplitButtonProps);
 
   const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
@@ -145,8 +145,8 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
         isSelected={isPopoverOpen}
         css={splitButtonCss}
         notificationIndicatorPosition={{
-          top: TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
-          left: TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT,
+          top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
+          left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
         }}
         notificationIndicatorSize="m"
         notificationIndicatorColor="primary"
@@ -187,7 +187,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
 
   if (hasItems || hasSplitItems) {
     return (
-      <TopNavMenuPopover
+      <AppMenuPopover
         // For split button, only allow popover behavior on the split part of the split button.
         items={hasSplitItems ? splitButtonItems : items ?? []}
         tooltipContent={content}

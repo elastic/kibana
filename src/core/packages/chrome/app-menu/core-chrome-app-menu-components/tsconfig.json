@@ -5,19 +5,18 @@
     "types": [
       "jest",
       "node",
-      "@kbn/ambient-storybook-types",
+      "react",
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
-  ],
-  "kbn_references": [
-    "@kbn/storybook",
-    "@kbn/unified-tabs",
-    "@kbn/core-chrome-app-menu-components",
+    "**/*.tsx",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/split-button",
+    "@kbn/i18n",
   ]
 }

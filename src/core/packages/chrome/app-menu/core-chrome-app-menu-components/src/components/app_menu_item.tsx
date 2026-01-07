@@ -11,17 +11,17 @@ import React from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
-import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
-import { TopNavMenuPopover } from './top_nav_menu_popover';
-import type { TopNavMenuItemType } from './types';
+import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { AppMenuPopover } from './app_menu_popover';
+import type { AppMenuItemType } from '../types';
 
-type TopNavMenuItemBetaProps = TopNavMenuItemType & {
+type AppMenuItemProps = AppMenuItemType & {
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 };
 
-export const TopNavMenuItem = ({
+export const AppMenuItem = ({
   run,
   id,
   htmlId,
@@ -40,7 +40,7 @@ export const TopNavMenuItem = ({
   popoverWidth,
   onPopoverToggle,
   onPopoverClose,
-}: TopNavMenuItemBetaProps) => {
+}: AppMenuItemProps) => {
   const { euiTheme } = useEuiTheme();
 
   const itemText = upperFirst(label);
@@ -109,7 +109,7 @@ export const TopNavMenuItem = ({
 
   if (hasItems) {
     return (
-      <TopNavMenuPopover
+      <AppMenuPopover
         items={items}
         anchorElement={button}
         tooltipContent={content}

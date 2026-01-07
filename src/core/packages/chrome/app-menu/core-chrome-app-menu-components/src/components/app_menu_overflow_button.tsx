@@ -11,31 +11,31 @@ import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { getIsSelectedColor } from './utils';
-import { TopNavMenuPopover } from './top_nav_menu_popover';
+import { getIsSelectedColor } from '../utils';
+import { AppMenuPopover } from './app_menu_popover';
 import type {
-  TopNavMenuItemType,
-  TopNavMenuPrimaryActionItem,
-  TopNavMenuSecondaryActionItem,
-} from './types';
+  AppMenuItemType,
+  AppMenuPrimaryActionItem,
+  AppMenuSecondaryActionItem,
+} from '../types';
 
-interface TopNavMenuShowMoreButtonProps {
-  items: TopNavMenuItemType[];
+interface AppMenuShowMoreButtonProps {
+  items: AppMenuItemType[];
   isPopoverOpen: boolean;
-  primaryActionItem?: TopNavMenuPrimaryActionItem;
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  primaryActionItem?: AppMenuPrimaryActionItem;
+  secondaryActionItem?: AppMenuSecondaryActionItem;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 }
 
-export const TopNavMenuOverflowButton = ({
+export const AppMenuOverflowButton = ({
   items,
   isPopoverOpen,
   primaryActionItem,
   secondaryActionItem,
   onPopoverToggle,
   onPopoverClose,
-}: TopNavMenuShowMoreButtonProps) => {
+}: AppMenuShowMoreButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (items.length === 0) {
@@ -60,7 +60,7 @@ export const TopNavMenuOverflowButton = ({
     <EuiButtonIcon
       iconType="boxesHorizontal" // TODO: Change to "ellipsis" when it's available in EUI.
       size="xs"
-      aria-label={i18n.translate('navigation.topNavMenu.showMoreButtonLabel', {
+      aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
       color="text"
@@ -73,10 +73,10 @@ export const TopNavMenuOverflowButton = ({
   );
 
   return (
-    <TopNavMenuPopover
+    <AppMenuPopover
       items={items}
       anchorElement={button}
-      tooltipContent={i18n.translate('navigation.topNavMenu.showMoreButtonTooltip', {
+      tooltipContent={i18n.translate('core.chrome.appMenu.showMoreButtonTooltip', {
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}

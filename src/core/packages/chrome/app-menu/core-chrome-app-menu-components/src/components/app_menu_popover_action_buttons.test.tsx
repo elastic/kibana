@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TopNavMenuPopoverActionButtons } from './top_nav_menu_popover_action_buttons';
+import { AppMenuPopoverActionButtons } from './app_menu_popover_action_buttons';
 
-describe('TopNavMenuPopoverActionButtons', () => {
+describe('AppMenuPopoverActionButtons', () => {
   const primaryActionItem = {
     id: 'save',
     label: 'Save',
@@ -31,38 +31,38 @@ describe('TopNavMenuPopoverActionButtons', () => {
   });
 
   it('should return null when neither primary nor secondary action item is provided', () => {
-    const { container } = render(<TopNavMenuPopoverActionButtons />);
+    const { container } = render(<AppMenuPopoverActionButtons />);
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render container when primary action item is provided', () => {
-    render(<TopNavMenuPopoverActionButtons primaryActionItem={primaryActionItem} />);
+    render(<AppMenuPopoverActionButtons primaryActionItem={primaryActionItem} />);
 
     expect(screen.getByTestId('top-nav-menu-popover-action-buttons-container')).toBeInTheDocument();
   });
 
   it('should render container when secondary action item is provided', () => {
-    render(<TopNavMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
+    render(<AppMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
 
     expect(screen.getByTestId('top-nav-menu-popover-action-buttons-container')).toBeInTheDocument();
   });
 
   it('should render primary action button', () => {
-    render(<TopNavMenuPopoverActionButtons primaryActionItem={primaryActionItem} />);
+    render(<AppMenuPopoverActionButtons primaryActionItem={primaryActionItem} />);
 
     expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
   it('should render secondary action button', () => {
-    render(<TopNavMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
+    render(<AppMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
 
     expect(screen.getByText('Cancel')).toBeInTheDocument();
   });
 
   it('should render both primary and secondary action buttons', () => {
     render(
-      <TopNavMenuPopoverActionButtons
+      <AppMenuPopoverActionButtons
         primaryActionItem={primaryActionItem}
         secondaryActionItem={secondaryActionItem}
       />
@@ -74,7 +74,7 @@ describe('TopNavMenuPopoverActionButtons', () => {
 
   it('should render secondary action before primary action in DOM order', () => {
     render(
-      <TopNavMenuPopoverActionButtons
+      <AppMenuPopoverActionButtons
         primaryActionItem={primaryActionItem}
         secondaryActionItem={secondaryActionItem}
       />

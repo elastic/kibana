@@ -10,18 +10,18 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { TopNavMenuActionButton } from './top_nav_menu_action_button';
-import type { TopNavMenuPrimaryActionItem, TopNavMenuSecondaryActionItem } from './types';
+import { AppMenuActionButton } from './app_menu_action_button';
+import type { AppMenuPrimaryActionItem, AppMenuSecondaryActionItem } from '../types';
 
-interface TopNavMenuPopoverActionButtonsProps {
-  primaryActionItem?: TopNavMenuPrimaryActionItem;
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+interface AppMenuPopoverActionButtonsProps {
+  primaryActionItem?: AppMenuPrimaryActionItem;
+  secondaryActionItem?: AppMenuSecondaryActionItem;
 }
 
-export const TopNavMenuPopoverActionButtons = ({
+export const AppMenuPopoverActionButtons = ({
   primaryActionItem,
   secondaryActionItem,
-}: TopNavMenuPopoverActionButtonsProps) => {
+}: AppMenuPopoverActionButtonsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
 
@@ -53,7 +53,7 @@ export const TopNavMenuPopoverActionButtons = ({
     >
       {secondaryActionItem && (
         <EuiFlexItem grow={false}>
-          <TopNavMenuActionButton
+          <AppMenuActionButton
             {...secondaryActionItem}
             isPopoverOpen={openPopoverId === secondaryActionItem.id}
             onPopoverToggle={() => {
@@ -66,7 +66,7 @@ export const TopNavMenuPopoverActionButtons = ({
       )}
       {primaryActionItem && (
         <EuiFlexItem grow={false}>
-          <TopNavMenuActionButton
+          <AppMenuActionButton
             {...primaryActionItem}
             isPopoverOpen={openPopoverId === primaryActionItem.id}
             onPopoverToggle={() => {

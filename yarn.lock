@@ -5228,6 +5228,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-app-menu-components@link:src/core/packages/chrome/app-menu/core-chrome-app-menu-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-app-menu@link:src/core/packages/chrome/app-menu/core-chrome-app-menu":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-browser-internal@link:src/core/packages/chrome/browser-internal":
   version "0.0.0"
   uid ""
