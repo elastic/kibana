@@ -8,7 +8,7 @@
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type Feature, type Streams } from '@kbn/streams-schema';
+import { type BaseFeature, type Streams } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { sumTokens } from '../helpers/sum_tokens';
@@ -34,7 +34,7 @@ export async function identifyFeatures({
   esClient,
   signal,
 }: IdentifyFeaturesOptions): Promise<{
-  features: Feature[];
+  features: BaseFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
   logger.debug(`Identifying features for stream ${stream.name}`);
@@ -61,16 +61,7 @@ export async function identifyFeatures({
     })
   );
 
-  const now = new Date().toISOString();
-  const features = response.toolCalls.flatMap((toolCall) =>
-    toolCall.function.arguments.features.map((args) => {
-      return {
-        ...args,
-        status: 'active' as const,
-        last_seen: now,
-      };
-    })
-  );
+  const features = response.toolCalls.flatMap((toolCall) => toolCall.function.arguments.features);
 
   return {
     features,

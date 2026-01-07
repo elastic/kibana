@@ -20,6 +20,7 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -63,7 +64,16 @@ export const upsertFeatureRoute = createServerRoute({
     }
 
     await featureClient.bulk(name, [
-      { index: { feature: { ...body, status: 'active', last_seen: new Date().toISOString() } } },
+      {
+        index: {
+          feature: {
+            ...body,
+            status: 'active' as const,
+            last_seen: new Date().toISOString(),
+            id: getFeatureId(name, body),
+          },
+        },
+      },
     ]);
 
     return { acknowledged: true };
@@ -198,7 +208,15 @@ export const identifyFeaturesRoute = createServerRoute({
         stream,
         prompt: featurePromptOverride,
         signal,
-      }).then(async ({ features, tokensUsed }) => {
+      }).then(async ({ features: baseFeatures, tokensUsed }) => {
+        const now = new Date().toISOString();
+        const features = baseFeatures.map((feature) => ({
+          ...feature,
+          status: 'active' as const,
+          last_seen: now,
+          id: getFeatureId(name, feature),
+        }));
+
         await featureClient.bulk(
           name,
           features.map((feature) => ({ index: { feature } }))

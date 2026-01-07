@@ -25,6 +25,7 @@ export interface BaseFeature {
 }
 
 export interface Feature extends BaseFeature {
+  id: string;
   status: FeatureStatus;
   last_seen: string;
 }
@@ -40,6 +41,7 @@ export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
 
 export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
   z.object({
+    id: z.string(),
     status: featureStatusSchema,
     last_seen: z.string(),
   })

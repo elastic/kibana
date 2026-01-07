@@ -7,7 +7,7 @@
 import { termQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { Feature, FeatureStatus } from '@kbn/streams-schema';
+import type { BaseFeature, Feature, FeatureStatus } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import {
   STREAM_NAME,
@@ -107,7 +107,7 @@ export class FeatureClient {
 function toStorage(name: string, feature: Feature): StoredFeature {
   return {
     [FEATURE_TYPE]: feature.type,
-    [FEATURE_UUID]: getUuid(name, feature),
+    [FEATURE_UUID]: getFeatureId(name, feature),
     [FEATURE_NAME]: feature.name,
     [FEATURE_DESCRIPTION]: feature.description,
     [FEATURE_VALUE]: feature.value,
@@ -121,6 +121,7 @@ function toStorage(name: string, feature: Feature): StoredFeature {
 
 function fromStorage(feature: StoredFeature): Feature {
   return {
+    id: feature[FEATURE_UUID],
     type: feature[FEATURE_TYPE],
     name: feature[FEATURE_NAME],
     description: feature[FEATURE_DESCRIPTION],
@@ -132,7 +133,7 @@ function fromStorage(feature: StoredFeature): Feature {
   };
 }
 
-function getUuid(name: string, feature: Feature): string {
+export function getFeatureId(name: string, feature: BaseFeature): string {
   return objectHash({
     [FEATURE_TYPE]: feature.type,
     [STREAM_NAME]: name,
