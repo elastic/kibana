@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/data-forge'
   - '@kbn/test'
-  - '@kbn/profiling-plugin'
 tags:
   - test-helper
   - package
