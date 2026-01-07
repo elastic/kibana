@@ -94,7 +94,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/cypress-test-helper",
     "@kbn/streams-schema",
-    "@kbn/data-quality",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/data-quality"
   ]
 }
