@@ -24,7 +24,6 @@ import type {
   LensDocument,
   SupportedDatasourceId,
 } from '@kbn/lens-common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
 import type { LensRootStore } from '../../../state_management';
