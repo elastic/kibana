@@ -11,16 +11,15 @@ import { getSampleDashboardState } from '../../mocks';
 import { coreServices } from '../../services/kibana_services';
 import { saveDashboard } from './save_dashboard';
 import type { DashboardState } from '../../../server';
-import type { Reference } from '@kbn/content-management-utils';
 
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 jest.mock('../../dashboard_client', () => ({
   dashboardClient: {
-    create: (dashboardState: DashboardState, references: Reference[]) =>
-      mockCreate(dashboardState, references),
-    update: (id: string, dashboardState: DashboardState, references: Reference[]) =>
-      mockUpdate(id, dashboardState, references),
+    create: (dashboardState: DashboardState) =>
+      mockCreate(dashboardState),
+    update: (id: string, dashboardState: DashboardState) =>
+      mockUpdate(id, dashboardState),
   },
 }));
 
@@ -35,7 +34,6 @@ describe('Save dashboard state', () => {
       ...getSampleDashboardState(),
       title: 'BOO',
     };
-    const references: Reference[] = [];
     const result = await saveDashboard({
       dashboardState,
       lastSavedId: 'Boogaloo',
@@ -43,7 +41,7 @@ describe('Save dashboard state', () => {
     });
 
     expect(result.id).toBe('Boogaloo');
-    expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState, references);
+    expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState);
     expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BOO' was saved`,
       className: 'eui-textBreakWord',

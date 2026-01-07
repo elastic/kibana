@@ -110,7 +110,7 @@ describe('deserializeLayout', () => {
           "title": "panel One",
         },
         "3": Object {
-         "title": "panel Three",
+          "title": "panel Three",
         },
         "control1": Object {
           "someValue": "test",
