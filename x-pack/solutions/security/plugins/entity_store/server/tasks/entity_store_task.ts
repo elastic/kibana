@@ -17,7 +17,6 @@ import type { EntityStoreTaskConfig } from './config';
 import type { TaskManager } from '../types';
 
 export abstract class EntityStoreTask {
-
   protected name!: string;
 
   constructor(

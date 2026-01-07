@@ -15,7 +15,6 @@ import { EntityStoreTask } from './entity_store_task';
 import type { TaskManager } from '../types';
 
 export class ExtractEntityTask extends EntityStoreTask {
-
   constructor(taskManager: TaskManager, logger: Logger, private readonly entityType: EntityType) {
     super(taskManager, TasksConfig[EntityStoreTaskType.Values.extractEntity], logger);
     this.entityType = entityType;
