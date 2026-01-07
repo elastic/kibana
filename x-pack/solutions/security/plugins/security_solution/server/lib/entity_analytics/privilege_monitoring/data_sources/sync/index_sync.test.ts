@@ -23,7 +23,6 @@ import type { BulkResponse } from 'elasticsearch-8.x/lib/api/types';
 
 const mockList = jest.fn();
 
-const STALE_USERS_PATH = '../../deletion_detection/stale_users';
 jest.mock('../../saved_objects', () => {
   return {
     MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
@@ -38,16 +37,17 @@ jest.mock('../../saved_objects', () => {
 });
 
 const mockFindStaleUsersForIndex = jest.fn();
-jest.mock(STALE_USERS_PATH, () => {
+const mockFindStaleUsersFactory = jest.fn();
+jest.mock('./deletion_detection/stale_users', () => {
   return {
     findStaleUsersForIndexFactory: () => mockFindStaleUsersForIndex,
+    findStaleUsersFactory: () => mockFindStaleUsersFactory,
   };
 });
 
 const mockSearchUsernamesInIndex = jest.fn();
 const mockGetMonitoredUsers = jest.fn();
 const mockGetExistingUsersMap = jest.fn();
-const mockFindStaleUsersFactory = jest.fn();
 jest.mock('../../users/search', () => {
   return {
     createSearchService: () => ({
@@ -55,12 +55,6 @@ jest.mock('../../users/search', () => {
         mockSearchUsernamesInIndex(obj),
       getExistingUsersMap: (usernames: string[]) => mockGetExistingUsersMap(usernames),
     }),
-  };
-});
-
-jest.mock(STALE_USERS_PATH, () => {
-  return {
-    findStaleUsersFactory: () => mockFindStaleUsersFactory,
   };
 });
 
