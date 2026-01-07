@@ -38,7 +38,7 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
           },
         },
       },
-      true
+      { displaySuccessMessage: true }
     );
     return newMarkdownEmbeddable?.onEdit({ isNewPanel: true });
   },

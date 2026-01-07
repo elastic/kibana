@@ -16,6 +16,7 @@ import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-nav
 import { TestProviders } from '../../common/mock';
 import { useNavigation } from '../../common/lib/kibana';
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 
 const mockDashboardTopNav = DashboardTopNav as jest.Mock;
 
@@ -37,6 +38,7 @@ const mockGetAppUrl = jest.fn();
 const mockDashboardContainer = {
   viewMode$: new BehaviorSubject('view'),
 } as unknown as DashboardApi;
+const mockDashboardInternalApi = {} as unknown as DashboardInternalApi;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
@@ -53,9 +55,16 @@ describe('DashboardToolBar', () => {
       navigateTo: mockNavigateTo,
       getAppUrl: mockGetAppUrl,
     });
-    render(<DashboardToolBar onLoad={mockOnLoad} dashboardContainer={mockDashboardContainer} />, {
-      wrapper,
-    });
+    render(
+      <DashboardToolBar
+        onLoad={mockOnLoad}
+        dashboardContainer={mockDashboardContainer}
+        dashboardInternalApi={mockDashboardInternalApi}
+      />,
+      {
+        wrapper,
+      }
+    );
   });
   it('should render the DashboardToolBar component', () => {
     expect(screen.getByTestId('dashboard-top-nav')).toBeInTheDocument();
