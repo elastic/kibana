@@ -21,15 +21,27 @@ import {
   ExceptionListItem,
   ExceptionListItemId,
   ExceptionListItemHumanId,
-  ExceptionListHumanId,
   ExceptionListItemType,
   ExceptionListItemName,
   ExceptionListItemDescription,
   ExceptionNamespaceType,
-  ExceptionListItemOsTypeArray,
-  ExceptionListItemTags,
   ExceptionListItemMeta,
   ExceptionListItemExpireTime,
+  ExceptionListHumanId,
+  ExceptionListItemOsTypeArray,
+  ExceptionListItemTags,
+  EndpointListProperties,
+  TrustedAppsWindowsProperties,
+  TrustedAppsMacProperties,
+  TrustedAppsLinuxProperties,
+  TrustedDevicesWindowsProperties,
+  TrustedDevicesMacProperties,
+  TrustedDevicesWindowsMacProperties,
+  EventFiltersProperties,
+  HostIsolationProperties,
+  BlocklistWindowsProperties,
+  BlocklistLinuxProperties,
+  BlocklistMacProperties,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
 
@@ -44,8 +56,8 @@ export type UpdateExceptionListItemCommentArray = z.infer<
 >;
 export const UpdateExceptionListItemCommentArray = z.array(UpdateExceptionListItemComment);
 
-export type UpdateExceptionListItemGeneric = z.infer<typeof UpdateExceptionListItemGeneric>;
-export const UpdateExceptionListItemGeneric = z.object({
+export type UpdateExceptionListItemBase = z.infer<typeof UpdateExceptionListItemBase>;
+export const UpdateExceptionListItemBase = z.object({
   /**
    * Either `id` or `item_id` must be specified
    */
@@ -54,14 +66,10 @@ export const UpdateExceptionListItemGeneric = z.object({
    * Either `id` or `item_id` must be specified
    */
   item_id: ExceptionListItemHumanId.optional(),
-  list_id: ExceptionListHumanId.optional(),
   type: ExceptionListItemType,
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
   namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
   expire_time: ExceptionListItemExpireTime.optional(),
   comments: UpdateExceptionListItemCommentArray.optional().default([]),
@@ -71,65 +79,109 @@ export const UpdateExceptionListItemGeneric = z.object({
   _version: z.string().optional(),
 });
 
+export type UpdateExceptionListItemGeneric = z.infer<typeof UpdateExceptionListItemGeneric>;
+export const UpdateExceptionListItemGeneric = UpdateExceptionListItemBase.merge(
+  z.object({
+    list_id: ExceptionListHumanId.optional(),
+    entries: ExceptionListItemEntryArray,
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: ExceptionListItemTags.optional(),
+  })
+);
+
 export type UpdateExceptionListItemEndpointList = z.infer<
   typeof UpdateExceptionListItemEndpointList
 >;
-export const UpdateExceptionListItemEndpointList = UpdateExceptionListItemGeneric.merge(
-  z.object({
-    list_id: z.literal('endpoint_list'),
-  })
-);
+export const UpdateExceptionListItemEndpointList =
+  UpdateExceptionListItemBase.merge(EndpointListProperties);
 
-export type UpdateExceptionListItemTrustedApps = z.infer<typeof UpdateExceptionListItemTrustedApps>;
-export const UpdateExceptionListItemTrustedApps = UpdateExceptionListItemGeneric.merge(
-  z.object({
-    list_id: z.literal('endpoint_trusted_apps'),
-  })
-);
-
-export type UpdateExceptionListItemTrustedDevices = z.infer<
-  typeof UpdateExceptionListItemTrustedDevices
+export type UpdateExceptionListItemTrustedAppsWindows = z.infer<
+  typeof UpdateExceptionListItemTrustedAppsWindows
 >;
-export const UpdateExceptionListItemTrustedDevices = UpdateExceptionListItemGeneric.merge(
-  z.object({
-    list_id: z.literal('endpoint_trusted_devices'),
-  })
+export const UpdateExceptionListItemTrustedAppsWindows = UpdateExceptionListItemBase.merge(
+  TrustedAppsWindowsProperties
+);
+
+export type UpdateExceptionListItemTrustedAppsMac = z.infer<
+  typeof UpdateExceptionListItemTrustedAppsMac
+>;
+export const UpdateExceptionListItemTrustedAppsMac =
+  UpdateExceptionListItemBase.merge(TrustedAppsMacProperties);
+
+export type UpdateExceptionListItemTrustedAppsLinux = z.infer<
+  typeof UpdateExceptionListItemTrustedAppsLinux
+>;
+export const UpdateExceptionListItemTrustedAppsLinux = UpdateExceptionListItemBase.merge(
+  TrustedAppsLinuxProperties
+);
+
+export type UpdateExceptionListItemTrustedDevicesWindows = z.infer<
+  typeof UpdateExceptionListItemTrustedDevicesWindows
+>;
+export const UpdateExceptionListItemTrustedDevicesWindows = UpdateExceptionListItemBase.merge(
+  TrustedDevicesWindowsProperties
+);
+
+export type UpdateExceptionListItemTrustedDevicesMac = z.infer<
+  typeof UpdateExceptionListItemTrustedDevicesMac
+>;
+export const UpdateExceptionListItemTrustedDevicesMac = UpdateExceptionListItemBase.merge(
+  TrustedDevicesMacProperties
+);
+
+export type UpdateExceptionListItemTrustedDevicesWindowsMac = z.infer<
+  typeof UpdateExceptionListItemTrustedDevicesWindowsMac
+>;
+export const UpdateExceptionListItemTrustedDevicesWindowsMac = UpdateExceptionListItemBase.merge(
+  TrustedDevicesWindowsMacProperties
 );
 
 export type UpdateExceptionListItemEventFilters = z.infer<
   typeof UpdateExceptionListItemEventFilters
 >;
-export const UpdateExceptionListItemEventFilters = UpdateExceptionListItemGeneric.merge(
-  z.object({
-    list_id: z.literal('endpoint_event_filters'),
-  })
-);
+export const UpdateExceptionListItemEventFilters =
+  UpdateExceptionListItemBase.merge(EventFiltersProperties);
 
 export type UpdateExceptionListItemHostIsolation = z.infer<
   typeof UpdateExceptionListItemHostIsolation
 >;
-export const UpdateExceptionListItemHostIsolation = UpdateExceptionListItemGeneric.merge(
-  z.object({
-    list_id: z.literal('endpoint_host_isolation_exceptions'),
-  })
+export const UpdateExceptionListItemHostIsolation =
+  UpdateExceptionListItemBase.merge(HostIsolationProperties);
+
+export type UpdateExceptionListItemBlocklistWindows = z.infer<
+  typeof UpdateExceptionListItemBlocklistWindows
+>;
+export const UpdateExceptionListItemBlocklistWindows = UpdateExceptionListItemBase.merge(
+  BlocklistWindowsProperties
 );
 
-export type UpdateExceptionListItemBlocklist = z.infer<typeof UpdateExceptionListItemBlocklist>;
-export const UpdateExceptionListItemBlocklist = UpdateExceptionListItemGeneric.merge(
-  z.object({
-    list_id: z.literal('endpoint_blocklists'),
-  })
-);
+export type UpdateExceptionListItemBlocklistLinux = z.infer<
+  typeof UpdateExceptionListItemBlocklistLinux
+>;
+export const UpdateExceptionListItemBlocklistLinux =
+  UpdateExceptionListItemBase.merge(BlocklistLinuxProperties);
+
+export type UpdateExceptionListItemBlocklistMac = z.infer<
+  typeof UpdateExceptionListItemBlocklistMac
+>;
+export const UpdateExceptionListItemBlocklistMac =
+  UpdateExceptionListItemBase.merge(BlocklistMacProperties);
 
 export type UpdateExceptionListItemRequestBody = z.infer<typeof UpdateExceptionListItemRequestBody>;
 export const UpdateExceptionListItemRequestBody = z.union([
   UpdateExceptionListItemGeneric,
   UpdateExceptionListItemEndpointList,
-  UpdateExceptionListItemTrustedApps,
-  UpdateExceptionListItemTrustedDevices,
+  UpdateExceptionListItemTrustedAppsWindows,
+  UpdateExceptionListItemTrustedAppsMac,
+  UpdateExceptionListItemTrustedAppsLinux,
+  UpdateExceptionListItemTrustedDevicesWindows,
+  UpdateExceptionListItemTrustedDevicesMac,
+  UpdateExceptionListItemTrustedDevicesWindowsMac,
   UpdateExceptionListItemEventFilters,
   UpdateExceptionListItemHostIsolation,
-  UpdateExceptionListItemBlocklist,
+  UpdateExceptionListItemBlocklistWindows,
+  UpdateExceptionListItemBlocklistLinux,
+  UpdateExceptionListItemBlocklistMac,
 ]);
 export type UpdateExceptionListItemRequestBodyInput = z.input<
   typeof UpdateExceptionListItemRequestBody

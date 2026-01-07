@@ -19,11 +19,17 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
                 - $ref: '#/components/schemas/UpdateExceptionListItemEndpointList'
-                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedApps'
-                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevices'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsMac'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsLinux'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevicesWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevicesMac'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevicesWindowsMac'
                 - $ref: '#/components/schemas/UpdateExceptionListItemEventFilters'
                 - $ref: '#/components/schemas/UpdateExceptionListItemHostIsolation'
-                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklist'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistLinux'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistMac'
       responses:
         200:
           description: Successful response
@@ -119,21 +125,9 @@ paths:
 components:
   x-codegen-enabled: true
   schemas:
-    UpdateExceptionListItemGeneric:
+    # Base schema WITHOUT entries, os_types, tags, list_id - these are defined by artifact-specific schemas
+    UpdateExceptionListItemBase:
       type: object
-      example:
-        comments: []
-        description: Updated description
-        entries:
-          - field: host.name
-            type: match
-            value: rock01
-            operator: included
-        item_id: simple_list_item
-        name: Updated name
-        namespace_type: single
-        tags: []
-        type: simple
       properties:
         id:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemId'
@@ -141,24 +135,15 @@ components:
         item_id:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
           description: Either `id` or `item_id` must be specified
-        list_id:
-          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
         type:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
         name:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
         description:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
-        entries:
-          $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
         namespace_type:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
           default: 'single'
-        os_types:
-          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
-          default: []
-        tags:
-          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
         meta:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
         expire_time:
@@ -173,85 +158,97 @@ components:
         - type
         - name
         - description
-        - entries
+
+    # Generic schema for non-endpoint artifacts (includes generic entries, os_types, tags)
+    UpdateExceptionListItemGeneric:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - type: object
+          example:
+            comments: []
+            description: Updated description
+            entries:
+              - field: host.name
+                type: match
+                value: rock01
+                operator: included
+            item_id: simple_list_item
+            name: Updated name
+            namespace_type: single
+            tags: []
+            type: simple
+          properties:
+            list_id:
+              $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+            entries:
+              $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+            os_types:
+              $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+              default: []
+            tags:
+              $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+          required:
+            - entries
 
     UpdateExceptionListItemEndpointList:
       allOf:
-        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
-        - type: object
-          description: Update an item in the Endpoint Security Exception List.
-          properties:
-            list_id:
-              type: string
-              enum: [endpoint_list]
-              example: endpoint_list
-          required:
-            - list_id
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/EndpointListProperties'
 
-    UpdateExceptionListItemTrustedApps:
+    UpdateExceptionListItemTrustedAppsWindows:
       allOf:
-        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
-        - type: object
-          description: Update an item in the Endpoint Security Trusted Apps List.
-          properties:
-            list_id:
-              type: string
-              enum: [endpoint_trusted_apps]
-              example: endpoint_trusted_apps
-          required:
-            - list_id
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedAppsWindowsProperties'
 
-    UpdateExceptionListItemTrustedDevices:
+    UpdateExceptionListItemTrustedAppsMac:
       allOf:
-        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
-        - type: object
-          description: Update an item in the Endpoint Security Trusted Devices List.
-          properties:
-            list_id:
-              type: string
-              enum: [endpoint_trusted_devices]
-              example: endpoint_trusted_devices
-          required:
-            - list_id
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedAppsMacProperties'
+
+    UpdateExceptionListItemTrustedAppsLinux:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedAppsLinuxProperties'
+
+    UpdateExceptionListItemTrustedDevicesWindows:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedDevicesWindowsProperties'
+
+    UpdateExceptionListItemTrustedDevicesMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedDevicesMacProperties'
+
+    UpdateExceptionListItemTrustedDevicesWindowsMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedDevicesWindowsMacProperties'
 
     UpdateExceptionListItemEventFilters:
       allOf:
-        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
-        - type: object
-          description: Update an item in the Endpoint Security Event Filters List.
-          properties:
-            list_id:
-              type: string
-              enum: [endpoint_event_filters]
-              example: endpoint_event_filters
-          required:
-            - list_id
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/EventFiltersProperties'
 
     UpdateExceptionListItemHostIsolation:
       allOf:
-        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
-        - type: object
-          description: Update an item in the Endpoint Security Host isolation exceptions List.
-          properties:
-            list_id:
-              type: string
-              enum: [endpoint_host_isolation_exceptions]
-              example: endpoint_host_isolation_exceptions
-          required:
-            - list_id
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/HostIsolationProperties'
 
-    UpdateExceptionListItemBlocklist:
+    UpdateExceptionListItemBlocklistWindows:
       allOf:
-        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
-        - type: object
-          description: Update an item in the Endpoint Security Blocklists List.
-          properties:
-            list_id:
-              type: string
-              enum: [endpoint_blocklists]
-              example: endpoint_blocklists
-          required:
-            - list_id
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/BlocklistWindowsProperties'
+
+    UpdateExceptionListItemBlocklistLinux:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/BlocklistLinuxProperties'
+
+    UpdateExceptionListItemBlocklistMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/BlocklistMacProperties'
 
     UpdateExceptionListItemComment:
       type: object
