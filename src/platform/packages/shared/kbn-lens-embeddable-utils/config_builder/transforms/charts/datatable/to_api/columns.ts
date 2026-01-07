@@ -29,45 +29,95 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
   };
 }
 
+/**
+ * Build the color props for a metric column or an esql row.
+ * - If colorMapping is present → output colorMapping
+ * - If palette is present → output colorByValue
+ */
+function buildColorProps(
+  column: ColumnState
+): Partial<Pick<DatatableState['metrics'][number], 'apply_color_to' | 'color'>> {
+  const { colorMode, palette, colorMapping } = column;
+  if (!colorMode || colorMode === 'none') return {};
+
+  const applyColorTo = colorMode === 'text' ? 'value' : 'background';
+
+  // Prefer colorMapping if present, otherwise use palette
+  if (colorMapping) {
+    return {
+      apply_color_to: applyColorTo,
+      color: fromColorMappingLensStateToAPI(colorMapping),
+    };
+  }
+
+  if (palette) {
+    return {
+      apply_color_to: applyColorTo,
+      color: fromColorByValueLensStateToAPI(palette),
+    };
+  }
+
+  return { apply_color_to: applyColorTo };
+}
+
 type APIMetricProps = APIMetricRowCommonProps &
   Partial<Pick<DatatableState['metrics'][number], 'apply_color_to' | 'color' | 'summary'>>;
 
 function buildMetricsAPI(column: ColumnState): APIMetricProps {
-  const { summaryRow, summaryLabel, colorMode, palette } = column;
+  const { summaryRow, summaryLabel } = column;
   return {
     ...buildCommonMetricRowProps(column),
-    ...(colorMode && colorMode !== 'none'
-      ? {
-          apply_color_to: colorMode === 'text' ? 'value' : 'background',
-          ...(palette ? { color: fromColorByValueLensStateToAPI(palette) } : {}),
-        }
-      : {}),
+    ...buildColorProps(column),
     ...(summaryRow && summaryRow !== 'none'
       ? { summary: { type: summaryRow, ...(summaryLabel ? { label: summaryLabel } : {}) } }
       : {}),
   };
 }
 
-type APIRowProps = APIMetricRowCommonProps &
+function buildRowCommonProps(
+  column: ColumnState
+): Pick<NonNullable<DatatableState['rows']>[number], 'collapse_by' | 'click_filter'> {
+  const { collapseFn, oneClickFilter } = column;
+  return {
+    ...buildCommonMetricRowProps(column),
+    ...(collapseFn ? { collapse_by: collapseFn } : {}),
+    ...(oneClickFilter !== undefined ? { click_filter: oneClickFilter } : {}),
+  };
+}
+
+type APIRowPropsNoESQL = APIMetricRowCommonProps &
   Partial<
     Pick<
-      NonNullable<DatatableState['rows']>[number],
+      NonNullable<DatatableStateNoESQL['rows']>[number],
       'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
     >
   >;
 
-function buildRowsAPI(column: ColumnState): APIRowProps {
-  const { collapseFn, oneClickFilter, colorMode, colorMapping } = column;
+function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
+  const { colorMode, colorMapping } = column;
   return {
-    ...buildCommonMetricRowProps(column),
+    ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
           apply_color_to: colorMode === 'text' ? 'value' : 'background',
           ...(colorMapping ? { color: fromColorMappingLensStateToAPI(colorMapping) } : {}),
         }
       : {}),
-    ...(collapseFn ? { collapse_by: collapseFn } : {}),
-    ...(oneClickFilter !== undefined ? { click_filter: oneClickFilter } : {}),
+  };
+}
+
+type APIRowPropsESQL = APIMetricRowCommonProps &
+  Partial<
+    Pick<
+      NonNullable<DatatableStateESQL['rows']>[number],
+      'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
+    >
+  >;
+
+function buildRowsAPIESQL(column: ColumnState): APIRowPropsESQL {
+  return {
+    ...buildRowCommonProps(column),
+    ...buildColorProps(column),
   };
 }
 
@@ -146,7 +196,7 @@ export function convertDatatableColumnsToAPI(
         columnIdMapping[columnId] = { type: 'row', index: rows.length };
         rows.push({
           ...apiOperation,
-          ...buildRowsAPI(column),
+          ...buildRowsAPINoESQL(column),
         });
       }
     }
@@ -183,7 +233,7 @@ export function convertDatatableColumnsToAPI(
       splitMetricsBy.push(apiOperation);
     } else {
       columnIdMapping[columnId] = { type: 'row', index: rows.length };
-      rows.push({ ...apiOperation, ...buildRowsAPI(column) });
+      rows.push({ ...apiOperation, ...buildRowsAPIESQL(column) });
     }
   }
 

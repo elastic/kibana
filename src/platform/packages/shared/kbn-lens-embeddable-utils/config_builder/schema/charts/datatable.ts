@@ -195,7 +195,7 @@ const datatableStateCommonOptionsSchema = {
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
 };
 
-const datatableStateRowsOptionsSchema = schema.object({
+const datatableStateRowsOptionsNoESQLSchema = schema.object({
   ...datatableStateCommonOptionsSchema,
   /**
    * Alignment of the rows
@@ -227,12 +227,33 @@ const datatableStateRowsOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
+const datatableStateRowsOptionsESQLSchema = datatableStateRowsOptionsNoESQLSchema.extends({
+  /**
+   * Color configuration
+   */
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+      meta: {
+        description:
+          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+      },
+    })
+  ),
+});
+
 const datatableStateMetricsOptionsSchema = schema.object({
   ...datatableStateCommonOptionsSchema,
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+      meta: {
+        description:
+          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+      },
+    })
+  ),
   /**
    * Alignment of the columns
    */
@@ -346,11 +367,14 @@ export const datatableStateSchemaNoESQL = schema.object(
      * Row configuration, optional bucket operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsSchema), {
-        minSize: 1,
-        maxSize: 50,
-        meta: { description: 'Array of operations to split the datatable rows by' },
-      })
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsNoESQLSchema),
+        {
+          minSize: 1,
+          maxSize: 50,
+          meta: { description: 'Array of operations to split the datatable rows by' },
+        }
+      )
     ),
     /**
      * Split metrics by configuration, optional bucket operations.
@@ -399,7 +423,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(schema.allOf([datatableStateRowsOptionsSchema, esqlColumnSchema]), {
+      schema.arrayOf(schema.allOf([datatableStateRowsOptionsESQLSchema, esqlColumnSchema]), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },

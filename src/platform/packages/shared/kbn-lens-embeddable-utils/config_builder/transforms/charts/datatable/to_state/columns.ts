@@ -9,22 +9,40 @@
 import type { ColumnState } from '@kbn/lens-common';
 import type { DatatableState } from '../../../../schema';
 import { fromColorMappingAPIToLensState, fromColorByValueAPIToLensState } from '../../../coloring';
-import { getAccessorName } from '../helpers';
+import { getAccessorName, isColorByValueColor, isColorMappingColor } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
   SPLIT_METRIC_BY_ACCESSOR_PREFIX,
 } from '../constants';
 
+function buildColorProps(
+  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
+): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
+  if (!config.apply_color_to) return {};
+  const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
+
+  if (isColorMappingColor(config.color)) {
+    return { colorMode, colorMapping: fromColorMappingAPIToLensState(config.color) };
+  }
+
+  if (isColorByValueColor(config.color)) {
+    return { colorMode, palette: fromColorByValueAPIToLensState(config.color) };
+  }
+
+  return { colorMode };
+}
+
 function buildCommonMetricRowState(
   config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
-): Pick<ColumnState, 'hidden' | 'alignment' | 'colorMode' | 'isTransposed'> {
+): Pick<
+  ColumnState,
+  'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping'
+> {
   return {
     ...(config.visible != null ? { hidden: !config.visible } : {}),
     ...(config.alignment ? { alignment: config.alignment } : {}),
-    ...(config.apply_color_to
-      ? { colorMode: config.apply_color_to === 'value' ? 'text' : 'cell' }
-      : {}),
+    ...buildColorProps(config),
     isTransposed: false,
   };
 }
@@ -36,9 +54,6 @@ export function buildMetricsState(metrics: DatatableState['metrics']): ColumnSta
     return {
       columnId,
       ...buildCommonMetricRowState(metric),
-      ...(metric.color && metric.apply_color_to
-        ? { palette: fromColorByValueAPIToLensState(metric.color) }
-        : {}),
       ...(metric.summary
         ? {
             summaryRow: metric.summary.type,
@@ -58,9 +73,6 @@ export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
     return {
       columnId,
       ...buildCommonMetricRowState(row),
-      ...(row.color && row.apply_color_to
-        ? { colorMapping: fromColorMappingAPIToLensState(row.color) }
-        : {}),
       ...(row.click_filter != null ? { oneClickFilter: row.click_filter } : {}),
       ...(row.collapse_by ? { collapseFn: row.collapse_by } : {}),
       isMetric: false,

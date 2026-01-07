@@ -12,6 +12,7 @@ import type {
   GenericIndexPatternColumn,
   TextBasedLayerColumn,
 } from '@kbn/lens-common';
+import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { ACCESSOR } from './constants';
 
 /**
@@ -56,4 +57,18 @@ export function getAccessorName(
     return `${ACCESSOR}_${type}`;
   }
   return `${ACCESSOR}_${type}_${index}`;
+}
+
+export function isColorMappingColor(color: unknown): color is ColorMappingType {
+  if (color == null) return false;
+  return (
+    typeof color === 'object' &&
+    'mode' in color &&
+    (color.mode === 'categorical' || color.mode === 'gradient')
+  );
+}
+
+export function isColorByValueColor(color: unknown): color is ColorByValueType {
+  if (color == null) return false;
+  return typeof color === 'object' && 'type' in color && color.type === 'dynamic';
 }
