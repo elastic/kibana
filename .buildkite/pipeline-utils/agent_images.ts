@@ -84,7 +84,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) 
   const additionalProps =
     {
       spot: { preemptible: true },
-      virt: { enableNestedVirtualization: true }
+      virt: { enableNestedVirtualization: true },
     }[addition] || {};
 
   return {
