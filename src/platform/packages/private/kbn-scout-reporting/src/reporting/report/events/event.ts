@@ -122,4 +122,7 @@ export interface ScoutReportEvent {
   test_run: ScoutTestRunInfo;
   suite?: ScoutSuiteInfo;
   test?: ScoutTestInfo;
+  process?: {
+    uptime?: number;
+  };
 }
