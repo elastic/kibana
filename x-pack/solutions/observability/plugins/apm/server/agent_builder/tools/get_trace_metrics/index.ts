@@ -8,7 +8,6 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ApmDocumentType } from '../../../../common/document_type';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
@@ -56,9 +55,7 @@ async function getPreferredDocumentSource({
   if (kqlFilter) {
     kueryParts.push(kqlFilter);
   }
-  if (groupBy) {
-    kueryParts.push(`${groupBy}: *`);
-  }
+  kueryParts.push(`${groupBy}: *`);
   const kuery = kueryParts.join(' AND ');
 
   const documentSources = await apmDataAccessServices.getDocumentSources({
@@ -87,20 +84,20 @@ export async function getTraceMetrics({
   start,
   end,
   kqlFilter,
-  groupBy = SERVICE_NAME,
+  groupBy,
 }: {
   apmEventClient: APMEventClient;
   apmDataAccessServices: ApmDataAccessServices;
   start: number;
   end: number;
   kqlFilter?: string;
-  groupBy?: string;
+  groupBy: string;
 }): Promise<GetTraceMetricsResponse> {
   const source = await getPreferredDocumentSource({
     apmDataAccessServices,
     start,
     end,
-    groupBy: groupBy || SERVICE_NAME,
+    groupBy,
     kqlFilter,
   });
 
@@ -127,7 +124,7 @@ export async function getTraceMetrics({
     aggs: {
       groups: {
         terms: {
-          field: groupBy || SERVICE_NAME,
+          field: groupBy,
           size: MAX_NUMBER_OF_GROUPS,
         },
         aggs: {

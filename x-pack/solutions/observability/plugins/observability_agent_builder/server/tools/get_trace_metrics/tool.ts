@@ -90,6 +90,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
     },
     handler: async ({ start, end, kqlFilter, groupBy }, context) => {
       const { request } = context;
+      const groupByField = groupBy || 'service.name';
 
       try {
         const { items } = await getToolHandler({
@@ -98,7 +99,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           start,
           end,
           kqlFilter,
-          groupBy,
+          groupBy: groupByField,
         });
 
         return {

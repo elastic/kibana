@@ -21,8 +21,8 @@ export async function getToolHandler({
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   start: string;
   end: string;
+  groupBy: string;
   kqlFilter?: string;
-  groupBy?: string;
 }): Promise<{
   items: TraceMetricsItem[];
 }> {
