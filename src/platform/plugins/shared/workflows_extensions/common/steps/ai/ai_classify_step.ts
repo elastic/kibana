@@ -40,6 +40,7 @@ export const OutputSchema = z.object({
   category: z.string().optional(),
   categories: z.array(z.string()).optional(),
   rationale: z.string().optional(),
+  metadata: z.record(z.string(), z.any()),
 });
 
 export type AiClassifyStepConfigSchema = typeof ConfigSchema;

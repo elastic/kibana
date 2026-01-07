@@ -69,21 +69,26 @@ export const aiClassifyStepDefinition = (
         ...buildInstructionsPart(instructions),
       ];
 
-      const modelResponse = await chatModel
-        .withStructuredOutput(z.toJSONSchema(responseZodSchema))
+      const invocationResult = await chatModel
+        .withStructuredOutput(z.toJSONSchema(responseZodSchema), {
+          includeRaw: true,
+        })
         .invoke(modelInput, {
           signal: context.abortSignal,
         });
 
       validateModelResponse({
-        modelResponse,
+        modelResponse: invocationResult.parsed,
         schema: responseZodSchema,
         expectedCategories: context.input.categories,
         fallbackCategory: context.input.fallbackCategory,
       });
 
       return {
-        output: modelResponse,
+        output: {
+          ...invocationResult.parsed,
+          metadata: invocationResult.raw.response_metadata,
+        },
       };
     },
   });
