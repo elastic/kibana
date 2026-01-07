@@ -56,7 +56,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
 
