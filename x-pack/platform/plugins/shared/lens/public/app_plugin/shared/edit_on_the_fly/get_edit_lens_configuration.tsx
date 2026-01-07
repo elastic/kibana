@@ -23,7 +23,9 @@ import type {
   LensStoreDeps,
   LensDocument,
 } from '@kbn/lens-common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import { getActiveDatasourceIdFromDoc } from '../../../utils';
 import type { LensRootStore } from '../../../state_management';
 import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
 import {
@@ -182,6 +184,14 @@ export async function getEditLensConfiguration(
     const [currentAttributes, setCurrentAttributes] =
       useState<TypedLensSerializedState['attributes']>(attributes);
 
+    // Derive datasourceId from currentAttributes so it updates when attributes change
+    // (e.g., after converting from formBased to textBased)
+    const currentDatasourceId = (getActiveDatasourceIdFromDoc(currentAttributes) ||
+      datasourceId) as EditLensConfigurationProps['datasourceId'];
+
+    // Derive canEditTextBasedQuery from currentAttributes so it updates after conversion
+    const currentCanEditTextBasedQuery = isOfAggregateQueryType(currentAttributes.state.query);
+
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
      * When the user applies the changes we save them to the Lens SO
@@ -197,7 +207,7 @@ export async function getEditLensConfiguration(
       },
       [savedObjectId]
     );
-    const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
+    const datasourceState = currentAttributes.state.datasourceStates[currentDatasourceId];
     const storeDeps: LensStoreDeps = {
       lensServices,
       datasourceMap,
@@ -228,7 +238,7 @@ export async function getEditLensConfiguration(
       updatePanelState,
       updateSuggestion,
       closeFlyout,
-      datasourceId,
+      datasourceId: currentDatasourceId,
       coreStart,
       startDependencies,
       dataLoading$,
@@ -238,7 +248,7 @@ export async function getEditLensConfiguration(
       updateByRefInput,
       navigateToLensEditor,
       displayFlyoutHeader,
-      canEditTextBasedQuery,
+      canEditTextBasedQuery: currentCanEditTextBasedQuery,
       hidesSuggestions,
       setCurrentAttributes,
       isNewPanel,
