@@ -13,6 +13,7 @@ import {
   waitForEntityStoreReady,
   executeEnrichPolicy,
   waitForEnrichPolicyCreated,
+  dataViewRouteHelpersFactory,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -294,6 +295,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             // Enable asset inventory setting
             await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+
+            // Initialize security-solution-default data-view (required by entity store)
+            const dataView = dataViewRouteHelpersFactory(supertest);
+            await dataView.create('security-solution');
 
             // Enable asset inventory which creates the enrich policy
             await enableAssetInventory({ supertest, logger });
