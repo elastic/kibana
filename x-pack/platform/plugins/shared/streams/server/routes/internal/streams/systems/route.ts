@@ -313,7 +313,7 @@ export const identifySystemsRoute = createServerRoute({
 
     const { read } = await checkAccess({ name, scopedClusterClient });
     if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
     }
 
     // Get connector info for error enrichment

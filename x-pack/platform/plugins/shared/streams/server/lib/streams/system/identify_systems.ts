@@ -16,10 +16,10 @@ export async function identifySystemsWithDescription(
 ): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
   const result = await identifySystems(options);
 
-  options.logger.trace('Generating descriptions for identified system features');
+  options.logger.trace('Generating descriptions for identified systems');
 
   let totalTokensUsed: ChatCompletionTokenCount = result.tokensUsed;
-  const systemsWithDescription = await withSpan('generate_system_feature_descriptions', () =>
+  const systemsWithDescription = await withSpan('generate_system_descriptions', () =>
     Promise.all(
       result.systems.map(async (system) => {
         const { description, tokensUsed } = await generateStreamDescription({
