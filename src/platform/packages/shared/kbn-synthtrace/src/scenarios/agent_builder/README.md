@@ -44,7 +44,7 @@ curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
 
 You must specify the required `tool_params` for the selected tool.
 
-## How to validate AI Insight
+## How to Validate an AI Insight
 
 ### 1. Running a Synthtrace Scenario
 
