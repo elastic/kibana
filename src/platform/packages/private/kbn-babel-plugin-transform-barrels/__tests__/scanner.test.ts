@@ -226,4 +226,134 @@ export default function defaultFn() {}`
       expect(exports.MyHelper.localName).toBe('MyHelper');
     });
   });
+
+  describe('export default handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-default-test-'));
+
+      // Create source file with default export
+      await Fsp.writeFile(
+        Path.join(tempDir, 'source.ts'),
+        `export const namedExport = 'named';
+export default class MyClass {}`
+      );
+
+      // Create barrel that directly exports a default
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export { namedExport } from './source';
+export default function barrelDefault() { return 'default'; }`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('captures export default declarations in barrel files', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Should capture the default export
+      expect(exports.default).toBeDefined();
+      expect(exports.default.type).toBe('default');
+      expect(exports.default.localName).toBe('barrelDefault');
+      expect(exports.default.path).toBe(mainBarrelPath);
+    });
+  });
+
+  describe('re-exported default handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-reexport-default-test-'));
+
+      // Create source file with default export
+      await Fsp.writeFile(
+        Path.join(tempDir, 'Observable.ts'),
+        `export default class Observable {}`
+      );
+
+      // Create barrel that re-exports default as named
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export { default as Observable } from './Observable';`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('marks re-exported defaults with type default', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Observable should be marked as type 'default' since it re-exports a default
+      expect(exports.Observable).toBeDefined();
+      expect(exports.Observable.type).toBe('default');
+      expect(exports.Observable.path).toBe(Path.join(tempDir, 'Observable.ts'));
+    });
+  });
+
+  describe('CommonJS __exportStar pattern handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-exportstar-test-'));
+
+      // Create source file with exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'operators.ts'),
+        `export const map = () => {};
+export const filter = () => {};
+export const reduce = () => {};`
+      );
+
+      // Create CommonJS barrel using __exportStar pattern (TypeScript compiled output)
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.js'),
+        `"use strict";
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) exports[p] = m[p];
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./operators"), exports);`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('handles __exportStar pattern for CommonJS barrels', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+
+      const mainBarrelPath = Path.join(tempDir, 'index.js');
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Should capture all exports from the __exportStar call
+      expect(exports.map).toBeDefined();
+      expect(exports.map.path).toBe(Path.join(tempDir, 'operators.ts'));
+      expect(exports.map.localName).toBe('map');
+
+      expect(exports.filter).toBeDefined();
+      expect(exports.filter.path).toBe(Path.join(tempDir, 'operators.ts'));
+
+      expect(exports.reduce).toBeDefined();
+      expect(exports.reduce.path).toBe(Path.join(tempDir, 'operators.ts'));
+    });
+  });
 });
