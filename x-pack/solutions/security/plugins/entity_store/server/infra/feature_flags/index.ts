@@ -12,6 +12,6 @@ export class FeatureFlags {
   constructor(private uiSettingsClient: IUiSettingsClient) {}
 
   public async isEntityStoreV2Enabled(): Promise<boolean> {
-    return this.uiSettingsClient.get(FF_ENABLE_ENTITY_STORE_V2) || false;
+    return this.uiSettingsClient.get(FF_ENABLE_ENTITY_STORE_V2);
   }
 }
