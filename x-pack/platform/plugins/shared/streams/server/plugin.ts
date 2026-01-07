@@ -239,7 +239,7 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(core, this.logger)
+        createStreamsGlobalSearchResultProvider(this.logger)
       );
     }
 

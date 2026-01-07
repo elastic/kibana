@@ -8,7 +8,6 @@
 import type { ModelValidation } from './validation/model_validation';
 import { joinValidation } from './validation/model_validation';
 import { BaseStream } from './base';
-import { GroupStream as nGroupStream } from './group';
 import { IngestStream } from './ingest';
 import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
@@ -20,23 +19,20 @@ export namespace Streams {
 
   export import WiredStream = nWiredStream;
   export import ClassicStream = nClassicStream;
-  export import GroupStream = nGroupStream;
 
   export namespace all {
-    export type Model = ingest.all.Model | GroupStream.Model;
-    export type Source = ingest.all.Source | GroupStream.Source;
-    export type Definition = ingest.all.Definition | GroupStream.Definition;
-    export type GetResponse = ingest.all.GetResponse | GroupStream.GetResponse;
-    export type UpsertRequest = ingest.all.UpsertRequest | GroupStream.UpsertRequest;
+    export type Model = ingest.all.Model;
+    export type Source = ingest.all.Source;
+    export type Definition = ingest.all.Definition;
+    export type GetResponse = ingest.all.GetResponse;
+    export type UpsertRequest = ingest.all.UpsertRequest;
   }
 
   export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(BaseStream, [
     ingest.all,
-    GroupStream,
   ]);
 }
 
 Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.ClassicStream = nClassicStream;
-Streams.GroupStream = nGroupStream;

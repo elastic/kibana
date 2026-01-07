@@ -45,11 +45,6 @@ function createFetchFunction(logger: Logger, getReader: () => Promise<StreamsUsa
     let wiredCount = 0;
 
     for (const definition of streamDefinitions) {
-      if (Streams.GroupStream.Definition.is(definition)) {
-        // Ignore group streams for current metrics
-        continue;
-      }
-
       if (Streams.WiredStream.Definition.is(definition)) {
         wiredCount++;
       } else if (Streams.ClassicStream.Definition.is(definition)) {

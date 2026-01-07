@@ -16,7 +16,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { FeedbackButton } from '../../feedback_button';
 import {
@@ -27,7 +26,6 @@ import {
 } from '../../stream_badges';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../streams_tour';
-import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
   string,
@@ -49,9 +47,6 @@ export function Wrapper({
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
   const { services } = useKibana();
-  const {
-    features: { groupStreams },
-  } = useStreamsPrivileges();
   const { getStepPropsByStepId } = useStreamsTour();
 
   const lastTrackedRef = useRef<string | null>(null);
@@ -166,10 +161,6 @@ export function Wrapper({
                     />
                   </EuiFlexGroup>
                 </EuiFlexItem>
-
-                {groupStreams.enabled && Streams.GroupStream.GetResponse.is(definition) && (
-                  <GroupStreamControls />
-                )}
               </EuiFlexGroup>
             </EuiFlexGroup>
             <FeedbackButton />

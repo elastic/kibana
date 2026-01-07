@@ -8,7 +8,6 @@
 /* eslint-disable max-classes-per-file */
 
 import { State } from './state';
-import { GroupStream } from './streams/group_stream';
 import { ClassicStream } from './streams/classic_stream';
 import { WiredStream } from './streams/wired_stream';
 import * as streamFromDefinition from './stream_active_record/stream_from_definition';
@@ -22,6 +21,22 @@ import type { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
 import type { Streams } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
+
+const placeholderStreamDefinition: Streams.WiredStream.Definition = {
+  name: 'placeholder_stream',
+  description: 'You know, for testing',
+  updated_at: new Date().toISOString(),
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
+    wired: {
+      fields: {},
+      routing: [],
+    },
+    failure_store: { inherit: {} },
+  },
+};
 
 describe('State', () => {
   const searchMock = jest.fn();
@@ -64,30 +79,19 @@ describe('State', () => {
         failure_store: { inherit: {} },
       },
     };
-    const groupStream: Streams.GroupStream.Definition = {
-      name: 'group_stream',
-      description: '',
-      updated_at: new Date().toISOString(),
-      group: {
-        metadata: {},
-        tags: [],
-        members: [],
-      },
-    };
 
     searchMock.mockImplementationOnce(() => ({
       hits: {
-        hits: [{ _source: wiredStream }, { _source: classicStream }, { _source: groupStream }],
-        total: { value: 3 },
+        hits: [{ _source: wiredStream }, { _source: classicStream }],
+        total: { value: 2 },
       },
     }));
 
     const currentState = await State.currentState(stateDependenciesMock);
 
-    expect(currentState.all().length).toEqual(3);
+    expect(currentState.all().length).toEqual(2);
     expect(currentState.get('wired_stream') instanceof WiredStream).toEqual(true);
     expect(currentState.get('classic_stream') instanceof ClassicStream).toEqual(true);
-    expect(currentState.get('group_stream') instanceof GroupStream).toEqual(true);
 
     const clonedState = currentState.clone();
     expect(clonedState.toPrintable()).toEqual(currentState.toPrintable());
@@ -97,7 +101,7 @@ describe('State', () => {
     searchMock.mockImplementationOnce(() => ({
       hits: {
         hits: [{ _source: { name: 'test_stream', unknown: {} } }],
-        total: { value: 3 },
+        total: { value: 1 },
       },
     }));
 
@@ -129,16 +133,7 @@ describe('State', () => {
           [
             {
               type: 'upsert',
-              definition: {
-                description: '',
-                name: 'whatever',
-                updated_at: new Date().toISOString(),
-                group: {
-                  metadata: {},
-                  tags: [],
-                  members: [],
-                },
-              },
+              definition: placeholderStreamDefinition,
             },
           ],
           stateDependenciesMock
@@ -164,16 +159,7 @@ describe('State', () => {
           [
             {
               type: 'upsert',
-              definition: {
-                description: '',
-                name: 'new_group_stream',
-                updated_at: new Date().toISOString(),
-                group: {
-                  metadata: {},
-                  tags: [],
-                  members: [],
-                },
-              },
+              definition: placeholderStreamDefinition,
             },
           ],
           stateDependenciesMock
@@ -199,16 +185,7 @@ describe('State', () => {
           [
             {
               type: 'upsert',
-              definition: {
-                name: 'stream_that_fails',
-                description: 'Something went wrong',
-                updated_at: new Date().toISOString(),
-                group: {
-                  metadata: {},
-                  tags: [],
-                  members: [],
-                },
-              },
+              definition: placeholderStreamDefinition,
             },
           ],
           stateDependenciesMock
@@ -318,16 +295,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
         cascadingChanges: [
           {
             type: 'upsert',
-            definition: {
-              name: 'and_another',
-              description: '',
-              updated_at: new Date().toISOString(),
-              group: {
-                metadata: {},
-                tags: [],
-                members: [],
-              },
-            },
+            definition: placeholderStreamDefinition,
           },
         ],
         changeStatus: 'unchanged',
