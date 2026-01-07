@@ -21,7 +21,8 @@
       "unifiedSearch",
       "developerExamples",
       "uiActions",
-      "kibanaReact"
+      "kibanaReact",
+      "presentationUtil"
     ]
   }
 }
