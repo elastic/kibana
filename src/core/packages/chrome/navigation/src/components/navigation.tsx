@@ -22,6 +22,7 @@ import {
   NAVIGATION_SELECTOR_PREFIX,
 } from '../constants';
 import { SideNav } from './side_nav';
+import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
@@ -58,6 +59,13 @@ export interface NavigationProps {
    */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
+   * Callback fired when the collapse button is toggled.
+   *
+   * The collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject
+   * that is persisted to localStorage. External consumers rely on this state.
+   */
+  onToggleCollapsed: (isCollapsed: boolean) => void;
+  /**
    * (optional) Content to display inside the side panel footer.
    */
   sidePanelFooter?: ReactNode;
@@ -73,6 +81,7 @@ export const Navigation = ({
   items,
   logo,
   onItemClick,
+  onToggleCollapsed,
   setWidth,
   sidePanelFooter,
   ...rest
@@ -102,6 +111,11 @@ export const Navigation = ({
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
+
+  // Create the collapse button if a toggle callback is provided
+  const collapseButton = onToggleCollapsed ? (
+    <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+  ) : null;
 
   return (
     <div
@@ -311,7 +325,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed}>
+        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {

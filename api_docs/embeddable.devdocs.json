@@ -2399,7 +2399,7 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>) => void"
+            "[] | undefined, id?: string | undefined) => object) | undefined>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -2444,7 +2444,7 @@
                   "section": "def-server.Reference",
                   "text": "Reference"
                 },
-                "[] | undefined) => object) | undefined>"
+                "[] | undefined, id?: string | undefined) => object) | undefined>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
               "deprecated": false,
@@ -2723,7 +2723,7 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>"
+            "[] | undefined, id?: string | undefined) => object) | undefined>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -3472,7 +3472,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, panelReferences?: ",
+          "{ transformOut?: ((storedState: StoredEmbeddableState, panelReferences?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -3488,7 +3488,7 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[] | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
+          "[] | undefined, id?: string | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

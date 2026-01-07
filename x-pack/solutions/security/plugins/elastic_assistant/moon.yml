@@ -104,7 +104,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/management-settings-ids'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/ai-assistant-common'
 tags:
   - plugin
