@@ -148,12 +148,6 @@
 # Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR", German "de-DE".
 #i18n.locale: "en"
 
-# =================== System: Airgapped Environment ===================
-# Set to true when running Kibana in an airgapped (network isolated) environment.
-# When enabled, plugins should disable features that require outbound network access.
-# Defaults to `false`.
-# airgapped: false
-
 # =================== Frequently used (Optional)===================
 
 # =================== Saved Objects: Migrations ===================
