@@ -696,11 +696,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         .map((obj) => `${obj.type}:${obj.id}`)
         .sort()
         .join(',');
-      const msg = `Unable to ${authzAction} ${targetTypes}${
+      // Enhanced error message: when access control restrictions apply, provide additional context
+      // explaining that this may be due to lacking the "manage_access_control" privilege or
+      // attempting to modify objects owned by another user (in "write_restricted" mode).
+      const accessControlHint =
         inaccessibleObjects.size > 0
-          ? ', access control restrictions for ' + inaccessibleObjectsString
-          : ''
-      }`;
+          ? `. Access control restrictions for objects: ${inaccessibleObjectsString}. ` +
+            `This may occur if you are trying to modify objects owned by another user, ` +
+            `or if you lack the "manage_access_control" privilege.`
+          : '';
+      const msg = `Unable to ${authzAction} ${targetTypes}${accessControlHint}`;
       // if we are bypassing all auditing, or bypassing failure auditing, do not log the event
       const error = this.errors.decorateForbiddenError(new Error(msg));
       if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
