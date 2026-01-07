@@ -7,6 +7,10 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
+  AgentBuilderEventTypes,
+  AgentBuilderTelemetryEventsMap,
+} from '@kbn/onechat-common/telemetry';
+import type {
   AlertsEventTypes,
   AlertsGroupingTelemetryEventsMap,
 } from './events/alerts_grouping/types';
@@ -66,6 +70,7 @@ export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
 export * from './events/preview_rule/types';
 export * from './events/notes/types';
+export * from '@kbn/onechat-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -102,6 +107,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? RuleUpgradeTelemetryEventsMap[T]
   : T extends AIValueReportEventTypes
   ? AIValueReportTelemetryEventsMap[T]
+  : T extends AgentBuilderEventTypes
+  ? AgentBuilderTelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
@@ -119,4 +126,5 @@ export type TelemetryEventTypes =
   | SiemMigrationsRuleEventTypes
   | SiemMigrationsDashboardEventTypes
   | RuleUpgradeEventTypes
-  | AIValueReportEventTypes;
+  | AIValueReportEventTypes
+  | AgentBuilderEventTypes;
