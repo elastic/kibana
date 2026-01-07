@@ -2583,7 +2583,7 @@
   dependencies:
     "@elastic/ecs-helpers" "^2.1.1"
 
-"@elastic/ecs@^9.2.0":
+"@elastic/ecs@9.2.0":
   version "9.2.0"
   resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.2.0.tgz#9b2b19b6c829192edcd79a1f0df348ccd633b3e6"
   integrity sha512-qYPncAQYJa+PgZT0S0JE2tvaPnxxGx7sUhICMmk9NGkJeeEko6GQ24XLKxaDLFxr4DuYVf/0EOaRX39OENqxwA==

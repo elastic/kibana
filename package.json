@@ -125,7 +125,7 @@
     "@elastic/charts": "71.1.2",
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "1.4.1",
-    "@elastic/ecs": "^9.2.0",
+    "@elastic/ecs": "9.2.0",
     "@elastic/elasticsearch": "9.1.1",
     "@elastic/ems-client": "8.6.3",
     "@elastic/eui": "111.0.0",
