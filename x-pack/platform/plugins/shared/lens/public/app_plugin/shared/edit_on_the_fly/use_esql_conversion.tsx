@@ -75,14 +75,20 @@ export const useEsqlConversion = (
         operationDefinitionMap[col.operationType]?.input === 'managedReference'
     );
 
-    const esqlLayer = getESQLForLayer(
-      esAggEntries,
-      singleLayer,
-      framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
-      coreStart.uiSettings,
-      framePublicAPI.dateRange,
-      startDependencies.data.nowProvider.get()
-    );
+    let esqlLayer;
+    try {
+      esqlLayer = getESQLForLayer(
+        esAggEntries,
+        singleLayer,
+        framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
+        coreStart.uiSettings,
+        framePublicAPI.dateRange,
+        startDependencies.data.nowProvider.get()
+      );
+    } catch (e) {
+      // Layer remains non-convertible
+      // This prevents conversion errors from breaking the visualization
+    }
 
     const convertibleLayer: ConvertibleLayer = {
       id: layerId,
