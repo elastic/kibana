@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+export class CancellationInProgressError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CancellationInProgressError';
+  }
+}
