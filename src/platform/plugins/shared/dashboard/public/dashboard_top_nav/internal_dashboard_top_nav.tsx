@@ -403,15 +403,27 @@ export function InternalDashboardTopNav({
           {...visibilityProps}
           query={query as Query | undefined}
           screenTitle={title}
+          useDefaultBehaviors={true}
           savedQueryId={savedQueryId}
           indexPatterns={allDataViews ?? []}
+          allowSavingQueries
           appName={DASHBOARD_APP_ID}
           onQuerySubmit={(_payload, isUpdate) => {
             if (isUpdate === false) {
               dashboardApi.forceRefresh();
             }
+            if (hasUnpublishedFilters) dashboardApi.publishFilters();
+            if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
+            if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
           }}
           onSavedQueryIdChange={setSavedQueryId}
+          hasDirtyState={
+            hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
+          }
+          useBackgroundSearchButton={
+            dataService.search.isBackgroundSearchEnabled &&
+            getDashboardCapabilities().storeSearchSession
+          }
         />
       )}
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
