@@ -69,8 +69,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   },
   context
 ) => {
-  const { logger, modelProvider, toolProvider, attachments, request, stateManager, events } =
-    context;
+  const {
+    logger,
+    modelProvider,
+    toolProvider,
+    attachments,
+    request,
+    stateManager,
+    events,
+    promptManager,
+  } = context;
 
   ensureValidInput({ input: nextInput, conversation });
 
@@ -182,6 +190,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      promptState: promptManager.dump(),
       pendingRound,
       startTime,
       modelProvider,

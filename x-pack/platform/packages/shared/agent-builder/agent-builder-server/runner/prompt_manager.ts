@@ -9,12 +9,14 @@ import type {
   ConfirmPromptDefinition,
   ConfirmationStatus,
   PromptResponseState,
+  PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerPromptReturn } from '../tools/handler';
 
 export interface PromptManager {
   set(promptId: string, response: PromptResponseState): void;
   get(promptId: string): PromptResponseState | undefined;
+  dump(): PromptStorageState;
   getConfirmationStatus(promptId: string): ConfirmationInfo;
   clear(): void;
   forTool(opts: {

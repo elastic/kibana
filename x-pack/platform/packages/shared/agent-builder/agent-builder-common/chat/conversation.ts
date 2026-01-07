@@ -13,7 +13,7 @@ import type {
   VersionedAttachment,
   AttachmentVersionRef,
 } from '../attachments';
-import { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
+import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
 import type { RoundState } from './round_state';
 
 /**
@@ -53,7 +53,7 @@ export interface ConverseInput {
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
-   * Response from the user to an prompt request.
+   * Response from the user to prompt requests.
    */
   prompts?: Record<string, PromptResponse>;
 }
@@ -250,7 +250,7 @@ export interface Conversation {
    * Internal representation of the prompt storage state for the conversation.
    * Keeps track of which prompts have been answered and the response.
    */
-  prompt_storage?: PromptStorageState;
+  prompt_state?: PromptStorageState;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

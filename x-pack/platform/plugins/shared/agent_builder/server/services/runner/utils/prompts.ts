@@ -33,6 +33,12 @@ export const createPromptManager = ({
     }
   }
 
+  const dump = (): PromptStorageState => {
+    return {
+      responses: Object.fromEntries(promptMap.entries()),
+    };
+  };
+
   const checkConfirmationStatus = (promptId: string): ConfirmationInfo => {
     const prompt = promptMap.get(promptId);
     if (!prompt) {
@@ -66,6 +72,7 @@ export const createPromptManager = ({
     clear: () => {
       promptMap.clear();
     },
+    dump,
     forTool: ({ toolId, toolCallId, toolParams }): ToolPromptManager => {
       return {
         checkConfirmationStatus,
@@ -84,7 +91,7 @@ export const getAgentPromptStorageState = ({
   input: ConverseInput;
   conversation?: Conversation;
 }): PromptStorageState => {
-  const state: PromptStorageState = conversation?.prompt_storage ?? {
+  const state: PromptStorageState = conversation?.prompt_state ?? {
     responses: {},
   };
 

@@ -40,6 +40,7 @@ import type {
   ModelProvider,
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
+import type { PromptStorageState } from '@kbn/agent-builder-common/agents';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
@@ -57,6 +58,7 @@ export const addRoundCompleteEvent = ({
   userInput,
   startTime,
   endTime,
+  promptState,
   modelProvider,
   stateManager,
 }: {
@@ -65,6 +67,7 @@ export const addRoundCompleteEvent = ({
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
+  promptState?: PromptStorageState;
   endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
@@ -98,6 +101,7 @@ export const addRoundCompleteEvent = ({
             data: {
               round,
               resumed: pendingRound !== undefined,
+              prompt_state: promptState,
             },
           };
 
