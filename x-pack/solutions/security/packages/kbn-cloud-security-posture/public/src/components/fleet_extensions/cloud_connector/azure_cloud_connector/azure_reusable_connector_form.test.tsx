@@ -230,4 +230,39 @@ describe('AzureReusableConnectorForm', () => {
       });
     });
   });
+
+  describe('packagePolicyId prop', () => {
+    it('renders form correctly with packagePolicyId', () => {
+      renderWithIntl(<AzureReusableConnectorForm {...defaultProps} packagePolicyId="policy-123" />);
+
+      // Verify form elements render correctly
+      expect(screen.getByText(/To streamline your Azure integration process/i)).toBeInTheDocument();
+      expect(screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ)).toBeInTheDocument();
+    });
+
+    it('renders form correctly without packagePolicyId', () => {
+      renderWithIntl(<AzureReusableConnectorForm {...defaultProps} />);
+
+      // Verify form elements render correctly without the prop
+      expect(screen.getByText(/To streamline your Azure integration process/i)).toBeInTheDocument();
+      expect(screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ)).toBeInTheDocument();
+    });
+
+    it('allows connector selection with packagePolicyId', async () => {
+      renderWithIntl(<AzureReusableConnectorForm {...defaultProps} packagePolicyId="policy-123" />);
+
+      const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
+      await userEvent.click(comboBox);
+
+      const connectorOption = await screen.findByText('Azure Connector 1');
+      await userEvent.click(connectorOption);
+
+      expect(mockSetCredentials).toHaveBeenCalledWith({
+        tenantId: 'tenant-123',
+        clientId: 'client-456',
+        azure_credentials_cloud_connector_id: 'azure-cc-789',
+        cloudConnectorId: 'connector-1',
+      });
+    });
+  });
 });

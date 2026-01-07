@@ -281,7 +281,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                 closePopover();
                 handleOpenSwitchModal(item);
               }}
-              data-test-subj="switchConnectorMenuItem"
+              data-test-subj={
+                CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+              }
             >
               {i18n.translate(
                 'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.switchConnectorAction',
@@ -297,7 +299,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                 closePopover();
                 handleNavigateToPolicy(item.id);
               }}
-              data-test-subj="viewPolicyMenuItem"
+              data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.VIEW_POLICY_MENU_ITEM}
             >
               {i18n.translate(
                 'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.viewPolicyAction',
@@ -322,7 +324,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                       defaultMessage: 'Actions',
                     }
                   )}
-                  data-test-subj="policyActionsButton"
+                  data-test-subj={
+                    CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+                  }
                 />
               }
               isOpen={isOpen}

@@ -24,6 +24,14 @@ jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_cloud_connector_usage');
 jest.mock('../hooks/use_update_cloud_connector');
 
+// Mock SwitchConnectorModal component
+const mockSwitchConnectorModal = jest.fn((_props: unknown) => (
+  <div data-test-subj="switch-connector-modal-mock" />
+));
+jest.mock('./switch_connector_modal', () => ({
+  SwitchConnectorModal: (props: unknown) => mockSwitchConnectorModal(props),
+}));
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction<
   typeof useCloudConnectorUsage
@@ -95,6 +103,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     mockOnClose.mockClear();
     mockNavigateToApp.mockClear();
+    mockSwitchConnectorModal.mockClear();
   });
 
   afterEach(() => {
@@ -504,6 +513,209 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-default/);
+    });
+  });
+
+  describe('Actions column', () => {
+    it('should render actions button for each policy row', async () => {
+      renderFlyout();
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE)
+        ).toBeInTheDocument();
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON)
+      ).toBeInTheDocument();
+    });
+
+    it('should open popover menu when clicking actions button', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const actionsButton = await screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(
+            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+          )
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.VIEW_POLICY_MENU_ITEM)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should display Switch Connector menu item', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const actionsButton = await screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Switch Connector')).toBeInTheDocument();
+      });
+    });
+
+    it('should display View Policy menu item', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const actionsButton = await screen.findByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('View Policy')).toBeInTheDocument();
+      });
+    });
+
+    it('should navigate to policy when clicking View Policy menu item', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const actionsButton = await screen.findByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.VIEW_POLICY_MENU_ITEM)
+        ).toBeInTheDocument();
+      });
+
+      await user.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.VIEW_POLICY_MENU_ITEM)
+      );
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', {
+        path: '/edit-integration/policy-1',
+      });
+    });
+  });
+
+  describe('Switch Connector Modal', () => {
+    it('should open switch connector modal when clicking Switch Connector menu item', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const actionsButton = await screen.findByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(
+            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+          )
+        ).toBeInTheDocument();
+      });
+
+      const switchMenuItem = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+      );
+      await user.click(switchMenuItem);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('switch-connector-modal-mock')).toBeInTheDocument();
+      });
+    });
+
+    it('should pass correct props to SwitchConnectorModal', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const actionsButton = await screen.findByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(
+            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+          )
+        ).toBeInTheDocument();
+      });
+
+      const switchMenuItem = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+      );
+      await user.click(switchMenuItem);
+
+      await waitFor(() => {
+        expect(mockSwitchConnectorModal).toHaveBeenCalledWith(
+          expect.objectContaining({
+            packagePolicyId: 'policy-1',
+            packagePolicyName: 'Test Policy 1',
+            currentCloudConnectorId: 'connector-123',
+            currentCloudConnectorName: 'Test Connector',
+            provider: 'aws',
+            accountType: SINGLE_ACCOUNT,
+          })
+        );
+      });
+    });
+
+    it('should not render switch modal initially', () => {
+      renderFlyout();
+
+      expect(screen.queryByTestId('switch-connector-modal-mock')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('onPolicyCloudConnectorSwitched callback', () => {
+    it('should accept onPolicyCloudConnectorSwitched prop', () => {
+      const mockCallback = jest.fn();
+
+      expect(() => {
+        renderFlyout({ onPolicyCloudConnectorSwitched: mockCallback });
+      }).not.toThrow();
+    });
+
+    it('should pass onSuccess handler to SwitchConnectorModal', async () => {
+      const user = userEvent.setup();
+      const mockCallback = jest.fn();
+      renderFlyout({ onPolicyCloudConnectorSwitched: mockCallback });
+
+      const actionsButton = await screen.findByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_ACTIONS_BUTTON
+      );
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(
+            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+          )
+        ).toBeInTheDocument();
+      });
+
+      const switchMenuItem = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SWITCH_CONNECTOR_MENU_ITEM
+      );
+      await user.click(switchMenuItem);
+
+      await waitFor(() => {
+        expect(mockSwitchConnectorModal).toHaveBeenCalledWith(
+          expect.objectContaining({
+            onSuccess: expect.any(Function),
+            onClose: expect.any(Function),
+          })
+        );
+      });
     });
   });
 });

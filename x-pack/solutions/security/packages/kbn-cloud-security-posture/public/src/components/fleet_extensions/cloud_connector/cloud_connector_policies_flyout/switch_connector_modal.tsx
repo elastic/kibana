@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common/test_subjects';
 import type { AccountType } from '@kbn/fleet-plugin/common/types';
 import type { CloudProviders, CloudConnectorCredentials } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
@@ -94,9 +95,17 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
   }, [packagePolicyId, selectedCredentials.cloudConnectorId, updatePackagePolicy]);
 
   return (
-    <EuiModal onClose={onClose} style={{ maxWidth: 600 }} aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={onClose}
+      style={{ maxWidth: 600 }}
+      aria-labelledby={modalTitleId}
+      data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.MODAL}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
+        <EuiModalHeaderTitle
+          id={modalTitleId}
+          data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.TITLE}
+        >
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.title"
             defaultMessage="Switch Cloud Connector"
@@ -105,31 +114,39 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.policyName"
-              defaultMessage="Integration: {policyName}"
-              values={{ policyName: <strong>{packagePolicyName}</strong> }}
-            />
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <strong>
+              <FormattedMessage
+                id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.policyName"
+                defaultMessage="Integration:"
+              />
+            </strong>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.POLICY_NAME}>
+              {packagePolicyName}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
                 <FormattedMessage
                   id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.currentConnector"
-                  defaultMessage="Current:"
+                  defaultMessage="Current Cloud Connector:"
                 />
               </strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{currentCloudConnectorName}</EuiText>
+            <EuiText
+              size="s"
+              data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.CURRENT_CONNECTOR_NAME}
+            >
+              {currentCloudConnectorName}
+            </EuiText>
           </EuiFlexItem>
           {accountType && (
             <EuiFlexItem grow={false}>
@@ -150,6 +167,7 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
           color="warning"
           iconType="warning"
           size="s"
+          data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.WARNING_CALLOUT}
         >
           <p>
             <FormattedMessage
@@ -181,6 +199,7 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
             )}
             color="danger"
             iconType="error"
+            data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.NO_CONNECTORS_CALLOUT}
           >
             <p>
               <FormattedMessage
@@ -197,7 +216,11 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} disabled={isLoading}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          disabled={isLoading}
+          data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.CANCEL_BUTTON}
+        >
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.cancelButton"
             defaultMessage="Cancel"
@@ -208,6 +231,7 @@ export const SwitchConnectorModal: React.FC<SwitchConnectorModalProps> = ({
           fill
           disabled={!canSwitch || isLoading || !hasCompatibleConnectors}
           isLoading={isLoading}
+          data-test-subj={SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.SWITCH_BUTTON}
         >
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.switchConnectorModal.switchButton"

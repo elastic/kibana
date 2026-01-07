@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SwitchConnectorModal } from './switch_connector_modal';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
@@ -15,6 +16,7 @@ import { useUpdatePackagePolicyCloudConnector } from '../hooks/use_update_packag
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common/constants';
 import type { AccountType } from '@kbn/fleet-plugin/common/types';
 import type { CloudConnectorCredentials } from '../types';
+import { SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common/test_subjects';
 
 // Mock the hooks
 jest.mock('../hooks/use_get_cloud_connectors');
@@ -28,6 +30,7 @@ jest.mock('../form/cloud_connector_selector', () => ({
     <div data-test-subj="cloud-connector-selector">
       <button
         type="button"
+        data-test-subj="cloud-connector-selector-button"
         onClick={() =>
           setCredentials({
             cloudConnectorId: 'new-connector-id',
@@ -106,7 +109,9 @@ describe('SwitchConnectorModal', () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </I18nProvider>
   );
 
   beforeEach(() => {
@@ -125,22 +130,59 @@ describe('SwitchConnectorModal', () => {
   it('renders modal with correct title and current connector info', () => {
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    expect(screen.getByText('Switch Cloud Connector')).toBeInTheDocument();
-    expect(screen.getByText('Test Policy')).toBeInTheDocument();
-    expect(screen.getByText('Current Connector')).toBeInTheDocument();
+    expect(screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.TITLE)).toBeInTheDocument();
+    expect(screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.POLICY_NAME)).toHaveTextContent(
+      'Test Policy'
+    );
+    expect(
+      screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.CURRENT_CONNECTOR_NAME)
+    ).toHaveTextContent('Current Connector');
   });
 
-  it('filters connectors by provider and account type, excluding current connector', () => {
+  it('shows selector when compatible connectors exist (same provider, account type, excluding current)', () => {
+    // Mock data has: current-connector-id (aws, SINGLE_ACCOUNT) and new-connector-id (aws, SINGLE_ACCOUNT)
+    // After filtering out current connector, new-connector-id should remain
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    // Should render the CloudConnectorSelector with filtered connectors
+    // Selector should be shown because there's at least one compatible connector
     expect(screen.getByTestId('cloud-connector-selector')).toBeInTheDocument();
+    // No connectors callout should NOT be shown
+    expect(
+      screen.queryByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.NO_CONNECTORS_CALLOUT)
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no connectors callout when only connectors with different account type exist', () => {
+    // Only provide connectors with different account type than what we're looking for
+    mockUseGetCloudConnectors.mockReturnValue({
+      data: [
+        {
+          id: 'org-connector',
+          name: 'Org Connector',
+          cloudProvider: 'aws',
+          accountType: ORGANIZATION_ACCOUNT, // Different from SINGLE_ACCOUNT in defaultProps
+          vars: {},
+          packagePolicyCount: 0,
+          created_at: '2023-01-01',
+          updated_at: '2023-01-01',
+        },
+      ],
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useGetCloudConnectors>);
+
+    render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
+
+    // No connectors callout should be shown because no compatible connectors exist
+    expect(
+      screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.NO_CONNECTORS_CALLOUT)
+    ).toBeInTheDocument();
   });
 
   it('disables switch button when no connector is selected', () => {
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    const switchButton = screen.getByText('Switch Connector');
+    const switchButton = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.SWITCH_BUTTON);
     expect(switchButton).toBeDisabled();
   });
 
@@ -148,11 +190,11 @@ describe('SwitchConnectorModal', () => {
     const user = userEvent.setup();
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    const selectButton = screen.getByText('Select Connector');
+    const selectButton = screen.getByTestId('cloud-connector-selector-button');
     await user.click(selectButton);
 
     await waitFor(() => {
-      const switchButton = screen.getByText('Switch Connector');
+      const switchButton = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.SWITCH_BUTTON);
       expect(switchButton).not.toBeDisabled();
     });
   });
@@ -161,12 +203,10 @@ describe('SwitchConnectorModal', () => {
     const user = userEvent.setup();
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    // Select a connector
-    const selectButton = screen.getByText('Select Connector');
+    const selectButton = screen.getByTestId('cloud-connector-selector-button');
     await user.click(selectButton);
 
-    // Click switch button
-    const switchButton = screen.getByText('Switch Connector');
+    const switchButton = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.SWITCH_BUTTON);
     await user.click(switchButton);
 
     expect(mockMutate).toHaveBeenCalledWith({
@@ -178,10 +218,12 @@ describe('SwitchConnectorModal', () => {
   it('shows warning callout about switching impact', () => {
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    expect(screen.getByText('Switching cloud connectors')).toBeInTheDocument();
-    expect(
-      screen.getByText(/This will change the cloud credentials used by this integration/)
-    ).toBeInTheDocument();
+    const warningCallout = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.WARNING_CALLOUT);
+    expect(warningCallout).toBeInTheDocument();
+    expect(warningCallout).toHaveTextContent('Switching cloud connectors');
+    expect(warningCallout).toHaveTextContent(
+      'This will change the cloud credentials used by this integration'
+    );
   });
 
   it('shows error message when no compatible connectors are available', () => {
@@ -193,8 +235,12 @@ describe('SwitchConnectorModal', () => {
 
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    expect(screen.getByText('No compatible connectors available')).toBeInTheDocument();
-    expect(screen.getByText(/There are no other cloud connectors/)).toBeInTheDocument();
+    const noConnectorsCallout = screen.getByTestId(
+      SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.NO_CONNECTORS_CALLOUT
+    );
+    expect(noConnectorsCallout).toBeInTheDocument();
+    expect(noConnectorsCallout).toHaveTextContent('No compatible connectors available');
+    expect(noConnectorsCallout).toHaveTextContent('There are no other cloud connectors');
   });
 
   it('disables switch button when no compatible connectors exist', () => {
@@ -206,7 +252,7 @@ describe('SwitchConnectorModal', () => {
 
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    const switchButton = screen.getByText('Switch Connector');
+    const switchButton = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.SWITCH_BUTTON);
     expect(switchButton).toBeDisabled();
   });
 
@@ -218,15 +264,15 @@ describe('SwitchConnectorModal', () => {
 
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    const switchButton = screen.getByText('Switch Connector');
-    expect(switchButton.closest('button')).toHaveAttribute('disabled');
+    const switchButton = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.SWITCH_BUTTON);
+    expect(switchButton).toBeDisabled();
   });
 
   it('calls onClose when cancel button is clicked', async () => {
     const user = userEvent.setup();
     render(<SwitchConnectorModal {...defaultProps} />, { wrapper });
 
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByTestId(SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS.CANCEL_BUTTON);
     await user.click(cancelButton);
 
     expect(mockOnClose).toHaveBeenCalled();

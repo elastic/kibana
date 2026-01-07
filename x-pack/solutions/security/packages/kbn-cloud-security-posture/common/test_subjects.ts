@@ -98,4 +98,18 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   POLICY_LINK: 'cloudConnectorPolicyLink',
   EMPTY_STATE: 'cloudConnectorPoliciesEmptyState',
   ERROR_STATE: 'cloudConnectorPoliciesErrorState',
+  POLICY_ACTIONS_BUTTON: 'policyActionsButton',
+  SWITCH_CONNECTOR_MENU_ITEM: 'switchConnectorMenuItem',
+  VIEW_POLICY_MENU_ITEM: 'viewPolicyMenuItem',
+};
+
+export const SWITCH_CONNECTOR_MODAL_TEST_SUBJECTS = {
+  MODAL: 'switchConnectorModal',
+  TITLE: 'switchConnectorModalTitle',
+  POLICY_NAME: 'switchConnectorModalPolicyName',
+  CURRENT_CONNECTOR_NAME: 'switchConnectorModalCurrentConnectorName',
+  WARNING_CALLOUT: 'switchConnectorModalWarningCallout',
+  NO_CONNECTORS_CALLOUT: 'switchConnectorModalNoConnectorsCallout',
+  CANCEL_BUTTON: 'switchConnectorModalCancelButton',
+  SWITCH_BUTTON: 'switchConnectorModalSwitchButton',
 };

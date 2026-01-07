@@ -22,6 +22,20 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
 
+// Capture the onPolicyCloudConnectorSwitched callback from the flyout
+let capturedOnPolicyCloudConnectorSwitched:
+  | ((policyId: string, connectorId: string) => void)
+  | undefined;
+
+jest.mock('../cloud_connector_policies_flyout', () => ({
+  CloudConnectorPoliciesFlyout: (props: {
+    onPolicyCloudConnectorSwitched?: (policyId: string, connectorId: string) => void;
+  }) => {
+    capturedOnPolicyCloudConnectorSwitched = props.onPolicyCloudConnectorSwitched;
+    return <div data-test-subj="cloudConnectorPoliciesFlyout" />;
+  },
+}));
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
   typeof useGetCloudConnectors
@@ -287,6 +301,121 @@ describe('CloudConnectorSelector', () => {
       await waitFor(() => {
         expect(screen.getByText('Used by 0 integrations')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('packagePolicyId prop', () => {
+    it('should render selector with packagePolicyId', () => {
+      renderSelector({
+        packagePolicyId: 'policy-123',
+      });
+
+      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+      expect(screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ)).toBeInTheDocument();
+    });
+
+    it('should work without packagePolicyId prop', () => {
+      renderSelector({
+        packagePolicyId: undefined,
+      });
+
+      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+    });
+  });
+
+  describe('handlePolicyCloudConnectorSwitched callback', () => {
+    beforeEach(() => {
+      capturedOnPolicyCloudConnectorSwitched = undefined;
+    });
+
+    it('should call setCredentials when switched policy matches current packagePolicyId', async () => {
+      const user = userEvent.setup();
+      renderSelector({
+        cloudConnectorId: 'connector-1',
+        packagePolicyId: 'policy-123',
+      });
+
+      // Open flyout to capture the callback
+      const editIcon = screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'));
+      await user.click(editIcon);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('cloudConnectorPoliciesFlyout')).toBeInTheDocument();
+      });
+
+      // Invoke the captured callback with matching policy ID and a connector that exists
+      expect(capturedOnPolicyCloudConnectorSwitched).toBeDefined();
+      capturedOnPolicyCloudConnectorSwitched!('policy-123', 'connector-2');
+
+      // setCredentials should be called with the new connector's credentials
+      expect(mockSetCredentials).toHaveBeenCalledWith({
+        cloudConnectorId: 'connector-2',
+        roleArn: 'arn:aws:iam::123456789012:role/Role2',
+        externalId: 'external-id-2',
+      });
+    });
+
+    it('should not call setCredentials when switched policy does not match current packagePolicyId', async () => {
+      const user = userEvent.setup();
+      renderSelector({
+        cloudConnectorId: 'connector-1',
+        packagePolicyId: 'policy-123',
+      });
+
+      const editIcon = screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'));
+      await user.click(editIcon);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('cloudConnectorPoliciesFlyout')).toBeInTheDocument();
+      });
+
+      // Invoke callback with a different policy ID
+      capturedOnPolicyCloudConnectorSwitched!('different-policy-456', 'connector-2');
+
+      // setCredentials should NOT be called because policy IDs don't match
+      expect(mockSetCredentials).not.toHaveBeenCalled();
+    });
+
+    it('should not call setCredentials when packagePolicyId is undefined', async () => {
+      const user = userEvent.setup();
+      renderSelector({
+        cloudConnectorId: 'connector-1',
+        packagePolicyId: undefined,
+      });
+
+      const editIcon = screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'));
+      await user.click(editIcon);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('cloudConnectorPoliciesFlyout')).toBeInTheDocument();
+      });
+
+      // Invoke callback - should be ignored when packagePolicyId is undefined
+      capturedOnPolicyCloudConnectorSwitched!('any-policy', 'connector-2');
+
+      // setCredentials should NOT be called
+      expect(mockSetCredentials).not.toHaveBeenCalled();
+    });
+
+    it('should not call setCredentials when new connector does not exist in loaded list', async () => {
+      const user = userEvent.setup();
+      renderSelector({
+        cloudConnectorId: 'connector-1',
+        packagePolicyId: 'policy-123',
+      });
+
+      const editIcon = screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'));
+      await user.click(editIcon);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('cloudConnectorPoliciesFlyout')).toBeInTheDocument();
+      });
+
+      // Invoke callback with a connector ID that doesn't exist in mockCloudConnectors
+      capturedOnPolicyCloudConnectorSwitched!('policy-123', 'non-existent-connector');
+
+      // setCredentials should NOT be called because connector doesn't exist
+      expect(mockSetCredentials).not.toHaveBeenCalled();
     });
   });
 });
