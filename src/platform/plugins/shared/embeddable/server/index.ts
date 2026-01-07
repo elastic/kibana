@@ -8,6 +8,7 @@
  */
 
 export type { EmbeddableSetup, EmbeddableStart } from './types';
+export type { EmbeddableStateWithType } from './bwc/persistable_state';
 export type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
 export const plugin = async () => {
