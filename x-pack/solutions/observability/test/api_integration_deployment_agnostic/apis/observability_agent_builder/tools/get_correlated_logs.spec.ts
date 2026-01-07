@@ -7,15 +7,33 @@
 
 import expect from '@kbn/expect';
 import { times } from 'lodash';
-import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type LogsSynthtraceEsClient,
+  generateCorrelatedLogsData,
+  type CorrelatedLogEvent,
+} from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { GetCorrelatedLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_correlated_logs/types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticLogsWithErrorsAndCorrelationIds } from '../utils/synthtrace_scenarios/create_synthetic_logs_with_errors_and_correlation_ids';
+
+async function indexCorrelatedLogs({
+  logsEsClient,
+  logs,
+}: {
+  logsEsClient: LogsSynthtraceEsClient;
+  logs: CorrelatedLogEvent[];
+}): Promise<void> {
+  await logsEsClient.clean();
+  const range = timerange('now-5m', 'now');
+  const { client, generator } = generateCorrelatedLogsData({ range, logsEsClient, logs });
+  await client.index(generator);
+}
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -24,6 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
+      logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
     });
 
     after(async () => {
@@ -34,9 +53,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with single error and `trace.id` as correlation ID', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'info',
@@ -69,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'trace.id': 'trace-123',
             },
           ],
-        }));
+        });
       });
 
       it('returns one log group with all logs', async () => {
@@ -135,16 +153,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'request.id': 'req-456',
         };
 
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             { level: 'info', message: 'Request started', ...sharedLogAttributes },
             { level: 'error', message: 'Database connection failed', ...sharedLogAttributes },
             { level: 'error', message: 'Rollback failed', ...sharedLogAttributes },
             { level: 'warn', message: 'Request aborted', ...sharedLogAttributes },
           ],
-        }));
+        });
       });
 
       it('creates only one group for multiple errors with same correlation ID', async () => {
@@ -183,9 +200,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with multiple errors having different correlation IDs', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'info',
@@ -213,7 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'transaction.id': 'txn-refund',
             },
           ],
-        }));
+        });
       });
 
       it('creates separate sequences for errors with different correlation IDs', async () => {
@@ -268,9 +284,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with errors lacking correlation IDs', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'info',
@@ -283,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'service.name': 'no-correlation-service',
             },
           ],
-        }));
+        });
       });
 
       it('returns empty results when errors have no correlation IDs', async () => {
@@ -304,9 +319,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with KQL filtering', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'error',
@@ -322,7 +336,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'trace.id': 'trace-b',
             },
           ],
-        }));
+        });
       });
 
       it('filters logs by service name', async () => {
@@ -343,9 +357,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with alternative error severity formats', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'info',
@@ -392,7 +405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'http.response.status_code': 500,
             },
           ],
-        }));
+        });
       });
 
       [
@@ -426,14 +439,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             { level: 'info', message: 'Request with multiple IDs started', ...shared },
             { level: 'error', message: 'Error with multiple correlation IDs', ...shared },
           ],
-        }));
+        });
       });
 
       it('uses trace.id when multiple correlation IDs are present (priority order)', async () => {
@@ -466,9 +478,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with additional log severity levels (SEVERE, WARNING, WARN)', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'severe',
@@ -489,7 +500,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'transaction.id': 'app-txn',
             },
           ],
-        }));
+        });
       });
 
       [
@@ -516,9 +527,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with additional correlation identifiers', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             // session.id
             {
@@ -594,7 +604,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'service.name': 'no-corr-id-service',
             },
           ],
-        }));
+        });
       });
 
       [
@@ -651,9 +661,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let targetIndex: string;
 
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'info',
@@ -668,7 +677,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'trace.id': 'trace-id-target',
             },
           ],
-        }));
+        });
 
         const es = getService('es');
         const result = await es.search({
@@ -704,9 +713,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with logSourceFields parameter', () => {
       before(async () => {
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
-
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
               level: 'info',
@@ -721,7 +729,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'trace.id': 'trace-fields',
             },
           ],
-        }));
+        });
       });
 
       it('returns only specified fields', async () => {
@@ -762,10 +770,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'trace.id': `trace-limit-${i}`,
           }));
 
-          ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-            getService,
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
             logs,
-          }));
+          });
         });
 
         it('limits the number of returned sequences', async () => {
@@ -806,10 +814,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           ];
 
-          ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-            getService,
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
             logs,
-          }));
+          });
         });
 
         it('limits the number of logs per sequence', async () => {
@@ -852,10 +860,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ];
 
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
-          getService,
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
           logs,
-        }));
+        });
       });
 
       it('returns two sequences (a single long sequence should not cause starvation)', async () => {
