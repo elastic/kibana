@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { createRuleExecutorTaskRunner } from './task_runner';
-import type { AlertingResourcesService } from './alerting_resources_service';
+import type { AlertingResourcesService } from '../lib/services/alerting_resources_service';
 
 export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting:esql' as const;
 

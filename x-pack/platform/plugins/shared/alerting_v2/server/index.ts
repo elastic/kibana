@@ -18,7 +18,7 @@ import { registerFeaturePrivileges } from './lib/security/privileges';
 import { CreateRuleRoute } from './routes/create_rule_route';
 import { UpdateRuleRoute } from './routes/update_rule_route';
 import { initializeRuleExecutorTaskDefinition } from './rule_executor';
-import { AlertingResourcesService } from './rule_executor/alerting_resources_service';
+import { AlertingResourcesService } from './lib/services/alerting_resources_service';
 import { registerSavedObjects } from './saved_objects';
 import type { AlertingServerStartDependencies } from './types';
 

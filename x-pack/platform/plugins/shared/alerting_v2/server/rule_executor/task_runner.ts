@@ -18,7 +18,7 @@ import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
 import { ALERT_EVENTS_INDEX } from './constants';
 import { writeEsqlAlerts } from './write_alerts';
-import type { AlertingResourcesService } from './alerting_resources_service';
+import type { AlertingResourcesService } from '../lib/services/alerting_resources_service';
 
 export function createRuleExecutorTaskRunner({
   logger,
