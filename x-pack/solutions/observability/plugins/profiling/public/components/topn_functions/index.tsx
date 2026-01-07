@@ -24,7 +24,6 @@ import type { TopNFunctions } from '@kbn/profiling-utils';
 import { TopNFunctionSortField, getCalleeFunction } from '@kbn/profiling-utils';
 import { last, orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import type { GridOnScrollProps } from 'react-window';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
@@ -43,7 +42,7 @@ interface Props {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   onFrameClick?: (functionName: string) => void;
-  onScroll?: (scroll: GridOnScrollProps) => void;
+  onScroll?: (scroll: { scrollLeft: number; scrollTop: number }) => void;
   showDiffColumn?: boolean;
   pageIndex: number;
   onChangePage: (nextPage: number) => void;

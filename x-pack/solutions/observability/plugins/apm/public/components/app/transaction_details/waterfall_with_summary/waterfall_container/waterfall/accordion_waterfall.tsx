@@ -17,7 +17,7 @@ import {
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
-import { List, type RowComponentProps } from 'react-window';
+import { List, type RowComponentProps, type ListImperativeAPI } from 'react-window';
 import { css } from '@emotion/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
@@ -81,7 +81,7 @@ export function AccordionWaterfall({
 }
 
 function Waterfall(props: WaterfallProps) {
-  const listRef = useRef<List>(null);
+  const listRef = useRef<ListImperativeAPI>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
   const visibleTraceList = props.displayLimit ? traceList.slice(0, props.displayLimit) : traceList;
@@ -96,7 +96,7 @@ function Waterfall(props: WaterfallProps) {
   };
 
   const onScroll = ({ scrollTop }: { scrollTop: number }) => {
-    listRef.current?.scrollTo(scrollTop);
+    listRef.current?.element?.scrollTo({ top: scrollTop });
   };
 
   return (

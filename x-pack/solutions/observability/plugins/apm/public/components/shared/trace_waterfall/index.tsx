@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
-import { List, type RowComponentProps } from 'react-window';
+import { List, type RowComponentProps, type ListImperativeAPI } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
@@ -176,7 +176,7 @@ function TraceTree() {
     toggleAccordionState,
   } = useTraceWaterfallContext();
 
-  const listRef = useRef<List>(null);
+  const listRef = useRef<ListImperativeAPI>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
 
   const onRowLoad = (index: number, size: number) => {
@@ -188,7 +188,7 @@ function TraceTree() {
   };
 
   const onScroll = ({ scrollTop }: { scrollTop: number }) => {
-    listRef.current?.scrollTo(scrollTop);
+    listRef.current?.element?.scrollTo({ top: scrollTop });
   };
 
   const visibleList = useMemo(
