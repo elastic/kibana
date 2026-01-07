@@ -190,18 +190,18 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       render: (type: string) => <EuiText size="s">{type}</EuiText>,
     },
     {
-      field: 'workflowIds',
+      field: 'workflows',
       name: i18n.translate('xpack.dataConnectors.activeSources.workflowsColumn', {
         defaultMessage: 'Workflows',
       }),
-      render: (workflowIds: string[]) => <EuiText size="s">{workflowIds.length}</EuiText>,
+      render: (workflows: string[]) => <EuiText size="s">{workflows.length}</EuiText>,
     },
     {
-      field: 'toolIds',
+      field: 'agentTools',
       name: i18n.translate('xpack.dataConnectors.activeSources.toolsColumn', {
         defaultMessage: 'Tools',
       }),
-      render: (toolIds: string[]) => <EuiText size="s">{toolIds.length}</EuiText>,
+      render: (agentTools: string[]) => <EuiText size="s">{agentTools.length}</EuiText>,
     },
     {
       field: 'usedBy',
