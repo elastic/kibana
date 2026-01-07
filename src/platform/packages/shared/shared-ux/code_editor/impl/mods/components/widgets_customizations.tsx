@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  type FC,
-  useEffect,
-  useCallback,
-  useRef,
-  useState,
-  type PropsWithChildren,
-} from 'react';
+import React, { type FC, useEffect, useCallback, useRef, type PropsWithChildren } from 'react';
 import type { monaco } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
-import { type CSSObject, Global, type GlobalProps } from '@emotion/react';
 
 const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
 const parameterHintsWidgetModifierClassName = 'kibanaCodeEditor__parameterHintsWidgetModifier';
@@ -33,9 +25,6 @@ export const EditorWidgetsCustomizations: FC<
   }>
 > = ({ children, editor, enableSuggestWidgetRepositioning }) => {
   const { euiTheme } = useEuiTheme();
-  const [globalStyleModifierClassNamesRecord, setGlobalStyleModifierClassNamesRecord] = useState<
-    Extract<GlobalProps['styles'], CSSObject>
-  >({});
   const headerOffset = useRef(
     'var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))'
   );
@@ -52,36 +41,37 @@ export const EditorWidgetsCustomizations: FC<
     ) => {
       // @ts-expect-error -- The "onDidShow" and "onDidHide" is not documented so we guard from possible changes in the underlying lib
       if (widget && widget.onDidShow && widget.onDidHide && enableSuggestWidgetRepositioning) {
-        let $widgetNode: HTMLElement | null = null;
+        const $widgetNode = domNodeGetter(widget);
 
-        // Add the modifier className to the global style modifier class names record
-        setGlobalStyleModifierClassNamesRecord((prevStyles) => ({
-          ...prevStyles,
-          [`.${modifierClassName}`]: {
-            visibility: 'hidden !important',
-          } as unknown as CSSObject,
-        }));
+        if (!$widgetNode) {
+          return;
+        }
 
-        // add the just declared modifier className on the widget to hide the widget by default
-        // so we might be able to correctly position the widget,
-        // then make it visible
-        ($widgetNode = domNodeGetter(widget))?.classList?.add(modifierClassName);
+        // Apply inline styles SYNCHRONOUSLY to hide widget before it appears
+        // This prevents flashing at incorrect position during initial render
+        $widgetNode.style.setProperty('visibility', 'hidden', 'important');
+        $widgetNode.classList.add(modifierClassName);
 
         let originalTopPosition: string | null = null;
 
         // @ts-expect-error -- "onDidShow" is defined at this point
         widget.onDidShow(() => {
           if ($widgetNode) {
+            // Save original position
             originalTopPosition = $widgetNode.style.top;
+            // Apply repositioned top to avoid header overlap
             $widgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset.current} + ${euiTheme.size.m}))`;
-            $widgetNode.classList.remove(modifierClassName);
+            // Make visible AFTER positioning is complete
+            $widgetNode.style.removeProperty('visibility');
           }
         });
 
         // @ts-expect-error -- "onDidHide" is defined at this point
         widget.onDidHide(() => {
           if ($widgetNode) {
-            $widgetNode.classList.add(modifierClassName);
+            // Hide widget again
+            $widgetNode.style.setProperty('visibility', 'hidden', 'important');
+            // Restore original position
             $widgetNode.style.top = originalTopPosition ?? '';
           }
         });
@@ -99,18 +89,16 @@ export const EditorWidgetsCustomizations: FC<
       ?.value;
     const $parameterHintsWidget = parameterHintsWidget?.getDomNode();
 
-    if (parameterHintsWidget) {
-      // Add the modifier className to the global style modifier class names record
-      setGlobalStyleModifierClassNamesRecord((prevStyles) => ({
-        ...prevStyles,
-        [`.${parameterHintsWidgetModifierClassName}`]: {
-          zIndex: `${euiTheme.levels.header} !important`,
-        } as unknown as CSSObject,
-      }));
+    if ($parameterHintsWidget) {
+      // Apply z-index directly via inline style for proper stacking context
+      ($parameterHintsWidget as HTMLElement).style.setProperty(
+        'z-index',
+        `${euiTheme.levels.header}`,
+        'important'
+      );
 
-      (
-        $parameterHintsWidget as ReturnType<monaco.editor.IContentWidget['getDomNode']>
-      ).classList.add(parameterHintsWidgetModifierClassName);
+      // Add className for identification
+      ($parameterHintsWidget as HTMLElement).classList.add(parameterHintsWidgetModifierClassName);
     }
   }, [editor, euiTheme.levels.header]);
 
@@ -128,10 +116,5 @@ export const EditorWidgetsCustomizations: FC<
     customizeParameterHintsWidget();
   }, [editor, registerRepositionHandlers, customizeParameterHintsWidget]);
 
-  return (
-    <React.Fragment>
-      <Global styles={globalStyleModifierClassNamesRecord} />
-      <React.Fragment key="children">{children}</React.Fragment>
-    </React.Fragment>
-  );
+  return <React.Fragment>{children}</React.Fragment>;
 };
