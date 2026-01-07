@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas",
+    "@kbn/i18n",
+    "@kbn/ui-actions-plugin",
+    "@kbn/controls-renderer",
+    "@kbn/data-views-plugin",
+    "@kbn/esql-types",
+    "@kbn/presentation-publishing",
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/std",
+    "@kbn/embeddable-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/presentation-containers",
+    "@kbn/kibana-react-plugin"
+  ]
+}

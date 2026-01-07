@@ -11,6 +11,7 @@ import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 
 const mockFlyoutRef = {
@@ -37,16 +38,9 @@ const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
   );
 };
 
-const mockAgentBuilderService: AgentBuilderPluginStart = {
-  openConversationFlyout:
-    mockOpenConversationFlyout as AgentBuilderPluginStart['openConversationFlyout'],
-  toggleConversationFlyout: jest.fn(),
-  agents: {} as AgentBuilderPluginStart['agents'],
-  tools: {} as AgentBuilderPluginStart['tools'],
-  attachments: {} as AgentBuilderPluginStart['attachments'],
-  setConversationFlyoutActiveConfig: jest.fn(),
-  clearConversationFlyoutActiveConfig: jest.fn(),
-};
+const mockAgentBuilderService = agentBuilderMocks.createStart();
+mockAgentBuilderService.openConversationFlyout =
+  mockOpenConversationFlyout as unknown as (typeof mockAgentBuilderService)['openConversationFlyout'];
 
 describe('useAgentBuilderAttachment', () => {
   const defaultParams = {

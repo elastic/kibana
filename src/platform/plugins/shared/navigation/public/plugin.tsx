@@ -27,7 +27,7 @@ import type {
   NavigationPublicStartDependencies,
   AddSolutionNavigationArg,
 } from './types';
-import { TopNavMenuExtensionsRegistry, createTopNav, createTopNavBeta } from './top_nav_menu';
+import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export class NavigationPublicPlugin
@@ -126,7 +126,6 @@ export class NavigationPublicPlugin
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
-        TopNavMenuBeta: createTopNavBeta(),
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {
