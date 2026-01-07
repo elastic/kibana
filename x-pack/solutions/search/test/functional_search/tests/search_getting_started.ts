@@ -137,6 +137,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
           });
+          it('should show both tabs in connection details flyout', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Both tabs should exist
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
+          });
         });
 
         describe('Explore the API', function () {
