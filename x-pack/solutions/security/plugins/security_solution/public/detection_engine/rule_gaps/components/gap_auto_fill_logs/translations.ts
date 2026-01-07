@@ -183,7 +183,7 @@ export const GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_SKIPPED_NO_CAPACITY_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSkippedNoCapacityTooltip',
   {
-    defaultMessage: 'The limit for scheduled gap fill tasks has been met.',
+    defaultMessage: 'Tasks could not be scheduled because the limit for scheduled gap fill tasks has been met.',
   }
 );
 
