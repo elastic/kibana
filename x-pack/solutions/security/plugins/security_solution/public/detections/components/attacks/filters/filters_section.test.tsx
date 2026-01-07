@@ -24,6 +24,7 @@ describe('FiltersSection', () => {
     render(
       <TestProviders>
         <FiltersSection
+          pageFilters={[]}
           dataView={dataView}
           setPageFilterHandler={jest.fn()}
           setPageFilters={jest.fn()}
@@ -41,6 +42,7 @@ describe('FiltersSection', () => {
     const { container } = render(
       <TestProviders>
         <FiltersSection
+          pageFilters={[]}
           dataView={dataView}
           setPageFilterHandler={jest.fn()}
           setPageFilters={jest.fn()}
