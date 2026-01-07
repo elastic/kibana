@@ -475,7 +475,7 @@ export class SavedMap {
           {
             embeddableId: newCopyOnSave ? undefined : this._embeddableId,
             type: MAP_SAVED_OBJECT_TYPE,
-            serializedState: { rawState: mapEmbeddableState },
+            serializedState: mapEmbeddableState,
           },
         ],
         path: this._originatingPath,
@@ -486,7 +486,7 @@ export class SavedMap {
         state: [
           {
             type: MAP_SAVED_OBJECT_TYPE,
-            serializedState: { rawState: mapEmbeddableState },
+            serializedState: mapEmbeddableState,
           },
         ],
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
