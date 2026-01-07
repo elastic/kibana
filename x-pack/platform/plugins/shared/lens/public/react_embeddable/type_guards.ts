@@ -13,7 +13,6 @@ import {
 import { isObject } from 'lodash';
 import type {
   LensApiCallbacks,
-  ESQLVariablesCompatibleDashboardApi,
   LensPublicCallbacks,
   LensComponentForwardedProps,
 } from '@kbn/lens-common';
@@ -83,14 +82,3 @@ export function apiPublishesIsEditableByUser(api: unknown): api is { isEditableB
     isObject(api) && typeof (api as { isEditableByUser?: boolean }).isEditableByUser === 'boolean'
   );
 }
-
-export const isApiESQLVariablesCompatible = (
-  api: unknown | null
-): api is ESQLVariablesCompatibleDashboardApi => {
-  return Boolean(
-    api &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
-  );
-};
