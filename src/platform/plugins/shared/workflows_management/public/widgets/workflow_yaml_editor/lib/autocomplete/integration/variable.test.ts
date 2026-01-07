@@ -91,6 +91,7 @@ steps:
         'execution',
         'inputs',
         'output',
+        'parent',
         'variables',
       ].sort()
     );
