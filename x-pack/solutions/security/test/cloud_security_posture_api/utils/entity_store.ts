@@ -161,6 +161,82 @@ export const executeEnrichPolicy = async ({
 };
 
 /**
+ * Helper to wait for entity store engines to be fully started
+ * This ensures asyncSetup has completed (not just enrich policy creation)
+ * Critical: asyncSetup can fail after creating the enrich policy, and the
+ * error handler will delete everything including the enrich policy
+ */
+export const waitForEntityStoreReady = async ({
+  supertest,
+  retry,
+  logger,
+  spaceId,
+}: Pick<EntityStoreHelpersDeps, 'supertest' | 'retry' | 'logger'> & { spaceId?: string }) => {
+  const spacePath = spaceId ? `/s/${spaceId}` : '';
+  const spaceLabel = spaceId || 'default';
+  logger.debug(`Waiting for entity store engines to be fully started for space: ${spaceLabel}`);
+
+  await retry.waitForWithTimeout('entity store engines to be started', 120000, async () => {
+    try {
+      const response = await supertest
+        .get(`${spacePath}/api/entity_store/status`)
+        .query({ include_components: true })
+        .set('kbn-xsrf', 'xxxx');
+
+      if (response.status !== 200) {
+        logger.debug(`Entity store status check failed with status: ${response.status}`);
+        return false;
+      }
+
+      const { status, engines = [] } = response.body;
+      const engineStatuses = engines
+        .map((e: { status: string; type: string }) => `${e.type}:${e.status}`)
+        .join(', ');
+      logger.debug(
+        `Entity store status: ${status}, engines: ${engines.length}, engine statuses: ${engineStatuses}`
+      );
+
+      // If the overall status is 'error', the entity store won't recover
+      if (status === 'error') {
+        throw new Error(`Entity store is in error state`);
+      }
+
+      // Check if any engine has an error - this means asyncSetup failed
+      const errorEngine = engines.find((e: { status: string }) => e.status === 'error');
+      if (errorEngine) {
+        throw new Error(
+          `Entity store engine ${(errorEngine as { type: string }).type} is in error state`
+        );
+      }
+
+      // Need at least the generic engine to be started
+      // The 'started' status means asyncSetup completed successfully
+      const genericEngine = engines.find((e: { type: string }) => e.type === 'generic');
+      if (!genericEngine) {
+        logger.debug('Generic engine not found yet');
+        return false;
+      }
+
+      if ((genericEngine as { status: string }).status === 'started') {
+        logger.debug('Entity store generic engine is fully started');
+        return true;
+      }
+
+      logger.debug(
+        `Generic engine status is ${(genericEngine as { status: string }).status}, waiting...`
+      );
+      return false;
+    } catch (e) {
+      if (e.message?.includes('error state')) {
+        throw e; // Re-throw error state exceptions to fail fast
+      }
+      logger.debug(`Error checking entity store status: ${e.message}`);
+      return false;
+    }
+  });
+};
+
+/**
  * Helper to install cloud asset inventory package
  */
 export const installCloudAssetInventoryPackage = async ({

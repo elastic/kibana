@@ -27,6 +27,7 @@ import {
   dataViewRouteHelpersFactory,
   cleanupEntityStore,
   enableAssetInventory,
+  waitForEntityStoreReady,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
   installCloudAssetInventoryPackage,
@@ -1026,6 +1027,17 @@ export default function (providerContext: FtrProviderContext) {
               // Enable asset inventory - this creates and executes the enrich policy
               await enableAssetInventory({ supertest, logger });
               await enableAssetInventory({ supertest, logger, spaceId: customNamespaceId });
+
+              // Wait for entity store engines to be fully started in both spaces
+              // This ensures asyncSetup has completed - if it fails after creating
+              // the enrich policy, the error handler will delete everything
+              await waitForEntityStoreReady({ supertest, retry, logger });
+              await waitForEntityStoreReady({
+                supertest,
+                retry,
+                logger,
+                spaceId: customNamespaceId,
+              });
 
               // Load entity data from the appropriate archive
               await esArchiver.load(config.archivePath);

@@ -10,6 +10,7 @@ import {
   cleanupEntityStore,
   waitForEntityDataIndexed,
   enableAssetInventory,
+  waitForEntityStoreReady,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
 } from '../../cloud_security_posture_api/utils';
@@ -349,6 +350,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             // Enable asset inventory which creates the enrich policy
             await enableAssetInventory({ supertest, logger });
+
+            // Wait for entity store engines to be fully started
+            // This ensures asyncSetup has completed - if it fails after creating
+            // the enrich policy, the error handler will delete everything
+            await waitForEntityStoreReady({ supertest, retry, logger });
 
             // Load entity data from the appropriate archive
             await esArchiver.load(config.archivePath);
