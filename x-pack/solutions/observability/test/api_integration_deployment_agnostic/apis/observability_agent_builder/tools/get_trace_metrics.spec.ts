@@ -6,15 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type ApmSynthtraceEsClient,
+  generateTraceMetricsData,
+  type TraceMetricsServiceConfig,
+} from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import {
-  createSyntheticTraceMetricsData,
-  type ServiceConfig,
-} from '../utils/synthtrace_scenarios/create_synthetic_trace_metrics_data';
 
 interface TraceMetricsItem {
   group: string;
@@ -29,14 +30,18 @@ interface GetTraceMetricsToolResult extends OtherResult {
   };
 }
 
+const START = 'now-15m';
+const END = 'now';
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-    const testServices: ServiceConfig[] = [
+    const testServices: TraceMetricsServiceConfig[] = [
       // Service 1: payment-service in production on host-01 with container, k8s pod, and labels
       {
         name: 'payment-service',
@@ -131,10 +136,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-      ({ apmSynthtraceEsClient } = await createSyntheticTraceMetricsData({
-        getService,
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      await apmSynthtraceEsClient.clean();
+
+      const range = timerange(START, END);
+      const { client, generator } = generateTraceMetricsData({
+        range,
+        apmEsClient: apmSynthtraceEsClient,
         services: testServices,
-      }));
+      });
+
+      await client.index(generator);
     });
 
     after(async () => {
@@ -150,8 +162,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
-            start: 'now-1h',
-            end: 'now',
+            start: START,
+            end: END,
           },
         });
 
@@ -221,8 +233,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'service.name: "payment-service"',
             },
           });
@@ -238,8 +250,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'service.name: "payment-service"',
             },
           });
@@ -260,8 +272,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'service.environment: "production"',
             },
           });
@@ -281,8 +293,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'service.environment: "staging"',
             },
           });
@@ -304,8 +316,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'transaction.name: "POST /api/payment"',
             },
           });
@@ -323,8 +335,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'transaction.name: "worker-process"',
             },
           });
@@ -344,8 +356,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'transaction.type: "request"',
             },
           });
@@ -367,8 +379,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'transaction.type: "page-load"',
             },
           });
@@ -386,8 +398,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'transaction.type: "messaging"',
             },
           });
@@ -405,8 +417,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'transaction.type: "worker"',
             },
           });
@@ -426,8 +438,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.team: "payments"',
             },
           });
@@ -445,8 +457,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.tier: "critical"',
             },
           });
@@ -464,8 +476,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.tier: "standard"',
             },
           });
@@ -483,8 +495,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.endpoint: "payment-create"',
             },
           });
@@ -502,8 +514,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.team: "non-existent-team"',
             },
           });
@@ -519,8 +531,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.tier: "critical" AND service.environment: "production"',
             },
           });
@@ -538,8 +550,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'labels.team: "payments"',
               groupBy: 'transaction.name',
             },
@@ -562,8 +574,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'host.name',
             },
           });
@@ -581,8 +593,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'host.name',
             },
           });
@@ -601,8 +613,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'host.name',
             },
           });
@@ -624,8 +636,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'transaction.name',
             },
           });
@@ -650,8 +662,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'transaction.name',
             },
           });
@@ -675,8 +687,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'service.environment',
             },
           });
@@ -694,8 +706,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'service.environment',
             },
           });
@@ -718,8 +730,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'container.id',
             },
           });
@@ -739,8 +751,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'container.id',
             },
           });
@@ -759,8 +771,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'kubernetes.pod.name',
             },
           });
@@ -780,8 +792,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               groupBy: 'kubernetes.pod.name',
             },
           });
@@ -800,8 +812,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
             id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
             params: {
-              start: 'now-1h',
-              end: 'now',
+              start: START,
+              end: END,
               kqlFilter: 'service.name: "payment-service"',
               groupBy: 'kubernetes.pod.name',
             },
@@ -821,8 +833,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
-            start: 'now-1h',
-            end: 'now',
+            start: START,
+            end: END,
             kqlFilter: 'service.name: "user-service" AND transaction.type: "request"',
           },
         });
@@ -841,8 +853,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
-            start: 'now-1h',
-            end: 'now',
+            start: START,
+            end: END,
             kqlFilter: 'service.environment: "staging" AND transaction.type: "request"',
           },
         });
@@ -860,8 +872,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
-            start: 'now-1h',
-            end: 'now',
+            start: START,
+            end: END,
             kqlFilter: 'service.name: "payment-service"',
             groupBy: 'transaction.name',
           },
@@ -880,8 +892,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
-            start: 'now-1h',
-            end: 'now',
+            start: START,
+            end: END,
             kqlFilter: 'host.name: "host-01"',
             groupBy: 'service.name',
           },
@@ -904,8 +916,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
-            start: 'now-1h',
-            end: 'now',
+            start: START,
+            end: END,
             kqlFilter: 'service.name: "non-existent-service"',
           },
         });

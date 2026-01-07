@@ -6,13 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type ApmSynthtraceEsClient,
+  type LogsSynthtraceEsClient,
+  generateApmServicesData,
+  generateLogsServicesData,
+  type ApmServiceConfig,
+  type LogsServiceConfig,
+} from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticApmData } from '../utils/synthtrace_scenarios/create_synthetic_apm_data';
-import { createSyntheticLogsWithService } from '../utils/synthtrace_scenarios/create_synthetic_logs_data';
 
 // APM-only services
 const APM_SERVICE_1 = 'apm-only-service';
@@ -49,6 +55,7 @@ interface GetServicesToolResult extends OtherResult {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
   let apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -62,12 +69,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('response structure', () => {
       before(async () => {
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-          getService,
-          serviceName: APM_SERVICE_1,
-          environment: PRODUCTION_ENVIRONMENT,
-          language: 'nodejs',
-        }));
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+
+        const testServices: ApmServiceConfig[] = [
+          {
+            name: APM_SERVICE_1,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+        ];
+
+        const range = timerange(START, END);
+        const { client, generator } = generateApmServicesData({
+          range,
+          apmEsClient: apmSynthtraceEsClient,
+          services: testServices,
+        });
+
+        await client.index(generator);
       });
 
       after(async () => {
@@ -112,21 +136,65 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('services from multiple data sources', () => {
       before(async () => {
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-          getService,
-          serviceName: [APM_SERVICE_1, APM_SERVICE_2, SHARED_SERVICE],
-          environment: PRODUCTION_ENVIRONMENT,
-          language: 'nodejs',
-        }));
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
 
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithService({
-          getService,
-          services: [
-            { name: LOG_SERVICE_1, environment: PRODUCTION_ENVIRONMENT },
-            { name: LOG_SERVICE_2, environment: PRODUCTION_ENVIRONMENT },
-            { name: SHARED_SERVICE, environment: PRODUCTION_ENVIRONMENT },
-          ],
-        }));
+        // Generate APM services
+        const apmServices: ApmServiceConfig[] = [
+          {
+            name: APM_SERVICE_1,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+          {
+            name: APM_SERVICE_2,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+          {
+            name: SHARED_SERVICE,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+        ];
+
+        const range = timerange(START, END);
+        const { client: apmClient, generator: apmGenerator } = generateApmServicesData({
+          range,
+          apmEsClient: apmSynthtraceEsClient,
+          services: apmServices,
+        });
+
+        await apmClient.index(apmGenerator);
+
+        // Generate logs services
+        const logsServices: LogsServiceConfig[] = [
+          { name: LOG_SERVICE_1, environment: PRODUCTION_ENVIRONMENT },
+          { name: LOG_SERVICE_2, environment: PRODUCTION_ENVIRONMENT },
+          { name: SHARED_SERVICE, environment: PRODUCTION_ENVIRONMENT },
+        ];
+
+        const { client: logsClient, generator: logsGenerator } = generateLogsServicesData({
+          range,
+          logsEsClient: logsSynthtraceEsClient,
+          services: logsServices,
+        });
+
+        await logsClient.index(logsGenerator);
       });
 
       after(async () => {
@@ -193,17 +261,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('filtering by health status', () => {
       before(async () => {
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-          getService,
-          serviceName: [APM_SERVICE_1],
-          environment: PRODUCTION_ENVIRONMENT,
-          language: 'nodejs',
-        }));
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
 
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithService({
-          getService,
-          services: [{ name: LOG_SERVICE_1, environment: PRODUCTION_ENVIRONMENT }],
-        }));
+        const apmServices: ApmServiceConfig[] = [
+          {
+            name: APM_SERVICE_1,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+        ];
+
+        const range = timerange(START, END);
+        const { client: apmClient, generator: apmGenerator } = generateApmServicesData({
+          range,
+          apmEsClient: apmSynthtraceEsClient,
+          services: apmServices,
+        });
+
+        await apmClient.index(apmGenerator);
+
+        const logsServices: LogsServiceConfig[] = [
+          { name: LOG_SERVICE_1, environment: PRODUCTION_ENVIRONMENT },
+        ];
+
+        const { client: logsClient, generator: logsGenerator } = generateLogsServicesData({
+          range,
+          logsEsClient: logsSynthtraceEsClient,
+          services: logsServices,
+        });
+
+        await logsClient.index(logsGenerator);
       });
 
       after(async () => {
@@ -232,20 +326,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('filtering by environment', () => {
       before(async () => {
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-          getService,
-          serviceName: APM_SERVICE_1,
-          environment: PRODUCTION_ENVIRONMENT,
-          language: 'nodejs',
-        }));
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
 
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithService({
-          getService,
-          services: [
-            { name: LOG_SERVICE_1, environment: PRODUCTION_ENVIRONMENT },
-            { name: LOG_SERVICE_2, environment: STAGING_ENVIRONMENT },
-          ],
-        }));
+        const apmServices: ApmServiceConfig[] = [
+          {
+            name: APM_SERVICE_1,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+        ];
+
+        const range = timerange(START, END);
+        const { client: apmClient, generator: apmGenerator } = generateApmServicesData({
+          range,
+          apmEsClient: apmSynthtraceEsClient,
+          services: apmServices,
+        });
+
+        await apmClient.index(apmGenerator);
+
+        const logsServices: LogsServiceConfig[] = [
+          { name: LOG_SERVICE_1, environment: PRODUCTION_ENVIRONMENT },
+          { name: LOG_SERVICE_2, environment: STAGING_ENVIRONMENT },
+        ];
+
+        const { client: logsClient, generator: logsGenerator } = generateLogsServicesData({
+          range,
+          logsEsClient: logsSynthtraceEsClient,
+          services: logsServices,
+        });
+
+        await logsClient.index(logsGenerator);
       });
 
       after(async () => {

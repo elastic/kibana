@@ -17,7 +17,7 @@ import {
 import {
   createDistributedTraceWithErrors,
   type DistributedTraceData,
-} from '../utils/synthtrace_scenarios/create_distributed_trace_with_errors';
+} from '../utils/synthtrace_scenarios/ai_insights/create_distributed_trace_with_errors';
 
 const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the payment timeout error.';
 
