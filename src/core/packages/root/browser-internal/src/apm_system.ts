@@ -56,6 +56,9 @@ export class ApmSystem {
     if (globalLabels) {
       apm.addLabels(globalLabels);
     }
+    apm.addLabels({
+      user_agent: navigator.userAgent,
+    });
 
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
