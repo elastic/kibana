@@ -201,7 +201,6 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
 
     await this.client.helpers.bulk(
       {
-        retries: 5,
         concurrency: this.concurrency,
         refresh: false,
         refreshOnCompletion: false,
