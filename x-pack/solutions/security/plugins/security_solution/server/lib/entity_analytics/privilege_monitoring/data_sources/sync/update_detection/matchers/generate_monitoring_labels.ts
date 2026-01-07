@@ -5,7 +5,7 @@
  * 2.0.
  */
 import _ from 'lodash';
-import type { Matcher, MonitoringLabel } from '../../../../../../common/api/entity_analytics';
+import type { Matcher, MonitoringLabel } from '../../../../../../../../common/api/entity_analytics';
 
 /**
  * Generates monitoring labels for a document based on a set of matchers.

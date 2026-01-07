@@ -6,11 +6,11 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/monitoring';
-import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
-import { createSourcesSyncService } from '../sources_sync';
-import { createUpdateDetectionService } from './update_detection/update_detection';
-import { createDeletionDetectionService } from './deletion_detection/deletion_detection';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
+import { createDeletionDetectionService } from './deletion_detection/integrations/deletion_detection';
+import { createSourcesSyncService } from './sources_sync';
+import { createUpdateDetectionService } from './update_detection/integrations/update_detection';
 
 export type IntegrationsSyncService = ReturnType<typeof createIntegrationsSyncService>;
 export const createIntegrationsSyncService = (
