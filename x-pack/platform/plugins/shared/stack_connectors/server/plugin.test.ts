@@ -166,7 +166,7 @@ describe('Stack Connectors Plugin', () => {
       });
 
       // SubAction Connectors
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -240,12 +240,19 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         11,
         expect.objectContaining({
+          id: '.mcp',
+          name: 'MCP',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        12,
+        expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        12,
+        13,
         expect.objectContaining({
           id: '.crowdstrike',
           name: 'CrowdStrike',
