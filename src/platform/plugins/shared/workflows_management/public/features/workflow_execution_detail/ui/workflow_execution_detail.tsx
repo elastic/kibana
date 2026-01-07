@@ -187,8 +187,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={
                 isChildStep && childExecution
-                  ? childExecution.duration
-                  : workflowExecution?.duration
+                  ? childExecution.duration ?? undefined
+                  : workflowExecution?.duration ?? undefined
               }
             />
           }

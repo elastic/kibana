@@ -40,6 +40,9 @@ describe('WorkflowOutputStepImpl', () => {
       finishStep: jest.fn().mockResolvedValue(undefined),
       failStep: jest.fn(),
       flushEventLogs: jest.fn().mockResolvedValue(undefined),
+      contextManager: {
+        renderValueAccordingToContext: jest.fn((value) => value), // Default: return value as-is
+      },
     } as any;
 
     mockWorkflowRuntime = {
@@ -104,6 +107,48 @@ describe('WorkflowOutputStepImpl', () => {
       expect(mockExecution.context.output).toEqual({
         result: 'success',
         count: 42,
+      });
+    });
+
+    it('should process template variables in output values', async () => {
+      mockNode.configuration = {
+        ...mockNode.configuration,
+        with: {
+          result: '{{ steps.process_data.output.processed_message }}',
+          timestamp: '{{ steps.process_data.output.current_time }}',
+        },
+      };
+
+      // Mock the template rendering to return resolved values
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockReturnValue({
+          result: 'processed message value',
+          timestamp: '2024-01-01T00:00:00Z',
+        });
+
+      impl = new WorkflowOutputStepImpl(
+        mockNode,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await impl.run();
+
+      // Verify that renderValueAccordingToContext was called with the raw template values
+      expect(
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith({
+        result: '{{ steps.process_data.output.processed_message }}',
+        timestamp: '{{ steps.process_data.output.current_time }}',
+      });
+
+      // Verify that the rendered values are stored in the context
+      const mockExecution = mockWorkflowRuntime.getWorkflowExecution();
+      expect(mockExecution.context.output).toEqual({
+        result: 'processed message value',
+        timestamp: '2024-01-01T00:00:00Z',
       });
     });
   });

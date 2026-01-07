@@ -86,7 +86,10 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
-    const { with: outputValues } = step;
+    // Render template variables in the output values
+    const outputValues = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+      step.with
+    ) as Record<string, unknown>;
 
     try {
       // Get the workflow definition to check for declared outputs
