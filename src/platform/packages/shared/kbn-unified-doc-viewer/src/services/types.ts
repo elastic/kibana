@@ -10,6 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
@@ -44,17 +45,19 @@ export interface DocViewRenderProps {
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
-  initialTabId?: string;
 }
 
-export type DocViewerComponent = React.FC<DocViewRenderProps>;
+export type DocViewComponentProps<TState extends object = any> = DocViewRenderProps &
+  RestorableStateProviderProps<TState>;
 
-export interface DocView {
+export type DocViewComponent<TState extends object = any> = React.FC<DocViewComponentProps<TState>>;
+
+export interface DocView<TState extends object = any> {
   id: string;
   order: number;
   title: string;
-  component: DocViewerComponent;
+  component: DocViewComponent<TState>;
   enabled?: boolean;
 }
 
-export type DocViewFactory = () => DocView;
+export type DocViewFactory<TState extends object = any> = () => DocView<TState>;

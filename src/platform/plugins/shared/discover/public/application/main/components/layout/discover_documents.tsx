@@ -52,6 +52,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
+import useUnmount from 'react-use/lib/useUnmount';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
@@ -315,6 +316,21 @@ function DiscoverDocumentsComponent({
     [dispatch, stateContainer.actions.updateESQLQuery]
   );
 
+  const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
+  const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
+  const onInitialDocViewStateChange = useCallback(
+    (docViews: Record<string, unknown>) => {
+      dispatch(setDocViewerUiState({ docViewerUiState: { ...docViewerUiState, docViews } }));
+    },
+    [dispatch, docViewerUiState, setDocViewerUiState]
+  );
+
+  const [selectedDocViewerTabId, setSelectedDocViewerTabId] = useState<string>();
+
+  useUnmount(() => {
+    setExpandedDoc(expandedDoc, { initialTabId: selectedDocViewerTabId });
+  });
+
   const renderDocumentView = useCallback(
     (
       hit: DataTableRecord,
@@ -339,6 +355,9 @@ function DiscoverDocumentsComponent({
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
+        initialDocViewState={docViewerUiState.docViews}
+        onInitialDocViewStateChange={onInitialDocViewStateChange}
+        onUpdateSelectedTabId={setSelectedDocViewerTabId}
       />
     ),
     [
@@ -351,6 +370,8 @@ function DiscoverDocumentsComponent({
       query,
       initialDocViewerTabId,
       docViewerExtensionActions,
+      docViewerUiState.docViews,
+      onInitialDocViewStateChange,
     ]
   );
 

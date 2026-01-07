@@ -11,5 +11,5 @@ export type {
   DocView,
   DocViewFilterFn,
   DocViewRenderProps,
-  DocViewerComponent,
+  DocViewComponent,
 } from './services/types';

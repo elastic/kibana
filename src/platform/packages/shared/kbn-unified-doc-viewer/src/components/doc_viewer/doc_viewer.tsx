@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -23,9 +23,14 @@ export interface DocViewerApi {
 interface DocViewerInternalProps extends DocViewRenderProps {
   docViews: DocView[];
   initialTabId?: DocView['id'];
+  initialDocViewState?: Record<string, unknown>;
+  onInitialDocViewStateChange?: (state: Record<string, unknown>) => void;
+  onUpdateSelectedTabId?: (tabId: string | undefined) => void;
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
+
+const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewer_tab_', '');
 
 /**
  * Rendering tabs with different views of 1 Elasticsearch hit in Discover.
@@ -34,7 +39,17 @@ const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
  * a `render` function.
  */
 export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
-  ({ docViews, initialTabId, ...renderProps }, ref) => {
+  (
+    {
+      docViews,
+      initialTabId,
+      initialDocViewState,
+      onInitialDocViewStateChange,
+      onUpdateSelectedTabId,
+      ...renderProps
+    },
+    ref
+  ) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map(({ id, title, component }: DocView) => ({
@@ -42,11 +57,13 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
         name: title,
         content: (
           <DocViewerTab
-            key={id}
+            key={`${renderProps.hit.id}_${id}`}
             id={id}
             title={title}
             component={component}
             renderProps={renderProps}
+            initialDocViewState={initialDocViewState}
+            onInitialDocViewStateChange={onInitialDocViewStateChange}
           />
         ),
         ['data-test-subj']: `docViewerTab-${id}`,
@@ -57,6 +74,10 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
       initialTabId ? getFullTabId(initialTabId) : storedInitialTabId
     );
     const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined;
+
+    useEffect(() => {
+      onUpdateSelectedTabId?.(selectedTabId ? getOriginalTabId(selectedTabId) : undefined);
+    }, [onUpdateSelectedTabId, selectedTabId]);
 
     useImperativeHandle(
       ref,

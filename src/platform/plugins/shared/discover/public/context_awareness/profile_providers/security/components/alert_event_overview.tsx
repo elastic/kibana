@@ -10,7 +10,7 @@
 import React, { useMemo, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
-import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
+import type { DocViewComponent } from '@kbn/unified-doc-viewer/types';
 import {
   EuiTitle,
   EuiSpacer,
@@ -60,7 +60,7 @@ export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
   );
 };
 
-export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
+export const AlertEventOverview: DocViewComponent = ({ hit }) => {
   const {
     application: { getUrlForApp },
     fieldsMetadata,

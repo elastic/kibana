@@ -170,6 +170,10 @@ export const internalStateSlice = createSlice({
       }>
     ) => {
       withTab(state, action.payload, (tab) => {
+        if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
+          tab.uiState.docViewer.docViews = {};
+        }
+
         tab.expandedDoc = action.payload.expandedDoc;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
       });
@@ -269,6 +273,7 @@ export const internalStateSlice = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.initialDocViewerTabId = undefined;
+        tab.uiState.docViewer.docViews = {};
       }),
 
     setESQLEditorUiState: (
@@ -340,6 +345,14 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
+      }),
+
+    setDocViewerUiState: (
+      state,
+      action: TabAction<{ docViewerUiState: TabState['uiState']['docViewer'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.docViewer = action.payload.docViewerUiState;
       }),
   },
   extraReducers: (builder) => {
