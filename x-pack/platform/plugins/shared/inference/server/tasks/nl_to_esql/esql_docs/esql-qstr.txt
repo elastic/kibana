@@ -14,6 +14,8 @@ Query string in Lucene query string format.
 
 ## Examples
 
+### Example 1
+
 ```esql
 FROM books
 | WHERE QSTR("author: Faulkner")
@@ -23,3 +25,15 @@ FROM books
 ```
 
 This example filters rows where the `author` field matches "Faulkner," keeps the `book_no` and `author` columns, sorts by `book_no`, and limits the output to 5 rows.
+
+
+### Example 2
+
+```esql
+FROM books
+| WHERE QSTR("""Great""")
+| LIMIT 10
+
+```
+
+This example filters rows where any field contains the term "Great" and limits the output to 10 rows.
