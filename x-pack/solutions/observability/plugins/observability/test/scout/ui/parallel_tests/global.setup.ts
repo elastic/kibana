@@ -11,20 +11,32 @@ import { createDataView, generateLogsData, generateRulesData } from '../fixtures
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apiServices, log, logsSynthtraceEsClient, kbnClient }) => {
+  async ({ apiServices, log, logsSynthtraceEsClient, kbnClient, esClient }) => {
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
+
+    log.info('Generating sample data into .alerts-observability.test index...');
+    await esClient.index({
+      index: '.alerts-observability.test',
+      document: {
+        '@timestamp': new Date().toISOString(),
+        message: 'Test alert document',
+        'service.name': 'test-service',
+      },
+      refresh: true,
+    });
+
+    log.info('Creating dummy data view for ad-hoc data view tests...');
+    await createDataView(kbnClient, {
+      name: 'test-data-view-name_1',
+      id: 'test-data-view-id_1',
+      title: 'logs-*',
+    });
 
     await generateLogsData({
       from: Date.now() - 15 * 60 * 1000, // 15 minutes ago
       to: Date.now(),
       client: logsSynthtraceEsClient,
-    });
-
-    await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
-      id: 'test-data-view-id_1',
-      title: 'logs-*',
     });
   }
 );
