@@ -15,6 +15,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  LowercaseProcessor,
   MathProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
@@ -23,6 +24,8 @@ import type {
   ReplaceProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
+  TrimProcessor,
+  UppercaseProcessor,
 } from '@kbn/streamlang';
 import {
   isActionBlock,
@@ -156,6 +159,24 @@ const actionStepValidators: {
     const expressionFields = extractFieldsFromMathExpression(step.expression);
     for (const field of expressionFields) {
       checkFieldName(field);
+    }
+  },
+  uppercase: (step: UppercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  lowercase: (step: LowercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  trim: (step: TrimProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
     }
   },
   // fields referenced in manual ingest pipelines are not validated here because
