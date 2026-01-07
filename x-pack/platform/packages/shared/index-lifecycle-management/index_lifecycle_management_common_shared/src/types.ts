@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export type { TestBed } from '@kbn/test-jest-helpers';
-export { registerTestBed } from '@kbn/test-jest-helpers';
+import type { PublicApiServiceSetup } from './services';
+
+export interface IndexLifecycleManagementPluginStart {
+  apiService: PublicApiServiceSetup;
+}
