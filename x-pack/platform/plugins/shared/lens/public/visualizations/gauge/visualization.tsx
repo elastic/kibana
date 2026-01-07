@@ -234,7 +234,7 @@ export const getGaugeVisualization = ({
           mainPalette?.type === 'legacyPalette'
             ? mainPalette.value
             : getDefaultPalette(paletteService),
-        ticksPosition: 'auto',
+        ticksPosition: 'bands',
         labelMajorMode: 'auto',
       }
     );

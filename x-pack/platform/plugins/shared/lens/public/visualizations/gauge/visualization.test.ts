@@ -67,7 +67,7 @@ describe('gauge', () => {
         layerType: LayerTypes.DATA,
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
-        ticksPosition: 'auto',
+        ticksPosition: 'bands',
         colorMode: 'palette',
         palette: {
           ...DEFAULT_PALETTE,

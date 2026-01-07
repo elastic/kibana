@@ -70,7 +70,7 @@ export const getSuggestions = ({
       shape: state?.shape ?? GaugeShapes.HORIZONTAL_BULLET,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
-      ticksPosition: GaugeTicksPositions.AUTO,
+      ticksPosition: GaugeTicksPositions.BANDS,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
       colorMode: 'palette',
       palette: getDefaultPalette(paletteService),
