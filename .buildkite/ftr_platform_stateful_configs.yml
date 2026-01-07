@@ -5,6 +5,7 @@ disabled:
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
+  - src/platform/test/functional/config.base.http2.ts
   - src/platform/test/functional/firefox/config.base.ts
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
