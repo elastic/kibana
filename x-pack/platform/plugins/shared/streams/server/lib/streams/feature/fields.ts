@@ -7,7 +7,6 @@
 
 export const STREAM_NAME = 'stream.name';
 
-// Initially features were called systems, for backward compatibility we need to keep the same field names
 export const FEATURE_UUID = 'feature.uuid';
 export const FEATURE_TYPE = 'feature.type';
 export const FEATURE_DESCRIPTION = 'feature.description';
@@ -17,3 +16,4 @@ export const FEATURE_CONFIDENCE = 'feature.confidence';
 export const FEATURE_EVIDENCE = 'feature.evidence';
 export const FEATURE_STATUS = 'feature.status';
 export const FEATURE_LAST_SEEN = 'feature.last_seen';
+export const FEATURE_TAGS = 'feature.tags';

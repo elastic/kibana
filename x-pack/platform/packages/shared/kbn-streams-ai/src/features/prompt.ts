@@ -7,7 +7,6 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
-import { featureTypes, type FeatureType } from '@kbn/streams-schema';
 import featuresUserPrompt from './user_prompt.text';
 import featuresSystemPrompt from './system_prompt.text';
 
@@ -23,7 +22,6 @@ const featuresSchema = {
         properties: {
           type: {
             type: 'string',
-            enum: featureTypes,
           },
           description: {
             type: 'string',
@@ -49,8 +47,15 @@ const featuresSchema = {
             description:
               'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
           },
+          tags: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'The tags that describe the feature.',
+          },
         },
-        required: ['type', 'description', 'name', 'value', 'confidence', 'evidence'],
+        required: ['type', 'description', 'name', 'value', 'confidence', 'evidence', 'tags'],
       },
     },
   },

@@ -20,6 +20,7 @@ import {
   FEATURE_TYPE,
   FEATURE_NAME,
   FEATURE_VALUE,
+  FEATURE_TAGS,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -115,6 +116,7 @@ function toStorage(name: string, feature: Feature): StoredFeature {
     [FEATURE_EVIDENCE]: feature.evidence,
     [FEATURE_STATUS]: feature.status,
     [FEATURE_LAST_SEEN]: feature.last_seen,
+    [FEATURE_TAGS]: feature.tags,
     [STREAM_NAME]: name,
   };
 }
@@ -130,6 +132,7 @@ function fromStorage(feature: StoredFeature): Feature {
     evidence: feature[FEATURE_EVIDENCE],
     status: feature[FEATURE_STATUS],
     last_seen: feature[FEATURE_LAST_SEEN],
+    tags: feature[FEATURE_TAGS],
   };
 }
 

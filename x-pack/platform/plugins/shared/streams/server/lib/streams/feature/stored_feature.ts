@@ -17,6 +17,7 @@ import {
   FEATURE_LAST_SEEN,
   FEATURE_NAME,
   FEATURE_TYPE,
+  FEATURE_TAGS,
 } from './fields';
 import { featureStatusSchema, FeatureStatus } from '@kbn/streams-schema/src/feature';
 
@@ -31,6 +32,7 @@ export interface StoredFeature {
   [FEATURE_EVIDENCE]: string[];
   [FEATURE_STATUS]: FeatureStatus;
   [FEATURE_LAST_SEEN]: string;
+  [FEATURE_TAGS]: string[];
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
@@ -44,4 +46,5 @@ export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
   [FEATURE_EVIDENCE]: z.array(z.string()),
   [FEATURE_STATUS]: featureStatusSchema,
   [FEATURE_LAST_SEEN]: z.string(),
+  [FEATURE_TAGS]: z.array(z.string()),
 });

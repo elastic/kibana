@@ -22,6 +22,7 @@ export interface BaseFeature {
   value: Record<string, any>;
   confidence: number;
   evidence: string[];
+  tags: string[];
 }
 
 export interface Feature extends BaseFeature {
@@ -37,6 +38,7 @@ export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   value: z.record(z.string(), z.any()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()),
+  tags: z.array(z.string()),
 });
 
 export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
