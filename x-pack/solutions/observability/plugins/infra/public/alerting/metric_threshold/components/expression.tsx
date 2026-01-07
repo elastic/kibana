@@ -445,11 +445,11 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiPanel color="subdued">
         <EuiFormRow
           label={
-            <>
+            <span style={{ cursor: 'default' }}>
               {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehaviorLabel', {
                 defaultMessage: 'If there is no data',
               })}
-            </>
+            </span>
           }
         >
           <EuiRadioGroup
