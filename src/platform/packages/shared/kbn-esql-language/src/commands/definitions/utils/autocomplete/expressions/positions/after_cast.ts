@@ -17,7 +17,6 @@ import type { ExpressionContext } from '../types';
 import { getExpressionType } from '../../..';
 import { inlineCastsMapping } from '../../../../generated/inline_casts_mapping';
 import { getMatchingSignatures } from '../../../expressions';
-import { SuggestionCategory } from '../../../../../../shared';
 
 /**
  * Suggests completions after the cast (::) keyword.
@@ -91,7 +90,6 @@ export function getCastingTypesSuggestions(typeBeingCasted?: SupportedDataType):
         defaultMessage: `Cast value to ${castingType}`,
         values: { castingType },
       }),
-      category: SuggestionCategory.OPERATOR,
     };
     return suggestion;
   });
