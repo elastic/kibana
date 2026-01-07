@@ -354,9 +354,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
     const { lineNumber, column } = position;
     const lineContent = model.getLineContent(lineNumber);
-    const charBeforeCursor = column > 1 ? lineContent[column - 2] : '';
+    const spaceHasBeenTyped = column > 1 && lineContent[column - 2] === ' ';
+    const inlineCastHasBeenTyped = lineContent.substring(0, column - 1).endsWith('::');
 
-    if (charBeforeCursor === ' ') {
+    if (spaceHasBeenTyped || inlineCastHasBeenTyped) {
       triggerSuggestions();
     }
   }, [triggerSuggestions]);
