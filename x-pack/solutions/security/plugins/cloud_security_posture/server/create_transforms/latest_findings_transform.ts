@@ -31,10 +31,28 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   source: {
     index: FINDINGS_INDEX_PATTERN,
     query: {
-      range: {
-        '@timestamp': {
-          gte: 'now-26h',
-        },
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-26h',
+              },
+            },
+          },
+        ],
+        must_not: [
+          {
+            exists: {
+              field: 'error.message',
+            },
+          },
+          {
+            terms: {
+              _tier: ['data_frozen', 'data_cold'],
+            },
+          },
+        ],
       },
     },
   },
