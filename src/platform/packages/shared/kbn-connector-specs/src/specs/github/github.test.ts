@@ -1307,6 +1307,52 @@ index abc123..def456 100644
     });
   });
 
+  describe('getPullRequestFiles action', () => {
+    it('should get pull request files', async () => {
+      const mockResponse = {
+        data: [
+          {
+            filename: 'src/file1.ts',
+            status: 'modified',
+            additions: 10,
+            deletions: 5,
+            changes: 15,
+            blob_url: 'https://github.com/owner/repo/blob/abc123/src/file1.ts',
+            contents_url: 'https://api.github.com/repos/owner/repo/contents/src/file1.ts',
+            patch: '@@ -1,3 +1,3 @@\n-old code\n+new code',
+          },
+          {
+            filename: 'src/file2.js',
+            status: 'added',
+            additions: 20,
+            deletions: 0,
+            changes: 20,
+            blob_url: 'https://github.com/owner/repo/blob/def456/src/file2.js',
+            contents_url: 'https://api.github.com/repos/owner/repo/contents/src/file2.js',
+            patch: '@@ -0,0 +1,20 @@\n+new file content',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getPullRequestFiles.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/pulls/123/files',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {

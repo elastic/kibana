@@ -544,6 +544,31 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    getPullRequestFiles: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        pullNumber: z.coerce.number(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          pullNumber: number;
+        };
+
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/files`,
+          {
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
   },
 
   test: {
