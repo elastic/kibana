@@ -19,7 +19,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -39,9 +39,10 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        streams: { streamsRepositoryClient, getClassicStatus },
       },
     },
+    core,
   } = context;
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
@@ -60,8 +61,28 @@ export function StreamListView() {
   );
 
   const {
+    ui: { manage: canManageStreamsKibana },
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
+
+  const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchClassicStatus = async () => {
+      try {
+        const status = await getClassicStatus();
+        setCanManageClassicElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching classic streams status',
+          }),
+        });
+      }
+    };
+    fetchClassicStatus();
+  }, [getClassicStatus, core.notifications.toasts]);
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
@@ -148,7 +169,11 @@ export function StreamListView() {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
+              <EuiButton
+                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                size="s"
+                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+              >
                 {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
                   defaultMessage: 'Create classic stream',
                 })}
