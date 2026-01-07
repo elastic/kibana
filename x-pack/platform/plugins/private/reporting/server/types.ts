@@ -46,7 +46,7 @@ import { type InternalReportingService } from './services/internal_generate_repo
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getInternalReportingService: () => InternalReportingService;
+  getInternalGenerateReportService: () => InternalReportingService;
 }
 
 /**
