@@ -30,6 +30,13 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
+  const config = getService('config');
+
+  const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
+    config.get('kbnTestServer.serverArgs', []) as string[]
+  )
+    .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
+    ?.includes('endpointExceptionsMovedUnderManagement');
 
   describe('@ess @serverless @skipInServerlessMKI Import Endpoint artifacts API', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
@@ -90,45 +97,113 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
       );
     };
 
-    describe('Endpoint exceptions move feature flag enabled', () => {
-      ALL_ENDPOINT_ARTIFACT_LIST_IDS.forEach((listId) => {
-        it(`should import ${listId} artifacts`, async () => {
-          await endpointArtifactTestResources.deleteList(listId);
+    if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
+      describe('Endpoint exceptions move feature flag enabled', () => {
+        ALL_ENDPOINT_ARTIFACT_LIST_IDS.forEach((listId) => {
+          it(`should import ${listId} artifacts`, async () => {
+            await endpointArtifactTestResources.deleteList(listId);
 
-          const expectedResponse: ImportExceptionsResponseSchema = {
-            errors: [],
-            success: true,
-            success_count: 4,
-            success_exception_lists: true,
-            success_count_exception_lists: 1,
-            success_exception_list_items: true,
-            success_count_exception_list_items: 3,
-          };
+            const expectedResponse: ImportExceptionsResponseSchema = {
+              errors: [],
+              success: true,
+              success_count: 4,
+              success_exception_lists: true,
+              success_count_exception_lists: 1,
+              success_exception_list_items: true,
+              success_count_exception_list_items: 3,
+            };
+
+            await endpointOpsAnalystSupertest
+              .post(`${EXCEPTION_LIST_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .attach(
+                'file',
+                buildImportBuffer(listId, [GLOBAL_ARTIFACT_TAG]),
+                'import_data.ndjson'
+              )
+              .expect(200)
+              .expect(expectedResponse);
+
+            const { body } = await endpointOpsAnalystSupertest
+              .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .query({
+                list_id: listId,
+                namespace_type: 'agnostic',
+              })
+              .send()
+              .expect(200);
+
+            expect(body.data.length).to.eql(3);
+
+            await endpointArtifactTestResources.deleteList(listId);
+          });
+        });
+      });
+    } else {
+      describe('Endpoint exceptions move feature flag disabled', () => {
+        // All non-Endpoint exceptions artifacts are not allowed to import
+        ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+          (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+        ).forEach((listId) => {
+          it(`should error when importing ${listId} artifacts`, async () => {
+            await endpointArtifactTestResources.deleteList(listId);
+
+            const { body } = await endpointOpsAnalystSupertest
+              .post(`${EXCEPTION_LIST_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([400]))
+              .attach('file', buildImportBuffer(listId), 'import_data.ndjson')
+              .expect(400);
+
+            expect(body.message).to.eql(
+              'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions'
+            );
+          });
+        });
+
+        it('should import endpoint exceptions and add global artifact tag if missing', async () => {
+          await endpointArtifactTestResources.deleteList(
+            ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          );
 
           await endpointOpsAnalystSupertest
             .post(`${EXCEPTION_LIST_URL}/_import`)
             .set('kbn-xsrf', 'true')
             .on('error', createSupertestErrorLogger(log))
-            .attach('file', buildImportBuffer(listId, [GLOBAL_ARTIFACT_TAG]), 'import_data.ndjson')
-            .expect(200)
-            .expect(expectedResponse);
+            .attach(
+              'file',
+              buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id),
+              'import_exceptions.ndjson'
+            )
+            .expect(200);
 
           const { body } = await endpointOpsAnalystSupertest
             .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
             .set('kbn-xsrf', 'true')
             .on('error', createSupertestErrorLogger(log))
             .query({
-              list_id: listId,
+              list_id: 'endpoint_list',
               namespace_type: 'agnostic',
+              per_page: 50,
             })
             .send()
             .expect(200);
 
+          // After import - all items should be returned on a GET `find` request.
           expect(body.data.length).to.eql(3);
 
-          await endpointArtifactTestResources.deleteList(listId);
+          for (const endpointException of body.data) {
+            expect(endpointException.tags).to.include.string(GLOBAL_ARTIFACT_TAG);
+          }
+
+          await endpointArtifactTestResources.deleteList(
+            ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          );
         });
       });
-    });
+    }
   });
 }
