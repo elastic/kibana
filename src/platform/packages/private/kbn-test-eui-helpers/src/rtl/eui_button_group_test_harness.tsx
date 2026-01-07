@@ -12,13 +12,6 @@ import { screen, within, fireEvent } from '@testing-library/react';
 export class EuiButtonGroupTestHarness {
   #testId: string;
 
-  /**
-   * Returns button group or throws
-   */
-  get #buttonGroup() {
-    return screen.getByTestId(this.#testId);
-  }
-
   constructor(testId: string) {
     this.#testId = testId;
   }
@@ -31,31 +24,43 @@ export class EuiButtonGroupTestHarness {
   }
 
   /**
-   * Returns button group if found, otherwise `null`
+   * Returns button group element if found, otherwise `null`.
    */
-  public get self() {
+  public getElement(): HTMLElement | null {
     return screen.queryByTestId(this.#testId);
   }
 
   /**
-   * Returns all options of button groups
+   * Returns all options of button groups.
+   * Returns empty array if button group is not found.
    */
-  public get options() {
-    return within(this.#buttonGroup).getAllByRole('button');
+  public getOptions(): HTMLButtonElement[] {
+    const el = this.getElement();
+    if (!el) return [];
+    return within(el).getAllByRole('button');
   }
 
   /**
-   * Returns selected option of button group
+   * Returns selected option of button group, or `null` if none is selected or button group is not found.
    */
-  public get selected() {
-    return within(this.#buttonGroup).getByRole('button', { pressed: true });
+  public getSelected(): HTMLButtonElement | null {
+    const el = this.getElement();
+    if (!el) return null;
+    return within(el).queryByRole('button', { pressed: true });
   }
 
   /**
    * Select option from group
    */
   public select(optionName: string | RegExp) {
-    const option = within(this.#buttonGroup).getByRole('button', { name: optionName });
+    const el = this.getElement();
+    if (!el) {
+      throw new Error(`Expected button group "${this.#testId}" to exist`);
+    }
+    const option = within(el).queryByRole('button', { name: optionName });
+    if (!option) {
+      throw new Error(`Expected button group option "${String(optionName)}" to exist`);
+    }
     fireEvent.click(option);
   }
 }
