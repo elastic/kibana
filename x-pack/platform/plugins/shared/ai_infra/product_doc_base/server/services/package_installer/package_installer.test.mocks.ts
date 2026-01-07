@@ -7,6 +7,7 @@
 
 export const validateArtifactArchiveMock = jest.fn();
 export const fetchArtifactVersionsMock = jest.fn();
+export const fetchSecurityLabsVersionsMock = jest.fn();
 export const createIndexMock = jest.fn();
 export const populateIndexMock = jest.fn();
 
@@ -16,6 +17,7 @@ jest.doMock('./steps', () => {
     ...actual,
     validateArtifactArchive: validateArtifactArchiveMock,
     fetchArtifactVersions: fetchArtifactVersionsMock,
+    fetchSecurityLabsVersions: fetchSecurityLabsVersionsMock,
     createIndex: createIndexMock,
     populateIndex: populateIndexMock,
   };
