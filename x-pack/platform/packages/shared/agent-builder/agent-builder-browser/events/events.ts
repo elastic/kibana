@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { TestBed } from '@kbn/test-jest-helpers';
-export { registerTestBed } from '@kbn/test-jest-helpers';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+
+// will have additional events later
+export type BrowserChatEvent = ChatEvent;
