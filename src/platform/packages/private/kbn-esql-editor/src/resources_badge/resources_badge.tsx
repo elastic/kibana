@@ -1,0 +1,257 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import { monaco } from '@kbn/monaco';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { Parser } from '@kbn/esql-language';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { ESQLSourceResult } from '@kbn/esql-types';
+import { findCommandStringPosition } from './utils';
+
+/**
+ * Hook to register a custom command in the ESQL editor for creating a resources badge.
+ * @param editorRef
+ * @param editorModel
+ * @param query
+ * @param getSources
+ */
+export const useResourcesBadge = (
+  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>,
+  editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
+  query: AggregateQuery,
+  getSources?: () => Promise<ESQLSourceResult[]>
+) => {
+  const { euiTheme } = useEuiTheme();
+  const resourcesOpenStatusRef = useRef<boolean>(false);
+  const resourcesFromBadgeClassName = 'resourcesFromBadge';
+  const resourcesWhereBadgeClassName = 'resourcesWhereBadge';
+
+  const resourcesBadgeStyle = css`
+    .${resourcesFromBadgeClassName} {
+      cursor: pointer;
+      display: inline-block;
+      vertical-align: middle;
+      padding-block: 0px;
+      padding-inline: 2px;
+      max-inline-size: 100%;
+      font-size: 0.8571rem;
+      line-height: 18px;
+      font-weight: 500;
+      white-space: nowrap;
+      text-decoration: none;
+      border-radius: 3px;
+      text-align: start;
+      border-width: 1px;
+      border-style: solid;
+      color: ${euiTheme.colors.plainLight} !important;
+      background-color: ${euiTheme.colors.primary};
+    }
+    .${resourcesWhereBadgeClassName} {
+      cursor: pointer;
+      display: inline-block;
+      vertical-align: middle;
+      padding-block: 0px;
+      padding-inline: 2px;
+      max-inline-size: 100%;
+      font-size: 0.8571rem;
+      line-height: 18px;
+      font-weight: 500;
+      white-space: nowrap;
+      text-decoration: none;
+      border-radius: 3px;
+      text-align: start;
+      border-width: 1px;
+      border-style: solid;
+      color: ${euiTheme.colors.plainLight} !important;
+      background-color: ${euiTheme.colors.accent};
+    }
+  `;
+
+  const addResourcesDecorator = useCallback(() => {
+    // we need to remove the previous decorations first
+    const lineCount = editorModel.current?.getLineCount() || 1;
+    for (let i = 1; i <= lineCount; i++) {
+      const decorations = editorRef.current?.getLineDecorations(i) ?? [];
+      editorRef?.current?.removeDecorations(decorations.map((d) => d.id));
+    }
+
+    const { root } = Parser.parse(query.esql);
+    const fromCommand = root.commands.find((command) => command.name === 'from');
+    const whereCommand = root.commands.find((command) => command.name === 'where');
+
+    const fromStringPosition = fromCommand ? findCommandStringPosition(query.esql, 'from') : undefined;
+    const whereStringPosition = whereCommand ? findCommandStringPosition(query.esql, 'where') : undefined;
+    if (!fromStringPosition && !whereStringPosition) {
+      return;
+    }
+
+    const collections = [];
+
+    if (fromStringPosition) {
+      collections.push(
+        {
+          range: new monaco.Range(
+            fromStringPosition.startLineNumber,
+            fromStringPosition.min + 1,
+            fromStringPosition.endLineNumber,
+            fromStringPosition.max
+          ),
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: resourcesFromBadgeClassName,
+          },
+        },
+      );
+    }
+    if (whereStringPosition) {
+      collections.push(
+        {
+          range: new monaco.Range(
+            whereStringPosition.startLineNumber,
+            whereStringPosition.min + 1,
+            whereStringPosition.endLineNumber,
+            whereStringPosition.max
+          ),
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: resourcesWhereBadgeClassName,
+          },
+        },
+      );
+    }
+
+    editorRef?.current?.createDecorationsCollection(collections);
+  }, [editorModel, editorRef, query.esql]);
+
+  useEffect(
+    function updateOnQueryChange() {
+      addResourcesDecorator();
+    },
+    [query.esql, addResourcesDecorator]
+  );
+
+  const resourcesLabelClickHandler = useCallback(
+    (e: monaco.editor.IEditorMouseEvent) => {
+      const mousePosition = e.target.position;
+      if (!mousePosition) return;
+
+      const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
+      if (!currentWord) return;
+      const fromStringPosition = findCommandStringPosition(query.esql, 'from');
+      const whereStringPosition = findCommandStringPosition(query.esql, 'where');
+
+      if (
+        currentWord.word === 'FROM' &&
+        fromStringPosition.startLineNumber === mousePosition.lineNumber &&
+        currentWord.startColumn >= fromStringPosition.min &&
+        currentWord.endColumn <= fromStringPosition.max
+      ) {
+        // Move cursor to position after "FROM "
+        const positionAfterCommand = new monaco.Position(
+            fromStringPosition.startLineNumber,
+            fromStringPosition.max + 1
+          )
+        editorRef.current?.setPosition(positionAfterCommand);
+        editorRef.current?.revealPosition(positionAfterCommand);
+
+        // Trigger autocomplete suggestions
+        setTimeout(() => {
+          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        }, 0);
+      }
+      if (
+        currentWord.word === 'WHERE' &&
+        whereStringPosition.startLineNumber === mousePosition.lineNumber &&
+        currentWord.startColumn >= whereStringPosition.min &&
+        currentWord.endColumn <= whereStringPosition.max
+      ) {
+        // Move cursor to position after "WHERE "
+        const positionAfterCommand = new monaco.Position(
+            whereStringPosition.startLineNumber,
+            whereStringPosition.max + 1
+          );
+        editorRef.current?.setPosition(positionAfterCommand);
+        editorRef.current?.revealPosition(positionAfterCommand);
+
+        // Trigger autocomplete suggestions
+        setTimeout(() => {
+          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        }, 0);
+      }
+    },
+    [editorModel, editorRef, query.esql]
+  );
+
+  const resourcesLabelKeyDownHandler = useCallback(
+    (e: monaco.IKeyboardEvent) => {
+      const currentPosition = editorRef.current?.getPosition();
+      if (!currentPosition) return;
+      const currentWord = editorModel.current?.getWordAtPosition(currentPosition);
+      if (!currentWord) return;
+      const fromStringPosition = findCommandStringPosition(query.esql, 'from');
+      const whereStringPosition = findCommandStringPosition(query.esql, 'where');
+      // Open the popover on arrow down key press
+      if (
+        e.keyCode === monaco.KeyCode.DownArrow &&
+        !resourcesOpenStatusRef.current &&
+        currentWord.word === 'FROM' &&
+        fromStringPosition.startLineNumber === currentPosition.lineNumber &&
+        currentWord.startColumn >= fromStringPosition.min &&
+        currentWord.endColumn <= fromStringPosition.max
+      ) {
+        e.preventDefault();
+        // Move cursor to position after "FROM "
+        const positionAfterFrom = new monaco.Position(
+          fromStringPosition.startLineNumber,
+          fromStringPosition.max + 1
+        );
+        editorRef.current?.setPosition(positionAfterFrom);
+        editorRef.current?.revealPosition(positionAfterFrom);
+
+        // Trigger autocomplete suggestions
+        setTimeout(() => {
+          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        }, 0);
+      }
+      if (
+        e.keyCode === monaco.KeyCode.DownArrow &&
+        !resourcesOpenStatusRef.current &&
+        currentWord.word === 'WHERE' &&
+        whereStringPosition.startLineNumber === currentPosition.lineNumber &&
+        currentWord.startColumn >= whereStringPosition.min &&
+        currentWord.endColumn <= whereStringPosition.max
+      ) {
+        e.preventDefault();
+        // Move cursor to position after "WHERE "
+        const positionAfterWhere = new monaco.Position(
+          whereStringPosition.startLineNumber,
+          whereStringPosition.max + 1
+        );
+        editorRef.current?.setPosition(positionAfterWhere);
+        editorRef.current?.revealPosition(positionAfterWhere);
+
+        // Trigger autocomplete suggestions
+        setTimeout(() => {
+          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        }, 0);
+      }
+    },
+    [editorModel, editorRef, query.esql]
+  );
+
+  return {
+    addResourcesDecorator,
+    resourcesBadgeStyle,
+    resourcesLabelClickHandler,
+    resourcesLabelKeyDownHandler,
+  };
+};

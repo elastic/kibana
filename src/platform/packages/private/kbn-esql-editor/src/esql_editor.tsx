@@ -90,8 +90,7 @@ import {
 } from './custom_editor_commands';
 import { IndicesBrowserPopup } from './indices_browser/indices_browser_popup';
 import { FieldsBrowserPopup } from './fields_browser/fields_browser_popup';
-import { useResourcesCommand } from './popover_elements/open_resources_popover';
-import { DatePickerPopover } from './popover_elements/date_picker';
+import { useResourcesBadge } from './resources_badge/resources_badge';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -181,10 +180,8 @@ const ESQLEditorInternal = function ESQLEditor({
     'resizableContainerHeight',
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
-  const [datePickerPopoverPosition, setDatePickerPopoverPosition] = useState<{
-    top?: number;
-    left?: number;
-  }>({});
+  const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
+  const [timePickerDate, setTimePickerDate] = useState(moment());
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
@@ -391,7 +388,15 @@ const ESQLEditorInternal = function ESQLEditor({
         absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
       }
 
-      setDatePickerPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      // Set time picker date to the nearest half hour
+      setTimePickerDate(
+        moment()
+          .minute(Math.round(moment().minute() / 30) * 30)
+          .second(0)
+          .millisecond(0)
+      );
+
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
       popoverRef.current?.focus();
     }
@@ -674,10 +679,7 @@ const ESQLEditorInternal = function ESQLEditor({
     resourcesLabelClickHandler,
     resourcesLabelKeyDownHandler,
     addResourcesDecorator,
-    closeResourcesPopover,
-    ResourcesPopover,
-    resourcesOpenStatusRef,
-  } = useResourcesCommand(
+  } = useResourcesBadge(
     editorRef,
     editorModel,
     query,
@@ -1041,13 +1043,7 @@ const ESQLEditorInternal = function ESQLEditor({
         onOpenIndicesBrowser: enableIndicesBrowser ? openIndicesBrowser : undefined,
         onOpenFieldsBrowser: enableIndicesBrowser ? openFieldsBrowser : undefined,
       }),
-    [
-      esqlCallbacks,
-      telemetryCallbacks,
-      enableIndicesBrowser,
-      openIndicesBrowser,
-      openFieldsBrowser,
-    ]
+    [esqlCallbacks, telemetryCallbacks, enableIndicesBrowser, openIndicesBrowser, openFieldsBrowser]
   );
 
   const hoverProvider = useMemo(
@@ -1258,7 +1254,6 @@ const ESQLEditorInternal = function ESQLEditor({
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             setIsCodeEditorExpandedFocused(false);
-            closeResourcesPopover();
           }}
         >
           <div css={styles.resizableContainer}>
@@ -1340,14 +1335,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     addTabKeybindingRules();
 
                     editor.onMouseDown((e) => {
-                      setTimeout(() => {
-                        if (!resourcesOpenStatusRef.current) {
-                          editor.focus();
-                        }
-                      }, 100);
-                      if (datePickerOpenStatusRef.current) {
-                        setDatePickerPopoverPosition({});
-                      }
+                      resourcesLabelClickHandler(e);
                     });
 
                     editor.onKeyDown((e) => {
@@ -1466,16 +1454,77 @@ const ESQLEditorInternal = function ESQLEditor({
         toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
         hideQuickSearch={hideQuickSearch}
       />
+      {createPortal(
+        Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
+          <div
+            tabIndex={0}
+            style={{
+              ...popoverPosition,
+              backgroundColor: theme.euiTheme.colors.emptyShade,
+              borderRadius: theme.euiTheme.border.radius.small,
+              position: 'absolute',
+              overflow: 'auto',
+              zIndex: 1001,
+              border: theme.euiTheme.border.thin,
+            }}
+            ref={popoverRef}
+            data-test-subj="ESQLEditor-timepicker-popover"
+          >
+            <EuiDatePicker
+              selected={timePickerDate}
+              autoFocus
+              onChange={(date) => {
+                if (date) {
+                  setTimePickerDate(date);
+                }
+              }}
+              onSelect={(date, event) => {
+                if (date && event) {
+                  const currentCursorPosition = editorRef.current?.getPosition();
+                  const lineContent = editorModel.current?.getLineContent(
+                    currentCursorPosition?.lineNumber ?? 0
+                  );
+                  const contentAfterCursor = lineContent?.substring(
+                    (currentCursorPosition?.column ?? 0) - 1,
+                    lineContent.length + 1
+                  );
 
-      <DatePickerPopover
-        editorRef={editorRef}
-        editorModel={editorModel}
-        position={datePickerPopoverPosition}
-        popoverRef={popoverRef}
-        setPopoverPosition={setDatePickerPopoverPosition}
-        datePickerOpenStatusRef={datePickerOpenStatusRef}
-      />
-      <ResourcesPopover />
+                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
+                  editorRef.current?.executeEdits('time', [
+                    {
+                      range: {
+                        startLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        startColumn: currentCursorPosition?.column ?? 0,
+                        endLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        endColumn: (currentCursorPosition?.column ?? 0) + addition.length + 1,
+                      },
+                      text: addition,
+                      forceMoveMarkers: true,
+                    },
+                  ]);
+
+                  setPopoverPosition({});
+
+                  datePickerOpenStatusRef.current = false;
+
+                  // move the cursor past the date we just inserted
+                  editorRef.current?.setPosition({
+                    lineNumber: currentCursorPosition?.lineNumber ?? 0,
+                    column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
+                  });
+                  // restore focus to the editor
+                  editorRef.current?.focus();
+                }
+              }}
+              inline
+              showTimeSelect={true}
+              shadow={true}
+            />
+          </div>
+        ),
+        document.body
+      )}
+
       {enableIndicesBrowser && (
         <>
           <IndicesBrowserPopup
