@@ -91,7 +91,7 @@ export const getAgentPromptStorageState = ({
   input: ConverseInput;
   conversation?: Conversation;
 }): PromptStorageState => {
-  const state: PromptStorageState = conversation?.prompt_state ?? {
+  const state: PromptStorageState = conversation?.state?.prompt ?? {
     responses: {},
   };
 

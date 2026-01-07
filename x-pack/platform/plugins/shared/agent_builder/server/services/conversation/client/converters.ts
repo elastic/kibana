@@ -104,7 +104,7 @@ export const fromEs = (document: Document): Conversation => {
     ...base,
     rounds: deserializeStepResults(rounds),
     ...(document._source!.attachments && { attachments: document._source!.attachments }),
-    ...(document._source!.prompt_state && { prompt_state: document._source!.prompt_state }),
+    ...(document._source!.state && { state: document._source!.state }),
   };
 };
 
@@ -125,7 +125,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
-    prompt_state: conversation.prompt_state,
+    state: conversation.state,
   };
 };
 
@@ -171,5 +171,6 @@ export const createRequestToEs = ({
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
+    state: conversation.state,
   };
 };

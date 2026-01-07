@@ -250,7 +250,15 @@ export interface Conversation {
    * Internal representation of the prompt storage state for the conversation.
    * Keeps track of which prompts have been answered and the response.
    */
-  prompt_state?: PromptStorageState;
+  state?: ConversationInternalState;
+}
+
+/**
+ * Internal storage for the conversation's arbitrary state.
+ * Used for example to keep track of the prompt responses.
+ */
+export interface ConversationInternalState {
+  prompt?: PromptStorageState;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

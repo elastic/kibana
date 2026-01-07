@@ -17,6 +17,8 @@ import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/ag
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { StructuredTool } from '@langchain/core/tools';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
@@ -190,7 +192,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      promptState: promptManager.dump(),
+      getConversationState: () => getConversationState({ promptManager }),
       pendingRound,
       startTime,
       modelProvider,
@@ -211,6 +213,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   return {
     round,
+  };
+};
+
+const getConversationState = ({
+  promptManager,
+}: {
+  promptManager: PromptManager;
+}): ConversationInternalState => {
+  return {
+    prompt: promptManager.dump(),
   };
 };
 
