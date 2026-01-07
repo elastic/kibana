@@ -123,15 +123,6 @@ interface StreamsSignificantEventsCreatedProps {
   stream_type: StreamType;
 }
 
-interface StreamsFeatureIdentificationIdentifiedProps {
-  count: number;
-  count_by_type: CountByFeatureType;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
   count_by_type: CountByFeatureType;
@@ -202,7 +193,6 @@ export {
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
-  type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,

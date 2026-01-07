@@ -25,6 +25,9 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   remove_by_prefix: { from: 'fields' },
   remove: { from: 'field', where: 'if' },
   replace: { from: 'field', to: 'target_field', where: 'if' },
+  uppercase: { from: 'field', to: 'target_field', where: 'if' },
+  lowercase: { from: 'field', to: 'target_field', where: 'if' },
+  trim: { from: 'field', to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 

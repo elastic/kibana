@@ -28,7 +28,7 @@ export async function startHistoricalDataUpload({
   from: number;
   to: number;
 }) {
-  const { logger, clients, kibanaClient } = await bootstrap(runOptions);
+  const { logger, clients, kibanaClient, esClient } = await bootstrap(runOptions);
 
   const files = runOptions.files;
 
@@ -50,7 +50,7 @@ export async function startHistoricalDataUpload({
     await Promise.all(
       scenarios.map(async (scenario) => {
         if (scenario.teardown) {
-          return scenario.teardown(clients, kibanaClient);
+          return scenario.teardown(clients, kibanaClient, esClient);
         }
       })
     );
@@ -61,7 +61,7 @@ export async function startHistoricalDataUpload({
   await Promise.all(
     scenarios.map(async (scenario) => {
       if (scenario.bootstrap) {
-        return scenario.bootstrap(clients, kibanaClient);
+        return scenario.bootstrap(clients, kibanaClient, esClient);
       }
     })
   );
