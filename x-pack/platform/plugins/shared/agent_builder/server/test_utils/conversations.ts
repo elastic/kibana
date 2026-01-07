@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { type Conversation } from '@kbn/agent-builder-common';
+import {
+  type Conversation,
+  type ConversationRound,
+  ConversationRoundStatus,
+} from '@kbn/agent-builder-common';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {
@@ -24,6 +28,26 @@ export const createEmptyConversation = (parts: Partial<Conversation> = {}): Conv
     user: {
       id: 'unknown',
       username: 'unknown',
+    },
+    ...parts,
+  };
+};
+
+export const createRound = (parts: Partial<ConversationRound>): ConversationRound => {
+  return {
+    id: 'id',
+    status: ConversationRoundStatus.inProgress,
+    input: { message: 'user message' },
+    response: { message: 'assistant response' },
+    steps: [],
+    started_at: new Date().toISOString(),
+    time_to_first_token: 0,
+    time_to_last_token: 0,
+    model_usage: {
+      connector_id: 'unknown',
+      input_tokens: 0,
+      output_tokens: 0,
+      llm_calls: 0,
     },
     ...parts,
   };
