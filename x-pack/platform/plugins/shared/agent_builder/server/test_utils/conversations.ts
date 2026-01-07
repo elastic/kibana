@@ -13,7 +13,7 @@ export type ConversationServiceMock = jest.Mocked<ConversationService> & {
 };
 export type ConversationClientMock = jest.Mocked<ConversationClient>;
 
-export const createEmptyConversation = (): Conversation => {
+export const createEmptyConversation = (parts: Partial<Conversation> = {}): Conversation => {
   return {
     id: 'id',
     title: 'New conversation',
@@ -25,6 +25,7 @@ export const createEmptyConversation = (): Conversation => {
       id: 'unknown',
       username: 'unknown',
     },
+    ...parts,
   };
 };
 
