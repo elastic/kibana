@@ -1572,13 +1572,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(await secretExists(externalIdSecretId)).to.be(true);
 
         // Create AWS cloud connector with the secret reference
-        // Log the external ID for debugging - should be exactly 20 chars
-        // eslint-disable-next-line no-console
-        console.log(
-          `[DEBUG] externalIdSecretId: "${externalIdSecretId}" (length: ${externalIdSecretId.length})`
-        );
-
-        const createResult = await supertest
+        const { body: createResponse } = await supertest
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -1594,19 +1588,8 @@ export default function (providerContext: FtrProviderContext) {
                 },
               },
             },
-          });
-
-        // Log the response for debugging if it's not 200
-        if (createResult.status !== 200) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `[DEBUG] Create cloud connector failed with status ${createResult.status}:`,
-            JSON.stringify(createResult.body, null, 2)
-          );
-        }
-        expect(createResult.status).to.be(200);
-
-        const createResponse = createResult.body;
+          })
+          .expect(200);
 
         const connectorId = createResponse.item.id;
 
@@ -1678,7 +1661,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should delete secrets even when force deleting a connector', async () => {
-        const externalIdSecretId = `aws-force-delete-secret-${Date.now()}`;
+        // External ID must be exactly 20 chars to match EXTERNAL_ID_REGEX validation /^[a-zA-Z0-9_-]{20}$/
+        const timestamp = Date.now().toString();
+        const externalIdSecretId = `forcedl${timestamp.slice(-13)}`; // 'forcedl' (7) + 13 digits = 20 chars
         const secretValue = 'test-force-delete-value';
 
         // Create the secret in .fleet-secrets index
