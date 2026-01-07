@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+const fiveMinutesInMs = 5 * 60 * 1000;
+
+export function isStale(taskCreatedAt: string) {
+  const createdAt = new Date(taskCreatedAt).getTime();
+  const now = Date.now();
+  return now - createdAt > fiveMinutesInMs;
+}
