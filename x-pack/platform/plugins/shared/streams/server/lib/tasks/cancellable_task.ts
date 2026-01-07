@@ -26,8 +26,12 @@ export function cancellableTask(
     try {
       let intervalId: NodeJS.Timeout;
       const cancellationPromise = new Promise<'canceled'>((resolve) => {
+        taskContext.logger.debug('Starting cancellable task check loop');
         intervalId = setInterval(async () => {
           const task = await taskClient.get(runContext.taskInstance.id);
+          taskContext.logger.trace(
+            `Cancellable task check loop for task ${runContext.taskInstance.id}: status is ${task.status}`
+          );
           if (task.status === 'being_canceled') {
             runContext.abortController.abort();
             await taskClient.update({
@@ -39,14 +43,19 @@ export function cancellableTask(
         }, 5000);
       });
 
+      taskContext.logger.debug(
+        `Running task ${runContext.taskInstance.id} with cancellation support (race)`
+      );
       const result = await Promise.race([run(), cancellationPromise]).finally(() => {
         clearInterval(intervalId);
       });
 
       if (result === 'canceled') {
+        taskContext.logger.debug(`Task ${runContext.taskInstance.id} canceled`);
         return undefined;
       }
 
+      taskContext.logger.debug(`Task ${runContext.taskInstance.id} completed`);
       return result;
     } catch (error) {
       taskContext.logger.error(`Task ${runContext.taskInstance.id} failed unexpectedly`, { error });
