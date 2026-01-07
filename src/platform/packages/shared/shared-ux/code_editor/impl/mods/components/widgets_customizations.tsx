@@ -25,9 +25,6 @@ export const EditorWidgetsCustomizations: FC<
   }>
 > = ({ children, editor, enableSuggestWidgetRepositioning }) => {
   const { euiTheme } = useEuiTheme();
-  const headerOffset = useRef(
-    'var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))'
-  );
 
   /**
    * @description Repositioning handlers for widgets of interest, assumes the widget has the the "onDidShow" and "onDidHide" methods,
@@ -60,7 +57,7 @@ export const EditorWidgetsCustomizations: FC<
             // Save original position
             originalTopPosition = $widgetNode.style.top;
             // Apply repositioned top to avoid header overlap
-            $widgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset.current} + ${euiTheme.size.m}))`;
+            $widgetNode.style.top = `max(${originalTopPosition}, calc(var(--kbn-layout--application-top, 0px) + ${euiTheme.size.m}))`;
             // Make visible AFTER positioning is complete
             $widgetNode.style.removeProperty('visibility');
           }

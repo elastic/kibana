@@ -204,6 +204,7 @@ export function MonacoEditor({
   }, [euiTheme]);
 
   const initMonaco = () => {
+    console.log('*** MonacoEditor: initMonaco called', overflowWidgetsDomNode.current);
     const finalValue = value !== null ? value : defaultValue;
 
     if (containerElement.current && overflowWidgetsDomNode.current) {
