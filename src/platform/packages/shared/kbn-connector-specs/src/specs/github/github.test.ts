@@ -1223,6 +1223,56 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getPullRequestComments action', () => {
+    it('should get pull request comments', async () => {
+      const mockResponse = {
+        data: [
+          {
+            id: 1,
+            body: 'This is a review comment',
+            user: {
+              login: 'user1',
+              id: 123,
+            },
+            path: 'src/file.ts',
+            line: 42,
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
+          },
+          {
+            id: 2,
+            body: 'This is another review comment',
+            user: {
+              login: 'user2',
+              id: 456,
+            },
+            path: 'src/other.ts',
+            line: 10,
+            created_at: '2024-01-02T00:00:00Z',
+            updated_at: '2024-01-02T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getPullRequestComments.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/pulls/123/comments',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
