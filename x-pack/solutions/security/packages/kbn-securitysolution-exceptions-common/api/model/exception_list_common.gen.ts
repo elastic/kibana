@@ -467,6 +467,7 @@ export const EndpointListProperties = z.object({
  
       */
   entries: ExceptionListItemEntryArray.optional(),
+  os_types: ExceptionListItemOsTypeArray.optional().default([]),
   tags: EndpointArtifactTags.optional(),
 });
 
@@ -682,6 +683,7 @@ export const EventFiltersProperties = z.object({
  
       */
   entries: ExceptionListItemEntryArray.optional(),
+  os_types: ExceptionListItemOsTypeArray.optional().default([]),
   tags: EndpointArtifactTags.optional(),
 });
 

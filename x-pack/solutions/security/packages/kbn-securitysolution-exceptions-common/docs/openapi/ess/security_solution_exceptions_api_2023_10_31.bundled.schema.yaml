@@ -3054,6 +3054,9 @@ components:
             - endpoint_list
           example: endpoint_list
           type: string
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
         tags:
           $ref: '#/components/schemas/EndpointArtifactTags'
       required:
@@ -3079,6 +3082,9 @@ components:
             - endpoint_event_filters
           example: endpoint_event_filters
           type: string
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
         tags:
           $ref: '#/components/schemas/EndpointArtifactTags'
       required:

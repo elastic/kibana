@@ -13,6 +13,7 @@ import {
   CreateExceptionListItemRequestBody,
   CreateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import type { EntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
@@ -86,12 +87,17 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
             });
           }
 
+          // Cast to io-ts types for compatibility with downstream functions
+          const entriesArray = entries as EntriesArray;
+          const osTypesArray = (osTypes ?? []) as OsTypeArray;
+          const tagsArray = tags ?? [];
+
           if (exceptionList.type === 'endpoint') {
-            const error = validateEndpointExceptionItemEntries(request.body.entries);
+            const error = validateEndpointExceptionItemEntries(entriesArray);
             if (error != null) {
               return siemResponse.error(error);
             }
-            for (const entry of entries) {
+            for (const entry of entriesArray) {
               if (endpointDisallowedFields.includes(entry.field)) {
                 return siemResponse.error({
                   body: `cannot add endpoint exception item on field ${entry.field}`,
@@ -104,15 +110,15 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
           const createdListItem = await exceptionLists.createExceptionListItem({
             comments,
             description,
-            entries,
+            entries: entriesArray,
             expireTime,
             itemId,
             listId,
             meta,
             name,
             namespaceType,
-            osTypes,
-            tags,
+            osTypes: osTypesArray,
+            tags: tagsArray,
             type,
           });
 

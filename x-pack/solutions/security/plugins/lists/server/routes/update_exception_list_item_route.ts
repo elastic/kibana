@@ -12,6 +12,7 @@ import {
   UpdateExceptionListItemRequestBody,
   UpdateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import type { EntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
@@ -72,20 +73,25 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             });
           }
 
+          // Cast to io-ts types for compatibility with downstream functions
+          const entriesArray = entries as EntriesArray;
+          const osTypesArray = (osTypes ?? []) as OsTypeArray;
+          const tagsArray = tags ?? [];
+
           const exceptionLists = await getExceptionListClient(context);
           const exceptionListItem = await exceptionLists.updateOverwriteExceptionListItem({
             _version,
             comments,
             description,
-            entries,
+            entries: entriesArray,
             expireTime,
             id,
             itemId,
             meta,
             name,
             namespaceType,
-            osTypes,
-            tags,
+            osTypes: osTypesArray,
+            tags: tagsArray,
             type,
           });
 

@@ -567,6 +567,9 @@ components:
             Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
 
             **Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
         tags:
           $ref: '#/components/schemas/EndpointArtifactTags'
       required:
@@ -849,6 +852,9 @@ components:
             **Flexible field support:** Any event field name is allowed (e.g., `process.name`, `file.path`, `event.action`, `dns.question.name`, etc.)
 
             **Minimum requirement:** At least 1 entry required
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
         tags:
           $ref: '#/components/schemas/EndpointArtifactTags'
       required:
