@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboard.waitForRenderComplete();
+      const panelCountBefore = await dashboard.getPanelCount();
 
       await retry.try(async () => {
         const panelCount = await dashboard.getPanelCount();
@@ -74,10 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create the control
       await testSubjects.click('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
-
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);
       });
 
       // Check Lens editor has been updated accordingly

@@ -7,7 +7,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { AgentNotFoundError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
@@ -87,9 +87,7 @@ export async function sendUpgradeAgentsActions(
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
-        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
-          `Cannot find agent ${maybeAgent.id}`
-        );
+        outgoingErrors[maybeAgent.id] = new AgentNotFoundError(`Agent ${maybeAgent.id} not found`);
       } else {
         givenAgents.push(maybeAgent);
       }

@@ -14,8 +14,8 @@ export interface DataConnectorAPIResponse {
   name: string;
   type: string;
   stackConnectors: string[];
-  workflowIds: string[];
-  toolIds: string[];
+  agentTools: string[];
+  workflows: string[];
 }
 
 export function convertSOtoAPIResponse(
@@ -26,14 +26,14 @@ export function convertSOtoAPIResponse(
     name: savedObject.attributes.name,
     type: savedObject.attributes.type,
     stackConnectors: savedObject.attributes.kscIds,
-    workflowIds: savedObject.attributes.workflowIds,
-    toolIds: savedObject.attributes.toolIds,
+    agentTools: savedObject.attributes.toolIds,
+    workflows: savedObject.attributes.workflowIds,
   };
 }
 
 export const createDataConnectorRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
-  name: schema.maybe(schema.string({ minLength: 1 })),
-  token: schema.maybe(schema.string({ minLength: 1 })), // in the future, this can be either token or username&password
+  name: schema.string({ minLength: 1 }),
+  token: schema.string({ minLength: 1 }), // in the future, this can be either token or username&password
   stack_connector_id: schema.maybe(schema.string({ minLength: 1 })),
 });

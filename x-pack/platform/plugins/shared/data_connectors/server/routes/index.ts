@@ -7,72 +7,58 @@
 
 import type {
   IRouter,
+  KibanaResponseFactory,
   Logger,
   SavedObject,
   SavedObjectsFindResponse,
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import {
+  createConnectorAndRelatedResources,
+  deleteConnectorAndRelatedResources,
+} from './connectors_helpers';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { DataConnectorsServerStartDependencies } from '../types';
+import type {
+  DataConnectorsServerSetupDependencies,
+  DataConnectorsServerStartDependencies,
+} from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
 import { API_BASE_PATH } from '../../common/constants';
 
-/**
- * Builds the secrets object for a connector based on its spec
- * @param connectorType - The connector type ID (e.g., '.notion')
- * @param token - The authentication token
- * @returns The secrets object to pass to the actions client
- * @throws Error if the connector spec is not found
- * @internal exported for testing
- */
-export function buildSecretsFromConnectorSpec(
-  connectorType: string,
-  token: string
-): Record<string, string> {
-  const connectorSpec = Object.values(connectorsSpecs).find(
-    (spec) => spec.metadata.id === connectorType
-  );
-  if (!connectorSpec) {
-    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
-  }
+// Constants
+const DEFAULT_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 1000;
 
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
+function createErrorResponse(
+  response: KibanaResponseFactory,
+  message: string,
+  error: Error,
+  statusCode: number = 500
+) {
+  return response.customError({
+    statusCode,
+    body: {
+      message: `${message}: ${error.message}`,
+    },
   });
-
-  const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
-  }
-
-  return secrets;
 }
 
-export function registerRoutes(
-  router: IRouter,
-  logger: Logger,
-  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>
-) {
-  // List available connector types from Data Sources Registry
+export interface RouteDependencies {
+  router: IRouter;
+  logger: Logger;
+  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>;
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+}
+
+/**
+ * Registers all data connector routes
+ */
+export function registerRoutes(dependencies: RouteDependencies) {
+  const { router, logger, getStartServices, workflowManagement } = dependencies;
+
+  // List available source types from Data Sources Registry
   router.get(
     {
       path: `${API_BASE_PATH}/types`,
@@ -105,7 +91,7 @@ export function registerRoutes(
     }
   );
 
-  // Get a specific connector type by ID
+  // Get a specific source type by ID
   router.get(
     {
       path: `${API_BASE_PATH}/types/{id}`,
@@ -162,7 +148,7 @@ export function registerRoutes(
         },
       },
     },
-    async (context, request, response) => {
+    async (context, _request, response) => {
       const coreContext = await context.core;
 
       try {
@@ -170,7 +156,7 @@ export function registerRoutes(
         const findResult: SavedObjectsFindResponse<DataConnectorAttributes> =
           await savedObjectsClient.find({
             type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            perPage: 100,
+            perPage: DEFAULT_PAGE_SIZE,
           });
 
         const connectors = findResult.saved_objects.map((savedObject) => {
@@ -185,12 +171,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Failed to list all data connectors: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to list connectors: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to list connectors', error as Error);
       }
     }
   );
@@ -222,12 +203,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Error fetching data connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to fetch data connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to fetch data connector', error as Error);
       }
     }
   );
@@ -250,18 +226,11 @@ export function registerRoutes(
       const coreContext = await context.core;
 
       try {
-        const { name, type, token, stack_connector_id: stackConnectorId } = request.body;
-        const [, { actions, dataSourcesRegistry }] = await getStartServices();
+        const { name, type, token } = request.body;
+        const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
+        const savedObjectsClient = coreContext.savedObjects.client;
 
-        // Validate: either use existing connector OR create new one
-        if (!stackConnectorId && (!name || !token)) {
-          return response.badRequest({
-            body: {
-              message: 'Either stack_connector_id or both name and token are required',
-            },
-          });
-        }
-
+        // Validate data connector type exists
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
         if (!dataConnectorTypeDef) {
@@ -273,72 +242,28 @@ export function registerRoutes(
           });
         }
 
-        const actionsClient = await actions.getActionsClientWithRequest(request);
-        let stackConnector;
-        let dataConnectorName: string;
-
-        if (stackConnectorId) {
-          try {
-            stackConnector = await actionsClient.get({ id: stackConnectorId });
-            dataConnectorName = stackConnector.name;
-          } catch (error) {
-            logger.error(`Stack connector not found: ${stackConnectorId}`);
-            return response.notFound({
-              body: {
-                message: `Stack connector "${stackConnectorId}" not found`,
-              },
-            });
-          }
-
-          // Validate connector type matches
-          if (stackConnector.actionTypeId !== dataConnectorTypeDef.stackConnector.type) {
-            return response.badRequest({
-              body: {
-                message: `Stack connector type "${stackConnector.actionTypeId}" does not match expected type "${dataConnectorTypeDef.stackConnector.type}"`,
-              },
-            });
-          }
-        } else {
-          const connectorType = dataConnectorTypeDef.stackConnector.type;
-          const secrets = buildSecretsFromConnectorSpec(connectorType, token!);
-
-          stackConnector = await actionsClient.create({
-            action: {
-              name: `${type} stack connector for data connector '${name}'`,
-              actionTypeId: connectorType,
-              config: {},
-              secrets,
-            },
-          });
-          dataConnectorName = name!;
-          logger.info(`Created new stack connector: ${stackConnector.id}`);
-        }
-
-        // Create data connector saved object
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
-          name: dataConnectorName,
+        const dataConnectorId = await createConnectorAndRelatedResources({
+          name,
           type,
-          workflowIds: [],
-          toolIds: [],
-          kscIds: [stackConnector.id],
+          token,
+          savedObjectsClient,
+          request,
+          logger,
+          workflowManagement,
+          actions,
+          dataConnectorTypeDef,
+          agentBuilder,
         });
 
         return response.ok({
           body: {
             message: 'Data connector created successfully!',
-            dataConnectorId: savedObject.id,
-            stackConnectorId: stackConnector.id,
+            dataConnectorId,
           },
         });
       } catch (error) {
         logger.error(`Error creating data connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to create data connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to create data connector', error as Error);
       }
     }
   );
@@ -430,39 +355,61 @@ export function registerRoutes(
         const findResponse: SavedObjectsFindResponse<DataConnectorAttributes> =
           await savedObjectsClient.find({
             type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            perPage: 1000,
+            perPage: MAX_PAGE_SIZE,
           });
         const connectors = findResponse.saved_objects;
 
-        const kscIds: string[] = connectors.flatMap((connector) => connector.attributes.kscIds);
-        logger.info(
-          `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
-        );
+        logger.debug(`Found ${connectors.length} data connector(s) to delete`);
 
-        const [, { actions }] = await getStartServices();
+        if (connectors.length === 0) {
+          return response.ok({
+            body: {
+              success: true,
+              deletedCount: 0,
+              fullyDeletedCount: 0,
+              partiallyDeletedCount: 0,
+            },
+          });
+        }
+
+        // Delete all related resources and saved objects for each connector
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
-        await Promise.all(deleteKscPromises);
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-        const deletePromises = connectors.map((connector) =>
-          savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
-        );
-        await Promise.all(deletePromises);
+        let fullyDeletedCount = 0;
+        let partiallyDeletedCount = 0;
+
+        // Process each connector individually to handle partial failures
+        for (const connector of connectors) {
+          const result = await deleteConnectorAndRelatedResources({
+            connector,
+            savedObjectsClient,
+            actionsClient,
+            toolRegistry,
+            workflowManagement,
+            request,
+            logger,
+          });
+
+          if (result.fullyDeleted) {
+            fullyDeletedCount++;
+          } else {
+            partiallyDeletedCount++;
+          }
+        }
 
         return response.ok({
           body: {
             success: true,
             deletedCount: connectors.length,
+            fullyDeletedCount,
+            partiallyDeletedCount,
           },
         });
       } catch (error) {
         logger.error(`Failed to delete all connectors: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to delete all connectors: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to delete all connectors', error as Error);
       }
     }
   );
@@ -488,28 +435,28 @@ export function registerRoutes(
           DATA_CONNECTOR_SAVED_OBJECT_TYPE,
           request.params.id
         );
-        const kscIds: string[] = savedObject.attributes.kscIds;
 
-        const [, { actions }] = await getStartServices();
+        // Delete the connector and all related resources
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        kscIds.forEach((kscId) => actionsClient.delete({ id: kscId }));
-        logger.info(`Successfully deleted Kibana stack connectors: ${kscIds.join(', ')}`);
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-        await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
-        logger.info(`Successfully deleted data connector ${savedObject.id}`);
+        const result = await deleteConnectorAndRelatedResources({
+          connector: savedObject,
+          savedObjectsClient,
+          actionsClient,
+          toolRegistry,
+          workflowManagement,
+          request,
+          logger,
+        });
+
         return response.ok({
-          body: {
-            success: true,
-          },
+          body: result,
         });
       } catch (error) {
         logger.error(`Failed to delete connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to delete connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to delete connector', error as Error);
       }
     }
   );
