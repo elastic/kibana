@@ -64,13 +64,11 @@ export class SuggestionBuilder {
     ignoredFunctions?: string[];
     addComma?: boolean;
     addSpaceAfterFunction?: boolean;
-    openSuggestions?: boolean;
     constantGeneratingOnly?: boolean;
   }): this {
     const types = options?.types ?? ['any'];
     const ignored = options?.ignoredFunctions ?? [];
     const addSpaceAfterFunction = options?.addSpaceAfterFunction;
-    const openSuggestions = options?.openSuggestions;
     const constantGeneratingOnly = options?.constantGeneratingOnly ?? false;
 
     const functionSuggestions = getFunctionsSuggestions({
@@ -81,7 +79,6 @@ export class SuggestionBuilder {
         addComma: options?.addComma,
         suggestOnlyName: this.context.options.isCursorFollowedByParens,
         addSpaceAfterFunction,
-        openSuggestions,
         constantGeneratingOnly,
       },
       context: this.context.context,

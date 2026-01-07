@@ -186,7 +186,6 @@ interface FunctionSuggestionOptions {
   ignored?: string[];
   addComma?: boolean;
   addSpaceAfterFunction?: boolean;
-  openSuggestions?: boolean;
   constantGeneratingOnly?: boolean;
   suggestOnlyName?: boolean;
 }

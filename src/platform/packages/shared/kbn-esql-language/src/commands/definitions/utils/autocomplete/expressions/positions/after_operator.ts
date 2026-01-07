@@ -245,7 +245,6 @@ async function handleIncompleteOperator(
             types: typeToUse,
             ignoredFunctions: [],
             addSpaceAfterFunction: options.addSpaceAfterOperator ?? false,
-            openSuggestions: options.openSuggestions ?? false,
           })
       );
   }
