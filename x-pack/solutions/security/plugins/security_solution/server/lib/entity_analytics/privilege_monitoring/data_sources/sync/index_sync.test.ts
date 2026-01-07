@@ -22,6 +22,8 @@ import type { SearchService } from '../../users/search';
 import type { BulkResponse } from 'elasticsearch-8.x/lib/api/types';
 
 const mockList = jest.fn();
+
+const STALE_USERS_PATH = '../../deletion_detection/stale_users';
 jest.mock('../../saved_objects', () => {
   return {
     MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
