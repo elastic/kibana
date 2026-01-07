@@ -11691,7 +11691,7 @@
             "label": "castType",
             "description": [],
             "signature": [
-              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\""
+              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"aggregate_metric_double\" | \"dense_vector\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"geohash\" | \"geohex\" | \"geotile\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/types.ts",
             "deprecated": false,
@@ -13152,6 +13152,34 @@
             "description": [],
             "signature": [
               "{ message: string; type: { name: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ValidationErrors.unknownCastingType",
+            "type": "Object",
+            "tags": [],
+            "label": "unknownCastingType",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { castType: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ValidationErrors.invalidInlineCast",
+            "type": "Object",
+            "tags": [],
+            "label": "invalidInlineCast",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { castType: string; valueType: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
             "deprecated": false,
