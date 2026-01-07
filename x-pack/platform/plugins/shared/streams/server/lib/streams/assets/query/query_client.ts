@@ -262,7 +262,7 @@ export class QueryClient {
     await this.dependencies.storageClient.clean();
   }
 
-  async getQueryLinks(names: string[]): Promise<Record<string, QueryLink[]>> {
+  async getStreamToQueryLinksMap(names: string[]): Promise<Record<string, QueryLink[]>> {
     const filters = [...termsQuery(STREAM_NAME, names), ...termQuery(ASSET_TYPE, 'query')];
 
     const assetsResponse = await this.dependencies.storageClient.search({
@@ -287,6 +287,28 @@ export class QueryClient {
     });
 
     return queriesPerName;
+  }
+
+  /**
+   * Returns all query links for a given stream or
+   * all query links if no stream is provided.
+   */
+  async getQueryLinks(name?: string): Promise<QueryLink[]> {
+    const filter = name
+      ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
+      : [...termQuery(ASSET_TYPE, 'query')];
+
+    const queriesResponse = await this.dependencies.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    });
+
+    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -360,7 +382,7 @@ export class QueryClient {
   }
 
   async getAssets(name: string): Promise<Query[]> {
-    const { [name]: queryLinks } = await this.getQueryLinks([name]);
+    const { [name]: queryLinks } = await this.getStreamToQueryLinksMap([name]);
 
     if (queryLinks.length === 0) {
       return [];
@@ -396,7 +418,7 @@ export class QueryClient {
      * - If a query is updated without a breaking change, it updates the existing rule.
      * - If a query is deleted, it removes the associated rule.
      */
-    const { [stream]: currentQueryLinks } = await this.getQueryLinks([stream]);
+    const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
@@ -468,7 +490,7 @@ export class QueryClient {
       return;
     }
 
-    const { [stream]: currentQueryLinks } = await this.getQueryLinks([stream]);
+    const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
     await this.bulk(stream, queriesToDelete);
   }
@@ -484,7 +506,7 @@ export class QueryClient {
       return;
     }
 
-    const { [stream]: currentQueryLinks } = await this.getQueryLinks([stream]);
+    const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
       operations

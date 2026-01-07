@@ -98,7 +98,51 @@ const previewSignificantEventsRoute = createServerRoute({
   },
 });
 
-const readSignificantEventsRoute = createServerRoute({
+const readAllSignificantEventsRoute = createServerRoute({
+  endpoint: 'GET /api/streams/significant_events 2023-10-31',
+  params: z.object({
+    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
+  }),
+  options: {
+    access: 'public',
+    summary: 'Read all significant events',
+    description: 'Read all significant events',
+    availability: {
+      since: '9.3.0',
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsGetResponse> => {
+    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { from, to, bucketSize } = params.query;
+
+    return await readSignificantEventsFromAlertsIndices(
+      {
+        from,
+        to,
+        bucketSize,
+      },
+      { queryClient, scopedClusterClient }
+    );
+  },
+});
+
+const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
@@ -263,7 +307,8 @@ const generateSignificantEventsRoute = createServerRoute({
 });
 
 export const significantEventsRoutes = {
-  ...readSignificantEventsRoute,
+  ...readAllSignificantEventsRoute,
+  ...readStreamSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,
 };
