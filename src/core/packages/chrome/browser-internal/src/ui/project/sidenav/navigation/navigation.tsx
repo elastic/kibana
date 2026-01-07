@@ -49,6 +49,9 @@ export interface ChromeNavigationProps {
   dataTestSubj$?: Observable<string | undefined>;
 
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
+
+  // collapse toggle callback
+  onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -75,6 +78,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         }
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
+        onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />

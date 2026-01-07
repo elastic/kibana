@@ -126,12 +126,22 @@ interface AgentBase {
   agent?: FleetServerAgentMetadata;
   unhealthy_reason?: UnhealthyReason[];
   namespaces?: string[];
+  upgrade?: AgentUpgrade;
 }
 
 export enum UnhealthyReason {
   INPUT = 'input',
   OUTPUT = 'output',
   OTHER = 'other',
+}
+
+export interface AgentUpgrade {
+  rollbacks?: AgentRollback[];
+}
+
+export interface AgentRollback {
+  valid_until: string;
+  version: string;
 }
 
 export interface AgentMetrics {
@@ -386,6 +396,10 @@ export interface FleetServerAgent {
    * The last known agent status
    */
   last_known_status?: AgentStatus;
+  /**
+   * Upgrade information including available upgrade rollbacks for the Elastic Agent
+   */
+  upgrade?: AgentUpgrade;
 }
 
 /**

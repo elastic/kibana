@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
-import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
@@ -29,6 +29,7 @@ export const EditSignificantEventFlyout = ({
   refresh,
   onFeatureIdentificationClick,
   generateOnMount,
+  aiFeatures,
 }: {
   refreshDefinition: () => void;
   refresh: () => void;
@@ -43,20 +44,22 @@ export const EditSignificantEventFlyout = ({
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onFeatureIdentificationClick: () => void;
   generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }) => {
   const {
     core: { notifications },
     services: { telemetryClient },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
   const { upsertQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
-    start,
-    end,
   });
+
+  const onCloseFlyout = () => {
+    setIsEditFlyoutOpen(false);
+    setQueryToEdit(undefined);
+    setSelectedFeatures([]);
+  };
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
@@ -65,6 +68,7 @@ export const EditSignificantEventFlyout = ({
       onFeatureIdentificationClick={onFeatureIdentificationClick}
       definition={definition}
       query={queryToEdit}
+      aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);
 
@@ -79,7 +83,7 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
 
                 telemetryClient.trackSignificantEventsCreated({
@@ -137,7 +141,7 @@ export const EditSignificantEventFlyout = ({
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
               },
               (error) => {
@@ -153,11 +157,7 @@ export const EditSignificantEventFlyout = ({
             break;
         }
       }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedFeatures([]);
-      }}
+      onClose={onCloseFlyout}
       initialFlow={initialFlow}
       initialSelectedFeatures={selectedFeatures}
       features={features}

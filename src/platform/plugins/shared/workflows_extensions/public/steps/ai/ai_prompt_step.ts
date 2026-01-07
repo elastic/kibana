@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiPromptStepCommonDefinition, AiPromptStepTypeId } from '../../../common/steps/ai';
-import type { PublicStepDefinition } from '../../step_registry/types';
+import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
 export const AiPromptStepDefinition: PublicStepDefinition = {
   ...AiPromptStepCommonDefinition,
@@ -25,6 +25,7 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
   description: i18n.translate('workflowsExtensionsExample.AiPromptStep.description', {
     defaultMessage: 'Sends a prompt to an AI connector and returns the response',
   }),
+  actionsMenuGroup: ActionsMenuGroup.ai,
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.AiPromptStep.documentation.details', {
       defaultMessage: `The ${AiPromptStepTypeId} step sends a prompt to an AI connector and returns the response. The response can be referenced in later steps using template syntax like {templateSyntax}.`,

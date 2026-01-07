@@ -108,8 +108,8 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   // Set conversation flyout active config on mount, clear on unmount
   useEffect(() => {
-    if (services.onechat?.setConversationFlyoutActiveConfig) {
-      services.onechat.setConversationFlyoutActiveConfig({
+    if (services.agentBuilder?.setConversationFlyoutActiveConfig) {
+      services.agentBuilder.setConversationFlyoutActiveConfig({
         sessionTag: 'security',
         agentId: THREAT_HUNTING_AGENT_ID,
         newConversation: false,
@@ -117,11 +117,11 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     }
 
     return () => {
-      if (services.onechat?.clearConversationFlyoutActiveConfig) {
-        services.onechat.clearConversationFlyoutActiveConfig();
+      if (services.agentBuilder?.clearConversationFlyoutActiveConfig) {
+        services.agentBuilder.clearConversationFlyoutActiveConfig();
       }
     };
-  }, [services.onechat]);
+  }, [services.agentBuilder]);
 
   return (
     <KibanaContextProvider

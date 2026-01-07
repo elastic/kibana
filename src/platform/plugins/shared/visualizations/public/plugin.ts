@@ -48,6 +48,7 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
@@ -157,6 +158,7 @@ export interface VisualizationsStartDeps {
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  cps?: CPSPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
@@ -407,6 +409,7 @@ export class VisualizationsPlugin
           serverless: pluginsStart.serverless,
           noDataPage: pluginsStart.noDataPage,
           contentManagement: pluginsStart.contentManagement,
+          cps: pluginsStart.cps,
         };
 
         params.element.classList.add(styles.visAppWrapper);
@@ -476,7 +479,9 @@ export class VisualizationsPlugin
               references: [],
             },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,

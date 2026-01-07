@@ -68,18 +68,6 @@ describe('Notebook Catalog', () => {
       it('returns default notebooks when theres an empty catalog config', async () => {
         await expect(getNotebookCatalog(staticOptions)).resolves.toMatchObject(DEFAULT_NOTEBOOKS);
       });
-      it.skip('returns requested list of notebooks when it exists', async () => {
-        // Re-enable this with actual list when we implement them
-        await expect(
-          getNotebookCatalog({ ...staticOptions, notebookList: 'ml' })
-        ).resolves.toMatchObject({
-          notebooks: [
-            NOTEBOOKS_MAP['03_elser'],
-            NOTEBOOKS_MAP['02_hybrid_search'],
-            NOTEBOOKS_MAP['04_multilingual'],
-          ],
-        });
-      });
       it('returns default list if requested list doesnt exist', async () => {
         await expect(
           getNotebookCatalog({ ...staticOptions, notebookList: 'foo' })

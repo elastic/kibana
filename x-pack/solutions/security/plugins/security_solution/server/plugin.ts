@@ -241,12 +241,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.trialCompanionMilestoneService = new TrialCompanionMilestoneServiceImpl(this.logger);
   }
 
-  private registerOnechatAttachmentsAndTools(
-    onechat: SecuritySolutionPluginSetupDependencies['onechat'],
+  private registerAgentBuilderAttachmentsAndTools(
+    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
     core: SecuritySolutionPluginCoreSetupDependencies,
     logger: Logger
   ): void {
-    if (!onechat) {
+    if (!agentBuilder) {
       return;
     }
 
@@ -264,13 +264,13 @@ export class Plugin implements ISecuritySolutionPlugin {
           return;
         }
 
-        registerTools(onechat, core, logger).catch((error) => {
+        registerTools(agentBuilder, core, logger).catch((error) => {
           this.logger.error(`Error registering security tools: ${error}`);
         });
-        registerAttachments(onechat).catch((error) => {
+        registerAttachments(agentBuilder).catch((error) => {
           this.logger.error(`Error registering security attachments: ${error}`);
         });
-        registerAgents(onechat, core, logger).catch((error) => {
+        registerAgents(agentBuilder, core, logger).catch((error) => {
           this.logger.error(`Error registering security agent: ${error}`);
         });
       })
@@ -689,7 +689,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
 
     return {
       setProductFeaturesConfigurator:
