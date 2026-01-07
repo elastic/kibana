@@ -194,7 +194,12 @@ Machine Learning::
 [[release-notes-8.19.7]]
 == {kib} 8.19.7
 
-The 8.19.7 release includes the following enhancements and fixes.
+The 8.19.7 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.19.7]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[enhancement-v8.19.7]]
