@@ -81,24 +81,20 @@ export async function loadDashboardApi({
   console.log({
     lastSavedState,
     unsavedChanges,
-    initialState: {
-      ...lastSavedState,
-      ...unsavedChanges,
-      ...overrideState,
-      panels: [
-        ...(lastSavedState.panels ?? []),
-        ...(unsavedChanges?.panels ?? []),
-        ...(overrideState?.panels ?? []),
-      ],
-    },
+    overrideState,
   });
 
-  const controlGroupInput = {
-    controls: lastSavedState.controlGroupInput?.controls ?? [],
-  };
+  const controls = lastSavedState.controlGroupInput?.controls ?? [];
   (unsavedChanges?.controlGroupInput?.controls ?? []).forEach((control, index) => {
-    controlGroupInput.controls[index] = { ...controlGroupInput.controls[index], ...control };
+    if (Object.keys(control ?? {}).length) {
+      controls[index] = { ...controls[index], ...control };
+    } else {
+      delete controls[index];
+      index--;
+    }
   });
+
+  console.log({ controls });
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
@@ -113,10 +109,10 @@ export async function loadDashboardApi({
         ...(overrideState?.panels ?? []),
       ],
       controlGroupInput: {
-        controls: [
-          ...controlGroupInput.controls,
-          ...(overrideState?.controlGroupInput?.controls ?? []),
-        ],
+        ...lastSavedState.controlGroupInput,
+        ...unsavedChanges?.controlGroupInput,
+        controls,
+        ...overrideState?.controlGroupInput,
       },
     },
     readResult,

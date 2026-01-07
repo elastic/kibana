@@ -12,8 +12,8 @@ import {
   combineLatest,
   debounceTime,
   map,
-  tap,
   type Observable,
+  tap,
   type Subject,
 } from 'rxjs';
 
@@ -111,6 +111,7 @@ export function initializeUnsavedChangesManager({
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
     .subscribe(([viewMode, dashboardChanges, childrenWithUnsavedChanges]) => {
+      console.log({ dashboardChanges });
       const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
       const hasLayoutChanges = dashboardChanges.panels;
       const hasUnsavedChanges = hasDashboardChanges || Boolean(childrenWithUnsavedChanges.length);
@@ -130,21 +131,30 @@ export function initializeUnsavedChangesManager({
 
         // Backup latest state from children that have unsaved changes
         if (childrenWithUnsavedChanges.length || hasLayoutChanges) {
-          const { panels, controlGroupInput, references } =
-            layoutManager.internalApi.serializeLayout(
-              hasLayoutChanges || !(childrenWithUnsavedChanges ?? []).length
-                ? undefined // serialized the whole layout by sending in `undefined` for the subset
-                : childrenWithUnsavedChanges
-            );
+          const {
+            panels: panelsWithUnsavedChanges = [],
+            controlGroupInput: controlsWithUnsavedChanges = { controls: [] },
+          } = layoutManager.internalApi.serializeLayout(childrenWithUnsavedChanges);
 
-          console.log({ panels, controlGroupInput, references });
+          const { panels, controlGroupInput, references } =
+            layoutManager.internalApi.serializeLayout();
+
+          console.log({
+            childrenWithUnsavedChanges,
+            panels,
+            panelsWithUnsavedChanges,
+            controlGroupInput,
+            controlsWithUnsavedChanges,
+            references,
+          });
 
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
           dashboardBackupState.references = references ?? [];
-          dashboardBackupState.panels = panels;
-          dashboardBackupState.controlGroupInput = controlGroupInput;
+          if (panelsWithUnsavedChanges.length) dashboardBackupState.panels = panels;
+          if (controlsWithUnsavedChanges.controls.length)
+            dashboardBackupState.controlGroupInput = controlGroupInput;
         }
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
