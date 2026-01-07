@@ -176,7 +176,7 @@ const generateSignificantEventsRoute = createServerRoute({
         ),
     }),
     body: z.object({
-      feature: systemSchema.optional(),
+      system: systemSchema.optional(),
     }),
   }),
   options: {
@@ -234,7 +234,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          feature: params.body?.feature,
+          system: params.body?.system,
           connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
