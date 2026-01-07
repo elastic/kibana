@@ -38,3 +38,17 @@ export type {
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+
+export {
+  createPrecisionAtKEvaluator,
+  createRecallAtKEvaluator,
+  createF1AtKEvaluator,
+  createRagEvaluators,
+} from './src/evaluators/rag';
+export type {
+  GroundTruth,
+  RagEvaluatorConfig,
+  RetrievedDocsExtractor,
+  GroundTruthExtractor,
+  RetrievedDoc,
+} from './src/evaluators/rag/types';

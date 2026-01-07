@@ -14,7 +14,7 @@ import {
 import type { Client } from '@elastic/elasticsearch';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { ApmApiClient } from '../../../../services/apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateLargeTrace } from './generate_large_trace';

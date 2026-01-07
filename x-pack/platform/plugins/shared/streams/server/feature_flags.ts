@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
@@ -40,6 +41,29 @@ export function registerFeatureFlags(
             requiresPageReload: true,
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
+          },
+        });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.significantEventsDiscoverySettingsName', {
+              defaultMessage: 'Streams significant events discovery',
+            }) as string,
+            value: false,
+            description: i18n.translate(
+              'xpack.streams.significantEventsDiscoverySettingsDescription',
+              {
+                defaultMessage: 'Enable streams significant events discovery.',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: true,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
           },
         });
       }
@@ -98,8 +122,6 @@ export function registerFeatureFlags(
       requiresPageReload: true,
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
-      readonly: true,
-      readonlyMode: 'ui',
     },
   });
 }

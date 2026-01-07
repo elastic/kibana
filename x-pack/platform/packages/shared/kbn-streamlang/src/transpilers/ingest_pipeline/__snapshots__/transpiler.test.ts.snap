@@ -181,6 +181,24 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "uppercase": Object {
+        "field": "message",
+        "target_field": "message_uppercase",
+      },
+    },
+    Object {
+      "lowercase": Object {
+        "field": "message",
+        "target_field": "message_lowercase",
+      },
+    },
+    Object {
+      "trim": Object {
+        "field": "message",
+        "target_field": "message_trimmed",
+      },
+    },
+    Object {
       "drop": Object {
         "if": "
   try {
@@ -239,6 +257,20 @@ Object {
       "set": Object {
         "field": "attributes.status",
         "value": "active",
+      },
+    },
+    Object {
+      "script": Object {
+        "description": "Math processor: price * quantity",
+        "lang": "painless",
+        "source": "ctx['total'] = ($('price', null) * $('quantity', null));",
+      },
+    },
+    Object {
+      "script": Object {
+        "description": "Math processor: attributes.price * attributes.quantity + attributes.tax",
+        "lang": "painless",
+        "source": "ctx['attributes.total'] = (($('attributes.price', null) * $('attributes.quantity', null)) + $('attributes.tax', null));",
       },
     },
     Object {

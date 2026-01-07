@@ -34,6 +34,7 @@ import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
@@ -138,6 +139,7 @@ test('creates a rules client with proper constructor arguments when security is 
       RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       API_KEY_PENDING_INVALIDATION_TYPE,
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
     ],
   });
 
@@ -200,6 +202,7 @@ test('creates a rules client with proper constructor arguments', async () => {
       RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       API_KEY_PENDING_INVALIDATION_TYPE,
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
     ],
   });
 
@@ -315,7 +318,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   expect(securityPluginStart.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
     expect.any(Object),
     {
-      metadata: { managed: true },
+      metadata: { managed: true, kibana: { type: 'alerting_rule' } },
       name: 'test',
       role_descriptors: {},
     }

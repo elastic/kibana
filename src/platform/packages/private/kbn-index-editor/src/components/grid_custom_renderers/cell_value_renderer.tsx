@@ -13,6 +13,7 @@ import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getCellValue } from '../../utils';
 
 export const getCellValueRenderer =
   (
@@ -22,8 +23,7 @@ export const getCellValueRenderer =
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
-
-    const cellValue = row.flattened[columnId]?.toString();
+    const cellValue = getCellValue(row.flattened[columnId]);
 
     const onEditStartHandler = () => {
       dataTableRef.current?.openCellPopover({
@@ -34,13 +34,15 @@ export const getCellValueRenderer =
 
     return (
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ width: '100%' }}>
           <div
             data-test-subj={`indexEditorCellValue-${rowIndex}-${colIndex}`}
             css={{
               cursor: canEditIndex ? 'pointer' : 'inherit',
               height: '100%',
               width: '100%',
+              display: 'flex',
+              alignItems: 'center',
             }}
             onClick={canEditIndex ? onEditStartHandler : undefined}
             onKeyDown={
@@ -63,7 +65,11 @@ export const getCellValueRenderer =
                   </EuiText>
                 ) : null
               ) : (
-                <EuiText size="xs" title={cellValue}>
+                <EuiText
+                  size="xs"
+                  title={cellValue}
+                  css={{ overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}
+                >
                   {cellValue}
                 </EuiText>
               )

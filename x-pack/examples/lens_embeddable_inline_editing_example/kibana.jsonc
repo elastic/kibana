@@ -17,9 +17,7 @@
       "dataViews",
       "embeddable",
       "developerExamples",
-      "kibanaReact"
-    ],
-    "requiredBundles": [
+      "kibanaReact",
       "data"
     ]
   }

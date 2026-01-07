@@ -260,12 +260,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: false,
               look_back_window: 5,
               status_change_threshold: 5,
             },
           });
 
         expect(updatedRule.flapping).eql({
+          enabled: false,
           look_back_window: 5,
           status_change_threshold: 5,
         });
@@ -310,7 +312,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(updatedRule.flapping).eql(null);
       });
 
-      it('should throw if flapping is updated when global flapping is off', async () => {
+      it('should not throw if flapping is updated when global flapping is off', async () => {
         const response = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -327,7 +329,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             status_change_threshold: 5,
           });
 
-        await supertest
+        const { body: updatedRule } = await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
           .set('kbn-xsrf', 'foo')
           .send({
@@ -341,72 +343,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 5,
               status_change_threshold: 5,
             },
-          })
-          .expect(400);
-      });
-
-      it('should allow rule to be updated when global flapping is off if not updating flapping', async () => {
-        const response = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              flapping: {
-                look_back_window: 5,
-                status_change_threshold: 5,
-              },
-            })
-          );
-
-        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
-
-        await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            enabled: false,
-            look_back_window: 5,
-            status_change_threshold: 5,
           });
 
-        await supertest
-          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'updated name 1',
-            tags: ['foo'],
-            params: {
-              foo: true,
-            },
-            schedule: { interval: '12s' },
-            actions: [],
-            throttle: '1m',
-            notify_when: 'onThrottleInterval',
-          })
-          .expect(200);
-
-        await supertest
-          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'updated name 2',
-            tags: ['foo'],
-            params: {
-              foo: true,
-            },
-            schedule: { interval: '12s' },
-            actions: [],
-            throttle: '1m',
-            notify_when: 'onThrottleInterval',
-            flapping: {
-              look_back_window: 5,
-              status_change_threshold: 5,
-            },
-          })
-          .expect(200);
+        expect(updatedRule.flapping).eql({
+          enabled: true,
+          look_back_window: 5,
+          status_change_threshold: 5,
+        });
       });
 
       it('should throw if flapping is invalid', async () => {
@@ -591,6 +538,80 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             })
           )
           .expect(400);
+      });
+    });
+
+    describe('system actions', () => {
+      const systemAction = {
+        id: 'system-connector-test.system-action',
+        params: {},
+      };
+
+      it('should throw 400 when updating a rule to use the same system action twice', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Updated rule',
+            tags: [],
+            schedule: { interval: '12s' },
+            throttle: null,
+            params: {},
+            actions: [systemAction, systemAction],
+          })
+          .expect(400);
+      });
+
+      it('should allow updating a rule with multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
+        const multipleSystemAction = {
+          id: 'system-connector-test.system-action-allow-multiple',
+          params: {},
+        };
+
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Updated rule',
+            tags: [],
+            schedule: { interval: '12s' },
+            throttle: null,
+            params: {},
+            actions: [multipleSystemAction, multipleSystemAction],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.actions.length).to.eql(2);
+
+        const action1 = response.body.actions[0];
+        const action2 = response.body.actions[1];
+
+        expect(action1.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action1.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action1.uuid).to.not.be(undefined);
+
+        expect(action2.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action2.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action2.uuid).to.not.be(undefined);
+
+        // UUIDs should be different
+        expect(action1.uuid).to.not.eql(action2.uuid);
       });
     });
   });

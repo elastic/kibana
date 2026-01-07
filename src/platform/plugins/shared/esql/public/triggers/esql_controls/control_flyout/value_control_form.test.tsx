@@ -12,7 +12,7 @@ import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
@@ -62,6 +62,10 @@ describe('ValueControlForm', () => {
     data: dataMock,
   };
 
+  services.core.http.get = jest
+    .fn()
+    .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
+
   const defaultProps = {
     initialVariableType: ESQLVariableType.TIME_LITERAL,
     queryString: 'FROM foo | STATS BY BUCKET(@timestamp,)',
@@ -104,13 +108,6 @@ describe('ValueControlForm', () => {
       // variable label input should be rendered and with the default value (empty)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('');
 
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Medium'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
       // control type radio should be rendered and default to 'single'
       const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
       expect(selectionTypeContainer).toBeInTheDocument();
@@ -118,11 +115,6 @@ describe('ValueControlForm', () => {
         'Only allow a single selection'
       );
       expect(singleRadioButton).toBeChecked();
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).not.toBeChecked();
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
@@ -194,18 +186,6 @@ describe('ValueControlForm', () => {
 
       // variable label input should be rendered and with the default value (my control)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('my control');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Small'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).toBeChecked();
     });
 
     it('should call the onEditControl callback, if initialState is given', async () => {
@@ -360,6 +340,28 @@ describe('ValueControlForm', () => {
         if (queryEditor) {
           expect(queryEditor.textContent).toContain('custom-logs');
         }
+      });
+
+      it("should show the 'no results' callout", async () => {
+        (getESQLResults as jest.Mock).mockResolvedValueOnce({
+          response: {
+            columns: [],
+          },
+        });
+
+        const { findByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field.id  == 'lala' | STATS BY field.name"
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
       });
     });
   });

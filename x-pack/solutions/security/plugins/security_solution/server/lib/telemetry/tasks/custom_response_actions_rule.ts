@@ -13,6 +13,7 @@ import {
   newTelemetryLogger,
   createUsageCounterLabel,
   safeValue,
+  withErrorMessage,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -146,8 +147,9 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         } as LogMeta);
 
         return totalCount;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running custom response actions rule task', withErrorMessage(error));
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

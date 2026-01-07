@@ -33,5 +33,10 @@ export {
   isEntityNode,
   getNodeDocumentMode,
   hasNodeDocumentsData,
+  isEntityNodeEnriched,
   getSingleDocumentData,
 } from './utils';
+export { Callout, type CalloutProps } from './callout/callout';
+export { getCalloutConfig } from './callout/callout.config';
+export { useGraphCallout } from '../hooks/use_graph_callout';
+export { type CalloutVariant, type CalloutConfig } from './callout/callout.translations';

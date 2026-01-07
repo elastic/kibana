@@ -14,6 +14,7 @@ import {
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
 } from '@kbn/esql-types';
 
 export const registerLookupIndexRoutes = (
@@ -28,7 +29,8 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
-          operations: schema.arrayOf(schema.any()),
+          // maxSize is added here to prevent DoS vulnerabilities https://github.com/elastic/kibana/pull/245533,
+          operations: schema.arrayOf(schema.any(), { maxSize: 1000 }),
         }),
       },
       security: {
@@ -187,6 +189,43 @@ export const registerLookupIndexRoutes = (
         return res.ok({
           body: indexPrivileges,
         });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
+
+  router.put(
+    {
+      path: `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/{indexName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          properties: schema.object({}, { unknowns: 'allow' }),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      const core = await requestHandlerContext.core;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+
+      const { indexName } = request.params;
+
+      try {
+        const responseBody = await esClient.indices.putMapping({
+          properties: request.body.properties,
+          index: indexName,
+        });
+        return response.ok({ body: responseBody });
       } catch (error) {
         logger.get().debug(error);
         throw error;

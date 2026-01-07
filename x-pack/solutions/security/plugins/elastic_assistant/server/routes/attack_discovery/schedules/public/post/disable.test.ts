@@ -13,11 +13,6 @@ import { requestContextMock } from '../../../../../__mocks__/request_context';
 import { disableAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/request';
 import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
 import { performChecks } from '../../../../helpers';
-import { getKibanaFeatureFlags } from '../../../helpers/get_kibana_feature_flags';
-
-jest.mock('../../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 jest.mock('../../../../helpers', () => ({
   performChecks: jest.fn(),
@@ -46,9 +41,6 @@ describe('disableAttackDiscoverySchedulesRoute', () => {
     );
     (performChecks as jest.Mock).mockResolvedValue({
       isSuccess: true,
-    });
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true,
     });
     disableAttackDiscoverySchedulesRoute(server.router);
   });
@@ -89,82 +81,6 @@ describe('disableAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      let featureFlagServer: ReturnType<typeof serverMock.create>;
-      let featureFlagContext: ReturnType<typeof requestContextMock.createTools>['context'];
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-        featureFlagServer = serverMock.create();
-        const { context: freshContext } = requestContextMock.createTools();
-        featureFlagContext = freshContext;
-
-        featureFlagContext.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
-          mockSchedulingDataClient
-        );
-
-        (performChecks as jest.Mock).mockResolvedValue({
-          isSuccess: true,
-        });
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-
-        disableAttackDiscoverySchedulesRoute(featureFlagServer.router);
-      });
-
-      it('returns a 403 response when the public API is disabled', async () => {
-        const response = await featureFlagServer.inject(
-          disableAttackDiscoverySchedulesRequest('schedule-1'),
-          requestContextMock.convertContext(featureFlagContext)
-        );
-
-        expect(response.status).toEqual(403);
-        expect(response.body).toEqual({
-          message: { error: 'Attack discovery public API is disabled', success: false },
-          status_code: 403,
-        });
-      });
-    });
-
-    describe('when the public API is enabled', () => {
-      let featureFlagServer: ReturnType<typeof serverMock.create>;
-      let featureFlagContext: ReturnType<typeof requestContextMock.createTools>['context'];
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-        featureFlagServer = serverMock.create();
-        const { context: freshContext } = requestContextMock.createTools();
-        featureFlagContext = freshContext;
-
-        disableAttackDiscoverySchedule.mockResolvedValue({ id: 'schedule-1' });
-
-        featureFlagContext.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
-          mockSchedulingDataClient
-        );
-        (performChecks as jest.Mock).mockResolvedValue({
-          isSuccess: true,
-        });
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-
-        disableAttackDiscoverySchedulesRoute(featureFlagServer.router);
-      });
-
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        const response = await featureFlagServer.inject(
-          disableAttackDiscoverySchedulesRequest('schedule-1'),
-          requestContextMock.convertContext(featureFlagContext)
-        );
-
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({ id: 'schedule-1' });
-      });
     });
   });
 });

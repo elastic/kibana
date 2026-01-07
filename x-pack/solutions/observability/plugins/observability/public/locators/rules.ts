@@ -6,21 +6,9 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
-import { rulesLocatorID } from '../../common';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import { RULES_PATH } from '../../common/locators/paths';
-
-export interface RulesParams extends SerializableRecord {
-  lastResponse?: string[];
-  params?: Record<string, string | number>;
-  search?: string;
-  status?: RuleStatus[];
-  type?: string[];
-}
-
-export type RulesLocatorParams = RulesParams;
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;

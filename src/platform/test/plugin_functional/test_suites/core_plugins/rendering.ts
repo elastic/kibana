@@ -373,7 +373,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.rules.enabled (boolean?)',
         'xpack.timelines.enableExperimental (array?)',
         'xpack.alerting.rules.run.alerts.max (number?)',
-        'xpack.alerting.maintenanceWindow.enabled (boolean?)',
         'xpack.alerting.rulesSettings.enabled (boolean?)',
         'xpack.alerting.disabledRuleTypes (array?)',
         'xpack.alerting.enabledRuleTypes (array?)',
@@ -397,6 +396,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
         'xpack.genAiSettings.showSpacesIntegration (boolean?)',
         'xpack.genAiSettings.showAiAssistantsVisibilitySetting (boolean?)',
+        'xpack.maintenanceWindows.enabled (boolean?)',
         /**
          * Rule form V2 feature flags
          */

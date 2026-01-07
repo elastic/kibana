@@ -31,6 +31,8 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'findBackfill',
     'findGaps',
     'bulkEditParams',
+    'getGapAutoFillScheduler',
+    'findGapAutoFillSchedulerLogs',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
@@ -60,6 +62,9 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'bulkDelete',
     'unsnooze',
     'runSoon',
+    'createGapAutoFillScheduler',
+    'updateGapAutoFillScheduler',
+    'deleteGapAutoFillScheduler',
   ],
   alert: ['update'],
 };

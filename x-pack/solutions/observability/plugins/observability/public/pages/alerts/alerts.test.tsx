@@ -7,7 +7,7 @@
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';

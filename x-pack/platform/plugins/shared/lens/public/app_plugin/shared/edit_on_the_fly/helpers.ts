@@ -12,7 +12,7 @@ import {
   mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
@@ -59,6 +59,7 @@ export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   data: DataPublicPluginStart,
+  http: CoreStart['http'],
   uiSettings: IUiSettingsClient,
   abortController?: AbortController,
   esqlVariables: ESQLControlVariable[] = []
@@ -74,6 +75,7 @@ export const getGridAttrs = async (
         dataViewsService: data.dataViews,
         query: query.esql,
         options: { skipFetchFields: true },
+        http,
       });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
@@ -107,6 +109,7 @@ export const getGridAttrs = async (
 export const getSuggestions = async (
   query: AggregateQuery,
   data: DataPublicPluginStart,
+  http: CoreStart['http'],
   uiSettings: IUiSettingsClient,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
@@ -123,6 +126,7 @@ export const getSuggestions = async (
       query,
       adHocDataViews,
       data,
+      http,
       uiSettings,
       abortController,
       esqlVariables

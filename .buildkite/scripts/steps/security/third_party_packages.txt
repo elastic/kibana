@@ -20,3 +20,8 @@ xml-formatter
 dompurify
 magic-bytes.js
 @opentelemetry/exporter-trace-otlp-grpc
+@ai-sdk/langchain
+ink
+@hey-api/openapi-ts
+vscode-languageserver-textdocument
+yaml-language-server

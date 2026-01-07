@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type {
+  ChromeSetup,
   ChromeStart,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
@@ -20,8 +21,11 @@ import type {
   SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
-import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InternalChromeSetup extends ChromeSetup {}
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -192,10 +196,5 @@ export interface InternalChromeStart extends ChromeStart {
      * will be replaced with the legacy Kibana navigation.
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
-
-    /**
-     * Used to manage the navigation tour state and start/stop the tour.
-     */
-    navigationTourManager: NavigationTourManager;
   };
 }

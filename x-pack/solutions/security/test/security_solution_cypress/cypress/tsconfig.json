@@ -38,6 +38,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/cloud-security-posture-common",
     "@kbn/security-plugin-types-common",
-    "@kbn/securitysolution-utils"
+    "@kbn/securitysolution-utils",
+    "@kbn/maintenance-windows-plugin"
   ]
 }

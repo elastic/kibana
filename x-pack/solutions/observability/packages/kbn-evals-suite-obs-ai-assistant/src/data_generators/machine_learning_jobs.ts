@@ -9,9 +9,9 @@ import type { Client } from '@elastic/elasticsearch';
 import type { MlGetJobsResponse, MlPutJobRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ScoutLogger } from '@kbn/scout';
 import moment from 'moment';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
+import type { ApmFields } from '@kbn/synthtrace-client';
 
 export const ANOMALY_DETECTION_INDEX = 'observability-ml-test-index';
 

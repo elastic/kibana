@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "__mocks__/**/*",
     "../../../../../typings/emotion.d.ts"
   ],
@@ -43,13 +44,10 @@
     "@kbn/config-schema",
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-rendering-server-internal",
-    "@kbn/ui-shared-deps-src",
     "@kbn/core-saved-objects-server",
     "@kbn/utility-types-jest",
     "@kbn/es-errors",
     "@kbn/logging",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-utils-server",
@@ -94,8 +92,11 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
+    "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/licensing-types",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/scout",
+    "@kbn/mock-idp-utils"
   ],
   "exclude": ["target/**/*"]
 }

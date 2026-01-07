@@ -438,7 +438,9 @@
             "type": "Function",
             "tags": [],
             "label": "removeClashingFiles",
-            "description": [],
+            "description": [
+              "\nRemoves files that have clashing mappings and cannot be imported together.\nFiles marked with ERROR clash type will be removed from the file list."
+            ],
             "signature": [
               "() => Promise<void>"
             ],
@@ -454,7 +456,9 @@
             "type": "Function",
             "tags": [],
             "label": "analyzeFileWithOverrides",
-            "description": [],
+            "description": [
+              "\nCreates a function to analyze a file at the specified index with custom overrides."
+            ],
             "signature": [
               "(index: number) => (overrides: ",
               {
@@ -476,7 +480,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "index",
-                "description": [],
+                "description": [
+                  "- The index of the file to analyze"
+                ],
                 "signature": [
                   "number"
                 ],
@@ -486,7 +492,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "A function that accepts overrides and performs the file analysis"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -494,7 +502,9 @@
             "type": "Function",
             "tags": [],
             "label": "getUploadStatus",
-            "description": [],
+            "description": [
+              "\nGets the current upload status including file clashes, analysis status, and import progress."
+            ],
             "signature": [
               "() => ",
               {
@@ -509,7 +519,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The current upload status"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -517,7 +529,9 @@
             "type": "Function",
             "tags": [],
             "label": "getInitializedWithExistingIndex",
-            "description": [],
+            "description": [
+              "\nChecks if the file upload manager was initialized with an existing index."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -525,7 +539,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "True if initialized with an existing index, false otherwise"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -533,7 +549,9 @@
             "type": "Function",
             "tags": [],
             "label": "getExistingIndexName",
-            "description": [],
+            "description": [
+              "\nGets the name of the existing index being used for import."
+            ],
             "signature": [
               "() => string | null"
             ],
@@ -541,7 +559,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The existing index name or null if none is set"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -549,7 +569,9 @@
             "type": "Function",
             "tags": [],
             "label": "setExistingIndexName",
-            "description": [],
+            "description": [
+              "\nSets the existing index name and resets the analysis status."
+            ],
             "signature": [
               "(name: string | null) => void"
             ],
@@ -563,7 +585,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "name",
-                "description": [],
+                "description": [
+                  "- The index name to set, or null to clear"
+                ],
                 "signature": [
                   "string | null"
                 ],
@@ -581,7 +605,9 @@
             "type": "Function",
             "tags": [],
             "label": "isExistingIndexUpload",
-            "description": [],
+            "description": [
+              "\nChecks if this upload is targeting an existing index."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -589,7 +615,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "True if uploading to an existing index, false otherwise"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -597,7 +625,9 @@
             "type": "Function",
             "tags": [],
             "label": "getFiles",
-            "description": [],
+            "description": [
+              "\nGets the current array of file wrappers being managed."
+            ],
             "signature": [
               "() => ",
               "FileWrapper",
@@ -607,7 +637,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "Array of FileWrapper instances"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -647,7 +679,9 @@
             "type": "Function",
             "tags": [],
             "label": "updatePipelines",
-            "description": [],
+            "description": [
+              "\nUpdates the pipelines for all files with the provided array."
+            ],
             "signature": [
               "(pipelines: (",
               {
@@ -669,7 +703,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "pipelines",
-                "description": [],
+                "description": [
+                  "- Array of pipelines corresponding to each file"
+                ],
                 "signature": [
                   "(",
                   {
@@ -695,7 +731,9 @@
             "type": "Function",
             "tags": [],
             "label": "getMappings",
-            "description": [],
+            "description": [
+              "\nGets the current index mappings."
+            ],
             "signature": [
               "() => ",
               "Config",
@@ -707,7 +745,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The current mappings configuration"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -715,7 +755,9 @@
             "type": "Function",
             "tags": [],
             "label": "updateMappings",
-            "description": [],
+            "description": [
+              "\nUpdates the index mappings configuration."
+            ],
             "signature": [
               "(mappings: string | ",
               "MappingTypeMapping",
@@ -731,7 +773,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "mappings",
-                "description": [],
+                "description": [
+                  "- New mappings as object or JSON string"
+                ],
                 "signature": [
                   "string | ",
                   "MappingTypeMapping"
@@ -750,7 +794,9 @@
             "type": "Function",
             "tags": [],
             "label": "getSettings",
-            "description": [],
+            "description": [
+              "\nGets the current index settings."
+            ],
             "signature": [
               "() => ",
               "Config",
@@ -762,7 +808,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The current index settings configuration"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -770,7 +818,9 @@
             "type": "Function",
             "tags": [],
             "label": "updateSettings",
-            "description": [],
+            "description": [
+              "\nUpdates the index settings configuration."
+            ],
             "signature": [
               "(settings: string | ",
               "IndicesIndexSettings",
@@ -786,7 +836,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "settings",
-                "description": [],
+                "description": [
+                  "- New settings as object or JSON string"
+                ],
                 "signature": [
                   "string | ",
                   "IndicesIndexSettings"
@@ -805,7 +857,9 @@
             "type": "Function",
             "tags": [],
             "label": "getAutoCreateDataView",
-            "description": [],
+            "description": [
+              "\nGets whether a data view should be automatically created after import."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -813,7 +867,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "True if auto-creating data view, false otherwise"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -821,7 +877,9 @@
             "type": "Function",
             "tags": [],
             "label": "import",
-            "description": [],
+            "description": [
+              "\nImports all files into the specified index with optional data view creation."
+            ],
             "signature": [
               "(indexName: string, dataViewName?: string | null | undefined) => Promise<",
               {
@@ -843,7 +901,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
-                "description": [],
+                "description": [
+                  "- Name of the target index"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -858,7 +918,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "dataViewName",
-                "description": [],
+                "description": [
+                  "- Optional name for the data view to create"
+                ],
                 "signature": [
                   "string | null | undefined"
                 ],
@@ -866,6 +928,100 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "Promise resolving to import results or null if cancelled"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadManager.renamePipelineTargetFields",
+            "type": "Function",
+            "tags": [],
+            "label": "renamePipelineTargetFields",
+            "description": [
+              "\nRenames target fields in CSV processors across all file pipelines."
+            ],
+            "signature": [
+              "(changes: { oldName: string; newName: string; }[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-public.FileUploadManager.renamePipelineTargetFields.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "changes",
+                "description": [
+                  "- Array of field name changes to apply"
+                ],
+                "signature": [
+                  "{ oldName: string; newName: string; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadManager.removeConvertProcessors",
+            "type": "Function",
+            "tags": [],
+            "label": "removeConvertProcessors",
+            "description": [
+              "\nRemoves all convert processors from all file pipelines."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadManager.updateDateFields",
+            "type": "Function",
+            "tags": [],
+            "label": "updateDateFields",
+            "description": [
+              "\nUpdates date field processors in all file pipelines based on current mappings."
+            ],
+            "signature": [
+              "(mappings: ",
+              "MappingTypeMapping",
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-public.FileUploadManager.updateDateFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "mappings",
+                "description": [
+                  "- Current index mappings to validate against"
+                ],
+                "signature": [
+                  "MappingTypeMapping"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -909,7 +1065,7 @@
             "section": "def-common.OpenFileUploadLiteContext",
             "text": "OpenFileUploadLiteContext"
           },
-          ">"
+          ", {}>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
         "deprecated": false,
@@ -947,6 +1103,39 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-public.FileUploadLiteLookUpView",
+        "type": "Function",
+        "tags": [],
+        "label": "FileUploadLiteLookUpView",
+        "description": [],
+        "signature": [
+          "({ onClose, setDropzoneDisabled, setFileUploadActive, }: Props) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadLiteLookUpView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onClose,\n  setDropzoneDisabled,\n  setFileUploadActive,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1001,7 +1190,7 @@
             "section": "def-common.FileUploadResults",
             "text": "FileUploadResults"
           },
-          " | null) => void) | undefined) => { fileUploadManager: ",
+          " | null) => void) | undefined, reset: ((existingIndex?: string | undefined) => void) | undefined) => { fileUploadManager: ",
           {
             "pluginId": "@kbn/file-upload",
             "scope": "public",
@@ -1097,7 +1286,7 @@
             "section": "def-common.FindFileStructureResponse",
             "text": "FindFileStructureResponse"
           },
-          " | null; }>) | undefined; }"
+          " | null; }>) | undefined; reset: ((existingIndex?: string | undefined) => void) | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,
@@ -1235,6 +1424,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.useFileUpload.$8",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "((existingIndex?: string | undefined) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1344,7 +1548,7 @@
             "section": "def-common.FindFileStructureResponse",
             "text": "FindFileStructureResponse"
           },
-          " | null; }>) | undefined; }"
+          " | null; }>) | undefined; reset: ((existingIndex?: string | undefined) => void) | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,
@@ -1458,7 +1662,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -1518,7 +1722,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1526,7 +1730,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1534,7 +1738,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1542,7 +1746,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1550,7 +1754,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1558,7 +1762,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1566,7 +1770,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1574,7 +1778,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1960,6 +2164,28 @@
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.UploadStatus.totalDocs",
+            "type": "number",
+            "tags": [],
+            "label": "totalDocs",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.UploadStatus.totalFailedDocs",
+            "type": "number",
+            "tags": [],
+            "label": "totalFailedDocs",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2208,7 +2434,7 @@
             "section": "def-common.FindFileStructureResponse",
             "text": "FindFileStructureResponse"
           },
-          " | null; }>) | undefined; } | undefined>"
+          " | null; }>) | undefined; reset: ((existingIndex?: string | undefined) => void) | undefined; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,

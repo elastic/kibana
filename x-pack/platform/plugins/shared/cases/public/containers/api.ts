@@ -27,6 +27,7 @@ import type {
   UserActionInternalFindResponse,
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
+  FindCasesContainingAllDocumentsRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -110,6 +111,7 @@ import {
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
   caseId,
@@ -189,15 +191,15 @@ export const getSingleCaseMetrics = async (
   );
 };
 
-export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+export const findCasesByAttachmentId = async (documentIds: string[], caseIds: string[]) => {
   const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
     `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
     {
       method: 'POST',
       body: JSON.stringify({
-        alertIds,
+        documentIds,
         caseIds,
-      }),
+      } as FindCasesContainingAllDocumentsRequest),
     }
   );
   return decodeFindAllAttachedAlertsResponse(response);
@@ -278,6 +280,8 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    from: DEFAULT_FROM_DATE,
+    to: DEFAULT_TO_DATE,
   },
   queryParams = {
     page: 1,
@@ -306,6 +310,8 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.from ? { from: filterOptions.from } : {}),
+    ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
   };
 

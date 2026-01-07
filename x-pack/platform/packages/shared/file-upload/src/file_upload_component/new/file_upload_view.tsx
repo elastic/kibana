@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
@@ -27,10 +27,9 @@ interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  reset?: (existingIndex?: string) => void;
 }
 
-export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
+export const FileUploadView: FC<Props> = ({ getAdditionalLinks }) => {
   const {
     fileUploadManager,
     filesStatus,
@@ -42,6 +41,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
     importResults,
     indexName,
     abortImport,
+    reset,
   } = useFileUploadContext();
 
   const showImportControls =
@@ -59,22 +59,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
       <>
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
           <>
-            <IndexSelection />
-
-            <EuiSpacer />
-
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.fileUpload.uploadView.uploadFilesTitle"
-                  defaultMessage="Upload files"
-                />
-              </h3>
-            </EuiTitle>
-
-            <EuiSpacer size="xs" />
-
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.fileUpload.uploadView.uploadFileDescription"
@@ -83,7 +68,11 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
               </p>
             </EuiText>
 
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="m" />
+
+            <IndexSelection />
+
+            <EuiSpacer size="m" />
 
             <FilePicker
               fileUploadManager={fileUploadManager}

@@ -10,13 +10,13 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
-import { getReferencesForPanelId } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
+import { getPanelReferences } from './get_panel_references';
 
 export function transformPanelsOut(
-  panelsJSON: string = '{}',
+  panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
-  references?: SavedObjectReference[]
+  containerReferences?: SavedObjectReference[]
 ): DashboardState['panels'] {
   const topLevelPanels: DashboardPanel[] = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
@@ -32,13 +32,14 @@ export function transformPanelsOut(
   });
 
   JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
-    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references ?? []);
-    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+    const panelReferences = getPanelReferences(containerReferences ?? [], panel);
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      sectionsMap[sectionId].panels.push(transformPanelProperties(panel, panelReferences));
+      sectionsMap[sectionId].panels.push(
+        transformPanelProperties(panel, panelReferences, containerReferences)
+      );
     } else {
-      topLevelPanels.push(transformPanelProperties(panel, panelReferences));
+      topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
     }
   });
   return [...topLevelPanels, ...Object.values(sectionsMap)];
@@ -55,13 +56,14 @@ function transformPanelProperties(
     type,
     version,
   }: SavedDashboardPanel,
-  references?: SavedObjectReference[]
+  panelReferences?: SavedObjectReference[],
+  containerReferences?: SavedObjectReference[]
 ) {
   const { sectionId, i, ...restOfGrid } = gridData;
 
   const matchingReference =
-    panelRefName && references
-      ? references.find((reference) => reference.name === panelRefName)
+    panelRefName && panelReferences
+      ? panelReferences.find((reference) => reference.name === panelRefName)
       : undefined;
 
   const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
@@ -80,7 +82,11 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(config, references);
+      transformedPanelConfig = transforms.transformOut(
+        config,
+        panelReferences,
+        containerReferences
+      );
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError

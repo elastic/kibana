@@ -188,31 +188,21 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
-export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate markdown text with most important information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration. Limit your response to 500 characters. Only reply with the required sections, and nothing else.
-  ### Format  
-  Return a string with markdown text without any explanations, or variable assignments. Do **not** wrap the output in triple backticks. 
-    The result must be a list of bullet points, nothing more.
-    Generate summaries for the following sections, but omit any section that if the information isn't available in the context:
-      - Risk score: Summarize the entity's risk score and the main factors contributing to it.
-      - Criticality: Note the entity's criticality level and its impact on the risk score.
-      - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
-      - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
-    The generated data **MUST** follow this pattern:
-  """- **{title1}**: {description1}
-  - **{title2}**: {description2}
-  ...
-  - **{titleN}**: {descriptionN}
-  
-  **Recommended action**: {description}"""
-  
-    **Strict rules**:
-      _ Only reply with the required sections, and nothing else.
-      - Limit your total response to 500 characters.
-      - Never return an section which there is no data available in the context.
-      - Use inline code (backticks) for technical values like file paths, process names, arguments, etc.
-      - Recommended action title should be bold and text should be inline.    
-      - **Do not** include any extra explanation, reasoning or text.
-    `;
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration.
+
+Generate a list of highlight items, each with a title and text. Only include highlights for which information is available in the context.
+  - Risk score: Summarize the entity's risk score and the main factors contributing to it. Don't mention any risk contribution scores.
+  - Criticality: Note the entity's criticality level and its impact on the risk score. Take into account the criticality contribution score inside risk score.
+  - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.
+  - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+
+Additionally, provide a list of actionable recommendations for the security analyst if available.
+
+**Guidelines**:
+  - Only include highlight items for which information is available in the context.
+  - Use must use inline code (backticks) for technical values like file paths, process names, arguments, scores, package versions, etc.
+  - **Do not** include any extra explanation, reasoning or text.
+`;
 
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
@@ -333,7 +323,7 @@ export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
 
 export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
-export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown, no more than 500 characters. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
 
 \`\`\`
 - Between July 18 and August 18, daily cost savings **averaged around $135K**

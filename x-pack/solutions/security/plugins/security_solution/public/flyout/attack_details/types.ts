@@ -13,5 +13,6 @@ export interface AttackDetailsProps extends FlyoutPanelProps {
   path?: PanelPath;
   params?: {
     attackId: string;
+    indexName: string;
   };
 }

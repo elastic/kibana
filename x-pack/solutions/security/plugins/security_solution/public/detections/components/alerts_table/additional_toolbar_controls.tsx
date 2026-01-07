@@ -13,12 +13,10 @@ import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  TableId,
 } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -31,27 +29,29 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { changeViewMode } = dataTableActions;
 
 const AdditionalToolbarControlsComponent = ({
   tableType,
+  pageScope,
 }: Pick<
   ComponentProps<GetSecurityAlertsTableProp<'renderAdditionalToolbarControls'>>,
-  'tableType'
+  'tableType' | 'pageScope'
 >) => {
   const dispatch = useDispatch();
   const {
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(pageScope);
 
   const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView: experimentalDataView } = useDataView(pageScope);
 
   const groupId = useMemo(() => groupIdSelector(), []);
-  const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
+  const { options, settings } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
     options: [],
   };
 
@@ -91,6 +91,7 @@ const AdditionalToolbarControlsComponent = ({
     fields,
     defaultGroupingOptions: options,
     maxGroupingLevels: 3,
+    settings,
   });
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -138,7 +139,7 @@ const AdditionalToolbarControlsComponent = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
-      {[TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableType) && (
+      {DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType) && (
         <EuiFlexItem grow={false} data-test-subj="summary-view-selector">
           <SummaryViewSelector viewSelected={tableView} onViewChange={handleChangeTableView} />
         </EuiFlexItem>

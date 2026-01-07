@@ -175,6 +175,7 @@ export const AssetManager: FC<Props> = (props) => {
 };
 
 AssetManager.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   assets: PropTypes.arrayOf(PropTypes.object).isRequired,
   onClose: PropTypes.func.isRequired,
   onAddAsset: PropTypes.func.isRequired,

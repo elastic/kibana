@@ -165,7 +165,7 @@ module.exports = {
         },
         {
           from: '@elastic/apm-synthtrace',
-          to: '@kbn/apm-synthtrace',
+          to: '@kbn/synthtrace',
         },
         {
           from: 'rison-node',
