@@ -237,17 +237,19 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
-  const onSearchDraftChange = useMemo(() => {
-    // console.log('Creating onSearchDraftChange for tab:', tabId);
-    return (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
+  console.log('DiscoverTopNav rendered with tabId:', tabId, searchDraftUiState?.query);
+
+  const onSearchDraftChange = useCallback(
+    (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
         internalStateActions.setSearchDraftUiState({
           tabId,
           searchDraftUiState: newSearchDraftUiState,
         })
       );
-    };
-  }, [dispatch, tabId]);
+    },
+    [dispatch, tabId]
+  );
 
   const onEsqlEditorInitialStateChange = useCallback(
     (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
