@@ -227,6 +227,6 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
     kqlFilter?: string;
-    groupBy?: string;
+    groupBy: string;
   }) => Promise<TraceMetricsResponse>;
 }
