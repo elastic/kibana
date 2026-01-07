@@ -8,9 +8,3 @@
  */
 
 export type { EmbeddableTransforms } from './types';
-
-export type {
-  EmbeddableRegistryDefinition,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '../server';

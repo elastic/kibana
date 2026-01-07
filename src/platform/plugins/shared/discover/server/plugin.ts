@@ -18,7 +18,6 @@ import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
-import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
@@ -28,7 +27,7 @@ import {
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
-import { getSearchEmbeddableTransforms } from '../common/embeddable';
+import { extract, getSearchEmbeddableTransforms, inject } from '../common/embeddable';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
@@ -64,7 +63,10 @@ export class DiscoverServerPlugin
       });
     }
 
-    plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
+    plugins.embeddable.bwc.registerPersistableState(SEARCH_EMBEDDABLE_TYPE, {
+      inject,
+      extract,
+    });
     plugins.embeddable.registerTransforms(
       SEARCH_EMBEDDABLE_TYPE,
       getSearchEmbeddableTransforms(

@@ -7,32 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '@kbn/embeddable-plugin/server';
+import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import type { Writable } from '@kbn/utility-types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
 const dataViewReferenceName = 'rangeSliderDataView';
 
-export const createRangeSliderInject = (): EmbeddablePersistableStateService['inject'] => {
-  return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const workingState = { ...state } as EmbeddableStateWithType;
+export const rangeSliderPersistableState: PersistableStateDefinition = {
+  inject: (state: SerializableRecord, references: SavedObjectReference[]) => {
+    const workingState = { ...state };
     references.forEach((reference) => {
       if (reference.name === dataViewReferenceName) {
         (workingState as Writable<Partial<RangeSliderControlState>>).dataViewId = reference.id;
       }
     });
-    return workingState as EmbeddableStateWithType;
-  };
-};
-
-export const createRangeSliderExtract = (): EmbeddablePersistableStateService['extract'] => {
-  return (state: EmbeddableStateWithType) => {
-    const workingState = { ...state } as EmbeddableStateWithType;
+    return workingState;
+  },
+  extract: (state: SerializableRecord) => {
+    const workingState = { ...state };
     const references: SavedObjectReference[] = [];
 
     if ('dataViewId' in workingState) {
@@ -43,6 +37,6 @@ export const createRangeSliderExtract = (): EmbeddablePersistableStateService['e
       });
       delete workingState.dataViewId;
     }
-    return { state: workingState as EmbeddableStateWithType, references };
-  };
+    return { state: workingState, references };
+  },
 };

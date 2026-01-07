@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import { createTimeSliderExtract, createTimeSliderInject } from './time_slider_persistable_state';
-
-export const timeSliderPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
-  return {
-    id: TIME_SLIDER_CONTROL,
-    extract: createTimeSliderExtract(),
-    inject: createTimeSliderInject(),
-  };
-};
+export { optionsListPersistableState } from './options_list_persistable_state';
+export { rangeSliderPersistableState } from './range_slider_persistable_state';

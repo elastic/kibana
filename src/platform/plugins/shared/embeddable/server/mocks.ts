@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
-import type { EmbeddableSetup, EmbeddableStart } from './plugin';
+// import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
+import type { EmbeddableSetup, EmbeddableStart } from './types';
 
 export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
-  ...createEmbeddablePersistableStateServiceMock(),
-  registerEmbeddableFactory: jest.fn(),
   registerTransforms: jest.fn(),
-  getAllMigrations: jest.fn().mockReturnValue({}),
   registerEnhancement: jest.fn(),
   transformEnhancementsIn: jest.fn(),
   transformEnhancementsOut: jest.fn(),
+  bwc: {
+    registerPersistableState: jest.fn(),
+  }
 });
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
-  ...createEmbeddablePersistableStateServiceMock(),
   getEmbeddableSchemas: jest.fn(),
   getTransforms: jest.fn(),
 });
