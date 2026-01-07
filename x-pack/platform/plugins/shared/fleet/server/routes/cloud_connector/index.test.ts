@@ -73,6 +73,13 @@ describe('Cloud Connector API', () => {
           find: jest.fn(),
         },
       }),
+      core: Promise.resolve({
+        elasticsearch: {
+          client: {
+            asInternalUser: {},
+          },
+        },
+      }),
     } as any;
     response = httpServerMock.createResponseFactory();
   });

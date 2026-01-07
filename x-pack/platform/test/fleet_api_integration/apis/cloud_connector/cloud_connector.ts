@@ -1560,9 +1560,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should delete AWS cloud connector secrets when connector is deleted', async () => {
-        // External ID must be exactly 20 chars to match EXTERNAL_ID_REGEX validation
+        // External ID must be exactly 20 chars to match EXTERNAL_ID_REGEX validation /^[a-zA-Z0-9_-]{20}$/
         const timestamp = Date.now().toString();
-        const externalIdSecretId = `test${timestamp.slice(-16)}`; // 'test' (4) + 16 digits = 20 chars
+        const externalIdSecretId = `awstest${timestamp.slice(-13)}`; // 'awstest' (7) + 13 digits = 20 chars
         const secretValue = 'test-external-id-value-123';
 
         // Create the secret in .fleet-secrets index
