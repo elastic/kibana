@@ -330,8 +330,8 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         name: z.string(),
         description: z.string().optional(),
-        private: z.boolean().optional(),
-        autoInit: z.boolean().optional(),
+        private: z.coerce.boolean().optional(),
+        autoInit: z.coerce.boolean().optional(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -407,7 +407,7 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string(),
         repo: z.string(),
-        issue_number: z.number(),
+        issue_number: z.coerce.number(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -432,9 +432,9 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string(),
         repo: z.string(),
-        issue_number: z.number(),
-        page: z.number().optional(),
-        per_page: z.number().optional(),
+        issue_number: z.coerce.number(),
+        page: z.coerce.number().optional(),
+        per_page: z.coerce.number().optional(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
