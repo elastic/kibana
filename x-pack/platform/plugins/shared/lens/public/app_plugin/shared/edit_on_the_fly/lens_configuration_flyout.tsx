@@ -45,6 +45,7 @@ import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import { useEsqlConversion } from './use_esql_conversion';
+import { convertToEsql } from './convert_to_esql';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -336,97 +337,29 @@ export function LensEditConfigurationFlyout({
 
   const handleConvertToEsql = useCallback(
     ({ layersToConvert }: { layersToConvert: string[] }) => {
-      if (layersToConvert.length === 0 || !buildTextBasedState) {
-        closeModal();
+      // TODO: handle case where buildTextBasedState is undefined
+      if (!buildTextBasedState) {
         return;
       }
 
-      const conversionResult = buildTextBasedState(layersToConvert);
-      if (!conversionResult) {
-        closeModal();
-        return;
-      }
-
-      const { newDatasourceState, columnIdMapping } = conversionResult;
-
-      // Update visualization state to remap column IDs to new ES|QL field names
-      const visualizationState = visualization.state;
-      if (
-        visualizationState &&
-        typeof visualizationState === 'object' &&
-        'layers' in (visualizationState as Record<string, unknown>)
-      ) {
-        const updatedVisualizationState = JSON.parse(JSON.stringify(visualizationState));
-
-        if (Array.isArray(updatedVisualizationState.layers)) {
-          updatedVisualizationState.layers = updatedVisualizationState.layers.map(
-            (vizLayer: {
-              layerId?: string;
-              xAccessor?: string;
-              accessors?: string[];
-              splitAccessor?: string;
-            }) => {
-              if (!vizLayer.layerId || !layersToConvert.includes(vizLayer.layerId)) {
-                return vizLayer;
-              }
-
-              const updatedLayer = { ...vizLayer };
-
-              // Remap xAccessor (horizontal axis - typically the date histogram)
-              if (vizLayer.xAccessor && columnIdMapping[vizLayer.xAccessor]) {
-                updatedLayer.xAccessor = columnIdMapping[vizLayer.xAccessor];
-              }
-
-              // Remap accessors array (vertical axis - metrics)
-              if (Array.isArray(vizLayer.accessors)) {
-                updatedLayer.accessors = vizLayer.accessors.map(
-                  (accessor: string) => columnIdMapping[accessor] || accessor
-                );
-              }
-
-              // Remap splitAccessor if present
-              if (vizLayer.splitAccessor && columnIdMapping[vizLayer.splitAccessor]) {
-                updatedLayer.splitAccessor = columnIdMapping[vizLayer.splitAccessor];
-              }
-
-              return updatedLayer;
-            }
-          );
-        }
-
-        // Get the ES|QL query from the first converted layer
-        const firstLayerId = layersToConvert[0];
-        const esqlQuery = newDatasourceState.layers[firstLayerId]?.query;
-
-        // Build new attributes with textBased datasource
-        if (esqlQuery) {
-          const newAttributes: TypedLensSerializedState['attributes'] = {
-            ...attributes,
-            state: {
-              ...attributes.state,
-              query: esqlQuery,
-              datasourceStates: {
-                textBased: newDatasourceState,
-              },
-              visualization: updatedVisualizationState,
-            },
-          };
-
-          // Close modal first
-          closeModal();
-
-          // Update local attributes state - this triggers re-render of get_edit_lens_configuration
-          // which will derive the new datasourceId ('textBased') from the updated attributes
-          // and recreate the Redux store with the correct datasource
-          setCurrentAttributes?.(newAttributes);
-
-          // Also update the embeddable's attributes for persistence
-          updateSuggestion?.(newAttributes);
-          return;
-        }
-      }
+      const newAttributes = convertToEsql({
+        layersToConvert,
+        attributes,
+        visualizationState: visualization.state,
+        buildTextBasedState,
+      });
 
       closeModal();
+
+      if (newAttributes) {
+        // Update local attributes state - this triggers re-render of get_edit_lens_configuration
+        // which will derive the new datasourceId ('textBased') from the updated attributes
+        // and recreate the Redux store with the correct datasource
+        setCurrentAttributes?.(newAttributes);
+
+        // Also update the embeddable's attributes for persistence
+        updateSuggestion?.(newAttributes);
+      }
     },
     [
       attributes,
