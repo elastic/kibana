@@ -1572,7 +1572,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(await secretExists(externalIdSecretId)).to.be(true);
 
         // Create AWS cloud connector with the secret reference
-        const { body: createResponse } = await supertest
+        // Log the external ID for debugging - should be exactly 20 chars
+        // eslint-disable-next-line no-console
+        console.log(
+          `[DEBUG] externalIdSecretId: "${externalIdSecretId}" (length: ${externalIdSecretId.length})`
+        );
+
+        const createResult = await supertest
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -1588,8 +1594,19 @@ export default function (providerContext: FtrProviderContext) {
                 },
               },
             },
-          })
-          .expect(200);
+          });
+
+        // Log the response for debugging if it's not 200
+        if (createResult.status !== 200) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `[DEBUG] Create cloud connector failed with status ${createResult.status}:`,
+            JSON.stringify(createResult.body, null, 2)
+          );
+        }
+        expect(createResult.status).to.be(200);
+
+        const createResponse = createResult.body;
 
         const connectorId = createResponse.item.id;
 
