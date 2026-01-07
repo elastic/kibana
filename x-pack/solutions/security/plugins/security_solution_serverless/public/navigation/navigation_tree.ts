@@ -33,126 +33,116 @@ const SOLUTION_NAME = i18n.translate(
 export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
-): Promise<NavigationTreeDefinition> => {
-  // `agentBuilder` capability key matches `AGENTBUILDER_FEATURE_ID` ('agentBuilder')
-  const agentBuilderCapabilities = services.application.capabilities as
-    | Record<string, { show?: boolean }>
-    | undefined;
-  const canAccessAgentBuilder =
-    chatExperience === AIChatExperience.Agent &&
-    agentBuilderCapabilities?.agentBuilder?.show === true;
-
-  return {
-    body: [
-      {
-        id: 'security_solution_home',
-        link: securityLink(SecurityPageName.landing),
-        title: SOLUTION_NAME,
-        icon: 'logoSecurity',
-        renderAs: 'home',
-      },
-      {
-        link: 'discover',
-        icon: 'discoverApp',
-      },
-      defaultNavigationTree.dashboards(),
-      defaultNavigationTree.rules(),
-      services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
-        ? defaultNavigationTree.alertDetections()
-        : {
-            id: SecurityPageName.alerts,
-            icon: 'warning',
-            link: securityLink(SecurityPageName.alerts),
+): Promise<NavigationTreeDefinition> => ({
+  body: [
+    {
+      id: 'security_solution_home',
+      link: securityLink(SecurityPageName.landing),
+      title: SOLUTION_NAME,
+      icon: 'logoSecurity',
+      renderAs: 'home',
+    },
+    {
+      link: 'discover',
+      icon: 'discoverApp',
+    },
+    defaultNavigationTree.dashboards(),
+    defaultNavigationTree.rules(),
+    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+      ? defaultNavigationTree.alertDetections()
+      : {
+          id: SecurityPageName.alerts,
+          icon: 'warning',
+          link: securityLink(SecurityPageName.alerts),
+        },
+    {
+      // TODO: update icon from EUI
+      icon: LazyIconWorkflow,
+      link: 'workflows',
+      badgeType: 'techPreview' as const,
+    },
+    ...(chatExperience === AIChatExperience.Agent
+      ? [
+          {
+            // TODO: update icon to 'robot' once it's available in EUI
+            icon: LazyIconAgentBuilder,
+            link: 'agent_builder' as AppDeepLinkId,
           },
-      {
-        // TODO: update icon from EUI
-        icon: LazyIconWorkflow,
-        link: 'workflows',
-        badgeType: 'techPreview' as const,
-      },
-      ...(canAccessAgentBuilder
-        ? [
+        ]
+      : []),
+    {
+      id: SecurityPageName.attackDiscovery,
+      icon: 'bolt',
+      link: securityLink(SecurityPageName.attackDiscovery),
+    },
+    {
+      id: SecurityPageName.cloudSecurityPostureFindings,
+      // TODO change this to the `bullseye` EUI icon when available
+      icon: LazyIconFindings,
+      link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+    },
+    defaultNavigationTree.cases(),
+    defaultNavigationTree.entityAnalytics(),
+    defaultNavigationTree.explore(),
+    defaultNavigationTree.investigations(),
+    {
+      id: SecurityPageName.threatIntelligence,
+      // TODO change this to the `compute` EUI icon when available
+      icon: LazyIconIntelligence,
+      link: securityLink(SecurityPageName.threatIntelligence),
+    },
+    {
+      id: SecurityPageName.assetInventory,
+      icon: 'editorChecklist',
+      link: securityLink(SecurityPageName.assetInventory),
+    },
+    defaultNavigationTree.assets(services),
+    defaultNavigationTree.ml(),
+  ],
+  footer: [
+    {
+      id: SecurityGroupName.launchpad,
+      title: i18nStrings.launchPad.title,
+      renderAs: 'panelOpener',
+      icon: 'launch',
+      children: [
+        {
+          children: [
             {
-              // TODO: update icon to 'robot' once it's available in EUI
-              icon: LazyIconAgentBuilder,
-              link: 'agent_builder' as AppDeepLinkId,
+              id: SecurityPageName.landing,
+              link: securityLink(SecurityPageName.landing),
             },
-          ]
-        : []),
-      {
-        id: SecurityPageName.attackDiscovery,
-        icon: 'bolt',
-        link: securityLink(SecurityPageName.attackDiscovery),
-      },
-      {
-        id: SecurityPageName.cloudSecurityPostureFindings,
-        // TODO change this to the `bullseye` EUI icon when available
-        icon: LazyIconFindings,
-        link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
-      },
-      defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(),
-      defaultNavigationTree.explore(),
-      defaultNavigationTree.investigations(),
-      {
-        id: SecurityPageName.threatIntelligence,
-        // TODO change this to the `compute` EUI icon when available
-        icon: LazyIconIntelligence,
-        link: securityLink(SecurityPageName.threatIntelligence),
-      },
-      {
-        id: SecurityPageName.assetInventory,
-        icon: 'editorChecklist',
-        link: securityLink(SecurityPageName.assetInventory),
-      },
-      defaultNavigationTree.assets(services),
-      defaultNavigationTree.ml(),
-    ],
-    footer: [
-      {
-        id: SecurityGroupName.launchpad,
-        title: i18nStrings.launchPad.title,
-        renderAs: 'panelOpener',
-        icon: 'launch',
-        children: [
-          {
-            children: [
-              {
-                id: SecurityPageName.landing,
-                link: securityLink(SecurityPageName.landing),
-              },
-              {
-                id: SecurityPageName.siemReadiness,
-                link: securityLink(SecurityPageName.siemReadiness),
-              },
-              {
-                // value report
-                id: SecurityPageName.aiValue,
-                link: securityLink(SecurityPageName.aiValue),
-              },
-            ],
-          },
-          {
-            title: i18nStrings.launchPad.migrations.title,
-            children: [
-              {
-                id: SecurityPageName.siemMigrationsRules,
-                link: securityLink(SecurityPageName.siemMigrationsRules),
-              },
-              {
-                id: SecurityPageName.siemMigrationsDashboards,
-                link: securityLink(SecurityPageName.siemMigrationsDashboards),
-              },
-            ],
-          },
-        ],
-      },
-      {
-        link: 'dev_tools',
-        title: i18nStrings.devTools,
-        icon: 'editorCodeBlock',
-      },
-      createManagementFooterItemsTree(chatExperience),
-    ],
-  };
-};
+            {
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
+            },
+            {
+              // value report
+              id: SecurityPageName.aiValue,
+              link: securityLink(SecurityPageName.aiValue),
+            },
+          ],
+        },
+        {
+          title: i18nStrings.launchPad.migrations.title,
+          children: [
+            {
+              id: SecurityPageName.siemMigrationsRules,
+              link: securityLink(SecurityPageName.siemMigrationsRules),
+            },
+            {
+              id: SecurityPageName.siemMigrationsDashboards,
+              link: securityLink(SecurityPageName.siemMigrationsDashboards),
+            },
+          ],
+        },
+      ],
+    },
+    {
+      link: 'dev_tools',
+      title: i18nStrings.devTools,
+      icon: 'editorCodeBlock',
+    },
+    createManagementFooterItemsTree(chatExperience),
+  ],
+});
