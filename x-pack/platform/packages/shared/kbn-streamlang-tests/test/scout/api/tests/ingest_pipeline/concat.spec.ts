@@ -42,5 +42,42 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('full_email', 'john.doe@example.com');
     });
+
+    apiTest('should concatenate fields and literals with a where clause', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-concat-with-where';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: '.' },
+              { type: 'field', value: 'last_name' },
+              { type: 'literal', value: '@' },
+              { type: 'field', value: 'email_domain' },
+            ],
+            where: {
+              field: 'has_email',
+              eq: true,
+            },
+            to: 'full_email',
+          } as ConcatProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+
+      const docs = [
+        { first_name: 'john', last_name: 'doe', email_domain: 'example.com', has_email: true },
+        { first_name: 'jane', last_name: 'smith', email_domain: 'example.com', has_email: false },
+      ];
+      await testBed.ingest(indexName, docs, processors);
+
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(2);
+      expect(ingestedDocs[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(ingestedDocs[1]).not.toHaveProperty('full_email');
+    });
   }
 );
