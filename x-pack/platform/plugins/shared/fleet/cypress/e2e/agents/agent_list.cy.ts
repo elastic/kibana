@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
-
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
-import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
 import { setUISettings } from '../../tasks/ui_settings';
-
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from '../../tasks/common';
 import { login } from '../../tasks/login';
 
