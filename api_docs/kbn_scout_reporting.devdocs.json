@@ -1322,7 +1322,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"playwright\" | \"jest\" | \"ftr\""
+              "\"cypress\" | \"playwright\" | \"jest\" | \"ftr\""
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "deprecated": false,

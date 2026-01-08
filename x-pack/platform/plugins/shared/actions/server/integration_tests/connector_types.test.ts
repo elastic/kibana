@@ -103,6 +103,11 @@ describe('Connector type config checks', () => {
           connectorConfig = {
             apiUrl: 'https://_face_api_.com',
           };
+        } else if (connectorTypeId === '.mcp') {
+          connectorConfig = {
+            serverUrl: 'https://_fake_mcp_.com',
+            hasAuth: false,
+          };
         }
 
         const subActions = getService({
