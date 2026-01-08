@@ -25,13 +25,7 @@ interface TabInfo {
   id: string;
   name: string;
   /**
-   * Places content before the tab content/children.
-   * Will be excluded from interactive effects.
-   */
-  prepend?: React.ReactNode;
-  /**
    * Places content after the tab content/children.
-   * Will be excluded from interactive effects.
    */
   append?: React.ReactNode;
 }
@@ -121,7 +115,6 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               isSelected={tab.id === selectedTabId}
               onClick={() => onSelectedTabChanged(tab.id)}
               append={tab.append}
-              prepend={tab.prepend}
             >
               {tab.name}
             </EuiTab>
