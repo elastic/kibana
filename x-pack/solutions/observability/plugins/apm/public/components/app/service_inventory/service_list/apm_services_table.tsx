@@ -465,6 +465,12 @@ export function ApmServicesTable({
               const rulesUrl = basePath.prepend(
                 `/app/observability/alerts/rules?_a=${rison.encode({
                   search: `service.name:${item.serviceName}`,
+                  type: [
+                    'apm.anomaly',
+                    'apm.error_rate',
+                    'apm.transaction_error_rate',
+                    'apm.transaction_duration',
+                  ],
                 })}`
               );
               window.location.href = rulesUrl;
@@ -501,8 +507,13 @@ export function ApmServicesTable({
             }),
             icon: 'tableOfContents',
             onClick: (item) => {
-              // eslint-disable-next-line no-console
-              console.log('Manage SLOs', item.serviceName);
+              const { basePath } = core.http;
+              const slosUrl = basePath.prepend(
+                `/app/slos?search=${rison.encode({
+                  kqlQuery: `service.name:${item.serviceName}`,
+                })}`
+              );
+              window.location.href = slosUrl;
             },
           },
         ],
