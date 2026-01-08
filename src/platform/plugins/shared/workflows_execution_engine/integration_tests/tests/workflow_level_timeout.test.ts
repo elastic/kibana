@@ -96,21 +96,21 @@ steps:
   it('should have completed status for executed steps', () => {
     const allStepExecutions = Array.from(
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-    ).filter(
-      (se) =>
-        se.stepId &&
-        se.stepType === FakeConnectors.slow_1sec_inference.actionTypeId
-    );
-    
+    ).filter((se) => se.stepId && se.stepType === FakeConnectors.slow_1sec_inference.actionTypeId);
+
     // Step1 should always complete (finishes at ~1s, timeout is at 2s)
     // Step2 might complete OR fail depending on timing (finishes at ~2s, same as timeout)
-    const step1Execution = allStepExecutions.find((se) => se.stepId === 'slowInferenceStep1Completed');
-    const step2Execution = allStepExecutions.find((se) => se.stepId === 'slowInferenceStep2Completed');
-    
+    const step1Execution = allStepExecutions.find(
+      (se) => se.stepId === 'slowInferenceStep1Completed'
+    );
+    const step2Execution = allStepExecutions.find(
+      (se) => se.stepId === 'slowInferenceStep2Completed'
+    );
+
     expect(step1Execution).toBeDefined();
     expect(step1Execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(step1Execution?.error).toBeUndefined();
-    
+
     // Step2 might be COMPLETED or FAILED depending on timing
     expect(step2Execution).toBeDefined();
     if (step2Execution?.status === ExecutionStatus.COMPLETED) {
@@ -132,11 +132,9 @@ steps:
         se.stepId.endsWith('Failed') &&
         se.stepType === FakeConnectors.slow_1sec_inference.actionTypeId
     );
-    
-    const step3Execution = allStepExecutions.find(
-      (se) => se.stepId === 'slowInferenceStep3Failed'
-    );
-    
+
+    const step3Execution = allStepExecutions.find((se) => se.stepId === 'slowInferenceStep3Failed');
+
     // Step3 might not exist if timeout occurs before it starts executing
     // In that case, the workflow still timed out correctly
     if (step3Execution) {
@@ -144,14 +142,12 @@ steps:
       expect(step3Execution.status).toBe(ExecutionStatus.FAILED);
       expect(step3Execution.error?.message).toContain('Failed due to workflow timeout');
     }
-    
+
     // Verify that if any steps failed, they have the correct timeout error
     // Note: It's possible that no steps failed if the timeout occurred between steps
     // (e.g., after step2 completed but before step3 started)
-    const failedSteps = allStepExecutions.filter(
-      (se) => se.status === ExecutionStatus.FAILED
-    );
-    
+    const failedSteps = allStepExecutions.filter((se) => se.status === ExecutionStatus.FAILED);
+
     // If there are failed steps, verify they all have timeout errors
     if (failedSteps.length > 0) {
       failedSteps.forEach((failedStep) => {
