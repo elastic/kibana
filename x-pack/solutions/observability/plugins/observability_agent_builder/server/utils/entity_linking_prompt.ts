@@ -9,8 +9,13 @@ import dedent from 'dedent';
 
 /**
  * Shared Entity Linking prompt section for Observability Agent Builder.
- * This prompt instructs the LLM to format entities (services, traces, errors, hosts, containers,
- * transactions, dependencies, alerts, ML jobs, dashboards) as clickable links using Kibana's relative URL paths.
+ * This prompt instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
+ *
+ * Supported entity types:
+ * - APM: Services, Traces, Errors (individual and service-level), Transactions, Dependencies, Service Map
+ * - Logs: Service-specific logs and general logs explorer
+ * - Infrastructure: Hosts
+ * - Platform: Alerts, ML Jobs
  *
  * This should be included in:
  * - System prompts for all AI insight attachment types (logs, alerts, errors)
