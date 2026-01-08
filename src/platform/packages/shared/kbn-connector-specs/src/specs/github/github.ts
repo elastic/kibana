@@ -407,17 +407,17 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string(),
         repo: z.string(),
-        issue_number: z.coerce.number(),
+        issueNumber: z.coerce.number(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
           repo: string;
-          issue_number: number;
+          issueNumber: number;
         };
 
         const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issue_number}`,
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}`,
           {
             headers: {
               Accept: 'application/vnd.github.v3+json',
@@ -432,17 +432,17 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string(),
         repo: z.string(),
-        issue_number: z.coerce.number(),
+        issueNumber: z.coerce.number(),
         page: z.coerce.number().optional(),
-        per_page: z.coerce.number().optional(),
+        perPage: z.coerce.number().optional(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
           repo: string;
-          issue_number: number;
+          issueNumber: number;
           page?: number;
-          per_page?: number;
+          perPage?: number;
         };
 
         const params: {
@@ -453,12 +453,12 @@ export const GithubConnector: ConnectorSpec = {
         if (typedInput.page !== undefined) {
           params.page = typedInput.page;
         }
-        if (typedInput.per_page !== undefined) {
-          params.per_page = typedInput.per_page;
+        if (typedInput.perPage !== undefined) {
+          params.per_page = typedInput.perPage;
         }
 
         const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issue_number}/comments`,
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}/comments`,
           {
             ...(Object.keys(params).length > 0 ? { params } : {}),
             headers: {

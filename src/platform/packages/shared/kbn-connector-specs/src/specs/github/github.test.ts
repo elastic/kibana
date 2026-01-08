@@ -1080,7 +1080,7 @@ describe('GithubConnector', () => {
       const result = await GithubConnector.actions.getIssue.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
-        issue_number: 42,
+        issueNumber: 42,
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -1126,7 +1126,7 @@ describe('GithubConnector', () => {
       const result = await GithubConnector.actions.getIssueComments.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
-        issue_number: 42,
+        issueNumber: 42,
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -1160,9 +1160,9 @@ describe('GithubConnector', () => {
       const result = await GithubConnector.actions.getIssueComments.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
-        issue_number: 42,
+        issueNumber: 42,
         page: 2,
-        per_page: 10,
+        perPage: 10,
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
