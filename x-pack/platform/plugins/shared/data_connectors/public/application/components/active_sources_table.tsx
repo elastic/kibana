@@ -142,18 +142,6 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const handleBulkDelete = () => {
-    // TODO: Implement bulk delete once the bulk delete API is available
-    selectedItems.forEach((source) => onDelete?.(source));
-    setSelectedItems([]);
-  };
-
-  const handleBulkClone = () => {
-    // TODO: Implement bulk clone functionality
-    // For now, just clear selection
-    setSelectedItems([]);
-  };
-
   const handleChangeItemsPerPage = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setActivePage(0); // Reset to first page when changing page size
@@ -256,7 +244,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
               <EuiButton
                 size="s"
                 iconType="copy"
-                onClick={handleBulkClone}
+                onClick={() => {}}
                 disabled
                 data-test-subj="bulkCloneButton"
               >
@@ -270,7 +258,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
                 size="s"
                 color="danger"
                 iconType="trash"
-                onClick={handleBulkDelete}
+                onClick={() => {}}
                 disabled
                 data-test-subj="bulkDeleteButton"
               >

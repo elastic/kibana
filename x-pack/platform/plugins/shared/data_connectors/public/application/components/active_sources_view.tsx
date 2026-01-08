@@ -38,10 +38,6 @@ export const ActiveSourcesView: React.FC = () => {
     onConnectorUpdated: handleCloseEditFlyout,
   });
 
-  const handleReconnect = (source: ActiveSource) => {
-    // TODO: Implement reconnect action when backend is ready
-  };
-
   const handleEdit = useCallback(
     (source: ActiveSource) => {
       setSourceToEdit(source);
@@ -95,7 +91,7 @@ export const ActiveSourcesView: React.FC = () => {
         <ActiveSourcesTable
           sources={activeSources}
           isLoading={isLoading}
-          onReconnect={handleReconnect}
+          onReconnect={() => {}}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
