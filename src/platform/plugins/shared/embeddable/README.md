@@ -191,7 +191,7 @@ Embeddable serialized state can not be modified with breaking changes. Fields ca
 Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
 
 #### Minimize required fields
-Avoid unnecessary information to keep public REST APIs concise. Do not require fields that have can have a default behavior.
+Avoid unnecessary information to keep public REST APIs concise. Do not require fields that have can have a default behavior. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable.
 
 #### Do not apply defaults in server
 POST, PUT, and GET requests should return symmetrical data. Do not apply defaults in server transforms. Instead, spread defaults into embeddable state in public when initializing an embeddable.
@@ -202,6 +202,8 @@ Defaults can change over time. Changing defaults only effects dashboards created
 Transforms decouple REST API state from stored state, allowing embeddables to have one shape for REST APIs and another for storage.
 - On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
 - On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+
+**Note:** Transforms are optional and only required when an embeddable has references or a container has stored legacy embeddable state that needs to converted into new schema defined shape.
 
 Containers use schemas to
 - Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
