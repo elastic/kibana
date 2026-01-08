@@ -57,7 +57,10 @@ export interface PublicStepDefinition<
    * @returns A Zod schema defining structure and validation rules for the output of the step.
    */
   dynamicOutputSchema?:
-    | ((input: z.infer<InputSchema>) => z.ZodType<z.infer<OutputSchema>>)
+    | ((params: {
+        input: z.infer<InputSchema>;
+        config: z.infer<ConfigSchema>;
+      }) => z.ZodType<z.infer<OutputSchema>>)
     | undefined;
 }
 

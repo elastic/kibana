@@ -30,7 +30,7 @@ export const AiPromptStepDefinition: PublicStepDefinition<
 > = {
   ...AiPromptStepCommonDefinition,
   // Simple type assertion - assumes the types are compatible
-  dynamicOutputSchema: (input) => {
+  dynamicOutputSchema: ({ input }) => {
     if (input.outputSchema) {
       return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
     }
