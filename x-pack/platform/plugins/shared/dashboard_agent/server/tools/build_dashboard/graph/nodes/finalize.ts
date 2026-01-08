@@ -46,7 +46,7 @@ export function createFinalizeNode({
 
       const dashboardUrl = await dashboardLocator.getRedirectUrl(
         {
-          panels: normalizedPanels as any,
+          panels: normalizedPanels,
           title: state.title,
           description: state.description,
           viewMode: 'edit',
@@ -59,15 +59,14 @@ export function createFinalizeNode({
       events.sendUiEvent<typeof DASHBOARD_EVENTS.FINALIZED, DashboardFinalizedData>(
         DASHBOARD_EVENTS.FINALIZED,
         {
-          dashboardId: '',
-          url: dashboardUrl ?? '',
+          url: dashboardUrl,
         }
       );
 
       action = {
         type: 'finalize',
         success: true,
-        dashboardUrl: dashboardUrl ?? undefined,
+        dashboardUrl,
       };
 
       return {

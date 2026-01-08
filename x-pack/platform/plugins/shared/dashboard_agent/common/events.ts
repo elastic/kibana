@@ -36,6 +36,5 @@ export interface DashboardPanelAddedData {
  * Data emitted when the dashboard is finalized
  */
 export interface DashboardFinalizedData {
-  dashboardId: string;
   url: string;
 }
