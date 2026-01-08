@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/renovate.sh
     label: 'Renovate validation'
     agents:
-      machineType: n2-highcpu-8
+      machineType: n2d-highcpu-8
       preemptible: true
     key: renovate_validation
     timeout_in_minutes: 60

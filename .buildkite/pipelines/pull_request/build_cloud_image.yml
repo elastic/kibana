@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/cloud/build_cloud_image.sh
     label: 'Build Cloud Image'
     agents:
-      machineType: n2-standard-2
+      machineType: n2d-standard-2
       preemptible: true
     depends_on:
       - build

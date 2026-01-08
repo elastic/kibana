@@ -2,8 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
-      machineType: n2-standard-8
+      machineType: n2d-standard-8
       preemptible: true
-      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
+      spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
     key: storybooks
     timeout_in_minutes: 80

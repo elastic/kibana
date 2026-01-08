@@ -2,9 +2,9 @@ steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
-      machineType: n2-standard-4
+      machineType: n2d-standard-4
       preemptible: true
-      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
+      spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
     depends_on:
       - build
       - quick_checks

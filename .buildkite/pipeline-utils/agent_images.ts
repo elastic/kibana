@@ -79,7 +79,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   return config;
 }
 
-const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
+const expandAgentQueue = (queueName: string = 'n2d-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
   const additionalProps =
     {
@@ -91,7 +91,8 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) 
     ...getAgentImageConfig(),
     machineType: `${kind}-standard-${cores}`,
     ...(diskSizeGb ? { diskSizeGb } : {}),
-    spotZones: 'us-central1-f,southamerica-east1-b,southamerica-east1-c',
+    spotZones:
+      'us-central1-f,us-central1-a,us-central1-b,us-central1-c,southamerica-east1-c,asia-south2-a',
     ...additionalProps,
   };
 };

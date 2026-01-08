@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: 'Build Project Image'
     agents:
-      machineType: n2-standard-16
+      machineType: n2d-standard-16
       preemptible: true
       diskSizeGb: 150
     timeout_in_minutes: 60

@@ -2,8 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
-      machineType: n2-standard-8
+      machineType: n2d-standard-8
       preemptible: true
-      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
+      spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60

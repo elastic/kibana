@@ -212,7 +212,7 @@ for (const testSuite of testSuites) {
       concurrency,
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
-      agents: expandAgentQueue('n2-4-spot'),
+      agents: expandAgentQueue('n2d-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
       cancel_on_build_failing: true,
@@ -241,7 +241,7 @@ for (const testSuite of testSuites) {
       concurrency,
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
-      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      agents: expandAgentQueue(usesParallelWorkers ? 'n2d-8-spot' : 'n2d-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 60,
       cancel_on_build_failing: true,
@@ -261,7 +261,7 @@ for (const testSuite of testSuites) {
           `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
         );
       }
-      const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
+      const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2d-4-spot';
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
@@ -298,7 +298,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: synthGroup.name,
-        agents: expandAgentQueue('n2-4-spot'),
+        agents: expandAgentQueue('n2d-4-spot'),
         key: `${TestSuiteType.SYNTHETICS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 30,
@@ -326,7 +326,7 @@ pipeline.steps.push({
 pipeline.steps.push({
   command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
-  agents: expandAgentQueue('n2-4-spot'),
+  agents: expandAgentQueue('n2d-4-spot'),
   timeout_in_minutes: 15,
   retry: {
     automatic: [{ exit_status: '-1', limit: 3 }],

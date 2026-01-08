@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      machineType: n2-standard-2
+      machineType: n2d-standard-2
       diskSizeGb: 115
     timeout_in_minutes: 10
     env:
