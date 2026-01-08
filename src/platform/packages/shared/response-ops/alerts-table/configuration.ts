@@ -18,6 +18,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
@@ -108,6 +109,13 @@ const columns = [
     id: ALERT_REASON,
     linkField: '*',
     initialWidth: 260,
+  },
+  {
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.workflowTagsColumnDescription', {
+      defaultMessage: 'Workflow Tags',
+    }),
+    id: ALERT_WORKFLOW_TAGS,
+    initialWidth: 150,
   },
   {
     displayAsText: i18n.translate(
