@@ -15,31 +15,23 @@ import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 
 import { Navigation } from './navigation';
-import { SideNavCollapseButton } from './collapse_button';
 import type { NavigationProps } from './types';
 
 interface CollapsibleNavigationProps {
-  toggle: (isVisible: boolean) => void;
   isCollapsed$: BehaviorSubject<boolean>;
   navProps: NavigationProps;
 }
 
 export const FixedLayoutProjectSideNav: FunctionComponent<CollapsibleNavigationProps> = ({
-  toggle,
   isCollapsed$,
   navProps,
 }) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
 
   return (
-    <>
-      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={toggle} />
-      <CollapsibleNavigationFlyout>
-        {({ setWidth }) => (
-          <Navigation {...navProps} isCollapsed={isCollapsed} setWidth={setWidth} />
-        )}
-      </CollapsibleNavigationFlyout>
-    </>
+    <CollapsibleNavigationFlyout>
+      {({ setWidth }) => <Navigation {...navProps} isCollapsed={isCollapsed} setWidth={setWidth} />}
+    </CollapsibleNavigationFlyout>
   );
 };
 
