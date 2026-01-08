@@ -12,7 +12,7 @@ import type {
   MitreSubTechnique,
   MitreTactic,
   MitreTechnique,
-} from '../../../../detections/mitre/types';
+} from '../../../../../common/detection_engine/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
 const lazyMitreConfiguration = () => {
