@@ -134,6 +134,10 @@ export interface ESQLCommandSummary {
    * We are separating them here to be able to treat them differently in some contexts
    */
   metadataColumns?: Set<string>;
+  /**
+   * A set of renamed columns pairs [oldName, newName]
+   */
+  renamedColumnsPairs?: Set<[string, string]>;
 }
 
 export interface ESQLPolicy {
