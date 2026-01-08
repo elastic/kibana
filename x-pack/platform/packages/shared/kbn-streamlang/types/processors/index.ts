@@ -472,22 +472,22 @@ export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
  */
 
 interface ConcatFromField {
-  from: 'field';
+  type: 'field';
   value: string;
 }
 
 const concatFromFieldSchema = z.object({
-  from: z.literal('field'),
+  type: z.literal('field'),
   value: StreamlangSourceField,
 }) satisfies z.Schema<ConcatFromField>;
 
 interface ConcatFromLiteral {
-  from: 'literal';
+  type: 'literal';
   value: string;
 }
 
 const concatFromLiteralSchema = z.object({
-  from: z.literal('literal'),
+  type: z.literal('literal'),
   value: StreamlangSeparator,
 }) satisfies z.Schema<ConcatFromLiteral>;
 

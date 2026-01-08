@@ -12,7 +12,24 @@ import type { ConcatProcessor } from '../../../../types/processors';
  * Converts a ConcatProcessor to an Ingest Pipeline set processor.
  *
  * @example
-    TODO: Add example
+ * Input:
+    {
+        action: 'concat',
+        from: [
+            { type: 'field', value: 'first_name' },
+            { type: 'literal', value: ' ' },
+            { type: 'field', value: 'last_name' }
+        ],
+        to: 'full_name',
+      }
+
+ * Output:
+    {
+        set: {
+            field: 'full_name',
+            value: '{{{first_name}}} {{{last_name}}}',
+        }
+    }
  */
 export const processConcatProcessor = (
   processor: Omit<ConcatProcessor, 'where'> & { if?: string; tag?: string }
@@ -20,7 +37,7 @@ export const processConcatProcessor = (
   let value = '';
   // value is the concatenation of the fields and literals in the from array
   for (const from of processor.from) {
-    if (from.from === 'field') {
+    if (from.type === 'field') {
       value += `{{{${from.value}}}}`;
     } else {
       value += from.value;

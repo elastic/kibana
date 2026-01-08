@@ -22,11 +22,11 @@ apiTest.describe(
           {
             action: 'concat',
             from: [
-              { from: 'field', value: 'first_name' },
-              { from: 'literal', value: '.' },
-              { from: 'field', value: 'last_name' },
-              { from: 'literal', value: '@' },
-              { from: 'field', value: 'email_domain' },
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: '.' },
+              { type: 'field', value: 'last_name' },
+              { type: 'literal', value: '@' },
+              { type: 'field', value: 'email_domain' },
             ],
             to: 'full_email',
           } as ConcatProcessor,
