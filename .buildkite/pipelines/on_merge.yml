@@ -682,6 +682,7 @@ steps:
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     key: storybooks
     timeout_in_minutes: 80
     retry:
