@@ -162,7 +162,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     if (actionRequest.command === 'runscript') {
       const scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
 
-      if (scriptDetails.requiresInput && !actionRequest.parameters.scriptInput) {
+      if (scriptDetails.requiresInput && !(actionRequest.parameters.scriptInput ?? '').trim()) {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
