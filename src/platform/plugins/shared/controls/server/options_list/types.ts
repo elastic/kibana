@@ -8,7 +8,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { OptionsListSelection } from '../../common/options_list/options_list_selections';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import type {
   OptionsListParsedSuggestions,
   OptionsListRequestBody,
