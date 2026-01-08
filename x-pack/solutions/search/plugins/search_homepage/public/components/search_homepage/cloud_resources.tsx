@@ -49,7 +49,7 @@ const ResourceCard = ({
     <EuiSplitPanel.Outer
       direction="row"
       css={css({
-        //maxWidth: euiTheme.base * 36,
+        // maxWidth: euiTheme.base * 36,
       })}
       responsive={['xs', 's', 'm']}
       data-test-subj={dataTestSubj}
@@ -87,7 +87,7 @@ const ResourceCard = ({
               data-test-subj="searchHomepageSearchCloudResourceCardAction"
               href={actionHref}
               target="_blank"
-              flush='both'
+              flush="both"
             >
               {actionText}
             </EuiButtonEmpty>
@@ -183,15 +183,13 @@ export const CloudResources = () => {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          
           <h6>
             <EuiTextColor color="subdued">
-            {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
-              defaultMessage: 'Cloud resources',
-            })}
+              {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
+                defaultMessage: 'Cloud resources',
+              })}
             </EuiTextColor>
           </h6>
-          
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
