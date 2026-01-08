@@ -30,10 +30,13 @@ export const AI_ASSISTED_RULE_CREATION_ERROR_TITLE = i18n.translate(
 );
 
 export const AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM = (errorMessage: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.errorDuringStream', {
-    defaultMessage: 'Error during AI assisted rule creation: {errorMessage}',
-    values: { errorMessage },
-  });
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.errorDuringStream',
+    {
+      defaultMessage: 'Error during AI assisted rule creation: {errorMessage}',
+      values: { errorMessage },
+    }
+  );
 
 export const AI_ASSISTED_RULE_CREATION_ERROR_STARTING = (errorMessage: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.errorStarting', {

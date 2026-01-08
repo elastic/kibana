@@ -51,7 +51,8 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
     'aiAssistedRuleCreationEnabled'
   );
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { addError } = useAppToasts();
   const isLoading = userInfoLoading || listsConfigLoading;
   const collapseFn = useRef<() => void | undefined>();
@@ -239,7 +240,9 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
 
                       {isAiRuleCreationCancelled ? (
                         <EuiCallOut announceOnMount color="warning" iconType="warning">
-                          <EuiText size="s">{i18n.AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE}</EuiText>
+                          <EuiText size="s">
+                            {i18n.AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE}
+                          </EuiText>
                         </EuiCallOut>
                       ) : null}
 
