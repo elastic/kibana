@@ -18,13 +18,15 @@ import {
   EuiPopoverTitle,
   EuiTextTruncate,
 } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { noop } from 'lodash';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
+import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
+import { css } from '@emotion/react';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
@@ -80,6 +82,10 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
         : entityIdentifier,
     [entityIdentifier, assistantResult?.replacements]
   );
+
+  const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
+  const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
+  const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
 
   const getPromptContext = useCallback(
     async () =>
@@ -181,18 +187,44 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               >
                 <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label={i18n.translate(
-                        'xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues',
-                        {
-                          defaultMessage: 'Show anonymized values',
-                        }
-                      )}
-                      checked={showAnonymizedValues}
-                      onChange={onChangeShowAnonymizedValues}
-                      compressed
-                      disabled={!selectedConversationHasAnonymizedValues}
-                    />
+                    <EuiFlexGroup
+                      alignItems="center"
+                      data-test-subj="anonymizationGroup"
+                      gutterSize="s"
+                      responsive={false}
+                      wrap={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiSwitch
+                          label={i18n.translate(
+                            'xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues',
+                            {
+                              defaultMessage: 'Show anonymized values',
+                            }
+                          )}
+                          checked={showAnonymizedValues}
+                          onChange={onChangeShowAnonymizedValues}
+                          compressed
+                          disabled={!selectedConversationHasAnonymizedValues}
+                        />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.securitySolution.flyout.entityDetails.highlights.anonymizationArialLabel',
+                            {
+                              defaultMessage: 'Anonymization',
+                            }
+                          )}
+                          data-test-subj="anonymizationSettings"
+                          iconType="gear"
+                          onClick={showAnonymizationModal}
+                          size="s"
+                          color="text"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiContextMenuItem>
@@ -297,6 +329,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       isAgentBuilderEnabled,
       isLoading,
       assistantResult,
+      showAnonymizationModal,
     ]
   );
 
@@ -320,7 +353,17 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       panelPaddingSize="none"
       anchorPosition="leftUp"
     >
-      <EuiContextMenu initialPanelId={0} size="m" panels={panels} />
+      <EuiContextMenu
+        css={css`
+          width: 280px;
+        `}
+        initialPanelId={0}
+        size="m"
+        panels={panels}
+      />
+      {isAnonymizationModalVisible && (
+        <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
+      )}
     </EuiPopover>
   );
 };

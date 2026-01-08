@@ -403,6 +403,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
     // If a new file was uploaded, then delete the old one
     if (newFileStorage) {
+      this.logger.debug(
+        `Update to script [${id}] with new file upload info successful. Deleting old file id [${currentScriptSoItem.attributes.file_id}]`
+      );
+
       this.filesClient
         .delete({ id: currentScriptSoItem.attributes.file_id })
         .catch((deleteError) => {
