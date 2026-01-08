@@ -13,7 +13,6 @@ import type { DataControlState } from '@kbn/controls-schemas';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   titleComparators,
@@ -204,9 +203,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
   );
 
   /** Output filters when selections and/or filter meta data changes */
-  const sectionId$ = (
-    apiHasSections(parentApi) ? parentApi.getPanelSection$(controlId) : of(undefined)
-  ) as PublishingSubject<string | undefined>;
+  const sectionId$ = apiHasSections(parentApi)
+    ? parentApi.getPanelSection$(controlId)
+    : of(undefined);
 
   return {
     api: {

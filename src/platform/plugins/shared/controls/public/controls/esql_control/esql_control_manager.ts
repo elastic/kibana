@@ -266,7 +266,7 @@ export function initializeESQLControlManager(
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
       singleSelect$: singleSelect$ as PublishingSubject<boolean>,
-      sectionId$: sectionId$ as PublishingSubject<string | undefined>,
+      sectionId$,
     },
     anyStateChange$: merge(
       selectedOptions$,
