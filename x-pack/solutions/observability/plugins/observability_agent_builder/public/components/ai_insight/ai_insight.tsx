@@ -22,33 +22,13 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import {
-  EuiMarkdownFormat,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-} from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
-
-const ButtonSection = ({
-  children,
-  align = 'flexStart',
-}: {
-  children: React.ReactNode;
-  align?: 'flexStart' | 'flexEnd';
-}) => (
-  <>
-    <EuiSpacer size="m" />
-    <EuiHorizontalRule margin="none" />
-    <EuiSpacer size="s" />
-    <EuiFlexGroup justifyContent={align} gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-    </EuiFlexGroup>
-  </>
-);
+import { useMarkdownPluginsWithCursor, CURSOR } from './loading_cursor';
 
 export interface AiInsightAttachment {
   type: string;
@@ -81,6 +61,10 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
 
   const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
     useStreamingAiInsight(fetchInsight);
+
+  const { parsingPluginList, processingPluginList } = useMarkdownPluginsWithCursor(
+    euiTheme.colors.text
+  );
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
@@ -153,47 +137,71 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
             <EuiText size="s">
               <EuiMarkdownFormat
                 textSize="s"
-                parsingPluginList={getDefaultEuiMarkdownParsingPlugins()}
-                processingPluginList={getDefaultEuiMarkdownProcessingPlugins()}
+                parsingPluginList={parsingPluginList}
+                processingPluginList={processingPluginList}
               >
-                {summary}
+                {`${summary}${isLoading ? CURSOR : ''}`}
               </EuiMarkdownFormat>
             </EuiText>
           )}
-        </EuiPanel>
 
-        {isLoading ? (
-          <ButtonSection>
-            <EuiButtonEmpty
-              data-test-subj="observabilityAgentBuilderStopGeneratingButton"
-              color="text"
-              iconType="stop"
-              size="s"
-              onClick={stop}
-            >
-              {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.stopGeneratingButton', {
-                defaultMessage: 'Stop generating',
-              })}
-            </EuiButtonEmpty>
-          </ButtonSection>
-        ) : wasStopped ? (
-          <ButtonSection>
-            <EuiButtonEmpty
-              data-test-subj="observabilityAgentBuilderRegenerateButton"
-              size="s"
-              iconType="sparkles"
-              onClick={regenerate}
-            >
-              {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
-                defaultMessage: 'Regenerate',
-              })}
-            </EuiButtonEmpty>
-          </ButtonSection>
-        ) : Boolean(summary && summary.trim()) ? (
-          <ButtonSection align="flexEnd">
-            <StartConversationButton onClick={handleStartConversation} />
-          </ButtonSection>
-        ) : null}
+          {isLoading ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="observabilityAgentBuilderStopGeneratingButton"
+                    color="text"
+                    iconType="stop"
+                    size="s"
+                    onClick={stop}
+                  >
+                    {i18n.translate(
+                      'xpack.observabilityAgentBuilder.aiInsight.stopGeneratingButton',
+                      {
+                        defaultMessage: 'Stop generating',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : wasStopped ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="observabilityAgentBuilderRegenerateButton"
+                    size="s"
+                    iconType="sparkles"
+                    onClick={regenerate}
+                  >
+                    {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
+                      defaultMessage: 'Regenerate',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : Boolean(summary && summary.trim()) ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <StartConversationButton onClick={handleStartConversation} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
+        </EuiPanel>
       </EuiAccordion>
     </EuiPanel>
   );
