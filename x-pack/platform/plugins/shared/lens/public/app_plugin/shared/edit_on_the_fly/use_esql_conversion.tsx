@@ -21,11 +21,11 @@ import { operationDefinitionMap } from '../../../datasources/form_based/operatio
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 
-const cannotConvertTooltip = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
+const cannotConvertToEsqlTooltip = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
   defaultMessage: 'This visualization cannot be converted to ES|QL',
 });
 
-export const disabled = (tooltip: string = cannotConvertTooltip) => ({
+const getEsqlConversionDisabledSettings = (tooltip: string = cannotConvertToEsqlTooltip) => ({
   isConvertToEsqlButtonDisabled: true,
   convertToEsqlButtonTooltip: tooltip,
   convertibleLayers: [],
@@ -62,18 +62,18 @@ export const useEsqlConversion = (
 } => {
   return useMemo(() => {
     if (!showConvertToEsqlButton) {
-      return disabled();
+      return getEsqlConversionDisabledSettings();
     }
 
     if (!activeVisualization || !visualization?.state) {
-      return disabled();
+      return getEsqlConversionDisabledSettings();
     }
 
     const { state } = visualization;
 
     // Guard: trendline check
     if (hasTrendLineLayer(state)) {
-      return disabled(
+      return getEsqlConversionDisabledSettings(
         i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
           defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
         })
@@ -82,7 +82,7 @@ export const useEsqlConversion = (
 
     // Guard: layer count
     if (layerIds.length > 1) {
-      return disabled(
+      return getEsqlConversionDisabledSettings(
         i18n.translate('xpack.lens.config.cannotConvertToEsqlMultilayerTooltip', {
           defaultMessage: 'Multi-layer visualizations cannot be converted to query mode',
         })
@@ -92,19 +92,19 @@ export const useEsqlConversion = (
     // Guard: datasource state exists and has layers
     const datasourceState = datasourceStates[datasourceId]?.state;
     if (!isValidDatasourceState(datasourceState)) {
-      return disabled();
+      return getEsqlConversionDisabledSettings();
     }
 
     // Guard: layer access
     const layerId = layerIds[0];
     const layers = datasourceState.layers;
     if (!layerId || !layers[layerId]) {
-      return disabled();
+      return getEsqlConversionDisabledSettings();
     }
 
     const singleLayer = layers[layerId];
     if (!singleLayer?.columnOrder || !singleLayer?.columns) {
-      return disabled();
+      return getEsqlConversionDisabledSettings();
     }
 
     // Main logic: compute esqlLayer
@@ -151,7 +151,7 @@ export const useEsqlConversion = (
             },
           ],
         }
-      : disabled(
+      : getEsqlConversionDisabledSettings(
           i18n.translate('xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip', {
             defaultMessage: 'The visualization has unsupported settings for query mode',
           })
