@@ -174,7 +174,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               <EuiSpacer size="m" />
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false}>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="observabilityAgentBuilderRegenerateButton"
@@ -187,6 +187,9 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <StartConversationButton onClick={handleStartConversation} />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </>
           ) : Boolean(summary && summary.trim()) ? (
@@ -195,6 +198,18 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="observabilityAgentBuilderRegenerateButton"
+                    size="s"
+                    iconType="sparkles"
+                    onClick={regenerate}
+                  >
+                    {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
+                      defaultMessage: 'Regenerate',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <StartConversationButton onClick={handleStartConversation} />
                 </EuiFlexItem>
