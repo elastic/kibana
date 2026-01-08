@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -146,6 +146,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           </EuiFlexItem>
         </EuiFlexItem>
       )}
+
+      {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
+      {isCurrentRound && <EuiSpacer size="l" />}
     </EuiFlexGroup>
   );
 };

@@ -56,7 +56,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress']); // 'queue', 'drop' TBD
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']); // 'queue' TBD
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
 export const ConcurrencySettingsSchema = z.object({
