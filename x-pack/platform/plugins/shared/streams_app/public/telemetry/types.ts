@@ -11,6 +11,8 @@ import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
+type ConfigurationMode = 'interactive' | 'yaml';
+
 type StreamsAttachmentCountProps = {
   name: string;
 } & Record<AttachmentType, number>;
@@ -83,6 +85,7 @@ interface WiredStreamsStatusChangedProps {
 interface StreamsProcessingSavedProps {
   processors_count: number;
   stream_type: StreamType;
+  configuration_mode: ConfigurationMode;
 }
 
 interface StreamsRetentionChangedProps {
@@ -116,15 +119,6 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 interface StreamsSignificantEventsCreatedProps {
   count: number;
   count_by_feature_type: CountByFeatureType;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsFeatureIdentificationIdentifiedProps {
-  count: number;
-  count_by_type: CountByFeatureType;
-  input_tokens_used: number;
-  output_tokens_used: number;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -180,6 +174,7 @@ interface StreamsTabVisitedProps {
 }
 
 export {
+  type ConfigurationMode,
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
   type StreamsAttachmentLinkChangedProps,
@@ -198,7 +193,6 @@ export {
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
-  type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import { onechatMocks } from '@kbn/onechat-plugin/server/mocks';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 import { createEntityAttachmentType } from './entity';
 
 describe('createEntityAttachmentType', () => {
   const attachmentType = createEntityAttachmentType();
-  const formatContext = onechatMocks.attachments.createFormatContextMock();
+  const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when entity data is valid with host identifierType', async () => {

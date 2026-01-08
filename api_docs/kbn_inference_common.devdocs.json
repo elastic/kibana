@@ -1871,7 +1871,7 @@
         "signature": [
           "() => ",
           "OperatorFunction",
-          "<T, Exclude<T, { content: string; tool_calls: ",
+          "<T, Exclude<T, { content: string; refusal?: string | undefined; tool_calls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -2689,6 +2689,22 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteResponse.refusal",
+            "type": "string",
+            "tags": [],
+            "label": "refusal",
+            "description": [
+              "\nOptional refusal reason returned by the model when content is filtered."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ChatCompleteResponse.toolCalls",
             "type": "Array",
             "tags": [],
@@ -2732,6 +2748,22 @@
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteResponse.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [
+              "\nModel effectively used, as specified by the response"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2757,7 +2789,7 @@
               "\nDefines the strategy for error retry\n\nEither one of\n- all: will retry all errors\n- auto: will only retry errors that could be recoverable (e.g rate limit, connectivity)\nOf a custom function to manually handle filtering\n\nDefaults to \"auto\""
             ],
             "signature": [
-              "\"all\" | \"auto\" | ((err: Error) => boolean) | undefined"
+              "\"auto\" | \"all\" | ((err: Error) => boolean) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
             "deprecated": false,
@@ -2895,12 +2927,28 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompletionTokenCount.thinking",
+            "type": "number",
+            "tags": [],
+            "label": "thinking",
+            "description": [
+              "\nThinking token count, if available"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ChatCompletionTokenCount.total",
             "type": "number",
             "tags": [],
             "label": "total",
             "description": [
-              "\nTotal token count"
+              "\nTotal token count (prompt + completion + thinking)"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
             "deprecated": false,
@@ -5207,7 +5255,7 @@
             "section": "def-common.MessageRole",
             "text": "MessageRole"
           },
-          ".Assistant> & { content: string | null; } & (TToolCalls extends ",
+          ".Assistant> & { content: string | null; refusal?: string | null | undefined; } & (TToolCalls extends ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5248,7 +5296,7 @@
             "section": "def-common.MessageRole",
             "text": "MessageRole"
           },
-          ".Assistant> & { content: string | null; } & (",
+          ".Assistant> & { content: string | null; refusal?: string | null | undefined; } & (",
           "ToolCallsOfToolOptions",
           "<TToolOptions> extends ",
           {
@@ -5786,7 +5834,7 @@
           "\nChunk event, containing a fragment of the total content,\nand potentially chunks of tool calls."
         ],
         "signature": [
-          "{ content: string; tool_calls: ",
+          "{ content: string; refusal?: string | undefined; tool_calls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5851,7 +5899,7 @@
           "\nEvents emitted from the {@link ChatCompleteResponse} observable\nreturned from the {@link ChatCompleteAPI}.\n\nThe chatComplete API returns 3 type of events:\n- {@link ChatCompletionChunkEvent}: message chunk events\n- {@link ChatCompletionTokenCountEvent}: token count event\n- {@link ChatCompletionMessageEvent}: message event\n\nNote that chunk events can be emitted any amount of times, but token count will be emitted\nat most once (could not be emitted depending on the underlying connector), and message\nevent will be emitted ex\n"
         ],
         "signature": [
-          "({ content: string; tool_calls: ",
+          "({ content: string; refusal?: string | undefined; tool_calls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5915,7 +5963,7 @@
             "section": "def-common.ChatCompletionEventType",
             "text": "ChatCompletionEventType"
           },
-          ".ChatCompletionTokenCount; }) | ({ content: string; deanonymized_input?: { message: ",
+          ".ChatCompletionTokenCount; }) | ({ content: string; refusal?: string | undefined; deanonymized_input?: { message: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5980,7 +6028,7 @@
           "\nMessage event, sent only once, after all the chunks were emitted, and containing\nthe whole text content and potential tool calls of the response."
         ],
         "signature": [
-          "{ content: string; deanonymized_input?: { message: ",
+          "{ content: string; refusal?: string | undefined; deanonymized_input?: { message: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

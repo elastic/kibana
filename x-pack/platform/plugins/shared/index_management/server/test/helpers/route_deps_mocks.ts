@@ -32,8 +32,5 @@ export function getTransportRequest(
 ): jest.MockedFunction<
   typeof router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
 > {
-  return router.contextMock.core.elasticsearch.client.asCurrentUser.transport
-    .request as unknown as jest.MockedFunction<
-    typeof router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
-  >;
+  return jest.mocked(router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request);
 }

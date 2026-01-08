@@ -19,8 +19,8 @@ import {
   type UpdateSLOInput,
   type UpdateSLOResponse,
 } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
-import { paths } from '../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
