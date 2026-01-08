@@ -6,7 +6,11 @@
  */
 
 import type { ConversationRound, ToolCallStep, ToolResult } from '@kbn/agent-builder-common';
-import { platformCoreTools, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  platformCoreTools,
+  ConversationRoundStepType,
+  ConversationRoundStatus,
+} from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalToolDefinition, ToolHistoryCleanerFn } from '@kbn/agent-builder-server';
 import type { ToolRegistry } from '../../../tools';
@@ -35,6 +39,7 @@ const createRound = (steps: ToolCallStep[]): ConversationRound => ({
   time_to_first_token: 100,
   time_to_last_token: 200,
   model_usage: { connector_id: 'test', llm_calls: 1, input_tokens: 100, output_tokens: 50 },
+  status: ConversationRoundStatus.completed,
 });
 
 // Helper to create a tool result
