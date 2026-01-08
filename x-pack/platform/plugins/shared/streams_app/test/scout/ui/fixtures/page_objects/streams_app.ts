@@ -106,6 +106,7 @@ export class StreamsApp {
 
   async gotoAttachmentsTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'attachments');
+    await this.page.waitForLoadState('networkidle');
   }
 
   async clickStreamNameLink(streamName: string) {
