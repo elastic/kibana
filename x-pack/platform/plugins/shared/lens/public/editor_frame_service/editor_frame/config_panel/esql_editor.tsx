@@ -113,7 +113,7 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
-  console.log({ panelId, esqlVariables });
+
   const dispatch = useLensDispatch();
 
   useEffect(() => {
