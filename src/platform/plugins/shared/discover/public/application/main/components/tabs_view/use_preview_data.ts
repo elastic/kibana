@@ -25,6 +25,7 @@ import {
   selectRecentlyClosedTabs,
 } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
+import type { RecentlyClosedTabState } from '../../state_management/redux/types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
   const allTabs = useInternalStateSelector(selectAllTabs);
@@ -140,12 +141,10 @@ const getPreviewTitle = (
 
 const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
-  tabState: TabState,
+  tabState: TabState | RecentlyClosedTabState,
   savedDataViews: DataViewListItem[]
 ) => {
-  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
-
-  if (!tabRuntimeState) {
+  if ('closedAt' in tabState) {
     // Recently closed tab, no runtime state, no updates expected
     const derivedDataViewName = getDataViewNameFromInitialInternalState(
       tabState.initialInternalState,
@@ -157,6 +156,8 @@ const getPreviewDataObservable = (
       title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
     });
   }
+
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
 
   return tabRuntimeState.stateContainer$.pipe(
     switchMap((tabStateContainer) => {
