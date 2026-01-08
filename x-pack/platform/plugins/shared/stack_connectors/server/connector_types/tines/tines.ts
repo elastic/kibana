@@ -120,7 +120,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     reducer: (response: R) => T,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<T & { incompleteResponse: boolean }> {
-    this.logger.debug(`[tinesApiRequest]. Method: ${req.method}. URL: ${req.url}`);
+    this.logger.debug(`[tinesApiRequest]. URL: ${req.url}`);
     const response = await this.request<R>(
       {
         ...req,
