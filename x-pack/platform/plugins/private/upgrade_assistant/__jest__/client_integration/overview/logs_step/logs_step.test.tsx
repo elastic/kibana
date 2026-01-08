@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import {
   DEPRECATION_LOGS_INDEX,
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   DEPRECATION_LOGS_ORIGIN_FIELD,
   APPS_WITH_DEPRECATION_LOGS,
 } from '../../../../common/constants';
-import { setupEnvironment } from '../../helpers';
-import type { OverviewTestBed } from '../overview.helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Logs Step', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -40,34 +39,31 @@ describe('Overview - Logs Step', () => {
         isDeprecationLoggingEnabled: true,
       });
 
-      await act(async () => {
-        testBed = await setupOverviewPage(httpSetup);
-      });
-
-      testBed.component.update();
+      await setupOverviewPage(httpSetup);
     });
 
     test('is rendered and allows retry', async () => {
-      const { exists, actions } = testBed;
-      expect(exists('deprecationLogsErrorCallout')).toBe(true);
-      expect(exists('deprecationLogsRetryButton')).toBe(true);
+      expect(screen.getByTestId('deprecationLogsErrorCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('deprecationLogsRetryButton')).toBeInTheDocument();
 
-      expect(exists('logsCountDescription')).toBe(false);
-      expect(exists('viewDiscoverLogsButton')).toBe(false);
-      expect(exists('viewDetailsLink')).toBe(false);
+      expect(screen.queryByTestId('logsCountDescription')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('viewDiscoverLogsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('viewDetailsLink')).not.toBeInTheDocument();
 
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
       });
 
-      await actions.clickRetryLogsButton();
+      fireEvent.click(screen.getByTestId('deprecationLogsRetryButton'));
 
-      expect(exists('logsCountDescription')).toBe(true);
-      expect(exists('viewDiscoverLogsButton')).toBe(true);
-      expect(exists('viewDetailsLink')).toBe(true);
+      await waitFor(() => {
+        expect(screen.getByTestId('logsCountDescription')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('viewDiscoverLogsButton')).toBeInTheDocument();
+      expect(screen.getByTestId('viewDetailsLink')).toBeInTheDocument();
 
-      expect(exists('deprecationLogsErrorCallout')).toBe(false);
-      expect(exists('deprecationLogsRetryButton')).toBe(false);
+      expect(screen.queryByTestId('deprecationLogsErrorCallout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deprecationLogsRetryButton')).not.toBeInTheDocument();
     });
   });
 
@@ -85,15 +81,8 @@ describe('Overview - Logs Step', () => {
           count: 0,
         });
 
-        await act(async () => {
-          testBed = await setupOverviewPage(httpSetup);
-        });
-
-        const { component, exists } = testBed;
-
-        component.update();
-
-        expect(exists('logsStep-complete')).toBe(true);
+        await setupOverviewPage(httpSetup);
+        expect(screen.getByTestId('logsStep-complete')).toBeInTheDocument();
       });
 
       test('renders step as incomplete when a user has >0 logs', async () => {
@@ -101,15 +90,8 @@ describe('Overview - Logs Step', () => {
           count: 10,
         });
 
-        await act(async () => {
-          testBed = await setupOverviewPage(httpSetup);
-        });
-
-        const { component, exists } = testBed;
-
-        component.update();
-
-        expect(exists('logsStep-incomplete')).toBe(true);
+        await setupOverviewPage(httpSetup);
+        expect(screen.getByTestId('logsStep-incomplete')).toBeInTheDocument();
       });
 
       test('renders deprecation issue count and button to view logs', async () => {
@@ -117,32 +99,41 @@ describe('Overview - Logs Step', () => {
           count: 10,
         });
 
-        await act(async () => {
-          testBed = await setupOverviewPage(httpSetup);
-        });
-
-        const { component, find } = testBed;
-
-        component.update();
-
-        expect(find('logsCountDescription').text()).toContain('You have 10 deprecation issues');
+        await setupOverviewPage(httpSetup);
+        expect(screen.getByTestId('logsCountDescription')).toHaveTextContent(
+          'You have 10 deprecation issues'
+        );
       });
 
       test('displays discover and verify changes buttons', async () => {
-        const { exists, find } = testBed;
-        expect(exists('viewDiscoverLogsButton')).toBe(true);
-        expect(exists('viewDetailsLink')).toBe(true);
-        expect(find('viewDiscoverLogsButton').text()).toContain('Analyze logs in Discover');
-        expect(find('viewDetailsLink').text()).toContain('View details');
-        expect(exists('enableLogsLink')).toBe(false);
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+          count: 10,
+        });
+
+        await setupOverviewPage(httpSetup);
+
+        const discoverButton = await screen.findByTestId('viewDiscoverLogsButton');
+        const viewDetailsLink = await screen.findByTestId('viewDetailsLink');
+
+        expect(discoverButton).toBeInTheDocument();
+        expect(viewDetailsLink).toBeInTheDocument();
+        expect(discoverButton).toHaveTextContent('Analyze logs in Discover');
+        expect(viewDetailsLink).toHaveTextContent('View details');
+        expect(screen.queryByTestId('enableLogsLink')).not.toBeInTheDocument();
       });
 
       test('has a link to see logs in discover app', async () => {
-        const { exists, find } = testBed;
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+          count: 10,
+        });
 
-        expect(exists('viewDiscoverLogsButton')).toBe(true);
+        await setupOverviewPage(httpSetup);
 
-        const decodedUrl = decodeURIComponent(find('viewDiscoverLogsButton').props().href);
+        const discoverButton = await screen.findByTestId('viewDiscoverLogsButton');
+        expect(discoverButton).toBeInTheDocument();
+
+        const href = (discoverButton as HTMLAnchorElement).getAttribute('href');
+        const decodedUrl = decodeURIComponent(href ?? '');
         expect(decodedUrl).toContain('discoverUrl');
         [
           '"language":"kuery"',
@@ -167,22 +158,14 @@ describe('Overview - Logs Step', () => {
           isDeprecationLoggingEnabled: true,
         });
 
-        await act(async () => {
-          testBed = await setupOverviewPage(httpSetup);
-        });
-
-        const { component } = testBed;
-
-        component.update();
+        await setupOverviewPage(httpSetup);
       });
 
       test('renders button to enable logs', () => {
-        const { find, exists } = testBed;
-
-        expect(exists('logsCountDescription')).toBe(false);
-        expect(find('enableLogsLink').text()).toContain('Enable logging');
-        expect(exists('viewDiscoverLogsButton')).toBe(false);
-        expect(exists('viewDetailsLink')).toBe(false);
+        expect(screen.queryByTestId('logsCountDescription')).not.toBeInTheDocument();
+        expect(screen.getByTestId('enableLogsLink')).toHaveTextContent('Enable logging');
+        expect(screen.queryByTestId('viewDiscoverLogsButton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('viewDetailsLink')).not.toBeInTheDocument();
       });
     });
   });
@@ -196,41 +179,29 @@ describe('Overview - Logs Step', () => {
     });
 
     test('warns the user of missing index privileges', async () => {
-      await act(async () => {
-        testBed = await setupOverviewPage(httpSetup, {
-          privileges: {
-            hasAllPrivileges: true,
-            missingPrivileges: {
-              cluster: [],
-              index: [DEPRECATION_LOGS_INDEX],
-            },
+      await setupOverviewPage(httpSetup, {
+        privileges: {
+          hasAllPrivileges: true,
+          missingPrivileges: {
+            cluster: [],
+            index: [DEPRECATION_LOGS_INDEX],
           },
-        });
+        },
       });
-
-      const { component, exists } = testBed;
-      component.update();
-
-      expect(exists('missingIndexPrivilegesCallout')).toBe(true);
+      expect(screen.getByTestId('missingIndexPrivilegesCallout')).toBeInTheDocument();
     });
 
     test('warns the user of missing cluster privileges', async () => {
-      await act(async () => {
-        testBed = await setupOverviewPage(httpSetup, {
-          privileges: {
-            hasAllPrivileges: true,
-            missingPrivileges: {
-              cluster: [...APP_LOGS_COUNT_CLUSTER_PRIVILEGES],
-              index: [],
-            },
+      await setupOverviewPage(httpSetup, {
+        privileges: {
+          hasAllPrivileges: true,
+          missingPrivileges: {
+            cluster: [...APP_LOGS_COUNT_CLUSTER_PRIVILEGES],
+            index: [],
           },
-        });
+        },
       });
-
-      const { component, exists } = testBed;
-      component.update();
-
-      expect(exists('missingClusterPrivilegesCallout')).toBe(true);
+      expect(screen.getByTestId('missingClusterPrivilegesCallout')).toBeInTheDocument();
     });
   });
 });
