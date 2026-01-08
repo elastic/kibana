@@ -1854,6 +1854,9 @@
         "index": false,
         "type": "flattened"
       },
+      "has_agent_version_conditions": {
+        "type": "boolean"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -2276,6 +2279,9 @@
       "global_data_tags": {
         "index": false,
         "type": "flattened"
+      },
+      "has_agent_version_conditions": {
+        "type": "boolean"
       },
       "inactivity_timeout": {
         "type": "integer"
