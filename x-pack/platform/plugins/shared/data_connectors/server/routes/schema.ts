@@ -37,7 +37,7 @@ export function convertSOtoAPIResponse(
 
 export const createDataConnectorRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
-  name: schema.string({ minLength: 1 }),
-  token: schema.string({ minLength: 1 }), // in the future, this can be either token or username&password
+  name: schema.maybe(schema.string({ minLength: 1 })),
+  token: schema.maybe(schema.string({ minLength: 1 })),
   stack_connector_id: schema.maybe(schema.string({ minLength: 1 })),
 });
