@@ -44,6 +44,12 @@ export const initializeRelatedPanelsManager = (
   const { children$, layout$, getDashboardPanelFromId } = layoutManager.api;
   const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
 
+  /**
+   * Iterate through the current children$ and pipe them to a stream of:
+   * - Which child UUIDs apply filters and which are only affected by filters, grouped by sectionID
+   * - Which child UUIDs publish ES|QL variables, and which ones publish ES|QL queries that may be affected
+   *   by these variables
+   */
   const childUUIDsIndexed$ = combineLatest([
     children$,
     focusedPanelId$,
@@ -90,10 +96,12 @@ export const initializeRelatedPanelsManager = (
       }
 
       return combineLatest([
-        of({
-          childrenBySectionAndFilterApplication,
-          uuidsUsingGlobalFilters,
-        }),
+        of(
+          getRelatedPanelsByAppliedFilters({
+            childrenBySectionAndFilterApplication,
+            uuidsUsingGlobalFilters,
+          })
+        ),
         esqlVariableChildrenByUUID.length
           ? combineLatest(esqlVariableChildrenByUUID)
           : of(undefined),
@@ -102,88 +110,21 @@ export const initializeRelatedPanelsManager = (
     })
   );
 
-  const filterRelatedPanels$ = childUUIDsIndexed$.pipe(
-    map(([{ childrenBySectionAndFilterApplication, uuidsUsingGlobalFilters }]) => {
-      const filterRelatedPanels = new Map<string, string[]>();
-
-      const { appliesFilters: globalAppliesFilters } =
-        childrenBySectionAndFilterApplication.get(GLOBAL) ?? getBlankSectionFilterEntry();
-
-      for (const [
-        sectionId,
-        { appliesFilters, doesNotApplyFilters },
-      ] of childrenBySectionAndFilterApplication.entries()) {
-        for (const uuid of appliesFilters) {
-          const relatedPanels = [
-            ...doesNotApplyFilters,
-            // If this panel uses global filters, other filter-applying panels should be `related`
-            // to this panel as well
-            ...(uuidsUsingGlobalFilters.has(uuid)
-              ? [
-                  ...Array.from(appliesFilters).filter((id) => id !== uuid),
-                  ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
-                ]
-              : []),
-          ];
-          filterRelatedPanels.set(uuid, relatedPanels);
-        }
-
-        for (const uuid of doesNotApplyFilters) {
-          const relatedPanels = [
-            ...Array.from(appliesFilters).filter((id) => id !== uuid),
-            ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
-          ];
-
-          filterRelatedPanels.set(uuid, relatedPanels);
-        }
-      }
-
-      return filterRelatedPanels;
-    })
+  const relatedPanelSubscription = childUUIDsIndexed$.subscribe(
+    ([filterRelatedPanels, esqlVariablesWithUUIDs, esqlQueriesWithUUIDs]) => {
+      const esqlRelatedPanels = getRelatedPanelsByESQL({
+        esqlVariablesWithUUIDs,
+        esqlQueriesWithUUIDs,
+      });
+      arePanelsRelated$.next((a: string, b: string) => {
+        const relatedPanelUUIDs = new Set([
+          ...(filterRelatedPanels.get(b) ?? []),
+          ...(esqlRelatedPanels.get(b) ?? []),
+        ]);
+        return relatedPanelUUIDs.has(a);
+      });
+    }
   );
-
-  const esqlRelatedPanels$ = childUUIDsIndexed$.pipe(
-    map(([_, esqlVariablesWithUUIDs, esqlQueries]) => {
-      const nextESQLRelatedPanels: Map<string, string[]> = new Map();
-      if (!esqlVariablesWithUUIDs || !esqlQueries) return nextESQLRelatedPanels;
-
-      // For each panel with an ES|QL query, check if it has any variables, then create a map of which
-      // panels publish these corresponding variables
-      for (const { esql, uuid } of esqlQueries) {
-        const variables = getESQLQueryVariables(esql);
-        if (variables.length > 0) {
-          const relatedPanelUUIDs = variables
-            .map(
-              (variableName) =>
-                esqlVariablesWithUUIDs.find(({ variable: { key } }) => key === variableName)?.uuid
-            )
-            .filter(Boolean) as string[];
-          nextESQLRelatedPanels.set(uuid, relatedPanelUUIDs);
-
-          for (const relatedUUID of relatedPanelUUIDs) {
-            nextESQLRelatedPanels.set(relatedUUID, [
-              ...(nextESQLRelatedPanels.get(relatedUUID) ?? []),
-              uuid,
-            ]);
-          }
-        }
-      }
-      return nextESQLRelatedPanels;
-    })
-  );
-
-  const relatedPanelSubscription = combineLatest([
-    filterRelatedPanels$,
-    esqlRelatedPanels$,
-  ]).subscribe(([filterRelatedPanels, esqlRelatedPanels]) => {
-    arePanelsRelated$.next((a: string, b: string) => {
-      const relatedPanelUUIDs = new Set([
-        ...(filterRelatedPanels.get(b) ?? []),
-        ...(esqlRelatedPanels.get(b) ?? []),
-      ]);
-      return relatedPanelUUIDs.has(a);
-    });
-  });
 
   return {
     api: {
@@ -194,3 +135,81 @@ export const initializeRelatedPanelsManager = (
     },
   };
 };
+
+function getRelatedPanelsByAppliedFilters({
+  childrenBySectionAndFilterApplication,
+  uuidsUsingGlobalFilters,
+}: {
+  childrenBySectionAndFilterApplication: Map<string | Symbol, SectionFilterEntry>;
+  uuidsUsingGlobalFilters: Set<string>;
+}) {
+  const filterRelatedPanels = new Map<string, string[]>();
+
+  const { appliesFilters: globalAppliesFilters } =
+    childrenBySectionAndFilterApplication.get(GLOBAL) ?? getBlankSectionFilterEntry();
+
+  for (const [
+    sectionId,
+    { appliesFilters, doesNotApplyFilters },
+  ] of childrenBySectionAndFilterApplication.entries()) {
+    for (const uuid of appliesFilters) {
+      const relatedPanels = [
+        ...doesNotApplyFilters,
+        // If this panel uses global filters, other filter-applying panels should be `related`
+        // to this panel as well
+        ...(uuidsUsingGlobalFilters.has(uuid)
+          ? [
+              ...Array.from(appliesFilters).filter((id) => id !== uuid),
+              ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
+            ]
+          : []),
+      ];
+      filterRelatedPanels.set(uuid, relatedPanels);
+    }
+
+    for (const uuid of doesNotApplyFilters) {
+      const relatedPanels = [
+        ...Array.from(appliesFilters).filter((id) => id !== uuid),
+        ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
+      ];
+
+      filterRelatedPanels.set(uuid, relatedPanels);
+    }
+  }
+
+  return filterRelatedPanels;
+}
+
+function getRelatedPanelsByESQL({
+  esqlVariablesWithUUIDs,
+  esqlQueriesWithUUIDs,
+}: {
+  esqlVariablesWithUUIDs?: Array<{ uuid: string; variable: ESQLControlVariable }>;
+  esqlQueriesWithUUIDs?: Array<{ uuid: string; esql: string }>;
+}) {
+  const nextESQLRelatedPanels: Map<string, string[]> = new Map();
+  if (!esqlVariablesWithUUIDs || !esqlQueriesWithUUIDs) return nextESQLRelatedPanels;
+
+  // For each panel with an ES|QL query, check if it has any variables, then create a map of which
+  // panels publish these corresponding variables
+  for (const { esql, uuid } of esqlQueriesWithUUIDs) {
+    const variables = getESQLQueryVariables(esql);
+    if (variables.length > 0) {
+      const relatedPanelUUIDs = variables
+        .map(
+          (variableName) =>
+            esqlVariablesWithUUIDs.find(({ variable: { key } }) => key === variableName)?.uuid
+        )
+        .filter(Boolean) as string[];
+      nextESQLRelatedPanels.set(uuid, relatedPanelUUIDs);
+
+      for (const relatedUUID of relatedPanelUUIDs) {
+        nextESQLRelatedPanels.set(relatedUUID, [
+          ...(nextESQLRelatedPanels.get(relatedUUID) ?? []),
+          uuid,
+        ]);
+      }
+    }
+  }
+  return nextESQLRelatedPanels;
+}
