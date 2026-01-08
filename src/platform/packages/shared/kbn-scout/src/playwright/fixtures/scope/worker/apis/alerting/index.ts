@@ -109,7 +109,12 @@ export interface AlertingApiService {
       spaceId?: string,
       timeoutMs?: number
     ) => Promise<void>;
-    waitForNextExecution: (ruleId: string, spaceId?: string, timeoutMs?: number) => Promise<void>;
+    waitForNextExecution: (
+      ruleId: string,
+      spaceId?: string,
+      timeoutMs?: number,
+      dateStart?: Date
+    ) => Promise<void>;
   };
   cleanup: {
     deleteAllRules: (spaceId?: string) => Promise<void>;
