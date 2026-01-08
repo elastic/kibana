@@ -273,7 +273,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
       if (existingScriptWithSameFile.saved_objects.length > 0) {
         throw new ScriptLibraryError(
-          `The file you are attempting to upload (hash: [${fileStorage.data.hash.sha256}]) already exists and is associated with with a script entry named [${existingScriptWithSameFile.saved_objects[0].attributes.name}] (script ID: [${existingScriptWithSameFile.saved_objects[0].id}])`,
+          `The file you are attempting to upload (hash: [${fileStorage.data.hash.sha256}]) already exists and is associated with a script entry named [${existingScriptWithSameFile.saved_objects[0].attributes.name}] (script ID: [${existingScriptWithSameFile.saved_objects[0].id}])`,
           400
         );
       }
