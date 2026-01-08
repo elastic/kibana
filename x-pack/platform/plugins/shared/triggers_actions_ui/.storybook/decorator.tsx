@@ -50,6 +50,12 @@ const notifications: NotificationsStart = {
     get$: () => of([]),
   },
   showErrorDialog: () => {},
+  feedback: {
+    isEnabled: () => true,
+  },
+  tours: {
+    areEnabled: () => true,
+  },
 };
 
 const userProfile = { getUserProfile$: () => of(null) };
