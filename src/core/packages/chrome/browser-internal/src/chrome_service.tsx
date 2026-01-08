@@ -42,6 +42,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
@@ -59,7 +60,6 @@ import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
 // import { handleEuiDevProviderWarning } from './handle_eui_dev_provider_warning';
