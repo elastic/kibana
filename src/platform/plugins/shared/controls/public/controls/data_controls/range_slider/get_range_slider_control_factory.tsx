@@ -207,7 +207,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
-      console.log('API', api);
       return {
         api,
         Component: () => {

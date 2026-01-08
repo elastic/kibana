@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { apiAppliesFilters } from '@kbn/presentation-publishing';
+import { apiAppliesFilters, apiHasUseGlobalFiltersSetting } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, filter, map, of, switchMap } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -46,17 +46,19 @@ export const initializeRelatedPanelsManager = (
   const { children$, getDashboardPanelFromId } = layoutManager.api;
   const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
 
-  const childrenWithData$ = combineLatest([children$, focusedPanelId$]).pipe(
+  const indexedChildren$ = combineLatest([children$, focusedPanelId$]).pipe(
     // Skip calculations if there is no focused panel
     filter(([, focusedPanelId]) => Boolean(focusedPanelId)),
     switchMap(([children]) => {
-      const esqlVariableChildren: Array<
-        Observable<{ uuid: string; variable: ESQLControlVariable }>
-      > = [];
-      const esqlQueryChildren: Array<Observable<{ uuid: string; esql: string }>> = [];
       const childrenWithSectionIds: Array<
         Observable<{ sectionId?: string | typeof GLOBAL; child: DefaultEmbeddableApi }>
       > = [];
+
+      const esqlQueryChildrenByUUID: Array<Observable<{ uuid: string; esql: string }>> = [];
+      const esqlVariableChildrenByUUID: Array<
+        Observable<{ uuid: string; variable: ESQLControlVariable }>
+      > = [];
+
       for (const child of Object.values(children)) {
         if (apiHasSectionId(child)) {
           childrenWithSectionIds.push(
@@ -67,11 +69,11 @@ export const initializeRelatedPanelsManager = (
         }
 
         if (apiPublishesESQLQuery(child)) {
-          esqlQueryChildren.push(
+          esqlQueryChildrenByUUID.push(
             child.query$.pipe(map(({ esql }) => ({ esql, uuid: child.uuid })))
           );
         } else if (apiPublishesESQLVariable(child)) {
-          esqlVariableChildren.push(
+          esqlVariableChildrenByUUID.push(
             child.esqlVariable$.pipe(map((variable) => ({ variable, uuid: child.uuid })))
           );
         }
@@ -79,21 +81,24 @@ export const initializeRelatedPanelsManager = (
 
       return combineLatest([
         combineLatest(childrenWithSectionIds),
-        esqlVariableChildren.length ? combineLatest(esqlVariableChildren) : of(undefined),
-        esqlQueryChildren.length ? combineLatest(esqlQueryChildren) : of(undefined),
+        esqlVariableChildrenByUUID.length
+          ? combineLatest(esqlVariableChildrenByUUID)
+          : of(undefined),
+        esqlQueryChildrenByUUID.length ? combineLatest(esqlQueryChildrenByUUID) : of(undefined),
       ]);
     })
   );
 
-  const childrenWithSectionIds$ = childrenWithData$.pipe(
+  const childrenWithSectionIds$ = indexedChildren$.pipe(
     map(([childrenWithSections]) => childrenWithSections)
   );
-  const esqlVariablesWithUUIDs$ = childrenWithData$.pipe(map(([, variables]) => variables));
-  const esqlQueriesWithUUIDs$ = childrenWithData$.pipe(map(([, , queries]) => queries));
+  const esqlVariablesWithUUIDs$ = indexedChildren$.pipe(map(([, variables]) => variables));
+  const esqlQueriesWithUUIDs$ = indexedChildren$.pipe(map(([, , queries]) => queries));
 
   const filterRelatedPanels$ = childrenWithSectionIds$.pipe(
     map((childrenWithSectionIds) => {
       const childrenBySectionAndFilterApplication = new Map<string | Symbol, SectionFilterEntry>();
+      const uuidsUsingGlobalFilters = new Set<string>();
 
       for (const { child, sectionId: publishedSectionId } of Object.values(
         childrenWithSectionIds
@@ -105,6 +110,8 @@ export const initializeRelatedPanelsManager = (
 
         if (apiAppliesFilters(child)) {
           nextSectionEntry.appliesFilters.add(child.uuid);
+          if (apiHasUseGlobalFiltersSetting(child) && child.useGlobalFilters$.value === true)
+            uuidsUsingGlobalFilters.add(child.uuid);
         } else {
           nextSectionEntry.doesNotApplyFilters.add(child.uuid);
         }
@@ -123,11 +130,15 @@ export const initializeRelatedPanelsManager = (
       ] of childrenBySectionAndFilterApplication.entries()) {
         for (const uuid of appliesFilters) {
           const relatedPanels = [
-            // Other filter-applying panels should be `related` to this panel as well
-            // TODO: Make this only true if useGlobalFilters is true
-            ...Array.from(appliesFilters).filter((id) => id !== uuid),
             ...doesNotApplyFilters,
-            ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
+            // If this panel uses global filters, other filter-applying panels should be `related`
+            // to this panel as well
+            ...(uuidsUsingGlobalFilters.has(uuid)
+              ? [
+                  ...Array.from(appliesFilters).filter((id) => id !== uuid),
+                  ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
+                ]
+              : []),
           ];
           filterRelatedPanels.set(uuid, relatedPanels);
         }
