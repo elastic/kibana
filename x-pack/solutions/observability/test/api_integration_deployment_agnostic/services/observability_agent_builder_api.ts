@@ -49,7 +49,10 @@ function createObservabilityAgentBuilderApiClient({
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
-    const { method, pathname, version } = formatRequest(endpoint, params.path);
+    const { method, pathname, version } = formatRequest(
+      endpoint,
+      params.path as Record<string, string> | undefined
+    );
     const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
     const url = format({ pathname: pathnameWithSpaceId, query: params?.query });
 

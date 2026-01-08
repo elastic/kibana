@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
@@ -108,7 +109,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
           logger,
           signal: getRequestAbortedSignal(request),
         }),
-      });
+      }) as IKibanaResponse;
     },
   });
 
@@ -153,7 +154,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
           logger,
           signal: getRequestAbortedSignal(request),
         }),
-      });
+      }) as IKibanaResponse;
     },
   });
 
