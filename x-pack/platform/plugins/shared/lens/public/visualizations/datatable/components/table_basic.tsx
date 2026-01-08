@@ -519,8 +519,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       {
         id: 'rowNumber',
         headerCellRender: () => null,
-        rowCellRender: function RowCellRender({ rowIndex }) {
-          return <span data-test-subj="lnsDataTable-rowNumber">{rowIndex + 1}</span>;
+        rowCellRender: function RowCellRender({ visibleRowIndex }) {
+          return <span data-test-subj="lnsDataTable-rowNumber">{visibleRowIndex + 1}</span>;
         },
         width: 50,
       },

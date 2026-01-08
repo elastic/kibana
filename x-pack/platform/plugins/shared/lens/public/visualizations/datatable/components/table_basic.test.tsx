@@ -869,7 +869,7 @@ describe('DatatableComponent', () => {
       // Page 2
       await userEvent.click(screen.getByRole('link', { name: `Page 2 of 4` }));
       rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
-      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['5', '6', '7', '8']);
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
     });
   });
 });
