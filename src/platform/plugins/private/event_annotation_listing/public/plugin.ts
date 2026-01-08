@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationListingStartDependencies {
@@ -34,6 +35,7 @@ export interface EventAnnotationListingStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentManagement: ContentManagementPublicStart;
   lens: LensPublicStart;
+  embeddable: EmbeddableStart;
 }
 
 interface SetupDependencies {
@@ -80,6 +82,7 @@ export class EventAnnotationListingPlugin
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
+          embeddable: pluginsStart.embeddable,
           queryInputServices: {
             http: coreStart.http,
             docLinks: coreStart.docLinks,

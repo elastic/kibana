@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { isEditingFromDashboard } from '@kbn/kibana-utils-plugin/public';
 import { lazy } from 'react';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -69,9 +70,9 @@ function createNavTree({
       },
       {
         link: 'dashboards',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
         link: 'workflows',
@@ -363,7 +364,12 @@ function createNavTree({
               defaultMessage: 'Logs categories',
             }),
           },
-          { link: 'maps' },
+          {
+            link: 'maps',
+            getIsActive: ({ pathNameSerialized, location, prepend }) =>
+              !isEditingFromDashboard(location, pathNameSerialized, prepend) &&
+              pathNameSerialized.includes('/app/maps'),
+          },
           { link: 'graph' },
         ],
       },

@@ -10,6 +10,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
+import { isEditingFromDashboard } from '@kbn/kibana-utils-plugin/public';
 
 const LazyIconAgents = lazy(() =>
   import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
@@ -59,9 +60,9 @@ export function createNavigationTree({
       },
       {
         link: 'dashboards',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
         icon: LazyIconAgents, // Temp svg until we have icon in EUI

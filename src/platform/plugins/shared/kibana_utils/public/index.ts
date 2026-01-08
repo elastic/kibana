@@ -105,6 +105,8 @@ export {
   removeQueryParam,
   redirectWhenMissing,
   getQueryParams,
+  hasQueryParam,
+  isEditingFromDashboard,
   createQueryParamsObservable,
   createHistoryObservable,
   createQueryParamObservable,

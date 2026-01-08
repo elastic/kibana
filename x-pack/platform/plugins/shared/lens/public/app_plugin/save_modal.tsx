@@ -36,6 +36,7 @@ export interface Props {
   onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => Promise<void>;
 
   managed: boolean;
+  isEmbedded?: boolean;
 }
 
 export const SaveModal = (props: Props) => {
@@ -54,10 +55,10 @@ export const SaveModal = (props: Props) => {
     onSave,
     returnToOrigin,
     managed,
+    isEmbedded,
   } = props;
 
-  // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
-  if (originatingApp && returnToOrigin !== false) {
+  if (originatingApp && returnToOrigin !== false && isEmbedded) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
         savedObjectsTagging={savedObjectsTagging}

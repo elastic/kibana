@@ -112,7 +112,9 @@ export function setBreadcrumbsTitle(
     // the serverless navigation is not yet aware of the byValue/originatingApp context
     serverless.setBreadcrumbs(currentDocBreadcrumb);
   } else {
-    chrome.setBreadcrumbs(breadcrumbs);
+    chrome.setBreadcrumbs(breadcrumbs, {
+      project: { value: breadcrumbs, absolute: true },
+    });
   }
 }
 

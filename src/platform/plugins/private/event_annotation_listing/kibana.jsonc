@@ -18,7 +18,8 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "contentManagement"
+      "contentManagement",
+      "embeddable"
     ],
     "optionalPlugins": ["savedObjectsTagging", "lens", "dashboard"],
     "requiredBundles": [],

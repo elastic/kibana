@@ -73,9 +73,14 @@ export const VisualizationTableList = ({
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
 
-  const createNewVis = useCallback(() => {
-    closeNewVisModal.current = visualizations.showNewVisModal();
-  }, [visualizations]);
+  const createNewVis = useCallback(async () => {
+    const currentApp = await firstValueFrom(core.application.currentAppId$);
+    closeNewVisModal.current = visualizations.showNewVisModal({
+      originatingApp: currentApp,
+      originatingPath: window.location.hash,
+      outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+    });
+  }, [visualizations, core.application]);
 
   useEffect(() => {
     return () => {
@@ -92,8 +97,12 @@ export const VisualizationTableList = ({
 
       const { editApp, editUrl } = editor as { editApp?: string; editUrl?: string };
       const targetApp = editApp ?? VISUALIZE_APP_NAME;
-      const path = editApp ? editUrl : `#${editUrl}`;
       const currentApp = await firstValueFrom(core.application.currentAppId$);
+
+      // Add originatingApp query param to keep Dashboard as active nav item
+      const separator = editUrl?.includes('?') ? '&' : '?';
+      const queryParam = `${separator}originatingApp=${currentApp}`;
+      const path = editApp ? `${editUrl}${queryParam}` : `#${editUrl}${queryParam}`;
 
       if (currentApp && currentApp !== VISUALIZE_APP_NAME) {
         await embeddable.getStateTransfer().navigateToEditor(targetApp, {

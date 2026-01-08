@@ -680,7 +680,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(originatingApp
+    ...(originatingApp && embeddableId
       ? [
           {
             id: 'saveAndReturn',

@@ -323,7 +323,13 @@ export class SavedMap {
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
       });
-      getCoreChrome().setBreadcrumbs(breadcrumbs);
+      if (this._originatingApp) {
+        getCoreChrome().setBreadcrumbs(breadcrumbs, {
+          project: { value: breadcrumbs, absolute: true },
+        });
+      } else {
+        getCoreChrome().setBreadcrumbs(breadcrumbs);
+      }
     }
   }
 

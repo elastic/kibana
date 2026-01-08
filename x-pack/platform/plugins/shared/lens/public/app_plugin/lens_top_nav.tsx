@@ -309,6 +309,7 @@ function getLensTopNavConfig(options: {
 export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
+  incomingState,
   indicateNoData,
   lensInspector,
   setIsSaveModalVisible,
@@ -344,7 +345,6 @@ export const LensTopNavMenu = ({
 
   const {
     isSaveable,
-    isLinkedToOriginatingApp,
     query,
     activeData,
     savedQuery,
@@ -580,9 +580,16 @@ export const LensTopNavMenu = ({
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
+    // Check if coming from a specific dashboard view (not from library list)
+    const isComingFromDashboardView =
+      incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
+      !incomingState.originatingPath.includes('/list/');
+
     const showSaveAndReturn =
       !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
+      Boolean(isComingFromDashboardView || initialContextIsEmbedded);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -798,7 +805,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isLinkedToOriginatingApp),
+          visible: Boolean(isComingFromDashboardView),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -854,7 +861,7 @@ export const LensTopNavMenu = ({
   }, [
     initialContext,
     initialInput?.savedObjectId,
-    isLinkedToOriginatingApp,
+    incomingState,
     initialContextIsEmbedded,
     activeData,
     isSaveable,
