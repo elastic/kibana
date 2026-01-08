@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FeatureType, StreamType } from '@kbn/streams-schema';
+
 interface StreamEndpointLatencyProps {
   name: string;
   endpoint: string;
@@ -20,4 +22,19 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-export { type StreamEndpointLatencyProps, type StreamsStateErrorProps };
+type CountByFeatureType = Record<FeatureType, number>;
+
+interface StreamsFeatureIdentificationIdentifiedProps {
+  count: number;
+  count_by_type: CountByFeatureType;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+export {
+  type StreamEndpointLatencyProps,
+  type StreamsStateErrorProps,
+  type StreamsFeatureIdentificationIdentifiedProps,
+};

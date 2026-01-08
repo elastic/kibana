@@ -158,7 +158,12 @@ describe('EntityHighlightsSettings', () => {
   });
 
   it('disables Ask AI Assistant when agent builder is enabled and no assistant result', () => {
-    mockUseAgentBuilderAvailability.mockImplementation(() => ({ isAgentBuilderEnabled: true }));
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    }));
 
     render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
       wrapper: TestProviders,
@@ -172,7 +177,12 @@ describe('EntityHighlightsSettings', () => {
   });
 
   it('enables Ask AI Assistant when agent builder is enabled and assistant result exists', () => {
-    mockUseAgentBuilderAvailability.mockImplementation(() => ({ isAgentBuilderEnabled: true }));
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    }));
 
     render(<EntityHighlightsSettings {...defaultProps} isLoading={false} />, {
       wrapper: TestProviders,

@@ -7,10 +7,12 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolSelection } from '@kbn/agent-builder-common';
-import { filterToolsBySelection } from '@kbn/agent-builder-common';
-import type { ToolProvider, ExecutableTool } from '@kbn/agent-builder-server';
+import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/agent-builder-server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
@@ -19,12 +21,14 @@ export const selectTools = async ({
   toolProvider,
   agentConfiguration,
   attachmentsService,
+  runner,
 }: {
   conversation: ProcessedConversation;
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
+  runner: ScopedRunner;
 }) => {
   // create tool selection for attachments types
   const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
@@ -38,6 +42,13 @@ export const selectTools = async ({
     .flatMap((attachment) => attachment.tools)
     .map((tool) => attachmentsService.convertAttachmentTool(tool));
 
+  // this are not passed to the agents for now.
+  // @ts-ignore
+  const versionedAttachmentTools = createVersionedAttachmentTools({
+    attachmentStateManager: conversation.attachmentStateManager,
+    runner,
+  });
+
   // pick tools from provider (from agent config and attachment-type tools)
   const registryTools = await pickTools({
     selection: [attachmentToolSelection, ...agentConfiguration.tools],
@@ -46,6 +57,47 @@ export const selectTools = async ({
   });
 
   return [...attachmentBoundTools, ...registryTools];
+};
+
+/**
+ * Creates executable tools for managing versioned conversation attachments.
+ * These tools allow the LLM to add, read, update, delete, restore, list, and diff attachments.
+ */
+const createVersionedAttachmentTools = ({
+  attachmentStateManager,
+  runner,
+}: {
+  attachmentStateManager: AttachmentStateManager;
+  runner: ScopedRunner;
+}): ExecutableTool[] => {
+  const builtinTools = createAttachmentTools({ attachmentManager: attachmentStateManager });
+
+  return builtinTools.map((tool) => ({
+    id: tool.id,
+    type: ToolType.builtin,
+    description: tool.description,
+    tags: tool.tags,
+    configuration: {},
+    readonly: true,
+    isAvailable: async () => ({ status: 'available' as const }),
+    getSchema: () => tool.schema,
+    execute: async (params) => {
+      return runner.runInternalTool({
+        ...params,
+        tool: {
+          id: tool.id,
+          type: ToolType.builtin,
+          description: tool.description,
+          tags: tool.tags,
+          configuration: {},
+          readonly: true,
+          isAvailable: async () => ({ status: 'available' as const }),
+          getSchema: () => tool.schema,
+          getHandler: () => tool.handler,
+        },
+      });
+    },
+  }));
 };
 
 const getToolsForAttachmentTypes = (

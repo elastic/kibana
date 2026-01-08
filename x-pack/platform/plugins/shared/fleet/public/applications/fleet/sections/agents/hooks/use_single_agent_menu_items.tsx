@@ -9,7 +9,10 @@ import { useMemo } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../common/constants';
+import {
+  LICENSE_FOR_AGENT_MIGRATION,
+  LICENSE_FOR_AGENT_ROLLBACK,
+} from '../../../../../../common/constants';
 import {
   isAgentEligibleForMigration,
   isAgentEligibleForPrivilegeLevelChange,
@@ -39,6 +42,7 @@ export interface SingleAgentMenuCallbacks {
   onChangeAgentPrivilegeLevelClick: () => void;
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
+  onRollbackClick: () => void;
 }
 
 export interface UseSingleAgentMenuItemsOptions {
@@ -64,6 +68,15 @@ export function useSingleAgentMenuItems({
   const hasFleetAllPrivileges = authz.fleet.allAgents;
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+  const agentRollbackEnabled = ExperimentalFeaturesService.get().enableAgentRollback;
+
+  const agentHasValidRollback = useMemo(() => {
+    const rollbacks = agent.upgrade?.rollbacks;
+    if (!Array.isArray(rollbacks) || rollbacks.length === 0) {
+      return false;
+    }
+    return rollbacks.some(({ valid_until }) => new Date(valid_until).getTime() > Date.now());
+  }, [agent.upgrade]);
 
   const menuItems = useMemo(() => {
     const items: MenuItem[] = [];
@@ -159,6 +172,27 @@ export function useSingleAgentMenuItems({
             },
             'data-test-subj': 'restartUpgradeBtn',
           },
+          ...(agentRollbackEnabled
+            ? [
+                {
+                  id: 'rollback',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.rollbackOneButton"
+                      defaultMessage="Roll back"
+                    />
+                  ),
+                  icon: 'clockCounter',
+                  disabled:
+                    !agentHasValidRollback ||
+                    !licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK),
+                  onClick: () => {
+                    callbacks.onRollbackClick();
+                  },
+                  'data-test-subj': 'rollbackBtn',
+                },
+              ]
+            : []),
         ],
       });
     }
@@ -319,16 +353,18 @@ export function useSingleAgentMenuItems({
 
     return items;
   }, [
-    agent,
-    agentPolicy,
+    callbacks,
     hasFleetAllPrivileges,
+    agentPolicy,
+    agent,
     authz.fleet.allAgents,
     authz.fleet.readAgents,
-    isAgentUpdating,
-    isUnenrolling,
     agentPrivilegeLevelChangeEnabled,
+    isAgentUpdating,
+    agentRollbackEnabled,
+    agentHasValidRollback,
     licenseService,
-    callbacks,
+    isUnenrolling,
   ]);
 
   return menuItems;

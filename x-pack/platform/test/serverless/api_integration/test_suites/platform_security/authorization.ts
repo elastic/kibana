@@ -939,16 +939,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('public', function () {
-        // Public but undocumented, hence 'internal' in path
-        it('reset session page', async function () {
-          const { status } = await supertestAdminWithCookieCredentials.get(
-            '/internal/security/reset_session_page.js'
-          );
-          expect(status).toBe(200);
-        });
-      });
-
       describe('custom roles', function () {
         describe('internal', function () {
           it('get built-in elasticsearch privileges', async function () {
