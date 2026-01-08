@@ -298,6 +298,54 @@
       }
     }
   },
+  "alerting_rule": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "groupingKey": {
+        "type": "keyword"
+      },
+      "lookbackWindow": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "query": {
+        "type": "text"
+      },
+      "schedule": {
+        "properties": {
+          "custom": {
+            "type": "keyword"
+          }
+        }
+      },
+      "scheduledTaskId": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "timeField": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {

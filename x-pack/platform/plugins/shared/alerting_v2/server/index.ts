@@ -5,9 +5,75 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
+import { CoreSetup, PluginInitializer, Route } from '@kbn/core-di-server';
+import type { CoreStart, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { ContainerModule } from 'inversify';
+import { RulesClient } from './lib/rules_client';
+import type { PluginConfig } from './config';
+import { configSchema } from './config';
+import { AlertingRetryService } from './lib/services/retry_service';
+import { registerFeaturePrivileges } from './lib/security/privileges';
+import { CreateRuleRoute } from './routes/create_rule_route';
+import { UpdateRuleRoute } from './routes/update_rule_route';
+import { initializeRuleExecutorTaskDefinition } from './lib/rule_executor';
+import { AlertingResourcesService } from './lib/services/alerting_resources_service';
+import { registerSavedObjects } from './saved_objects';
+import type { AlertingServerStartDependencies } from './types';
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { AlertingPlugin } = await import('./plugin');
-  return new AlertingPlugin(initContext);
+export const config: PluginConfigDescriptor<PluginConfig> = {
+  schema: configSchema,
 };
+
+export const module = new ContainerModule(({ bind }) => {
+  // Register HTTP routes via DI
+  bind(Route).toConstantValue(CreateRuleRoute);
+  bind(Route).toConstantValue(UpdateRuleRoute);
+
+  // Request-scoped rules client
+  bind(RulesClient).toSelf().inRequestScope();
+
+  // Singleton services
+  bind(AlertingRetryService).toSelf().inSingletonScope();
+  bind(AlertingResourcesService).toSelf().inSingletonScope();
+
+  bind(OnSetup).toConstantValue((container) => {
+    const logger = container.get(Logger);
+    const pluginConfig = container.get(
+      PluginInitializer('config')
+    ) as PluginInitializerContext['config'];
+    const alertingConfig = pluginConfig.get<PluginConfig>();
+
+    // Register feature privileges
+    registerFeaturePrivileges(container.get(PluginSetup('features')));
+
+    // Saved Objects + Encrypted Saved Objects registration
+    registerSavedObjects({
+      savedObjects: container.get(CoreSetup('savedObjects')),
+      logger,
+    });
+
+    // Task type registration
+    const taskManagerSetup = container.get(PluginSetup<TaskManagerSetupContract>('taskManager'));
+    const getStartServices = container.get(CoreSetup('getStartServices')) as () => Promise<
+      [CoreStart, AlertingServerStartDependencies, unknown]
+    >;
+    const startServices = getStartServices();
+
+    const resourcesService = container.get(AlertingResourcesService);
+    resourcesService.startInitialization({
+      enabled: alertingConfig.enabled,
+    });
+
+    initializeRuleExecutorTaskDefinition(
+      logger,
+      taskManagerSetup,
+      startServices,
+      alertingConfig,
+      resourcesService
+    );
+  });
+});
+
+export type { PluginConfig as AlertingV2Config } from './config';

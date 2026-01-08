@@ -11,6 +11,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export type AlertingServerSetup = void;
 export type AlertingServerStart = void;
@@ -18,9 +21,13 @@ export type AlertingServerStart = void;
 export interface AlertingServerSetupDependencies {
   taskManager: TaskManagerSetupContract;
   features: FeaturesPluginSetup;
+  spaces: SpacesPluginSetup;
 }
 
 export interface AlertingServerStartDependencies {
   taskManager: TaskManagerStartContract;
   features: FeaturesPluginStart;
+  spaces: SpacesPluginStart;
+  data: DataPluginStart;
+  security?: SecurityPluginStart;
 }

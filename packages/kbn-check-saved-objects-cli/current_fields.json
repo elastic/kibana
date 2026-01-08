@@ -89,6 +89,22 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_rule": [
+    "createdAt",
+    "createdBy",
+    "enabled",
+    "groupingKey",
+    "lookbackWindow",
+    "name",
+    "query",
+    "schedule",
+    "schedule.custom",
+    "scheduledTaskId",
+    "tags",
+    "timeField",
+    "updatedAt",
+    "updatedBy"
+  ],
   "alerting_rule_template": [
     "name",
     "ruleTypeId",
@@ -322,14 +338,10 @@
     "version"
   ],
   "data_connector": [
-    "config",
-    "createdAt",
-    "features",
     "kscIds",
     "name",
     "toolIds",
     "type",
-    "updatedAt",
     "workflowIds"
   ],
   "data_stream-config": [
@@ -341,12 +353,7 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "metadata.created_at",
-    "metadata.sample_count",
-    "metadata.version",
-    "result",
-    "result.field_mapping",
-    "result.ingest_pipeline"
+    "result"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -841,10 +848,6 @@
     "data_stream_count",
     "integration_id",
     "metadata",
-    "metadata.created_at",
-    "metadata.description",
-    "metadata.title",
-    "metadata.version",
     "status"
   ],
   "intercept_interaction_record": [],

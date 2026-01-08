@@ -13,6 +13,16 @@ const ALERTS_FEATURE_ID = 'alerting_v2_alerts';
 const RULES_FEATURE_ID = 'alerting_v2_rules';
 const CATEGORY_ID = 'alerting';
 
+export const ALERTING_V2_API_PRIVILEGES = {
+  rules: {
+    read: 'read-alerting-v2-rules',
+    write: 'write-alerting-v2-rules',
+  },
+  alerts: {
+    read: 'read-alerting-v2-alerts',
+  },
+} as const;
+
 const getPrivileges = () => ({
   all: {
     app: [APP_ID],
@@ -21,7 +31,11 @@ const getPrivileges = () => ({
       read: [],
     },
     ui: [],
-    api: [],
+    api: [
+      ALERTING_V2_API_PRIVILEGES.rules.read,
+      ALERTING_V2_API_PRIVILEGES.rules.write,
+      ALERTING_V2_API_PRIVILEGES.alerts.read,
+    ],
   },
   read: {
     app: [APP_ID],
@@ -30,7 +44,7 @@ const getPrivileges = () => ({
       read: [],
     },
     ui: [],
-    api: [],
+    api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.alerts.read],
   },
 });
 

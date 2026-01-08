@@ -12,8 +12,10 @@
     "requiredPlugins": [
       "taskManager",
       "features",
+      "spaces",
+      "data"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["security"],
     "extraPublicDirs": []
   }
 }
