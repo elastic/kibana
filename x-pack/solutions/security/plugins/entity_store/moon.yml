@@ -21,6 +21,12 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-server'
   - '@kbn/developer-examples-plugin'
+  - '@kbn/zod'
+  - '@kbn/logging'
+  - '@kbn/zod-helpers'
+  - '@kbn/core-lifecycle-server'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod
