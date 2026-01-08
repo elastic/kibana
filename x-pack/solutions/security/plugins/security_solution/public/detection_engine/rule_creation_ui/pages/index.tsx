@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiResizableContainerActions } from '@elastic/eui/src/components/resizable_container/types';
 import React, { memo } from 'react';
 import * as i18n from './translations';
@@ -17,6 +17,7 @@ const CustomHeaderPage: React.FC<
     togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
     isRulePreviewVisible: boolean;
     setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
+    askAiAssistantButton?: React.ReactNode;
   }
 > = ({
   backOptions,
@@ -26,6 +27,7 @@ const CustomHeaderPage: React.FC<
   isRulePreviewVisible,
   setIsRulePreviewVisible,
   backComponent,
+  askAiAssistantButton,
 }) => (
   <HeaderPage
     backOptions={backOptions}
@@ -33,18 +35,27 @@ const CustomHeaderPage: React.FC<
     title={title}
     backComponent={backComponent}
   >
-    <EuiButton
-      data-test-subj="preview-container"
-      isSelected={isRulePreviewVisible}
-      fill={isRulePreviewVisible}
-      iconType="visBarVerticalStacked"
-      onClick={() => {
-        togglePanel?.('preview', { direction: 'left' });
-        setIsRulePreviewVisible((isVisible) => !isVisible);
-      }}
-    >
-      {i18n.RULE_PREVIEW_TITLE}
-    </EuiButton>
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      {askAiAssistantButton && (
+        <EuiFlexItem grow={false}>
+          {askAiAssistantButton}
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="preview-container"
+          isSelected={isRulePreviewVisible}
+          fill={isRulePreviewVisible}
+          iconType="visBarVerticalStacked"
+          onClick={() => {
+            togglePanel?.('preview', { direction: 'left' });
+            setIsRulePreviewVisible((isVisible) => !isVisible);
+          }}
+        >
+          {i18n.RULE_PREVIEW_TITLE}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </HeaderPage>
 );
 

@@ -79,3 +79,14 @@ Formatting Requirements:
   - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).`;
 
 export const ENTITY_PROMPT = `Investigate the entity and suggest next steps.`;
+
+export const RULE_ATTACHMENT_PROMPT = `Review the detection rule provided and help improve it. Analyze the rule's configuration including:
+- Query logic and data sources
+- MITRE ATT&CK mappings
+- Rule schedule and lookback periods
+- Tags and categorization
+- Severity and risk score settings
+
+Format your response in markdown with clear sections and easy to copy code blocks.
+
+Question:`;

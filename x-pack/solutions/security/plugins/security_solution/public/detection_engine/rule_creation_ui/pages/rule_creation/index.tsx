@@ -89,6 +89,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -117,9 +118,9 @@ MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC<{
   rule?: RuleResponse;
-  aiAssistedUserQuery?: string;
+  sendToAgentChat?: boolean; // allows the user to send the rule to the agent chat as an attachment
   backComponent?: React.ReactNode;
-}> = ({ rule, aiAssistedUserQuery, backComponent }) => {
+}> = ({ rule, sendToAgentChat, backComponent }) => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.edit;
@@ -259,6 +260,7 @@ const CreateRulePageComponent: React.FC<{
     }),
     [rulesUrl]
   );
+
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -550,7 +552,6 @@ const CreateRulePageComponent: React.FC<{
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
-            aiAssistedUserQuery={aiAssistedUserQuery}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -574,7 +575,6 @@ const CreateRulePageComponent: React.FC<{
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
-      aiAssistedUserQuery,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
@@ -625,7 +625,6 @@ const CreateRulePageComponent: React.FC<{
             isLoading={isCreateRuleLoading || loading}
             form={aboutStepForm}
             esqlQuery={esqlQueryForAboutStep}
-            aiAssistedUserQuery={aiAssistedUserQuery}
           />
 
           <NextStep
@@ -650,7 +649,6 @@ const CreateRulePageComponent: React.FC<{
       loading,
       memoAboutStepReadOnly,
       esqlQueryForAboutStep,
-      aiAssistedUserQuery,
     ]
   );
   const memoAboutStepExtraAction = useMemo(
@@ -858,6 +856,19 @@ const CreateRulePageComponent: React.FC<{
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
+                        askAiAssistantButton={
+                          sendToAgentChat ? (
+                            <AddRuleAttachmentToChatButton
+                              defineStepData={defineStepData}
+                              aboutStepData={aboutStepData}
+                              scheduleStepData={scheduleStepData}
+                              actionsStepData={actionsStepData}
+                              actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+                              size="s"
+                              showOnlyWhenEnabled
+                            />
+                          ) : undefined
+                        }
                       />
                       <MyEuiPanel zindex={4} hasBorder>
                         <MemoEuiAccordion

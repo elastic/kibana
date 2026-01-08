@@ -114,7 +114,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
-  aiAssistedUserQuery?: string;
 }
 
 interface StepDefineRuleReadOnlyProps {

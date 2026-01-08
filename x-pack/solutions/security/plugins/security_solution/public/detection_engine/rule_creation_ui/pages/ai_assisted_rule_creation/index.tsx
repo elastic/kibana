@@ -76,15 +76,6 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     }
   }, [aiConnectors, isAiConnectorsLoading, selectedConnectorId]);
 
-  // const {
-  //   rule,
-  //   streamRuleCreation,
-  //   updates,
-  //   cancelRuleCreation,
-  //   isStreaming: isAiRuleCreationInProgress,
-  //   isCancelled: isAiRuleCreationCancelled,
-  // } = useAiRuleCreationStream();
-
   const {
     rule,
     streamRuleCreation,
@@ -159,7 +150,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     <CreateRulePage
       rule={rule}
       backComponent={backComponent}
-      aiAssistedUserQuery={submittedPromptValue}
+      sendToAgentChat
     />
   ) : (
     <>
