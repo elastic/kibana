@@ -35,58 +35,72 @@ interface LayerConversionData {
 }
 
 /**
+ * Minimal interface for visualization states that contain layers.
+ * Each visualization type (XY, partition, metric, etc.) has its own state shape,
+ * but they all share a `layers` array. There's no common base type in @kbn/lens-common,
+ * so we use this minimal interface for type narrowing.
+ */
+interface VisualizationStateWithLayers {
+  layers: unknown[];
+}
+
+/**
+ * Type guard to check if visualization state has a layers array
+ */
+function hasLayers(state: unknown): state is VisualizationStateWithLayers {
+  return Array.isArray((state as VisualizationStateWithLayers | null)?.layers);
+}
+
+/**
+ * Common layer properties used for column ID remapping during conversion.
+ * There's no shared base layer type in @kbn/lens-common - each visualization
+ * (XY, partition, heatmap, etc.) defines its own layer config. This interface
+ * captures only the properties we need to remap for XY-like visualizations.
+ */
+interface VisualizationLayer {
+  layerId?: string;
+  xAccessor?: string;
+  accessors?: string[];
+  splitAccessor?: string;
+}
+
+/**
  * Remaps visualization state column IDs to new ES|QL field names
  */
 function remapVisualizationState(
-  visualizationState: unknown,
+  visualizationState: VisualizationStateWithLayers,
   layersToConvert: string[],
   columnIdMapping: Record<string, string>
-): unknown {
-  if (
-    !visualizationState ||
-    typeof visualizationState !== 'object' ||
-    !('layers' in (visualizationState as Record<string, unknown>))
-  ) {
-    return visualizationState;
-  }
+): VisualizationStateWithLayers {
+  const updatedVisualizationState = structuredClone(visualizationState);
 
-  const updatedVisualizationState = JSON.parse(JSON.stringify(visualizationState));
+  updatedVisualizationState.layers = updatedVisualizationState.layers.map((vizLayer: unknown) => {
+    const layer = vizLayer as VisualizationLayer;
+    if (!layer.layerId || !layersToConvert.includes(layer.layerId)) {
+      return vizLayer;
+    }
 
-  if (Array.isArray(updatedVisualizationState.layers)) {
-    updatedVisualizationState.layers = updatedVisualizationState.layers.map(
-      (vizLayer: {
-        layerId?: string;
-        xAccessor?: string;
-        accessors?: string[];
-        splitAccessor?: string;
-      }) => {
-        if (!vizLayer.layerId || !layersToConvert.includes(vizLayer.layerId)) {
-          return vizLayer;
-        }
+    const updatedLayer = structuredClone(layer);
 
-        const updatedLayer = { ...vizLayer };
+    // Remap xAccessor (horizontal axis, for example a time axis)
+    if (layer.xAccessor && columnIdMapping[layer.xAccessor]) {
+      updatedLayer.xAccessor = columnIdMapping[layer.xAccessor];
+    }
 
-        // Remap xAccessor (horizontal axis - typically the date histogram)
-        if (vizLayer.xAccessor && columnIdMapping[vizLayer.xAccessor]) {
-          updatedLayer.xAccessor = columnIdMapping[vizLayer.xAccessor];
-        }
+    // Remap accessors array (vertical axis, for example counts or metrics)
+    if (Array.isArray(layer.accessors)) {
+      updatedLayer.accessors = layer.accessors.map(
+        (accessor) => columnIdMapping[accessor] || accessor
+      );
+    }
 
-        // Remap accessors array (vertical axis - metrics)
-        if (Array.isArray(vizLayer.accessors)) {
-          updatedLayer.accessors = vizLayer.accessors.map(
-            (accessor: string) => columnIdMapping[accessor] || accessor
-          );
-        }
+    // Remap splitAccessor if present
+    if (layer.splitAccessor && columnIdMapping[layer.splitAccessor]) {
+      updatedLayer.splitAccessor = columnIdMapping[layer.splitAccessor];
+    }
 
-        // Remap splitAccessor if present
-        if (vizLayer.splitAccessor && columnIdMapping[vizLayer.splitAccessor]) {
-          updatedLayer.splitAccessor = columnIdMapping[vizLayer.splitAccessor];
-        }
-
-        return updatedLayer;
-      }
-    );
-  }
+    return updatedLayer;
+  });
 
   return updatedVisualizationState;
 }
@@ -264,11 +278,7 @@ export function convertFormBasedToTextBasedLayer({
   const { newDatasourceState, columnIdMapping } = conversionResult;
 
   // Check if visualization state has layers to remap
-  if (
-    !visualizationState ||
-    typeof visualizationState !== 'object' ||
-    !('layers' in (visualizationState as Record<string, unknown>))
-  ) {
+  if (!hasLayers(visualizationState)) {
     return undefined;
   }
 
