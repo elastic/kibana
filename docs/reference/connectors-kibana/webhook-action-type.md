@@ -28,7 +28,12 @@ Name
 :   The name of the connector.
 
 Method
-:   The HTTP method to send a request to a web service: `POST` (default), `PUT`, {applies_to}`stack: ga 9.3` `PATCH`, `GET`, or `DELETE` 
+:   The HTTP method to send a request to a web service: 
+    - `POST` (default)
+    - `PUT`
+    - {applies_to}`stack: ga 9.3` `PATCH`
+    - {applies_to}`stack: ga 9.3` `GET`
+    - {applies_to}`stack: ga 9.3` `DELETE` 
 
 URL
 :   The request URL. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
