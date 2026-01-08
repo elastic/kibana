@@ -16,13 +16,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../../../common/consta
 import { KibanaServices } from '../../../../../common/lib/kibana/services';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import {
-  AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
-  AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM,
-  AI_ASSISTED_RULE_CREATION_ERROR_STARTING,
-  AI_ASSISTED_RULE_CREATION_ERROR_ABORTING,
-  AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING,
-} from '../translations';
+import * as i18n from '../translations';
 
 const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
@@ -91,8 +85,8 @@ export const useAgentBuilderStream = () => {
           },
           error: (error) => {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM(errorMessage)), {
-              title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+            addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM(errorMessage)), {
+              title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
             });
             setIsStreaming(false);
           },
@@ -105,8 +99,8 @@ export const useAgentBuilderStream = () => {
         subscriptionRef.current = subscription;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_STARTING(errorMessage)), {
-          title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+        addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_STARTING(errorMessage)), {
+          title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
         });
         setIsStreaming(false);
         subscriptionRef.current = null;
@@ -121,8 +115,8 @@ export const useAgentBuilderStream = () => {
         abortControllerRef.current.abort();
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_ABORTING(errorMessage)), {
-          title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+        addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_ABORTING(errorMessage)), {
+          title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
         });
       }
     }
@@ -132,8 +126,8 @@ export const useAgentBuilderStream = () => {
         subscriptionRef.current.unsubscribe();
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING(errorMessage)), {
-          title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+        addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING(errorMessage)), {
+          title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
         });
       }
       subscriptionRef.current = null;

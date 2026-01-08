@@ -23,9 +23,8 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { MaxWidthEuiFlexItem } from '../../../common/helpers';
+import { MaxWidthEuiFlexItem, redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
-// import { useKibana } from '../../../../common/lib/kibana';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { useAgentBuilderStream } from './hooks/use_agent_builder_stream';
 import { CreateRulePage } from '../rule_creation';
@@ -37,23 +36,23 @@ import { AiAssistedRuleUpdates } from './agent_builder_updates';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AiAssistedRuleInfo } from './ai_assisted_rule_info';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import {
+  getDetectionEngineUrl,
+  getRulesUrl,
+} from '../../../../common/components/link_to/redirect_to_detection_engine';
+import * as i18n from './translations';
+
 const AiAssistedCreateRulePageComponent: React.FC = () => {
-  const [
-    {
-      loading: userInfoLoading,
-      // isSignalIndexExists,
-      // isAuthenticated,
-      // hasEncryptionKey,
-      // canUserCRUD,
-    },
-  ] = useUserData();
+  const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
+    useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
   const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
     'aiAssistedRuleCreationEnabled'
   );
-  const { loading: listsConfigLoading } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } = useListsConfig();
   const { addError } = useAppToasts();
-  // const { navigateToApp } = useKibana().services.application;
   const isLoading = userInfoLoading || listsConfigLoading;
   const collapseFn = useRef<() => void | undefined>();
   const lastSubmittedPrompt = useRef<string>('');
@@ -97,7 +96,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
           setShowForm(true);
         })
         .catch((err) => {
-          addError(err, { title: 'Failure to suggest rule with AI assistant' });
+          addError(err, { title: i18n.AI_ASSISTED_RULE_CREATION_FAILURE_TITLE });
         });
     }
   }, [promptValue, isValid, streamRuleCreation, selectedConnectorId, addError]);
@@ -132,16 +131,30 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
           }}
           iconType="arrowLeft"
         >
-          {'Back to AI prompt'}
+          {i18n.AI_ASSISTED_RULE_CREATION_BACK_TO_PROMPT}
         </LinkIcon>
       </div>
     ),
     [styles.linkBack, submittedPromptValue]
   );
 
-  if (!aiAssistedRuleCreationEnabled) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
+    return null;
+  } else if (!canEditRules || !aiAssistedRuleCreationEnabled) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
+      path: getRulesUrl(),
     });
     return null;
   }
@@ -160,7 +173,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       <EuiText>
-                        <h3>{'Describe the rule you want to create'}</h3>
+                        <h3>{i18n.AI_ASSISTED_RULE_CREATION_DESCRIBE_RULE_HEADING}</h3>
                       </EuiText>
                       <EuiSpacer size="m" />
                       <AiAssistedRuleInfo />
@@ -195,7 +208,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                                 isLoading={isAiRuleCreationInProgress}
                                 isDisabled={!isValid}
                               >
-                                {'Regenerate'}
+                                {i18n.AI_ASSISTED_RULE_CREATION_REGENERATE_BUTTON}
                               </EuiButton>
                             </EuiFlexItem>
                           </EuiFlexGroup>
@@ -207,7 +220,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           <EuiFlexGroup direction="row" justifyContent="flexStart" gutterSize="s">
                             <EuiFlexItem grow={false}>
                               <EuiButton color="danger" onClick={cancelRuleCreation}>
-                                {'Cancel'}
+                                {i18n.AI_ASSISTED_RULE_CREATION_CANCEL_BUTTON}
                               </EuiButton>
                             </EuiFlexItem>
                           </EuiFlexGroup>
@@ -226,9 +239,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
 
                       {isAiRuleCreationCancelled ? (
                         <EuiCallOut announceOnMount color="warning" iconType="warning">
-                          <EuiText size="s">
-                            {'The AI-assisted rule creation process was cancelled.'}
-                          </EuiText>
+                          <EuiText size="s">{i18n.AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE}</EuiText>
                         </EuiCallOut>
                       ) : null}
 

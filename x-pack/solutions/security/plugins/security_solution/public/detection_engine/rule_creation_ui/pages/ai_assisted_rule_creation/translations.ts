@@ -55,3 +55,45 @@ export const AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING = (errorMessage: stri
       values: { errorMessage },
     }
   );
+
+export const AI_ASSISTED_RULE_CREATION_FAILURE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.failureTitle',
+  {
+    defaultMessage: 'Failure to suggest rule with AI assistant',
+  }
+);
+
+export const AI_ASSISTED_RULE_CREATION_BACK_TO_PROMPT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.backToPrompt',
+  {
+    defaultMessage: 'Back to AI prompt',
+  }
+);
+
+export const AI_ASSISTED_RULE_CREATION_DESCRIBE_RULE_HEADING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.describeRuleHeading',
+  {
+    defaultMessage: 'Describe the rule you want to create',
+  }
+);
+
+export const AI_ASSISTED_RULE_CREATION_REGENERATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.regenerateButton',
+  {
+    defaultMessage: 'Regenerate',
+  }
+);
+
+export const AI_ASSISTED_RULE_CREATION_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.cancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.cancelledMessage',
+  {
+    defaultMessage: 'The AI-assisted rule creation process was cancelled.',
+  }
+);
