@@ -17,7 +17,6 @@ export interface CreateRuleParams {
 
 export interface RuleResponse extends CreateRuleData {
   id: string;
-  scheduledTaskId: string | null;
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;
@@ -25,3 +24,15 @@ export interface RuleResponse extends CreateRuleData {
 }
 
 export type UpdateRuleData = TypeOf<typeof updateRuleDataSchema>;
+
+export interface FindRulesParams {
+  page?: number;
+  perPage?: number;
+}
+
+export interface FindRulesResponse {
+  items: RuleResponse[];
+  total: number;
+  page: number;
+  perPage: number;
+}
