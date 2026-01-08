@@ -17,6 +17,7 @@ import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
@@ -728,6 +729,8 @@ export class CaseUserActionService {
       total_deletions: response.aggregations?.deletions?.doc_count ?? 0,
       total_comments: 0,
       total_comment_deletions: 0,
+      total_comment_creations: 0,
+      total_hidden_comment_updates: 0,
       total_other_actions: 0,
       total_other_action_deletions: 0,
     };
@@ -743,6 +746,30 @@ export class CaseUserActionService {
         result.total_comment_deletions = docCount;
       }
     });
+
+    response.aggregations?.creations.creations.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (key === 'user') {
+        result.total_comment_creations = docCount;
+      }
+    });
+
+    /**
+     * Calculate total_hidden_comment_updates by summing updates for DELETED comments.
+     * These are edit actions that are no longer visible to users because the comment was deleted.
+     */
+    const commentBuckets =
+      response.aggregations?.nonDeletedCommentUpdates?.comments?.byCommentId?.buckets ?? [];
+
+    for (const bucket of commentBuckets) {
+      const hasBeenDeleted = bucket.reverse?.hasDelete?.doc_count > 0;
+      if (hasBeenDeleted) {
+        const userCommentUpdates =
+          bucket.reverse?.updates?.byCommentType?.buckets?.find(
+            (b: { key: string; doc_count: number }) => b.key === 'user'
+          )?.doc_count ?? 0;
+        result.total_hidden_comment_updates += userCommentUpdates;
+      }
+    }
 
     result.total_other_actions = result.total - result.total_comments;
     result.total_other_action_deletions = result.total_deletions - result.total_comment_deletions;
@@ -772,6 +799,81 @@ export class CaseUserActionService {
             terms: {
               field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
               size: 100,
+            },
+          },
+        },
+      },
+      creations: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.create,
+          },
+        },
+        aggs: {
+          creations: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
+        },
+      },
+      /**
+       * Count updates only for comments that have NOT been deleted.
+       * This aggregation:
+       * 1. Groups user actions by comment_id reference
+       * 2. Filters out comments that have a delete action
+       * 3. Sums up the update counts for remaining (non-deleted) comments
+       */
+      nonDeletedCommentUpdates: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggs: {
+          comments: {
+            filter: {
+              term: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: CASE_COMMENT_SAVED_OBJECT,
+              },
+            },
+            aggs: {
+              byCommentId: {
+                terms: {
+                  field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+                  size: MAX_DOCS_PER_PAGE,
+                },
+                aggs: {
+                  reverse: {
+                    reverse_nested: {},
+                    aggs: {
+                      hasDelete: {
+                        filter: {
+                          term: {
+                            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]:
+                              UserActionActions.delete,
+                          },
+                        },
+                      },
+                      updates: {
+                        filter: {
+                          term: {
+                            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]:
+                              UserActionActions.update,
+                          },
+                        },
+                        aggs: {
+                          byCommentType: {
+                            terms: {
+                              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+                              size: 100,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },

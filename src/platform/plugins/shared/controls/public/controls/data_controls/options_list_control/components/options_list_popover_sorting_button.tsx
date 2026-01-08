@@ -21,17 +21,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
+import type { OptionsListSortingType } from '@kbn/controls-schemas';
 
-import type { OptionsListSortBy } from '../../../../../common/options_list/suggestions_sorting';
-import {
-  getCompatibleSortingTypes,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '../../../../../common/options_list/suggestions_sorting';
+import { getCompatibleSortingTypes } from '../../../../../common/options_list/suggestions_sorting';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
 type SortByItem = EuiSelectableOption & {
-  data: { sortBy: OptionsListSortBy };
+  data: { sortBy: OptionsListSortingType['by'] };
 };
 
 const sortOrderOptions: EuiButtonGroupOptionProps[] = [
