@@ -83,7 +83,7 @@ You can test connectors as you’re creating or editing the connector in {{kib}}
 Webhook actions have the following properties.
 
 Body
-:   A JSON payload sent to the request URL. For example:
+:   A JSON payload sent to the request URL using the `POST`, `PUT`, or `PATCH` HTTP methods. For example:
 
     ```text
     {
