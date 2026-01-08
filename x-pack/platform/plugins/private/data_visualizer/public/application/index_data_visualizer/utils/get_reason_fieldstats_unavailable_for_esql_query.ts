@@ -20,7 +20,7 @@ export const getReasonIfFieldStatsUnavailableForQuery = (
     const trimmedQuery = query.esql.trim();
     if (trimmedQuery.toLowerCase().startsWith('ts')) {
       return i18n.translate('xpack.dataVisualizer.fieldStats.unavailableForTSQuery', {
-        defaultMessage: `Field statistics are not available for ES|QL with TS command.`,
+        defaultMessage: `Field statistics are not available for ES|QL with the TS command.`,
       });
     }
   }
