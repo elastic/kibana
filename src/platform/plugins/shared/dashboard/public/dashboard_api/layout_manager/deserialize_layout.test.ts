@@ -37,22 +37,21 @@ describe('deserializeLayout', () => {
           ],
         },
       ],
-      {
-        controls: [
-          {
-            uid: 'control1',
-            type: 'someType',
-            width: 'small',
-            grow: true,
-            config: { someValue: 'test' },
-          } as unknown as PinnedControlState,
-          {
-            uid: 'control2',
-            type: 'anotherType',
-            config: { anotherValue: 1 },
-          } as unknown as PinnedControlState,
-        ],
-      },
+      [
+        {
+          uid: 'control1',
+          type: 'someType',
+          width: 'small',
+          grow: true,
+          config: { someValue: 'test' },
+        } as unknown as PinnedControlState,
+        {
+          uid: 'control2',
+          type: 'anotherType',
+          config: { anotherValue: 1 },
+        } as unknown as PinnedControlState,
+      ],
+
       () => []
     );
     expect(layout.panels).toMatchInlineSnapshot(`

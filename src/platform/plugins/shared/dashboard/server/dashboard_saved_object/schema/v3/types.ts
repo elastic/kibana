@@ -37,7 +37,7 @@ export type StoredControlState = Pick<
 > & {
   order: number; // order is generated from the array order
   id: string; // id is required
-  explicitInput: ControlsGroupState['controls'][number]['config'] & { dataViewRefName?: string };
+  explicitInput: ControlsGroupState[number]['config'] & { dataViewRefName?: string };
 };
 
 export type StoredControlGroupInput = Omit<

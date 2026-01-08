@@ -88,7 +88,7 @@ describe('serializeLayout', () => {
       },
     };
 
-    const { panels, controlGroupInput, references } = serializeLayout(layout, childState);
+    const { panels, pinned_panels, references } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -129,7 +129,7 @@ describe('serializeLayout', () => {
         },
       ]
     `);
-    expect(controlGroupInput).toMatchInlineSnapshot(`
+    expect(pinned_panels).toMatchInlineSnapshot(`
       Object {
         "controls": Array [
           Object {
