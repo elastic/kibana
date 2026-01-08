@@ -568,6 +568,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       editorWillUnmount?.();
 
+      // Clear the stored editor reference before it gets disposed, to avoid downstream
+      // effects/hooks attempting to call into a disposed editor instance.
+      setEditor(null);
+
       const model = editor.getModel();
       model?.dispose();
     },
