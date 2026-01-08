@@ -53,7 +53,7 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
 }
 
 function injectControlReferences(
-  controls: ControlsGroupState['controls'],
+  controls: ControlsGroupState,
   containerReferences: Reference[]
 ): DashboardControlsState {
   const transformedControls: DashboardControlsState = [];

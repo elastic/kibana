@@ -88,7 +88,7 @@ describe('deserializeLayout', () => {
         },
       }
     `);
-    expect(layout.controls).toMatchInlineSnapshot(`
+    expect(layout.pinnedPanels).toMatchInlineSnapshot(`
       Object {
         "control1": Object {
           "grow": true,

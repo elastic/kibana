@@ -388,7 +388,7 @@ describe('layout manager', () => {
       );
 
       layoutManager.api.pinPanel('control3');
-      expect(layoutManager.api.layout$.getValue().controls).toEqual({
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control1']: {
           ...pick(pinnedControls[0], ['grow', 'width', 'type']),
           order: 0,
@@ -422,7 +422,7 @@ describe('layout manager', () => {
         },
         () => []
       );
-      expect(layoutManager.api.layout$.getValue().controls).toEqual({
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control1']: {
           ...pick(pinnedControls[0], ['grow', 'width', 'type']),
           order: 0,
@@ -434,7 +434,7 @@ describe('layout manager', () => {
       });
 
       layoutManager.api.unpinPanel('control1');
-      expect(layoutManager.api.layout$.getValue().controls).toEqual({
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control2']: {
           ...pick(pinnedControls[1], ['grow', 'width', 'type']),
           order: 0, // adjusted order

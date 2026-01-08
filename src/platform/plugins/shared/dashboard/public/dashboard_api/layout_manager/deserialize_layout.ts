@@ -15,14 +15,14 @@ import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  controls: DashboardState['pinned_panels'],
+  pinnedPanels: DashboardState['pinned_panels'],
   getReferences: (id: string) => Reference[]
 ) {
   const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
-    controls: Object.values(controls ?? { controls: {} }).reduce((prev, control, index) => {
+    pinnedPanels: (pinnedPanels ?? []).reduce((prev, control, index) => {
       const controlId = control.uid ?? v4();
       const { width, grow, type, config } = control;
       childState[controlId] = { rawState: config }; // push to child state

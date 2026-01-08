@@ -69,14 +69,14 @@ import {
   type DashboardChildren,
   type DashboardLayout,
   type DashboardLayoutPanel,
-  type DashboardPinnableControl,
+  type DashboardPinnablePanel,
 } from './types';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
-  initialControls: DashboardState['pinned_panels'] | undefined,
+  initialPinnedPanels: DashboardState['pinned_panels'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferences: (id: string) => Reference[]
 ) {
@@ -86,7 +86,7 @@ export function initializeLayoutManager(
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
-    initialControls,
+    initialPinnedPanels,
     getReferences
   );
 
@@ -124,7 +124,7 @@ export function initializeLayoutManager(
       const expectedChildCount =
         Object.values(layout.panels).filter((panel) => {
           return panel.grid.sectionId ? !isSectionCollapsed(panel.grid.sectionId) : true;
-        }).length + (viewMode === 'print' ? 0 : Object.values(layout.controls).length); // pinned controls are not rendered in print mode
+        }).length + (viewMode === 'print' ? 0 : Object.values(layout.pinnedPanels).length); // pinned controls are not rendered in print mode
 
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
@@ -142,7 +142,7 @@ export function initializeLayoutManager(
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (lastSavedLayout.panels[uuid] || lastSavedLayout.controls[uuid]) {
+      if (lastSavedLayout.panels[uuid] || lastSavedLayout.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {
@@ -316,7 +316,7 @@ export function initializeLayoutManager(
   const removePanel = (uuid: string) => {
     const currentLayout = layout$.value;
     const panels = { ...currentLayout.panels };
-    const controls = { ...currentLayout.controls };
+    const controls = { ...currentLayout.pinnedPanels };
     if (panels[uuid]) {
       delete panels[uuid];
       layout$.next({ ...layout$.value, panels });
@@ -329,7 +329,7 @@ export function initializeLayoutManager(
           (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
           {}
         );
-      layout$.next({ ...layout$.value, controls: nextControls });
+      layout$.next({ ...layout$.value, pinnedPanels: nextControls });
     }
 
     const children = { ...children$.value };
@@ -344,7 +344,7 @@ export function initializeLayoutManager(
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
-    const existingControlData = layout$.value.controls[idToRemove];
+    const existingControlData = layout$.value.pinnedPanels[idToRemove];
     if (!existingGridData && !existingControlData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
@@ -408,9 +408,9 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
   };
 
-  const pinPanel = (uuid: string, controlToPin: DashboardPinnableControl) => {
+  const pinPanel = (uuid: string, controlToPin: DashboardPinnablePanel) => {
     // add control panel to the end of the pinned controls
-    const newControls = { ...layout$.getValue().controls };
+    const newControls = { ...layout$.getValue().pinnedPanels };
 
     newControls[uuid] = {
       type: controlToPin.type as PinnedControlLayoutState['type'],
@@ -422,7 +422,7 @@ export function initializeLayoutManager(
     delete newPanels[uuid];
 
     // update the layout with the control panel removed and added as a pinned control
-    layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+    layout$.next({ ...layout$.getValue(), panels: newPanels, pinnedPanels: newControls });
   };
 
   const addPinnedPanel = async (
@@ -444,7 +444,7 @@ export function initializeLayoutManager(
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
-    const { panels, controls } = layout$.value;
+    const { panels, pinnedPanels: controls } = layout$.value;
     // Typescript erroneously believes panels[uuid] cannot be undefined, so we need to add these Object.hasOwn
     // checks to get the type signature of panelLayout to be correct
     const panelLayout = Object.hasOwn(panels, uuid)
@@ -542,13 +542,13 @@ export function initializeLayoutManager(
 
       /** Pinned panels (only controls can currently be pinned) */
       panelIsPinned: (uuid: string) => {
-        return Object.keys(layout$.getValue().controls).includes(uuid);
+        return Object.keys(layout$.getValue().pinnedPanels).includes(uuid);
       },
       unpinPanel: (uuid: string) => {
-        const controlToUnpin = layout$.getValue().controls[uuid];
+        const controlToUnpin = layout$.getValue().pinnedPanels[uuid];
         if (!controlToUnpin) return;
 
-        const newControls = { ...layout$.getValue().controls };
+        const newControls = { ...layout$.getValue().pinnedPanels };
         const originalOrder = newControls[uuid].order;
         delete newControls[uuid];
         // adjust the order of the remaining controls
@@ -576,7 +576,7 @@ export function initializeLayoutManager(
               grid: { ...newPanelPlacement },
             },
           },
-          controls: newControls,
+          pinnedPanels: newControls,
         });
       },
       pinPanel: (uuid: string) => {

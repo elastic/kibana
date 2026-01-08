@@ -10,7 +10,7 @@
 import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { controlsGroupSchema as pinnedControlsSchema } from '@kbn/controls-schemas';
+import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
@@ -172,7 +172,7 @@ export function getDashboardStateSchema() {
     ),
 
     // supported "as code" keys
-    pinned_panels: schema.maybe(pinnedControlsSchema),
+    pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
     options: schema.maybe(optionsSchema),
