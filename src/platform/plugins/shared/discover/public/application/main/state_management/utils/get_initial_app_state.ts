@@ -68,7 +68,13 @@ function getDefaultColumns(
   if (persistedTab?.columns && persistedTab.columns.length > 0) {
     return [...persistedTab.columns];
   }
-  return [...uiSettings.get(DEFAULT_COLUMNS_SETTING)];
+  const defaultColumnsFromConfig = uiSettings.get(DEFAULT_COLUMNS_SETTING);
+  const hasPersistedEmptyColumns = persistedTab?.columns && persistedTab.columns.length === 0;
+  return defaultColumnsFromConfig?.length
+    ? [...defaultColumnsFromConfig]
+    : hasPersistedEmptyColumns
+    ? []
+    : undefined;
 }
 
 function getDefaultAppState({
