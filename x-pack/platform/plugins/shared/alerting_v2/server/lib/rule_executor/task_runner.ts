@@ -95,7 +95,7 @@ export function createRuleExecutorTaskRunner({
             name: ruleAttributes.name,
           },
           params: {
-            esql: ruleAttributes.esql,
+            query: ruleAttributes.query,
             timeField: ruleAttributes.timeField,
             lookbackWindow: ruleAttributes.lookbackWindow,
           },

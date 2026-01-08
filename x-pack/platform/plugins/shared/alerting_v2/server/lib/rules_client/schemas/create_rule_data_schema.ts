@@ -13,9 +13,11 @@ export const createRuleDataSchema = schema.object(
   {
     name: schema.string({ minLength: 1, maxLength: 64 }),
     tags: schema.arrayOf(schema.string({ maxLength: 64 }), { defaultValue: [], maxSize: 100 }),
-    schedule: schema.string({ validate: validateDuration }),
+    schedule: schema.object({
+      custom: schema.string({ validate: validateDuration }),
+    }),
     enabled: schema.boolean({ defaultValue: true }),
-    esql: schema.string({ minLength: 1, maxLength: 10000, validate: validateEsqlQuery }),
+    query: schema.string({ minLength: 1, maxLength: 10000, validate: validateEsqlQuery }),
     timeField: schema.string({ minLength: 1, maxLength: 128, defaultValue: '@timestamp' }),
     lookbackWindow: schema.string({ validate: validateDuration }),
     groupingKey: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 16 }),

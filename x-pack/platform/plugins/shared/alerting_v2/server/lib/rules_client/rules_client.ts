@@ -74,7 +74,7 @@ export class RulesClient {
       tags: params.data.tags ?? [],
       schedule: params.data.schedule,
       enabled: params.data.enabled,
-      esql: params.data.esql,
+      query: params.data.query,
       timeField: params.data.timeField,
       lookbackWindow: params.data.lookbackWindow,
       groupingKey: params.data.groupingKey ?? [],
@@ -109,7 +109,7 @@ export class RulesClient {
           input: {
             ruleId: id,
             spaceId,
-            schedule: { interval: ruleAttributes.schedule },
+            schedule: { interval: ruleAttributes.schedule.custom },
             request: this.request as unknown as CoreKibanaRequest,
           },
         });
@@ -189,7 +189,7 @@ export class RulesClient {
         input: {
           ruleId: id,
           spaceId,
-          schedule: { interval: nextAttrs.schedule },
+          schedule: { interval: nextAttrs.schedule.custom },
           request: this.request as unknown as CoreKibanaRequest,
         },
       });

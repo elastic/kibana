@@ -16,9 +16,13 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     name: { type: 'text' },
     tags: { type: 'keyword' },
     enabled: { type: 'boolean' },
-    schedule: { type: 'keyword' },
+    schedule: {
+      properties: {
+        custom: { type: 'keyword' },
+      },
+    },
 
-    esql: { type: 'text' },
+    query: { type: 'text' },
     timeField: { type: 'keyword' },
     lookbackWindow: { type: 'keyword' },
     groupingKey: { type: 'keyword' },

@@ -33,9 +33,9 @@ describe('writeEsqlAlerts', () => {
         ruleAttributes: {
           name: 'My ES|QL Rule',
           tags: ['esql', 'test'],
-          schedule: '1m',
+          schedule: { custom: '1m' },
           enabled: true,
-          esql: 'FROM idx | STATS count = COUNT(*) BY host.name',
+          query: 'FROM idx | STATS count = COUNT(*) BY host.name',
           timeField: '@timestamp',
           lookbackWindow: '5m',
           groupingKey: ['host.name'],

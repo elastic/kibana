@@ -14,10 +14,12 @@ import { schema } from '@kbn/config-schema';
 export const ruleSavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  schedule: schema.string(),
+  schedule: schema.object({
+    custom: schema.string(),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 
-  esql: schema.string(),
+  query: schema.string(),
   timeField: schema.string(),
   lookbackWindow: schema.string(),
   groupingKey: schema.arrayOf(schema.string(), { defaultValue: [] }),

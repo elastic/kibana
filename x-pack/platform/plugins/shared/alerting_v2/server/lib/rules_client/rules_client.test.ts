@@ -47,9 +47,9 @@ describe('RulesClient', () => {
   const baseCreateData: CreateRuleParams['data'] = {
     name: 'rule-1',
     tags: [],
-    schedule: '1m',
+    schedule: { custom: '1m' },
     enabled: true,
-    esql: 'FROM logs-* | LIMIT 1',
+    query: 'FROM logs-* | LIMIT 1',
     timeField: '@timestamp',
     lookbackWindow: '1m',
     groupingKey: [],
@@ -183,7 +183,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: { ...baseCreateData, esql: 'FROM |' },
+          data: { ...baseCreateData, query: 'FROM |' },
           options: { id: 'rule-id-5' },
         })
       ).rejects.toMatchObject({

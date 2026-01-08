@@ -13,9 +13,13 @@ export const updateRuleDataSchema = schema.object(
   {
     name: schema.maybe(schema.string({ minLength: 1 })),
     tags: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),
-    schedule: schema.maybe(schema.string({ validate: validateDuration })),
+    schedule: schema.maybe(
+      schema.object({
+        custom: schema.string({ validate: validateDuration }),
+      })
+    ),
     enabled: schema.maybe(schema.boolean()),
-    esql: schema.maybe(schema.string({ minLength: 1, validate: validateEsqlQuery })),
+    query: schema.maybe(schema.string({ minLength: 1, validate: validateEsqlQuery })),
     timeField: schema.maybe(schema.string({ minLength: 1 })),
     lookbackWindow: schema.maybe(schema.string({ validate: validateDuration })),
     groupingKey: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),

@@ -33,13 +33,13 @@ export const getEsqlQuery = (
   ];
 
   const query = {
-    query: params.esql,
+    query: params.query,
     filter: {
       bool: {
         filter: rangeFilter,
       },
     },
-    ...(hasStartEndParams(params.esql)
+    ...(hasStartEndParams(params.query)
       ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
       : {}),
   };
@@ -48,7 +48,7 @@ export const getEsqlQuery = (
 
 export type ExecuteRuleParams = Pick<
   RuleSavedObjectAttributes,
-  'esql' | 'timeField' | 'lookbackWindow'
+  'query' | 'timeField' | 'lookbackWindow'
 >;
 
 export async function executeEsqlRule({

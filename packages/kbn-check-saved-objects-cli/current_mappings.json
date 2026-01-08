@@ -298,7 +298,7 @@
       }
     }
   },
-  "alerting_esql_rule": {
+  "alerting_rule": {
     "dynamic": false,
     "properties": {
       "createdAt": {
@@ -310,10 +310,7 @@
       "enabled": {
         "type": "boolean"
       },
-      "esql": {
-        "type": "text"
-      },
-      "groupKey": {
+      "groupingKey": {
         "type": "keyword"
       },
       "lookbackWindow": {
@@ -322,8 +319,15 @@
       "name": {
         "type": "text"
       },
+      "query": {
+        "type": "text"
+      },
       "schedule": {
-        "type": "keyword"
+        "properties": {
+          "custom": {
+            "type": "keyword"
+          }
+        }
       },
       "scheduledTaskId": {
         "type": "keyword"
