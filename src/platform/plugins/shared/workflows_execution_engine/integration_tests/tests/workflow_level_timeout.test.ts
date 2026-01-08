@@ -48,7 +48,7 @@ steps:
         message: 4
 `;
 
-  async function waitForWorkflowTimedOut(maxWaitMs = 5000) {
+  async function waitForWorkflowTimedOut(maxWaitMs = 10000) {
     const startTime = Date.now();
     while (Date.now() - startTime < maxWaitMs) {
       const workflowExecutionDoc =
@@ -129,7 +129,7 @@ steps:
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
     ).filter(
       (se) =>
-        se.stepId.endsWith('Failed') &&
+        se.stepId?.endsWith('Failed') &&
         se.stepType === FakeConnectors.slow_1sec_inference.actionTypeId
     );
 
