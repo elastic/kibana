@@ -359,6 +359,31 @@ export class AgentBuilderPageObject extends FtrService {
     await this.monacoEditor.setCodeEditorValue(query);
   }
 
+  async selectMcpConnector(connectorId: string) {
+    await this.testSubjects.click('agentBuilderMcpConnectorSelect');
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`mcpConnectorOption-${connectorId}`);
+    });
+  }
+
+  async selectMcpTool(toolName: string) {
+    await this.testSubjects.click('agentBuilderMcpToolSelect');
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`mcpToolOption-${toolName}`);
+    });
+  }
+
+  async waitForMcpToolsToLoad() {
+    // Wait for the MCP tool selector to be enabled (not loading)
+    await this.retry.try(async () => {
+      const comboBox = await this.testSubjects.find('agentBuilderMcpToolSelect');
+      const isDisabled = await comboBox.getAttribute('disabled');
+      if (isDisabled === 'true') {
+        throw new Error('MCP tools still loading');
+      }
+    });
+  }
+
   /*
    * ==========================
    * Tools: actions (save, context menu, delete, test flyout)

@@ -8,6 +8,7 @@
 import type SuperTest from 'supertest';
 import type { AgentBuilderApiFtrProviderContext } from '../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
+import type { McpServerSimulator } from './mcp_server_simulator';
 /**
  * Creates a basic auth connector for the LLM proxy
  */
@@ -66,4 +67,64 @@ export async function teardownConnector(
   llmProxy.close();
   const supertest = getService('supertest');
   await deleteConnectors(supertest);
+}
+
+/**
+ * Creates an MCP connector pointing to the MCP server simulator
+ */
+export async function createMcpConnector(
+  mcpServer: McpServerSimulator,
+  supertest: SuperTest.Agent,
+  options: { name?: string } = {}
+): Promise<{ id: string }> {
+  const response = await supertest
+    .post('/api/actions/connector')
+    .set('kbn-xsrf', 'mcp-test')
+    .send({
+      name: options.name ?? 'mcp-test-connector',
+      config: {
+        serverUrl: mcpServer.getUrl(),
+        hasAuth: false,
+      },
+      secrets: {},
+      connector_type_id: '.mcp',
+    })
+    .expect(200);
+
+  return { id: response.body.id };
+}
+
+/**
+ * Sets up an MCP connector with the test server
+ */
+export async function setupMcpConnector(
+  getService: AgentBuilderApiFtrProviderContext['getService'],
+  mcpServer: McpServerSimulator,
+  options: { name?: string } = {}
+): Promise<{ id: string }> {
+  const supertest = getService('supertest');
+  return createMcpConnector(mcpServer, supertest, options);
+}
+
+/**
+ * Deletes all tools matching a prefix
+ */
+export async function deleteToolsByPrefix(
+  supertest: SuperTest.Agent,
+  prefix: string
+): Promise<void> {
+  // List all tools
+  const response = await supertest.get('/api/agent_builder/tools').expect(200);
+  const tools = response.body.results || [];
+
+  // Filter by prefix and delete
+  for (const tool of tools) {
+    if (tool.id.startsWith(prefix)) {
+      try {
+        await supertest.delete(`/api/agent_builder/tools/${tool.id}`).set('kbn-xsrf', 'true');
+      } catch {
+        // Tool may already be deleted
+      }
+    }
+  }
 }
