@@ -13,7 +13,7 @@ import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
 type WorkflowInputs = NonNullable<WorkflowContext['inputs']>;
-function mergeWorkflowInputs(
+function applyInputDefaults(
   workflowDefinitionInputs: WorkflowInput[] = [],
   providedInputs: WorkflowInputs | undefined
 ): WorkflowInputs | undefined {
@@ -48,7 +48,7 @@ export function buildWorkflowContext(
     workflowExecution.id
   );
 
-  const mergedInputs = mergeWorkflowInputs(
+  const inputsWithDefaults = applyInputDefaults(
     workflowExecution.workflowDefinition?.inputs,
     workflowExecution.context?.inputs
   );
@@ -69,7 +69,7 @@ export function buildWorkflowContext(
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
-    inputs: mergedInputs,
+    inputs: inputsWithDefaults,
     now: new Date(),
   };
 }
