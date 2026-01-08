@@ -77,13 +77,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Wait for the successful response to appear
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        // Assert the succesful response is visible
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
-
-      // Assert the successful response is visible
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
 
       // Assert the error is no longer visible
       const isErrorStillVisible = await agentBuilder.isErrorVisible();
@@ -127,12 +125,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
-
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
     });
 
     it('an error does not persist across conversations', async () => {
@@ -211,14 +207,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Wait for the successful response to appear
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
-      });
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(NEW_RESPONSE);
 
-      // Assert the error is cleared and no longer visible
-      const isErrorStillVisible = await agentBuilder.isErrorVisible();
-      expect(isErrorStillVisible).to.be(false);
+        // Assert the error is cleared and no longer visible
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
+      });
     });
 
     it('keeps the previous conversation rounds visible when there is an error', async () => {

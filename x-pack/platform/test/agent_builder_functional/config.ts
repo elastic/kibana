@@ -16,6 +16,7 @@ export default createStatefulTestConfig({
   },
   kbnServerArgs: [
     '--uiSettings.overrides.agentBuilder:enabled=true',
+    '--uiSettings.overrides["aiAssistant:preferredChatExperience"]=agent',
     `--logging.loggers=${JSON.stringify([
       { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
     ])}`,
