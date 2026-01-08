@@ -101,6 +101,56 @@ steps:
 `;
 }
 
+export function generateGithubListIssuesWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.github.list_issues'
+description: 'List issues in a GitHub repository'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: state
+    type: string
+    required: false
+  - name: sort
+    type: string
+    required: false
+  - name: direction
+    type: string
+    required: false
+  - name: since
+    type: string
+    required: false
+  - name: labels
+    type: array
+    required: false
+  - name: page
+    type: number
+    required: false
+  - name: perPage
+    type: number
+    required: false
+steps:
+  - name: list-issues
+    type: github.listIssues
+    connector-id: ${stackConnectorId}
+    with:
+      owner: "\${{inputs.owner}}"
+      repo: "\${{inputs.repo}}"
+      state: "\${{inputs.state}}"
+      sort: "\${{inputs.sort}}"
+      direction: "\${{inputs.direction}}"
+      since: "\${{inputs.since}}"
+      labels: "\${{inputs.labels}}"
+      page: "\${{inputs.page}}"
+      perPage: "\${{inputs.perPage}}"
+`;
+}
+
 export function generateGithubGetIssueWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.get_issue'

@@ -13,6 +13,7 @@ import {
   generateGithubGetDocsWorkflow,
   generateGithubListRepositoriesWorkflow,
   generateGithubSearchPullRequestsWorkflow,
+  generateGithubListIssuesWorkflow,
   generateGithubGetIssueWorkflow,
   generateGithubGetPullRequestWorkflow,
   generateGithubGetFileContentsWorkflow,
@@ -58,6 +59,10 @@ export const githubDataSource: DataTypeDefinition = {
       },
       {
         content: generateGithubSearchPullRequestsWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubListIssuesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
