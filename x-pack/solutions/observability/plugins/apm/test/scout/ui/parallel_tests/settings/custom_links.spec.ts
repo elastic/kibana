@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
@@ -35,8 +36,8 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
     await expect(customLinksPage.saveButton).toBeDisabled();
 
-    // Create a link with unique name to avoid conflicts
-    const uniqueLabel = `test-link-${Date.now()}`;
+    // Create a link with unique name to avoid conflicts (using UUID for guaranteed uniqueness)
+    const uniqueLabel = `test-link-${randomUUID()}`;
     await customLinksPage.fillLabel(uniqueLabel);
     await customLinksPage.fillUrl('https://example.com');
 
@@ -44,8 +45,10 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
     await customLinksPage.clickSave();
 
     await expect(page).toHaveURL(/.*custom-links$/);
-    // Check that our unique link appears in the table (if table exists) or in the page content
-    await expect(page.locator('body')).toContainText(uniqueLabel);
+    // Wait for the custom link row to be visible in the table (with extended timeout for slow loading)
+    await customLinksPage
+      .getCustomLinkRow(uniqueLabel)
+      .waitFor({ state: 'visible', timeout: 30000 });
 
     await test.step('shows create button', async () => {
       await customLinksPage.goto();
@@ -58,25 +61,29 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
       await customLinksPage.goto();
       await customLinksPage.clickCreateCustomLink();
 
-      const uniqueDeleteLabel = `delete-test-${Date.now()}`;
+      const uniqueDeleteLabel = `delete-test-${randomUUID()}`;
       await customLinksPage.fillLabel(uniqueDeleteLabel);
       await customLinksPage.fillUrl('https://example.com/delete-test');
       await customLinksPage.clickSave();
 
-      // Verify we're back on the main page and our link appears
+      // Verify we're back on the main page and our link row appears in the table (with extended timeout for slow loading)
       await expect(page).toHaveURL(/.*custom-links$/);
-      await expect(page.locator('body')).toContainText(uniqueDeleteLabel);
+      await customLinksPage
+        .getCustomLinkRow(uniqueDeleteLabel)
+        .waitFor({ state: 'visible', timeout: 30000 });
 
       // Then delete the specific link we created
       await customLinksPage.clickEditCustomLinkForRow(uniqueDeleteLabel);
       await customLinksPage.clickDelete();
 
-      // Verify deletion - the specific link should no longer be present
+      // Verify deletion - the specific link row should no longer be present
       await expect(page).toHaveURL(/.*custom-links$/);
-      await expect(page.locator('body')).not.toContainText(uniqueDeleteLabel);
+      await expect(customLinksPage.getCustomLinkRow(uniqueDeleteLabel)).toBeHidden();
 
-      // Verify the previously created link is still present
-      await expect(page.locator('body')).toContainText(uniqueLabel);
+      // Verify the previously created link row is still present
+      await customLinksPage
+        .getCustomLinkRow(uniqueLabel)
+        .waitFor({ state: 'visible', timeout: 30000 });
     });
   });
 });

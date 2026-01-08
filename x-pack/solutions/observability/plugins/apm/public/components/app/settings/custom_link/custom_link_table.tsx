@@ -113,6 +113,9 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         initialSortField="@timestamp"
         initialSortDirection="desc"
         initialPageSize={25}
+        rowProps={(item) => ({
+          'data-test-subj': `customLinkRow-${item.label}`,
+        })}
       />
     </>
   );

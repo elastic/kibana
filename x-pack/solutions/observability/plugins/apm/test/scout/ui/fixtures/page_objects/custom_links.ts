@@ -58,10 +58,16 @@ export class CustomLinksPage {
     return this.page.testSubj.locator('editCustomLink');
   }
 
+  getCustomLinkRow(labelText: string): Locator {
+    return this.page.testSubj.locator(`customLinkRow-${labelText}`);
+  }
+
   async clickEditCustomLinkForRow(labelText: string) {
     // Click edit button for a specific custom link by finding its row first
-    const row = this.page.locator(`tr:has-text("${labelText}")`);
-    const editButton = row.locator('[data-test-subj="editCustomLink"]');
+    const row = this.getCustomLinkRow(labelText);
+    // Wait for the row to be visible before clicking to avoid race conditions
+    await row.waitFor({ state: 'visible', timeout: 30000 });
+    const editButton = row.getByTestId('editCustomLink');
     await editButton.click();
   }
 }
