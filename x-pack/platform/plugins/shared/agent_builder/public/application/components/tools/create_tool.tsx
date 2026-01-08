@@ -13,7 +13,7 @@ import { ToolFormMode } from './form/tool_form';
 
 export const TOOL_SOURCE_QUERY_PARAM = 'source_id';
 export const TOOL_TYPE_QUERY_PARAM = 'tool_type';
-export const OPEN_TEST_FLYOUT_QUERY_PARAM = 'open_test_flyout';
+export const TEST_TOOL_ID_QUERY_PARAM = 'test_tool_id';
 
 export const CreateTool: React.FC = () => {
   const [searchParams] = useSearchParams();
