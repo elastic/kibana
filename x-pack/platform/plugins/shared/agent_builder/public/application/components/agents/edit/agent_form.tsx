@@ -39,7 +39,6 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pushFlyoutPaddingStyles } from '../../../../common.styles';
-import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -53,6 +52,7 @@ import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -80,6 +80,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { manageAgents } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
   const deferNavigateToAgentBuilderUrl = useCallback(
     (...args: Parameters<typeof navigateToAgentBuilderUrl>) => {
@@ -431,7 +432,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={docLinks.agentBuilderAgents}
+                    href={docLinksService.agentBuilderAgents}
                     target="_blank"
                     aria-label={i18n.translate(
                       'xpack.agentBuilder.agents.form.settings.systemReferencesLearnMoreAriaLabel',

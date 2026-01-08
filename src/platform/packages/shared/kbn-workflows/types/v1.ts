@@ -29,6 +29,14 @@ export enum ExecutionStatus {
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
 export const ExecutionStatusValues = Object.values(ExecutionStatus);
 
+export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.SKIPPED,
+  ExecutionStatus.TIMED_OUT,
+] as const;
+
 export enum ExecutionType {
   TEST = 'test',
   PRODUCTION = 'production',
