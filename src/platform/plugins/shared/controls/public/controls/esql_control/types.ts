@@ -14,15 +14,13 @@ import type {
   TitlesApi,
 } from '@kbn/presentation-publishing';
 import type { Filter } from '@kbn/es-query';
-import type { HasSectionId } from '@kbn/presentation-containers';
 import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<ESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
   TitlesApi &
-  PublishesDataLoading &
-  HasSectionId;
+  PublishesDataLoading;
 
 type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
 type HideExistsUnusedState = Pick<OptionsListComponentState, 'existsSelected'>;

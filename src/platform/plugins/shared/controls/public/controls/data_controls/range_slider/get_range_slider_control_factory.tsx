@@ -8,14 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
   apiPublishesViewMode,
   fetch$,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -173,11 +173,16 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         }
       );
 
+      /** Output filters when selections and/or filter meta data changes */
+      const sectionId$ = apiHasSections(parentApi)
+        ? parentApi.getPanelSection$(uuid)
+        : of(undefined);
+
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selections.value$,
-        dataControlManager.api.sectionId$,
+        sectionId$,
       ])
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, value, sectionId]) => {
