@@ -56,7 +56,6 @@ export const useAgentBuilderStream = () => {
           browser_api_tools: [],
         };
 
-        // Create Observable from HTTP response using SSE utilities
         const events$: Observable<ChatEvent> = defer(() => {
           return http.post(AGENT_BUILDER_CONVERSE_ASYNC_API_PATH, {
             signal: abortController.signal,
@@ -155,16 +154,12 @@ export const useAgentBuilderStream = () => {
     };
   }, []);
 
-  // Rule is extracted directly from tool_result events and stored in state
-  // Only return rule when streaming is complete and not cancelled
-  const finalRule = isStreaming === false && isCancelled === false ? rule : null;
-
   return {
     streamRuleCreation,
     cancelRuleCreation,
     isStreaming,
     isCancelled,
-    rule: finalRule,
+    rule: isStreaming === false && isCancelled === false ? rule : null,
     updates,
   };
 };
