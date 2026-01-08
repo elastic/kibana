@@ -28,6 +28,7 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     id: '1-2-3',
     name: 'script one',
     platform: ['linux', 'macos'],
+    tags: ['dataCollection'],
     fileName: 'my_script.sh',
     fileSize: 12098,
     fileHash: 'e5441eb2bb',
@@ -56,6 +57,7 @@ const generateCreateScriptBodyMock = (
     instructions: 'just execute it',
     example: 'bash -c script_one.sh',
     requiresInput: false,
+    tags: ['dataCollection'],
     file: createHapiReadableStreamMock(),
     ...overrides,
   };
@@ -183,6 +185,7 @@ export const ScriptsLibraryMock = Object.freeze({
   generateScriptEntry: generateScriptEntryMock,
   generateCreateScriptBody: generateCreateScriptBodyMock,
   generateUpdateScriptBody: generateUpdateScriptBodyMock,
+  generateSavedObjectScriptEntry: generateSavedObjectScriptEntryMock,
   createFilesPluginClient: createFilesPluginClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });

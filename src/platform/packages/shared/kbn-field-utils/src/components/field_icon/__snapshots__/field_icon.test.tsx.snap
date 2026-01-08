@@ -1,33 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FieldUtils <FieldIcon /> accepts additional props 1`] = `
-<FieldIcon
-  fill="none"
-  label="Date"
-  scripted={false}
-  type="date"
-/>
-`;
-
-exports[`FieldUtils <FieldIcon /> renders Document type properly 1`] = `
-<FieldIcon
-  label="Records"
-  type="number"
-/>
+<span
+  class="euiToken kbnFieldIcon emotion-euiToken-square-none-s-euiColorVis8"
+>
+  <span
+    data-euiicon-type="tokenDate"
+    title="Date"
+  >
+    Date
+  </span>
+</span>
 `;
 
 exports[`FieldUtils <FieldIcon /> renders properly 1`] = `
-<FieldIcon
-  label="Date"
-  scripted={false}
-  type="date"
-/>
+<span
+  class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis8"
+>
+  <span
+    data-euiicon-type="tokenDate"
+    title="Date"
+  >
+    Date
+  </span>
+</span>
 `;
 
 exports[`FieldUtils <FieldIcon /> renders properly scripted fields 1`] = `
-<FieldIcon
-  label="Date"
-  scripted={true}
-  type="date"
-/>
+<span
+  class="euiToken kbnFieldIcon emotion-euiToken-square-dark-s-euiColorVis8"
+>
+  <span
+    data-euiicon-type="tokenDate"
+    title="Date"
+  >
+    Date
+  </span>
+</span>
 `;
