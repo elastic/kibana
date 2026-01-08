@@ -17,7 +17,7 @@
     "cypress.config.ts",
     "cypress.config.space_awareness.ts",
     "../../../../../typings/**/*",
-    "tests/**/*"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
