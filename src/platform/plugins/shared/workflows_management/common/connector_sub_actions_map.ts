@@ -28,6 +28,10 @@ import {
   SUB_ACTION as JiraServiceManagementSubActions,
 } from '@kbn/connector-schemas/jira-service-management/constants';
 import {
+  CONNECTOR_ID as MCP_CONNECTOR_ID,
+  SUB_ACTION as MCP_SUB_ACTION,
+} from '@kbn/connector-schemas/mcp/constants';
+import {
   CONNECTOR_ID as OPENAI_CONNECTOR_ID,
   SUB_ACTION as OPENAI_SUB_ACTION,
 } from '@kbn/connector-schemas/openai/constants';
@@ -120,6 +124,7 @@ function createSubActionsMapping() {
     { id: D3_SECURITY_CONNECTOR_ID, actions: D3SECURITY_SUB_ACTION },
     { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
     { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
+    { id: MCP_CONNECTOR_ID, actions: MCP_SUB_ACTION },
     // Legacy connectors (using older ActionType pattern)
     { id: '.jira', actions: JIRA_SUB_ACTIONS },
     { id: '.servicenow-itsm', actions: SERVICENOW_ITSM_SUB_ACTIONS },

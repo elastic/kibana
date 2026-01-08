@@ -6,53 +6,56 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiButtonEmpty,
   EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
-  EuiFlexItem,
-  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { isEqual, isEmpty } from 'lodash';
-import React, { useState, useEffect, forwardRef } from 'react';
-import type { SubmitHandler } from 'react-hook-form';
-import { useForm, useWatch, FormProvider } from 'react-hook-form';
 import { useSelector } from '@xstate5/react';
-import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
+import { isEmpty, isEqual } from 'lodash';
+import React, { forwardRef, useEffect, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { ActionBlockProps } from '.';
+import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import {
   useGetStreamEnrichmentState,
   useStreamEnrichmentSelector,
 } from '../../../state_management/stream_enrichment_state_machine';
-import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import {
+  selectStreamType,
+  selectValidationErrors,
+} from '../../../state_management/stream_enrichment_state_machine/selectors';
 import type { ProcessorFormState } from '../../../types';
 import {
   convertFormStateToProcessor,
-  SPECIALISED_TYPES,
   getFormStateFromActionStep,
+  SPECIALISED_TYPES,
 } from '../../../utils';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import type { ConfigDrivenProcessorType } from './config_driven/types';
+import { ConvertProcessorForm } from './convert';
 import { DateProcessorForm } from './date';
 import { DissectProcessorForm } from './dissect';
+import { DropProcessorForm } from './drop_document';
 import { GrokProcessorForm } from './grok';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
-import { ProcessorErrors } from './processor_metrics';
-import { ProcessorTypeSelector } from './processor_type_selector';
-import { SetProcessorForm } from './set';
-import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
-import { ConvertProcessorForm } from './convert';
-import { ReplaceProcessorForm } from './replace';
-import { DropProcessorForm } from './drop_document';
 import { MathProcessorForm } from './math';
 import { ProcessorContextProvider } from './processor_context';
-import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import { ProcessorErrors } from './processor_metrics';
+import { ProcessorTypeSelector } from './processor_type_selector';
+import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
+import { ReplaceProcessorForm } from './replace';
+import { SetProcessorForm } from './set';
+import { TransformStringProcessorForm } from './transform_string';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -152,6 +155,51 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'set' && <SetProcessorForm />}
                 {type === 'drop_document' && <DropProcessorForm />}
                 {type === 'math' && <MathProcessorForm />}
+                {type === 'uppercase' && (
+                  <TransformStringProcessorForm
+                    fieldSelectorHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseFieldHelpText',
+                      { defaultMessage: 'The field to uppercase.' }
+                    )}
+                    targetFieldHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseTargetHelpText',
+                      {
+                        defaultMessage:
+                          'The field that will hold the uppercased string. If empty, the input field is updated in place.',
+                      }
+                    )}
+                  />
+                )}
+                {type === 'lowercase' && (
+                  <TransformStringProcessorForm
+                    fieldSelectorHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseFieldHelpText',
+                      { defaultMessage: 'The field to lowercase.' }
+                    )}
+                    targetFieldHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseTargetHelpText',
+                      {
+                        defaultMessage:
+                          'The field that will hold the lowercase string. If empty, the input field is updated in place.',
+                      }
+                    )}
+                  />
+                )}
+                {type === 'trim' && (
+                  <TransformStringProcessorForm
+                    fieldSelectorHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimFieldHelpText',
+                      { defaultMessage: 'The field to trim.' }
+                    )}
+                    targetFieldHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimTargetHelpText',
+                      {
+                        defaultMessage:
+                          'The field that will hold the trimmed string. If empty, the input field is updated in place.',
+                      }
+                    )}
+                  />
+                )}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}
