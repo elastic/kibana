@@ -259,6 +259,11 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
     const parsedFormData: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(formData)) {
+      // Skip empty string values
+      if (typeof value === 'string' && value.trim() === '') {
+        continue;
+      }
+
       const param = parameters.find((p) => p.name === key);
       if (
         param &&
