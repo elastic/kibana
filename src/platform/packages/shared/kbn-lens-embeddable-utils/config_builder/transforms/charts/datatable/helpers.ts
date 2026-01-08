@@ -44,7 +44,7 @@ export function isMetricColumnESQL(
   if (col.isTransposed) return false;
   // Check if the column is in the layer columns and return if it is in the metric dimension
   const layerColumn = layerColumns.find((c) => c.columnId === col.columnId);
-  if (!layerColumn) throw new Error(`Column ${col.columnId} not found in layer columns`);
+  if (!layerColumn) throw new Error(`Column with id ${col.columnId} not found in layer columns`);
 
   return layerColumn.inMetricDimension ?? false;
 }
@@ -59,6 +59,9 @@ export function getAccessorName(
   return `${ACCESSOR}_${type}_${index}`;
 }
 
+/**
+ * Checks if the API color is of type color mapping
+ */
 export function isColorMappingColor(color: unknown): color is ColorMappingType {
   if (color == null) return false;
   return (
@@ -68,6 +71,9 @@ export function isColorMappingColor(color: unknown): color is ColorMappingType {
   );
 }
 
+/**
+ * Checks if the API color is of type color by value
+ */
 export function isColorByValueColor(color: unknown): color is ColorByValueType {
   if (color == null) return false;
   return typeof color === 'object' && 'type' in color && color.type === 'dynamic';

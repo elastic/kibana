@@ -220,7 +220,7 @@ export function convertDatatableColumnsToAPI(
   for (const column of columns) {
     const { columnId } = column;
     const apiOperation = columnId ? getValueApiColumn(columnId, layer) : undefined;
-    if (!apiOperation) throw new Error('Column not found');
+    if (!apiOperation) throw new Error(`Column with id ${columnId} not found`);
 
     if (isMetricColumnESQL(column, layer.columns)) {
       columnIdMapping[columnId] = { type: 'metric', index: metrics.length };
