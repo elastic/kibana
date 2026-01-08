@@ -2802,7 +2802,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (3) than the maximum number of allowed cases (1). Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
@@ -2889,7 +2889,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 20. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (21) than the maximum number of allowed cases (20). Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });

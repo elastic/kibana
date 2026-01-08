@@ -249,11 +249,12 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlerts: CasesGroupedAlerts[]
   ): CasesGroupedAlerts[] {
-    if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
+    const groupSize = groupedAlerts.length;
+    if (groupSize > params.maximumCasesToOpen || groupSize > MAX_OPEN_CASES) {
       const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
 
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases ${maxCasesCircuitBreaker}. Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${maxCasesCircuitBreaker}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 
