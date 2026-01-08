@@ -15,7 +15,7 @@ import type {
   SecuritySolutionPluginStartDependencies,
 } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
-import { getBuildAgent } from '../../lib/detection_engine/ai_assisted_rule_creation/iterative_agent';
+import { getBuildAgent } from '../../lib/detection_engine/ai_assisted_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
