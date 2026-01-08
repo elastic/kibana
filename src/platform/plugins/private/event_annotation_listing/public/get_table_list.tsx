@@ -60,11 +60,10 @@ export const getTableList = (
           queryInputServices={services.queryInputServices}
           navigateToLens={async () => {
             const currentApp = await firstValueFrom(services.core.application.currentAppId$);
-            // Use state transfer to properly pass originatingApp for breadcrumbs
             await services.embeddable.getStateTransfer().navigateToEditor('lens', {
               path: '',
               state: {
-                originatingApp: currentApp,
+                originatingApp: currentApp ?? 'dashboards',
                 originatingPath: window.location.hash,
               },
             });
