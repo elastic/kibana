@@ -11,6 +11,7 @@ import {
   featureSchema,
   type Feature,
   featureTypeSchema,
+  TaskStatus,
 } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
@@ -20,7 +21,6 @@ import type {
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { catchError, from, map } from 'rxjs';
-import { BooleanFromString } from '@kbn/zod-helpers';
 import { conflict } from '@hapi/boom';
 import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
 import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
@@ -292,25 +292,101 @@ export const bulkFeaturesRoute = createServerRoute({
 
 export type FeatureIdentificationTaskResult =
   | {
-      status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
     }
   | {
-      status: 'failed';
+      status: TaskStatus.Failed;
       error: string;
     }
   | ({
-      status: 'completed';
+      status: TaskStatus.Completed;
     } & IdentifyFeaturesResult)
   | ({
-      status: 'acknowledged';
+      status: TaskStatus.Acknowledged;
     } & IdentifyFeaturesResult);
 
-export const identifyFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify',
+export const featuresStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/features/_status',
+  options: {
+    access: 'internal',
+    summary: 'Check the status of feature identification',
+    description:
+      'Feature identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/features/_task which manages the task lifecycle.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<FeatureIdentificationTaskResult> => {
+    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { name },
+    } = params;
+
+    const { read } = await checkAccess({ name, scopedClusterClient });
+
+    if (!read) {
+      throw new SecurityError(`Cannot read features for stream ${name}, insufficient privileges`);
+    }
+
+    const task = await taskClient.get<FeatureIdentificationTaskParams, IdentifyFeaturesResult>(
+      `streams_feature_identification_${name}`
+    );
+
+    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
+      return {
+        status: TaskStatus.Stale,
+      };
+    } else if (task.status === TaskStatus.Failed) {
+      return {
+        status: TaskStatus.Failed,
+        error: task.task.error,
+      };
+    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
+      return {
+        status: task.status as TaskStatus.Completed | TaskStatus.Acknowledged,
+        ...task.task.payload,
+      };
+    }
+
+    return {
+      status: task.status as
+        | TaskStatus.InProgress
+        | TaskStatus.NotStarted
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled,
+    };
+  },
+});
+
+export const featuresTaskRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features/_task',
   options: {
     access: 'internal',
     summary: 'Identify features in a stream',
-    description: 'Identify features in a stream with an LLM',
+    description:
+      'Identify features in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
   },
   security: {
     authz: {
@@ -319,19 +395,25 @@ export const identifyFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      from: dateFromString,
-      to: dateFromString,
-      schedule: BooleanFromString.optional(),
-      cancel: BooleanFromString.optional(),
-      acknowledge: BooleanFromString.optional(),
-    }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule'),
+        from: dateFromString,
+        to: dateFromString,
+        connectorId: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel'),
+      }),
+      z.object({
+        action: z.literal('acknowledge'),
+      }),
+    ]),
   }),
   handler: async ({
     params,
@@ -350,7 +432,7 @@ export const identifyFeaturesRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId: connectorIdParam, from: start, to: end },
+      body,
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -359,13 +441,17 @@ export const identifyFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
-    const connectorId = await resolveConnectorId({
-      connectorId: connectorIdParam,
-      uiSettingsClient,
-      logger,
-    });
+    const { action } = body;
 
-    if (params.query.schedule) {
+    if (action === 'schedule') {
+      const { from: start, to: end, connectorId: connectorIdParam } = body;
+
+      const connectorId = await resolveConnectorId({
+        connectorId: connectorIdParam,
+        uiSettingsClient,
+        logger,
+      });
+
       try {
         await taskClient.schedule<FeatureIdentificationTaskParams>({
           task: {
@@ -383,7 +469,7 @@ export const identifyFeaturesRoute = createServerRoute({
         });
 
         return {
-          status: 'in_progress',
+          status: TaskStatus.InProgress,
         };
       } catch (error) {
         if (error instanceof CancellationInProgressError) {
@@ -392,61 +478,31 @@ export const identifyFeaturesRoute = createServerRoute({
 
         throw error;
       }
-    } else if (params.query.cancel) {
+    } else if (action === 'cancel') {
       await taskClient.cancel(`streams_feature_identification_${name}`);
 
       return {
-        status: 'being_canceled',
+        status: TaskStatus.BeingCanceled,
       };
-    } else if (params.query.acknowledge) {
-      try {
-        const task = await taskClient.acknowledge<
-          FeatureIdentificationTaskParams,
-          IdentifyFeaturesResult
-        >(`streams_feature_identification_${name}`);
-
-        return {
-          status: 'acknowledged',
-          ...task.task.payload,
-        };
-      } catch (error) {
-        if (error instanceof AcknowledgingIncompleteError) {
-          throw conflict(error.message);
-        }
-
-        throw error;
-      }
     }
 
-    const task = await taskClient.get<FeatureIdentificationTaskParams, IdentifyFeaturesResult>(
-      `streams_feature_identification_${name}`
-    );
-
-    if (task.status === 'in_progress') {
-      if (isStale(task.created_at)) {
-        return {
-          status: 'stale',
-        };
-      }
+    try {
+      const task = await taskClient.acknowledge<
+        FeatureIdentificationTaskParams,
+        IdentifyFeaturesResult
+      >(`streams_feature_identification_${name}`);
 
       return {
-        status: 'in_progress',
-      };
-    } else if (task.status === 'failed') {
-      return {
-        status: 'failed',
-        error: task.task.error,
-      };
-    } else if (task.status === 'completed' || task.status === 'acknowledged') {
-      return {
-        status: task.status,
+        status: TaskStatus.Acknowledged,
         ...task.task.payload,
       };
-    }
+    } catch (error) {
+      if (error instanceof AcknowledgingIncompleteError) {
+        throw conflict(error.message);
+      }
 
-    return {
-      status: task.status,
-    };
+      throw error;
+    }
   },
 });
 
@@ -566,6 +622,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...listFeaturesRoute,
   ...bulkFeaturesRoute,
-  ...identifyFeaturesRoute,
+  ...featuresStatusRoute,
+  ...featuresTaskRoute,
   ...describeStreamRoute,
 };

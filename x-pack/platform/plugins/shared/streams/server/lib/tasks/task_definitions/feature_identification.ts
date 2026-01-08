@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition, type FeatureType } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, TaskStatus, type FeatureType } from '@kbn/streams-schema';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -98,7 +98,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
 
                 await taskClient.update<FeatureIdentificationTaskParams, IdentifyFeaturesResult>({
                   ..._task,
-                  status: 'completed',
+                  status: TaskStatus.Completed,
                   task: {
                     params: {
                       connectorId,
@@ -129,7 +129,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
 
                 await taskClient.update<FeatureIdentificationTaskParams>({
                   ..._task,
-                  status: 'failed',
+                  status: TaskStatus.Failed,
                   task: {
                     params: {
                       connectorId,

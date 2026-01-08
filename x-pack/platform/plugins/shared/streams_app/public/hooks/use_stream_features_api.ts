@@ -13,7 +13,7 @@ import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  getFeatureIdentificationTask: () => Promise<FeatureIdentificationTaskResult>;
+  getFeatureIdentificationStatus: () => Promise<FeatureIdentificationTaskResult>;
   scheduleFeatureIdentificationTask: (connectorId: string) => Promise<void>;
   cancelFeatureIdentificationTask: () => Promise<void>;
   acknowledgeFeatureIdentificationTask: () => Promise<void>;
@@ -37,61 +37,47 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal } = useAbortController();
 
   return {
-    getFeatureIdentificationTask: async () => {
-      return await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/features/_identify',
-        {
-          signal,
-          params: {
-            path: { name: definition.name },
-            query: {
-              connectorId: '',
-              to: '',
-              from: '',
-            },
-          },
-        }
-      );
-    },
-    scheduleFeatureIdentificationTask: async (connectorId: string) => {
-      const now = Date.now();
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+    getFeatureIdentificationStatus: async () => {
+      return await streamsRepositoryClient.fetch('GET /internal/streams/{name}/features/_status', {
         signal,
         params: {
           path: { name: definition.name },
-          query: {
-            schedule: true,
-            connectorId,
+        },
+      });
+    },
+    scheduleFeatureIdentificationTask: async (connectorId: string) => {
+      const now = Date.now();
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'schedule',
             to: new Date(now).toISOString(),
             from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+            connectorId,
           },
         },
       });
     },
     cancelFeatureIdentificationTask: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
         signal,
         params: {
           path: { name: definition.name },
-          query: {
-            cancel: true,
-            connectorId: '',
-            to: '',
-            from: '',
+          body: {
+            action: 'cancel',
           },
         },
       });
     },
     acknowledgeFeatureIdentificationTask: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
         signal,
         params: {
           path: { name: definition.name },
-          query: {
-            acknowledge: true,
-            connectorId: '',
-            to: '',
-            from: '',
+          body: {
+            action: 'acknowledge',
           },
         },
       });
