@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useId } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -17,7 +17,7 @@ import { getAlertProcessingDonutAttributes } from '../../../common/components/vi
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
 const ChartSize = 250;
-const visualizationId = 'aiValueAlertProcessingDonut';
+const visualizationIdPrefix = 'aiValueAlertProcessingDonut';
 interface Props {
   attackAlertIds: string[];
   from: string;
@@ -25,6 +25,9 @@ interface Props {
 }
 export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to }) => {
   const spaceId = useSpaceId();
+  // Lens embeddables (and our query store) key state by `id`; make it instance-unique to avoid stale/cross-instance rendering.
+  const instanceId = useId();
+  const visualizationId = `${visualizationIdPrefix}-${instanceId}`;
   const {
     euiTheme: { font },
   } = useEuiTheme();
