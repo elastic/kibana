@@ -10,15 +10,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { App } from './components/app';
 
-export const renderApp = (
-  core: CoreStart,
-  { navigation }: { navigation: NavigationPublicPluginStart },
-  { appBasePath, element }: AppMountParameters
-) => {
+export const renderApp = (core: CoreStart, { appBasePath, element }: AppMountParameters) => {
   ReactDOM.render(
     core.rendering.addContext(
       <App
@@ -26,7 +21,6 @@ export const renderApp = (
         basename={appBasePath}
         overlays={core.overlays}
         rendering={core.rendering}
-        navigation={navigation}
       />
     ),
     element

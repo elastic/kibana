@@ -9,19 +9,15 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 const PLUGIN_NAME = 'FlyoutSystemExamples';
 
-interface StartDeps {
-  navigation: NavigationPublicPluginStart;
-}
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-export class FlyoutSystemExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps): void {
+export class FlyoutSystemExamplesPlugin implements Plugin<void, void, SetupDeps> {
+  public setup(core: CoreSetup, deps: SetupDeps): void {
     // Register an application into the side navigation menu
     core.application.register({
       id: 'flyoutSystemExamples',
@@ -30,9 +26,9 @@ export class FlyoutSystemExamplesPlugin implements Plugin<void, void, SetupDeps,
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart, params);
+        return renderApp(coreStart, params);
       },
     });
 

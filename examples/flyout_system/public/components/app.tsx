@@ -10,17 +10,15 @@
 import React from 'react';
 
 import { EuiCode, EuiPageTemplate, EuiText, type EuiPageTemplateProps } from '@elastic/eui';
-import type { OverlayStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { OverlayStart } from '@kbn/core/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 
-import { FlyoutWithOverlays } from './_flyout_with_overlays';
 import { FlyoutWithComponent } from './_flyout_with_component';
+import { FlyoutWithOverlays } from './_flyout_with_overlays';
 
 interface AppDeps {
   basename: string;
-  navigation: NavigationPublicPluginStart;
   overlays: OverlayStart;
   rendering: RenderingService;
 }
@@ -80,14 +78,9 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
 };
 
 // Main App component that provides Router context
-export const App = ({ basename, navigation, overlays, rendering }: AppDeps) => {
+export const App = ({ basename, overlays, rendering }: AppDeps) => {
   return (
     <Router basename={basename}>
-      <navigation.ui.TopNavMenu
-        appName="flyout_system_example"
-        showSearchBar={false}
-        useDefaultBehaviors={true}
-      />
       <AppContent overlays={overlays} rendering={rendering} />
     </Router>
   );
