@@ -89,12 +89,12 @@
     "updatedAt",
     "updatedBy"
   ],
-  "alerting_esql_rule": [
+  "alerting_rule": [
     "createdAt",
     "createdBy",
     "enabled",
     "esql",
-    "groupKey",
+    "groupingKey",
     "lookbackWindow",
     "name",
     "schedule",
