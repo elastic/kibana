@@ -28,6 +28,7 @@ import { resolveTimeShift } from './time_shift_utils';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
+
 // Need a more complex logic for decimals percentiles
 
 export function getESQLForLayer(
@@ -80,6 +81,9 @@ export function getESQLForLayer(
     esAggEntries,
     ([_, col]) => !col.isBucketed
   );
+
+  // Collect all params from metrics and buckets
+  const allParamObjects: Array<Record<string, string | number>> = [];
 
   const metrics = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
@@ -134,7 +138,7 @@ export function getESQLForLayer(
       },
     ];
 
-    let metricESQL = def.toESQL(
+    const rawResult = def.toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -151,9 +155,13 @@ export function getESQLForLayer(
       dateRange
     );
 
-    if (!metricESQL) return undefined;
+    if (!rawResult) return undefined;
 
-    metricESQL = `${esAggsId} = ` + metricESQL;
+    if (rawResult.params) {
+      allParamObjects.push(rawResult.params);
+    }
+
+    let metricESQL = `${esAggsId} = ` + rawResult.template;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
@@ -257,25 +265,30 @@ export function getESQLForLayer(
       }
     }
 
-    return (
-      `${esAggsId} = ` +
-      def.toESQL(
-        {
-          ...col,
-          timeShift: resolveTimeShift(
-            col.timeShift,
-            absDateRange,
-            histogramBarsTarget,
-            hasDateHistogram
-          ),
-        },
-        wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
-        indexPattern,
-        layer,
-        uiSettings,
-        dateRange
-      )
+    const rawResult = def.toESQL(
+      {
+        ...col,
+        timeShift: resolveTimeShift(
+          col.timeShift,
+          absDateRange,
+          histogramBarsTarget,
+          hasDateHistogram
+        ),
+      },
+      wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
+      indexPattern,
+      layer,
+      uiSettings,
+      dateRange
     );
+
+    if (!rawResult) return undefined;
+
+    if (rawResult.params) {
+      allParamObjects.push(rawResult.params);
+    }
+
+    return `${esAggsId} = ` + rawResult.template;
   });
 
   if (buckets.some((m) => !m)) return;
@@ -284,7 +297,11 @@ export function getESQLForLayer(
     if (buckets.some((b) => !b || b.includes('undefined'))) return;
 
     if (metrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
+      const statsBody = `${metrics.join(', ')} BY ${buckets.join(', ')}`;
+      const allParams = Object.assign({}, ...allParamObjects);
+      esqlCompose = esqlCompose.pipe(
+        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
+      );
     }
 
     const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
@@ -303,7 +320,11 @@ export function getESQLForLayer(
     esqlCompose = esqlCompose.pipe(sort(...sorts));
   } else {
     if (metrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(metrics.join(', ')));
+      const statsBody = metrics.join(', ');
+      const allParams = Object.assign({}, ...allParamObjects);
+      esqlCompose = esqlCompose.pipe(
+        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
+      );
     }
   }
 
