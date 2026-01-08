@@ -94,7 +94,7 @@ steps:
       machineType: c4-standard-4
       diskType: 'hyperdisk-balanced'
       preemptible: true
-      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
+      spotZones: us-central1-f,southamerica-east1-b
       diskSizeGb: 115
     key: check_types
     timeout_in_minutes: 60
