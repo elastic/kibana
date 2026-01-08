@@ -119,7 +119,7 @@ describe('validateToolCalls', () => {
       if (isToolValidationError(error)) {
         expect(error.meta).toEqual({
           arguments: JSON.stringify({ foo: 'bar' }),
-          errorsText: `data must have required property 'bar'`,
+          errorsText: 'bar: Required',
           name: 'my_function',
           toolCalls: [
             {
