@@ -3,7 +3,8 @@ name: "CodeQL PR"
 on:
   pull_request:
     branches: [ "main" ]
-    types: [ opened, ready_for_review, synchronize ]
+    types: [ opened, ready_for_review ]
+
 jobs:
 
   test:
@@ -13,13 +14,14 @@ jobs:
       (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft == false
       )
     permissions:
       contents: read
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
@@ -49,6 +51,7 @@ jobs:
       (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft == false
       )
     permissions:
       security-events: write
@@ -62,7 +65,7 @@ jobs:
         language: [ 'javascript' ]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
@@ -70,18 +73,8 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
     - name: Perform CodeQL Analysis
-      id: analyze
       uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
       env:
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
       with:
         category: "/language:${{matrix.language}}"
-        output: sarif-results
-
-    - name: Dismiss alerts
-      uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
-      env:
-        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
-      with:
-        sarif-id: ${{ steps.analyze.outputs.sarif-id }}
-        sarif-file: sarif-results/${{ matrix.language }}.sarif
