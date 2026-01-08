@@ -558,6 +558,12 @@ export const QueryBarTopRow = React.memo(
       onDraftChangeDebounced?.(draft);
     }, [onDraftChangeDebounced, draft]);
 
+    useEffect(() => {
+      return () => {
+        onDraftChangeDebounced?.flush(); // immediately invoke pending debounced calls on unmount
+      };
+    }, [onDraftChangeDebounced]);
+
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
     }

@@ -15,8 +15,10 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -36,6 +38,8 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
+
+const EMPTY_FILTERS: Filter[] = [];
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -64,15 +68,37 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
-  const { tabId, query, esqlVariables, timeRange, searchDraftUiState, esqlEditorUiState } =
-    useCurrentTabSelector((state) => ({
-      tabId: state.id,
-      query: state.appState.query,
-      esqlVariables: state.esqlVariables,
-      timeRange: state.dataRequestParams.timeRangeAbsolute,
-      searchDraftUiState: state.uiState.searchDraft,
-      esqlEditorUiState: state.uiState.esqlEditor,
-    }));
+  const {
+    tabId,
+    query,
+    appFilters,
+    globalFilters,
+    refreshInterval,
+    timeRange,
+    timeRangeRelative,
+    esqlVariables,
+    searchDraftUiState,
+    esqlEditorUiState,
+  } = useCurrentTabSelector((state) => ({
+    tabId: state.id,
+    query: state.appState.query,
+    appFilters: state.appState.filters,
+    globalFilters: state.globalState.filters,
+    refreshInterval: state.globalState.refreshInterval,
+    timeRange: state.dataRequestParams.timeRangeAbsolute,
+    timeRangeRelative: state.dataRequestParams.timeRangeRelative,
+    esqlVariables: state.esqlVariables,
+    searchDraftUiState: state.uiState.searchDraft,
+    esqlEditorUiState: state.uiState.esqlEditor,
+  }));
+
+  const filtersMemoized = useMemo(() => {
+    if (isOfAggregateQueryType(query)) {
+      return EMPTY_FILTERS;
+    }
+    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
+    return allFilters.length ? cloneDeep(allFilters) : EMPTY_FILTERS;
+  }, [appFilters, globalFilters, query]);
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -279,14 +305,19 @@ export const DiscoverTopNav = ({
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
+        disableSubscribingToGlobalDataServices={true}
         query={query}
+        filters={filtersMemoized}
+        dateRangeFrom={timeRangeRelative?.from}
+        dateRangeTo={timeRangeRelative?.to}
+        refreshInterval={refreshInterval?.value}
+        isRefreshPaused={refreshInterval?.pause}
         savedQueryId={savedQuery}
         screenTitle={persistedDiscoverSession?.title}
         showDatePicker={showDatePicker}
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
-        disableSubscribingToGlobalDataServices={true}
         dataViewPickerOverride={
           searchBarCustomization?.CustomDataViewPicker ? (
             <searchBarCustomization.CustomDataViewPicker />
