@@ -30,4 +30,16 @@ const timeZone = {
   ignoreAsSuggestion: true,
 };
 
-export const settings = [projectRouting, timeZone];
+const unmappedFields = {
+  // HD
+  name: 'unmapped_fields',
+  type: 'keyword',
+  serverlessOnly: false,
+  preview: true,
+  snapshotOnly: true,
+  description:
+    'Defines how unmapped fields are treated. Possible values are: "FAIL" (default) - fails the query if unmapped fields are present; "NULLIFY" - treats unmapped fields as null values; "LOAD" - attempts to load the fields from the source.',
+  ignoreAsSuggestion: false,
+};
+
+export const settings = [projectRouting, timeZone, unmappedFields];

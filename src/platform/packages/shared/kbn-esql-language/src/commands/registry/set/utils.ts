@@ -38,6 +38,36 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   ];
 };
 
+const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
+  return [
+    {
+      label: 'FAIL',
+      text: 'FAIL',
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
+        defaultMessage: 'Fails the query if unmapped fields are present',
+      }),
+    },
+    {
+      label: 'NULLIFY',
+      text: 'NULLIFY',
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.nullifyDoc', {
+        defaultMessage: 'Treats unmapped fields as null values',
+      }),
+    },
+    {
+      label: 'LOAD',
+      text: 'LOAD',
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+        defaultMessage: 'Attempts to load the fields from the source',
+      }),
+    },
+  ];
+};
+
 export const COMPLETIONS_BY_SETTING_NAME: Record<string, ISuggestionItem[]> = {
   project_routing: getProjectRoutingCommonCompletionItems(),
+  unmapped_fields: getUnmappedFieldsCompletionItems(),
 };
