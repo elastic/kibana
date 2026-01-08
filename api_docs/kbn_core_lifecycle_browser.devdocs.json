@@ -71,6 +71,22 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreSetup.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [
+              "{@link ChromeSetup}"
+            ],
+            "signature": [
+              "ChromeSetup"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-public.CoreSetup.customBranding",
             "type": "Object",
             "tags": [],

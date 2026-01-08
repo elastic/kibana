@@ -36,6 +36,23 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser-mocks",
+            "id": "def-public.chromeServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalChromeSetup"
+            ],
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-mocks",
             "id": "def-public.chromeServiceMock.createStartContract",
             "type": "Function",
             "tags": [],

@@ -16,7 +16,7 @@ import { createSearchService } from '../../users/search';
 
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import { createBulkUtilsService } from '../bulk';
-import { findStaleUsersFactory } from './stale_users';
+import { findStaleUsersFactory } from './deletion_detection/stale_users';
 import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
@@ -54,7 +54,11 @@ export const createIndexSyncService = (
       namespace: deps.namespace,
     });
     // get all monitoring index source saved objects of type 'index_sync'
-    const indexSources = await monitoringIndexSourceClient.findSourcesByType('index');
+    const { sources: indexSources } = await monitoringIndexSourceClient.list({
+      type: 'index',
+      per_page: 10000,
+    });
+
     if (indexSources.length === 0) {
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
@@ -64,6 +68,13 @@ export const createIndexSyncService = (
       'info',
       `Privilege monitoring sync started - Maximum supported number of privileged users allowed: ${maxUsersAllowed}`
     );
+    // TODO: Update this log in line with https://github.com/elastic/kibana/pull/233335#discussion_r2330097328
+    // Tracked Issue: https://github.com/elastic/security-team/issues/14860
+    /**
+     * Should be:
+     * "The maximum supported number of privileged users has been exceeded
+     * (current count <current_count> of a max <maxUsersAllowed>). Please remove privileged users to prevent performance degradation"
+     */
 
     const allStaleUsers: PrivMonBulkUser[] = [];
 
@@ -136,6 +147,7 @@ export const createIndexSyncService = (
    *
    * @param indexName - Name of the Elasticsearch index to pull usernames from.
    * @param kuery - Optional KQL filter to narrow down results.
+   * @paramn sourceId - The ID of the monitoring entity source.
    * @returns A list of all usernames processed from the source index.
    */
   const syncUsernamesFromIndex = async ({

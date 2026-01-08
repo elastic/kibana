@@ -18,7 +18,7 @@ export const ScrollButton: React.FC<ScrollButtonProps> = ({ onClick }) => {
 
   const scrollDownButtonStyles = css`
     position: absolute;
-    bottom: ${euiTheme.size.s};
+    bottom: ${euiTheme.size.l};
     left: 50%;
     transform: translateX(-50%);
     z-index: 1;
