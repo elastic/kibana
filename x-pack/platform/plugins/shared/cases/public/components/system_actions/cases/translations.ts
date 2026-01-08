@@ -122,3 +122,9 @@ export const MAX_CASES_TO_OPEN_LABEL = i18n.translate(
     defaultMessage: 'Maximum amount of cases to open',
   }
 );
+
+export const MAX_CASES_TO_OPEN_ERROR = (maxCases: number) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.maxCasesToOpenError', {
+    defaultMessage: '"Maximum cases" must be between 1 and {maxCases}.',
+    values: { maxCases },
+  });
