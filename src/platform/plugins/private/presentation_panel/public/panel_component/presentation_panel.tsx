@@ -27,18 +27,12 @@ export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 >(
-  props: PresentationPanelProps<ApiType, PropsType> & { hidePanelChrome?: boolean }
+  props: PresentationPanelProps<ApiType, PropsType>
 ) => {
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const { Component, hidePanelChrome, ...passThroughProps } = props;
+  const { Component, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
-    if (hidePanelChrome) {
-      return {
-        unwrappedComponent: isPromise(Component) ? await Component : Component,
-      };
-    }
-
     const startServicesPromise = untilPluginStartServicesReady();
     const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
     const results = await Promise.allSettled([
@@ -86,9 +80,8 @@ export const PresentationPanel = <
   const Panel = value?.Panel;
   const PanelError = value?.PanelError;
   const UnwrappedComponent = value?.unwrappedComponent;
-  const shouldHavePanel = !hidePanelChrome;
 
-  if (value?.loadErrorReason || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
+  if (value?.loadErrorReason || !Panel || !UnwrappedComponent) {
     return (
       <div ref={panelRef}>
         {PanelError ? (
@@ -100,7 +93,7 @@ export const PresentationPanel = <
     );
   }
 
-  return shouldHavePanel && Panel ? (
+  return Panel ? (
     <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
   ) : (
     <EuiErrorBoundary>

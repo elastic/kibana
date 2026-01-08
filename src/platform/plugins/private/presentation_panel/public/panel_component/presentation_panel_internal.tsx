@@ -176,33 +176,52 @@ export const PresentationPanelInternal = <
     setInitialLoadComplete(true);
   }
 
-  const InnerPanel = useMemo(() => {
-    return (
+  const panelContent = useMemo(() => {
+    const errorAndLoader = (
       <>
         {blockingError && api && <PresentationPanelErrorInternal api={api} error={blockingError} />}
         {!initialLoadComplete && <PanelLoader />}
+      </>
+    );
+
+    const componentWithBoundary = (
+      <EuiErrorBoundary>
+        <Component
+          {...(componentProps as React.ComponentProps<typeof Component>)}
+          ref={(newApi) => {
+            if (newApi && !api) setApi(newApi);
+          }}
+        />
+      </EuiErrorBoundary>
+    );
+
+    if (hidePanelChrome) {
+      return (
+        <>
+          {errorAndLoader}
+          {componentWithBoundary}
+        </>
+      );
+    }
+
+    return (
+      <>
+        {errorAndLoader}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
         >
-          <EuiErrorBoundary>
-            <Component
-              {...(componentProps as React.ComponentProps<typeof Component>)}
-              ref={(newApi) => {
-                if (newApi && !api) setApi(newApi);
-              }}
-            />
-          </EuiErrorBoundary>
+          {componentWithBoundary}
         </div>
       </>
     );
-  }, [blockingError, api, initialLoadComplete, Component, componentProps]);
+  }, [blockingError, api, initialLoadComplete, Component, componentProps, hidePanelChrome]);
 
   return hidePanelChrome ? (
-    InnerPanel
+    panelContent
   ) : (
     <PresentationPanelChrome {...rest} api={api} setDragHandle={setDragHandle}>
-      {InnerPanel}
+      {panelContent}
     </PresentationPanelChrome>
   );
 };

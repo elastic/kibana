@@ -361,40 +361,4 @@ describe('Presentation panel', () => {
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
   });
-
-  describe('hidePanelChrome', () => {
-    it('renders component directly without panel wrapper when hidePanelChrome is true', async () => {
-      render(
-        <PresentationPanel
-          hidePanelChrome={true}
-          Component={getMockPresentationPanelCompatibleComponent()}
-        />
-      );
-      await waitFor(() =>
-        expect(screen.getByTestId('testPresentationPanelInternalComponent')).toBeInTheDocument()
-      );
-      expect(screen.queryByTestId('embeddablePanel')).not.toBeInTheDocument();
-    });
-
-    it('renders component with panel wrapper when hidePanelChrome is false', async () => {
-      render(
-        <PresentationPanel
-          hidePanelChrome={false}
-          Component={getMockPresentationPanelCompatibleComponent()}
-        />
-      );
-      await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanel')).toBeInTheDocument();
-        expect(screen.getByTestId('testPresentationPanelInternalComponent')).toBeInTheDocument();
-      });
-    });
-
-    it('renders component with panel wrapper by default', async () => {
-      render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent()} />);
-      await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanel')).toBeInTheDocument();
-        expect(screen.getByTestId('testPresentationPanelInternalComponent')).toBeInTheDocument();
-      });
-    });
-  });
 });
