@@ -460,13 +460,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
   });
 
   startListening({
-    actionCreator: internalStateSlice.actions.setSearchDraftUiState,
-    effect: (action, listenerApi) => {
-      console.log('setSearchDraftUiState', action, listenerApi.getState().tabs);
-    },
-  });
-
-  startListening({
     actionCreator: initializeTabs.fulfilled,
     effect: (action, listenerApi) => {
       const { services } = listenerApi.extra;
