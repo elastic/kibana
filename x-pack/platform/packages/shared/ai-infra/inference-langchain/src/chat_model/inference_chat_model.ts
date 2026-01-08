@@ -63,6 +63,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   temperature?: number;
   model?: string;
   signal?: AbortSignal;
+  timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
@@ -74,7 +75,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   model?: string;
 }
 
-type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
+type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream' | 'timeout'>;
 
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
@@ -102,6 +103,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected maxRetries?: number;
   protected model?: string;
   protected signal?: AbortSignal;
+  protected timeout?: number;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -113,6 +115,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
+    this.timeout = args.timeout;
     this.maxRetries = args.maxRetries;
   }
 
@@ -190,6 +193,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
+      timeout: options.timeout ?? this.timeout,
     };
   }
 
