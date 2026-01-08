@@ -14,6 +14,11 @@ import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
 import { FEATURE_TYPE } from './fields';
 
+export interface IdentifyFeaturesResult {
+  features: Feature[];
+  tokensUsed: ChatCompletionTokenCount;
+}
+
 export class FeatureTypeRegistry {
   private handlers = new Map<string, FeatureTypeHandler>();
 
@@ -55,9 +60,7 @@ export class FeatureTypeRegistry {
     return handler.toStorage(streamName, feature);
   }
 
-  async identifyFeatures(
-    options: any
-  ): Promise<{ features: Feature[]; tokensUsed: ChatCompletionTokenCount }> {
+  async identifyFeatures(options: any): Promise<IdentifyFeaturesResult> {
     options.logger.debug(`Identifying features for stream ${options.stream.name}`);
 
     options.logger.trace('Describing dataset for feature identification');

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { IdentifySystemsOptions } from '@kbn/streams-ai';
+import type { IdentifySystemsOptions, IdentifySystemsResult } from '@kbn/streams-ai';
 import { generateStreamDescription, identifySystems, sumTokens } from '@kbn/streams-ai';
-import type { System } from '@kbn/streams-schema';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { withSpan } from '@kbn/apm-utils';
 
 export async function identifySystemsWithDescription(
   options: IdentifySystemsOptions
-): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
+): Promise<IdentifySystemsResult> {
   const result = await identifySystems(options);
 
   options.logger.trace('Generating descriptions for identified systems');

@@ -6,20 +6,20 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import { firstValueFrom } from 'rxjs';
 import type { Streams, System } from '@kbn/streams-schema';
-import type { IdentifiedSystemsEvent } from '@kbn/streams-plugin/server/routes/internal/streams/systems/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
+import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/systems/route';
 import { useKibana } from './use_kibana';
-import { getLast24HoursTimeRange } from '../util/time_range';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  upsertSystem: (system: System) => Promise<void>;
-  identifySystems: (connectorId: string) => Promise<IdentifiedSystemsEvent>;
+  getSystemIdentificationTask: () => Promise<SystemIdentificationTaskResult>;
+  scheduleSystemIdentificationTask: (connectorId: string) => Promise<void>;
+  cancelSystemIdentificationTask: () => Promise<void>;
+  acknowledgeSystemIdentificationTask: () => Promise<void>;
   addSystemsToStream: (systems: System[]) => Promise<StorageClientBulkResponse>;
   removeSystemsFromStream: (systems: Pick<System, 'name'>[]) => Promise<StorageClientBulkResponse>;
-  abort: () => void;
+  upsertSystem: (system: System) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -32,37 +32,67 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     services: { telemetryClient },
   } = useKibana();
 
-  const { signal, abort, refresh } = useAbortController();
+  const { signal } = useAbortController();
 
   return {
-    identifySystems: async (connectorId: string) => {
-      const { from, to } = getLast24HoursTimeRange();
-      const events$ = streamsRepositoryClient.stream(
+    getSystemIdentificationTask: async () => {
+      return await streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/systems/_identify',
         {
           signal,
           params: {
             path: { name: definition.name },
             query: {
-              connectorId,
-              from,
-              to,
+              connectorId: '',
+              to: '',
+              from: '',
             },
           },
         }
       );
-
-      const identifiedSystems = await firstValueFrom(events$);
-
-      telemetryClient.trackFeaturesIdentified({
-        count: identifiedSystems.systems.length,
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-        input_tokens_used: identifiedSystems.tokensUsed.prompt,
-        output_tokens_used: identifiedSystems.tokensUsed.completion,
+    },
+    scheduleSystemIdentificationTask: async (connectorId: string) => {
+      const now = Date.now();
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            schedule: true,
+            connectorId,
+            to: new Date(now).toISOString(),
+            from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+          },
+        },
       });
-
-      return identifiedSystems;
+    },
+    cancelSystemIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            cancel: true,
+            connectorId: '',
+            to: '',
+            from: '',
+          },
+        },
+      });
+    },
+    acknowledgeSystemIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            acknowledge: true,
+            connectorId: '',
+            to: '',
+            from: '',
+          },
+        },
+      });
     },
     addSystemsToStream: async (systems: System[]) => {
       const response = await streamsRepositoryClient.fetch(
@@ -127,10 +157,6 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           body: system,
         },
       });
-    },
-    abort: () => {
-      abort();
-      refresh();
     },
   };
 }
