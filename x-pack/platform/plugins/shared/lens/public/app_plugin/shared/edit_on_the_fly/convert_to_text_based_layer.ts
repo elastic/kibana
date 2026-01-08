@@ -18,7 +18,7 @@ import type {
 } from '@kbn/lens-common';
 
 import type { OriginalColumn } from '../../../../common/types';
-import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
+import { generateEsqlQuery } from '../../../datasources/form_based/generate_esql_query';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 
@@ -122,7 +122,7 @@ function getLayerConversionData(
 
   let esqlResult: EsqlConversionResult | undefined;
   try {
-    esqlResult = getESQLForLayer(
+    esqlResult = generateEsqlQuery(
       esAggEntries,
       layer,
       indexPattern,
@@ -228,10 +228,10 @@ interface ConvertToEsqlParams {
 }
 
 /**
- * Converts form-based layers to ES|QL and returns new attributes.
+ * Converts form-based layers to text-based (ES|QL) and returns new attributes.
  * Returns undefined if conversion fails or no layers to convert.
  */
-export function convertToEsql({
+export function convertFormBasedToTextBasedLayer({
   layersToConvert,
   attributes,
   visualizationState,

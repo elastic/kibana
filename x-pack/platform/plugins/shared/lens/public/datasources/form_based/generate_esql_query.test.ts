@@ -6,7 +6,7 @@
  */
 
 import type { IndexPattern, DateHistogramIndexPatternColumn } from '@kbn/lens-common';
-import { getESQLForLayer } from './to_esql';
+import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 
 const defaultUiSettingsGet = (key: string) => {
@@ -47,7 +47,7 @@ describe('to_esql', () => {
   } as unknown as IndexPattern;
 
   it('should produce valid esql for date histogram and count', () => {
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -90,7 +90,7 @@ describe('to_esql', () => {
   });
 
   it('should return undefined if missing row option is set', () => {
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -128,7 +128,7 @@ describe('to_esql', () => {
   });
 
   it('should return undefined if lens formula is used', () => {
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -155,7 +155,7 @@ describe('to_esql', () => {
   });
 
   test('it should add a where condition to esql if timeField is set', () => {
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -198,7 +198,7 @@ describe('to_esql', () => {
   });
 
   it('should not add a where condition to esql if timeField is not set', () => {
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -252,7 +252,7 @@ describe('to_esql', () => {
       return defaultUiSettingsGet(key);
     });
 
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -296,7 +296,7 @@ describe('to_esql', () => {
       return defaultUiSettingsGet(key);
     });
 
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',
@@ -339,7 +339,7 @@ describe('to_esql', () => {
   });
 
   it('should work with custom filters on the layer', () => {
-    const esql = getESQLForLayer(
+    const esql = generateEsqlQuery(
       [
         [
           '1',

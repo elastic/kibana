@@ -33,7 +33,7 @@ import type {
   IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
-import { getESQLForLayer } from './to_esql';
+import { generateEsqlQuery } from './generate_esql_query';
 import { convertToAbsoluteDateRange } from '../../utils';
 import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
@@ -180,7 +180,7 @@ function getExpressionForLayer(
     const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
     const esqlLayer =
       canUseESQL &&
-      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
+      generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
 
     if (!esqlLayer) {
       esAggEntries.forEach(([colId, col], index) => {
