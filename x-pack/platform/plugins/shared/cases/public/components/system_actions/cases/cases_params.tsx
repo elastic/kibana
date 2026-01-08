@@ -308,7 +308,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           <EuiFormRow
             fullWidth
             label={i18n.MAX_CASES_TO_OPEN_LABEL}
-            labelAppend={OptionalFieldLabel}
             helpText={i18n.MAX_CASES_TO_OPEN_HELP_TEXT(MAX_OPEN_CASES)}
           >
             <EuiFieldNumber
