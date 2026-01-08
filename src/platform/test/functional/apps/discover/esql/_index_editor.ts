@@ -46,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246944
-  describe.skip('Index editor', function () {
+  describe('Index editor', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['superuser']);
