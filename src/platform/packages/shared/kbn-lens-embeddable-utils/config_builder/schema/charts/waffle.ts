@@ -105,7 +105,11 @@ export const waffleStateSchemaNoESQL = schema.object(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
       ),
-      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
@@ -145,7 +149,11 @@ const waffleStateSchemaESQL = schema.object(
         schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
           meta: { description: 'ES|QL column reference for breakdown dimension' },
         }),
-        { minSize: 1, meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' } }
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
+        }
       )
     ),
   },
