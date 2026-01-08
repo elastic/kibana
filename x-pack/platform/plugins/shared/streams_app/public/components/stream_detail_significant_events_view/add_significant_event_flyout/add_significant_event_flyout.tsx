@@ -50,7 +50,7 @@ interface Props {
   features: System[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedFeatures: Feature[];
+  initialSelectedFeatures: System[];
   refreshFeatures: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;

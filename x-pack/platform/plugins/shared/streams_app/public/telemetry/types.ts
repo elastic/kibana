@@ -118,14 +118,6 @@ interface StreamsSignificantEventsCreatedProps {
   stream_type: StreamType;
 }
 
-interface StreamsFeatureIdentificationIdentifiedProps {
-  count: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
   stream_name: string;
