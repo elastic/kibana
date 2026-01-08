@@ -26,6 +26,7 @@ const _allowedExperimentalValues = {
   enableEsqlViewInstall: false,
   enableSloTemplates: false,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
+  enableAgentRollback: false, // When enabled, agent upgrade rollback will be available in the API and UI.
 };
 
 /**

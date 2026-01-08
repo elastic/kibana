@@ -21,4 +21,3 @@ export const AI_ASSISTED_RULE_CREATION_INFO_MESSAGE = i18n.translate(
       'AI assisted rule creation generates a detection rule with name, description, data source, query, tags, severity, risk score, schedule and MITRE ATT&CK mapping fields. Always review the rule before creating and enabling it.',
   }
 );
-
