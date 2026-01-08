@@ -141,6 +141,15 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+export interface TraceMetricsItem {
+  group: string;
+  latency: number | null;
+  throughput: number;
+  failureRate: number;
+}
+
+type TraceMetricsResponse = TraceMetricsItem[];
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -212,4 +221,12 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  traceMetrics: (params: {
+    request: KibanaRequest;
+    start: string;
+    end: string;
+    kqlFilter?: string;
+    groupBy: string;
+  }) => Promise<TraceMetricsResponse>;
 }

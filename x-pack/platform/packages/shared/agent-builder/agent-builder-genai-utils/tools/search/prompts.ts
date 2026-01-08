@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SearchTarget } from './types';
+import { cleanPrompt } from '../../prompts';
 
 import {
   naturalLanguageSearchToolName as nlTool,
@@ -22,13 +23,25 @@ export const getSearchPrompt = ({
   searchTarget: SearchTarget;
   customInstructions?: string;
 }): BaseMessageLike[] => {
-  const systemPrompt = `You are an expert search dispatcher. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it.
-You **must** call **one** of the available tools. Do not answer the user directly or ask clarifying questions.
+  const systemPrompt =
+    cleanPrompt(`You are a search dispatcher. Your ONLY task is to call the appropriate search tool with the correct parameters.
+
+## CRITICAL INSTRUCTIONS
+
+- You MUST call exactly ONE tool. Do NOT respond with text.
+- Do NOT ask clarifying questions. Make your best judgment.
+
+## Search Target
+
+- Name: \`${searchTarget.name}\`
+- Type: ${searchTarget.type}
+- Use this value for the \`index\` parameter in your tool call.
 
 ## Available Tools
 
 ### 1. Relevance Search Tool ('${relevanceTool}')
 - **Purpose**: For full-text, relevance-based searches. Use this when the user is looking for documents based on topics, concepts, or matching unstructured text. The results are ranked by a relevance score.
+- **Schema**: { index: string, term: string }
 - **Use Case Examples**:
   - "find information about our Q3 earnings report"
   - "search for documents mentioning 'data privacy'"
@@ -36,23 +49,19 @@ You **must** call **one** of the available tools. Do not answer the user directl
 
 ### 2. Natural Language Analytic Tool ('${nlTool}')
 - **Purpose**: For structured queries, aggregations, and calculations. Use this for any query that requires sorting by a specific field, filtering by exact values, counting, or creating data breakdowns.
+- **Schema**: { index: string, query: string }
 - **Use Case Examples**:
   - "show me the last 5 documents"
   - "what is the average order value?"
   - "list all products where status is 'in_stock' and price is less than 50"
   - "how many errors were logged in the past hour?"
 
-## Additional instructions
+${customInstructions ? `## Additional Instructions\n\n${customInstructions}\n` : ''}
+`);
 
-- The search will be performed against the \`${searchTarget.name}\` ${
-    searchTarget.type
-  }, so you should use that value for the \`index\` parameters of the tool you will call.${
-    customInstructions ? `\n- User provided additional instructions: ${customInstructions}` : ''
-  }
+  const userPrompt = `Execute the following user query: "${nlQuery}"
 
-`;
-
-  const userPrompt = `Execute the following user query: "${nlQuery}"`;
+Call exactly ONE tool now with index="${searchTarget.name}".`;
 
   return [
     ['system', systemPrompt],
