@@ -1733,9 +1733,10 @@ class AgentPolicyService {
 
         for (const version of options?.agentVersions ?? commonVersions) {
           let updatedFullPolicy: FullAgentPolicy | null = null;
-          // TODO how to determine if package has agent version condition in template? in package-spec?
-          if (fullPolicy.inputs.some((input) => input.meta?.package?.name === 'auth0')) {
-            // performance concern to recreate full agent policy for every agent policy which has an input with agent version conditions in template
+
+          // if none of the inputs have package level agent version conditions, it means some inputs have template level conditions, so have to recreate the full agent policy with agent version
+          if (fullPolicy.inputs.every((input) => !input.meta?.package?.agentVersion)) {
+            // performance concern?
             updatedFullPolicy = await agentPolicyService.getFullAgentPolicy(
               soClient,
               fullPolicy.id,
@@ -1749,7 +1750,7 @@ class AgentPolicyService {
             policy_id: `${fullPolicy.id}#${version}`,
             data: {
               ...fleetServerPolicy.data,
-              inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version), // fullPolicy.inputs
+              inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
             },
           };
           fleetServerPolicies.push(versionSpecificPolicy);

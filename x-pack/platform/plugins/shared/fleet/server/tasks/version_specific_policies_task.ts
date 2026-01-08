@@ -176,14 +176,20 @@ export class VersionSpecificPoliciesTask {
       spaceId: '*',
       perPage: SO_SEARCH_LIMIT,
       kuery: `${await getAgentPolicySavedObjectType()}.has_agent_version_conditions:true`,
-      fields: ['id'],
+      fields: ['id', 'revision'],
     });
-    // console.log(JSON.stringify(agentPoliciesWithVersionConditions, null, 2));
 
+    if (agentPoliciesWithVersionConditions.total === 0) {
+      return;
+    }
     throwIfAborted(abortController);
 
+    // TODO kuery could be too long if many policies, need to page through
     const policyIdsKuery = agentPoliciesWithVersionConditions.items
-      .map((policy) => `policy_id:"${policy.id}"`)
+      .map(
+        (policy) =>
+          `(policy_id:"${policy.id}" OR (policy_id:${policy.id}* AND policy_revision_idx<${policy.revision}))`
+      )
       .join(' OR ');
 
     // reassigned agents won't be found on the next run
@@ -207,7 +213,6 @@ export class VersionSpecificPoliciesTask {
       },
     });
 
-    //  console.log(JSON.stringify(aggregations, null, 2));
     throwIfAborted(abortController);
 
     const policiesVersions = (aggregations?.policy as any).buckets?.reduce(

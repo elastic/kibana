@@ -653,7 +653,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
-          hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo),
+          hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo, assetsMap),
         }
       );
     }
@@ -669,8 +669,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
   }
 
-  private hasAgentVersionCondition(pkgInfo: PackageInfo): boolean {
-    return !!pkgInfo.conditions?.agent?.version || pkgInfo.name === 'auth0';
+  private hasAgentVersionCondition(
+    pkgInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap
+  ): boolean {
+    if (pkgInfo.conditions?.agent?.version) {
+      return true;
+    }
+    let hasAgentVersionCondition = false;
+    assetsMap?.forEach((assetBuffer, assetPath) => {
+      if (assetPath.endsWith('.hbs') && assetBuffer?.toString().includes('_meta.agent.version')) {
+        hasAgentVersionCondition = true;
+      }
+    });
+    return hasAgentVersionCondition;
   }
 
   private async bumpAgentPoliciesRevision(
@@ -914,7 +926,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         asyncDeploy: options?.asyncDeploy,
         hasAgentVersionConditions: packageInfos
           .values()
-          .some((pkgInfo) => this.hasAgentVersionCondition(pkgInfo)),
+          .some((pkgInfo) =>
+            this.hasAgentVersionCondition(
+              pkgInfo,
+              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+            )
+          ),
       });
     }
     logger.debug(`Created new package policies`);
@@ -1585,7 +1602,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             (!assignedInOldPolicy && assignedInNewPolicy)
           );
         },
-        hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo),
+        hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo, assetsMap),
       }
     );
 
@@ -1979,7 +1996,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         },
         hasAgentVersionConditions: packageInfos
           .values()
-          .some((pkgInfo) => this.hasAgentVersionCondition(pkgInfo)),
+          .some((pkgInfo) =>
+            this.hasAgentVersionCondition(
+              pkgInfo,
+              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+            )
+          ),
       }
     ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
@@ -3293,20 +3315,6 @@ export function _compilePackagePolicyInputs(
   return inputs.map((input) => {
     const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap, agentVersion);
     const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap, agentVersion);
-    // if (input.type === 'cel') {
-    //   console.log('PackagePolicyInput: ' + agentVersion);
-    //   console.log(
-    //     JSON.stringify(
-    //       {
-    //         ...input,
-    //         compiled_input: compiledInput,
-    //         streams: compiledStreams,
-    //       },
-    //       null,
-    //       2
-    //     )
-    //   );
-    // }
     return {
       ...input,
       compiled_input: compiledInput,
