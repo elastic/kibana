@@ -17,6 +17,7 @@ describe('WorkflowExecutionRepository', () => {
     index: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
+    get: jest.Mock;
     indices: { exists: jest.Mock; create: jest.Mock };
   };
 
@@ -25,6 +26,7 @@ describe('WorkflowExecutionRepository', () => {
       index: jest.fn(),
       update: jest.fn(),
       search: jest.fn(),
+      get: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
@@ -51,10 +53,9 @@ describe('WorkflowExecutionRepository', () => {
       );
     });
 
-    it('should respect space isolation when searching for workflow executions', async () => {
+    it('should respect space isolation when getting workflow execution by ID', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
 
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -64,16 +65,53 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      await repository.getWorkflowExecutionById('1', 'space2');
+      // Mock get to return a document with different spaceId
+      esClient.get.mockResolvedValueOnce({
+        _source: { id: '1', workflowId: 'test-workflow', spaceId: 'space1' },
+      });
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { spaceId: 'space2' } }]),
-            }),
-          }),
-        })
+      // Should return null when spaceId doesn't match
+      const result = await repository.getWorkflowExecutionById('1', 'space2');
+
+      expect(esClient.get).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: '1',
+      });
+      expect(result).toBeNull();
+    });
+
+    it('should return document when spaceId matches', async () => {
+      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      esClient.get.mockResolvedValueOnce({
+        _source: workflowExecution,
+      });
+
+      const result = await repository.getWorkflowExecutionById('1', 'space1');
+
+      expect(esClient.get).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: '1',
+      });
+      expect(result).toEqual(workflowExecution);
+    });
+
+    it('should return null when document is not found', async () => {
+      const notFoundError = new Error('Not Found');
+      (notFoundError as any).meta = { statusCode: 404 };
+      esClient.get.mockRejectedValueOnce(notFoundError);
+
+      const result = await repository.getWorkflowExecutionById('non-existent', 'space1');
+
+      expect(result).toBeNull();
+    });
+
+    it('should throw error for non-404 errors', async () => {
+      const serverError = new Error('Internal Server Error');
+      (serverError as any).meta = { statusCode: 500 };
+      esClient.get.mockRejectedValueOnce(serverError);
+
+      await expect(repository.getWorkflowExecutionById('1', 'space1')).rejects.toThrow(
+        'Internal Server Error'
       );
     });
   });

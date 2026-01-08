@@ -20,6 +20,9 @@ export class WorkflowExecutionRepository {
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
    *
+   * Uses direct document GET by _id for O(1) lookup performance instead of search.
+   * This is critical for high-frequency operations like cancel polling.
+   *
    * @param workflowExecutionId - The ID of the workflow execution to retrieve.
    * @param spaceId - The ID of the space associated with the workflow execution.
    * @returns A promise that resolves to the workflow execution document, or null if not found.
@@ -28,19 +31,29 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
-      query: {
-        bool: {
-          filter: [{ term: { id: workflowExecutionId } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-    });
-    if (response.hits.hits.length === 0) {
-      return null;
+    try {
+      const response = await this.esClient.get<EsWorkflowExecution>({
+        index: this.indexName,
+        id: workflowExecutionId,
+      });
+
+      const doc = response._source;
+      // Verify spaceId matches for security/multi-tenancy
+      if (!doc || doc.spaceId !== spaceId) {
+        return null;
+      }
+      return doc;
+    } catch (error: unknown) {
+      // Handle 404 - document not found
+      if (
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
     }
-    return response.hits.hits[0]._source as EsWorkflowExecution;
   }
 
   /**
