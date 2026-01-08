@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, memo } from 'react';
+import React, { useEffect, useMemo, memo, useState, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -17,8 +17,10 @@ import {
   Position,
   type Node,
   type Edge,
+  type EdgeMarker,
   type NodeTypes,
   type NodeProps,
+  type NodeMouseHandler,
   MarkerType,
 } from '@xyflow/react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
@@ -44,6 +46,11 @@ interface ServiceMapNodeData extends Record<string, unknown> {
     healthStatus?: ServiceHealthStatus;
   };
   isService: boolean;
+}
+
+// Edge data interface
+interface ServiceMapEdgeData extends Record<string, unknown> {
+  isBidirectional?: boolean;
 }
 
 // Custom Service Node component (circular)
@@ -89,6 +96,7 @@ const ServiceNode = memo(({ data, selected }: NodeProps<Node<ServiceMapNodeData>
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: '0 2px 2px rgba(0,0,0,0.15)',
+          cursor: 'pointer',
         }}
       >
         {iconUrl && (
@@ -151,6 +159,7 @@ const DependencyNode = memo(({ data, selected }: NodeProps<Node<ServiceMapNodeDa
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: '0 2px 2px rgba(0,0,0,0.15)',
+          cursor: 'pointer',
         }}
       >
         <div style={{ transform: 'rotate(-45deg)' }}>
@@ -193,13 +202,19 @@ const nodeTypes: NodeTypes = {
   dependency: DependencyNode,
 };
 
+// Default edge colors
+const EDGE_COLOR_DEFAULT = '#98A2B3';
+
 // Transform Cytoscape elements to React Flow format
-function transformElements(elements: cytoscape.ElementDefinition[]): {
+function transformElements(
+  elements: cytoscape.ElementDefinition[],
+  defaultColor: string
+): {
   nodes: Node<ServiceMapNodeData>[];
-  edges: Edge[];
+  edges: Edge<ServiceMapEdgeData>[];
 } {
   const nodes: Node<ServiceMapNodeData>[] = [];
-  const edges: Edge[] = [];
+  const edges: Edge<ServiceMapEdgeData>[] = [];
   const bidirectionalPairs = new Set<string>();
 
   // First pass: identify bidirectional edges
@@ -234,17 +249,24 @@ function transformElements(elements: cytoscape.ElementDefinition[]): {
       const edgeKey = `${edgeData.source}->${edgeData.target}`;
       const isBidirectional = edgeData.bidirectional || bidirectionalPairs.has(edgeKey);
 
+      const markerEnd: EdgeMarker = {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15,
+        color: defaultColor,
+      };
+
       edges.push({
         id: edgeData.id || `${edgeData.source}-${edgeData.target}`,
         source: edgeData.source,
         target: edgeData.target,
         type: 'default',
-        animated: false,
-        markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15 },
+        style: { stroke: defaultColor, strokeWidth: 1 },
+        markerEnd,
         markerStart: isBidirectional
-          ? { type: MarkerType.ArrowClosed, width: 15, height: 15 }
+          ? { type: MarkerType.ArrowClosed, width: 15, height: 15, color: defaultColor }
           : undefined,
-        style: { stroke: '#98A2B3', strokeWidth: 1 },
+        data: { isBidirectional },
       });
     } else {
       // It's a node
@@ -291,8 +313,8 @@ function transformElements(elements: cytoscape.ElementDefinition[]): {
 // Apply Dagre layout (left-to-right like Cytoscape version)
 function applyLayout(
   nodes: Node<ServiceMapNodeData>[],
-  edges: Edge[]
-): { nodes: Node<ServiceMapNodeData>[]; edges: Edge[] } {
+  edges: Edge<ServiceMapEdgeData>[]
+): { nodes: Node<ServiceMapNodeData>[]; edges: Edge<ServiceMapEdgeData>[] } {
   if (nodes.length === 0) return { nodes, edges };
 
   const g = new dagre.graphlib.Graph();
@@ -345,8 +367,12 @@ interface ReactFlowGraphProps {
 function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<ServiceMapNodeData>>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<ServiceMapEdgeData>>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
+  const primaryColor = euiTheme.colors.primary;
+
+  // Transform and layout elements when they change
   useEffect(() => {
     if (elements.length === 0) {
       setNodes([]);
@@ -354,7 +380,10 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
       return;
     }
 
-    const { nodes: transformedNodes, edges: transformedEdges } = transformElements(elements);
+    const { nodes: transformedNodes, edges: transformedEdges } = transformElements(
+      elements,
+      EDGE_COLOR_DEFAULT
+    );
     const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
       transformedNodes,
       transformedEdges
@@ -363,6 +392,66 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
   }, [elements, setNodes, setEdges]);
+
+  // Handle node click - update edges with highlight colors (GitHub discussion approach)
+  const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
+    (_, node) => {
+      const newSelectedId = selectedNodeId === node.id ? null : node.id;
+      setSelectedNodeId(newSelectedId);
+
+      // Update all edges based on selection (approach from GitHub discussion)
+      setEdges((currentEdges) =>
+        currentEdges.map((edge) => {
+          const isConnected =
+            newSelectedId !== null &&
+            (edge.source === newSelectedId || edge.target === newSelectedId);
+          const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
+          const strokeWidth = isConnected ? 3 : 1;
+
+          return {
+            ...edge,
+            style: { stroke: color, strokeWidth },
+            markerEnd: {
+              ...(edge.markerEnd as EdgeMarker),
+              color,
+            },
+            markerStart: edge.data?.isBidirectional
+              ? {
+                  ...(edge.markerStart as EdgeMarker),
+                  color,
+                }
+              : undefined,
+            zIndex: isConnected ? 1000 : 0,
+          };
+        })
+      );
+    },
+    [selectedNodeId, setEdges, primaryColor]
+  );
+
+  // Handle pane click to deselect
+  const handlePaneClick = useCallback(() => {
+    setSelectedNodeId(null);
+
+    // Reset all edges to default
+    setEdges((currentEdges) =>
+      currentEdges.map((edge) => ({
+        ...edge,
+        style: { stroke: EDGE_COLOR_DEFAULT, strokeWidth: 1 },
+        markerEnd: {
+          ...(edge.markerEnd as EdgeMarker),
+          color: EDGE_COLOR_DEFAULT,
+        },
+        markerStart: edge.data?.isBidirectional
+          ? {
+              ...(edge.markerStart as EdgeMarker),
+              color: EDGE_COLOR_DEFAULT,
+            }
+          : undefined,
+        zIndex: 0,
+      }))
+    );
+  }, [setEdges]);
 
   const containerStyle = useMemo(
     () => ({
@@ -395,6 +484,8 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeClick={handleNodeClick}
+        onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2, duration: 200 }}
@@ -404,10 +495,6 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         nodesDraggable={true}
         nodesConnectable={false}
         edgesFocusable={false}
-        defaultEdgeOptions={{
-          type: 'default',
-          style: { stroke: euiTheme.colors.mediumShade },
-        }}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls
@@ -439,10 +526,13 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
 /**
  * React Flow Graph Component with Provider
  */
-export default function ReactFlowGraph(props: ReactFlowGraphProps) {
+function ReactFlowGraph(props: ReactFlowGraphProps) {
   return (
     <ReactFlowProvider>
       <ReactFlowGraphInner {...props} />
     </ReactFlowProvider>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ReactFlowGraph;
