@@ -14,6 +14,7 @@ describe('APM metrics static dashboard helpers', () => {
     const dataView = {
       id: 'id-1',
       title: 'test-data-view:metrics*,metrics*',
+      getIndexPattern: () => 'test-data-view:metrics*,metrics*',
     } as unknown as DataView;
 
     it('returns undefined when dashboard file does not exist', async () => {
