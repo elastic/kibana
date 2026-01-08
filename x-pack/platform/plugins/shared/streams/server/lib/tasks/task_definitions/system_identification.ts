@@ -76,6 +76,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   signal: runContext.abortController.signal,
                   systemsPromptOverride: featurePromptOverride,
                   descriptionPromptOverride,
+                  dropUnmapped: true,
                 });
 
                 taskContext.telemetry.trackSystemsIdentified({
