@@ -442,6 +442,14 @@ export class AgentBuilderPageObject extends FtrService {
     });
   }
 
+  async setToolTestInput(paramName: string, value: string | number) {
+    await this.testSubjects.setValue(`agentBuilderToolTestInput-${paramName}`, String(value));
+  }
+
+  async getToolTestResponse(): Promise<string> {
+    return await this.testSubjects.getVisibleText('agentBuilderToolTestResponse');
+  }
+
   /*
    * ==========================
    * Tools: table helpers

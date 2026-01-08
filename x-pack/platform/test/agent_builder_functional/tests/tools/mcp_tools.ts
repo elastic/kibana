@@ -190,5 +190,49 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
         expect(await agentBuilder.isToolInTable(toolId)).to.be(false);
       });
     });
+
+    describe('executing MCP tools', function () {
+      it('should execute the add tool and receive correct result', async () => {
+        const toolId = `${TOOL_PREFIX}execute.${Date.now()}`;
+
+        // Create tool via API using the 'add' tool
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: toolId,
+            type: 'mcp',
+            description: 'Tool for execution test',
+            tags: [],
+            configuration: {
+              connector_id: connectorId,
+              tool_name: 'add',
+            },
+          })
+          .expect(200);
+
+        // Navigate to the tool
+        await agentBuilder.navigateToTool(toolId);
+        await testSubjects.existOrFail('agentBuilderToolFormPage');
+
+        // Open test flyout
+        await agentBuilder.openToolTestFlyout();
+        await testSubjects.existOrFail('agentBuilderToolTestFlyout');
+
+        // Fill in parameters: a=5, b=3
+        await agentBuilder.setToolTestInput('a', 5);
+        await agentBuilder.setToolTestInput('b', 3);
+
+        // Submit the test
+        await agentBuilder.submitToolTest();
+
+        // Wait for response and verify result
+        await agentBuilder.waitForToolTestResponseNotEmpty();
+        const response = await agentBuilder.getToolTestResponse();
+
+        // The 'add' tool returns the sum as text, expect "8"
+        expect(response).to.contain('8');
+      });
+    });
   });
 }
