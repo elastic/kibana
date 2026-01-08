@@ -151,7 +151,7 @@ describe('count operation', () => {
       const esql = callToESQL({
         operationType: 'count',
       });
-      expect(esql).toBe('COUNT(*)');
+      expect(esql).toEqual({ template: 'COUNT(*)' });
     });
 
     test('returns COUNT(field) for non-document fields', () => {
@@ -159,7 +159,10 @@ describe('count operation', () => {
         sourceField: 'bytes',
         operationType: 'count',
       });
-      expect(esql).toBe('COUNT(`bytes`)');
+      expect(esql).toEqual({
+        template: 'COUNT(??field_1)',
+        params: { field_1: 'bytes' },
+      });
     });
   });
 });
