@@ -63,14 +63,17 @@ export const NavigationFeedbackSnippet = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <FeedbackSnippet
+    <div
       css={css`
-        border-top: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
+        border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
       `}
-      feedbackButtonMessage={feedbackButtonMessage}
-      feedbackSnippetId={feedbackSnippetId}
-      promptViewMessage={promptViewMessage}
-      surveyUrl={feedbackSurveyUrl}
-    />
+    >
+      <FeedbackSnippet
+        feedbackButtonMessage={feedbackButtonMessage}
+        feedbackSnippetId={feedbackSnippetId}
+        promptViewMessage={promptViewMessage}
+        surveyUrl={feedbackSurveyUrl}
+      />
+    </div>
   );
 };

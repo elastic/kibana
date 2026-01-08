@@ -7,7 +7,11 @@
 
 import type { Span } from '@opentelemetry/api';
 import { safeJsonStringify } from '@kbn/std';
-import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import {
+  withActiveInferenceSpan,
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+} from '@kbn/inference-tracing';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { AgentHandlerReturn } from '@kbn/agent-builder-server';
 
@@ -26,6 +30,7 @@ export function withAgentSpan(
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
         [ElasticGenAIAttributes.AgentId]: agentId,
+        [GenAISemanticConventions.GenAIAgentId]: agentId,
         [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
       },
     },
