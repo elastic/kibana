@@ -7616,6 +7616,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/newsfeed-public@link:src/platform/packages/private/kbn-newsfeed-public":
+  version "0.0.0"
+  uid ""
+
 "@kbn/newsfeed-test-plugin@link:src/platform/test/common/plugins/newsfeed":
   version "0.0.0"
   uid ""

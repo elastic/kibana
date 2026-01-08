@@ -365,6 +365,7 @@ src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualiz
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-migrator-test-kit @elastic/kibana-core
 src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
+src/platform/packages/private/kbn-newsfeed-public @elastic/appex-sharedux
 src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation

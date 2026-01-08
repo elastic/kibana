@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type { FetchResult } from '@kbn/newsfeed-public';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { useEffect, useState } from 'react';

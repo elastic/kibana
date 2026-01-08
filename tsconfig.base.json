@@ -1552,6 +1552,8 @@
       "@kbn/navigation-plugin/*": ["src/platform/plugins/shared/navigation/*"],
       "@kbn/newsfeed-plugin": ["src/platform/plugins/shared/newsfeed"],
       "@kbn/newsfeed-plugin/*": ["src/platform/plugins/shared/newsfeed/*"],
+      "@kbn/newsfeed-public": ["src/platform/packages/private/kbn-newsfeed-public"],
+      "@kbn/newsfeed-public/*": ["src/platform/packages/private/kbn-newsfeed-public/*"],
       "@kbn/newsfeed-test-plugin": ["src/platform/test/common/plugins/newsfeed"],
       "@kbn/newsfeed-test-plugin/*": ["src/platform/test/common/plugins/newsfeed/*"],
       "@kbn/no-data-page-plugin": ["src/platform/plugins/shared/no_data_page"],

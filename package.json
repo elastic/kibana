@@ -792,6 +792,7 @@
     "@kbn/monitoring-plugin": "link:x-pack/platform/plugins/private/monitoring",
     "@kbn/navigation-plugin": "link:src/platform/plugins/shared/navigation",
     "@kbn/newsfeed-plugin": "link:src/platform/plugins/shared/newsfeed",
+    "@kbn/newsfeed-public": "link:src/platform/packages/private/kbn-newsfeed-public",
     "@kbn/newsfeed-test-plugin": "link:src/platform/test/common/plugins/newsfeed",
     "@kbn/no-data-page-plugin": "link:src/platform/plugins/shared/no_data_page",
     "@kbn/node-libs-browser-webpack-plugin": "link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin",

@@ -20,11 +20,11 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/screenshot-mode-plugin'
-  - '@kbn/i18n-react'
   - '@kbn/i18n'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/newsfeed-public'
 tags:
   - plugin
   - prod
