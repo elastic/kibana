@@ -61,7 +61,7 @@ import { coreServices, usageCollectionService } from '../../services/kibana_serv
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { areControlsLayoutsEqual, arePanelLayoutsEqual } from './are_layouts_equal';
+import { arePinnedPanelLayoutsEqual, arePanelLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
@@ -511,7 +511,7 @@ export function initializeLayoutManager(
           ),
           map(([currentLayout]) => {
             const panelsAreEqual = arePanelLayoutsEqual(lastSavedLayout, currentLayout);
-            const controlsAreEqual = areControlsLayoutsEqual(lastSavedLayout, currentLayout);
+            const controlsAreEqual = arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
             if (!(panelsAreEqual && controlsAreEqual)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
               const { panels, controlGroupInput, references } = serializeLayout(

@@ -17,7 +17,7 @@ import type { DashboardLayout } from './types';
  */
 export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: DashboardLayout) => {
   return (
-    areControlsLayoutsEqual(originalLayout, newLayout) &&
+    arePinnedPanelLayoutsEqual(originalLayout, newLayout) &&
     arePanelLayoutsEqual(originalLayout, newLayout)
   );
 };
@@ -63,7 +63,7 @@ export const arePanelLayoutsEqual = (
   return true;
 };
 
-export const areControlsLayoutsEqual = (
+export const arePinnedPanelLayoutsEqual = (
   originalLayout?: DashboardLayout,
   newLayout?: DashboardLayout
 ) => {
