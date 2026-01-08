@@ -27,7 +27,7 @@ import { QradarDataInputStep, type OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useMissingReferenceSetsListStep } from './sub_steps/missing_reference_set_list';
 import { useReferencesFileUploadStep } from './sub_steps/reference_sets_file_upload';
-import type { MigrationStepProps } from '../../../../../common/types';
+import { type MigrationStepProps } from '../../../../../common/types';
 
 interface ReferenceSetDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -130,7 +130,7 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
       onCopied,
     });
 
-    // Upload macros step
+    // Upload reference sets step
     const uploadStep = useReferencesFileUploadStep({
       status: getEuiStepStatus(2, subStep),
       migrationStats,
