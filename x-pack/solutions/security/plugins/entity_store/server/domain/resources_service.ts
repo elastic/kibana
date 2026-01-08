@@ -6,21 +6,21 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { TaskManager } from '../types';
-import { ExtractEntityTask } from '../tasks/extract_entity_task';
 import type { EntityType } from './definitions/entity_type';
 import { ALL_ENTITY_TYPES } from './definitions/entity_type';
+import { TaskManagers } from '../tasks/task_manager';
+import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
 
 export class ResourcesService {
-  constructor(private logger: Logger, private taskManager: TaskManager) {}
+  constructor(private logger: Logger, private taskManager: TaskManagers) {}
 
-  public async install(types: EntityType[] = ALL_ENTITY_TYPES) {
-    this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
-    await this.initExtractEntitiesTasks(types);
-  }
+  public async install(entityTypes: EntityType[] = ALL_ENTITY_TYPES) {
+    this.logger.info(`Should initialize entity store for types ${JSON.stringify(entityTypes)}`);
 
-  private async initExtractEntitiesTasks(types: EntityType[]) {
-    const tasks = types.map((type) => new ExtractEntityTask(this.taskManager, this.logger, type));
-    await Promise.all(tasks.map(async (task) => await task.schedule()));
+    await scheduleExtractEntityTasks({
+      taskManager: this.taskManager.taskManagerStart,
+      logger: this.logger,
+      entityTypes,
+    });
   }
 }

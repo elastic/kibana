@@ -14,7 +14,7 @@ import type {
   EntityStoreRequestHandlerContext,
 } from './types';
 import { ResourcesService } from './domain/resources_service';
-import { getTaskManager } from './tasks/task_manager';
+import { getTaskManagers } from './tasks/task_manager';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
@@ -30,11 +30,11 @@ export async function createRequestHandlerContext({
   plugins,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const coreCtx = await context.core;
-  const taskManager = await getTaskManager(core, plugins);
+  const taskManagers = await getTaskManagers(core, plugins);
 
   return {
     core: coreCtx,
     getLogger: memoize(() => logger),
-    getResourcesService: memoize(() => new ResourcesService(logger, taskManager)),
+    getResourcesService: memoize(() => new ResourcesService(logger, taskManagers)),
   };
 }

@@ -6,19 +6,24 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { EntityStorePlugins, TaskManager } from '../types';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EntityStorePlugins } from '../types';
 
-export async function getTaskManager(
+export interface TaskManagers {
+  taskManagerSetup: TaskManagerSetupContract;
+  taskManagerStart: TaskManagerStartContract;
+}
+
+export async function getTaskManagers(
   core: CoreSetup,
   setupPlugins: EntityStorePlugins
-): Promise<TaskManager> {
+): Promise<TaskManagers> {
   const [, startPlugins] = await core.getStartServices();
   const taskManagerStart = (startPlugins as { taskManager: TaskManagerStartContract }).taskManager;
   const taskManagerSetup = setupPlugins.taskManager;
 
   return {
-    ...taskManagerSetup,
-    ...taskManagerStart,
+    taskManagerSetup,
+    taskManagerStart,
   };
 }

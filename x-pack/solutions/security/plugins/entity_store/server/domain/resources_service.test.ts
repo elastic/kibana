@@ -7,17 +7,17 @@
 
 import { ResourcesService } from './resources_service';
 import { EntityType } from './definitions/entity_type';
-import { ExtractEntityTask } from '../tasks/extract_entity_task';
-import type { TaskManager } from '../types';
 import type { Logger } from '@kbn/logging';
+import type { TaskManagers } from '../tasks/task_manager';
+import * as extractEntityTaskModule from '../tasks/extract_entity_task';
 
 jest.mock('../tasks/extract_entity_task');
 
 describe('ResourcesService', () => {
   let resourcesService: ResourcesService;
   let mockLogger: jest.Mocked<Logger>;
-  let mockTaskManager: jest.Mocked<TaskManager>;
-  let mockExtractEntityTask: jest.MockedClass<typeof ExtractEntityTask>;
+  let mockTaskManagers: jest.Mocked<TaskManagers>;
+  let mockScheduleExtractEntityTasks: jest.MockedFunction<typeof extractEntityTaskModule.scheduleExtractEntityTasks>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,64 +29,48 @@ describe('ResourcesService', () => {
       error: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
 
-    mockTaskManager = {
-      registerTaskDefinitions: jest.fn(),
+    const mockTaskManagerStart = {
       ensureScheduled: jest.fn().mockResolvedValue({}),
-    } as unknown as jest.Mocked<TaskManager>;
+    };
 
-    mockExtractEntityTask = ExtractEntityTask as jest.MockedClass<typeof ExtractEntityTask>;
+    mockTaskManagers = {
+      taskManagerSetup: {} as any,
+      taskManagerStart: mockTaskManagerStart as any,
+    } as unknown as jest.Mocked<TaskManagers>;
 
-    resourcesService = new ResourcesService(mockLogger, mockTaskManager);
+    mockScheduleExtractEntityTasks = extractEntityTaskModule.scheduleExtractEntityTasks as jest.MockedFunction<typeof extractEntityTaskModule.scheduleExtractEntityTasks>;
+    mockScheduleExtractEntityTasks.mockResolvedValue(undefined);
+
+    resourcesService = new ResourcesService(mockLogger, mockTaskManagers);
   });
 
   describe('install', () => {
     // Verifies that install creates and schedules a task for each entity type provided
     it('should create and schedule tasks for each entity type', async () => {
       const types = [EntityType.Values.user, EntityType.Values.host];
-      const mockTaskInstances = types.map((type) => {
-        const mockTask = {
-          schedule: jest.fn().mockResolvedValue(undefined),
-        };
-        mockExtractEntityTask.mockImplementationOnce(
-          () => mockTask as unknown as ExtractEntityTask
-        );
-        return mockTask;
-      });
 
       await resourcesService.install(types);
 
-      expect(mockExtractEntityTask).toHaveBeenCalledTimes(types.length);
-      types.forEach((type, index) => {
-        expect(mockExtractEntityTask).toHaveBeenNthCalledWith(
-          index + 1,
-          mockTaskManager,
-          mockLogger,
-          type
-        );
-      });
-
-      mockTaskInstances.forEach((mockTask) => {
-        expect(mockTask.schedule).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledWith({
+        taskManager: mockTaskManagers.taskManagerStart,
+        logger: mockLogger,
+        entityTypes: types,
       });
     });
 
     // Ensures install works correctly when only one entity type is provided
     it('should handle single entity type', async () => {
       const types = [EntityType.Values.service];
-      const mockTask = {
-        schedule: jest.fn().mockResolvedValue(undefined),
-      };
-      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
 
       await resourcesService.install(types);
 
-      expect(mockExtractEntityTask).toHaveBeenCalledTimes(1);
-      expect(mockExtractEntityTask).toHaveBeenCalledWith(
-        mockTaskManager,
-        mockLogger,
-        EntityType.Values.service
-      );
-      expect(mockTask.schedule).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledWith({
+        taskManager: mockTaskManagers.taskManagerStart,
+        logger: mockLogger,
+        entityTypes: types,
+      });
     });
 
     // Tests install with all available entity types to verify scalability
@@ -97,21 +81,14 @@ describe('ResourcesService', () => {
         EntityType.Values.service,
         EntityType.Values.generic,
       ];
-      const mockTaskInstances = types.map(() => {
-        const mockTask = {
-          schedule: jest.fn().mockResolvedValue(undefined),
-        };
-        mockExtractEntityTask.mockImplementationOnce(
-          () => mockTask as unknown as ExtractEntityTask
-        );
-        return mockTask;
-      });
 
       await resourcesService.install(types);
 
-      expect(mockExtractEntityTask).toHaveBeenCalledTimes(types.length);
-      mockTaskInstances.forEach((mockTask) => {
-        expect(mockTask.schedule).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledWith({
+        taskManager: mockTaskManagers.taskManagerStart,
+        logger: mockLogger,
+        entityTypes: types,
       });
     });
 
@@ -121,58 +98,50 @@ describe('ResourcesService', () => {
 
       await resourcesService.install(types);
 
-      expect(mockExtractEntityTask).not.toHaveBeenCalled();
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledWith({
+        taskManager: mockTaskManagers.taskManagerStart,
+        logger: mockLogger,
+        entityTypes: types,
+      });
     });
 
     // Ensures scheduling errors bubble up to caller for proper error handling
     it('should propagate errors from task scheduling', async () => {
       const types = [EntityType.Values.user];
       const mockError = new Error('Scheduling failed');
-      const mockTask = {
-        schedule: jest.fn().mockRejectedValue(mockError),
-      };
-      mockExtractEntityTask.mockImplementationOnce(() => mockTask as unknown as ExtractEntityTask);
+      mockScheduleExtractEntityTasks.mockRejectedValueOnce(mockError);
 
       await expect(resourcesService.install(types)).rejects.toThrow('Scheduling failed');
 
-      expect(mockTask.schedule).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledWith({
+        taskManager: mockTaskManagers.taskManagerStart,
+        logger: mockLogger,
+        entityTypes: types,
+      });
     });
 
-    // Confirms that multiple tasks are scheduled concurrently for better performance
-    it('should execute scheduling in parallel for multiple types', async () => {
+    // Verifies that install calls scheduleExtractEntityTasks with correct parameters
+    it('should call scheduleExtractEntityTasks with correct parameters', async () => {
       const types = [EntityType.Values.user, EntityType.Values.host];
-      const schedulePromises: Array<Promise<void>> = [];
-      const mockTaskInstances = types.map(() => {
-        let resolveSchedule: () => void;
-        const schedulePromise = new Promise<void>((resolve) => {
-          resolveSchedule = resolve;
-        });
-        schedulePromises.push(schedulePromise);
-
-        const mockTask = {
-          schedule: jest.fn().mockReturnValue(schedulePromise),
-        };
-        mockExtractEntityTask.mockImplementationOnce(
-          () => mockTask as unknown as ExtractEntityTask
-        );
-        return { mockTask, resolveSchedule: resolveSchedule! };
+      let resolveSchedule: () => void;
+      const schedulePromise = new Promise<void>((resolve) => {
+        resolveSchedule = resolve;
       });
+      mockScheduleExtractEntityTasks.mockReturnValueOnce(schedulePromise);
 
       const installPromise = resourcesService.install(types);
 
-      mockTaskInstances.forEach(({ mockTask }) => {
-        expect(mockTask.schedule).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTasks).toHaveBeenCalledWith({
+        taskManager: mockTaskManagers.taskManagerStart,
+        logger: mockLogger,
+        entityTypes: types,
       });
 
-      mockTaskInstances.forEach(({ resolveSchedule }) => {
-        resolveSchedule();
-      });
-
+      resolveSchedule!();
       await installPromise;
-
-      mockTaskInstances.forEach(({ mockTask }) => {
-        expect(mockTask.schedule).toHaveBeenCalledTimes(1);
-      });
     });
   });
 });

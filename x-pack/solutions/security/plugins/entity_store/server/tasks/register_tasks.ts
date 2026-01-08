@@ -7,13 +7,9 @@
 
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { ExtractEntityTask } from './extract_entity_task';
 import { ALL_ENTITY_TYPES } from '../domain/definitions/entity_type';
-import type { TaskManager } from '../types';
+import { registerExtractEntityTasks } from './extract_entity_task';
 
 export function registerTasks(taskManager: TaskManagerSetupContract, logger: Logger) {
-  const tasks = ALL_ENTITY_TYPES.map(
-    (type) => new ExtractEntityTask(taskManager as TaskManager, logger, type)
-  );
-  tasks.forEach((task) => task.register());
+  registerExtractEntityTasks({ taskManager, logger, entityTypes: ALL_ENTITY_TYPES });
 }
