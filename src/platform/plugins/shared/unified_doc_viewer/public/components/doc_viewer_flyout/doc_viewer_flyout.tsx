@@ -9,7 +9,6 @@
 
 import React, { useMemo, useCallback, type ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
@@ -18,8 +17,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiSpacer,
   EuiPortal,
   EuiPagination,
   keys,
@@ -265,6 +262,10 @@ export function UnifiedDocViewerFlyout({
     <EuiPortal>
       <EuiFlyout
         session="start"
+        flyoutMenuProps={{
+          title: currentFlyoutTitle,
+          hideTitle: false,
+        }}
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         type={flyoutType ?? 'push'}
@@ -289,21 +290,10 @@ export function UnifiedDocViewerFlyout({
           <EuiFlexGroup
             direction="row"
             alignItems="center"
-            gutterSize="m"
+            justifyContent="spaceBetween"
             responsive={false}
             wrap={true}
           >
-            <EuiFlexItem grow={false}>
-              <EuiTitle
-                size="xs"
-                data-test-subj="docViewerRowDetailsTitle"
-                css={css`
-                  white-space: nowrap;
-                `}
-              >
-                <h2>{currentFlyoutTitle}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                 <EuiPagination
@@ -318,13 +308,10 @@ export function UnifiedDocViewerFlyout({
                 />
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
+            </EuiFlexItem>
           </EuiFlexGroup>
-          {isEsqlQuery || !flyoutActions ? null : (
-            <>
-              <EuiSpacer size="s" />
-              {flyoutActions}
-            </>
-          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
       </EuiFlyout>
