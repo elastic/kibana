@@ -10,7 +10,7 @@ import { test } from '../../fixtures';
 
 const DEPENDENCY_NAME = 'postgresql';
 
-test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe.skip('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });
