@@ -43,6 +43,21 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
+    name: 'esql-query',
+    type: 'elasticsearch.esql.query',
+    with: {
+      query: `
+          FROM library
+          | EVAL year = DATE_EXTRACT("year", release_date)
+          | WHERE page_count > ?1 AND author == ?2
+          | STATS count = COUNT(*) by year
+          | WHERE count > ?3
+          | LIMIT 5
+        `,
+      params: [300, 'Frank Herbert', 0],
+    },
+  },
+  {
     name: 'create-document',
     type: 'elasticsearch.index',
     with: {
@@ -54,6 +69,14 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
+    name: 'index-empty-document',
+    type: 'elasticsearch.index',
+    with: {
+      index: 'test-index',
+      id: '1',
+    },
+  },
+  {
     name: 'update-document',
     type: 'elasticsearch.update',
     with: {
@@ -62,14 +85,6 @@ export const ES_VALID_SAMPLE_STEPS = [
       doc: {
         message: 'test',
       },
-    },
-  },
-  {
-    name: 'index-empty-document',
-    type: 'elasticsearch.index',
-    with: {
-      index: 'test-index',
-      id: '1',
     },
   },
   // indices
@@ -131,6 +146,29 @@ export const ES_VALID_SAMPLE_STEPS = [
     type: 'elasticsearch.indices.delete',
     with: {
       index: 'test-index',
+    },
+  },
+  {
+    name: 'exists-index',
+    type: 'elasticsearch.indices.exists',
+    with: {
+      index: 'test-index',
+    },
+  },
+  {
+    name: 'bulk',
+    type: 'elasticsearch.bulk',
+    with: {
+      index: 'test-index',
+      operations: [
+        { index: { _index: 'test', _id: '1' } },
+        { field1: 'value1' },
+        { delete: { _index: 'test', _id: '2' } },
+        { create: { _index: 'test', _id: '3' } },
+        { field1: 'value3' },
+        { update: { _id: '1', _index: 'test' } },
+        { doc: { field2: 'value2' } },
+      ],
     },
   },
 ];
