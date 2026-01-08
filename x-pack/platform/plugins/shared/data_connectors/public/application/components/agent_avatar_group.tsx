@@ -22,23 +22,16 @@ export const AgentAvatarGroup: React.FC<AgentAvatarGroupProps> = ({ agents, maxC
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {displayAgents.map((agent) => {
-        // Generate initials from agent name (e.g., "Customer Support Agent" -> "CS")
-        const initials = agent.name
-          .split(' ')
-          .filter((word) => word.length > 0)
-          .slice(0, 2) // Take first 2 words
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase();
-
         return (
           <EuiFlexItem key={agent.id} grow={false}>
             <EuiToolTip content={agent.name} position="top">
-              {agent.symbol ? (
-                <EuiAvatar name={agent.name} size="s" iconType={agent.symbol} color={agent.color} />
-              ) : (
-                <EuiAvatar name={agent.name} size="s" initials={initials} color={agent.color} />
-              )}
+              <EuiAvatar
+                name={agent.name}
+                size="s"
+                initials={agent.symbol}
+                color={agent.color}
+                type="user"
+              />
             </EuiToolTip>
           </EuiFlexItem>
         );

@@ -18,8 +18,8 @@ export interface Connector {
 export interface Agent {
   id: string;
   name: string;
-  color?: string; // Avatar color
-  symbol?: string; // Avatar symbol/icon
+  color?: string;
+  symbol?: string;
 }
 
 export interface ActiveSource {
