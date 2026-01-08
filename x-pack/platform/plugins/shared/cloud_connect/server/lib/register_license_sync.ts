@@ -58,7 +58,6 @@ export function registerCloudConnectLicenseSync({
           return;
         }
 
-        console.log('syncing license to Cloud Connect', { type, uid });
         await cloudConnectClient.updateClusterLicense(apiKeyData.apiKey, apiKeyData.clusterId, {
           type: String(type),
           uid: String(uid),
