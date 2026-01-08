@@ -156,6 +156,27 @@ const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): strin
   return undefined;
 };
 
+export interface GetSystemPromptFromPromptIdParams {
+  promptId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+
+/**
+ * Fetches a system prompt by saved object id, when a request passes `promptId`.
+ */
+export const getSystemPromptFromPromptId = async ({
+  promptId,
+  promptsDataClient,
+}: GetSystemPromptFromPromptIdParams): Promise<string | undefined> => {
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${promptId}"`,
+  });
+
+  return extractPromptFromESResult(result);
+};
+
 export const getSystemPromptFromUserConversation = async ({
   conversationsDataClient,
   conversationId,
@@ -169,12 +190,11 @@ export const getSystemPromptFromUserConversation = async ({
   if (!currentSystemPromptId) {
     return undefined;
   }
-  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
-    perPage: 1,
-    page: 1,
-    filter: `_id: "${currentSystemPromptId}"`,
+
+  return getSystemPromptFromPromptId({
+    promptId: currentSystemPromptId,
+    promptsDataClient,
   });
-  return extractPromptFromESResult(result);
 };
 
 export interface AppendAssistantMessageToConversationParams {
