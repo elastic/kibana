@@ -7,22 +7,25 @@
 
 import { z } from '@kbn/zod';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
+const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
+
 const getServicesSchema = z.object({
-  ...timeRangeSchemaRequired,
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   environment: z
     .string()
     .min(1)
@@ -31,11 +34,14 @@ const getServicesSchema = z.object({
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
-    .describe('Optionally filter the services by their health status.'),
+    .describe(
+      'Optional list of health statuses to filter services by (e.g., ["healthy", "warning"]). Valid values: "unknown", "healthy", "warning", "critical".'
+    ),
 });
 
 export function createGetServicesTool({
   core,
+  plugins,
   dataRegistry,
   logger,
 }: {
@@ -43,14 +49,23 @@ export function createGetServicesTool({
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getServicesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Retrieves a list of monitored APM services, including their health status, active alert counts, and key performance metrics: latency, transaction error rate, and throughput. Useful for high-level system overview, identifying unhealthy services, and quantifying performance issues.',
+    description: `Retrieves a list of services from APM, logs, and metrics data sources.
+    
+For APM services, includes health status, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
+For services found only in logs or metrics, basic information like service name and environment is returned.
+
+When to use:
+- Getting a high-level overview of system health from a service perspective
+- Identifying key metrics for services like latency, error rate, throughput, anomalies and alert counts
+- Answering "which services are having problems?"
+- Discovering services that may not be instrumented with APM but appear in logs or metrics`,
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {
@@ -59,13 +74,23 @@ export function createGetServicesTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, environment, healthStatus }, context) => {
-      const { request } = context;
+    handler: async (toolParams, context) => {
+      const {
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+        environment,
+        healthStatus,
+      } = toolParams;
+      const { request, esClient } = context;
 
       try {
         const { services, maxCountExceeded, serviceOverflowCount } = await getToolHandler({
+          core,
+          plugins,
           request,
+          esClient,
           dataRegistry,
+          logger,
           start,
           end,
           environment,
@@ -77,6 +102,7 @@ export function createGetServicesTool({
             {
               type: ToolResultType.other,
               data: {
+                total: services.length,
                 services,
                 maxCountExceeded,
                 serviceOverflowCount,

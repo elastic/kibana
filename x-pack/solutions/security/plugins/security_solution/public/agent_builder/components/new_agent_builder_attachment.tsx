@@ -6,10 +6,10 @@
  */
 
 import type { EuiButtonColor } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
-import { onechatIconType } from '@kbn/onechat-plugin/public';
+import { agentBuilderIconType } from '@kbn/agent-builder-plugin/public';
 import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
 import { useReportAddToChat } from '../hooks/use_report_add_to_chat';
 import * as i18n from './translations';
@@ -50,7 +50,8 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   disabled = false,
   telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
+    useAgentBuilderAvailability();
   const reportAddToChatClick = useReportAddToChat();
 
   const handleClick = useCallback(() => {
@@ -63,24 +64,38 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     onClick();
   }, [onClick, reportAddToChatClick, telemetryData]);
 
-  if (!isAgentBuilderEnabled) {
+  const isDisabled = disabled || !hasValidAgentBuilderLicense;
+  const shouldShowLicenseTooltip = !hasValidAgentBuilderLicense;
+
+  if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
     return null;
   }
-  return (
+
+  const button = (
     <EuiButtonEmpty
       aria-label={i18n.ADD_TO_CHAT}
       color={color}
-      data-test-subj={'newAgentBuilderAttachment'}
+      data-test-subj="newAgentBuilderAttachment"
       onClick={handleClick}
       size={size}
-      disabled={disabled}
+      disabled={isDisabled}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={onechatIconType} color={color === 'primary' ? 'default' : color} />
+          <EuiIcon type={agentBuilderIconType} color={color === 'primary' ? 'default' : color} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{i18n.ADD_TO_CHAT}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiButtonEmpty>
+  );
+
+  if (!shouldShowLicenseTooltip) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip content={i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>
+      <span>{button}</span>
+    </EuiToolTip>
   );
 });
