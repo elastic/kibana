@@ -148,7 +148,7 @@ describe('scripts library client', () => {
       });
 
       await expect(scriptsClient.create(createBodyMock)).rejects.toThrow(
-        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with with a script entry named [my script] (script ID: [1-2-3])'
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with a script entry named [my script] (script ID: [1-2-3])'
       );
     });
 
