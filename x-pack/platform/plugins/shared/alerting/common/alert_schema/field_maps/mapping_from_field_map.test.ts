@@ -208,6 +208,7 @@ describe('mappingFromFieldMap', () => {
             },
             original: {
               type: 'keyword',
+              ignore_above: 32766,
             },
           },
         },

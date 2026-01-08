@@ -52,6 +52,7 @@ it('matches snapshot', () => {
       },
       "event.original": Object {
         "array": false,
+        "ignore_above": 32766,
         "required": false,
         "type": "keyword",
       },
