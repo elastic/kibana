@@ -33,7 +33,7 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
           return stepDefinition.dynamicOutputSchema(node.configuration.with);
         }
       } catch (error) {
-        return stepDefinition.outputSchema;
+        // If dynamic schema generation fails, fallback to static output schema
       }
 
       return stepDefinition.outputSchema;
