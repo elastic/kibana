@@ -445,6 +445,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
         await expandedFlyoutGraph.expandGraph();
         await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.dismissCallout();
         await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
         const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
