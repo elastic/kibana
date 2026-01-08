@@ -22,9 +22,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   connectedAt,
   subscription,
 }) => {
-  // `connectedAt` is stored as an ISO timestamp (UTC). Use UTC formatting to avoid
-  // timezone-dependent off-by-one-day rendering around midnight.
-  const formattedDate = moment.utc(connectedAt).format('LL');
+  const formattedDate = moment(connectedAt).format('LL');
 
   return (
     <>
