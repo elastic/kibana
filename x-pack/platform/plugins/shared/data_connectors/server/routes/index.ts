@@ -306,6 +306,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
             {
               ...savedObject.attributes,
               name,
+              updatedAt: new Date().toISOString(),
             }
           );
 

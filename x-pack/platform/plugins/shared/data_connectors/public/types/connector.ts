@@ -28,7 +28,7 @@ export interface ActiveSource {
   stackConnectors: string[];
   workflows: string[];
   agentTools: string[];
-  usedBy?: Agent[]; // Agents using this source (future)
-  createdAt?: string; // Auto-populated by Saved Objects
-  updatedAt?: string; // Auto-populated by Saved Objects
+  usedBy?: Agent[];
+  createdAt?: string;
+  updatedAt?: string;
 }

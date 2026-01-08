@@ -147,9 +147,13 @@ export async function createConnectorAndRelatedResources(
   }
 
   // Create the data connector saved object
+  const now = new Date().toISOString();
   const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
     name,
     type,
+    config: {}, // Placeholder for future connector-specific configuration
+    createdAt: now,
+    updatedAt: now,
     workflowIds,
     toolIds,
     kscIds: [stackConnector.id],
@@ -402,6 +406,7 @@ export async function deleteConnectorAndRelatedResources(
       kscIds: deletionResult.failedKscIds,
       toolIds: deletionResult.failedToolIds,
       workflowIds: deletionResult.failedWorkflowIds,
+      updatedAt: new Date().toISOString(),
     };
 
     await savedObjectsClient.update(

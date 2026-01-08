@@ -30,8 +30,8 @@ export function convertSOtoAPIResponse(
     stackConnectors: savedObject.attributes.kscIds,
     agentTools: savedObject.attributes.toolIds,
     workflows: savedObject.attributes.workflowIds,
-    createdAt: savedObject.created_at,
-    updatedAt: savedObject.updated_at,
+    createdAt: savedObject.attributes.createdAt,
+    updatedAt: savedObject.attributes.updatedAt,
   };
 }
 

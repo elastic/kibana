@@ -95,6 +95,9 @@ describe('registerRoutes', () => {
           attributes: {
             name: 'Test Connector 1',
             type: 'notion',
+            config: {},
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
             workflowIds: ['workflow-1'],
             toolIds: ['tool-1'],
             kscIds: ['ksc-1'],
@@ -109,6 +112,9 @@ describe('registerRoutes', () => {
           attributes: {
             name: 'Test Connector 2',
             type: 'notion',
+            config: {},
+            createdAt: '2024-01-02T00:00:00.000Z',
+            updatedAt: '2024-01-02T00:00:00.000Z',
             workflowIds: ['workflow-2'],
             toolIds: ['tool-2'],
             kscIds: ['ksc-2'],
@@ -177,6 +183,9 @@ describe('registerRoutes', () => {
         attributes: {
           name: 'Test Connector',
           type: 'notion',
+          config: {},
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],
           kscIds: ['ksc-1'],
@@ -349,6 +358,9 @@ describe('registerRoutes', () => {
           attributes: {
             name: 'Connector 1',
             type: 'notion',
+            config: {},
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
             workflowIds: ['workflow-1'],
             toolIds: ['tool-1'],
             kscIds: ['ksc-1'],
@@ -360,6 +372,9 @@ describe('registerRoutes', () => {
           attributes: {
             name: 'Connector 2',
             type: 'notion',
+            config: {},
+            createdAt: '2024-01-02T00:00:00.000Z',
+            updatedAt: '2024-01-02T00:00:00.000Z',
             workflowIds: ['workflow-2'],
             toolIds: ['tool-2'],
             kscIds: ['ksc-2'],
@@ -464,6 +479,9 @@ describe('registerRoutes', () => {
         attributes: {
           name: 'Test Connector',
           type: 'notion',
+          config: {},
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],
           kscIds: ['ksc-1'],
@@ -509,6 +527,11 @@ describe('registerRoutes', () => {
         id: 'connector-1',
         type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
         attributes: {
+          name: 'Partial Connector',
+          type: 'notion',
+          config: {},
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],
           kscIds: ['ksc-1'],

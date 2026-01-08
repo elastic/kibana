@@ -18,6 +18,9 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'My Notion Connector',
         type: 'notion',
+        config: {},
+        createdAt: '2025-01-07T10:00:00.000Z',
+        updatedAt: '2025-01-07T10:00:00.000Z',
         workflowIds: ['workflow-1', 'workflow-2'],
         toolIds: ['tool-1'],
         kscIds: ['ksc-789'],
@@ -33,8 +36,8 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: ['ksc-789'],
       workflows: ['workflow-1', 'workflow-2'],
       agentTools: ['tool-1'],
-      createdAt: undefined,
-      updatedAt: undefined,
+      createdAt: '2025-01-07T10:00:00.000Z',
+      updatedAt: '2025-01-07T10:00:00.000Z',
     });
   });
 
@@ -46,6 +49,9 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Empty Connector',
         type: 'github',
+        config: {},
+        createdAt: '2025-01-07T10:00:00.000Z',
+        updatedAt: '2025-01-07T10:00:00.000Z',
         workflowIds: [],
         toolIds: [],
         kscIds: [],
@@ -61,8 +67,8 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: [],
       workflows: [],
       agentTools: [],
-      createdAt: undefined,
-      updatedAt: undefined,
+      createdAt: '2025-01-07T10:00:00.000Z',
+      updatedAt: '2025-01-07T10:00:00.000Z',
     });
   });
 
@@ -74,6 +80,9 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Minimal',
         type: 'slack',
+        config: {},
+        createdAt: '2025-01-07T10:00:00.000Z',
+        updatedAt: '2025-01-07T10:00:00.000Z',
         workflowIds: [],
         toolIds: [],
         kscIds: ['ksc-1'],
@@ -89,8 +98,8 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: ['ksc-1'],
       workflows: [],
       agentTools: [],
-      createdAt: undefined,
-      updatedAt: undefined,
+      createdAt: '2025-01-07T10:00:00.000Z',
+      updatedAt: '2025-01-07T10:00:00.000Z',
     });
   });
 
@@ -102,6 +111,9 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Multi Stack Connector',
         type: 'custom',
+        config: {},
+        createdAt: '2025-01-07T10:00:00.000Z',
+        updatedAt: '2025-01-07T10:00:00.000Z',
         workflowIds: ['wf-1'],
         toolIds: ['t-1', 't-2'],
         kscIds: ['ksc-1', 'ksc-2', 'ksc-3'],
@@ -117,21 +129,22 @@ describe('convertSOtoAPIResponse', () => {
       stackConnectors: ['ksc-1', 'ksc-2', 'ksc-3'],
       workflows: ['wf-1'],
       agentTools: ['t-1', 't-2'],
-      createdAt: undefined,
-      updatedAt: undefined,
+      createdAt: '2025-01-07T10:00:00.000Z',
+      updatedAt: '2025-01-07T10:00:00.000Z',
     });
   });
 
-  it('should include timestamps when provided by Saved Objects', () => {
+  it('should use timestamps from attributes', () => {
     const savedObject: SavedObject<DataConnectorAttributes> = {
       id: 'connector-with-timestamps',
       type: 'data_connector',
       references: [],
-      created_at: '2025-01-07T10:00:00.000Z',
-      updated_at: '2025-01-07T12:30:00.000Z',
       attributes: {
         name: 'Timestamped Connector',
         type: 'notion',
+        config: {},
+        createdAt: '2025-01-07T10:00:00.000Z',
+        updatedAt: '2025-01-07T12:30:00.000Z',
         workflowIds: [],
         toolIds: [],
         kscIds: ['ksc-123'],
