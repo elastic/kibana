@@ -66,7 +66,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -99,7 +99,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -144,7 +144,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -184,7 +184,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -218,7 +218,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -281,7 +281,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -343,7 +343,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -422,7 +422,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
