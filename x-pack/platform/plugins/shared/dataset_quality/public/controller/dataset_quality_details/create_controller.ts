@@ -10,6 +10,7 @@ import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createDatasetQualityDetailsControllerStateMachine } from '../../state_machines/dataset_quality_details_controller/state_machine';
 import type { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import type { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
@@ -31,8 +32,12 @@ export const createDatasetQualityDetailsControllerFactory =
   ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
+    streamsRepositoryClient,
+    refreshDefinition,
   }: {
     initialState: DatasetQualityDetailsPublicStateUpdate;
+    streamsRepositoryClient?: StreamsRepositoryClient;
+    refreshDefinition?: () => void;
   }): Promise<DatasetQualityDetailsController> => {
     const initialContext = getContextFromPublicState(initialState);
 
@@ -43,6 +48,8 @@ export const createDatasetQualityDetailsControllerFactory =
       plugins,
       toasts: core.notifications.toasts,
       dataStreamDetailsClient,
+      streamsRepositoryClient,
+      refreshDefinition,
     });
 
     const service = interpret(machine, {

@@ -17,6 +17,8 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
     'tags',
     'assignees',
     'category',
+    'from',
+    'to',
   ]);
 
   const customFieldsAsQueryParams = Object.entries(state.filterOptions.customFields).reduce(
@@ -39,6 +41,7 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
       assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
     ),
     customFields: customFieldsAsQueryParams,
+    search: encodeURIComponent(state.filterOptions.search ?? ''),
   };
 
   // filters empty values

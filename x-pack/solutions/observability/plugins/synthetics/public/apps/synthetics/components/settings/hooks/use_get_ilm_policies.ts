@@ -34,7 +34,7 @@ export const useGetIlmPolicies = () => {
 
       let totalSize =
         policyIndices?.reduce((acc, curr) => {
-          return acc + Number(curr?.['store.size']) ?? 0;
+          return acc + Number(curr?.['store.size'] ?? 0);
         }, 0) ?? 0;
 
       const phases = policy?.policy.phases ?? {};
@@ -44,7 +44,7 @@ export const useGetIlmPolicies = () => {
       if (name === 'synthetics') {
         totalSize =
           sizeData?.data?.reduce((acc, curr) => {
-            return acc + Number(curr?.['store.size']) ?? 0;
+            return acc + Number(curr?.['store.size'] ?? 0);
           }, 0) ?? 0;
       }
 

@@ -73,9 +73,12 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   }
 
   // add the authType discriminator key
-  return schemaToUse
-    .extend({
-      [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
-    })
-    .meta(existingMeta);
+  return {
+    id: authTypeId,
+    schema: schemaToUse
+      .extend({
+        [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
+      })
+      .meta(existingMeta),
+  };
 };

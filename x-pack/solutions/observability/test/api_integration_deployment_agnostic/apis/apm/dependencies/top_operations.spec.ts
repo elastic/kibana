@@ -10,7 +10,7 @@ import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_value
 import type { ValuesType } from 'utility-types';
 import type { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
 import { meanBy } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';

@@ -110,8 +110,30 @@ export class SyntheticsService {
   public start(taskManager: TaskManagerStartContract) {
     if (this.config?.manifestUrl) {
       void this.scheduleSyncTask(taskManager);
+    } else {
+      const logLevel = this.shouldLogAsError() ? 'error' : 'debug';
+      const message =
+        'Synthetics sync task is not being scheduled because manifestUrl is not configured.';
+      this.logger[logLevel](message);
     }
     void this.setupIndexTemplates();
+  }
+
+  private shouldLogAsError(): boolean {
+    const cloud = this.server.cloud;
+    if (!cloud) {
+      return false; // Self-managed, use DEBUG
+    }
+    // Serverless deployments should log as ERROR
+    if (cloud.isServerlessEnabled) {
+      return true;
+    }
+    // ECH (stateful) deployments have deploymentId, should log as ERROR
+    if (cloud.isCloudEnabled && cloud.deploymentId) {
+      return true;
+    }
+    // ECE or self-managed, use DEBUG
+    return false;
   }
 
   public async setupIndexTemplates() {
@@ -195,7 +217,7 @@ export class SyntheticsService {
 
                 if (service.isAllowed && service.config.manifestUrl) {
                   void service.setupIndexTemplates();
-                  await service.pushConfigs();
+                  await service.pushConfigs(ALL_SPACES_ID);
                 } else {
                   if (!service.isAllowed) {
                     service.logger.debug('User is not allowed to access Synthetics service.');
@@ -408,7 +430,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs() {
+  async pushConfigs(spaceId: string) {
     const license = await this.getLicense();
     const service = this;
 
@@ -418,7 +440,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows();
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -647,7 +669,7 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows() {
+  async getMaintenanceWindows(spaceId: string) {
     const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
       {} as KibanaRequest
     );
@@ -659,6 +681,7 @@ export class SyntheticsService {
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
+      namespaces: [spaceId],
     });
     return mws.data;
   }

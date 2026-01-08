@@ -18,7 +18,7 @@ import {
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricUnit } from '../../types';
 import { chartPalette, type DataSource } from '.';
 
 interface TraceChart {

@@ -22,6 +22,9 @@ interface TopNavMenuItemsProps {
   gutterSize?: EuiHeaderLinksProps['gutterSize'];
 }
 
+/**
+ * @deprecated Use `AppMenu` instead.
+ */
 export const TopNavMenuItems = ({
   config,
   className,

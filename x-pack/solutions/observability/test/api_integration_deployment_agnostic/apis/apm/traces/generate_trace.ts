@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { apm } from '@kbn/apm-synthtrace-client';
+import type { apm } from '@kbn/synthtrace-client';
 
 type Instance = ReturnType<ReturnType<typeof apm.service>['instance']>;
 type Transaction = ReturnType<Instance['transaction']>;

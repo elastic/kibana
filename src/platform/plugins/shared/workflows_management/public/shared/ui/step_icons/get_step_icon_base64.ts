@@ -17,6 +17,7 @@ import { KibanaLogo } from './icons/kibana.svg';
 export interface GetStepIconBase64Params {
   actionTypeId: string;
   icon?: IconType;
+  fromRegistry?: boolean;
 }
 
 /**
@@ -58,6 +59,15 @@ async function resolveLazyComponent(
   return module.default;
 }
 
+function defaultIconForConnector(connector: GetStepIconBase64Params): string {
+  if (connector.fromRegistry) {
+    // default to kibana icon if the step is comes from custom step registry
+    return HardcodedIcons.kibana;
+  }
+  // Fallback to default icon for other connector types
+  return DEFAULT_CONNECTOR_DATA_URL;
+}
+
 /**
  * Get data URL for a connector icon (supports SVG, PNG, and other image formats)
  * Returns a full data URL (e.g., "data:image/svg+xml;base64,..." or "data:image/png;base64,...")
@@ -75,6 +85,11 @@ export async function getStepIconBase64(connector: GetStepIconBase64Params): Pro
         const IconComponent = await resolveLazyComponent(connector.icon);
         return getDataUrlFromReactComponent(IconComponent);
       }
+      if (typeof connector.icon === 'function') {
+        return getDataUrlFromReactComponent(
+          connector.icon as React.FC<{ width: number; height: number }>
+        );
+      }
     }
 
     if (connector.actionTypeId === 'elasticsearch') {
@@ -87,17 +102,12 @@ export async function getStepIconBase64(connector: GetStepIconBase64Params): Pro
 
     const hardcodedIcon = HardcodedIcons[connector.actionTypeId];
     if (hardcodedIcon) {
-      if (hardcodedIcon.startsWith('data:')) {
-        return hardcodedIcon;
-      }
-      return `data:image/svg+xml;base64,${hardcodedIcon}`;
+      return hardcodedIcon;
     }
 
-    // Fallback to default icon for other connector types
-    return DEFAULT_CONNECTOR_DATA_URL;
+    return defaultIconForConnector(connector);
   } catch (error) {
-    // Fallback to default static icon
-    return DEFAULT_CONNECTOR_DATA_URL;
+    return defaultIconForConnector(connector);
   }
 }
 

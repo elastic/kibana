@@ -62,9 +62,11 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
-import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ProductFeatureKeyType, ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -103,6 +105,7 @@ import type { SiemMigrationsService } from './siem_migrations/service';
 export interface SetupPlugins {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  share?: SharePluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
   security: SecurityPluginSetup;
@@ -164,6 +167,8 @@ export interface StartPlugins {
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
   inference: InferencePublicStart;
+  share?: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -175,6 +180,7 @@ export interface ContractStartServices {
   getComponents$: GetComponents$;
   upselling: UpsellingService;
   onboarding: OnboardingService;
+  productFeatureKeys$: Observable<Set<ProductFeatureKeyType> | null>;
 }
 
 export type StartServices = CoreStart &

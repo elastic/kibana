@@ -12,6 +12,13 @@ import {
   type MissingCapability,
 } from '../../common/service/capabilities';
 
+const minimumDashboardMigrationCapability = {
+  capability: `dashboard_v2.show`,
+  description: i18n.translate(
+    'xpack.securitySolution.siemMigrations.service.capabilities.dashboardsRead',
+    { defaultMessage: 'Analytics > Dashboards: Read' }
+  ),
+};
 const dashboardCapability = {
   capability: `dashboard_v2.createNew`,
   description: i18n.translate(
@@ -24,6 +31,6 @@ export const requiredDashboardMigrationCapabilities: Record<
   CapabilitiesLevel,
   MissingCapability[]
 > = {
-  minimum: requiredSiemMigrationCapabilities.minimum,
+  minimum: [...requiredSiemMigrationCapabilities.minimum, minimumDashboardMigrationCapability],
   all: [...requiredSiemMigrationCapabilities.all, dashboardCapability],
 };

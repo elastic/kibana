@@ -7,8 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiBasicTableColumn } from '@elastic/eui';
+
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EventFieldsData } from '../../../common/components/event_details/types';
+import { TableFieldNameCell } from '../../document_details/right/components/table_field_name_cell';
+import { getFieldFromBrowserField } from '../../document_details/right/tabs/table_tab';
+import { TableFieldValueCell } from '../components/table_field_value_cell';
 
 export const FIELD = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel',
@@ -20,12 +25,21 @@ const VALUE = i18n.translate('xpack.securitySolution.attackDetailsFlyout.table.v
   defaultMessage: 'Value',
 });
 
-export type ColumnsProvider = () => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
+export type ColumnsProvider = (providerOptions: {
+  /**
+   * An object containing fields by type
+   */
+  browserFields: BrowserFields;
+  /**
+   * Id of the attack document
+   */
+  attackId: string;
+}) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 /**
  * Returns the columns for the table tab
  */
-export const getTableTabColumns: ColumnsProvider = () => [
+export const getTableTabColumns: ColumnsProvider = ({ browserFields, attackId }) => [
   {
     field: 'field',
     name: (
@@ -35,7 +49,7 @@ export const getTableTabColumns: ColumnsProvider = () => [
     ),
     width: '30%',
     render: (field, data) => {
-      return <EuiText size="xs">{field}</EuiText>;
+      return <TableFieldNameCell dataType={(data as EventFieldsData).type} field={field} />;
     },
   },
   {
@@ -46,7 +60,20 @@ export const getTableTabColumns: ColumnsProvider = () => [
       </EuiText>
     ),
     render: (values, data) => {
-      return <EuiText size="xs">{values}</EuiText>;
+      const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
+
+      return (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <TableFieldValueCell
+              data={data as EventFieldsData}
+              attackId={attackId}
+              fieldFromBrowserField={fieldFromBrowserField}
+              values={values}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     },
   },
 ];

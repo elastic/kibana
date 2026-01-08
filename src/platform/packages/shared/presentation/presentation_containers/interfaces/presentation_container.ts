@@ -13,6 +13,7 @@ import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
+import type { CanAddNewSection } from './can_add_new_section';
 
 export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
@@ -73,6 +74,14 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
   );
 };
 
+export interface HasSections extends CanAddNewSection {
+  getPanelSection$: (uuid: string) => Observable<string | undefined>;
+}
+
+export const apiHasSections = (api: unknown): api is HasSections => {
+  return typeof (api as HasSections)?.getPanelSection$ === 'function';
+};
+
 export const apiPublishesChildren = (
   api: unknown | null
 ): api is Pick<PresentationContainer, 'children$'> => {
@@ -131,6 +140,7 @@ export const combineCompatibleChildrenApis = <ApiType extends unknown, Publishin
       const compatibleChildren: Array<Observable<PublishingSubjectType>> = [];
       for (const child of Object.values(children)) {
         if (isCompatible(child) && isObservable(child[observableKey]))
+          // @ts-expect-error upgrade typescript v5.9.3
           compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
       }
 

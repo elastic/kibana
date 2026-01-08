@@ -8,9 +8,9 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { uniqBy } from 'lodash';
 import React, { useState } from 'react';
-import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
 
@@ -23,6 +23,11 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
   );
   const [isOpen, setIsOpen] = useState(false);
 
+  const dismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem('slo_health_callout_hidden', 'true');
+  };
+
   if (!showCallOut) {
     return null;
   }
@@ -31,17 +36,12 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     return null;
   }
 
-  const problematicSloList = results.filter((result) => result.health.overall !== 'healthy');
+  const problematicSloList = results.filter((result) => result.health.isProblematic);
   if (problematicSloList.length === 0) {
     return null;
   }
 
-  const deduplicatedList = uniqBy(problematicSloList, (item) => item.sloId);
-
-  const dismiss = () => {
-    setShowCallOut(false);
-    sessionStorage.setItem('slo_health_callout_hidden', 'true');
-  };
+  const deduplicatedList = uniqBy(problematicSloList, (item) => item.id);
 
   return (
     <EuiCallOut
@@ -71,8 +71,8 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
           <EuiFlexItem>
             <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
+                id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
+                defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
                 values={{
                   count: deduplicatedList.length,
                 }}
@@ -80,16 +80,11 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
             </span>
             <ul>
               {deduplicatedList.map((result) => (
-                <li key={result.sloId}>
+                <li key={result.id}>
                   <ContentWithInspectCta
                     textSize="xs"
-                    content={result.sloName}
-                    url={paths.sloDetails(
-                      result.sloId,
-                      result.sloInstanceId,
-                      undefined,
-                      'overview'
-                    )}
+                    content={result.name}
+                    url={paths.sloDetails(result.id, result.instanceId, undefined, 'overview')}
                   />
                 </li>
               ))}

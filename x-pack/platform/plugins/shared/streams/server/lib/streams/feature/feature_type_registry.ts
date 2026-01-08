@@ -7,11 +7,18 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { describeDataset } from '@kbn/ai-tools';
-import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import { sumTokens, type IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import { withSpan } from '@kbn/apm-utils';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
 import { SystemFeatureHandler } from './handlers/system';
 import { FEATURE_TYPE } from './fields';
+
+export interface IdentifyFeaturesResult {
+  features: Feature[];
+  tokensUsed: ChatCompletionTokenCount;
+}
 
 export class FeatureTypeRegistry {
   private handlers = new Map<string, FeatureTypeHandler>();
@@ -56,25 +63,40 @@ export class FeatureTypeRegistry {
 
   async identifyFeatures(
     options: Omit<IdentifyFeaturesOptions, 'analysis'>
-  ): Promise<{ features: Feature[] }> {
-    const analysis = await describeDataset({
-      start: options.start,
-      end: options.end,
-      esClient: options.esClient,
-      index: options.stream.name,
-    });
+  ): Promise<IdentifyFeaturesResult> {
+    options.logger.debug(`Identifying features for stream ${options.stream.name}`);
+
+    options.logger.trace('Describing dataset for feature identification');
+    const analysis = await withSpan('describe_dataset_for_feature_identification', () =>
+      describeDataset({
+        start: options.start,
+        end: options.end,
+        esClient: options.esClient,
+        index: options.stream.name,
+      })
+    );
 
     const features: Feature[] = [];
+    let tokensUsed: ChatCompletionTokenCount = {
+      prompt: 0,
+      completion: 0,
+      total: 0,
+      cached: 0,
+    };
     for (const handler of this.handlers.values()) {
-      const result = await handler.identifyFeatures({
-        ...options,
-        analysis,
-      });
+      options.logger.trace(`Identifying features of type ${handler.type}`);
+      const result = await withSpan(`identify_${handler.type}_features`, () =>
+        handler.identifyFeatures({ ...options, analysis })
+      );
 
       features.push(...result.features);
+      tokensUsed = sumTokens(tokensUsed, result.tokensUsed);
     }
 
-    return { features };
+    options.logger.debug(
+      `Identified ${features.length} features for stream ${options.stream.name}`
+    );
+    return { features, tokensUsed };
   }
 }
 

@@ -19,7 +19,7 @@ spec:
       description: Runs the Agent Builder smoke tests daily
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#agent-builder-eng'
+        SLACK_NOTIFICATIONS_CHANNEL: '#agent-builder-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main

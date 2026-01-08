@@ -79,17 +79,10 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
 
-  const panels = dashboardInternalApi.serializeLayout() as Pick<
+  const { panels, controlGroupInput, references } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'references'
+    'panels' | 'controlGroupInput' | 'references'
   >;
-
-  const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
-
-  const combinedReferences = [
-    ...(panels?.references ?? []),
-    ...(controlGroupReferences ?? []),
-  ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
@@ -101,17 +94,17 @@ function getLocatorParams({
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
-    timeRange: shouldRestoreSearchSession
+    time_range: shouldRestoreSearchSession
       ? dataService.query.timefilter.timefilter.getAbsoluteTime()
       : dataService.query.timefilter.timefilter.getTime(),
-    refreshInterval: shouldRestoreSearchSession
+    refresh_interval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session
           value: 0,
         }
       : undefined,
     controlGroupInput,
-    panels: panels?.panels,
-    references: combinedReferences,
+    panels,
+    references: (references ?? []) as unknown as DashboardState['references'] & SerializableRecord,
   };
 }

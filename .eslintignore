@@ -34,6 +34,7 @@ snapshots.js
 /src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /src/platform/packages/shared/kbn-flot-charts/lib
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
-/src/platform/packages/shared/kbn-esql-ast/src/**/antlr
-/src/platform/packages/shared/kbn-workflows/common/generated
+/src/platform/packages/shared/kbn-esql-language/src/parser/antlr
+/src/platform/packages/shared/kbn-workflows/spec/elasticsearch/generated/**
+/src/platform/packages/shared/kbn-workflows/spec/kibana/generated/**
 /x-pack/platform/plugins/shared/screenshotting/chromium

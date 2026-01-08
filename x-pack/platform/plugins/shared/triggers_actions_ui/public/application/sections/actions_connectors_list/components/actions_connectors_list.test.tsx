@@ -172,6 +172,7 @@ describe('actions_connectors_list', () => {
           actionTypeTitle: 'Test Action',
           defaultActionParams: {},
           defaultRecoveredActionParams: {},
+          source: 'stack',
         };
       });
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -560,6 +561,7 @@ describe('actions_connectors_list', () => {
           actionTypeTitle: 'Test Action',
           defaultActionParams: {},
           defaultRecoveredActionParams: {},
+          source: 'stack',
         };
       });
 
@@ -618,6 +620,63 @@ describe('actions_connectors_list', () => {
         .getByTestId('actionsTable')
         .querySelectorAll('[data-euiicon-type="warning"]');
       expect(warningIcons.length).toEqual(2);
+    });
+  });
+
+  describe('component with spec connectors', () => {
+    beforeEach(async () => {
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: 'spec.connector',
+          name: 'Spec Connector',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          supportedFeatureIds: ['alerting'],
+          source: 'spec',
+        },
+      ]);
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: { execute: true, save: true, delete: true },
+      };
+      useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    });
+
+    it('should disable the test play button', async () => {
+      const actions = [
+        {
+          id: '1',
+          actionTypeId: 'spec.connector',
+          name: 'Spec Connector 1',
+          referencedByCount: 1,
+          config: {},
+          source: 'stack',
+        },
+      ] as ActionConnector[];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(await screen.findAllByTestId('connectors-row')).toHaveLength(1);
+      const runButtons = await screen.findAllByTestId('runConnector');
+      expect(runButtons[0]).toBeDisabled();
     });
   });
 });

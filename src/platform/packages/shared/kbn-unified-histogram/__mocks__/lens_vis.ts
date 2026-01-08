@@ -11,6 +11,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import type { ChartType } from '@kbn/visualization-utils';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
@@ -36,6 +37,7 @@ export const getLensVisMock = async ({
   table,
   externalVisContext,
   getModifiedVisAttributes,
+  onLensSuggestionsApiCall,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -50,6 +52,7 @@ export const getLensVisMock = async ({
   table?: Datatable;
   externalVisContext?: UnifiedHistogramVisContext;
   getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
+  onLensSuggestionsApiCall?: (preferredChartType: ChartType | undefined) => void;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -61,6 +64,8 @@ export const getLensVisMock = async ({
     lensSuggestionsApi: allSuggestions
       ? (...params) => {
           const context = params[0];
+          const preferredChartType = params[3];
+          onLensSuggestionsApiCall?.(preferredChartType);
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }
@@ -72,13 +77,10 @@ export const getLensVisMock = async ({
   });
 
   let visContext: UnifiedHistogramVisContext | undefined;
-  lensService.visContext$.subscribe((nextAttributesContext) => {
-    visContext = nextAttributesContext;
-  });
-
   let currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
-  lensService.currentSuggestionContext$.subscribe((nextSuggestionContext) => {
-    currentSuggestionContext = nextSuggestionContext;
+  lensService.state$.subscribe((state) => {
+    visContext = state.visContext;
+    currentSuggestionContext = state.currentSuggestionContext;
   });
 
   lensService.update({

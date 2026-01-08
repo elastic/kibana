@@ -33,7 +33,7 @@ export const emptySloList: FindSLOResponse = {
 
 const now = '2022-12-29T10:11:12.000Z';
 
-const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
+export const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   name: 'super important level service',
   description: 'some description useful',
   indicator: {

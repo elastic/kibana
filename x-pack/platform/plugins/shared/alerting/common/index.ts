@@ -179,8 +179,12 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
-export { gapStatus } from './constants';
-
+export { gapStatus, gapFillStatus } from './constants';
+export type { GapStatus, GapFillStatus } from './constants';
+export { GAP_AUTO_FILL_STATUS } from './constants';
+export type { GapAutoFillStatus } from './constants';
+export { backfillInitiator } from './constants';
+export type { BackfillInitiator } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,
@@ -224,6 +228,9 @@ export const INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH =
 
 export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
+
+export const INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler` as const;
 
 export const INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_summary` as const;

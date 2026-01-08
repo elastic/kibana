@@ -17,6 +17,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   dissect: { from: 'field', where: 'if' },
   date: { from: 'field', to: 'target_field', where: 'if' },
   drop_document: { where: 'if' },
+  math: { where: 'if' },
   rename: { from: 'field', to: 'target_field', where: 'if' },
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },
@@ -24,6 +25,9 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   remove_by_prefix: { from: 'fields' },
   remove: { from: 'field', where: 'if' },
   replace: { from: 'field', to: 'target_field', where: 'if' },
+  uppercase: { from: 'field', to: 'target_field', where: 'if' },
+  lowercase: { from: 'field', to: 'target_field', where: 'if' },
+  trim: { from: 'field', to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 

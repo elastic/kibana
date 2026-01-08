@@ -69,6 +69,7 @@ export interface TopNOption {
 /** the following scopes are detection alert tables */
 export const detectionAlertsTables: string[] = [
   TableId.alertsOnAlertsPage,
+  TableId.alertsOnAttacksPage,
   TableId.alertsOnRuleDetailsPage,
   TableId.alertsOnCasePage,
   TimelineId.casePage,

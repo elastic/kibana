@@ -30,7 +30,7 @@ const isEmpty = (value: string | undefined): value is string => value != null ||
 
 const getSecretFields = (fields: FieldsMap): FieldsMap =>
   Object.keys(fields)
-    .filter((fieldPath) => fieldPath.includes('secrets'))
+    .filter((fieldPath) => fieldPath.includes('secrets') && fields[fieldPath].label)
     .reduce((filteredFields, path) => ({ ...filteredFields, [path]: fields[path] }), {});
 
 const getLabelsFromFields = (fields: FieldsMap): string[] =>

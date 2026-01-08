@@ -17,7 +17,7 @@ export interface Props {
   items: SLODefinitionResponse[];
 }
 
-export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: Props) {
+export function BulkDeleteConfirmationModal({ items, onCancel, onConfirm }: Props) {
   const { mutate: bulkDelete } = useBulkDeleteSlo({ onConfirm });
   const modalTitleId = useGeneratedHtmlId();
 

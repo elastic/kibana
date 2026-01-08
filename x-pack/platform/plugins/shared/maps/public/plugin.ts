@@ -43,6 +43,7 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 import {
   createRegionMapFn,
@@ -100,6 +101,7 @@ export interface MapsPluginSetupDependencies {
 
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
+  cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;

@@ -12,7 +12,12 @@ import type { PackagePolicyClient } from '../../package_policy_service';
 import { sendTelemetryEvents } from '../../upgrade_sender';
 
 import { installPackage } from './install';
-import { isIntegrationRollbackTTLExpired, rollbackInstallation } from './rollback';
+import {
+  bulkRollbackAvailableCheck,
+  isIntegrationRollbackTTLExpired,
+  rollbackAvailableCheck,
+  rollbackInstallation,
+} from './rollback';
 
 jest.mock('../..', () => ({
   appContextService: {
@@ -20,6 +25,7 @@ jest.mock('../..', () => ({
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     getTelemetryEventsSender: jest.fn(),
     getConfig: jest.fn().mockReturnValue({}),
+    getInternalUserSOClient: jest.fn(),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
@@ -133,7 +139,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -163,6 +173,54 @@ describe('rollbackInstallation', () => {
     ).rejects.toThrow('No previous version found for package policies: test-package-policy');
   });
 
+  it('should throw an error if at least one package policy is not upgraded to the current package version', async () => {
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+        {
+          id: 'test-package-policy2',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+      ],
+    } as any);
+
+    await expect(
+      rollbackInstallation({
+        esClient,
+        currentUserPolicyIds: ['test-package-policy'],
+        pkgName,
+        spaceId,
+      })
+    ).rejects.toThrow(
+      `Rollback not available because some integration policies are not upgraded to version ${newPkgVersion}`
+    );
+  });
+
   it('should throw an error if at least one package policy has a different previous version', async () => {
     (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({
@@ -170,7 +228,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -208,7 +270,7 @@ describe('rollbackInstallation', () => {
         spaceId,
       })
     ).rejects.toThrow(
-      'Wrong previous version for package policies: test-package-policy (version: 1.2.0, expected: 1.0.0)'
+      'Rollback not available because not all integration policies were upgraded from the same previous version 1.0.0'
     );
   });
 
@@ -426,7 +488,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -495,5 +561,147 @@ describe('isIntegrationRollbackTTLExpired', () => {
     const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 + 100).toISOString();
     const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
     expect(isExpired).toBe(false);
+  });
+});
+
+describe('rollbackAvailableCheck', () => {
+  beforeEach(() => {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: pkgName,
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
+          },
+        ],
+      }),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return isAvailable: false if at least one package policy is not upgraded to the current package version', async () => {
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+        {
+          id: 'test-package-policy2',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+      ],
+    } as any);
+
+    const response = await rollbackAvailableCheck(pkgName, []);
+
+    expect(response).toEqual({
+      isAvailable: false,
+      reason: `Rollback not available because some integration policies are not upgraded to version ${newPkgVersion}`,
+    });
+  });
+
+  it('should return isAvailable: true if all package policies are upgraded to the current package version', async () => {
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+      ],
+    } as any);
+
+    const response = await rollbackAvailableCheck(pkgName, [
+      'test-package-policy',
+      'test-package-policy:prev',
+    ]);
+
+    expect(response).toEqual({
+      isAvailable: true,
+    });
+  });
+
+  describe('bulkRollbackAvailableCheck', () => {
+    it('should return isAvailable: true if installed package has rollback available', async () => {
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: `${pkgName}-1`,
+              package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+              revision: 3,
+              latest_revision: true,
+            },
+          },
+          {
+            id: 'test-package-policy:prev',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: `${pkgName}-1`,
+              package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+              revision: 1,
+              latest_revision: false,
+            },
+          },
+        ],
+      } as any);
+
+      const response = await bulkRollbackAvailableCheck({} as any);
+
+      expect(response).toEqual({
+        'test-package': {
+          isAvailable: true,
+        },
+      });
+    });
   });
 });

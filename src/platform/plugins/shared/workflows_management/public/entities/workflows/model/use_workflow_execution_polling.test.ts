@@ -8,7 +8,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
@@ -60,6 +60,7 @@ describe('useWorkflowExecutionPolling', () => {
     spaceId: 'default',
     id: mockWorkflowExecutionId,
     status,
+    error: null,
     isTestRun: false,
     startedAt: new Date().toISOString(),
     finishedAt: new Date().toISOString(),
@@ -191,15 +192,7 @@ describe('useWorkflowExecutionPolling', () => {
   });
 
   describe('polling stops for terminal statuses', () => {
-    const terminalStatuses = [
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
-    ];
-
-    terminalStatuses.forEach((status) => {
+    TerminalExecutionStatuses.forEach((status: ExecutionStatus) => {
       it(`should stop polling when status changes to ${status}`, () => {
         // Start with a non-terminal status
         const initialWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);

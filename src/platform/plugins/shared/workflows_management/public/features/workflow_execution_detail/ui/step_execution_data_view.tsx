@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { JSONDataView } from '../../../shared/ui/json_data_view';
+import { ExecutionDataViewer } from '../../../shared/ui/execution_data_viewer';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
@@ -39,17 +39,25 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
         return { data: stepExecution.input, title: Titles.input };
       } else {
         if (stepExecution.error) {
-          return { data: { error: stepExecution.error }, title: Titles.error };
+          return {
+            data: { error: stepExecution.error as unknown as JsonValue },
+            title: Titles.error,
+          };
         }
         return { data: stepExecution.output, title: Titles.output };
       }
     }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
+      const isOverviewStep = stepExecution.stepType === '__overview';
       const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
       const triggerType = isTriggerStep
         ? stepExecution.stepType?.replace('trigger_', '')
         : undefined;
+
+      if (isOverviewStep) {
+        return ''; // overview context: paths like "<fieldPath>"
+      }
 
       if (!isTriggerStep) {
         if (mode !== 'output' || stepExecution.error) {
@@ -82,7 +90,11 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     }
 
     return (
-      <JSONDataView data={data} title={title} fieldPathActionsPrefix={fieldPathActionsPrefix} />
+      <ExecutionDataViewer
+        data={data}
+        title={title}
+        fieldPathActionsPrefix={fieldPathActionsPrefix}
+      />
     );
   }
 );

@@ -23,9 +23,27 @@ describe('transformOptionsOut', () => {
     });
     const result = transformOptionsOut(optionsJSON);
     expect(result).toEqual({
-      hidePanelTitles: true,
+      hide_panel_titles: true,
     });
     expect(result).not.toHaveProperty('unsupportedOption');
+  });
+
+  it('should translate all options', () => {
+    const optionsJSON = JSON.stringify({
+      hidePanelTitles: true,
+      useMargins: true,
+      syncColors: true,
+      syncCursor: true,
+      syncTooltips: true,
+    });
+    const result = transformOptionsOut(optionsJSON);
+    expect(result).toEqual({
+      hide_panel_titles: true,
+      use_margins: true,
+      sync_colors: true,
+      sync_cursor: true,
+      sync_tooltips: true,
+    });
   });
 
   it('should handle invalid JSON gracefully', () => {

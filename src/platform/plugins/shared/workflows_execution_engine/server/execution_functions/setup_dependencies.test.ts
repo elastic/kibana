@@ -7,34 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { ConnectorExecutor } from '../connector_executor';
-import { UrlValidator } from '../lib/url_validator';
-import type { LogsRepository } from '../repositories/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { NodesFactory } from '../step/nodes_factory';
-import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import type { ContextDependencies } from '../workflow_context_manager/types';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
-jest.mock('../connector_executor');
-jest.mock('../lib/url_validator');
-jest.mock('../step/nodes_factory');
-jest.mock('../workflow_context_manager/step_execution_runtime_factory');
-jest.mock('../workflow_context_manager/workflow_execution_runtime_manager');
-jest.mock('../workflow_context_manager/workflow_execution_state');
-jest.mock('../workflow_event_logger/workflow_event_logger');
-jest.mock('../workflow_task_manager/workflow_task_manager');
+import '../workflow_event_logger/mocks';
+jest.mock('../repositories/workflow_execution_repository');
 jest.mock('@kbn/workflows/graph');
 
 describe('setupDependencies', () => {
@@ -53,22 +34,10 @@ describe('setupDependencies', () => {
     startedAt: Date.now(),
   };
 
-  const mockUnsecuredActionsClient = {
-    getAll: jest.fn(),
-    execute: jest.fn(),
-  };
-
   const mockScopedActionsClient = {
     getAll: jest.fn(),
     execute: jest.fn(),
   };
-
-  const mockActionsPlugin = {
-    getUnsecuredActionsClient: jest.fn().mockResolvedValue(mockUnsecuredActionsClient),
-    getActionsClientWithRequest: jest.fn().mockResolvedValue(mockScopedActionsClient),
-  } as unknown as ActionsPluginStartContract;
-
-  const mockTaskManager = {} as TaskManagerStartContract;
 
   const mockLogger = {
     debug: jest.fn(),
@@ -86,37 +55,32 @@ describe('setupDependencies', () => {
     },
   } as WorkflowsExecutionEngineConfig;
 
-  const mockWorkflowExecutionRepository = {
-    getWorkflowExecutionById: jest.fn().mockResolvedValue(mockWorkflowExecution),
-  } as unknown as WorkflowExecutionRepository;
-
-  const mockStepExecutionRepository = {} as StepExecutionRepository;
-  const mockLogsRepository = {} as LogsRepository;
-
-  const cloudSetupMock = cloudMock.createSetup();
-  const mockDependencies: ContextDependencies = {
-    cloudSetup: cloudSetupMock,
-  };
+  let mockDependencies: ReturnType<typeof mockContextDependencies>;
+  let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (ConnectorExecutor as jest.Mock).mockImplementation(() => ({}));
-    (UrlValidator as jest.Mock).mockImplementation(() => ({}));
-    (NodesFactory as jest.Mock).mockImplementation(() => ({}));
-    (StepExecutionRuntimeFactory as jest.Mock).mockImplementation(() => ({}));
-    (WorkflowExecutionRuntimeManager as jest.Mock).mockImplementation(() => ({}));
-    (WorkflowExecutionState as jest.Mock).mockImplementation(() => ({
-      getWorkflowExecution: () => mockWorkflowExecution,
-    }));
-    (WorkflowEventLogger as jest.Mock).mockImplementation(() => ({
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      createStepLogger: jest.fn(),
-    }));
-    (WorkflowTaskManager as jest.Mock).mockImplementation(() => ({}));
-    (WorkflowGraph as unknown as jest.Mock).mockImplementation(() => ({
+
+    mockDependencies = mockContextDependencies();
+    mockDependencies.actions.getActionsClientWithRequest = jest
+      .fn()
+      .mockResolvedValue(mockScopedActionsClient);
+
+    mockWorkflowExecutionRepository = {
+      getWorkflowExecutionById: jest.fn().mockResolvedValue(mockWorkflowExecution),
+    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+
+    (WorkflowExecutionRepository as jest.Mock).mockImplementation(
+      () => mockWorkflowExecutionRepository
+    );
+
+    const mockWorkflowGraph = {
       fromWorkflowDefinition: jest.fn().mockReturnThis(),
-    }));
+      getStepGraph: jest.fn().mockReturnThis(),
+    };
+    (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest
+      .fn()
+      .mockReturnValue(mockWorkflowGraph);
   });
 
   it('should use user-scoped ES client from coreStart', async () => {
@@ -130,13 +94,7 @@ describe('setupDependencies', () => {
       asCurrentUser: mockAsCurrentUser,
     });
 
-    const mockCoreStart = {
-      elasticsearch: {
-        client: {
-          asScoped: mockAsScoped,
-        },
-      },
-    } as unknown as CoreStart;
+    mockDependencies.coreStart.elasticsearch.client.asScoped = mockAsScoped;
 
     const mockFakeRequest = {
       headers: {},
@@ -145,14 +103,8 @@ describe('setupDependencies', () => {
     const result = await setupDependencies(
       workflowRunId,
       spaceId,
-      mockActionsPlugin,
-      mockTaskManager,
       mockLogger,
       mockConfig,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockLogsRepository,
-      mockCoreStart,
       mockDependencies,
       mockFakeRequest
     );
@@ -167,18 +119,9 @@ describe('setupDependencies', () => {
       index: jest.fn(),
     } as unknown as ElasticsearchClient;
 
-    const mockAsCurrentUser = mockScopedClient;
-    const mockAsScoped = jest.fn().mockReturnValue({
-      asCurrentUser: mockAsCurrentUser,
+    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      asCurrentUser: mockScopedClient,
     });
-
-    const mockCoreStart = {
-      elasticsearch: {
-        client: {
-          asScoped: mockAsScoped,
-        },
-      },
-    } as unknown as CoreStart;
 
     const mockFakeRequest = {
       headers: {},
@@ -187,43 +130,30 @@ describe('setupDependencies', () => {
     await setupDependencies(
       workflowRunId,
       spaceId,
-      mockActionsPlugin,
-      mockTaskManager,
       mockLogger,
       mockConfig,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockLogsRepository,
-      mockCoreStart,
       mockDependencies,
       mockFakeRequest
     );
 
-    expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(mockFakeRequest);
-    expect(mockActionsPlugin.getUnsecuredActionsClient).not.toHaveBeenCalled();
-    expect(ConnectorExecutor).toHaveBeenCalledWith(mockScopedActionsClient);
+    expect(mockDependencies.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
+      mockFakeRequest
+    );
   });
 
   describe('WorkflowGraph', () => {
-    it('should call fromWorkflowDefinition with correct workflow definition', async () => {
+    beforeEach(() => {
       const mockScopedClient = {
         search: jest.fn(),
         index: jest.fn(),
       } as unknown as ElasticsearchClient;
 
-      const mockAsCurrentUser = mockScopedClient;
-      const mockAsScoped = jest.fn().mockReturnValue({
-        asCurrentUser: mockAsCurrentUser,
+      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockScopedClient,
       });
+    });
 
-      const mockCoreStart = {
-        elasticsearch: {
-          client: {
-            asScoped: mockAsScoped,
-          },
-        },
-      } as unknown as CoreStart;
-
+    it('should call fromWorkflowDefinition with correct workflow definition', async () => {
       const mockFakeRequest = {
         headers: {},
       } as KibanaRequest;
@@ -231,14 +161,8 @@ describe('setupDependencies', () => {
       await setupDependencies(
         workflowRunId,
         spaceId,
-        mockActionsPlugin,
-        mockTaskManager,
         mockLogger,
         mockConfig,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockLogsRepository,
-        mockCoreStart,
         mockDependencies,
         mockFakeRequest
       );
@@ -250,24 +174,6 @@ describe('setupDependencies', () => {
     });
 
     it('should call fromWorkflowDefinition with correct default settings', async () => {
-      const mockScopedClient = {
-        search: jest.fn(),
-        index: jest.fn(),
-      } as unknown as ElasticsearchClient;
-
-      const mockAsCurrentUser = mockScopedClient;
-      const mockAsScoped = jest.fn().mockReturnValue({
-        asCurrentUser: mockAsCurrentUser,
-      });
-
-      const mockCoreStart = {
-        elasticsearch: {
-          client: {
-            asScoped: mockAsScoped,
-          },
-        },
-      } as unknown as CoreStart;
-
       const mockFakeRequest = {
         headers: {},
       } as KibanaRequest;
@@ -275,14 +181,8 @@ describe('setupDependencies', () => {
       await setupDependencies(
         workflowRunId,
         spaceId,
-        mockActionsPlugin,
-        mockTaskManager,
         mockLogger,
         mockConfig,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockLogsRepository,
-        mockCoreStart,
         mockDependencies,
         mockFakeRequest
       );

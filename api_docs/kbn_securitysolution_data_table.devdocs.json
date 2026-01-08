@@ -437,7 +437,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isResizable\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+              ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
               "ColumnHeaderType",
               "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
               {
@@ -996,7 +996,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isResizable\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
           {
@@ -1032,11 +1032,11 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly totalCount: number; readonly defaultColumns: (Pick<",
+          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isResizable\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
           {
@@ -1072,7 +1072,7 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[]>; }"
+          "[]>; readonly totalCount: number; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
         "deprecated": false,
@@ -1099,6 +1099,8 @@
           ".alertsOnRuleDetailsPage | ",
           "TableId",
           ".alertsOnAlertsPage | ",
+          "TableId",
+          ".alertsOnAttacksPage | ",
           "TableId",
           ".alertsOnAlertSummaryPage | ",
           "TableId",
@@ -1465,6 +1467,8 @@
           "; \"alerts-rules-details-page\": ",
           "TableEntityType",
           "; \"alerts-page\": ",
+          "TableEntityType",
+          "; \"attacks-page\": ",
           "TableEntityType",
           "; \"alert-summary-page\": ",
           "TableEntityType",

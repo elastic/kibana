@@ -8,4 +8,3 @@
  */
 
 export const AGENT_BUILDER_APP_ID = 'agent_builder';
-export const AGENT_BUILDER_AGENTS_CREATE = 'agents_create';

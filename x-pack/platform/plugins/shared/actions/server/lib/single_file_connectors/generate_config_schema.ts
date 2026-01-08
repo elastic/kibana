@@ -6,10 +6,14 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { z as z4 } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 
 import type { ActionTypeConfig, ValidatorType } from '../../types';
 
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema']
-): ValidatorType<ActionTypeConfig> => ({ schema: schema ?? z4.object({}) });
+): ValidatorType<ActionTypeConfig> => {
+  const authType = z.string().optional();
+  const configSchema = schema ? schema.extend({ authType }) : z.object({ authType });
+  return { schema: configSchema };
+};

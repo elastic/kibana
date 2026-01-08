@@ -7,7 +7,7 @@
 
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -18,9 +18,9 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
@@ -103,6 +103,23 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   theme$,
 }) => {
   const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
+
+  // Set conversation flyout active config on mount, clear on unmount
+  useEffect(() => {
+    if (services.agentBuilder?.setConversationFlyoutActiveConfig) {
+      services.agentBuilder.setConversationFlyoutActiveConfig({
+        sessionTag: 'security',
+        agentId: THREAT_HUNTING_AGENT_ID,
+        newConversation: false,
+      });
+    }
+
+    return () => {
+      if (services.agentBuilder?.clearConversationFlyoutActiveConfig) {
+        services.agentBuilder.clearConversationFlyoutActiveConfig();
+      }
+    };
+  }, [services.agentBuilder]);
 
   return (
     <KibanaContextProvider

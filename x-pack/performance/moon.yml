@@ -24,7 +24,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/expect'
   - '@kbn/dev-utils'
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace-client'
   - '@kbn/test-suites-src'
 tags:
   - test-helper

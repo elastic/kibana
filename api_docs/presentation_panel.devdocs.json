@@ -15,19 +15,15 @@
           "DefaultPresentationPanelApi",
           " = ",
           "DefaultPresentationPanelApi",
-          ", PropsType extends {} = {}>(props: Omit<",
-          "PresentationPanelInternalProps",
-          "<ApiType, PropsType>, \"Component\"> & { Component: ",
+          ", PropsType extends {} = {}>(props: ",
           {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
+            "pluginId": "presentationPanel",
+            "scope": "public",
+            "docId": "kibPresentationPanelPluginApi",
+            "section": "def-public.PresentationPanelProps",
+            "text": "PresentationPanelProps"
           },
-          "<",
-          "PanelCompatibleComponent",
-          "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => React.JSX.Element | null"
+          "<ApiType, PropsType>) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
         "deprecated": false,
@@ -41,19 +37,14 @@
             "label": "props",
             "description": [],
             "signature": [
-              "Omit<",
-              "PresentationPanelInternalProps",
-              "<ApiType, PropsType>, \"Component\"> & { Component: ",
               {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.MaybePromise",
-                "text": "MaybePromise"
+                "pluginId": "presentationPanel",
+                "scope": "public",
+                "docId": "kibPresentationPanelPluginApi",
+                "section": "def-public.PresentationPanelProps",
+                "text": "PresentationPanelProps"
               },
-              "<",
-              "PanelCompatibleComponent",
-              "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }"
+              "<ApiType, PropsType>"
             ],
             "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
             "deprecated": false,
@@ -135,6 +126,21 @@
       },
       {
         "parentPluginId": "presentationPanel",
+        "id": "def-public.ACTION_REMOVE_PANEL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_REMOVE_PANEL",
+        "description": [],
+        "signature": [
+          "\"deletePanel\""
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/remove_panel_action/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationPanel",
         "id": "def-public.PresentationPanelProps",
         "type": "Type",
         "tags": [],
@@ -161,7 +167,44 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.DEFAULT_QUICK_ACTION_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_QUICK_ACTION_IDS",
+        "description": [],
+        "signature": [
+          "{ view?: ",
+          "QuickActionIds",
+          " | undefined; edit?: ",
+          "QuickActionIds",
+          " | undefined; }"
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.PresentationPanelQuickActionContext",
+        "type": "Object",
+        "tags": [],
+        "label": "PresentationPanelQuickActionContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "PresentationPanelQuickActionIds",
+          " | undefined>"
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_quick_action_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],

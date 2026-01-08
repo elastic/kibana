@@ -119,6 +119,7 @@ export const Datatable: FC<Props> = ({
 );
 
 Datatable.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   datatable: PropTypes.object.isRequired,
   paginate: PropTypes.bool,
   perPage: PropTypes.number,
