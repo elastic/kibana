@@ -9,10 +9,14 @@ import {
   createRepositoryClient,
   type DefaultClientOptions,
 } from '@kbn/server-route-repository-client';
+import type { RouteRepositoryClient } from '@kbn/server-route-repository-utils';
 import type { ObservabilityAgentBuilderServerRouteRepository } from '../../server';
 import { useKibana } from './use_kibana';
 
-export function useApiClient() {
+export function useApiClient(): RouteRepositoryClient<
+  ObservabilityAgentBuilderServerRouteRepository,
+  DefaultClientOptions
+> {
   const {
     services: { http },
   } = useKibana();

@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import type { IKibanaResponse } from '@kbn/core/server';
+import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
@@ -16,7 +17,7 @@ import { getLogAiInsights } from './get_log_ai_insights';
 import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
-export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
+export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
     endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
     options: {
