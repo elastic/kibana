@@ -962,7 +962,7 @@ x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-t
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
-x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra @elastic/search-inference-team
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
@@ -1265,6 +1265,10 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
+
+# Utility Scripts
+x-pack/platform/packages/shared/kbn-inference-cli/scripts/eis.ts @elastic/search-inference-team
+x-pack/platform/packages/shared/kbn-inference-cli/src/eis @elastic/search-inference-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
