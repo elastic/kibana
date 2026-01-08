@@ -151,10 +151,11 @@ export interface ChromeStart {
    * ```tsx
    * useEffect(() => {
    *  const badges: ChromeBreadcrumbsBadge[] = [
-   *   { text: 'Example', tooltip: 'This is an example badge' },
+   *   { badgeText: 'Example', color: '#F6E58D' },
    *  ];
    *
    *  core.chrome.setBreadcrumbsBadges(badges);
+   *
    *  return () => {
    *    // Clear badges when component unmounts
    *    core.chrome.setBreadcrumbsBadges([]);
