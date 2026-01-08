@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { xyStateSchema } from './xy';
+import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 
 describe('XY', () => {
   const universalTypes = [
@@ -503,5 +503,11 @@ describe('XY', () => {
         })
       ).toThrow();
     });
+  });
+
+  it('should track number of statistics options', () => {
+    const realStatisticsOptionsSize = (statisticsSchema.getSchema() as any)?.$_root?._types?.size;
+
+    expect(statisticsOptionsSize).toBe(realStatisticsOptionsSize);
   });
 });
