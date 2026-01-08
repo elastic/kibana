@@ -45,6 +45,9 @@ test.describe.skip('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
       ).toBeVisible();
       await alertsControls.addRuleFlyout.fillIsAbove(0);
       await expect(alertsControls.addRuleFlyout.isAboveExpression).toHaveText('is above 0 errors');
+      await alertsControls.addRuleFlyout.fillRuleSchedule(1, 's');
+      await expect(alertsControls.addRuleFlyout.scheduleValueInput).toHaveValue('1');
+      await expect(alertsControls.addRuleFlyout.scheduleUnitSelect).toHaveValue('s');
     });
 
     await test.step('create the rule', async () => {
