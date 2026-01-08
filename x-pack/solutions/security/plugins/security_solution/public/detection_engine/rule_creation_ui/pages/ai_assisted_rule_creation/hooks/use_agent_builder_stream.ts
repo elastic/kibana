@@ -25,7 +25,7 @@ export const useAgentBuilderStream = () => {
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const [updates, setUpdates] = useState<Array<{ message: string; timestamp: Date }>>([]);
   const [rule, setRule] = useState<Record<string, unknown> | null>(null);
-  
+
   const streamRuleCreation = useCallback(
     async ({ message, connectorId }: { message: string; connectorId: string }) => {
       setIsStreaming(true);
