@@ -23,7 +23,7 @@ export const DeprecationIssue = (props: Props) => {
           <EuiFlexItem grow={false}>
             <EuiIcon type={iconType} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} alignItems="center">
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {message}
             </EuiFlexGroup>
