@@ -11,7 +11,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import {
   legacyMonitorAttributes,
   syntheticsMonitorAttributes,
