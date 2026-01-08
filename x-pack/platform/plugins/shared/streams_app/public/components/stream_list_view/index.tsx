@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -45,7 +45,7 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        streams: { streamsRepositoryClient, getClassicStatus },
       },
     },
     core,
@@ -67,8 +67,28 @@ export function StreamListView() {
   );
 
   const {
+    ui: { manage: canManageStreamsKibana },
     features: { groupStreams, significantEventsDiscovery },
   } = useStreamsPrivileges();
+
+  const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchClassicStatus = async () => {
+      try {
+        const status = await getClassicStatus();
+        setCanManageClassicElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching classic streams status',
+          }),
+        });
+      }
+    };
+    fetchClassicStatus();
+  }, [getClassicStatus, core.notifications.toasts]);
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
@@ -169,7 +189,11 @@ export function StreamListView() {
             )}
             {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
-                <EuiButton href={router.link('/_discovery')} iconType="crosshairs">
+                <EuiButton
+                  href={router.link('/_discovery')}
+                  iconType="crosshairs"
+                  data-test-subj="streamsSignificantEventsDiscoveryButton"
+                >
                   {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
                     defaultMessage: 'SigEvents Discovery',
                   })}
@@ -192,7 +216,11 @@ export function StreamListView() {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
+              <EuiButton
+                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                size="s"
+                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+              >
                 {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
                   defaultMessage: 'Create classic stream',
                 })}
