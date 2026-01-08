@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BULK_CONTRACT } from './elasticsearch.bulk';
 import { INDEX_CONTRACT } from './elasticsearch.index';
+import { INDICES_CREATE_CONTRACT } from './elasticsearch.indices_create';
 import { SEARCH_CONTRACT } from './elasticsearch.search';
 
 export const ELASTICSEARCH_OVERRIDES = {
-  'elasticsearch.search': SEARCH_CONTRACT,
+  'elasticsearch.bulk': BULK_CONTRACT,
+  'elasticsearch.indices.create': INDICES_CREATE_CONTRACT,
   'elasticsearch.index': INDEX_CONTRACT,
+  'elasticsearch.search': SEARCH_CONTRACT,
 };
