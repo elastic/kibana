@@ -9,11 +9,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { filter, map, scan, takeUntil, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
-interface InsightState {
-  summary: string;
-  context: string;
-}
-
 interface ParsedEvent {
   type: 'context' | 'chunk' | 'message';
   context?: string;
@@ -35,10 +30,18 @@ interface ChatCompletionMessageEvent {
   content: string;
 }
 
-export type StreamEvent = ContextEvent | ChatCompletionChunkEvent | ChatCompletionMessageEvent;
+export type InsightStreamEvent =
+  | ContextEvent
+  | ChatCompletionChunkEvent
+  | ChatCompletionMessageEvent;
+
+export interface InsightResponse {
+  summary: string;
+  context: string;
+}
 
 export function useStreamingAiInsight(
-  createStream: (signal: AbortSignal) => Observable<StreamEvent>
+  createStream: (signal: AbortSignal) => Observable<InsightStreamEvent>
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -90,12 +93,12 @@ export function useStreamingAiInsight(
     try {
       const observable$ = createStream(abortController.signal).pipe(
         filter(
-          (event: StreamEvent): event is StreamEvent =>
+          (event: InsightStreamEvent): event is InsightStreamEvent =>
             event.type === 'context' ||
             event.type === 'chatCompletionChunk' ||
             event.type === 'chatCompletionMessage'
         ),
-        map((event: StreamEvent): ParsedEvent => {
+        map((event: InsightStreamEvent): ParsedEvent => {
           if (event.type === 'context') {
             return { type: 'context', context: event.context };
           }
@@ -104,7 +107,7 @@ export function useStreamingAiInsight(
           }
           return { type: 'message', content: event.content };
         }),
-        scan<ParsedEvent, InsightState>(
+        scan<ParsedEvent, InsightResponse>(
           (acc, event) => {
             if (event.type === 'context') {
               return { ...acc, context: event.context || '' };

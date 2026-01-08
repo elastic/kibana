@@ -26,7 +26,10 @@ import { EuiMarkdownFormat } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
-import { useStreamingAiInsight, type StreamEvent } from '../../hooks/use_streaming_ai_insight';
+import {
+  useStreamingAiInsight,
+  type InsightStreamEvent,
+} from '../../hooks/use_streaming_ai_insight';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { useMarkdownPluginsWithCursor, CURSOR } from './loading_cursor';
@@ -39,7 +42,7 @@ export interface AiInsightAttachment {
 
 export interface AiInsightProps {
   title: string;
-  createStream: (signal: AbortSignal) => Observable<StreamEvent>;
+  createStream: (signal: AbortSignal) => Observable<InsightStreamEvent>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
