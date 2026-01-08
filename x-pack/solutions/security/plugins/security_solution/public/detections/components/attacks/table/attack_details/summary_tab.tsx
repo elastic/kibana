@@ -107,10 +107,10 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
         />
       </div>
 
-      <EuiSpacer />
-
       {tacticMetadata.length > 0 && (
         <>
+          <EuiSpacer />
+
           <EuiTitle data-test-subj={ATTACK_CHAIN_TITLE_TEST_ID} size="xs">
             <h2>{i18n.ATTACK_CHAIN}</h2>
           </EuiTitle>
