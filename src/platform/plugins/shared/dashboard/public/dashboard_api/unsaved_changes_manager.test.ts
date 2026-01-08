@@ -23,6 +23,7 @@ import type { initializeProjectRoutingManager } from './project_routing_manager'
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
 import { serializeLayout } from './layout_manager/serialize_layout';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));
 
@@ -176,8 +177,12 @@ describe('unsavedChangesManager', () => {
         let child1Api: any;
         let child2Api: any;
         let apiMockWithChildren: ReturnType<typeof initializeLayoutManager>;
+        let unsavedChangesManager: ReturnType<typeof initializeUnsavedChangesManager>;
+        let backupState: any;
 
         beforeEach(async () => {
+          setBackupStateMock.mockReset();
+
           child1Api = {
             uuid: 'child1',
             hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
@@ -218,7 +223,7 @@ describe('unsavedChangesManager', () => {
             },
           } as unknown as ReturnType<typeof initializeLayoutManager>;
 
-          initializeUnsavedChangesManager({
+          unsavedChangesManager = initializeUnsavedChangesManager({
             viewMode$,
             storeUnsavedChanges: true,
             lastSavedState: DEFAULT_DASHBOARD_STATE,
@@ -229,12 +234,22 @@ describe('unsavedChangesManager', () => {
             projectRoutingManager: projectRoutingManagerMock,
             forcePublishOnReset$,
           });
+
+          setBackupStateMock.mockImplementation((id, result) => {
+            backupState = result;
+          });
+          await waitFor(() => {
+            expect(unsavedChangesManager.api.hasUnsavedChanges$.getValue()).toBe(false);
+          });
         });
 
         test('backs up panel state', async () => {
-          setBackupStateMock.mockImplementation((id, backupState) => {
-            expect(id).toBe(savedObjectId$.value);
-            expect(backupState).toMatchInlineSnapshot(`
+          child1Api.hasUnsavedChanges$.next(true);
+          await waitFor(() => {
+            expect(unsavedChangesManager.api.hasUnsavedChanges$.getValue()).toBe(true);
+          });
+
+          expect(backupState).toMatchInlineSnapshot(`
             Object {
               "panels": Array [
                 Object {
@@ -255,15 +270,15 @@ describe('unsavedChangesManager', () => {
               "viewMode": "edit",
             }
           `);
-          });
-          await new Promise((resolve) => setTimeout(resolve, 1)); // wait for first emit of `unsavedChangesSubscription`
-          child1Api.hasUnsavedChanges$.next(true);
         });
 
         test('backs up control state', async () => {
-          setBackupStateMock.mockImplementation((id, backupState) => {
-            expect(id).toBe(savedObjectId$.value);
-            expect(backupState).toMatchInlineSnapshot(`
+          child2Api.hasUnsavedChanges$.next(true);
+          await waitFor(() => {
+            expect(unsavedChangesManager.api.hasUnsavedChanges$.getValue()).toBe(true);
+          });
+
+          expect(backupState).toMatchInlineSnapshot(`
             Object {
               "controlGroupInput": Object {
                 "controls": Array [
@@ -280,9 +295,6 @@ describe('unsavedChangesManager', () => {
               "viewMode": "edit",
             }
           `);
-          });
-          await new Promise((resolve) => setTimeout(resolve, 1)); // wait for first emit of `unsavedChangesSubscription`
-          child2Api.hasUnsavedChanges$.next(true);
         });
       });
     });
