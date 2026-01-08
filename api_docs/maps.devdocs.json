@@ -722,7 +722,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>) | undefined"
+              "<object, object>[]>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -2488,7 +2488,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>) | undefined"
+              "<object, object>[]>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
