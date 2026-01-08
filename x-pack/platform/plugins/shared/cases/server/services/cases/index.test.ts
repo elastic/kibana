@@ -1427,7 +1427,9 @@ describe('CasesService', () => {
 
         expect(res).toMatchInlineSnapshot(`
           Object {
-            "attributes": Object {},
+            "attributes": Object {
+              "total_events": -1,
+            },
           }
         `);
       });
