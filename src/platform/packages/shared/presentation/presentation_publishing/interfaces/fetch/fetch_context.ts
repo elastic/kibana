@@ -9,6 +9,7 @@
 
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import fastIsEqual from 'fast-deep-equal';
 
 export interface FetchContext {
@@ -18,6 +19,7 @@ export interface FetchContext {
   searchSessionId: string | undefined;
   timeRange: TimeRange | undefined;
   timeslice: [number, number] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
   projectRouting: ProjectRouting | undefined;
 }
 
@@ -38,7 +40,8 @@ export function isReloadTimeFetchContextEqual(
     isQueryEqualForFetch(previousContext.query, currentContext.query) &&
     isTimeRangeEqualForFetch(previousContext.timeRange, currentContext.timeRange) &&
     isProjectRoutingEqualForFetch(previousContext.projectRouting, currentContext.projectRouting) &&
-    isTimeSliceEqualForFetch(previousContext.timeslice, currentContext.timeslice)
+    isTimeSliceEqualForFetch(previousContext.timeslice, currentContext.timeslice) &&
+    areVariablesEqualForFetch(previousContext.esqlVariables, currentContext.esqlVariables)
   );
 }
 
@@ -79,3 +82,8 @@ export const isTimeSliceEqualForFetch = (
   currentTimeslice: [number, number] | undefined,
   lastTimeslice: [number, number] | undefined
 ) => fastIsEqual(currentTimeslice, lastTimeslice);
+
+const areVariablesEqualForFetch = (
+  currentVariables: ESQLControlVariable[] | undefined,
+  lastVariables: ESQLControlVariable[] | undefined
+) => fastIsEqual(currentVariables, lastVariables);
