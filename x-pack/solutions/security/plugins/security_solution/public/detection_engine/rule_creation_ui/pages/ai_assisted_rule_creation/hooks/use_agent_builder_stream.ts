@@ -24,8 +24,8 @@ export const useAgentBuilderStream = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const [updates, setUpdates] = useState<Array<{ message: string; timestamp: Date }>>([]);
-  const [rule, setRule] = useState<any | null>(null);
-
+  const [rule, setRule] = useState<Record<string, unknown> | null>(null);
+  
   const streamRuleCreation = useCallback(
     async ({ message, connectorId }: { message: string; connectorId: string }) => {
       setIsStreaming(true);
@@ -77,7 +77,7 @@ export const useAgentBuilderStream = () => {
             ) {
               const result = event.data?.results?.[0];
               if (result?.type === 'other' && result.data?.success && result.data?.rule) {
-                setRule(result.data.rule);
+                setRule(result.data.rule as Record<string, unknown>);
               }
             }
           },
@@ -127,7 +127,6 @@ export const useAgentBuilderStream = () => {
     setIsCancelled(true);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (subscriptionRef.current) {
