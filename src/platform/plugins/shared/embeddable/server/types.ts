@@ -19,6 +19,6 @@ export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = Embe
 
 export interface EmbeddableRegistryDefinition<
   P extends EmbeddableStateWithType = EmbeddableStateWithType
-> extends Omit<PersistableStateDefinition<P>,'telemetry'> {
+> extends Omit<PersistableStateDefinition<P>, 'telemetry'> {
   id: string;
 }

@@ -18,17 +18,14 @@ import type {
 import type { ObjectType } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
-import {
-  getExtractFunction,
-  getInjectFunction,
-  getMigrateFunction,
-} from './persistable_state';
+import { getExtractFunction, getInjectFunction, getMigrateFunction } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
 import { EnhancementsRegistry } from '../common/enhancements/registry';
 import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
-export interface EmbeddableSetup extends Omit<PersistableStateService<EmbeddableStateWithType>, 'telemetry'> {
+export interface EmbeddableSetup
+  extends Omit<PersistableStateService<EmbeddableStateWithType>, 'telemetry'> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   /*
    * Use registerTransforms to register transforms and schema for an embeddable type.
@@ -45,7 +42,10 @@ export interface EmbeddableSetup extends Omit<PersistableStateService<Embeddable
   transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }
 
-export type EmbeddableStart = Omit<PersistableStateService<EmbeddableStateWithType>, 'telemetry'> & {
+export type EmbeddableStart = Omit<
+  PersistableStateService<EmbeddableStateWithType>,
+  'telemetry'
+> & {
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */

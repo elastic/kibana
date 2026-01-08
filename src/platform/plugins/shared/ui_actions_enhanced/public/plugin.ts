@@ -40,11 +40,7 @@ export interface StartContract
   extends UiActionsStart,
     Pick<
       UiActionsServiceEnhancements,
-      | 'getActionFactory'
-      | 'hasActionFactory'
-      | 'getActionFactories'
-      | 'extract'
-      | 'inject'
+      'getActionFactory' | 'hasActionFactory' | 'getActionFactories' | 'extract' | 'inject'
     > {
   DrilldownManager: PublicDrilldownManagerComponent;
 }

@@ -15,7 +15,9 @@ import type { EmbeddableStateWithType } from './types';
 export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 
 export const getMigrateFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => Pick<PersistableState<EmbeddableStateWithType>, 'migrations'>,
+  getEmbeddableFactory: (
+    embeddableFactoryId: string
+  ) => Pick<PersistableState<EmbeddableStateWithType>, 'migrations'>,
   getEnhancement: (enhancementId: string) => Pick<PersistableState, 'migrations'>
 ) => {
   const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
