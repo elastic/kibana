@@ -37,8 +37,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  // FAILING: https://github.com/elastic/kibana/issues/110153
-  describe.skip('rules security and spaces enabled: trial', function () {
+  describe('rules security and spaces enabled: trial', function () {
     before(async () => {
       await createSpaces(getService);
       await createUsersAndRoles(
