@@ -131,7 +131,7 @@ export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
 // Concat
 export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
   ConcatProcessor,
-  { to: 'target_field'; where: 'if' }
+  { to: 'field'; where: 'if' }
 >;
 
 // Manual Ingest Pipeline (escape hatch)
