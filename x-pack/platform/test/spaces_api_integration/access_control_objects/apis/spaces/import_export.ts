@@ -576,10 +576,13 @@ export default function ({ getService }: FtrProviderContext) {
             expect(results[0]).to.have.property('error', 'Forbidden');
             expect(results[0]).to.have.property('message');
             expect(results[0].message).to.contain(
-              `Unable to bulk_create ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+              `Unable to bulk_create ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
             );
             expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${firstObjId}`); // the order may vary
             expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${secondObjId}`);
+            expect(results[0].message).to.contain(
+              `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+            );
           });
         });
         it('should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user', async () => {

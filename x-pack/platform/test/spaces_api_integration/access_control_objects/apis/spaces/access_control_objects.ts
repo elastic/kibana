@@ -357,9 +357,13 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
 
           expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
-          expect(overwriteResponse.body).to.have.property(
-            'message',
-            `Unable to create ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:${objectId}`
+          expect(overwriteResponse.body).to.have.property('message');
+          expect(overwriteResponse.body.message).to.contain(
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+          );
+          expect(overwriteResponse.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId}`);
+          expect(overwriteResponse.body.message).to.contain(
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
           );
         });
       });
@@ -598,10 +602,13 @@ export default function ({ getService }: FtrProviderContext) {
           expect(res.body).to.have.property('error', 'Forbidden');
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.contain(
-            `Unable to bulk_create ${ACCESS_CONTROL_TYPE}, access control restrictions for`
+            `Unable to bulk_create ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
           );
-          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`); // order is not guaranteed
+          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
+          expect(res.body.message).to.contain(
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+          );
 
           const getResponse = await supertestWithoutAuth
             .get(`/access_control_objects/${objectId1}`)
@@ -1211,7 +1218,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('failuere modes', () => {
+      describe('failure modes', () => {
         it('rejects if all objects are write-restricted and inaccessible', async () => {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
@@ -1252,10 +1259,13 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.contain(
-            `Unable to bulk_update ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+            `Unable to bulk_update ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
           );
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
+          expect(res.body.message).to.contain(
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+          );
         });
 
         it('returns status if all objects are write-restricted but some are owned by the current user', async () => {
@@ -1896,10 +1906,13 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(403);
             expect(res.body).to.have.property('message');
             expect(res.body.message).to.contain(
-              `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}, access control restrictions for`
+              `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
             );
-            expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`); // order is not guaranteed
+            expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
             expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
+            expect(res.body.message).to.contain(
+              `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+            );
           });
 
           it('returns status if all objects are write-restricted but some objects are owned by the current user', async () => {
@@ -2349,9 +2362,12 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.contain(
-            `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}, access control restrictions for`
+            `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
           );
-          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`); // order is not guaranteed
+          expect(res.body.message).to.contain(
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+          );
+          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
         });
       });
