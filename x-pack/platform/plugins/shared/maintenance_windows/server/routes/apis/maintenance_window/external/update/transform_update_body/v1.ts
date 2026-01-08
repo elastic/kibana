@@ -7,7 +7,10 @@
 
 import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../schemas/maintenance_window/external/request/update';
 import type { UpdateMaintenanceWindowParams } from '../../../../../../application/methods/update/types';
-import { transformCustomScheduleToRRule } from '../../../../../schemas/schedule';
+import {
+  getDurationInMilliseconds,
+  transformCustomScheduleToRRule,
+} from '../../../../../schemas/schedule';
 
 /**
  *  This function converts from the external, human readable, Maintenance Window creation/POST
@@ -22,12 +25,17 @@ export const transformUpdateBody = (
   if (updateBody.schedule?.custom) {
     customSchedule = transformCustomScheduleToRRule(updateBody.schedule.custom);
   }
+  const durationInMilliseconds = updateBody.schedule?.custom?.duration
+    ? getDurationInMilliseconds(updateBody.schedule.custom.duration)
+    : undefined;
 
   return {
     ...(updateBody.title && { title: updateBody.title }),
     ...(updateBody.enabled !== undefined && { enabled: updateBody.enabled }),
-    ...(customSchedule?.duration && { duration: customSchedule.duration }),
+    ...(durationInMilliseconds && { duration: durationInMilliseconds }),
     ...(customSchedule?.rRule && { rRule: customSchedule.rRule }),
     ...(kql && { scopedQuery: { kql, filters: [] } }),
+    ...(updateBody.schedule && { schedule: updateBody.schedule }),
+    ...(kql && { scope: { alerting: { kql, filters: [] } } }),
   };
 };

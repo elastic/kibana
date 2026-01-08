@@ -70,7 +70,7 @@ async function archiveWithOCC(
       events = mergeEvents({
         oldEvents: attributes.events,
         newEvents: generateMaintenanceWindowEvents({
-          rRule: attributes.rRule,
+          schedule: attributes.schedule.custom,
           duration: attributes.duration,
           expirationDate,
         }),

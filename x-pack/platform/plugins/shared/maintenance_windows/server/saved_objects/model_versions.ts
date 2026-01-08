@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawMaintenanceWindowSchemaV1 } from './schema';
+import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
+import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
 
 export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -55,6 +56,30 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
     ],
     schemas: {
       forwardCompatibility: rawMaintenanceWindowSchemaV1.extends({}, { unknowns: 'ignore' }),
+    },
+  },
+  '4': {
+    changes: [
+      // {
+      //   type: 'data_backfill',
+      //   backfillFunction: async (doc) => {
+      //     // Add default schedule object to existing maintenance windows
+      //     if (!doc.attributes.schedule) {
+      //       const schedule = transformRRuleToCustomSchedule({
+      //         duration: doc.attributes.duration,
+      //         rRule: doc.attributes.rRule,
+      //       });
+      //       doc.attributes.schedule = {
+      //         custom: schedule,
+      //       };
+      //     }
+      //     return doc;
+      //   },
+      // },
+    ],
+    schemas: {
+      forwardCompatibility: rawMaintenanceWindowSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: rawMaintenanceWindowSchemaV2,
     },
   },
 };

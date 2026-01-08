@@ -7,25 +7,30 @@
 
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { RRule, Weekday } from '@kbn/rrule';
+import { RRule } from '@kbn/rrule';
 import type { RRuleParams } from '@kbn/alerting-types';
 import type { DateRange } from '../../../common';
-import type { MaintenanceWindow } from '../types';
+import type { MaintenanceWindow, Schedule } from '../types';
+import {
+  getDurationInMilliseconds,
+  transformCustomScheduleToRRule,
+} from '../../routes/schemas/schedule';
 
 export interface GenerateMaintenanceWindowEventsParams {
-  rRule: RRuleParams;
+  schedule: Schedule;
   expirationDate: string;
   duration: number;
   startDate?: string;
 }
 
 export const generateMaintenanceWindowEvents = ({
-  rRule,
+  schedule,
   expirationDate,
   duration,
   startDate,
 }: GenerateMaintenanceWindowEventsParams) => {
-  const { dtstart, until, wkst, byweekday, ...rest } = rRule;
+  const { rRule } = transformCustomScheduleToRRule(schedule);
+  const { dtstart, until, byweekday, ...rest } = rRule;
 
   const rRuleStartDate = new Date(dtstart);
   const endDate = new Date(expirationDate);
@@ -34,7 +39,7 @@ export const generateMaintenanceWindowEvents = ({
     ...rest,
     dtstart: rRuleStartDate,
     until: until ? new Date(until) : null,
-    wkst: wkst ? Weekday[wkst] : null,
+    wkst: null,
     byweekday: byweekday ?? null,
   };
 
@@ -68,11 +73,16 @@ export const shouldRegenerateEvents = ({
   duration?: number;
 }): boolean => {
   // If the rRule fails a deep equality check (there is a change), we should regenerate events
-  if (rRule && !_.isEqual(rRule, maintenanceWindow.rRule)) {
+  const { rRule: transformedRRule } = transformCustomScheduleToRRule(
+    maintenanceWindow.schedule.custom
+  );
+  const transformedDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
+
+  if (rRule && !_.isEqual(rRule, transformedRRule)) {
     return true;
   }
   // If the duration changes, we should regenerate events
-  if (typeof duration === 'number' && duration !== maintenanceWindow.duration) {
+  if (typeof duration === 'number' && duration !== transformedDuration) {
     return true;
   }
   return false;

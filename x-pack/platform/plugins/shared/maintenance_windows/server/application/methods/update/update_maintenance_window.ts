@@ -27,6 +27,7 @@ import {
 import { getMaintenanceWindowSo, createMaintenanceWindowSo } from '../../../data';
 import type { UpdateMaintenanceWindowParams } from './types';
 import { updateMaintenanceWindowParamsSchema } from './schemas';
+import { getDurationInMilliseconds } from '../../../routes/schemas/schedule';
 
 export async function updateMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -47,7 +48,7 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { id, data } = params;
-  const { title, enabled, duration, rRule, categoryIds, scopedQuery } = data;
+  const { title, enabled, rRule, schedule, scope, categoryIds, scopedQuery } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -96,20 +97,24 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
+    const durationInMilliseconds = schedule?.custom.duration
+      ? getDurationInMilliseconds(schedule.custom.duration)
+      : getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
+
     const expirationDate: string = getMaintenanceWindowExpirationDate({
-      rRule: rRule ? rRule : maintenanceWindow.rRule,
-      duration: duration ? duration : maintenanceWindow.duration,
+      schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
+      duration: durationInMilliseconds,
     });
 
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
-      rRule: rRule || maintenanceWindow.rRule,
-      duration: typeof duration === 'number' ? duration : maintenanceWindow.duration,
+      schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
+      duration: durationInMilliseconds,
       expirationDate,
     });
 
-    if (!shouldRegenerateEvents({ maintenanceWindow, rRule, duration })) {
+    if (!shouldRegenerateEvents({ maintenanceWindow, rRule, duration: durationInMilliseconds })) {
       events = mergeEvents({ oldEvents: maintenanceWindow.events, newEvents: events });
     }
 
@@ -122,12 +127,14 @@ async function updateWithOCC(
         ...(scopedQueryWithGeneratedValue !== undefined
           ? { scopedQuery: scopedQueryWithGeneratedValue }
           : {}),
-        ...(typeof duration === 'number' ? { duration } : {}),
+        ...(typeof durationInMilliseconds === 'number' ? { duration: durationInMilliseconds } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,
         events,
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
+        ...(schedule ? { schedule } : {}),
+        ...(scope ? { scope } : {}),
       });
 
     // We are deleting and then creating rather than updating because SO.update

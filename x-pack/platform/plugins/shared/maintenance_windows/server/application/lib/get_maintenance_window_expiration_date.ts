@@ -5,21 +5,23 @@
  * 2.0.
  */
 import moment from 'moment';
-import type { RRuleParams } from '@kbn/alerting-types';
+import { Schedule } from '../types';
 
 // Returns a date in ISO format one year in the future if the rule is recurring or until the end of the MW if it is not recurring.
 export const getMaintenanceWindowExpirationDate = ({
-  rRule,
+  // rRule,
+  schedule,
   duration,
 }: {
-  rRule: RRuleParams;
+  schedule: Schedule;
   duration: number;
 }): string => {
   let expirationDate;
-  if (rRule.interval || rRule.freq) {
+  const { recurring, start } = schedule;
+  if (recurring) {
     expirationDate = moment().utc().add(1, 'year').toISOString();
   } else {
-    expirationDate = moment(rRule.dtstart).utc().add(duration, 'ms').toISOString();
+    expirationDate = moment(start).utc().add(duration, 'ms').toISOString();
   }
 
   return expirationDate;

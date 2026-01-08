@@ -22,6 +22,7 @@ import {
 import { createMaintenanceWindowSo } from '../../../data';
 import { createMaintenanceWindowParamsSchema } from './schemas';
 import { getMaintenanceWindowExpirationDate } from '../../lib';
+import { getDurationInMilliseconds } from '@kbn/maintenance-windows-plugin/server/routes/schemas/schedule';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -29,7 +30,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, duration, rRule, categoryIds, scopedQuery, enabled = true } = data;
+  const { title, schedule, scope, rRule, duration, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -38,21 +39,21 @@ export async function createMaintenanceWindow(
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scopedQuery;
+  let scopedQueryWithGeneratedValue = scope?.alerting;
 
   try {
-    if (scopedQuery) {
+    if (scope?.alerting) {
       const dsl = JSON.stringify(
         buildEsQuery(
           undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
+          [{ query: scope.alerting.kql, language: 'kuery' }],
+          scope.alerting.filters as Filter[],
           esQueryConfig
         )
       );
 
       scopedQueryWithGeneratedValue = {
-        ...scopedQuery,
+        ...scope.alerting,
         dsl,
       };
     }
@@ -67,24 +68,31 @@ export async function createMaintenanceWindow(
   const id = SavedObjectsUtils.generateId();
 
   const expirationDate = getMaintenanceWindowExpirationDate({
-    rRule,
+    schedule: schedule.custom,
     duration,
   });
 
   const modificationMetadata = await getModificationMetadata();
 
-  const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
+  const events = generateMaintenanceWindowEvents({
+    schedule: schedule.custom,
+    expirationDate,
+    duration,
+  });
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
     enabled,
     expirationDate,
-    categoryIds,
+    rRule,
     scopedQuery: scopedQueryWithGeneratedValue,
-    rRule: rRule as MaintenanceWindow['rRule'],
     duration,
     events,
+    schedule,
+    scope,
     ...modificationMetadata,
   });
+
+  console.log('createMaintenanceWindow - ', { maintenanceWindowAttributes });
 
   try {
     const result = await createMaintenanceWindowSo({
@@ -95,10 +103,14 @@ export async function createMaintenanceWindow(
       },
     });
 
-    return transformMaintenanceWindowAttributesToMaintenanceWindow({
+    console.log('createMaintenanceWindow - SO ', { result });
+
+    const res = transformMaintenanceWindowAttributesToMaintenanceWindow({
       attributes: result.attributes,
       id: result.id,
     });
+    console.log('createMaintenanceWindow - transformed ', { res });
+    return res;
   } catch (e) {
     const errorMessage = `Failed to create maintenance window, Error: ${e}`;
     logger.error(errorMessage);
