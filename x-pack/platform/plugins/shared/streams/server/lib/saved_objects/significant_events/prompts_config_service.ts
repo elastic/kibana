@@ -12,7 +12,7 @@ import type {
   SavedObjectsCreateOptions,
 } from '@kbn/core/server';
 import { significantEventsSystemPromptTemplate } from '@kbn/streams-ai/src/significant_events/prompt';
-import { featuresSystemPromptTemplate } from '@kbn/streams-ai/src/systems/prompt';
+import { systemsSystemPromptTemplate } from '@kbn/streams-ai/src/systems/prompt';
 import { descriptionSystemPromptTemplate } from '@kbn/streams-ai/src/description/prompt';
 import { streamsPromptsSOType } from './prompts_config';
 import type { PromptsConfigAttributes } from './prompts_config';
@@ -20,7 +20,7 @@ import type { PromptsConfigAttributes } from './prompts_config';
 export type { PromptsConfigAttributes };
 
 const defaultsPrompts = {
-  featurePromptOverride: featuresSystemPromptTemplate,
+  featurePromptOverride: systemsSystemPromptTemplate,
   significantEventsPromptOverride: significantEventsSystemPromptTemplate,
   descriptionPromptOverride: descriptionSystemPromptTemplate,
 };
