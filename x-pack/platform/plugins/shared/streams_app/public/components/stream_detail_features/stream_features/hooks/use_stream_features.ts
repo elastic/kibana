@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import type { System } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
@@ -27,9 +27,9 @@ export const useStreamFeatures = (streamName: string) => {
     });
   };
 
-  const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
+  const { data, isLoading, error, refetch } = useQuery<{ systems: System[] }, Error>({
     queryKey: ['features', streamName],
-    queryFn: fetchFeatures,
+    queryFn: fetchSystems,
     onError: showFetchErrorToast,
   });
 
