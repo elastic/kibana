@@ -290,7 +290,7 @@ export const Navigation = ({
                                     onItemClick?.(item);
                                     if (!hasSubmenu) {
                                       closePopover();
-                                      focusMainContent();
+                                      focusMainContent(mainContentSelectors);
                                     }
                                   }}
                                   {...itemProps}
@@ -323,7 +323,7 @@ export const Navigation = ({
                                       onClick={() => {
                                         onItemClick?.(subItem);
                                         closePopover();
-                                        focusMainContent();
+                                        focusMainContent(mainContentSelectors);
                                       }}
                                       {...subItem}
                                     >
