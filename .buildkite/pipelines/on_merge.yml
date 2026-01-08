@@ -37,7 +37,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n4d-standard-8
+      diskType: 'hyperdisk-balanced'
       preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c
     key: build
     timeout_in_minutes: 60
     retry:
@@ -118,7 +120,7 @@ steps:
       machineType: n4d-standard-4
       diskType: 'hyperdisk-balanced'
       preemptible: true
-      spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
+      spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
