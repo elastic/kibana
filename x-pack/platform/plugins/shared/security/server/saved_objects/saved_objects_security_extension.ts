@@ -702,8 +702,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const accessControlHint =
         inaccessibleObjects.size > 0
           ? `. Access control restrictions for objects: ${inaccessibleObjectsString}. ` +
-            `This may occur if you are trying to modify objects owned by another user, ` +
-            `or if you lack the "manage_access_control" privilege.`
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
           : '';
       const msg = `Unable to ${authzAction} ${targetTypes}${accessControlHint}`;
       // if we are bypassing all auditing, or bypassing failure auditing, do not log the event

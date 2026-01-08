@@ -124,7 +124,9 @@ export class AccessControlService {
       const typeList = [...new Set([...typesRequiringAccessControl, ...typesRequiringRbac])].sort();
       addAuditEventFn?.(typeList);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(`Access denied: Unable to manage access control for ${typeList}`)
+        new Error(
+          `Access denied: Unable to manage access control for ${typeList}. The "manage_access_control" privilege is required to change access control of objects owned by another user.`
+        )
       );
     }
 
@@ -163,7 +165,9 @@ export class AccessControlService {
       const typeList = [...unauthorizedTypes].sort();
       addAuditEventFn?.(typeList);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(`Access denied: Unable to manage access control for ${typeList}`)
+        new Error(
+          `Access denied: Unable to manage access control for ${typeList}. The "manage_access_control" privilege is required to change access control of objects owned by another user.`
+        )
       );
     }
   }
