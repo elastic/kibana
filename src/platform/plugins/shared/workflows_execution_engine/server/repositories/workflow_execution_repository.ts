@@ -177,6 +177,9 @@ export class WorkflowExecutionRepository {
     });
 
     const total = response.hits.total;
+    if (total === undefined) {
+      return false;
+    }
     return typeof total === 'number' ? total > 0 : total.value > 0;
   }
 
