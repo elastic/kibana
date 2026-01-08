@@ -70,7 +70,8 @@
       "ml",
       "observability",
       "maps",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
+      "workflowsManagement"
     ]
   }
 }

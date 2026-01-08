@@ -5,62 +5,49 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLoadingSpinner, EuiText, EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
-import type cytoscape from 'cytoscape';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import React, { Suspense, lazy } from 'react';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import type { ElementDefinition } from 'cytoscape';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 interface ReactFlowServiceMapProps {
-  elements: cytoscape.ElementDefinition[];
+  elements: ElementDefinition[];
   height: number;
   serviceName?: string;
   status: FETCH_STATUS;
 }
 
-/**
- * React Flow Service Map Component (Placeholder)
- * This is a placeholder while we resolve the bundling issues with @xyflow/react
- */
-export function ReactFlowServiceMap({ elements, height, status }: ReactFlowServiceMapProps) {
-  const nodeCount = elements.filter((el) => !('source' in (el.data || {}))).length;
-  const edgeCount = elements.filter((el) => 'source' in (el.data || {})).length;
+// Lazy load the React Flow component with a separate webpack chunk
+const ReactFlowGraph = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "react-flow-service-map" */
+      /* webpackMode: "lazy" */
+      './react_flow_graph'
+    )
+);
 
+/**
+ * React Flow Service Map Component
+ * Uses lazy loading to handle webpack bundling issues with @xyflow/react
+ */
+export function ReactFlowServiceMap(props: ReactFlowServiceMapProps) {
   return (
-    <EuiPanel
-      style={{
-        height,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+    <Suspense
+      fallback={
+        <EuiPanel
+          style={{
+            height: props.height,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <EuiLoadingSpinner size="xl" />
+        </EuiPanel>
+      }
     >
-      {status === FETCH_STATUS.LOADING ? (
-        <EuiLoadingSpinner size="xl" />
-      ) : (
-        <EuiEmptyPrompt
-          iconType="visVega"
-          title={<h2>React Flow Service Map POC</h2>}
-          body={
-            <>
-              <EuiText>
-                <p>
-                  This is a placeholder for the React Flow implementation.
-                  <br />
-                  The data is being loaded successfully:
-                </p>
-                <ul>
-                  <li>
-                    <strong>Nodes:</strong> {nodeCount}
-                  </li>
-                  <li>
-                    <strong>Edges:</strong> {edgeCount}
-                  </li>
-                </ul>
-              </EuiText>
-            </>
-          }
-        />
-      )}
-    </EuiPanel>
+      <ReactFlowGraph {...props} />
+    </Suspense>
   );
 }
