@@ -7,8 +7,21 @@
 
 import { expect } from '@kbn/scout-search';
 import { test } from '../fixtures';
+import { SEARCH_HOMEPAGE_V2_UI_FLAG } from '../../../../common';
 
-test.describe('Search Homepage', { tag: ['@ess', '@svlSearch'] }, () => {
+test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
+  // Disable the V2 homepage to test the old (V1) homepage
+  test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [SEARCH_HOMEPAGE_V2_UI_FLAG]: false,
+    });
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    // Reset to default (V2 enabled)
+    await kbnClient.uiSettings.unset(SEARCH_HOMEPAGE_V2_UI_FLAG);
+  });
+
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.addInitScript(() => {
