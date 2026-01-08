@@ -53,7 +53,7 @@ steps:
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -69,7 +69,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -85,7 +85,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -101,7 +101,7 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -118,7 +118,7 @@ steps:
       machineType: c4-standard-4
       diskType: 'hyperdisk-balanced'
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -134,7 +134,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -239,7 +239,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -255,7 +255,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -271,7 +271,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 10
     retry:
@@ -287,7 +287,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -303,7 +303,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -319,7 +319,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -335,7 +335,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -351,7 +351,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -367,7 +367,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -383,7 +383,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -399,7 +399,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -415,7 +415,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -431,7 +431,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -447,7 +447,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -463,7 +463,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -479,7 +479,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -495,7 +495,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -511,7 +511,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -527,7 +527,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -543,7 +543,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -559,7 +559,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -575,7 +575,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -591,7 +591,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -607,7 +607,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -624,7 +624,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 75
     parallelism: 20
     retry:
@@ -641,7 +641,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 75
     parallelism: 14
     retry:
@@ -657,7 +657,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 120
     parallelism: 3
     retry:
