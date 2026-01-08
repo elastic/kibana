@@ -1054,7 +1054,7 @@
         "label": "SanitizedConnectionRequestParams",
         "description": [],
         "signature": [
-          "{ path: string; querystring?: string | undefined; method: string; }"
+          "{ method: string; path: string; querystring?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "deprecated": false,

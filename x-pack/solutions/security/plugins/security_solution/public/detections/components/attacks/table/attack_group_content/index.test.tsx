@@ -14,6 +14,8 @@ import {
   ATTACK_DESCRIPTION_TEST_ID_SUFFIX,
   ATTACK_TITLE_TEST_ID_SUFFIX,
   ATTACK_GROUP_TEST_ID_SUFFIX,
+  ATTACK_STATUS_TEST_ID_SUFFIX,
+  ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX,
 } from '.';
 
 jest.mock(
@@ -42,6 +44,11 @@ describe('AttackGroupContent', () => {
       'Unix1 Malware and Credential Theft'
     );
     expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toBeInTheDocument();
+    expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toBeInTheDocument();
+    expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toHaveTextContent(
+      mockAttack.alertWorkflowStatus!
+    );
+    expect(getByTestId(`test_id${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`)).toBeInTheDocument();
     expect(getByTestId('mock-subtitle')).toBeInTheDocument();
   });
 

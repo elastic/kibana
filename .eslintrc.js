@@ -2595,6 +2595,12 @@ module.exports = {
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
             ],
+            patterns: [
+              {
+                group: ['@kbn/scout-*', '@playwright/test/**', 'playwright/**'],
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+            ],
           },
         ],
       },

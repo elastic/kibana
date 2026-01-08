@@ -271,9 +271,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
-    if (plugins.onechat?.attachments) {
+    if (plugins.agentBuilder?.attachments) {
       registerAttachmentUiDefinitions({
-        attachments: plugins.onechat.attachments,
+        attachments: plugins.agentBuilder.attachments,
       });
     }
 
