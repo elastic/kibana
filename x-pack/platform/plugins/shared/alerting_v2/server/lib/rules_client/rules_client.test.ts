@@ -20,7 +20,7 @@ import { RulesClient } from './rules_client';
 
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
-jest.mock('../../rule_executor/schedule', () => ({
+jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
   getRuleExecutorTaskId: jest.fn(),
 }));
