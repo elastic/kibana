@@ -156,6 +156,28 @@
         },
         {
           "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.events",
+          "type": "Object",
+          "tags": [],
+          "label": "events",
+          "description": [
+            "\nEvents service contract, can be used to listen to chat events."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.EventsServiceStartContract",
+              "text": "EventsServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
           "id": "def-public.AgentBuilderPluginStart.openConversationFlyout",
           "type": "Function",
           "tags": [],
