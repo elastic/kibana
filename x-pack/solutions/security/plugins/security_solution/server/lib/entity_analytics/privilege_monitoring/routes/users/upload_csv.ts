@@ -17,13 +17,8 @@ import {
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics';
-import {
-  API_VERSIONS,
-  APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-} from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCsvService } from '../../users/csv_upload';
 import { checkAndInitPrivilegeMonitoringResources } from '../../check_and_init_privmon_resources';
 
@@ -71,11 +66,6 @@ export const uploadUsersCSVRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-
           const secSol = await context.securitySolution;
           const fileStream = request.body.file as HapiReadableStream;
 

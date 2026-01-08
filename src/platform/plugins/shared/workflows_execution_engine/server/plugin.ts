@@ -16,7 +16,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  ConcurrencySettings,
+  EsWorkflowExecution,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
@@ -62,14 +66,13 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private readonly concurrencyManager: ConcurrencyManager;
+  private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.concurrencyManager = new ConcurrencyManager(this.logger);
   }
 
   public setup(
@@ -251,7 +254,7 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
-              const workflowExecution = {
+              const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
@@ -264,7 +267,29 @@ export class WorkflowsExecutionEnginePlugin
                 createdBy: '',
                 triggeredBy: 'scheduled',
               };
+
+              const concurrencyGroupKey = this.getConcurrencyGroupKey(
+                workflowExecution,
+                workflow.definition?.settings?.concurrency,
+                coreStart,
+                dependencies
+              );
+              if (concurrencyGroupKey) {
+                workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
+              }
+
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+              // Check concurrency limits and apply collision strategy if needed
+              const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+              if (!canProceed) {
+                // Execution was dropped due to concurrency limit, skip running
+                return;
+              }
+
+              if (!workflowExecution.id || !workflowExecution.spaceId) {
+                throw new Error('Workflow execution must have id and spaceId');
+              }
 
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
@@ -299,6 +324,16 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    // Initialize ConcurrencyManager with dependencies
+    const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+    const workflowExecutionRepository = new WorkflowExecutionRepository(
+      coreStart.elasticsearch.client.asInternalUser
+    );
+    this.concurrencyManager = new ConcurrencyManager(
+      workflowTaskManager,
+      workflowExecutionRepository
+    );
+
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
       coreStart,
@@ -318,8 +353,6 @@ export class WorkflowsExecutionEnginePlugin
     }> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const createdBy = (context.createdBy as string | undefined) || 'system';
       const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -337,19 +370,14 @@ export class WorkflowsExecutionEnginePlugin
         triggeredBy,
       };
 
-      if (workflow.definition?.settings?.concurrency?.key) {
-        const workflowExecutionContext = buildWorkflowContext(
-          workflowExecution as EsWorkflowExecution,
-          coreStart,
-          dependencies
-        );
-        const concurrencyGroupKey = this.concurrencyManager.evaluateConcurrencyKey(
-          workflow.definition.settings.concurrency,
-          workflowExecutionContext
-        );
-        if (concurrencyGroupKey) {
-          workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
-        }
+      const concurrencyGroupKey = this.getConcurrencyGroupKey(
+        workflowExecution,
+        workflow.definition?.settings?.concurrency,
+        coreStart,
+        dependencies
+      );
+      if (concurrencyGroupKey) {
+        workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -397,6 +425,15 @@ export class WorkflowsExecutionEnginePlugin
         'manual'
       );
 
+      // Check concurrency limits and apply collision strategy if needed
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+      if (!canProceed) {
+        // Execution was dropped due to concurrency limit, return execution ID
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
+
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
         this.logger.debug(
@@ -432,6 +469,15 @@ export class WorkflowsExecutionEnginePlugin
         'alert'
       );
 
+      // Check concurrency limits and apply collision strategy if needed
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+      if (!canProceed) {
+        // Execution was dropped due to concurrency limit, skip scheduling
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
+
       // Always schedule a task (never execute directly)
       const taskInstance = createTaskInstance(
         workflowExecution,
@@ -461,10 +507,6 @@ export class WorkflowsExecutionEnginePlugin
       }
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-
-      // Get ES client and create repository for this execution
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const context: Record<string, unknown> = {
         contextOverride,
       };
@@ -521,13 +563,10 @@ export class WorkflowsExecutionEnginePlugin
       spaceId
     ) => {
       await this.initialize(coreStart);
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionId,
         spaceId
       );
-      const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -577,5 +616,109 @@ export class WorkflowsExecutionEnginePlugin
       });
     }
     await this.initializePromise;
+  }
+
+  /**
+   * Reused local wrapper for evaluating the concurrency group key for a workflow execution.
+   * Normalizes the partial workflowExecution to build the workflow context needed for template evaluation.
+   *
+   * @param workflowExecution - The partial workflow execution
+   * @param concurrencySettings - The concurrency settings from workflow definition
+   * @param coreStart - Core start services
+   * @param dependencies - Context dependencies for building workflow context
+   * @returns The evaluated concurrency group key, or null if not applicable
+   */
+  private getConcurrencyGroupKey(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    concurrencySettings: ConcurrencySettings | undefined,
+    coreStart: CoreStart,
+    dependencies: ContextDependencies
+  ): string | null {
+    if (!concurrencySettings?.key) {
+      return null;
+    }
+
+    // Guard check: ConcurrencyManager may not be initialized if task executes before start().
+    // This should not occur in normal operation.
+    if (!this.concurrencyManager) {
+      this.logger.warn('ConcurrencyManager not initialized, skipping concurrency key evaluation.');
+      return null;
+    }
+
+    const normalizedWorkflowExecution: EsWorkflowExecution = {
+      scopeStack: [],
+      error: null,
+      startedAt: null,
+      finishedAt: '',
+      cancelRequested: false,
+      duration: 0,
+      ...workflowExecution,
+    } as EsWorkflowExecution;
+
+    return this.concurrencyManager.evaluateConcurrencyKey(
+      concurrencySettings,
+      buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
+    );
+  }
+
+  /**
+   * Checks concurrency limits and applies collision strategy if needed.
+   * This helper method consolidates the duplicated concurrency check logic.
+   *
+   * For 'drop' strategy: if limit is exceeded, ConcurrencyManager marks execution as SKIPPED.
+   * For 'cancel-in-progress' strategy: ConcurrencyManager cancels old executions to make room.
+   *
+   * @param workflowExecution - The workflow execution (might be partial)
+   * @returns Promise<boolean> - true if execution can proceed, false if it should be dropped
+   */
+  private async checkConcurrencyIfNeeded(
+    workflowExecution: Partial<EsWorkflowExecution>
+  ): Promise<boolean> {
+    // Guard check: ConcurrencyManager not initialized if task executes before start().
+    // This should not occur in normal operation.
+    // Execution will proceed without concurrency enforcement.
+    if (!this.concurrencyManager) {
+      this.logger.warn(
+        `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
+      );
+      return true;
+    }
+
+    if (
+      !workflowExecution.workflowDefinition?.settings?.concurrency ||
+      !workflowExecution.concurrencyGroupKey ||
+      !workflowExecution.id ||
+      !workflowExecution.spaceId
+    ) {
+      return true; // No concurrency settings, allow execution
+    }
+
+    try {
+      const canProceed = await this.concurrencyManager.checkConcurrency(
+        workflowExecution.workflowDefinition.settings.concurrency,
+        workflowExecution.concurrencyGroupKey,
+        workflowExecution.id,
+        workflowExecution.spaceId
+      );
+
+      if (!canProceed) {
+        this.logger.debug(
+          `Dropped workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}) due to concurrency limit`
+        );
+      }
+
+      return canProceed;
+    } catch (error) {
+      // Best-effort concurrency enforcement: log error but allow execution to proceed
+      // This prevents a single cancellation failure from blocking new executions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.debug(
+        `Failed to enforce concurrency limits for workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}): ${errorMessage}. Execution will proceed without concurrency enforcement.`
+      );
+      if (error instanceof Error) {
+        this.logger.debug(`Concurrency enforcement error stack: ${error.stack}`);
+      }
+      return true; // On error, allow execution to proceed
+    }
   }
 }
