@@ -111,7 +111,7 @@ export async function registerTools({
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
-    createGetTraceChangePointsTool({ core, plugins, logger }),
+    createGetTraceChangePointsTool({ core, dataRegistry, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

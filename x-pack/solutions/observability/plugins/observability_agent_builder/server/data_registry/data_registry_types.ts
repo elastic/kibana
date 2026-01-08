@@ -141,6 +141,37 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+interface ChangePointDetails {
+  change_point?: number;
+  r_value?: number;
+  trend?: string;
+  p_value?: number;
+}
+
+interface Bucket {
+  key: string | number;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+interface ChangePointResult {
+  type: Record<ChangePointType, ChangePointDetails>;
+  bucket?: Bucket;
+}
+
+interface BucketChangePoints extends Bucket {
+  changes: ChangePointResult;
+  time_series: {
+    buckets: Array<
+      Bucket & {
+        avg_latency: {
+          value: number | null;
+        };
+      }
+    >;
+  };
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -212,4 +243,12 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  traceChangePoints: (params: {
+    request: KibanaRequest;
+    start: string;
+    end: string;
+    kqlFilter?: string;
+    groupBy: string;
+  }) => Promise<BucketChangePoints[]>;
 }
