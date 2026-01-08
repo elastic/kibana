@@ -43,11 +43,7 @@ export const reviewRuleInstallationRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
-              // Since the HTTP service converts `undefined` request bodies to null, we need to allow null values.
-              // This will be removed in the next release when we make pagination parameters required.
-              ReviewRuleInstallationRequestBodySchema.nullable()
-            ),
+            body: buildRouteValidationWithZod(ReviewRuleInstallationRequestBodySchema),
           },
         },
       },

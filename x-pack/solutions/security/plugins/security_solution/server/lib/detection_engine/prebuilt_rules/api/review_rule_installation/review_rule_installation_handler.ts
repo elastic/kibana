@@ -24,31 +24,14 @@ import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
 
-/*
-  To ensure a smooth transition from a non-paginated API to a paginated API, we will release the changes in two stages:
-  Release 1: Only the backend and mapping changes.
-    - Endpoint is paginated, but `page` and `per_page` parameters are optional. If no pagination parameters are provided, it will return all rules at once (same as previous behavior).
-    - No changes to frontend – sorting and pagination are still handled on the frontend.
-  Release 2: Frontend changes and making pagination parameters required.
-    - `page` and `per_page` parameters become required.
-    - Frontend makes use of backend-side pagination and sorting.
-*/
-const DEFAULT_PER_PAGE = 10_000;
-const DEFAULT_PAGE = 1;
-
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<unknown, unknown, ReviewRuleInstallationRequestBody | null>,
+  request: KibanaRequest<unknown, unknown, ReviewRuleInstallationRequestBody>,
   response: KibanaResponseFactory,
   logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
-  const {
-    page = DEFAULT_PAGE,
-    per_page: perPage = DEFAULT_PER_PAGE,
-    sort,
-    filter,
-  } = request.body ?? {};
+  const { page, per_page: perPage, sort, filter } = request.body;
 
   logger.debug(
     `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}, sort=${JSON.stringify(
