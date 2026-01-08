@@ -65,7 +65,7 @@ export async function convertSavedDashboardToPanels(
   const dashboardString = JSON.stringify(unreplacedDashboardJSON);
   // Replace indexPattern placeholder
   const dashboardStringWithReplacements = Mustache.render(dashboardString, {
-    indexPattern: apmIndices?.metric ?? dataView.title,
+    indexPattern: apmIndices?.metric ?? dataView.getIndexPattern(),
   });
   // Convert to JSON object
   const dashboardJSON = JSON.parse(dashboardStringWithReplacements);
