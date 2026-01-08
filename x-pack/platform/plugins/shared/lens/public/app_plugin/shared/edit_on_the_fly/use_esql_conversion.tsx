@@ -72,16 +72,7 @@ export const useEsqlConversion = (
     const { state } = visualization;
 
     // Guard: trendline check
-    if (
-      state &&
-      typeof state === 'object' &&
-      'trendlineLayerId' in state &&
-      'trendlineMetricAccessor' in state &&
-      'trendlineTimeAccessor' in state &&
-      state.trendlineLayerId &&
-      state.trendlineMetricAccessor &&
-      state.trendlineTimeAccessor
-    ) {
+    if (hasTrendLineLayer(state)) {
       return disabled(
         i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
           defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
@@ -100,19 +91,13 @@ export const useEsqlConversion = (
 
     // Guard: datasource state exists and has layers
     const datasourceState = datasourceStates[datasourceId]?.state;
-    if (
-      !datasourceState ||
-      typeof datasourceState !== 'object' ||
-      datasourceState === null ||
-      !('layers' in datasourceState) ||
-      !datasourceState.layers
-    ) {
+    if (!isValidDatasourceState(datasourceState)) {
       return disabled();
     }
 
     // Guard: layer access
     const layerId = layerIds[0];
-    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
+    const layers = datasourceState.layers;
     if (!layerId || !layers[layerId]) {
       return disabled();
     }
@@ -184,3 +169,28 @@ export const useEsqlConversion = (
     visualization,
   ]);
 };
+
+function hasTrendLineLayer(state: unknown) {
+  return Boolean(
+    state &&
+      typeof state === 'object' &&
+      'trendlineLayerId' in state &&
+      'trendlineMetricAccessor' in state &&
+      'trendlineTimeAccessor' in state &&
+      state.trendlineLayerId &&
+      state.trendlineMetricAccessor &&
+      state.trendlineTimeAccessor
+  );
+}
+
+function isValidDatasourceState(
+  datasourceState: unknown
+): datasourceState is { layers: Record<string, FormBasedLayer> } {
+  return Boolean(
+    datasourceState &&
+      typeof datasourceState === 'object' &&
+      datasourceState !== null &&
+      'layers' in datasourceState &&
+      (datasourceState as { layers?: unknown }).layers !== undefined
+  );
+}
