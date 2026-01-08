@@ -95,7 +95,6 @@ export function buildExpressionFunctionParameterContext(
 
   return {
     paramDefinitions: analyzer.getCompatibleParamDefs(),
-    functionsToIgnore: [fn.name], // Basic recursion prevention
     hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
     functionDefinition: fnDefinition,
     firstArgumentType: analyzer.getFirstArgumentType(),
