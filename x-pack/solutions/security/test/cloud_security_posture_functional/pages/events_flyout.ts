@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
   cleanupEntityStore,
