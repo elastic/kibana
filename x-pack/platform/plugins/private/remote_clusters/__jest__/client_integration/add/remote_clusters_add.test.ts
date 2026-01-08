@@ -156,15 +156,16 @@ describe('Create Remote cluster', () => {
           await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
 
           const seedsInput = new EuiComboBoxTestHarness('remoteClusterFormSeedsInput');
+          const invalidSeedMessage =
+            /Seed node must use host:port format\..*Hosts can only consist of letters, numbers, and dashes\./;
+
           // Representative invalid characters (full matrix covered by unit tests in validators).
           for (const char of ['#', 'é', '+']) {
-            seedsInput.clear();
+            await seedsInput.clear();
             seedsInput.select(`192.16${char}:3000`);
-            expect(
-              screen.getByText(
-                /Seed node must use host:port format\..*Hosts can only consist of letters, numbers, and dashes\./
-              )
-            ).toBeInTheDocument();
+            await waitFor(() => {
+              expect(screen.getByText(invalidSeedMessage)).toBeInTheDocument();
+            });
           }
         });
 
@@ -174,11 +175,11 @@ describe('Create Remote cluster', () => {
 
           const seedsInput = new EuiComboBoxTestHarness('remoteClusterFormSeedsInput');
 
-          seedsInput.clear();
+          await seedsInput.clear();
           seedsInput.select('192.168.1.1');
           expect(screen.getByText('A port is required.')).toBeInTheDocument();
 
-          seedsInput.clear();
+          await seedsInput.clear();
           seedsInput.select('192.168.1.1:abc');
           expect(screen.getByText('A port is required.')).toBeInTheDocument();
         });

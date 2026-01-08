@@ -59,7 +59,6 @@ export function renderRemoteClustersRoute(
 
   const router: AppRouter = {
     // ScopedHistory is structurally compatible with MemoryHistory for our usage in tests.
-
     history: history as unknown as AppRouter['history'],
     route: { location: history.location },
   };
