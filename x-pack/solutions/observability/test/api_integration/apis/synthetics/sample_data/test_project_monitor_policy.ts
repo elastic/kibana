@@ -6,7 +6,7 @@
  */
 
 import { type PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { formatMWs } from '@kbn/synthetics-plugin/server/synthetics_service/formatters/formatting_utils';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 import { getDataStream } from './test_policy';

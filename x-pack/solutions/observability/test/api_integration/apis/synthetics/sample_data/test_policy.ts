@@ -7,7 +7,7 @@
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
 import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 import { commonVars } from './test_project_monitor_policy';
 
