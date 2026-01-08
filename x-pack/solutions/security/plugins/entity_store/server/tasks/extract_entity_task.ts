@@ -15,6 +15,7 @@ import type { Logger } from '@kbn/logging';
 import type { EntityType } from '../domain/definitions/entity_type';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
+import { ResourcesService } from '../domain/resources_service';
 
 function getTaskName(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
@@ -43,12 +44,13 @@ async function run({
   // Read the current state from the previous run (or default empty object)
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
+  // Extract the resources service from the task instance params
+  const {resourcesService} = taskInstance.params as {resourcesService: ResourcesService};
 
   logger.info(`Running extract entity task, runs: ${runs}`);
   try {
-    // TODO: Implement your entity extraction logic here
-    // Example: await this.extractEntities(this.entityType);
-
+    // TODO: Implement your entity extraction logic here 
+    // use resourcesService domain related operations
     // Update state with execution information
     const updatedState = {
       lastExecutionTimestamp: new Date().toISOString(),
@@ -111,14 +113,11 @@ export function registerExtractEntityTasks({
   }
 }
 
-export async function scheduleExtractEntityTasks({
-  taskManager,
-  logger,
-  entityTypes,
-}: {
+export async function scheduleExtractEntityTasks({ taskManager, logger, entityTypes, resourcesService }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   entityTypes: EntityType[];
+  resourcesService: ResourcesService;
 }): Promise<void> {
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
@@ -130,7 +129,7 @@ export async function scheduleExtractEntityTasks({
         schedule: {
           interval: config.interval,
         },
-        params: {},
+        params: {resourcesService},
         state: {},
       });
     }
