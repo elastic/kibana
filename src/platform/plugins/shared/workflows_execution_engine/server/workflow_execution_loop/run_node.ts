@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
@@ -50,6 +51,16 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     return;
   }
 
+  // Create a span for the entire node execution lifecycle
+  const nodeSpan = apm.startSpan(`node: ${node.stepId || node.id}`, 'workflow', 'node');
+  if (nodeSpan) {
+    nodeSpan.setLabel('node_id', node.id);
+    nodeSpan.setLabel('node_type', node.stepType);
+    if (node.stepId) {
+      nodeSpan.setLabel('step_id', node.stepId);
+    }
+  }
+
   try {
     params.workflowRuntime.exitScope();
     stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
@@ -62,12 +73,16 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * the step should not be executed at all, e.g., if the workflow has been
      * cancelled or a timeout has already occurred.
      */
+    const monitoringSpan = apm.startSpan('pre-execution monitoring', 'workflow', 'monitoring');
     await processNodeStackMonitoring(params, stepExecutionRuntime);
+    monitoringSpan?.end();
 
     /**
      * If the workflow is no longer running after processing the node stack (e.g., cancelled), we skip executing the step.
      */
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
+      nodeSpan?.setOutcome('unknown');
+      nodeSpan?.end();
       return;
     }
 
@@ -93,15 +108,23 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     await Promise.race([runMonitorPromise, runStepPromise]);
     params.workflowRuntime.enterScope();
+    nodeSpan?.setOutcome('success');
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
+    nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
 
     if (stepExecutionRuntime) {
+      const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
       await catchError(params, stepExecutionRuntime);
+      catchErrorSpan?.end();
     }
 
+    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
+    saveStateSpan?.end();
+
+    nodeSpan?.end();
   }
 }

@@ -42,7 +42,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.index).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
-        refresh: true,
+        refresh: false,
         document: workflowExecution,
       });
     });
@@ -87,7 +87,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.update).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
-        refresh: true,
+        refresh: false,
         doc: workflowExecution,
       });
     });

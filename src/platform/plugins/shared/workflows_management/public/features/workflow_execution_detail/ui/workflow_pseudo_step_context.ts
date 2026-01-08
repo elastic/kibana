@@ -78,10 +78,21 @@ export function buildTriggerStepExecutionFromContext(
 export function buildOverviewStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto {
-  let contextData: JsonValue | undefined;
+  let contextData: Record<string, unknown> = {};
   if (workflowExecution.context) {
     const { inputs, event, ...context } = workflowExecution.context;
-    contextData = context as JsonValue;
+    contextData = context as Record<string, unknown>;
+  }
+
+  // Add trace information to the context data for display in the Overview table
+  if (workflowExecution.traceId) {
+    contextData = {
+      ...contextData,
+      trace: {
+        traceId: workflowExecution.traceId,
+        entryTransactionId: workflowExecution.entryTransactionId,
+      },
+    };
   }
 
   return {
@@ -91,7 +102,7 @@ export function buildOverviewStepExecutionFromContext(
     status: workflowExecution.status,
     stepExecutionIndex: 0,
     startedAt: workflowExecution.startedAt,
-    input: contextData,
+    input: contextData as JsonValue,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId ?? '',
