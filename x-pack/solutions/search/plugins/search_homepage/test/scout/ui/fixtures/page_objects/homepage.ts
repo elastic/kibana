@@ -85,4 +85,25 @@ export class Homepage {
   async getApiKeyValueRow() {
     return this.page.testSubj.locator('connectionDetailsApiKeyValueRow');
   }
+
+  // Embedded Console methods
+  async expectEmbeddedConsoleControlBarExists() {
+    await this.page.testSubj.waitForSelector('consoleEmbeddedSection');
+  }
+
+  async getEmbeddedConsoleBody() {
+    return this.page.testSubj.locator('consoleEmbeddedBody');
+  }
+
+  async clickEmbeddedConsoleControlBar() {
+    await this.page.testSubj.locator('consoleEmbeddedControlBar').click();
+  }
+
+  async getFullscreenToggleButton() {
+    return this.page.testSubj.locator('consoleToggleFullscreenButton');
+  }
+
+  async getSearchHomepageContainer() {
+    return this.page.testSubj.locator('search-homepage');
+  }
 }
