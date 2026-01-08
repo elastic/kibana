@@ -23,7 +23,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
-      enableQueryVersion: true
+      enableQueryVersion: true,
     })
     .addVersion(
       {
