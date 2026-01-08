@@ -23,7 +23,7 @@ interface TopNavMenuItemsProps {
 }
 
 /**
- * @deprecated Use `TopNavMenuBeta` instead.
+ * @deprecated Use `AppMenu` instead.
  */
 export const TopNavMenuItems = ({
   config,

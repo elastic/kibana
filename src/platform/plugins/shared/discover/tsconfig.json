@@ -110,7 +110,6 @@
     "@kbn/css-utils",
     "@kbn/restorable-state",
     "@kbn/esql-editor",
-    "@kbn/controls-plugin",
     "@kbn/esql-types",
     "@kbn/controls-constants",
     "@kbn/core-application-browser",
@@ -118,7 +117,9 @@
     "@kbn/timerange",
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/control-group-renderer",
     "@kbn/react-query",
+    "@kbn/controls-schemas",
     "@kbn/zod",
     "@kbn/cps"
   ],

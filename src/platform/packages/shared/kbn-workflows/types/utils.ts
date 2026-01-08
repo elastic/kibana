@@ -14,7 +14,7 @@ import type {
   HttpMethod,
   InternalConnectorContract,
 } from './v1';
-import { ExecutionStatus, KNOWN_HTTP_METHODS } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
   BuiltInStepType,
   ElasticsearchStep,
@@ -60,14 +60,7 @@ export function isDangerousStatus(status: ExecutionStatus) {
 }
 
 export function isTerminalStatus(status: ExecutionStatus) {
-  const TerminalStatus: readonly ExecutionStatus[] = [
-    ExecutionStatus.COMPLETED,
-    ExecutionStatus.FAILED,
-    ExecutionStatus.CANCELLED,
-    ExecutionStatus.SKIPPED,
-    ExecutionStatus.TIMED_OUT,
-  ];
-  return TerminalStatus.includes(status);
+  return TerminalExecutionStatuses.includes(status);
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {

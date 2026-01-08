@@ -22,6 +22,31 @@ import { type CSSObject, Global, type GlobalProps } from '@emotion/react';
 const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
 const parameterHintsWidgetModifierClassName = 'kibanaCodeEditor__parameterHintsWidgetModifier';
 
+const isEditorUsable = (
+  editor: monaco.editor.IStandaloneCodeEditor | null
+): editor is monaco.editor.IStandaloneCodeEditor => {
+  if (!editor) return false;
+
+  // Monaco exposes `isDisposed()` on the model (`ITextModel`), not on the editor (`IStandaloneCodeEditor`).
+  // We defensively check for:
+  // - model existence (and not disposed)
+  // - a DOM node that is still connected to the document
+  //
+  // This avoids calling into `getContribution(...)` on editors that have already been disposed
+  // during fast navigation/unmount cycles (where the model can still be alive briefly).
+  try {
+    const model = editor.getModel();
+    if (!model || model.isDisposed()) return false;
+
+    const domNode = editor.getDomNode();
+    if (!domNode) return false;
+
+    return domNode.isConnected;
+  } catch {
+    return false;
+  }
+};
+
 /**
  * @description helps reposition widgets of interest in the code editor,
  * so they are placed without layering over the header.
@@ -94,31 +119,58 @@ export const EditorWidgetsCustomizations: FC<
    * See {@link https://github.com/elastic/kibana/pull/245600 | GitHub issue #245600} for the rationale behind this bug fix implementation
    */
   const customizeParameterHintsWidget = useCallback(() => {
-    // @ts-expect-error -- the "widget" property is not documented but it exists
-    const parameterHintsWidget = editor?.getContribution('editor.controller.parameterHints')?.widget
-      ?.value;
-    const $parameterHintsWidget = parameterHintsWidget?.getDomNode();
-
-    if (parameterHintsWidget) {
-      // Add the modifier className to the global style modifier class names record
-      setGlobalStyleModifierClassNamesRecord((prevStyles) => ({
-        ...prevStyles,
-        [`.${parameterHintsWidgetModifierClassName}`]: {
-          zIndex: `${euiTheme.levels.header} !important`,
-        } as unknown as CSSObject,
-      }));
-
-      (
-        $parameterHintsWidget as ReturnType<monaco.editor.IContentWidget['getDomNode']>
-      ).classList.add(parameterHintsWidgetModifierClassName);
+    if (!isEditorUsable(editor)) {
+      return;
     }
+
+    // `getContribution(...)` can throw if the editor was disposed between render and effect flush.
+    // This can happen on fast unmount/remount cycles (e.g. SPA navigation + theme changes) and
+    // should not break the code editor field (or trip its error boundary).
+    let parameterHintsWidget: any;
+    try {
+      // @ts-expect-error -- the "widget" property is not documented but it exists
+      parameterHintsWidget = editor.getContribution('editor.controller.parameterHints')?.widget
+        ?.value;
+    } catch {
+      return;
+    }
+
+    const $parameterHintsWidget = parameterHintsWidget?.getDomNode?.();
+
+    if (!$parameterHintsWidget) {
+      return;
+    }
+
+    // Add the modifier className to the global style modifier class names record
+    setGlobalStyleModifierClassNamesRecord((prevStyles) => ({
+      ...prevStyles,
+      [`.${parameterHintsWidgetModifierClassName}`]: {
+        zIndex: `${euiTheme.levels.header} !important`,
+      } as unknown as CSSObject,
+    }));
+
+    ($parameterHintsWidget as ReturnType<monaco.editor.IContentWidget['getDomNode']>).classList.add(
+      parameterHintsWidgetModifierClassName
+    );
   }, [editor, euiTheme.levels.header]);
 
   // setup the repositioning handlers for widgets of interest
   useEffect(() => {
-    registerRepositionHandlers(
+    if (!isEditorUsable(editor)) {
+      return;
+    }
+
+    let suggestWidget: any;
+    try {
       // @ts-expect-error -- the "widget" property is not documented but it exists
-      editor?.getContribution('editor.contrib.suggestController')?.widget?.value,
+      suggestWidget = editor.getContribution('editor.contrib.suggestController')?.widget?.value;
+    } catch {
+      // editor disposed mid-flight
+      return;
+    }
+
+    registerRepositionHandlers(
+      suggestWidget,
       // @ts-expect-error -- this is the way to get the DOM node of the suggest widget,
       // not all widgets adhere to the advertised API
       (widget: monaco.editor.IContentWidget) => widget.element?.domNode,

@@ -7,20 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEmpty } from 'lodash';
-
-import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import {
-  initializeControlGroupTelemetry,
-  type ControlGroupTelemetry,
-} from '@kbn/controls-plugin/server';
 import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import type {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-} from '../dashboard_saved_object';
+import type { SavedDashboardPanel, StoredControlGroupInput } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState } from './task_state';
 import type { DashboardCollectorData, DashboardHit } from './types';
@@ -32,7 +22,10 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_value: 0,
     by_type: {},
   },
-  controls: initializeControlGroupTelemetry({}),
+  controls: {
+    total: 0,
+    by_type: {},
+  },
   sections: {
     total: 0,
   },
@@ -44,6 +37,10 @@ export const getEmptyPanelTypeData = () => ({
   by_reference: 0,
   by_value: 0,
   details: {},
+});
+
+export const getEmptyControlTypeData = () => ({
+  total: 0,
 });
 
 export const collectPanelsByType = (
@@ -92,21 +89,22 @@ export const collectSectionsAndAccessControl = (
   return collectorData;
 };
 
-export const controlsCollectorFactory =
-  (embeddableService: EmbeddablePersistableStateService) =>
-  (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
-    if (!isEmpty(attributes.controlGroupInput)) {
-      collectorData.controls = embeddableService.telemetry(
-        {
-          ...attributes.controlGroupInput,
-          type: CONTROLS_GROUP_TYPE,
-        },
-        collectorData.controls
-      ) as ControlGroupTelemetry;
-    }
+export const collectPinnedControls = (
+  controls: StoredControlGroupInput['panels'],
+  collectorData: DashboardCollectorData,
+  embeddableService: EmbeddablePersistableStateService
+) => {
+  const controlValues = Object.values(controls);
+  collectorData.controls.total += controlValues.length;
 
-    return collectorData;
-  };
+  for (const control of controlValues) {
+    const type = control.type;
+    if (!collectorData.controls.by_type[type]) {
+      collectorData.controls.by_type[type] = getEmptyControlTypeData();
+    }
+    collectorData.controls.by_type[type].total += 1;
+  }
+};
 
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {

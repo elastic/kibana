@@ -24,10 +24,6 @@ test_node() {
   fi
 }
 
-if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
-fi
-
 NODE="${DIR}/node/default/bin/node"
 {{#linux}}
 if ! "$NODE" --version >/dev/null 2>&1; then
@@ -44,8 +40,28 @@ NODE="${DIR}/node/pointer-compression/bin/node"
 {{/forcePointerCompression}}
 test_node
 
+BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
+if [ -f "${CONFIG_DIR}/node.options" ]; then
+  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+fi
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 # For now only on POSIX platforms, term signals work differently on Windows.
 NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="${NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT:---heapsnapshot-signal=SIGUSR2 --diagnostic-dir=$DIR/data}"
+ALL_NODE_OPTIONS="$BASE_NODE_OPTIONS $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS"
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"
+if [ "$ELASTIC_CONTAINER" = "true" ] && ! printf '%s' "$ALL_NODE_OPTIONS" | grep -q -- '--max-old-space-size'; then
+  heap_mb=
+  target_heap_percent=60
+  min_heap_mb=512
+  max_heap_mb=4096
+  cgroup_max_bytes=$((1024 * 1024 * 1024 * 1024)) # 1TB
+  cgroup_memory_limit_bytes=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null)
+  [ "$cgroup_memory_limit_bytes" -gt "$cgroup_max_bytes" ] 2>/dev/null && cgroup_memory_limit_bytes=max
+  mem_total_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null)
+  case "$cgroup_memory_limit_bytes" in ''|*[!0-9]*) ;; *) heap_mb=$(( (cgroup_memory_limit_bytes / 1024 / 1024) * target_heap_percent / 100 )) ;; esac
+  [ -n "$heap_mb" ] || case "$mem_total_kb" in ''|*[!0-9]*) ;; *) heap_mb=$(( (mem_total_kb / 1024) * target_heap_percent / 100 )) ;; esac
+  [ "$heap_mb" -gt "$max_heap_mb" ] 2>/dev/null && heap_mb=$max_heap_mb
+  [ "$heap_mb" -ge "$min_heap_mb" ] 2>/dev/null && ALL_NODE_OPTIONS="$ALL_NODE_OPTIONS --max-old-space-size=$heap_mb"
+fi
+
+NODE_OPTIONS="$ALL_NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"

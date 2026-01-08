@@ -262,10 +262,6 @@ export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConne
 /** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
 export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
-export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
-  'securitySolution:enablePrivilegedUserMonitoring' as const;
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

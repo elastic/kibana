@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
@@ -102,19 +102,11 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     spaceId: string,
     triggeredBy?: string
   ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
-    const terminalStatuses = [
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
-    ];
-
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
         exec.workflowId === workflowId &&
         exec.spaceId === spaceId &&
-        !terminalStatuses.includes(exec.status)
+        !TerminalExecutionStatuses.includes(exec.status)
     );
 
     if (triggeredBy) {
@@ -127,5 +119,74 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       _id: exec.id,
       _index: 'workflows-executions',
     }));
+  }
+
+  public async getRunningExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    excludeExecutionId?: string,
+    size: number = 5000
+  ): Promise<string[]> {
+    const results = Array.from(this.workflowExecutions.values())
+      .filter(
+        (exec) =>
+          exec.concurrencyGroupKey === concurrencyGroupKey &&
+          exec.spaceId === spaceId &&
+          !TerminalExecutionStatuses.includes(exec.status) &&
+          (!excludeExecutionId || exec.id !== excludeExecutionId)
+      )
+      .sort((a, b) => {
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return aTime - bTime; // Oldest first
+      })
+      .map((exec) => exec.id)
+      .slice(0, Math.min(size, 10000)); // Cap at ES default max_result_window
+
+    return results;
+  }
+
+  public async bulkUpdateWorkflowExecutions(
+    updates: Array<Partial<EsWorkflowExecution>>
+  ): Promise<void> {
+    if (updates.length === 0) {
+      return;
+    }
+
+    // Validate all IDs are present
+    for (const update of updates) {
+      if (!update.id) {
+        throw new Error('Workflow execution ID is required for bulk update');
+      }
+    }
+
+    // Validate all executions exist (matching Elasticsearch document_missing_exception behavior)
+    const missingIds: string[] = [];
+    for (const update of updates) {
+      if (!this.workflowExecutions.has(update.id!)) {
+        missingIds.push(update.id!);
+      }
+    }
+
+    if (missingIds.length > 0) {
+      throw new Error(
+        `Failed to update ${missingIds.length} workflow executions: ${JSON.stringify(
+          missingIds.map((id) => ({
+            id,
+            error: { type: 'document_missing_exception', reason: 'document missing' },
+            status: 404,
+          }))
+        )}`
+      );
+    }
+
+    // Perform updates
+    for (const update of updates) {
+      const existing = this.workflowExecutions.get(update.id!);
+      this.workflowExecutions.set(update.id!, {
+        ...existing!,
+        ...update,
+      } as EsWorkflowExecution);
+    }
   }
 }

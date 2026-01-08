@@ -14,6 +14,8 @@ import type { CasesApiService } from './cases';
 import { getCasesApiHelper } from './cases';
 import type { CoreApiService } from './core';
 import { getCoreApiHelper } from './core';
+import type { DataViewsApiService } from './data_views';
+import { getDataViewsApiHelper } from './data_views';
 import type { FleetApiService } from './fleet';
 import { getFleetApiHelper } from './fleet';
 import type { StreamsApiService } from './streams';
@@ -22,6 +24,7 @@ import { getStreamsApiService } from './streams';
 export interface ApiServicesFixture {
   alerting: AlertingApiService;
   cases: CasesApiService;
+  dataViews: DataViewsApiService;
   fleet: FleetApiService;
   streams: StreamsApiService;
   core: CoreApiService;
@@ -40,6 +43,7 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
       const services = {
         alerting: getAlertingApiHelper(log, kbnClient),
         cases: getCasesApiHelper(log, kbnClient),
+        dataViews: getDataViewsApiHelper(log, kbnClient),
         fleet: getFleetApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),
         core: getCoreApiHelper(log, kbnClient),

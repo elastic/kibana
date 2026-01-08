@@ -1642,6 +1642,21 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.ChromeSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeSetup",
+        "description": [
+          "\nChromeSetup exposes APIs available during the setup phase."
+        ],
+        "path": "src/core/packages/chrome/browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-public.ChromeStart",
         "type": "Interface",
         "tags": [],
@@ -1931,6 +1946,65 @@
                 "description": [],
                 "signature": [
                   "ChromeSetBreadcrumbsParams",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getAppMenu$",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppMenu$",
+            "description": [
+              "\nGet an observable of the current app menu configuration"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "AppMenuConfig",
+              " | undefined>"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.setAppMenu",
+            "type": "Function",
+            "tags": [],
+            "label": "setAppMenu",
+            "description": [
+              "\nSet the app menu configuration for the current application.\n"
+            ],
+            "signature": [
+              "(config?: ",
+              "AppMenuConfig",
+              " | undefined) => void"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.ChromeStart.setAppMenu.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "AppMenuConfig",
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",

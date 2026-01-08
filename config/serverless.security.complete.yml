@@ -6,6 +6,10 @@ xpack.cloud.serverless.product_tier: complete
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"
+  ### Agent Builder feature is available in this tier; move it from Analytics category to Security.
+  agentBuilder:
+    category: "security"
+    order: 1101
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

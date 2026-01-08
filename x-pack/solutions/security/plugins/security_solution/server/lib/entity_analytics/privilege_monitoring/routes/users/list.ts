@@ -17,11 +17,9 @@ import {
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_USERS_LIST_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
@@ -47,11 +45,6 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
       async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-
           const secSol = await context.securitySolution;
           const { elasticsearch } = await context.core;
           const crudService = createPrivilegedUsersCrudService({

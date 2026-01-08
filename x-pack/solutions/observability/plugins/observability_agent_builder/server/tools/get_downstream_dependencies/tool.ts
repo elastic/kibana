@@ -15,15 +15,17 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
   'observability.get_downstream_dependencies';
 
+const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
+
 const getDownstreamDependenciesToolSchema = z.object({
-  ...timeRangeSchemaRequired,
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z.string().min(1).describe('The name of the service'),
   serviceEnvironment: z
     .string()
@@ -48,8 +50,12 @@ export function createDownstreamDependenciesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getDownstreamDependenciesToolSchema> = {
     id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Identifies downstream dependencies (other services, databases, external APIs) for a specific service within a time range. Critical for mapping service architecture and troubleshooting dependency-related issues.',
+    description: `Identifies downstream dependencies (other services, databases, external APIs) for a specific service.
+
+When to use:
+- Showing the topology for a service
+- Investigating if a dependency is causing issues
+- Understanding the blast radius of a failing service`,
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {
@@ -58,24 +64,35 @@ export function createDownstreamDependenciesTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (args, context) => {
+    handler: async (toolParams, context) => {
+      const {
+        serviceName,
+        serviceEnvironment,
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+      } = toolParams;
       const { request } = context;
 
       try {
         const { dependencies } = await getToolHandler({
           request,
           dataRegistry,
-          serviceName: args.serviceName,
-          serviceEnvironment: args.serviceEnvironment,
-          start: args.start,
-          end: args.end,
+          serviceName,
+          serviceEnvironment,
+          start,
+          end,
         });
+
+        const total = dependencies?.length ?? 0;
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { dependencies },
+              data: {
+                total,
+                dependencies,
+              },
             },
           ],
         };

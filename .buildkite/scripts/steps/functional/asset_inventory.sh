@@ -13,4 +13,9 @@ cd x-pack/solutions/security/test/security_solution_cypress
 
 set +e
 
-yarn cypress:asset_inventory:run:ess; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:asset_inventory:run:ess; status=$?; yarn junit:merge || :
+
+# Scout reporter
+upload_scout_cypress_events "Cypress tests"
+
+exit $status

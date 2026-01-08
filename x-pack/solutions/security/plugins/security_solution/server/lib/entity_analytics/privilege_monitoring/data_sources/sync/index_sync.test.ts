@@ -21,11 +21,12 @@ import type { AuditLogger } from '@kbn/core/server';
 import type { SearchService } from '../../users/search';
 import type { BulkResponse } from 'elasticsearch-8.x/lib/api/types';
 
-const mockFindSourcesByType = jest.fn();
+const mockList = jest.fn();
+
 jest.mock('../../saved_objects', () => {
   return {
     MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-      findSourcesByType: () => mockFindSourcesByType(),
+      list: () => mockList(),
       create: jest.fn(),
     })),
     PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
@@ -36,16 +37,17 @@ jest.mock('../../saved_objects', () => {
 });
 
 const mockFindStaleUsersForIndex = jest.fn();
-jest.mock('./stale_users', () => {
+const mockFindStaleUsersFactory = jest.fn();
+jest.mock('./deletion_detection/stale_users', () => {
   return {
     findStaleUsersForIndexFactory: () => mockFindStaleUsersForIndex,
+    findStaleUsersFactory: () => mockFindStaleUsersFactory,
   };
 });
 
 const mockSearchUsernamesInIndex = jest.fn();
 const mockGetMonitoredUsers = jest.fn();
 const mockGetExistingUsersMap = jest.fn();
-const mockFindStaleUsersFactory = jest.fn();
 jest.mock('../../users/search', () => {
   return {
     createSearchService: () => ({
@@ -53,12 +55,6 @@ jest.mock('../../users/search', () => {
         mockSearchUsernamesInIndex(obj),
       getExistingUsersMap: (usernames: string[]) => mockGetExistingUsersMap(usernames),
     }),
-  };
-});
-
-jest.mock('./stale_users', () => {
-  return {
-    findStaleUsersFactory: () => mockFindStaleUsersFactory,
   };
 });
 
@@ -105,11 +101,14 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
         { name: 'source1', indexPattern: 'index1' },
         { name: 'source2', indexPattern: 'index2' },
       ];
-      mockFindSourcesByType.mockResolvedValue(mockMonitoringSOSources);
+      mockList.mockResolvedValue({
+        sources: mockMonitoringSOSources,
+        total: mockMonitoringSOSources.length,
+      });
 
       indexSyncService._syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
-      expect(mockFindSourcesByType).toHaveBeenCalled();
+      expect(mockList).toHaveBeenCalled();
       expect(mockSearchUsernamesInIndex).toHaveBeenCalledTimes(2);
       expect(mockSearchUsernamesInIndex).toHaveBeenCalledWith(
         expect.objectContaining({ indexName: 'index1' })
@@ -117,7 +116,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
     });
 
     it('logs and returns if no index sources', async () => {
-      mockFindSourcesByType.mockResolvedValue([]);
+      mockList.mockResolvedValue({ sources: [], total: 0 });
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
       expect(deps.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('No monitoring index sources found. Skipping sync.')
@@ -125,10 +124,13 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
     });
 
     it('skips sources without indexPattern', async () => {
-      mockFindSourcesByType.mockResolvedValue([
-        { name: 'no-index', indexPattern: undefined },
-        { name: 'with-index', indexPattern: 'foo' },
-      ]);
+      mockList.mockResolvedValue({
+        sources: [
+          { name: 'no-index', indexPattern: undefined },
+          { name: 'with-index', indexPattern: 'foo' },
+        ],
+        total: 2,
+      });
       mockFindStaleUsersForIndex.mockResolvedValue([]);
 
       await indexSyncService.plainIndexSync(mockSavedObjectClient);

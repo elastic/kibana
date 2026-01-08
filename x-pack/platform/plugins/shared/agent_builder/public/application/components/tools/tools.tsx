@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { docLinks } from '../../../../common/doc_links';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useToolsActions } from '../../context/tools_provider';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
@@ -29,6 +29,7 @@ export const AgentBuilderTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
   const { createAgentBuilderUrl } = useNavigation();
+  const { docLinksService } = useAgentBuilderServices();
 
   const { manageTools } = useUiPrivileges();
 
@@ -43,7 +44,7 @@ export const AgentBuilderTools = () => {
             values={{
               learnMoreLink: (
                 <EuiLink
-                  href={docLinks.tools}
+                  href={docLinksService.tools}
                   target="_blank"
                   aria-label={i18n.translate(
                     'xpack.agentBuilder.tools.toolsDocumentationAriaLabel',

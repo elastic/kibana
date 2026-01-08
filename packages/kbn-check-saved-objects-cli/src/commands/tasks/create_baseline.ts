@@ -45,12 +45,19 @@ export const createBaseline: Task = async (ctx, task) => {
       task: async () => {
         // convert the fixtures into SavedObjectsBulkCreateObject[]
         const allDocs = Object.entries(ctx.fixtures.previous).flatMap(
-          ([type, { version, documents }]) =>
-            documents.map<SavedObjectsBulkCreateObject<FixtureTemplate>>((attributes) => ({
+          ([type, { version, documents }]) => {
+            // This is a special case for when a type has no migrations yet, we do not send the typeMigrationVersion field
+            // because this type has not been migrated under the model version system yet.
+            if (version === '10.0.0') {
+              version = undefined as unknown as string;
+            }
+
+            return documents.map<SavedObjectsBulkCreateObject<FixtureTemplate>>((attributes) => ({
               type,
               attributes,
               typeMigrationVersion: version,
-            }))
+            }));
+          }
         );
         // insert all fixtures in the `.kibana_migrator` SO index
         await savedObjectsRepository.bulkCreate(allDocs, {

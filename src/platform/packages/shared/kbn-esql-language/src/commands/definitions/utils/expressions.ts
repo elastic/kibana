@@ -22,7 +22,7 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
-import { getFunctionDefinition } from './functions';
+import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
 import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
@@ -56,20 +56,19 @@ export function getExpressionType(
     return root.literalType;
   }
 
-  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
   if (isInlineCast(root)) {
-    switch (root.castType) {
-      case 'int':
-        return 'integer';
-      case 'bool':
-        return 'boolean';
-      case 'string':
-        return 'keyword';
-      case 'datetime':
-        return 'date';
-      default:
-        return root.castType;
+    const castFunction = getFunctionForInlineCast(root.castType);
+    if (!castFunction) {
+      return 'unknown';
     }
+
+    const fnDef = getFunctionDefinition(castFunction);
+    if (!fnDef) {
+      return 'unknown';
+    }
+
+    // Safe to get the first one as all cast functions have a single return type
+    return fnDef.signatures[0].returnType;
   }
 
   if (isColumn(root) && columns) {
@@ -91,6 +90,10 @@ export function getExpressionType(
 
   if (root.type === 'list') {
     return getExpressionType(root.values[0], columns);
+  }
+
+  if (root.type === 'map') {
+    return 'function_named_parameters';
   }
 
   if (isFunctionExpression(root)) {

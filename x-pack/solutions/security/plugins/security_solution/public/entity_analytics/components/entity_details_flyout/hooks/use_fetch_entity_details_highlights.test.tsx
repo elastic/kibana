@@ -93,6 +93,7 @@ describe('useFetchEntityDetailsHighlights', () => {
       isChatLoading: false,
       abortStream: expect.any(Function),
       result: null,
+      error: null,
     });
   });
 
@@ -134,6 +135,7 @@ describe('useFetchEntityDetailsHighlights', () => {
 
     // Verify no errors were added
     expect(mockAddError).not.toHaveBeenCalled();
+    expect(result.current.error).toBeNull();
   });
 
   it('handles error from fetchEntityDetailsHighlights API', async () => {
@@ -154,6 +156,7 @@ describe('useFetchEntityDetailsHighlights', () => {
     expect(mockInferenceOutput).not.toHaveBeenCalled();
 
     expect(result.current.result).toBeNull();
+    expect(result.current.error).toBeInstanceOf(Error);
   });
 
   it('handles error from inference.output', async () => {
@@ -176,6 +179,7 @@ describe('useFetchEntityDetailsHighlights', () => {
     });
 
     expect(result.current.result).toBeNull();
+    expect(result.current.error).toBeInstanceOf(Error);
   });
 
   it('returns early when fetchEntityDetailsHighlights returns null summary', async () => {

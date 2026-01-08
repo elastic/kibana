@@ -55,14 +55,12 @@ export class LlmProxy {
           return { ...m, content: m.role === 'system' ? m.content?.slice(0, 200) : m.content };
         });
 
-        // @ts-expect-error
-        const toolChoice = requestBody.tool_choice?.function.name;
         const availableToolNames = requestBody.tools?.map(({ function: fn }) => fn.name);
 
         this.log.info(`Outgoing conversation "${JSON.stringify(compressedConversation, null, 2)}"`);
         this.log.info(`Tools: ${JSON.stringify(availableToolNames, null, 2)}`);
-        if (toolChoice) {
-          this.log.info(`Tool choice: ${toolChoice}`);
+        if (requestBody.tool_choice) {
+          this.log.info(`Tool choice: ${JSON.stringify(requestBody.tool_choice, undefined, 2)}`);
         }
 
         if (matchingInterceptor) {

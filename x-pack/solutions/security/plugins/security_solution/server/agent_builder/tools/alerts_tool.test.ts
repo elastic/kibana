@@ -29,6 +29,7 @@ describe('alertsTool', () => {
   };
   const mockEvents = {
     reportProgress: jest.fn(),
+    sendUiEvent: jest.fn(),
   };
   const tool = alertsTool(mockCore, mockLogger);
 

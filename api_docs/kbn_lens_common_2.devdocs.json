@@ -166,7 +166,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; isExpandable?: boolean | undefined; isCustomizable?: boolean | undefined; isDuplicable?: boolean | undefined; isPinnable?: boolean | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -576,7 +576,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
+          "<object, object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -1111,7 +1111,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; isExpandable?: boolean | undefined; isCustomizable?: boolean | undefined; isDuplicable?: boolean | undefined; isPinnable?: boolean | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1521,7 +1521,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
+          "<object, object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",

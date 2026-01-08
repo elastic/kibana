@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { useKibana } from '../application/hooks/use_kibana';
-import { docLinks } from '../../common/doc_links';
+import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversationList } from '../application/hooks/use_conversation_list';
 import { useSendMessage } from '../application/context/send_message/send_message_context';
 import { useHasConnectorsAllPrivileges } from '../application/hooks/use_has_connectors_all_privileges';
@@ -21,6 +21,7 @@ export const EmbeddableWelcomeMessage = () => {
     services: { application },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
+  const { docLinksService } = useAgentBuilderServices();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
   const [showCallOut, setShowCallOut] = useState(
@@ -48,7 +49,7 @@ export const EmbeddableWelcomeMessage = () => {
   if (!showCallOut || !hasNoConversations) return null;
 
   const documentationLink = (
-    <EuiLink href={docLinks.agentBuilder} target="_blank" external>
+    <EuiLink href={docLinksService.agentBuilder} target="_blank" external>
       <FormattedMessage
         id="xpack.agentBuilder.welcomeMessage.documentationLink"
         defaultMessage="documentation"

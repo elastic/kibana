@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/authentication/app/auth_flow?statusCode=401')
           .set('authorization', `Bearer ${accessToken}`)
           .expect(401);
-        expect(authFlow401ResponseText).to.contain('<div/>');
+        expect(authFlow401ResponseText).to.contain('<h1>Unauthenticated</h1>');
         expect(refresh401Header).to.contain('url=/login');
 
         const {
@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/authentication/app/auth_flow?statusCode=500')
           .set('authorization', `Bearer ${accessToken}`)
           .expect(500);
-        expect(authFlow500ResponseText).to.contain('<div/>');
+        expect(authFlow500ResponseText).to.contain('<h1>Unauthenticated</h1>');
         expect(refresh500Header).to.contain('url=/login');
       });
     });

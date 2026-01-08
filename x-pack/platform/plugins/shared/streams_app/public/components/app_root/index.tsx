@@ -13,12 +13,15 @@ import {
   RouterProvider,
 } from '@kbn/typed-react-router-config';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
+
+const queryClient = new QueryClient();
 
 export function AppRoot({
   coreStart,
@@ -47,16 +50,18 @@ export function AppRoot({
   return (
     <StreamsAppContextProvider context={context}>
       <StreamsTourProvider>
-        {/* @ts-expect-error upgrade typescript v5.4.5 */}
-        <RouterProvider history={history} router={streamsAppRouter}>
-          <PerformanceContextProvider>
-            <KbnUrlStateStorageFromRouterProvider>
-              <BreadcrumbsContextProvider>
-                <RouteRenderer />
-              </BreadcrumbsContextProvider>
-            </KbnUrlStateStorageFromRouterProvider>
-          </PerformanceContextProvider>
-        </RouterProvider>
+        <QueryClientProvider client={queryClient}>
+          {/* @ts-expect-error upgrade typescript v5.4.5 */}
+          <RouterProvider history={history} router={streamsAppRouter}>
+            <PerformanceContextProvider>
+              <KbnUrlStateStorageFromRouterProvider>
+                <BreadcrumbsContextProvider>
+                  <RouteRenderer />
+                </BreadcrumbsContextProvider>
+              </KbnUrlStateStorageFromRouterProvider>
+            </PerformanceContextProvider>
+          </RouterProvider>
+        </QueryClientProvider>
       </StreamsTourProvider>
     </StreamsAppContextProvider>
   );

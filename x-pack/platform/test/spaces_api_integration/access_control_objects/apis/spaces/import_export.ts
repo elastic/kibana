@@ -365,222 +365,223 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('ovewriting objects', () => {
-        it('should disallow overwrite of owned objects if not owned by the current user', async () => {
-          const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
+      describe('overwriting objects', () => {
+        describe('negative tests', function () {
+          this.tags('skipFIPS');
 
-          let createResponse = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
-          expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property(
-            'accessMode',
-            'write_restricted'
-          );
-          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
-          const adminObjId = createResponse.body.id;
+          it('should disallow overwrite of owned objects if not owned by the current user', async () => {
+            const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
-          const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsNotObjectOwner(
-            'test_user',
-            'changeme'
-          );
+            let createResponse = await supertestWithoutAuth
+              .post('/access_control_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', adminCookie.cookieString())
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+              .expect(200);
+            expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
+            expect(createResponse.body).to.have.property('accessControl');
+            expect(createResponse.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
+            expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+            const adminObjId = createResponse.body.id;
 
-          createResponse = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', testUserCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
-          expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property(
-            'accessMode',
-            'write_restricted'
-          );
-          expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
-          const testUserObjId = createResponse.body.id;
+            const { cookie: testUserCookie, profileUid: testProfileId } =
+              await loginAsNotObjectOwner('test_user', 'changeme');
 
-          const toImport = [
-            {
-              // this first object will import ok
-              accessControl: { accessMode: 'write_restricted', owner: testProfileId },
-              attributes: { description: 'test' },
-              coreMigrationVersion: '8.8.0',
-              created_at: '2025-07-16T10:03:03.253Z',
-              created_by: testProfileId,
-              id: testUserObjId,
-              managed: false,
-              references: [],
-              type: ACCESS_CONTROL_TYPE,
-              updated_at: '2025-07-16T10:03:03.253Z',
-              updated_by: testProfileId,
-              version: 'WzY5LDFd',
-            },
-            {
-              // this second object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
-              attributes: { description: 'test' },
-              coreMigrationVersion: '8.8.0',
-              created_at: '2025-07-16T10:03:03.253Z',
-              created_by: adminProfileId,
-              id: adminObjId,
-              managed: false,
-              references: [],
-              type: ACCESS_CONTROL_TYPE,
-              updated_at: '2025-07-16T10:03:03.253Z',
-              updated_by: adminProfileId,
-              version: 'WzY5LDFd',
-            },
-            {
-              excludedObjects: [],
-              excludedObjectsCount: 0,
-              exportedCount: 2,
-              missingRefCount: 0,
-              missingReferences: [],
-            },
-          ];
+            createResponse = await supertestWithoutAuth
+              .post('/access_control_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', testUserCookie.cookieString())
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+              .expect(200);
+            expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
+            expect(createResponse.body).to.have.property('accessControl');
+            expect(createResponse.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
+            expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
+            const testUserObjId = createResponse.body.id;
 
-          const importResponse = await performImport(
-            toImport,
-            testUserCookie.cookieString(),
-            true, // overwrite = true,
-            false, // createNewCopies = false
-            200
-          );
-          const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
-          expect(Array.isArray(results)).to.be(true);
-          expect(results.length).to.be(1);
-          const result = results[0];
-          expect(result).to.have.property('successCount', 1);
-          expect(result).to.have.property('success', false);
-          expect(result).to.have.property('successResults');
-          expect(result.successResults).to.eql([
-            {
-              type: ACCESS_CONTROL_TYPE,
-              id: testUserObjId,
-              meta: {},
-              managed: false,
-              overwrite: true,
-            },
-          ]);
-          expect(result).to.have.property('errors');
-          expect(result.errors).to.eql([
-            {
-              id: adminObjId,
-              type: ACCESS_CONTROL_TYPE,
-              meta: {},
-              error: {
-                message:
-                  'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
-                statusCode: 403,
-                error: 'Forbidden',
-                type: 'unknown',
+            const toImport = [
+              {
+                // this first object will import ok
+                accessControl: { accessMode: 'write_restricted', owner: testProfileId },
+                attributes: { description: 'test' },
+                coreMigrationVersion: '8.8.0',
+                created_at: '2025-07-16T10:03:03.253Z',
+                created_by: testProfileId,
+                id: testUserObjId,
+                managed: false,
+                references: [],
+                type: ACCESS_CONTROL_TYPE,
+                updated_at: '2025-07-16T10:03:03.253Z',
+                updated_by: testProfileId,
+                version: 'WzY5LDFd',
               },
-              overwrite: true,
-            },
-          ]);
+              {
+                // this second object will be rejected because it is owned by another user
+                accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
+                attributes: { description: 'test' },
+                coreMigrationVersion: '8.8.0',
+                created_at: '2025-07-16T10:03:03.253Z',
+                created_by: adminProfileId,
+                id: adminObjId,
+                managed: false,
+                references: [],
+                type: ACCESS_CONTROL_TYPE,
+                updated_at: '2025-07-16T10:03:03.253Z',
+                updated_by: adminProfileId,
+                version: 'WzY5LDFd',
+              },
+              {
+                excludedObjects: [],
+                excludedObjectsCount: 0,
+                exportedCount: 2,
+                missingRefCount: 0,
+                missingReferences: [],
+              },
+            ];
+
+            const importResponse = await performImport(
+              toImport,
+              testUserCookie.cookieString(),
+              true, // overwrite = true,
+              false, // createNewCopies = false
+              200
+            );
+            const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
+            expect(Array.isArray(results)).to.be(true);
+            expect(results.length).to.be(1);
+            const result = results[0];
+            expect(result).to.have.property('successCount', 1);
+            expect(result).to.have.property('success', false);
+            expect(result).to.have.property('successResults');
+            expect(result.successResults).to.eql([
+              {
+                type: ACCESS_CONTROL_TYPE,
+                id: testUserObjId,
+                meta: {},
+                managed: false,
+                overwrite: true,
+              },
+            ]);
+            expect(result).to.have.property('errors');
+            expect(result.errors).to.eql([
+              {
+                id: adminObjId,
+                type: ACCESS_CONTROL_TYPE,
+                meta: {},
+                error: {
+                  message:
+                    'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
+                  statusCode: 403,
+                  error: 'Forbidden',
+                  type: 'unknown',
+                },
+                overwrite: true,
+              },
+            ]);
+          });
+
+          it('should throw if the import only contains objects are not overwritable by the current user', async () => {
+            const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
+
+            let createResponse = await supertestWithoutAuth
+              .post('/access_control_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', adminCookie.cookieString())
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+              .expect(200);
+            expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
+            expect(createResponse.body).to.have.property('accessControl');
+            expect(createResponse.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
+            expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+            const firstObjId = createResponse.body.id;
+
+            createResponse = await supertestWithoutAuth
+              .post('/access_control_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', adminCookie.cookieString())
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+              .expect(200);
+            expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
+            expect(createResponse.body).to.have.property('accessControl');
+            expect(createResponse.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
+            expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+            const secondObjId = createResponse.body.id;
+
+            const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+
+            const toImport = [
+              {
+                // this first object will be rejected because it is owned by another user
+                accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
+                attributes: { description: 'test' },
+                coreMigrationVersion: '8.8.0',
+                created_at: '2025-07-16T10:03:03.253Z',
+                created_by: adminProfileId,
+                id: firstObjId,
+                managed: false,
+                references: [],
+                type: ACCESS_CONTROL_TYPE,
+                updated_at: '2025-07-16T10:03:03.253Z',
+                updated_by: adminProfileId,
+                version: 'WzY5LDFd',
+              },
+              {
+                // this second object will be rejected because it is owned by another user
+                accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
+                attributes: { description: 'test' },
+                coreMigrationVersion: '8.8.0',
+                created_at: '2025-07-16T10:03:03.253Z',
+                created_by: adminProfileId,
+                id: secondObjId,
+                managed: false,
+                references: [],
+                type: ACCESS_CONTROL_TYPE,
+                updated_at: '2025-07-16T10:03:03.253Z',
+                updated_by: adminProfileId,
+                version: 'WzY5LDFd',
+                // there are no other imported object, so the import with throw rather than succeed with partial success
+              },
+              {
+                excludedObjects: [],
+                excludedObjectsCount: 0,
+                exportedCount: 2,
+                missingRefCount: 0,
+                missingReferences: [],
+              },
+            ];
+
+            const importResponse = await performImport(
+              toImport,
+              testUserCookie.cookieString(),
+              true, // overwrite = true,
+              false, // createNewCopies = false
+              403 // entire import fails
+            );
+            const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
+            expect(Array.isArray(results)).to.be(true);
+            expect(results.length).to.be(1);
+            expect(results[0]).to.have.property('statusCode', 403);
+            expect(results[0]).to.have.property('error', 'Forbidden');
+            expect(results[0]).to.have.property('message');
+            expect(results[0].message).to.contain(
+              `Unable to bulk_create ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+            );
+            expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${firstObjId}`); // the order may vary
+            expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${secondObjId}`);
+          });
         });
-
-        it('should throw if the import only contains objects are not overwritable by the current user', async () => {
-          const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
-
-          let createResponse = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
-          expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property(
-            'accessMode',
-            'write_restricted'
-          );
-          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
-          const firstObjId = createResponse.body.id;
-
-          createResponse = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
-          expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property(
-            'accessMode',
-            'write_restricted'
-          );
-          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
-          const secondObjId = createResponse.body.id;
-
-          const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
-
-          const toImport = [
-            {
-              // this first object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
-              attributes: { description: 'test' },
-              coreMigrationVersion: '8.8.0',
-              created_at: '2025-07-16T10:03:03.253Z',
-              created_by: adminProfileId,
-              id: firstObjId,
-              managed: false,
-              references: [],
-              type: ACCESS_CONTROL_TYPE,
-              updated_at: '2025-07-16T10:03:03.253Z',
-              updated_by: adminProfileId,
-              version: 'WzY5LDFd',
-            },
-            {
-              // this second object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
-              attributes: { description: 'test' },
-              coreMigrationVersion: '8.8.0',
-              created_at: '2025-07-16T10:03:03.253Z',
-              created_by: adminProfileId,
-              id: secondObjId,
-              managed: false,
-              references: [],
-              type: ACCESS_CONTROL_TYPE,
-              updated_at: '2025-07-16T10:03:03.253Z',
-              updated_by: adminProfileId,
-              version: 'WzY5LDFd',
-              // there are no other imported object, so the import with throw rather than succeed with partial success
-            },
-            {
-              excludedObjects: [],
-              excludedObjectsCount: 0,
-              exportedCount: 2,
-              missingRefCount: 0,
-              missingReferences: [],
-            },
-          ];
-
-          const importResponse = await performImport(
-            toImport,
-            testUserCookie.cookieString(),
-            true, // overwrite = true,
-            false, // createNewCopies = false
-            403 // entire import fails
-          );
-          const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
-          expect(Array.isArray(results)).to.be(true);
-          expect(results.length).to.be(1);
-          expect(results[0]).to.have.property('statusCode', 403);
-          expect(results[0]).to.have.property('error', 'Forbidden');
-          expect(results[0]).to.have.property('message');
-          expect(results[0].message).to.contain(
-            `Unable to bulk_create ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
-          );
-          expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${firstObjId}`); // the order may vary
-          expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${secondObjId}`);
-        });
-
         it('should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user', async () => {
           const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsObjectOwner(
             'test_user',
@@ -1003,136 +1004,140 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result.successResults[1]).to.have.property('destinationId'); // generated ID for new copy
       });
 
-      it('should disallow overwrite retry for write-restricted objects not owned by the current user', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
+      describe('should disallow', function () {
+        this.tags('skipFIPS');
 
-        let createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
-        expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property(
-          'accessMode',
-          'write_restricted'
-        );
-        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
-        const adminObjId = createResponse.body.id;
+        it('overwrite retry for write-restricted objects not owned by the current user', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
-        const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsNotObjectOwner(
-          'test_user',
-          'changeme'
-        );
+          let createResponse = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+            .expect(200);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
+          expect(createResponse.body).to.have.property('accessControl');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
+          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+          const adminObjId = createResponse.body.id;
 
-        createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', testUserCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
-        expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property(
-          'accessMode',
-          'write_restricted'
-        );
-        expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
-        const testUserObjId = createResponse.body.id;
+          const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsNotObjectOwner(
+            'test_user',
+            'changeme'
+          );
 
-        const toImport = [
-          {
-            // this first object will import ok
-            accessControl: { accessMode: 'write_restricted', owner: testProfileId },
-            attributes: { description: 'test' },
-            coreMigrationVersion: '8.8.0',
-            created_at: '2025-07-16T10:03:03.253Z',
-            created_by: testProfileId,
-            id: testUserObjId,
-            managed: false,
-            references: [],
-            type: ACCESS_CONTROL_TYPE,
-            updated_at: '2025-07-16T10:03:03.253Z',
-            updated_by: testProfileId,
-            version: 'WzY5LDFd',
-          },
-          {
-            // this second object will be rejected because it is owned by another user
-            accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
-            attributes: { description: 'test' },
-            coreMigrationVersion: '8.8.0',
-            created_at: '2025-07-16T10:03:03.253Z',
-            created_by: adminProfileId,
-            id: adminObjId,
-            managed: false,
-            references: [],
-            type: ACCESS_CONTROL_TYPE,
-            updated_at: '2025-07-16T10:03:03.253Z',
-            updated_by: adminProfileId,
-            version: 'WzY5LDFd',
-          },
-          {
-            excludedObjects: [],
-            excludedObjectsCount: 0,
-            exportedCount: 2,
-            missingRefCount: 0,
-            missingReferences: [],
-          },
-        ];
+          createResponse = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', testUserCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+            .expect(200);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
+          expect(createResponse.body).to.have.property('accessControl');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
+          expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
+          const testUserObjId = createResponse.body.id;
 
-        const importResponse = await performResolveImportErrors(
-          toImport,
-          testUserCookie.cookieString(),
-          [
+          const toImport = [
+            {
+              // this first object will import ok
+              accessControl: { accessMode: 'write_restricted', owner: testProfileId },
+              attributes: { description: 'test' },
+              coreMigrationVersion: '8.8.0',
+              created_at: '2025-07-16T10:03:03.253Z',
+              created_by: testProfileId,
+              id: testUserObjId,
+              managed: false,
+              references: [],
+              type: ACCESS_CONTROL_TYPE,
+              updated_at: '2025-07-16T10:03:03.253Z',
+              updated_by: testProfileId,
+              version: 'WzY5LDFd',
+            },
+            {
+              // this second object will be rejected because it is owned by another user
+              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
+              attributes: { description: 'test' },
+              coreMigrationVersion: '8.8.0',
+              created_at: '2025-07-16T10:03:03.253Z',
+              created_by: adminProfileId,
+              id: adminObjId,
+              managed: false,
+              references: [],
+              type: ACCESS_CONTROL_TYPE,
+              updated_at: '2025-07-16T10:03:03.253Z',
+              updated_by: adminProfileId,
+              version: 'WzY5LDFd',
+            },
+            {
+              excludedObjects: [],
+              excludedObjectsCount: 0,
+              exportedCount: 2,
+              missingRefCount: 0,
+              missingReferences: [],
+            },
+          ];
+
+          const importResponse = await performResolveImportErrors(
+            toImport,
+            testUserCookie.cookieString(),
+            [
+              {
+                type: ACCESS_CONTROL_TYPE,
+                id: testUserObjId,
+                overwrite: true,
+                replaceReferences: [],
+              },
+              {
+                type: ACCESS_CONTROL_TYPE,
+                id: adminObjId,
+                overwrite: true,
+                replaceReferences: [],
+              },
+            ],
+            false, // createNewCopies = false
+            200
+          );
+          const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
+          expect(Array.isArray(results)).to.be(true);
+          expect(results.length).to.be(1);
+          const result = results[0];
+          expect(result).to.have.property('successCount', 1);
+          expect(result).to.have.property('success', false);
+          expect(result).to.have.property('successResults');
+          expect(result.successResults).to.eql([
             {
               type: ACCESS_CONTROL_TYPE,
               id: testUserObjId,
+              meta: {},
+              managed: false,
               overwrite: true,
-              replaceReferences: [],
             },
+          ]);
+          expect(result).to.have.property('errors');
+          expect(result.errors).to.eql([
             {
-              type: ACCESS_CONTROL_TYPE,
               id: adminObjId,
+              type: ACCESS_CONTROL_TYPE,
+              meta: {},
+              error: {
+                message:
+                  'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
+                statusCode: 403,
+                error: 'Forbidden',
+                type: 'unknown',
+              },
               overwrite: true,
-              replaceReferences: [],
             },
-          ],
-          false, // createNewCopies = false
-          200
-        );
-        const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
-        expect(Array.isArray(results)).to.be(true);
-        expect(results.length).to.be(1);
-        const result = results[0];
-        expect(result).to.have.property('successCount', 1);
-        expect(result).to.have.property('success', false);
-        expect(result).to.have.property('successResults');
-        expect(result.successResults).to.eql([
-          {
-            type: ACCESS_CONTROL_TYPE,
-            id: testUserObjId,
-            meta: {},
-            managed: false,
-            overwrite: true,
-          },
-        ]);
-        expect(result).to.have.property('errors');
-        expect(result.errors).to.eql([
-          {
-            id: adminObjId,
-            type: ACCESS_CONTROL_TYPE,
-            meta: {},
-            error: {
-              message:
-                'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
-              statusCode: 403,
-              error: 'Forbidden',
-              type: 'unknown',
-            },
-            overwrite: true,
-          },
-        ]);
+          ]);
+        });
       });
 
       it('should disallow create new retry with same ID for write-restricted objects not owned by the current user', async () => {

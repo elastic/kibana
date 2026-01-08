@@ -302,15 +302,6 @@ export const labels = {
         defaultMessage: "You can't recover deleted data.",
       }
     ),
-    testTool: {
-      backToEditToolButton: i18n.translate(
-        'xpack.agentBuilder.tools.testTool.backToEditToolButton',
-        {
-          defaultMessage: 'Back to edit tool',
-        }
-      ),
-    },
-
     // Bulk import MCP tools
     bulkImportMcp: {
       title: i18n.translate('xpack.agentBuilder.tools.bulkImportMcp.title', {

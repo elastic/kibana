@@ -194,7 +194,7 @@ export const JobsListPage: FC<Props> = ({
                         defaultMessage="Identify, analyze, and process your data using advanced analysis techniques."
                       />
                     }
-                    rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
+                    rightSideItems={[<DocsLink key="docs-link" currentTabId={currentTabId} />]}
                     bottomBorder
                     paddingSize={'none'}
                   />

@@ -7,7 +7,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-const EXPECTED_CONTROLS = ['Statusactive 1', 'Rule', 'Group', 'Tags'];
+const EXPECTED_CONTROLS = ['Statusactive1', 'Rule', 'Group', 'Tags'];
 
 test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {

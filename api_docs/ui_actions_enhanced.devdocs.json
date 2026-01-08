@@ -765,7 +765,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<ExecutionContext>"
+              "<ExecutionContext, {}>"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
@@ -2458,7 +2458,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<ExecutionContext>"
+              "<ExecutionContext, {}>"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
             "deprecated": false,
@@ -3267,7 +3267,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3275,7 +3275,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly getActionFactory: (actionFactoryId: string) => ",
+              "<Context, object>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly getActionFactory: (actionFactoryId: string) => ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",

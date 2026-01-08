@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../../../../../common/mock';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import { getDashboardMigrationStatsMock } from '../../../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../service/hooks/use_upsert_resources');
 const mockUseUpsertResources = useUpsertResources as jest.Mock;
@@ -30,6 +31,7 @@ describe('useMacrosFileUploadStep', () => {
     const props = {
       status: 'incomplete' as const,
       migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+      migrationSource: MigrationSource.SPLUNK,
       missingMacros: [],
       onMacrosCreated: jest.fn(),
     };
@@ -54,6 +56,7 @@ describe('useMacrosFileUploadStep', () => {
     const props = {
       status: 'incomplete' as const,
       migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+      migrationSource: MigrationSource.SPLUNK,
       missingMacros: [],
       onMacrosCreated: jest.fn(),
     };
@@ -78,6 +81,7 @@ describe('useMacrosFileUploadStep', () => {
     const props = {
       status: 'incomplete' as const,
       migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+      migrationSource: MigrationSource.SPLUNK,
       missingMacros: [],
       onMacrosCreated: jest.fn(),
     };

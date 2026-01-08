@@ -8,6 +8,7 @@
  */
 
 import { serializeLayout } from './serialize_layout';
+import type { DashboardLayout } from './types';
 
 describe('serializeLayout', () => {
   test('should serialize panels', () => {
@@ -33,6 +34,18 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
       },
+      controls: {
+        control1: {
+          grow: true,
+          width: 'small',
+          type: 'someControl',
+          order: 1,
+        },
+        control2: {
+          type: 'someOtherControl',
+          order: 0,
+        },
+      },
       sections: {
         section1: {
           collapsed: true,
@@ -43,7 +56,7 @@ describe('serializeLayout', () => {
           title: 'Section One',
         },
       },
-    };
+    } as unknown as DashboardLayout;
     const childState = {
       '1': {
         rawState: {
@@ -63,9 +76,19 @@ describe('serializeLayout', () => {
         },
         references: [],
       },
+      control1: {
+        rawState: {
+          selection: 'some value',
+        },
+      },
+      control2: {
+        rawState: {
+          anotherValue: 'test',
+        },
+      },
     };
 
-    const { panels, references } = serializeLayout(layout, childState);
+    const { panels, controlGroupInput, references } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -105,6 +128,28 @@ describe('serializeLayout', () => {
           "uid": "section1",
         },
       ]
+    `);
+    expect(controlGroupInput).toMatchInlineSnapshot(`
+      Object {
+        "controls": Array [
+          Object {
+            "config": Object {
+              "anotherValue": "test",
+            },
+            "type": "someOtherControl",
+            "uid": "control2",
+          },
+          Object {
+            "config": Object {
+              "selection": "some value",
+            },
+            "grow": true,
+            "type": "someControl",
+            "uid": "control1",
+            "width": "small",
+          },
+        ],
+      }
     `);
     expect(references).toMatchInlineSnapshot(`
       Array [

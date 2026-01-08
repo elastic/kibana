@@ -41,15 +41,13 @@ export function generateYamlSchemaFromConnectors(
 
   if (loose) {
     return WorkflowSchema.partial().extend({
-      settings: WorkflowSettingsSchema.omit({ concurrency: true }).optional(),
+      settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
     });
   }
 
   return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose)
-      .omit({ concurrency: true })
-      .optional(),
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
   });
 }

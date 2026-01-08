@@ -17,7 +17,11 @@ describe('createEntityAttachmentType', () => {
 
   describe('validate', () => {
     it('returns valid when entity data is valid with host identifierType', async () => {
-      const input = { identifierType: 'host', identifier: 'hostname-1' };
+      const input = {
+        identifierType: 'host',
+        identifier: 'hostname-1',
+        attachmentLabel: 'Risk Entity',
+      };
 
       const result = await attachmentType.validate(input);
 
@@ -28,7 +32,11 @@ describe('createEntityAttachmentType', () => {
     });
 
     it('returns valid when entity data is valid with user identifierType', async () => {
-      const input = { identifierType: 'user', identifier: 'username-1' };
+      const input = {
+        identifierType: 'user',
+        identifier: 'username-1',
+        attachmentLabel: 'Risk Entity',
+      };
 
       const result = await attachmentType.validate(input);
 
@@ -39,7 +47,11 @@ describe('createEntityAttachmentType', () => {
     });
 
     it('returns valid when entity data is valid with service identifierType', async () => {
-      const input = { identifierType: 'service', identifier: 'service-1' };
+      const input = {
+        identifierType: 'service',
+        identifier: 'service-1',
+        attachmentLabel: 'Risk Entity',
+      };
 
       const result = await attachmentType.validate(input);
 
@@ -50,7 +62,11 @@ describe('createEntityAttachmentType', () => {
     });
 
     it('returns valid when entity data is valid with generic identifierType', async () => {
-      const input = { identifierType: 'generic', identifier: 'generic-1' };
+      const input = {
+        identifierType: 'generic',
+        identifier: 'generic-1',
+        attachmentLabel: 'Risk Entity',
+      };
 
       const result = await attachmentType.validate(input);
 

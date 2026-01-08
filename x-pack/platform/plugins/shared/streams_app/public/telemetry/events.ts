@@ -21,7 +21,6 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
@@ -42,7 +41,6 @@ import {
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   wiredStreamsStatusChangedSchema,
-  streamsFeatureIdentificationIdentifiedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
@@ -119,11 +117,6 @@ const streamsSignificantEventsCreatedEventType = {
   schema: streamsSignificantEventsCreatedSchema,
 };
 
-const streamsFeatureIdentificationIdentifiedEventType = {
-  eventType: STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
-  schema: streamsFeatureIdentificationIdentifiedSchema,
-};
-
 const streamsFeatureIdentificationSavedEventType = {
   eventType: STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   schema: streamsFeatureIdentificationSavedSchema,
@@ -165,7 +158,6 @@ export {
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
   wiredStreamsStatusChangedEventType,
-  streamsFeatureIdentificationIdentifiedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,

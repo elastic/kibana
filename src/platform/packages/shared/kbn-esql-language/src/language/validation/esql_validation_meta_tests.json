@@ -837,7 +837,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval TRIM(23::text)",
+      "query": "from a_index | eval TRIM(23::string)",
       "error": [],
       "warning": []
     },

@@ -15,8 +15,8 @@ export async function getAnchorLogs({
   logsIndices,
   startTime,
   endTime,
-  logsFilter,
-  interestingEventFilter,
+  kqlFilter,
+  errorLogsOnly,
   correlationFields,
   logger,
   logId,
@@ -26,8 +26,8 @@ export async function getAnchorLogs({
   logsIndices: string[];
   startTime: number;
   endTime: number;
-  logsFilter: string | undefined;
-  interestingEventFilter: string | undefined;
+  kqlFilter: string | undefined;
+  errorLogsOnly: boolean;
   correlationFields: string[];
   logger: Logger;
   logId?: string;
@@ -49,8 +49,8 @@ export async function getAnchorLogs({
     logsIndices,
     startTime,
     endTime,
-    logsFilter,
-    interestingEventFilter,
+    kqlFilter,
+    errorLogsOnly,
     correlationFields,
     logger,
     maxSequences,

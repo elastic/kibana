@@ -18,6 +18,7 @@ import { registerReloadRoute } from './register_reload_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerGetRoute } from './register_get_route';
 import { registerCreateRoute } from './register_create_route';
+import { registerPostIndexDocCountRoute } from './register_post_index_doc_count';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerClearCacheRoute(dependencies);
@@ -31,4 +32,5 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerDeleteRoute(dependencies);
   registerGetRoute(dependencies);
   registerCreateRoute(dependencies);
+  registerPostIndexDocCountRoute(dependencies);
 }

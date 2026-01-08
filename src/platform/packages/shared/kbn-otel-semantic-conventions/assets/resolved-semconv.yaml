@@ -6278,7 +6278,7 @@ groups:
         examples:
           - a3bf90e006b2
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: container.label
         type: template[string]
         brief: |
@@ -6398,7 +6398,7 @@ groups:
         examples:
           - gcr.io/opentelemetry/operator
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: container.image.repo_digests
         type: string[]
         brief: |
@@ -6409,7 +6409,7 @@ groups:
         requirement_level: recommended
         note: |
           [Docker](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
-        stability: development
+        stability: alpha
       - name: container.image.tags
         type: string[]
         brief: |
@@ -6418,7 +6418,7 @@ groups:
           - - v1.27.1
             - 3.5.7-0
         requirement_level: recommended
-        stability: development
+        stability: alpha
     name: container.image
     lineage:
       provenance:
@@ -7579,7 +7579,7 @@ groups:
         examples:
           - opentelemetry-cluster
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.cluster.uid
         type: string
@@ -7611,7 +7611,7 @@ groups:
 
           Therefore, UIDs between clusters should be extremely unlikely to
           conflict.
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.cluster
     lineage:
@@ -7652,13 +7652,15 @@ groups:
         examples:
           - redis
         requirement_level: recommended
-        stability: development
+        stability: alpha
+        role: identifying
       - name: k8s.container.restart_count
         type: int
         brief: |
           Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.
         requirement_level: recommended
-        stability: development
+        stability: alpha
+        role: descriptive
       - name: k8s.container.status.last_terminated_reason
         type: string
         brief: |
@@ -7668,6 +7670,7 @@ groups:
           - Error
         requirement_level: recommended
         stability: development
+        role: descriptive
     name: k8s.container
     lineage:
       provenance:
@@ -7682,6 +7685,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.container.restart_count:
           source_group: registry.k8s
           inherited_fields:
@@ -7689,6 +7694,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.container.status.last_terminated_reason:
           source_group: registry.k8s
           inherited_fields:
@@ -7697,6 +7704,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.cronjob
     type: entity
     brief: |
@@ -7718,7 +7727,7 @@ groups:
             `k8s.cronjob.annotation.retries` attribute with value `"4"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.cronjob.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.cronjob.label
         type: template[string]
@@ -7735,7 +7744,7 @@ groups:
             `k8s.cronjob.label.type` attribute with value `"weekly"`.
           - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.cronjob.label.automated` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.cronjob.name
         type: string
@@ -7744,7 +7753,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.cronjob.uid
         type: string
@@ -7753,7 +7762,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.cronjob
     lineage:
@@ -7823,7 +7832,7 @@ groups:
             as the `k8s.daemonset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.daemonset.label
         type: template[string]
@@ -7841,7 +7850,7 @@ groups:
             as the `k8s.daemonset.label.app` attribute with value `"guestbook"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.daemonset.name
         type: string
@@ -7850,7 +7859,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.daemonset.uid
         type: string
@@ -7859,7 +7868,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.daemonset
     lineage:
@@ -7929,7 +7938,7 @@ groups:
             as the `k8s.deployment.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.deployment.label
         type: template[string]
@@ -7947,7 +7956,7 @@ groups:
             as the `k8s.deployment.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.deployment.name
         type: string
@@ -7956,7 +7965,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.deployment.uid
         type: string
@@ -7965,7 +7974,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.deployment
     lineage:
@@ -8151,7 +8160,7 @@ groups:
             as the `k8s.job.annotation.number` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.job.label
         type: template[string]
@@ -8169,7 +8178,7 @@ groups:
             as the `k8s.job.label.jobtype` attribute with value `"ci"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.job.name
         type: string
@@ -8178,7 +8187,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.job.uid
         type: string
@@ -8187,7 +8196,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.job
     lineage:
@@ -8257,7 +8266,8 @@ groups:
             as the `k8s.namespace.annotation.ttl` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
+        role: descriptive
       - name: k8s.namespace.label
         type: template[string]
         brief: |
@@ -8274,7 +8284,8 @@ groups:
             as the `k8s.namespace.label.kubernetes.io/metadata.name` attribute with value `"default"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.label.data` attribute with value `""`.
-        stability: development
+        stability: alpha
+        role: descriptive
       - name: k8s.namespace.name
         type: string
         brief: |
@@ -8282,7 +8293,8 @@ groups:
         examples:
           - default
         requirement_level: recommended
-        stability: development
+        stability: alpha
+        role: identifying
     name: k8s.namespace
     lineage:
       provenance:
@@ -8298,6 +8310,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.namespace.label:
           source_group: registry.k8s
           inherited_fields:
@@ -8307,6 +8320,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.namespace.name:
           source_group: registry.k8s
           inherited_fields:
@@ -8315,6 +8329,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.node
     type: entity
     brief: |
@@ -8336,7 +8352,7 @@ groups:
             the `k8s.node.annotation.node.alpha.kubernetes.io/ttl` attribute with value `"0"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.node.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.node.label
         type: template[string]
@@ -8353,7 +8369,7 @@ groups:
             as the `k8s.node.label.kubernetes.io/arch` attribute with value `"arm64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.node.label.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.node.name
         type: string
@@ -8362,7 +8378,7 @@ groups:
         examples:
           - node-1
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.node.uid
         type: string
@@ -8371,7 +8387,7 @@ groups:
         examples:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.node
     lineage:
@@ -8443,7 +8459,7 @@ groups:
             the `k8s.pod.annotation.mycompany.io/arch` attribute with value `"x64"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.pod.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.pod.hostname
         type: string
@@ -8459,7 +8475,7 @@ groups:
 
           This attribute aligns with the `hostname` field of the
           [K8s PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podspec-v1-core).
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.pod.ip
         type: string
@@ -8471,7 +8487,7 @@ groups:
         note: |
           This attribute aligns with the `podIP` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core).
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.pod.label
         type: template[string]
@@ -8491,7 +8507,7 @@ groups:
             the `k8s.pod.label.mycompany.io/arch` attribute with value `"x64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.pod.label.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.pod.name
         type: string
@@ -8500,7 +8516,7 @@ groups:
         examples:
           - opentelemetry-pod-autoconf
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.pod.start_time
         type: string
@@ -8516,7 +8532,7 @@ groups:
           This attribute aligns with the `startTime` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core),
           in ISO 8601 (RFC 3339 compatible) format.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.pod.uid
         type: string
@@ -8525,7 +8541,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.pod
     lineage:
@@ -8625,7 +8641,7 @@ groups:
             as the `k8s.replicaset.annotation.replicas` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.replicaset.label
         type: template[string]
@@ -8643,7 +8659,7 @@ groups:
             as the `k8s.replicaset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.replicaset.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.replicaset.name
         type: string
@@ -8652,7 +8668,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.replicaset.uid
         type: string
@@ -8661,7 +8677,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.replicaset
     lineage:
@@ -8831,7 +8847,7 @@ groups:
             as the `k8s.statefulset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.statefulset.label
         type: template[string]
@@ -8849,7 +8865,7 @@ groups:
             as the `k8s.statefulset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.statefulset.name
         type: string
@@ -8858,7 +8874,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: descriptive
       - name: k8s.statefulset.uid
         type: string
@@ -8867,7 +8883,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
         role: identifying
     name: k8s.statefulset
     lineage:
@@ -38507,7 +38523,7 @@ groups:
           - redis
         requirement_level:
           conditionally_required: if and only if k8s.hpa.metric.type is ContainerResource.
-        stability: development
+        stability: alpha
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -38565,7 +38581,7 @@ groups:
           - redis
         requirement_level:
           conditionally_required: if and only if k8s.hpa.metric.type is ContainerResource
-        stability: development
+        stability: alpha
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -38623,7 +38639,7 @@ groups:
           - redis
         requirement_level:
           conditionally_required: if and only if k8s.hpa.metric.type is ContainerResource
-        stability: development
+        stability: alpha
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -61396,7 +61412,7 @@ groups:
         examples:
           - a3bf90e006b2
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: container.image.id
         type: string
         brief: |
@@ -61416,7 +61432,7 @@ groups:
         examples:
           - gcr.io/opentelemetry/operator
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: container.image.repo_digests
         type: string[]
         brief: |
@@ -61427,7 +61443,7 @@ groups:
         requirement_level: recommended
         note: |
           [Docker](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
-        stability: development
+        stability: alpha
       - name: container.image.tags
         type: string[]
         brief: |
@@ -61436,7 +61452,7 @@ groups:
           - - v1.27.1
             - 3.5.7-0
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: container.label
         type: template[string]
         brief: |
@@ -66581,7 +66597,7 @@ groups:
         examples:
           - opentelemetry-cluster
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.cluster.uid
         type: string
         brief: |
@@ -66612,7 +66628,7 @@ groups:
 
           Therefore, UIDs between clusters should be extremely unlikely to
           conflict.
-        stability: development
+        stability: alpha
       - name: k8s.container.name
         type: string
         brief: |
@@ -66620,13 +66636,13 @@ groups:
         examples:
           - redis
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.container.restart_count
         type: int
         brief: |
           Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.container.status.last_terminated_reason
         type: string
         brief: |
@@ -66727,7 +66743,7 @@ groups:
             `k8s.cronjob.annotation.retries` attribute with value `"4"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.cronjob.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.cronjob.label
         type: template[string]
         brief: |
@@ -66743,7 +66759,7 @@ groups:
             `k8s.cronjob.label.type` attribute with value `"weekly"`.
           - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.cronjob.label.automated` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.cronjob.name
         type: string
         brief: |
@@ -66751,7 +66767,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.cronjob.uid
         type: string
         brief: |
@@ -66759,7 +66775,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.daemonset.annotation
         type: template[string]
         brief: |
@@ -66776,7 +66792,7 @@ groups:
             as the `k8s.daemonset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.daemonset.label
         type: template[string]
         brief: |
@@ -66793,7 +66809,7 @@ groups:
             as the `k8s.daemonset.label.app` attribute with value `"guestbook"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.daemonset.name
         type: string
         brief: |
@@ -66801,7 +66817,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.daemonset.uid
         type: string
         brief: |
@@ -66809,7 +66825,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.deployment.annotation
         type: template[string]
         brief: |
@@ -66826,7 +66842,7 @@ groups:
             as the `k8s.deployment.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.deployment.label
         type: template[string]
         brief: |
@@ -66843,7 +66859,7 @@ groups:
             as the `k8s.deployment.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.deployment.name
         type: string
         brief: |
@@ -66851,7 +66867,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.deployment.uid
         type: string
         brief: |
@@ -66859,7 +66875,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -66944,7 +66960,7 @@ groups:
             as the `k8s.job.annotation.number` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.job.label
         type: template[string]
         brief: |
@@ -66961,7 +66977,7 @@ groups:
             as the `k8s.job.label.jobtype` attribute with value `"ci"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.job.name
         type: string
         brief: |
@@ -66969,7 +66985,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.job.uid
         type: string
         brief: |
@@ -66977,7 +66993,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.namespace.annotation
         type: template[string]
         brief: |
@@ -66994,7 +67010,7 @@ groups:
             as the `k8s.namespace.annotation.ttl` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.namespace.label
         type: template[string]
         brief: |
@@ -67011,7 +67027,7 @@ groups:
             as the `k8s.namespace.label.kubernetes.io/metadata.name` attribute with value `"default"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.label.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.namespace.name
         type: string
         brief: |
@@ -67019,7 +67035,7 @@ groups:
         examples:
           - default
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.namespace.phase
         type:
           members:
@@ -67056,7 +67072,7 @@ groups:
             the `k8s.node.annotation.node.alpha.kubernetes.io/ttl` attribute with value `"0"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.node.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.node.condition.status
         type:
           members:
@@ -67135,7 +67151,7 @@ groups:
             as the `k8s.node.label.kubernetes.io/arch` attribute with value `"arm64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.node.label.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.node.name
         type: string
         brief: |
@@ -67143,7 +67159,7 @@ groups:
         examples:
           - node-1
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.node.uid
         type: string
         brief: |
@@ -67151,7 +67167,7 @@ groups:
         examples:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.pod.annotation
         type: template[string]
         brief: |
@@ -67170,7 +67186,7 @@ groups:
             the `k8s.pod.annotation.mycompany.io/arch` attribute with value `"x64"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.pod.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.pod.hostname
         type: string
         brief: |
@@ -67185,7 +67201,7 @@ groups:
 
           This attribute aligns with the `hostname` field of the
           [K8s PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podspec-v1-core).
-        stability: development
+        stability: alpha
       - name: k8s.pod.ip
         type: string
         brief: |
@@ -67196,7 +67212,7 @@ groups:
         note: |
           This attribute aligns with the `podIP` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core).
-        stability: development
+        stability: alpha
       - name: k8s.pod.label
         type: template[string]
         brief: |
@@ -67215,7 +67231,7 @@ groups:
             the `k8s.pod.label.mycompany.io/arch` attribute with value `"x64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.pod.label.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.pod.name
         type: string
         brief: |
@@ -67223,7 +67239,7 @@ groups:
         examples:
           - opentelemetry-pod-autoconf
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.pod.start_time
         type: string
         brief: |
@@ -67238,7 +67254,7 @@ groups:
           This attribute aligns with the `startTime` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core),
           in ISO 8601 (RFC 3339 compatible) format.
-        stability: development
+        stability: alpha
       - name: k8s.pod.status.phase
         type:
           members:
@@ -67313,7 +67329,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.replicaset.annotation
         type: template[string]
         brief: |
@@ -67330,7 +67346,7 @@ groups:
             as the `k8s.replicaset.annotation.replicas` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.replicaset.label
         type: template[string]
         brief: |
@@ -67347,7 +67363,7 @@ groups:
             as the `k8s.replicaset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.replicaset.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.replicaset.name
         type: string
         brief: |
@@ -67355,7 +67371,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.replicaset.uid
         type: string
         brief: |
@@ -67363,7 +67379,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.replicationcontroller.name
         type: string
         brief: |
@@ -67422,7 +67438,7 @@ groups:
             as the `k8s.statefulset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.statefulset.label
         type: template[string]
         brief: |
@@ -67439,7 +67455,7 @@ groups:
             as the `k8s.statefulset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
-        stability: development
+        stability: alpha
       - name: k8s.statefulset.name
         type: string
         brief: |
@@ -67447,7 +67463,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.statefulset.uid
         type: string
         brief: |
@@ -67455,7 +67471,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: development
+        stability: alpha
       - name: k8s.storageclass.name
         type: string
         brief: |
@@ -72422,6 +72438,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -72447,6 +72464,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -72459,6 +72477,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -72529,6 +72548,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -72547,6 +72567,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -72556,6 +72577,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: rpc_service.server
     type: attribute_group
     brief: This document defines semantic conventions for remote procedure calls.
@@ -72686,6 +72708,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -72707,6 +72730,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -72719,6 +72743,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -72731,6 +72756,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -72819,6 +72845,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -72837,6 +72864,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -72846,6 +72874,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -72855,6 +72884,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: rpc.server
     type: attribute_group
     brief: This document defines semantic conventions for remote procedure calls.
@@ -72985,6 +73015,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -73010,6 +73041,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -73022,6 +73054,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -73110,6 +73143,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -73128,6 +73162,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -73137,6 +73172,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: server
     type: attribute_group
     brief: |
@@ -89416,6 +89452,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -89437,6 +89474,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -89461,6 +89499,7 @@ groups:
               stability: development
         brief: The Remote Procedure Call (RPC) system.
         requirement_level: required
+        sampling_relevant: true
         note: |
           The client and server RPC systems may differ for the same RPC interaction. For example, a client may use Apache Dubbo or Connect RPC to communicate with a server that uses gRPC since both protocols provide compatibility with gRPC.
         stability: development
@@ -89473,6 +89512,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -89485,6 +89525,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -89558,6 +89599,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -89575,6 +89617,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - sampling_relevant
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -89583,6 +89627,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -89592,6 +89637,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -89601,6 +89647,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.call.server
     type: span
     brief: This span represents an incoming Remote Procedure Call (RPC).
@@ -89746,6 +89793,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -89767,6 +89815,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -89791,6 +89840,7 @@ groups:
               stability: development
         brief: The Remote Procedure Call (RPC) system.
         requirement_level: required
+        sampling_relevant: true
         note: |
           The client and server RPC systems may differ for the same RPC interaction. For example, a client may use Apache Dubbo or Connect RPC to communicate with a server that uses gRPC since both protocols provide compatibility with gRPC.
         stability: development
@@ -89803,6 +89853,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -89815,6 +89866,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -89906,6 +89958,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -89924,6 +89977,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -89932,6 +89986,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -89941,6 +89996,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -89950,11 +90006,12 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.connect_rpc.call.client
     type: span
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
-      `rpc.system` MUST be set to `"connect_rpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"connect_rpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -90070,6 +90127,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -90119,6 +90177,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -90131,6 +90190,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -90143,6 +90203,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -90214,6 +90275,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -90249,6 +90311,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -90258,6 +90322,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -90267,11 +90332,12 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.connect_rpc.call.server
     type: span
     brief: This span represents an incoming Remote Procedure Call (RPC).
     note: |
-      `rpc.system` MUST be set to `"connect_rpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"connect_rpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -90407,6 +90473,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -90463,6 +90530,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -90475,6 +90543,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -90487,6 +90556,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -90576,6 +90646,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -90612,6 +90683,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -90621,6 +90693,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -90630,11 +90703,12 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.grpc.call.client
     type: span
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
-      `rpc.system` MUST be set to `"grpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"grpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -90751,6 +90825,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: required
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -90800,6 +90875,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: required
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -90812,6 +90888,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -90824,6 +90901,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -90895,6 +90973,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -90931,6 +91010,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -90940,6 +91020,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -90949,11 +91030,12 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.grpc.call.server
     type: span
     brief: This span represents an incoming Remote Procedure Call (RPC).
     note: |
-      `rpc.system` MUST be set to `"grpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"grpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -91090,6 +91172,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -91146,6 +91229,7 @@ groups:
         brief: The full (logical) name of the service being called, including its package name, if applicable.
         examples: myservice.EchoService
         requirement_level: recommended
+        sampling_relevant: true
         note: |
           This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
@@ -91158,6 +91242,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -91170,6 +91255,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -91259,6 +91345,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -91295,6 +91382,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -91304,6 +91392,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -91313,11 +91402,12 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.jsonrpc.call.client
     type: span
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
-      `rpc.system` MUST be set to `"jsonrpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"jsonrpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -91457,6 +91547,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: required
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -91481,6 +91572,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -91493,6 +91585,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -91582,6 +91675,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -91600,6 +91694,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -91609,11 +91704,12 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: span.rpc.jsonrpc.call.server
     type: span
     brief: This span represents an incoming Remote Procedure Call (RPC).
     note: |
-      `rpc.system` MUST be set to `"jsonrpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"jsonrpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -91773,6 +91869,7 @@ groups:
         brief: This is the logical name of the method from the RPC interface perspective.
         examples: exampleMethod
         requirement_level: required
+        sampling_relevant: true
         note: |
           This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
         stability: development
@@ -91797,6 +91894,7 @@ groups:
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: required
+        sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -91809,6 +91907,7 @@ groups:
           - 443
         requirement_level:
           conditionally_required: if the port is supported by the network transport used for communication.
+        sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -91916,6 +92015,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -91934,6 +92034,7 @@ groups:
             - brief
             - note
             - requirement_level
+            - sampling_relevant
         server.port:
           source_group: registry.server
           inherited_fields:
@@ -91943,6 +92044,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - sampling_relevant
   - id: thread
     type: attribute_group
     brief: |

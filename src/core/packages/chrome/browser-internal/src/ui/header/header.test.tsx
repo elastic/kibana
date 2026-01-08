@@ -47,6 +47,7 @@ function mockProps() {
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
     isFixed: true,
+    appMenu$: new BehaviorSubject(undefined),
   };
 }
 
@@ -96,6 +97,7 @@ describe('Header', () => {
         headerBanner$={headerBanner$}
         helpMenuLinks$={of([])}
         isServerless={false}
+        appMenu$={new BehaviorSubject(undefined)}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();

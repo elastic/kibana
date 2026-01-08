@@ -409,6 +409,48 @@ export const mathProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<MathProcessor>;
 
+export interface UppercaseProcessor extends ProcessorBaseWithWhere {
+  action: 'uppercase';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const uppercaseProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('uppercase'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<UppercaseProcessor>;
+
+export interface LowercaseProcessor extends ProcessorBaseWithWhere {
+  action: 'lowercase';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const lowercaseProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('lowercase'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<LowercaseProcessor>;
+
+export interface TrimProcessor extends ProcessorBaseWithWhere {
+  action: 'trim';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const trimProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('trim'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<TrimProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -422,6 +464,9 @@ export type StreamlangProcessorDefinition =
   | RemoveByPrefixProcessor
   | RemoveProcessor
   | ReplaceProcessor
+  | UppercaseProcessor
+  | LowercaseProcessor
+  | TrimProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -436,6 +481,9 @@ export const streamlangProcessorSchema = z.union([
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
   replaceProcessorSchema,
+  uppercaseProcessorSchema,
+  lowercaseProcessorSchema,
+  trimProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);

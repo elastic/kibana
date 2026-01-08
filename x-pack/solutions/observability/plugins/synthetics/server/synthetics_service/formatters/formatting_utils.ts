@@ -125,10 +125,7 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
 };
 
 function escapeTemplateLiterals(script: string): string {
-  // Escape ${...} to prevent Elastic Agent from interpreting as policy variables.
-  // Using unicode escape \u0024 for $ - agent won't recognize as variable,
-  // but JavaScript will interpret \u0024 as $ when the script runs.
-  return script.replace(/\$\{/g, '\\u0024{');
+  return script.replace(/\$\{/g, '$$${');
 }
 
 export const inlineSourceFormatter: FormatterFn = (fields, key) => {

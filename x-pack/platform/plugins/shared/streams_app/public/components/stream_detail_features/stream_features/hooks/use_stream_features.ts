@@ -5,29 +5,35 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/streams-schema';
 import { useMemo } from 'react';
+import type { QueryFunctionContext } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
+import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
-export const useStreamFeatures = (definition: Streams.all.Definition) => {
+export const useStreamFeatures = (streamName: string) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+  const showFetchErrorToast = useFetchErrorToast();
 
-  const { value, loading, error, refresh } = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-          },
+  const fetchFeatures = async ({ signal }: QueryFunctionContext) => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
+      params: {
+        path: {
+          name: streamName,
         },
-      });
-    },
-    [definition.name, streamsRepositoryClient]
-  );
+      },
+      signal: signal ?? null,
+    });
+  };
 
-  const features = useMemo(() => value?.features ?? [], [value?.features]);
+  const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
+    queryKey: ['features', streamName],
+    queryFn: fetchFeatures,
+    onError: showFetchErrorToast,
+  });
+
+  const features = useMemo(() => data?.features ?? [], [data?.features]);
 
   const featuresByName = useMemo(
     () => Object.fromEntries(features.map((f) => [f.name, f])),
@@ -35,10 +41,10 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
   );
 
   return {
-    refreshFeatures: refresh,
+    refreshFeatures: refetch,
     features,
     featuresByName,
-    featuresLoading: loading,
+    featuresLoading: isLoading,
     error,
   };
 };

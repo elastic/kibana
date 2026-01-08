@@ -47,7 +47,7 @@ export interface ActionMenuItemProps<Context extends object> {
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
   Required<Pick<Action<Context>, 'getCompatibilityChangesSubject' | 'couldBecomeCompatible'>>;
 
-export interface Action<Context extends object = object>
+export interface Action<Context extends object = object, ActionExtension extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -124,13 +124,17 @@ export interface Action<Context extends object = object>
    *
    */
   showNotification?: boolean;
+
+  extension?: ActionExtension;
 }
 
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<Context extends object = object>
-  extends Partial<Presentable<ActionDefinitionContext<Context>>> {
+export type ActionDefinition<
+  Context extends object = object,
+  ActionExtension extends object = {}
+> = Partial<Presentable<ActionDefinitionContext<Context>>> & { extension?: ActionExtension } & {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -189,6 +193,6 @@ export interface ActionDefinition<Context extends object = object>
    * is any chance that `isCompatible` could return true in the future.
    */
   couldBecomeCompatible?: (context: Context) => boolean;
-}
+};
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

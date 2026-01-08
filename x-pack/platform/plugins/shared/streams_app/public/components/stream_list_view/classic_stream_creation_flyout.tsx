@@ -30,12 +30,14 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       start: {
         share,
         indexManagement,
+        indexLifecycleManagement,
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
 
   const router = useStreamsAppRouter();
+  const isIlmAvailable = !!indexLifecycleManagement?.apiService;
 
   const templatesListFetch = useStreamsAppFetch(async () => {
     const response = await indexManagement.apiService.getIndexTemplates({ signal });
@@ -43,12 +45,37 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
     // Filter to only show templates that:
     // 1. Have data_stream enabled
     // 2. Have at least one index pattern containing a wildcard
+    // 3. Are not hidden
     return response.templates.filter((template) => {
+      const isHidden = template.dataStream?.hidden === true;
       const hasDataStream = template.dataStream !== undefined;
       const hasWildcardPattern = template.indexPatterns?.some((pattern) => pattern.includes('*'));
-      return hasDataStream && hasWildcardPattern;
+      return hasDataStream && hasWildcardPattern && !isHidden;
     });
   }, [indexManagement.apiService, signal]);
+
+  const getIlmPolicy = useCallback(
+    async (policyName: string) => {
+      if (!isIlmAvailable) {
+        return null;
+      }
+      // Errors are handled in the flyout component
+      const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
+      return policies.find((policy) => policy.name === policyName) ?? null;
+    },
+    [indexLifecycleManagement?.apiService, isIlmAvailable, signal]
+  );
+
+  const getSimulatedTemplate = useCallback(
+    async (templateName: string, templateSignal?: AbortSignal) => {
+      // Errors are handled in the flyout component
+      return await indexManagement.apiService.simulateIndexTemplate({
+        templateName,
+        signal: templateSignal ?? signal,
+      });
+    },
+    [indexManagement.apiService, signal]
+  );
 
   const handleCreate = useCallback(
     async (streamName: string) => {
@@ -163,7 +190,8 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       hasErrorLoadingTemplates={!!templatesListFetch.error}
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
-      showDataRetention={false}
+      getIlmPolicy={isIlmAvailable ? getIlmPolicy : undefined}
+      getSimulatedTemplate={getSimulatedTemplate}
     />
   );
 }

@@ -13,7 +13,7 @@ import type {
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
-import { getHitsTotal } from '../../utils/get_hits_total';
+import { getTotalHits } from '../../utils/get_total_hits';
 import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
@@ -106,7 +106,7 @@ export async function getFilteredLogCategories({
     query: { bool: boolQuery },
   });
 
-  const totalHits = getHitsTotal(countResponse);
+  const totalHits = getTotalHits(countResponse);
   if (totalHits === 0) {
     logger.debug('No log documents found for the given query.');
     return undefined;

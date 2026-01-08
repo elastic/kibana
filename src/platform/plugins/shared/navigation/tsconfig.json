@@ -28,7 +28,6 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
-    "@kbn/unified-tabs"
   ],
   "exclude": [
     "target/**/*",

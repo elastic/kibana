@@ -712,6 +712,13 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  public async getPanelIdByTitle(title: string) {
+    const panelHoverActionsWrapper = await this.testSubjects.find(
+      `embeddablePanelHoverActions-${title}`
+    );
+    return await panelHoverActionsWrapper.getAttribute('data-test-embeddable-id');
+  }
+
   /**
    * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
    */
@@ -834,7 +841,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async verifyNoRenderErrors() {
-    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
     }

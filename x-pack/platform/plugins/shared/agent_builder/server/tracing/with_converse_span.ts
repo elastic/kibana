@@ -9,7 +9,11 @@ import type { Span } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
 import { safeJsonStringify } from '@kbn/std';
-import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import {
+  withActiveInferenceSpan,
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+} from '@kbn/inference-tracing';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 
@@ -29,6 +33,7 @@ export function withConverseSpan(
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
         [ElasticGenAIAttributes.AgentId]: agentId,
         [ElasticGenAIAttributes.AgentConversationId]: conversationId,
+        [GenAISemanticConventions.GenAIConversationId]: conversationId,
       },
     },
     (span) => {

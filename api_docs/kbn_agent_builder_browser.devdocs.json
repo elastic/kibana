@@ -316,6 +316,47 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.EventsServiceStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventsServiceStartContract",
+        "description": [
+          "\nPublic-facing contract for AgentBuilder's events service."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EventsServiceStartContract.chat$",
+            "type": "Object",
+            "tags": [],
+            "label": "chat$",
+            "description": [
+              "\n(hot) observable of all chat events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ChatEvent",
+                "text": "ChatEvent"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.ExecuteToolParams",
         "type": "Interface",
         "tags": [],
@@ -560,7 +601,53 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.BrowserChatEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "BrowserChatEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ChatAgentEvent",
+            "text": "ChatAgentEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ConversationCreatedEvent",
+            "text": "ConversationCreatedEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ConversationUpdatedEvent",
+            "text": "ConversationUpdatedEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ConversationIdSetEvent",
+            "text": "ConversationIdSetEvent"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

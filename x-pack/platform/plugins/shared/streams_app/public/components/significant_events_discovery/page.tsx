@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { RedirectTo } from '../redirect_to';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { FeedbackButton } from '../feedback_button';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { FeedbackButton } from '../feedback_button';
+import { RedirectTo } from '../redirect_to';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { StreamsTree } from './components/streams_tree/streams_tree';
 
 export function SignificantEventsDiscoveryPage() {
   const {
@@ -58,7 +59,7 @@ export function SignificantEventsDiscoveryPage() {
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 {i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
-                  defaultMessage: 'Significant events Discovery',
+                  defaultMessage: 'Significant Events Discovery',
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -67,7 +68,7 @@ export function SignificantEventsDiscoveryPage() {
         }
       />
       <StreamsAppPageTemplate.Body grow>
-        {/* Significant events discovery content goes here */}
+        <StreamsTree />
       </StreamsAppPageTemplate.Body>
     </>
   );

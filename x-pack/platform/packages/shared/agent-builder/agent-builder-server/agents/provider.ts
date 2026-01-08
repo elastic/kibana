@@ -26,6 +26,7 @@ import type {
   PromptManager,
   ConversationStateManager,
 } from '../runner';
+import type { AttachmentStateManager } from '../attachments';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -82,6 +83,10 @@ export interface AgentHandlerContext {
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
+  /**
+   * Attachment state manager to manage conversation attachments during execution.
+   */
+  attachmentStateManager: AttachmentStateManager;
   /**
    * Used to manage interruptions.
    */

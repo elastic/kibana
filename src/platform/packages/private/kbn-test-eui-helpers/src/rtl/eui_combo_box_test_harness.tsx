@@ -11,6 +11,11 @@ import { screen, within, fireEvent, waitFor } from '@testing-library/react';
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+// Safety guard: Backspace-based clearing should converge quickly. This is NOT a “max pills” limit;
+// it prevents an infinite loop when Backspace doesn’t remove selections (e.g. focus not on input,
+// different combo box mode, or unexpected DOM structure).
+const MAX_BACKSPACE_PRESSES = 20;
+
 export class EuiComboBoxTestHarness {
   #testId: string;
 
@@ -142,14 +147,52 @@ export class EuiComboBoxTestHarness {
   }
 
   /**
-   * Clear all selected options by clicking the clear button
+   * Clear all selected options and wait for the UI to settle.
+   *
+   * Notes:
+   * - Some EUI combobox usages render `comboBoxClearButton` outside of the element that carries the
+   *   consumer-provided `data-test-subj` (e.g. on a wrapper). This method searches a broader scope.
+   * - If the clear button is not available, it falls back to removing pills via Backspace.
    */
-  public clear() {
+  public async clear() {
     const el = this.getElement();
     if (!el) return;
-    const clearButton = within(el).queryByTestId('comboBoxClearButton');
+
+    const scope = el.parentElement ?? el;
+
+    const clearButton =
+      within(el).queryByTestId('comboBoxClearButton') ??
+      within(scope).queryByTestId('comboBoxClearButton');
+
     if (clearButton) {
       fireEvent.click(clearButton);
+    } else {
+      const input = this.#inputEl;
+
+      // Focus/click so Backspace removes the last selected pill.
+      fireEvent.focus(input);
+      fireEvent.click(input);
+
+      for (let i = 0; i < MAX_BACKSPACE_PRESSES; i++) {
+        if (this.getSelected().length === 0) break;
+        fireEvent.keyDown(input, { key: 'Backspace' });
+      }
+
+      // Clear any pending input text (search value).
+      fireEvent.change(input, { target: { value: '' } });
     }
+
+    await waitFor(() => {
+      const selected = this.getSelected();
+      const inputValue = (this.#inputEl as HTMLInputElement).value ?? '';
+
+      if (selected.length === 0 && inputValue === '') return;
+
+      throw new Error(
+        `ComboBox did not clear. Still selected: ${JSON.stringify(
+          selected
+        )}, input: "${inputValue}"`
+      );
+    });
   }
 }

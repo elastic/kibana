@@ -23,7 +23,7 @@ describe('createAlertAttachmentType', () => {
 
   describe('validate', () => {
     it('returns valid when alert data is valid', async () => {
-      const input = { alert: 'test alert data' };
+      const input = { alert: 'test alert data', attachmentLabel: 'Security Alert' };
 
       const result = await attachmentType.validate(input);
 
@@ -61,7 +61,7 @@ describe('createAlertAttachmentType', () => {
       const attachment: Attachment<string, unknown> = {
         id: 'test-id',
         type: SecurityAgentBuilderAttachments.alert,
-        data: { alert: 'test alert content' },
+        data: { alert: 'test alert content', attachmentLabel: 'Security Alert' },
       };
 
       const formatted = await attachmentType.format(attachment, formatContext);
@@ -75,7 +75,7 @@ describe('createAlertAttachmentType', () => {
       const attachment: Attachment<string, unknown> = {
         id: 'test-id',
         type: SecurityAgentBuilderAttachments.alert,
-        data: { invalid: 'data' },
+        data: { invalid: 'data', attachmentLabel: 'Security Alert' },
       };
 
       expect(() => attachmentType.format(attachment, formatContext)).toThrow(

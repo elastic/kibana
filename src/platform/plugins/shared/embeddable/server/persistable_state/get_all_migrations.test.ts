@@ -21,7 +21,7 @@ describe('embeddable getAllMigratons', () => {
   const migrateFn = jest.fn();
 
   test('returns base migrations', () => {
-    expect(getAllMigrations([], [], migrateFn)).toEqual({});
+    expect(getAllMigrations([], [], migrateFn)).toHaveProperty(['8.7.0']);
   });
 
   test('returns embeddable factory migrations', () => {

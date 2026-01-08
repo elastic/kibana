@@ -52,6 +52,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.mcp",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.microsoft_defender_endpoint",
   },
   Object {

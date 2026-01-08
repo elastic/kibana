@@ -37,7 +37,7 @@ import {
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
 import { Parser } from '../../../parser';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
-import { getDateHistogramCompletionItem } from '../complete_items';
+import { getDateHistogramCompletionItem, PLACEHOLDER_CONFIG } from '../complete_items';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -827,6 +827,7 @@ describe('STATS Autocomplete', () => {
             // BUCKET second parameter (buckets) has constantOnly: true
             // Types: date_period, integer, time_duration (NOT date, so no ?_tstart/?_tend)
             ...getLiteralsByType('time_duration'),
+            PLACEHOLDER_CONFIG.number.snippet,
           ],
           mockCallbacks,
           mockContext,

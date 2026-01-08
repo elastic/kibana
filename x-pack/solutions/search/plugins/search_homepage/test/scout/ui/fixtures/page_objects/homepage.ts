@@ -48,6 +48,10 @@ export class Homepage {
     return this.page.testSubj.locator(cardId).getByRole('link');
   }
 
+  async getApiKeyButton() {
+    return this.page.testSubj.locator('searchHomepageConnectToElasticsearchApiKeysButton');
+  }
+
   async clickApiKeysButton() {
     await this.page.testSubj.locator('searchHomepageConnectToElasticsearchApiKeysButton').click();
   }
@@ -61,7 +65,9 @@ export class Homepage {
   }
 
   async clickConnectionDetailsButton() {
-    await this.page.testSubj.locator('search-homepage-context-menu-button').click();
+    await this.page.testSubj
+      .locator('searchHomepageConnectToElasticsearchConnectionDetailsButton')
+      .click();
   }
 
   async fillApiKeyName(name: string) {

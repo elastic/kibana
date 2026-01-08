@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
-import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
@@ -18,11 +18,16 @@ import {
 } from './mocked_responses';
 
 describe('Index settings deprecation flyout', () => {
-  let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const indexSettingDeprecation = esDeprecationsMockResponse.migrationsDeprecations[1];
-  beforeEach(async () => {
+
+  const openFlyout = async () => {
+    fireEvent.click(screen.getAllByTestId('deprecation-indexSetting')[0]);
+    return await screen.findByTestId('indexSettingsDetails');
+  };
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -44,39 +49,33 @@ describe('Index settings deprecation flyout', () => {
         aliases: [],
       },
     });
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    const { actions, component } = testBed;
-    component.update();
-    await actions.table.clickDeprecationRowAt({ deprecationType: 'indexSetting', index: 0 });
   });
 
   it('renders a flyout with deprecation details', async () => {
-    const { find, exists } = testBed;
+    await setupElasticsearchPage(httpSetup);
+    const flyout = await openFlyout();
 
-    expect(exists('indexSettingsDetails')).toBe(true);
-    expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
+    expect(flyout).toBeInTheDocument();
+    expect(within(flyout).getByTestId('flyoutTitle')).toHaveTextContent(
       indexSettingDeprecation.message
     );
-    expect(find('indexSettingsDetails.documentationLink').props().href).toBe(
-      indexSettingDeprecation.url
-    );
-    expect(exists('removeSettingsPrompt')).toBe(true);
+    expect(
+      (within(flyout).getByTestId('documentationLink') as HTMLAnchorElement).getAttribute('href')
+    ).toBe(indexSettingDeprecation.url);
+    expect(within(flyout).getByTestId('removeSettingsPrompt')).toBeInTheDocument();
   });
 
   it('removes deprecated index settings', async () => {
-    const { find, actions, exists } = testBed;
-
     httpRequestsMockHelpers.setUpdateIndexSettingsResponse(indexSettingDeprecation.index!, {
       acknowledged: true,
     });
 
-    expect(exists('indexSettingsDetails.warningDeprecationBadge')).toBe(true);
+    await setupElasticsearchPage(httpSetup);
+    const flyout = await openFlyout();
 
-    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
+    expect(within(flyout).getByTestId('warningDeprecationBadge')).toBeInTheDocument();
+
+    fireEvent.click(within(flyout).getByTestId('deleteSettingsButton'));
 
     expect(httpSetup.post).toHaveBeenLastCalledWith(
       `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
@@ -84,23 +83,28 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Verify the "Resolution" column of the table is updated
-    expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
-      'Deprecated settings removed'
-    );
+    await waitFor(() => {
+      expect(screen.getAllByTestId('indexSettingsResolutionStatusCell')[0]).toHaveTextContent(
+        'Deprecated settings removed'
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('indexSettingsDetails')).toBeNull();
+    });
 
     // Reopen the flyout
-    await actions.table.clickDeprecationRowAt({ deprecationType: 'indexSetting', index: 0 });
+    const reopenedFlyout = await openFlyout();
 
     // Verify prompt to remove setting no longer displays
-    expect(find('removeSettingsPrompt').length).toEqual(0);
+    expect(within(reopenedFlyout).queryByTestId('removeSettingsPrompt')).toBeNull();
     // Verify the action button no longer displays
-    expect(find('indexSettingsDetails.deleteSettingsButton').length).toEqual(0);
+    expect(within(reopenedFlyout).queryByTestId('deleteSettingsButton')).toBeNull();
     // Verify the badge got marked as resolved
-    expect(exists('indexSettingsDetails.resolvedDeprecationBadge')).toBe(true);
+    expect(within(reopenedFlyout).getByTestId('resolvedDeprecationBadge')).toBeInTheDocument();
   });
 
   it('handles failure', async () => {
-    const { find, actions } = testBed;
     const error = {
       statusCode: 500,
       error: 'Remove index settings error',
@@ -113,7 +117,9 @@ describe('Index settings deprecation flyout', () => {
       error
     );
 
-    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
+    await setupElasticsearchPage(httpSetup);
+    const flyout = await openFlyout();
+    fireEvent.click(within(flyout).getByTestId('deleteSettingsButton'));
 
     expect(httpSetup.post).toHaveBeenLastCalledWith(
       `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
@@ -121,19 +127,25 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Verify the "Resolution" column of the table is updated
-    expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
-      'Settings removal failed'
-    );
+    await waitFor(() => {
+      expect(screen.getAllByTestId('indexSettingsResolutionStatusCell')[0]).toHaveTextContent(
+        'Settings removal failed'
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('indexSettingsDetails')).toBeNull();
+    });
 
     // Reopen the flyout
-    await actions.table.clickDeprecationRowAt({ deprecationType: 'indexSetting', index: 0 });
+    const reopenedFlyout = await openFlyout();
 
     // Verify the flyout shows an error message
-    expect(find('indexSettingsDetails.deleteSettingsError').text()).toContain(
+    expect(within(reopenedFlyout).getByTestId('deleteSettingsError')).toHaveTextContent(
       'Error deleting index settings'
     );
     // Verify the remove settings button text changes
-    expect(find('indexSettingsDetails.deleteSettingsButton').text()).toEqual(
+    expect(within(reopenedFlyout).getByTestId('deleteSettingsButton')).toHaveTextContent(
       'Retry removing deprecated settings'
     );
   });

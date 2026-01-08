@@ -8,12 +8,14 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { Streams } from '@kbn/streams-schema';
 import { type FeatureSelectorProps } from '../feature_selector';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 
 export function EmptyState({
-  onFeatureIdentificationClick,
+  definition,
+  refreshFeatures,
   onManualEntryClick,
   onGenerateSuggestionsClick,
   features,
@@ -21,7 +23,8 @@ export function EmptyState({
   onFeaturesChange,
   aiFeatures,
 }: FeatureSelectorProps & {
-  onFeatureIdentificationClick: () => void;
+  definition: Streams.all.Definition;
+  refreshFeatures: () => void;
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   aiFeatures: AIFeatures | null;
@@ -53,7 +56,8 @@ export function EmptyState({
               selectedFeatures={selectedFeatures}
               onFeaturesChange={onFeaturesChange}
               onGenerateSuggestionsClick={onGenerateSuggestionsClick}
-              onFeatureIdentificationClick={onFeatureIdentificationClick}
+              definition={definition}
+              refreshFeatures={refreshFeatures}
               onManualEntryClick={onManualEntryClick}
               isGeneratingQueries={false}
               isSavingManualEntry={false}

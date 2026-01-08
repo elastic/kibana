@@ -55,7 +55,20 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cypress-config",
+        "id": "def-common.SCOUT_CYPRESS_REPORTER_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_CYPRESS_REPORTER_PATH",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cypress-config/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

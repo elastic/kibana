@@ -65,45 +65,45 @@ export async function autocomplete(
   // Find the function at cursor position for suggestions
   const foundFunction = cursorPosition ? findFunctionForSuggestions(command, cursorPosition) : null;
 
-  let functionParameterContext: FunctionParameterContext | undefined;
+  let filteringContext: StatsFilteringContext | undefined;
 
   if (
     foundFunction &&
     (foundFunction.subtype === 'variadic-call' || foundFunction.subtype === 'binary-expression')
   ) {
-    functionParameterContext = buildCustomFilteringContext(command, foundFunction, context);
-    const isInBy = isNodeWithinByClause(foundFunction, command);
-    const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
+    filteringContext = buildCustomFilteringContext(command, foundFunction, context);
 
-    // Determine the appropriate location based on context
-    let location: Location;
-    if (isInBy) {
-      // BY clause always uses EVAL location
-      location = Location.EVAL;
-    } else if (isTimeseriesSource && isAggFunctionUsedAlready(command, command.args.length - 1)) {
-      // Inside aggregate function with TS source command
-      location = Location.STATS_TIMESERIES;
-    } else {
-      // Regular STATS context
-      location = Location.STATS;
-    }
+    if (filteringContext) {
+      const isInBy = isNodeWithinByClause(foundFunction, command);
+      const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
-    const { suggestions: functionsSpecificSuggestions } = await suggestForExpression({
-      query,
-      expressionRoot: foundFunction,
-      command,
-      cursorPosition,
-      location,
-      context,
-      callbacks,
-      options: {
-        // Pass STATS-specific filtering context to be preserved in recursive calls
-        functionParameterContext,
-      },
-    });
+      let location: Location;
 
-    if (functionsSpecificSuggestions.length > 0) {
-      return functionsSpecificSuggestions;
+      if (isInBy) {
+        location = Location.EVAL;
+      } else if (isTimeseriesSource && isAggFunctionUsedAlready(command, command.args.length - 1)) {
+        location = Location.STATS_TIMESERIES;
+      } else {
+        location = Location.STATS;
+      }
+
+      const { suggestions: functionsSpecificSuggestions } = await suggestForExpression({
+        query,
+        expressionRoot: foundFunction,
+        command,
+        cursorPosition,
+        location,
+        context,
+        callbacks,
+        options: {
+          functionParameterContext: filteringContext.functionParameterContext,
+          functionsToIgnore: filteringContext.functionsToIgnore,
+        },
+      });
+
+      if (functionsSpecificSuggestions.length > 0) {
+        return functionsSpecificSuggestions;
+      }
     }
   }
 
@@ -146,7 +146,6 @@ export async function autocomplete(
         suggestColumns: false,
         suggestFunctions: true,
         controlType: ESQLVariableType.FUNCTIONS,
-        functionParameterContext,
       });
 
       return expressionSuggestions;
@@ -175,7 +174,6 @@ export async function autocomplete(
         suggestColumns: false,
         suggestFunctions: true,
         controlType: ESQLVariableType.FUNCTIONS,
-        functionParameterContext,
       });
 
       return expressionSuggestions;
@@ -234,7 +232,6 @@ export async function autocomplete(
         addSpaceAfterFirstField: false,
         ignoredColumns,
         openSuggestions: true,
-        functionParameterContext,
       });
     }
 
@@ -268,7 +265,6 @@ export async function autocomplete(
         addSpaceAfterFirstField: false,
         ignoredColumns,
         openSuggestions: true,
-        functionParameterContext,
       });
     }
 
@@ -277,8 +273,6 @@ export async function autocomplete(
   }
 }
 
-// TODO: Verify if ignoredColumns parameter is redundant since suggestForExpression
-// already calculates ignored columns internally via deriveIgnoredColumns()
 async function getExpressionSuggestions({
   query,
   command,
@@ -296,6 +290,7 @@ async function getExpressionSuggestions({
   ignoredColumns = [],
   openSuggestions,
   functionParameterContext,
+  functionsToIgnore,
 }: {
   query: string;
   command: ESQLAstAllCommands;
@@ -313,6 +308,7 @@ async function getExpressionSuggestions({
   ignoredColumns?: string[];
   openSuggestions?: boolean;
   functionParameterContext?: FunctionParameterContext;
+  functionsToIgnore?: { names: string[] };
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -334,6 +330,7 @@ async function getExpressionSuggestions({
       controlType,
       openSuggestions,
       functionParameterContext,
+      functionsToIgnore,
     },
   });
 
@@ -382,13 +379,16 @@ function alreadyUsedColumns(command: ESQLAstAllCommands) {
   return columnNodes.map((node) => node.parts.join('.'));
 }
 
-// Builds function filtering context: always ignore grouping functions,
-// in main STATS clause also filter conflicting aggregate functions
+interface StatsFilteringContext {
+  functionParameterContext: FunctionParameterContext;
+  functionsToIgnore: { names: string[] };
+}
+
 function buildCustomFilteringContext(
   command: ESQLAstAllCommands,
   foundFunction: ESQLFunction | null,
   context?: ICommandContext
-): FunctionParameterContext | undefined {
+): StatsFilteringContext | undefined {
   if (!foundFunction) {
     return undefined;
   }
@@ -400,7 +400,6 @@ function buildCustomFilteringContext(
   }
 
   const statsSpecificFunctionsToIgnore: string[] = [];
-  // Always ignore grouping functions in all contexts
   statsSpecificFunctionsToIgnore.push(
     ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
   );
@@ -421,8 +420,8 @@ function buildCustomFilteringContext(
   }
 
   return {
-    ...basicContext,
-    functionsToIgnore: [...basicContext.functionsToIgnore, ...statsSpecificFunctionsToIgnore],
+    functionParameterContext: basicContext,
+    functionsToIgnore: { names: statsSpecificFunctionsToIgnore },
   };
 }
 

@@ -30,7 +30,7 @@
         "label": "PLUGIN_ID",
         "description": [],
         "signature": [
-          "\"entity_store\""
+          "\"entityStore\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
         "deprecated": false,

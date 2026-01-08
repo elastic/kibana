@@ -29,6 +29,8 @@ import type {
   ConversationStateManager,
   PromptManager,
 } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -65,6 +67,7 @@ export interface CreateScopedRunnerDeps {
   defaultConnectorId?: string;
   // context-aware deps
   resultStore: WritableToolResultStore;
+  attachmentStateManager: AttachmentStateManager;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -72,6 +75,7 @@ export type CreateRunnerDeps = Omit<
   | 'request'
   | 'defaultConnectorId'
   | 'resultStore'
+  | 'attachmentStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
@@ -156,6 +160,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
   }): ScopedRunner => {
     const resultStore = createResultStore(conversation?.rounds);
+    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager();
 
@@ -170,6 +175,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       request,
       defaultConnectorId,
       resultStore,
+      attachmentStateManager,
       stateManager,
       promptManager,
     };

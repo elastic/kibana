@@ -13,7 +13,6 @@ import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -37,7 +36,6 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
@@ -109,7 +107,6 @@ export const entityAnalyticsLinks: LinkItem = {
   links: [eaOverviewLinks, privMonLinks, threatHuntingLinks],
   hideTimeline: true,
   skipUrlState: true,
-  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

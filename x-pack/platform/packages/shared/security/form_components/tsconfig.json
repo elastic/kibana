@@ -6,16 +6,21 @@
       "jest",
       "node",
       "react",
+      "@emotion/react/types/css-prop",
+      "../../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".storybook/**/*",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/storybook",
   ],
 }

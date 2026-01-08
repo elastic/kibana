@@ -1498,6 +1498,37 @@ export const getSavedObjectTypes = (
             }),
           },
         },
+        3: {
+          changes: [
+            {
+              type: 'data_removal',
+              removedAttributePaths: ['packagePolicyCount'],
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+            }),
+          },
+        },
       },
     },
   };

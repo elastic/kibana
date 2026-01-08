@@ -163,6 +163,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     <>
       <EuiAccordion
         id={item.id}
+        buttonElement="div"
         buttonContent={content}
         paddingSize="none"
         forceState={state}
