@@ -27,13 +27,6 @@ type SnakeToCamelCase<S extends string> = S extends `${infer P1}_${infer P2}${in
   : S;
 
 /**
- * A utility type that recursively converts all keys in an object from snake_case to camelCase
- */
-type ToCamelCase<T> = {
-  [K in keyof T as SnakeToCamelCase<string & K>]: T[K] extends object ? ToCamelCase<T[K]> : T[K];
-};
-
-/**
  * A type that maps each key in a state type to a definition of how it should be compared. If a custom
  * comparator is provided, return true if the values are equal, false otherwise.
  */
@@ -50,13 +43,13 @@ export type CustomComparators<StateType> = {
 };
 
 export type SubjectsOf<T extends object> = {
-  [KeyType in keyof Required<ToCamelCase<T>> as `${string & KeyType}$`]: PublishingSubject<
+  [KeyType in keyof Required<T> as `${SnakeToCamelCase<string & KeyType>}$`]: PublishingSubject<
     T[KeyType]
   >;
 };
 
 export type SettersOf<T extends object> = {
-  [KeyType in keyof Required<ToCamelCase<T>> as `set${Capitalize<string & KeyType>}`]: (
+  [KeyType in keyof Required<T> as `set${Capitalize<SnakeToCamelCase<string & KeyType>>}`]: (
     value: T[KeyType]
   ) => void;
 };
