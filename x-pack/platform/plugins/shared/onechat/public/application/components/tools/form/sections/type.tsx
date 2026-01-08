@@ -6,9 +6,9 @@
  */
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { ToolType } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { ToolType } from '@kbn/onechat-common';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { docLinks } from '../../../../../../common/doc_links';
 import { ToolFormSection } from '../components/tool_form_section';
@@ -18,7 +18,7 @@ import type { ToolFormData } from '../types/tool_form_types';
 import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
 import { ToolFormMode } from '../tool_form';
 
-const TECH_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.tools.techPreviewBadgeLabel', {
+const TECH_PREVIEW_LABEL = i18n.translate('xpack.onechat.tools.techPreviewBadgeLabel', {
   defaultMessage: 'Tech preview',
 });
 

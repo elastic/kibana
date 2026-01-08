@@ -40,12 +40,12 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 const TECH_PREVIEW_LABEL = i18n.translate(
-  'xpack.agentBuilder.tools.bulkImportMcp.techPreviewBadgeLabel',
+  'xpack.onechat.tools.bulkImportMcp.techPreviewBadgeLabel',
   { defaultMessage: 'Technical preview' }
 );
 
 const TECH_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.agentBuilder.tools.bulkImportMcp.techPreviewBadgeDescription',
+  'xpack.onechat.tools.bulkImportMcp.techPreviewBadgeDescription',
   {
     defaultMessage:
       'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
