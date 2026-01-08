@@ -251,4 +251,10 @@ export class DiscoverApp {
       await this.waitForDocTableRendered();
     }
   }
+
+  async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitUntilSearchingHasFinished();
+    await rowLocator.waitFor({ state: 'visible', timeout });
+  }
 }

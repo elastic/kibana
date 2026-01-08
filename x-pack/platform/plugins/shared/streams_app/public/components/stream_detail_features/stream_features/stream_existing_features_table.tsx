@@ -19,7 +19,7 @@ import {
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
@@ -35,11 +35,13 @@ export function StreamExistingFeaturesTable({
   features,
   definition,
   refreshFeatures,
+  aiFeatures,
 }: {
   isLoading?: boolean;
   features: Feature[];
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
+  aiFeatures: AIFeatures | null;
 }) {
   const router = useStreamsAppRouter();
 
@@ -49,7 +51,6 @@ export function StreamExistingFeaturesTable({
   const [isDeleting, setIsDeleting] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const aiFeatures = useAIFeatures();
   const { nameColumn, filterColumn, eventsLast24HoursColumn } = useStreamFeaturesTable({
     definition,
   });

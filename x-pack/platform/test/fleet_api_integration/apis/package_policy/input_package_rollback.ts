@@ -19,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -128,15 +129,15 @@ export default function (providerContext: FtrProviderContext) {
       await installPackage(PACKAGE_NAME, START_VERSION);
       await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
-      expectIdArraysEqual(installation.installed_es, [
-        {
-          id: 'input_package_upgrade-README.md',
-          type: 'knowledge_base',
-        },
-      ]);
+      await retry.tryForTime(10000, async () => {
+        const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
+        expectIdArraysEqual(installation.installed_es, [
+          {
+            id: 'input_package_upgrade-README.md',
+            type: 'knowledge_base',
+          },
+        ]);
+      });
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);
     });

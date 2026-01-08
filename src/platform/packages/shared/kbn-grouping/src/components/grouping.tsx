@@ -32,7 +32,13 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
+import type {
+  ParsedGroupingAggregation,
+  GroupPanelRenderer,
+  GetGroupStats,
+  GetAdditionalActionButtons,
+  GroupChildComponentRenderer,
+} from './types';
 import type { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
@@ -52,7 +58,7 @@ export interface GroupingProps<T> {
   onChangeGroupsItemsPerPage?: (size: number) => void;
   onChangeGroupsPage?: (index: number) => void;
   onGroupToggle?: OnGroupToggle;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
   takeActionItems?: (
@@ -76,6 +82,8 @@ export interface GroupingProps<T> {
   multiValueFields?: string[];
   /** Optional custom component to render when there are no grouping results */
   emptyGroupingComponent?: React.ReactElement;
+  /** Optional function to get additional action buttons to display in group stats before the Take actions button */
+  getAdditionalActionButtons?: GetAdditionalActionButtons<T>;
 }
 
 const GroupingComponent = <T,>({
@@ -101,6 +109,7 @@ const GroupingComponent = <T,>({
   groupsUnit = GROUPS_UNIT,
   multiValueFields,
   emptyGroupingComponent,
+  getAdditionalActionButtons,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -145,7 +154,7 @@ const GroupingComponent = <T,>({
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
-            <GroupPanel
+            <GroupPanel<T>
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
               onGroupClose={onGroupClose}
@@ -164,6 +173,10 @@ const GroupingComponent = <T,>({
                   groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
                   takeActionItems={takeActionItems}
+                  additionalActionButtons={
+                    getAdditionalActionButtons &&
+                    getAdditionalActionButtons(selectedGroup, groupBucket)
+                  }
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
@@ -216,6 +229,7 @@ const GroupingComponent = <T,>({
       trigger,
       unit,
       multiValueFields,
+      getAdditionalActionButtons,
     ]
   );
 

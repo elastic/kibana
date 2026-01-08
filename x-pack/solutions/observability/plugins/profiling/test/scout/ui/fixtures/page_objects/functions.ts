@@ -86,13 +86,11 @@ export class FunctionsPage {
     await this.page.getByTestId('tableSearchInput').clear();
     await this.page.getByTestId('tableSearchInput').fill(`${key}:"${value}"`);
     await this.page.keyboard.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async clearKqlFilter() {
     await this.page.getByTestId('tableSearchInput').clear();
     await this.page.keyboard.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   // Differential TopN Functions methods

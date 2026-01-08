@@ -528,7 +528,7 @@
             "tags": [],
             "label": "meta",
             "description": [
-              "\nSearchable but not aggregateable metadata relevant to the tracked action."
+              "\nSearchable but not aggregatable metadata relevant to the tracked action."
             ],
             "signature": [
               "Record<string, unknown> | undefined"

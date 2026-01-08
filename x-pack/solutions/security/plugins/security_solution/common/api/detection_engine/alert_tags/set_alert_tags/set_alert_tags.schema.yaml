@@ -21,15 +21,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                ids:
-                  $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
-                tags:
-                  $ref: '#/components/schemas/SetAlertTags'
-              required:
-                - ids
-                - tags
+              $ref: '../../model/set_alert_tags_body.schema.yaml#/components/schemas/SetAlertTagsBody'
             examples:
               add:
                 value:
@@ -90,17 +82,3 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
-
-components:
-  schemas:
-    SetAlertTags:
-      description: Object with list of tags to add and remove.
-      type: object
-      properties:
-        tags_to_add:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertTags'
-        tags_to_remove:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertTags'
-      required:
-        - tags_to_add
-        - tags_to_remove

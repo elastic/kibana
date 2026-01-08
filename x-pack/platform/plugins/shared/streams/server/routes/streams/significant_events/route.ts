@@ -16,6 +16,7 @@ import { conditionSchema } from '@kbn/streamlang';
 import { from as fromRxjs, map, catchError } from 'rxjs';
 import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
 import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -132,7 +133,7 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -150,7 +151,7 @@ const readSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
       },
-      { assetClient, scopedClusterClient }
+      { queryClient, scopedClusterClient }
     );
   },
 });
@@ -160,7 +161,12 @@ const generateSignificantEventsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
       sampleDocsSize: z
@@ -207,13 +213,19 @@ const generateSignificantEventsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
+
     const promptsConfigService = new PromptsConfigService({
       soClient,
       logger,
     });
 
     // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(params.query.connectorId);
+    const connector = await inferenceClient.getConnectorById(connectorId);
 
     const definition = await streamsClient.getStream(params.path.name);
 
@@ -224,7 +236,7 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           definition,
           feature: params.body?.feature,
-          connectorId: params.query.connectorId,
+          connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
           sampleDocsSize: params.query.sampleDocsSize,

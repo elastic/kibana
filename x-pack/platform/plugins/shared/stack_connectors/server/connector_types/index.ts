@@ -80,10 +80,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
-
-  if (experimentalFeatures.agentBuilderExternalMcpOn) {
-    actions.registerSubActionConnectorType(getMcpConnectorType());
-  }
+  actions.registerSubActionConnectorType(getMcpConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

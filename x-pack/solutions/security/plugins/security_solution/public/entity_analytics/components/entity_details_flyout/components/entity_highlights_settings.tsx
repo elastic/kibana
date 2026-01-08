@@ -158,6 +158,10 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               onClick={onAgentBuildAttachmentClick}
               size="s"
               disabled={isLoading || !assistantResult}
+              telemetry={{
+                pathway: 'entity_highlights',
+                attachments: ['entity'],
+              }}
             />
           </EuiContextMenuItem>
         ) : (

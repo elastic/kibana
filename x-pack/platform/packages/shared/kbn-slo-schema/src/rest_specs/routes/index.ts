@@ -27,4 +27,5 @@ export * from './get_suggestions';
 export * from './get_slo_health';
 export * from './bulk_delete';
 export * from './find_instances';
+export * from './repair';
 export * from './slo_templates';

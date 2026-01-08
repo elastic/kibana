@@ -208,12 +208,12 @@ export class PackageInstaller {
         inferenceId: customInference?.inference_id ?? this.elserInferenceId,
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
 
-      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPath}]`);
-      await downloadToDisk(artifactUrl, artifactPath);
+      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
+      const artifactFullPath = await downloadToDisk(artifactUrl, artifactPathAtVolume);
 
-      zipArchive = await openZipArchive(artifactPath);
+      zipArchive = await openZipArchive(artifactFullPath);
       validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
@@ -356,9 +356,9 @@ export class PackageInstaller {
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
       this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
-      await downloadToDisk(artifactUrl, artifactPath);
+      const downloadedFullPath = await downloadToDisk(artifactUrl, artifactPath);
 
-      zipArchive = await openZipArchive(artifactPath);
+      zipArchive = await openZipArchive(downloadedFullPath);
       validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([

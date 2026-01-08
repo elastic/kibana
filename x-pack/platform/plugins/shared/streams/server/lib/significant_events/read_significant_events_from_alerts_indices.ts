@@ -14,24 +14,24 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { SignificantEventsGetResponse, StreamQueryKql } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { AssetClient } from '../streams/assets/asset_client';
+import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
-import type { QueryLink } from '../../../common/assets';
+import type { QueryLink } from '../../../common/queries';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string; query?: string },
   dependencies: {
-    assetClient: AssetClient;
+    queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { assetClient, scopedClusterClient } = dependencies;
+  const { queryClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize, query } = params;
 
   const queryLinks = await (query
-    ? assetClient.findQueries(name, query)
-    : assetClient.getAssetLinks([name], ['query']).then(({ [name]: links }) => links));
+    ? queryClient.findQueries(name, query)
+    : queryClient.getQueryLinks([name]).then(({ [name]: links }) => links));
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }

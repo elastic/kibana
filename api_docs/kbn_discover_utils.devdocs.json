@@ -871,7 +871,7 @@
                     "section": "def-common.FieldFormatsRegistry",
                     "text": "FieldFormatsRegistry"
                   },
-                  ", \"init\" | \"register\"> & { deserialize: ",
+                  ", \"register\" | \"init\"> & { deserialize: ",
                   {
                     "pluginId": "fieldFormats",
                     "scope": "common",
@@ -1093,49 +1093,6 @@
               "LogsContextServiceDeps"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.createMetricsContextService",
-        "type": "Function",
-        "tags": [],
-        "label": "createMetricsContextService",
-        "description": [],
-        "signature": [
-          "({ metricsExperience, }: ",
-          "MetricsContextServiceDeps",
-          ") => Promise<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.MetricsContextService",
-            "text": "MetricsContextService"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.createMetricsContextService.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  metricsExperience,\n}",
-            "description": [],
-            "signature": [
-              "MetricsContextServiceDeps"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1783,7 +1740,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, defaultSortOrder: string, hidingTimeColumn: boolean, isEsqlMode: boolean) => ",
+          " | Pick<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", \"timeFieldName\"> | undefined, defaultSortOrder: string, hidingTimeColumn: boolean, isEsqlMode: boolean) => ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -1800,7 +1765,7 @@
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.getDefaultSort.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "dataView",
             "description": [],
@@ -1812,7 +1777,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined"
+              " | Pick<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ", \"timeFieldName\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_default_sort.ts",
             "deprecated": false,
@@ -2328,7 +2301,7 @@
                     "section": "def-common.FieldFormatsRegistry",
                     "text": "FieldFormatsRegistry"
                   },
-                  ", \"init\" | \"register\"> & { deserialize: ",
+                  ", \"register\" | \"init\"> & { deserialize: ",
                   {
                     "pluginId": "fieldFormats",
                     "scope": "common",
@@ -3328,7 +3301,7 @@
                     "section": "def-common.FieldFormatsRegistry",
                     "text": "FieldFormatsRegistry"
                   },
-                  ", \"init\" | \"register\"> & { deserialize: ",
+                  ", \"register\" | \"init\"> & { deserialize: ",
                   {
                     "pluginId": "fieldFormats",
                     "scope": "common",
@@ -5322,40 +5295,6 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.MetricsContextService",
-        "type": "Interface",
-        "tags": [],
-        "label": "MetricsContextService",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.MetricsContextService.getMetricsExperienceClient",
-            "type": "Function",
-            "tags": [],
-            "label": "getMetricsExperienceClient",
-            "description": [],
-            "signature": [
-              "() => { getDimensions: (params: { dimensions: string; indices?: string | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
-              "MetricField",
-              "[]; total: number; page: number; }>; searchFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; filters?: Record<string, string[]> | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
-              "MetricField",
-              "[]; total: number; page: number; }>; } | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.OtelExceptionLogFields",
         "type": "Interface",
         "tags": [],
@@ -5526,7 +5465,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,

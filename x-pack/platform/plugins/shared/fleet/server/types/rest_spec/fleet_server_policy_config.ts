@@ -18,7 +18,7 @@ const secretRefSchema = schema.oneOf([
 
 export const FleetServerHostBaseSchema = schema.object({
   name: schema.maybe(schema.string()),
-  host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+  host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 })),
   is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
   proxy_id: schema.nullable(schema.string()),
@@ -37,13 +37,15 @@ export const FleetServerHostBaseSchema = schema.object({
     schema.oneOf([
       schema.literal(null),
       schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
         certificate: schema.maybe(schema.string()),
         key: schema.maybe(schema.string()),
-        es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
         es_certificate: schema.maybe(schema.string()),
         es_key: schema.maybe(schema.string()),
-        agent_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        agent_certificate_authorities: schema.maybe(
+          schema.arrayOf(schema.string(), { maxSize: 10 })
+        ),
         agent_certificate: schema.maybe(schema.string()),
         agent_key: schema.maybe(schema.string()),
         client_auth: schema.maybe(
@@ -61,7 +63,7 @@ export const FleetServerHostBaseSchema = schema.object({
 export const FleetServerHostSchema = FleetServerHostBaseSchema.extends({
   id: schema.string(),
   name: schema.string(),
-  host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+  host_urls: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
   is_default: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean({ defaultValue: false }),

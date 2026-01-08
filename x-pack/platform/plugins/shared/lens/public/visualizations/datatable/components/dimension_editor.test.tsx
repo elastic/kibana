@@ -132,25 +132,25 @@ describe('data table dimension editor', () => {
 
   it('should render default alignment', () => {
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Left');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Left');
   });
 
   it('should render default alignment for number', () => {
     mockOperationForFirstColumn({ dataType: 'number' });
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Right');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Right');
   });
 
   it('should render default alignment for ranges', () => {
     mockOperationForFirstColumn({ isBucketed: true, dataType: 'number' });
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Left');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Left');
   });
 
   it('should render specific alignment', () => {
     state.columns[0].alignment = 'center';
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Center');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Center');
   });
 
   it('should set state for the right column', async () => {
@@ -182,7 +182,7 @@ describe('data table dimension editor', () => {
   it('should set the dynamic coloring default to "none"', () => {
     state.columns[0].colorMode = undefined;
     renderTableDimensionEditor();
-    expect(btnGroups.colorMode.selected).toHaveTextContent('None');
+    expect(btnGroups.colorMode.getSelected()).toHaveTextContent('None');
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
@@ -202,7 +202,7 @@ describe('data table dimension editor', () => {
     (colorMode) => {
       state.columns[0].colorMode = colorMode;
       renderTableDimensionEditor();
-      expect(btnGroups.colorMode.selected).toHaveTextContent(capitalize(colorMode));
+      expect(btnGroups.colorMode.getSelected()).toHaveTextContent(capitalize(colorMode));
       expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
     }
   );
@@ -212,7 +212,7 @@ describe('data table dimension editor', () => {
     (colorMode) => {
       state.columns[0].colorMode = colorMode;
       renderTableDimensionEditor();
-      expect(btnGroups.colorMode.selected).toHaveTextContent(capitalize(colorMode ?? 'none'));
+      expect(btnGroups.colorMode.getSelected()).toHaveTextContent(capitalize(colorMode ?? 'none'));
       expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
     }
   );

@@ -36,14 +36,13 @@ import { from, concatMap } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
-import { useAIFeatures } from '../../../hooks/use_ai_features';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { ALL_DATA_OPTION } from '../feature_selector';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
@@ -58,8 +57,9 @@ interface Props {
   query?: StreamQueryKql;
   initialFlow?: Flow;
   initialSelectedFeatures: Feature[];
-  onFeatureIdentificationClick: () => void;
+  refreshFeatures: () => void;
   generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }
 
 export function AddSignificantEventFlyout({
@@ -72,7 +72,8 @@ export function AddSignificantEventFlyout({
   initialFlow = undefined,
   initialSelectedFeatures,
   features,
-  onFeatureIdentificationClick,
+  refreshFeatures,
+  aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -82,10 +83,6 @@ export function AddSignificantEventFlyout({
       start: { data },
     },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
-  const aiFeatures = useAIFeatures();
 
   const dataViewsFetch = useStreamsAppFetch(() => {
     return data.dataViews.create({ title: definition.stream.name }).then((value) => {
@@ -93,10 +90,13 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const { onGenerateDescription: generateDescription, onSaveDescription: saveDescription } =
-    useStreamDescriptionApi({ definition, refreshDefinition });
+  const {
+    onGenerateDescription: generateDescription,
+    onSaveDescription: saveDescription,
+    abort: abortDescription,
+  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
 
-  const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
+  const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name });
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
@@ -115,7 +115,8 @@ export function AddSignificantEventFlyout({
   const stopGeneration = useCallback(() => {
     setIsGenerating(false);
     abort();
-  }, [abort]);
+    abortDescription();
+  }, [abort, abortDescription]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -304,10 +305,12 @@ export function AddSignificantEventFlyout({
                   selectedFeatures={selectedFeatures}
                   onFeaturesChange={setSelectedFeatures}
                   onGenerateSuggestionsClick={generateQueries}
-                  onFeatureIdentificationClick={onFeatureIdentificationClick}
+                  definition={definition.stream}
+                  refreshFeatures={refreshFeatures}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
+                  aiFeatures={aiFeatures}
                 />
               </EuiPanel>
             </EuiFlexItem>

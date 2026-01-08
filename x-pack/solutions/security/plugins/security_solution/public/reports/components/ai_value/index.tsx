@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import dateMath from '@kbn/datemath';
 import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
@@ -32,19 +33,24 @@ export const AIValueMetrics: React.FC<Props> = (props) => {
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
 
+  // When exporting/scheduling, forwardedState can include relative date-math strings
+  // (e.g. now-7d, now). Resolve them to a deterministic absolute range for this run.
+  const forceNow = useMemo(() => new Date(), []);
   const { from, to } = useMemo(() => {
     if (exportContext?.forwardedState) {
       const { timeRange } = exportContext.forwardedState;
+      const fromValue = timeRange.kind === 'absolute' ? timeRange.from : timeRange.fromStr;
+      const toValue = timeRange.kind === 'absolute' ? timeRange.to : timeRange.toStr;
       return {
-        from: timeRange.from,
-        to: timeRange.to,
+        from: dateMath.parse(fromValue, { forceNow })?.toISOString() ?? fromValue,
+        to: dateMath.parse(toValue, { forceNow, roundUp: true })?.toISOString() ?? toValue,
       };
     }
     return {
       from: props.from,
       to: props.to,
     };
-  }, [props.from, props.to, exportContext?.forwardedState]);
+  }, [props.from, props.to, exportContext?.forwardedState, forceNow]);
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
