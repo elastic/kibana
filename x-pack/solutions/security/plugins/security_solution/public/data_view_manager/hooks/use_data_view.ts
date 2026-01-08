@@ -89,13 +89,15 @@ export const useDataView = (
         setLocalStatus('error');
       }
     })();
+    // This is specifically for the logger as it looks to create a new instance on every run of this hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataViews,
     dataViewId,
     internalStatus,
     notifications,
     newDataViewPickerEnabled,
-    logger,
+    // logger,
     dataViewManagerScope,
   ]);
 
