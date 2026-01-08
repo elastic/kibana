@@ -6,9 +6,8 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { defer, from, filter, map, scan, takeUntil, Observable } from 'rxjs';
+import { filter, map, scan, takeUntil, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 
 interface InsightState {
   summary: string;
@@ -21,7 +20,26 @@ interface ParsedEvent {
   content?: string;
 }
 
-export function useStreamingAiInsight(fetchInsight: (signal?: AbortSignal) => Promise<Response>) {
+interface ContextEvent {
+  type: 'context';
+  context: string;
+}
+
+interface ChatCompletionChunkEvent {
+  type: 'chatCompletionChunk';
+  content: string;
+}
+
+interface ChatCompletionMessageEvent {
+  type: 'chatCompletionMessage';
+  content: string;
+}
+
+export type StreamEvent = ContextEvent | ChatCompletionChunkEvent | ChatCompletionMessageEvent;
+
+export function useStreamingAiInsight(
+  createStream: (signal: AbortSignal) => Observable<StreamEvent>
+) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState('');
@@ -38,7 +56,7 @@ export function useStreamingAiInsight(fetchInsight: (signal?: AbortSignal) => Pr
     }
   }, []);
 
-  const fetch = useCallback(async () => {
+  const fetch = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -70,24 +88,21 @@ export function useStreamingAiInsight(fetchInsight: (signal?: AbortSignal) => Pr
     });
 
     try {
-      const observable$ = defer(() =>
-        from(fetchInsight(abortController.signal)).pipe(map((response) => ({ response })))
-      ).pipe(
-        httpResponseIntoObservable(),
+      const observable$ = createStream(abortController.signal).pipe(
         filter(
-          (event: { type: string }): boolean =>
+          (event: StreamEvent): event is StreamEvent =>
             event.type === 'context' ||
             event.type === 'chatCompletionChunk' ||
             event.type === 'chatCompletionMessage'
         ),
-        map((event: { type: string; [key: string]: unknown }): ParsedEvent => {
+        map((event: StreamEvent): ParsedEvent => {
           if (event.type === 'context') {
-            return { type: 'context', context: (event.context as string) || '' };
+            return { type: 'context', context: event.context };
           }
           if (event.type === 'chatCompletionChunk') {
-            return { type: 'chunk', content: (event.content as string) || '' };
+            return { type: 'chunk', content: event.content };
           }
-          return { type: 'message', content: (event.content as string) || '' };
+          return { type: 'message', content: event.content };
         }),
         scan<ParsedEvent, InsightState>(
           (acc, event) => {
@@ -134,7 +149,7 @@ export function useStreamingAiInsight(fetchInsight: (signal?: AbortSignal) => Pr
       setError(e instanceof Error ? e.message : 'Failed to load AI insight');
       setIsLoading(false);
     }
-  }, [fetchInsight]);
+  }, [createStream]);
 
   useEffect(() => {
     return () => {

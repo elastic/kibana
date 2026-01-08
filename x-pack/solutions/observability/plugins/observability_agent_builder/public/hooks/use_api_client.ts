@@ -22,4 +22,3 @@ export function useApiClient() {
     DefaultClientOptions
   >({ http });
 }
-

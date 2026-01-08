@@ -23,9 +23,10 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { EuiMarkdownFormat } from '@elastic/eui';
+import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
-import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
+import { useStreamingAiInsight, type StreamEvent } from '../../hooks/use_streaming_ai_insight';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { useMarkdownPluginsWithCursor, CURSOR } from './loading_cursor';
@@ -38,11 +39,11 @@ export interface AiInsightAttachment {
 
 export interface AiInsightProps {
   title: string;
-  fetchInsight: (signal?: AbortSignal) => Promise<Response>;
+  createStream: (signal: AbortSignal) => Observable<StreamEvent>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
-export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightProps) {
+export function AiInsight({ title, createStream, buildAttachments }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -60,7 +61,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
   const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
-    useStreamingAiInsight(fetchInsight);
+    useStreamingAiInsight(createStream);
 
   const { parsingPluginList, processingPluginList } = useMarkdownPluginsWithCursor(
     euiTheme.colors.text

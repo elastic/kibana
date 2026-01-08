@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
 import {
@@ -31,11 +31,10 @@ export function ErrorSampleAiInsight({
 }: ErrorSampleAiInsightProps) {
   const apiClient = useApiClient();
 
-  const fetchInsight = async (signal?: AbortSignal) => {
-    const response = (await apiClient.fetch(
-      'POST /internal/observability_agent_builder/ai_insights/error',
-      {
-        signal: signal ?? null,
+  const createStream = useCallback(
+    (signal: AbortSignal) =>
+      apiClient.stream('POST /internal/observability_agent_builder/ai_insights/error', {
+        signal,
         params: {
           body: {
             errorId,
@@ -45,13 +44,9 @@ export function ErrorSampleAiInsight({
             environment,
           },
         },
-        asResponse: true,
-        rawResponse: true,
-      }
-    )) as unknown as { response: Response };
-
-    return response.response;
-  };
+      }),
+    [apiClient, errorId, serviceName, start, end, environment]
+  );
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
     {
@@ -91,7 +86,7 @@ export function ErrorSampleAiInsight({
       title={i18n.translate('xpack.observabilityAgentBuilder.errorAiInsight.titleLabel', {
         defaultMessage: "What's this error?",
       })}
-      fetchInsight={fetchInsight}
+      createStream={createStream}
       buildAttachments={buildAttachments}
     />
   );

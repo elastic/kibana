@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
 import {
@@ -22,23 +22,18 @@ export interface AlertAiInsightProps {
 export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
   const apiClient = useApiClient();
 
-  const fetchInsight = async (signal?: AbortSignal) => {
-    const response = (await apiClient.fetch(
-      'POST /internal/observability_agent_builder/ai_insights/alert',
-      {
-        signal: signal ?? null,
+  const createStream = useCallback(
+    (signal: AbortSignal) =>
+      apiClient.stream('POST /internal/observability_agent_builder/ai_insights/alert', {
+        signal,
         params: {
           body: {
             alertId,
           },
         },
-        asResponse: true,
-        rawResponse: true,
-      }
-    )) as unknown as { response: Response };
-
-    return response.response;
-  };
+      }),
+    [apiClient, alertId]
+  );
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
     {
@@ -71,7 +66,7 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
       title={i18n.translate('xpack.observabilityAgentBuilder.alertAiInsight.titleLabel', {
         defaultMessage: 'Help me understand this alert',
       })}
-      fetchInsight={fetchInsight}
+      createStream={createStream}
       buildAttachments={buildAttachments}
     />
   );

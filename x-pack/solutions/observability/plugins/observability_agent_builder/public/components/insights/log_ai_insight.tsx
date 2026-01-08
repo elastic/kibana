@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -42,28 +42,27 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     };
   }, [doc]);
 
-  if (typeof index !== 'string' || typeof id !== 'string') {
-    return null;
-  }
-
-  const fetchInsight = async (signal?: AbortSignal) => {
-    const response = (await apiClient.fetch(
-      'POST /internal/observability_agent_builder/ai_insights/log',
-      {
-        signal: signal ?? null,
+  const createStream = useCallback(
+    (signal: AbortSignal) => {
+      if (typeof index !== 'string' || typeof id !== 'string') {
+        throw new Error('Index and id must be strings');
+      }
+      return apiClient.stream('POST /internal/observability_agent_builder/ai_insights/log', {
+        signal,
         params: {
           body: {
             index,
             id,
           },
         },
-        asResponse: true,
-        rawResponse: true,
-      }
-    )) as unknown as { response: Response };
+      });
+    },
+    [apiClient, index, id]
+  );
 
-    return response.response;
-  };
+  if (typeof index !== 'string' || typeof id !== 'string') {
+    return null;
+  }
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
     {
@@ -98,7 +97,7 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     <>
       <AiInsight
         title={explainLogMessageButtonLabel}
-        fetchInsight={fetchInsight}
+        createStream={createStream}
         buildAttachments={buildAttachments}
       />
       <EuiSpacer size="s" />
