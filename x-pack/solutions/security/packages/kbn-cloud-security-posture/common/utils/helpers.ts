@@ -205,6 +205,6 @@ export const getEnrichPolicyId = (space: string = 'default'): string => {
 /**
  * Gets the entities latest index name for a specific space
  */
-export const getEntitiesLatestIndexName = (spaceId: string): string => {
+export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
   return ENTITIES_LATEST_INDEX.replace('<space>', spaceId);
 };

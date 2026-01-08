@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
   cleanupEntityStore,
@@ -270,18 +271,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           conflicts: 'proceed',
         });
 
-        // Delete entity indices completely to start fresh
         try {
+          // delete v2 index manually since its not being deleted by the cleanupEntityStore function
           await es.indices.delete({
-            index: '.entities.v1.latest.security_generic_default',
-            ignore_unavailable: true,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-        try {
-          await es.indices.delete({
-            index: '.entities.v2.latest.security_generic_default',
+            index: getEntitiesLatestIndexName(),
             ignore_unavailable: true,
           });
         } catch (e) {
@@ -319,38 +312,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
       });
 
-      // v1 tests - ENRICH policy (runs first)
-      describe('via ENRICH policy (v1)', () => {
-        before(async () => {
-          // Load v1 entity data
-          await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-          );
-
-          // Wait for entity data to be fully indexed
-          await waitForEntityDataIndexed({
-            es,
-            logger,
-            retry,
-            entitiesIndex: '.entities.v1.latest.security_*',
-            expectedCount: 12,
-          });
-
-          // Execute enrich policy to pick up entity data
-          await waitForEnrichPolicyCreated({ es, retry, logger });
-          await executeEnrichPolicy({ es, retry, logger });
-        });
-
-        after(async () => {
-          // Clean up v1 entity data
-          await es.deleteByQuery({
-            index: '.entities.v1.latest.security_generic_default',
-            query: { match_all: {} },
-            conflicts: 'proceed',
-            ignore_unavailable: true,
-          });
-        });
-
+      // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
+      const runEnrichmentTests = () => {
         it('expanded flyout - entity enrichment for multiple generic targets - single target field', async () => {
           await alertsPage.navigateToAlertsPage(
             `${alertsPage.getAbsoluteTimerangeFilter(
@@ -470,15 +433,37 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             'GCP Compute Instance'
           );
         });
-      }); // end of v1 tests
+      };
 
-      // v2 tests - LOOKUP JOIN (runs after v1)
+      describe('via ENRICH policy (v1)', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
+          );
+
+          // Wait for entity data to be fully indexed
+          await waitForEntityDataIndexed({
+            es,
+            logger,
+            retry,
+            entitiesIndex: '.entities.v1.latest.security_*',
+            expectedCount: 12,
+          });
+
+          // Execute enrich policy to pick up entity data
+          await waitForEnrichPolicyCreated({ es, retry, logger });
+          await executeEnrichPolicy({ es, retry, logger });
+        });
+
+        runEnrichmentTests();
+      });
+
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
-          // Delete v1 index to ensure v2 lookup mode is used
+          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
           try {
             await es.indices.delete({
-              index: '.entities.v1.latest.security_generic_default',
+              index: getEntitiesLatestIndexName(),
               ignore_unavailable: true,
             });
           } catch (e) {
@@ -501,137 +486,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
 
         after(async () => {
-          // Clean up v2 entity data
-          try {
-            await es.indices.delete({
-              index: '.entities.v2.latest.security_generic_default',
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            // Ignore if index doesn't exist
-          }
-        });
-
-        it('expanded flyout - entity enrichment for multiple generic targets - single target field', async () => {
-          await alertsPage.navigateToAlertsPage(
-            `${alertsPage.getAbsoluteTimerangeFilter(
-              '2024-09-01T00:00:00.000Z',
-              '2024-09-02T00:00:00.000Z'
-            )}&${alertsPage.getFlyoutFilter(
-              'new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567'
-            )}`
-          );
-          await alertsPage.waitForListToHaveAlerts();
-
-          await alertsPage.flyout.expandVisualizations();
-
-          await alertsPage.flyout.assertGraphPreviewVisible();
-          // We expect 5 nodes total in the graph:
-          // 1. Actor node (serviceaccount@example.com - user)
-          // 2. Grouped target node (3 service accounts grouped by same type/subtype)
-          // 3. Entity node (api-service full path)
-          // 4-5. Two label nodes
-          await alertsPage.flyout.assertGraphNodesNumber(5);
-
-          await expandedFlyoutGraph.expandGraph();
-          await expandedFlyoutGraph.waitGraphIsLoaded();
-          await expandedFlyoutGraph.assertGraphNodesNumber(5);
-          await expandedFlyoutGraph.toggleSearchBar();
-
-          // Test filter actions - Show actions by entity (user.entity.id)
-          await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
-          await expandedFlyoutGraph.showSearchBar();
-          await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-          await expandedFlyoutGraph.expectFilterTextEquals(
-            0,
-            'user.entity.id: serviceaccount@example.com'
-          );
-          await expandedFlyoutGraph.expectFilterPreviewEquals(
-            0,
-            'user.entity.id: serviceaccount@example.com'
-          );
-
-          await expandedFlyoutGraph.showEntityDetails('4be3083f01620e3b7ad07ed171640ace');
-          // check the preview panel grouped items rendered correctly
-          await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
-          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
-
-          await expandedFlyoutGraph.closePreviewSection();
-
-          // Clear filters to reset state
-          await expandedFlyoutGraph.clearAllFilters();
-
-          // Test custom filter in query bar
-          await expandedFlyoutGraph.addFilter({
-            field: 'user.entity.id',
-            operation: 'is',
-            value: 'serviceaccount@example.com',
-          });
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-
-          // Open timeline to verify integration
-          await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-          await timelinePage.ensureTimelineIsOpen();
-          await timelinePage.waitForEvents();
-          await timelinePage.closeTimeline();
-
-          // Test query bar with KQL
-          await expandedFlyoutGraph.setKqlQuery(
-            'event.action: "google.iam.admin.v1.UpdateServiceAccount"'
-          );
-          await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-          await timelinePage.ensureTimelineIsOpen();
-          await timelinePage.waitForEvents();
-          await timelinePage.closeTimeline();
-
-          // Test query bar with non-matching query
-          await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
-          await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-          await timelinePage.ensureTimelineIsOpen();
-          await timelinePage.waitForEvents();
-        });
-
-        it('expanded flyout - entity enrichment for service actor with multiple host targets - single target field', async () => {
-          // Navigate to alerts page with the multi-target alert
-          await alertsPage.navigateToAlertsPage(
-            `${alertsPage.getAbsoluteTimerangeFilter(
-              '2024-09-01T00:00:00.000Z',
-              '2024-09-02T00:00:00.000Z'
-            )}&${alertsPage.getFlyoutFilter(
-              'multi-target-alert-id-xyz123abc456def789ghi012jkl345mno678pqr901stu234'
-            )}`
-          );
-          await alertsPage.waitForListToHaveAlerts();
-
-          await alertsPage.flyout.expandVisualizations();
-          await alertsPage.flyout.assertGraphPreviewVisible();
-          // Should have 1 service actor (1 node) + 2 host targets grouped (1 node) + 1 label (1 node) = 3 nodes
-          await alertsPage.flyout.assertGraphNodesNumber(3);
-
-          await expandedFlyoutGraph.expandGraph();
-          await expandedFlyoutGraph.waitGraphIsLoaded();
-          await expandedFlyoutGraph.assertGraphNodesNumber(3);
-
-          // Verify first entity node - Service actor
-          await expandedFlyoutGraph.assertNodeEntityTag(
-            'api-service@your-project-id.iam.gserviceaccount.com',
-            'Service'
-          );
-          await expandedFlyoutGraph.assertNodeEntityDetails(
-            'api-service@your-project-id.iam.gserviceaccount.com',
-            'ApiServiceAccount'
-          );
-
-          // Verify second entity node - Host target
-          // get Node by md5 hash of host-instance-1 and host-instance-2
-          await expandedFlyoutGraph.assertNodeEntityTag('599353ee39e688c8a37d9d2818d77898', 'Host');
-          await expandedFlyoutGraph.assertNodeEntityDetails(
-            '599353ee39e688c8a37d9d2818d77898',
-            'GCP Compute Instance'
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
           );
         });
-      }); // end of v2 tests
-    }); // end of describe('ECS fields only')
+
+        runEnrichmentTests();
+      });
+    });
   });
 }

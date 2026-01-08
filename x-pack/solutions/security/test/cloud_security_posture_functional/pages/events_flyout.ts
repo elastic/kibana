@@ -324,15 +324,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // Delete entity indices completely to start fresh
         try {
           await es.indices.delete({
-            index: '.entities.v1.latest.security_generic_default',
-            ignore_unavailable: true,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-        try {
-          await es.indices.delete({
-            index: '.entities.v2.latest.security_generic_default',
+            index: getEntitiesLatestIndexName(),
             ignore_unavailable: true,
           });
         } catch (e) {
@@ -365,38 +357,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
       });
 
-      // v1 tests - ENRICH policy (runs first)
-      describe('via ENRICH policy (v1)', () => {
-        before(async () => {
-          // Load v1 entity data
-          await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-          );
-
-          // Wait for entity data to be fully indexed
-          await waitForEntityDataIndexed({
-            es,
-            logger,
-            retry,
-            entitiesIndex: '.entities.v1.latest.security_*',
-            expectedCount: 12,
-          });
-
-          // Execute enrich policy to pick up entity data
-          await waitForEnrichPolicyCreated({ es, retry, logger });
-          await executeEnrichPolicy({ es, retry, logger });
-        });
-
-        after(async () => {
-          // Clean up v1 entity data
-          await es.deleteByQuery({
-            index: '.entities.v1.latest.security_generic_default',
-            query: { match_all: {} },
-            conflicts: 'proceed',
-            ignore_unavailable: true,
-          });
-        });
-
+      // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
+      const runEnrichmentTests = () => {
         it('expanded flyout - entity enrichment for multiple actors and targets', async () => {
           // Navigate to events page with the multi-actor multi-target event
           await networkEventsPage.navigateToNetworkEventsPage(
@@ -436,15 +398,37 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
           await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
         });
-      }); // end of v1 tests
+      };
 
-      // v2 tests - LOOKUP JOIN (runs after v1)
+      describe('via ENRICH policy (v1)', () => {
+        before(async () => {
+          // Load v1 entity data
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
+          );
+
+          // Wait for entity data to be fully indexed
+          await waitForEntityDataIndexed({
+            es,
+            logger,
+            retry,
+            entitiesIndex: '.entities.v1.latest.security_*',
+            expectedCount: 12,
+          });
+
+          await waitForEnrichPolicyCreated({ es, retry, logger });
+          await executeEnrichPolicy({ es, retry, logger });
+        });
+
+        runEnrichmentTests();
+      });
+
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
-          // Delete v1 index to ensure v2 lookup mode is used
+          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
           try {
             await es.indices.delete({
-              index: '.entities.v1.latest.security_generic_default',
+              index: getEntitiesLatestIndexName(),
               ignore_unavailable: true,
             });
           } catch (e) {
@@ -467,57 +451,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
 
         after(async () => {
-          // Clean up v2 entity data
-          try {
-            await es.indices.delete({
-              index: '.entities.v2.latest.security_generic_default',
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            // Ignore if index doesn't exist
-          }
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+          );
         });
 
-        it('expanded flyout - entity enrichment for multiple actors and targets', async () => {
-          // Navigate to events page with the multi-actor multi-target event
-          await networkEventsPage.navigateToNetworkEventsPage(
-            `${networkEventsPage.getAbsoluteTimerangeFilter(
-              '2024-09-01T00:00:00.000Z',
-              '2024-09-02T00:00:00.000Z'
-            )}&${networkEventsPage.getFlyoutFilter('MultiActorMultiTargetEvent123')}`
-          );
-          await networkEventsPage.waitForListToHaveEvents();
-
-          await networkEventsPage.flyout.expandVisualizations();
-          await networkEventsPage.flyout.assertGraphPreviewVisible();
-          // Expected nodes:
-          // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
-          // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
-          // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
-          // - 2 label nodes (actor group -> storage group, actor group -> service group)
-          const expectedNodes = 5;
-          await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
-
-          await expandedFlyoutGraph.expandGraph();
-          await expandedFlyoutGraph.waitGraphIsLoaded();
-          await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
-
-          const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
-          await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
-          await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
-
-          const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
-          await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
-          await expandedFlyoutGraph.assertNodeEntityDetails(
-            storageBucketNodeId,
-            'GCP Storage Bucket'
-          );
-
-          const serviceNodeId = '0039c3b5dd064364a5f7edac77c2e158';
-          await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
-          await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
-        });
-      }); // end of v2 tests
-    }); // end of describe('ECS fields only')
+        runEnrichmentTests();
+      });
+    });
   });
 }
