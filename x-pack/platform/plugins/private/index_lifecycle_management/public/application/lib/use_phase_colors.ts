@@ -19,10 +19,10 @@ export const usePhaseColors = (): PhaseColorMap => {
   const { euiTheme } = useEuiTheme();
 
   return {
-    hot: euiTheme.colors.vis.euiColorVis6,
-    warm: euiTheme.colors.vis.euiColorVis9,
-    cold: euiTheme.colors.vis.euiColorVis2,
-    frozen: euiTheme.colors.vis.euiColorVis4,
-    delete: euiTheme.colors.borderBaseSubdued,
+    hot: euiTheme.colors.severity.risk,
+    warm: euiTheme.colors.severity.warning,
+    cold: euiTheme.colors.severity.neutral,
+    frozen: euiTheme.colors.vis.euiColorVis3,
+    delete: euiTheme.colors.backgroundBaseSubdued,
   };
 };

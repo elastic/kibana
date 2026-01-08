@@ -44,13 +44,14 @@ jest.mock('@elastic/eui', () => ({
       themeName: 'EUI_THEME_BOREALIS',
       colors: {
         vis: {
-          euiColorVis1: '#6092C0',
-          euiColorVis2: '#D36086',
-          euiColorVis4: '#CA8EAE',
-          euiColorVis5: '#D6BF57',
-          euiColorVis6: '#B9A888',
-          euiColorVis9: '#E7664C',
+          euiColorVis3: '#BFDBFF',
         },
+        severity: {
+          risk: '#FF995E',
+          warning: '#FCD883',
+          neutral: '#B5E5F2',
+        },
+        backgroundBaseSubdued: '#CAD3E2',
       },
     },
   }),
