@@ -39,6 +39,7 @@ steps:
     label: 'Quick Checks'
     agents:
       machineType: n2d-highcpu-8
+      diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -53,7 +54,7 @@ steps:
     label: 'Checks'
     key: checks
     agents:
-      machineType: n2d-standard-2
+      machineType: n2d-standard-4
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -66,7 +67,8 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: n2d-standard-16
+      machineType: n2d-standard-32
+      diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -81,6 +83,7 @@ steps:
     label: 'Linting (with types)'
     agents:
       machineType: n2d-standard-32
+      diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
