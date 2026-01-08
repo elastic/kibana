@@ -29,13 +29,14 @@ export const AiPromptStepDefinition: PublicStepDefinition<
   AiPromptStepConfigSchema
 > = {
   ...AiPromptStepCommonDefinition,
-  // Simple type assertion - assumes the types are compatible
-  dynamicOutputSchema: ({ input }) => {
-    if (input.outputSchema) {
-      return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
-    }
+  editorHandlers: {
+    dynamicOutputSchema: ({ input }) => {
+      if (input.outputSchema) {
+        return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
+      }
 
-    return OutputSchema;
+      return OutputSchema;
+    },
   },
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
