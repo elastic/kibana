@@ -22,8 +22,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: n4d-standard-8
-      diskType: 'hyperdisk-balanced'
+      machineType: c4d-standard-16-lssd
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
