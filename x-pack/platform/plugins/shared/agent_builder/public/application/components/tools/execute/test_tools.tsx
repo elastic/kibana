@@ -253,9 +253,31 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   });
 
   const onSubmit = async (formData: Record<string, any>) => {
+    const parameters = getParameters(tool);
+    const parsedFormData: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(formData)) {
+      const param = parameters.find((p) => p.name === key);
+      if (
+        param &&
+        (param.type === 'object' || param.type === 'array') &&
+        typeof value === 'string' &&
+        value.trim() !== ''
+      ) {
+        try {
+          parsedFormData[key] = JSON.parse(value);
+        } catch {
+          // If parsing fails, use the original string value
+          parsedFormData[key] = value;
+        }
+      } else {
+        parsedFormData[key] = value;
+      }
+    }
+
     await executeTool({
       toolId: tool!.id,
-      toolParams: formData,
+      toolParams: parsedFormData,
     });
   };
 
@@ -301,7 +323,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                 <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
                   <EuiFlexGroup direction="column" gutterSize="none">
                     {getParameters(tool).map((parameter) => {
-                      const { name, label, description, optional } = parameter;
+                      const { name, label, description, type, optional } = parameter;
                       return (
                         <EuiFormRow
                           key={name}
@@ -313,7 +335,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                               </EuiText>
                             )
                           }
-                          helpText={description}
+                          helpText={
+                            <>
+                              <code>{type}</code>
+                              {description && ` - ${description}`}
+                            </>
+                          }
                           isInvalid={!!errors[name]}
                           error={errors[name]?.message as string}
                           fullWidth
