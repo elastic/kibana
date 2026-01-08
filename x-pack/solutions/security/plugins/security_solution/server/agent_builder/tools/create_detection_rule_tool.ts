@@ -46,7 +46,8 @@ export function createDetectionRuleTool(
         if (!experimentalFeatures?.aiAssistedRuleCreationEnabled) {
           return {
             status: 'unavailable',
-            reason: 'AI assisted rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
+            reason:
+              'AI assisted rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
           };
         }
 

@@ -36,11 +36,7 @@ const CustomHeaderPage: React.FC<
     backComponent={backComponent}
   >
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      {askAiAssistantButton && (
-        <EuiFlexItem grow={false}>
-          {askAiAssistantButton}
-        </EuiFlexItem>
-      )}
+      {askAiAssistantButton && <EuiFlexItem grow={false}>{askAiAssistantButton}</EuiFlexItem>}
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="preview-container"

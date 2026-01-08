@@ -147,11 +147,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   }
 
   return showForm && rule ? (
-    <CreateRulePage
-      rule={rule}
-      backComponent={backComponent}
-      sendToAgentChat
-    />
+    <CreateRulePage rule={rule} backComponent={backComponent} sendToAgentChat />
   ) : (
     <>
       <SecuritySolutionPageWrapper>

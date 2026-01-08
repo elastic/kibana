@@ -7,4 +7,3 @@
 
 export { AddRuleAttachmentToChatButton } from './ask_ai_assistant_button';
 export type { AddRuleAttachmentToChatButtonProps } from './ask_ai_assistant_button';
-

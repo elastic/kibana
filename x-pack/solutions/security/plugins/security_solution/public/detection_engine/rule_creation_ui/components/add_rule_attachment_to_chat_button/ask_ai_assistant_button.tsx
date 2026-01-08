@@ -8,7 +8,12 @@
 import React, { useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../../common/types';
+import type {
+  AboutStepRule,
+  ActionsStepRule,
+  DefineStepRule,
+  ScheduleStepRule,
+} from '../../../common/types';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -54,13 +59,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       },
       attachmentPrompt: RULE_ATTACHMENT_PROMPT,
     };
-  }, [
-    defineStepData,
-    aboutStepData,
-    scheduleStepData,
-    actionsStepData,
-    actionTypeRegistry,
-  ]);
+  }, [defineStepData, aboutStepData, scheduleStepData, actionsStepData, actionTypeRegistry]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
@@ -83,4 +82,3 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     />
   );
 };
-

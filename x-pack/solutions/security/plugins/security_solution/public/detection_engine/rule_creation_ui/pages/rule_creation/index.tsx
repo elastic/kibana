@@ -261,7 +261,6 @@ const CreateRulePageComponent: React.FC<{
     [rulesUrl]
   );
 
-
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
       setOpenSteps((_openSteps) => ({
