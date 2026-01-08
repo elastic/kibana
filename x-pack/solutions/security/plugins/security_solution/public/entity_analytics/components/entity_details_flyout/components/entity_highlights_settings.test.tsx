@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { TestProviders } from '../../../../common/mock';
 
@@ -33,6 +34,19 @@ jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => 
     openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
   }),
 }));
+
+jest.mock(
+  '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
+  () => ({
+    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="anonymizationSettingsModal">
+        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  })
+);
 
 describe('EntityHighlightsSettings', () => {
   const defaultProps = {
@@ -157,7 +171,12 @@ describe('EntityHighlightsSettings', () => {
   });
 
   it('disables Ask AI Assistant when agent builder is enabled and no assistant result', () => {
-    mockUseAgentBuilderAvailability.mockImplementation(() => ({ isAgentBuilderEnabled: true }));
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    }));
 
     render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
       wrapper: TestProviders,
@@ -171,7 +190,12 @@ describe('EntityHighlightsSettings', () => {
   });
 
   it('enables Ask AI Assistant when agent builder is enabled and assistant result exists', () => {
-    mockUseAgentBuilderAvailability.mockImplementation(() => ({ isAgentBuilderEnabled: true }));
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    }));
 
     render(<EntityHighlightsSettings {...defaultProps} isLoading={false} />, {
       wrapper: TestProviders,
@@ -214,5 +238,38 @@ describe('EntityHighlightsSettings', () => {
     });
 
     expect(screen.getByRole('switch')).not.toBeChecked();
+  });
+
+  it('renders the anonymization settings button', () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('anonymizationSettings')).toBeInTheDocument();
+  });
+
+  it('opens the anonymization settings modal when the settings button is clicked', async () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    await userEvent.click(screen.getByTestId('anonymizationSettings'));
+    await waitFor(() =>
+      expect(screen.getByTestId('anonymizationSettingsModal')).toBeInTheDocument()
+    );
+  });
+
+  it('closes the anonymization settings modal when onClose is triggered', async () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    await userEvent.click(screen.getByTestId('anonymizationSettings'));
+    await waitFor(() => expect(screen.getByTestId('anonymizationSettingsModal')).toBeVisible());
+
+    await userEvent.click(screen.getByTestId('closeAnonymizationSettingsModal'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('anonymizationSettingsModal')).not.toBeInTheDocument()
+    );
   });
 });
