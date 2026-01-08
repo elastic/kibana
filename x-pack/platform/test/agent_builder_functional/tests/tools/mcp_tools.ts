@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     describe('creating MCP tools', function () {
       it('should create an MCP tool by selecting connector and tool', async () => {
-        const toolId = `ftr.mcp.${Date.now()}`;
+        const toolId = `${TOOL_PREFIX}create.${Date.now()}`;
 
         await agentBuilder.navigateToNewTool();
         await testSubjects.existOrFail('agentBuilderToolFormPage');
@@ -74,6 +74,120 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
         // Navigate to tools table and verify tool appears
         await agentBuilder.navigateToToolsLanding();
         expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
+      });
+    });
+
+    describe('editing MCP tools', function () {
+      it('should edit an MCP tool description', async () => {
+        const toolId = `${TOOL_PREFIX}edit.${Date.now()}`;
+        const newDescription = 'Updated MCP tool description';
+
+        // Create tool via API
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: toolId,
+            type: 'mcp',
+            description: 'Original description',
+            tags: [],
+            configuration: {
+              connector_id: connectorId,
+              tool_name: 'echo',
+            },
+          })
+          .expect(200);
+
+        // Navigate to tool and edit
+        await agentBuilder.navigateToTool(toolId);
+        await testSubjects.existOrFail('agentBuilderToolFormPage');
+
+        await agentBuilder.setToolDescription(newDescription);
+        await agentBuilder.saveTool();
+
+        // Reload and verify description was updated
+        await agentBuilder.navigateToTool(toolId);
+        const description = await agentBuilder.getToolDescriptionValue();
+        expect(description).to.contain(newDescription);
+      });
+    });
+
+    describe('cloning MCP tools', function () {
+      it('should clone an MCP tool and select a different server tool (add)', async () => {
+        const sourceToolId = `${TOOL_PREFIX}clone.source.${Date.now()}`;
+        const clonedToolId = `${TOOL_PREFIX}clone.copy.${Date.now()}`;
+
+        // Create source tool via API (using 'add' tool)
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: sourceToolId,
+            type: 'mcp',
+            description: 'Tool to be cloned',
+            tags: [],
+            configuration: {
+              connector_id: connectorId,
+              tool_name: 'add',
+            },
+          })
+          .expect(200);
+
+        // Navigate to tool and clone
+        await agentBuilder.navigateToTool(sourceToolId);
+        await testSubjects.existOrFail('agentBuilderToolFormPage');
+
+        await agentBuilder.openToolContextMenu();
+        await agentBuilder.clickToolCloneButton();
+
+        // Cloning keeps the same MCP server but requires selecting a tool
+        // Select a different tool ('echo') from the same server
+        await agentBuilder.waitForMcpToolsToLoad();
+        await agentBuilder.selectMcpTool('echo');
+
+        // Set new ID for cloned tool
+        await agentBuilder.setToolId(clonedToolId);
+        await agentBuilder.saveTool();
+
+        // Verify both tools exist in table
+        await agentBuilder.navigateToToolsLanding();
+        expect(await agentBuilder.isToolInTable(sourceToolId)).to.be(true);
+        expect(await agentBuilder.isToolInTable(clonedToolId)).to.be(true);
+      });
+    });
+
+    describe('deleting MCP tools', function () {
+      it('should delete an MCP tool', async () => {
+        const toolId = `${TOOL_PREFIX}delete.${Date.now()}`;
+
+        // Create tool via API
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: toolId,
+            type: 'mcp',
+            description: 'Tool to be deleted',
+            tags: [],
+            configuration: {
+              connector_id: connectorId,
+              tool_name: 'echo',
+            },
+          })
+          .expect(200);
+
+        // Navigate to tool
+        await agentBuilder.navigateToTool(toolId);
+        await testSubjects.existOrFail('agentBuilderToolFormPage');
+
+        // Delete via context menu
+        await agentBuilder.openToolContextMenu();
+        await agentBuilder.clickToolDeleteButton();
+        await agentBuilder.confirmModalConfirm();
+
+        // Verify tool is gone
+        await agentBuilder.navigateToToolsLanding();
+        expect(await agentBuilder.isToolInTable(toolId)).to.be(false);
       });
     });
   });
