@@ -7,5 +7,5 @@
 
 export { createTaskTool } from './sub_agent';
 export { createIngestPipelineGeneratorAgent } from './ingest_pipeline_generator';
-export { textToEcsSubAgent } from './text_to_ecs_agent';
+export { createTextToEcsAgent } from './text_to_ecs_agent';
 export { createLogsAnalyzerAgent } from './logs_analyzer';

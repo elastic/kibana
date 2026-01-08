@@ -6,34 +6,52 @@
  */
 
 import assert from 'assert';
-import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
+import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
+import { AgentService } from '../agents/agent_service';
+import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import type { AutomaticImportV2PluginStartDependencies } from '../../types';
 
 export const DATA_STREAM_CREATION_TASK_TYPE = 'autoImport-dataStream-task';
 
-export interface DataStreamTaskParams {
+export interface DataStreamTaskParams extends DataStreamParams {
+  /**
+   * Inference connector ID to use when the background task runs.
+   */
+  connectorId: string;
+  /**
+   * Minimal auth headers to reconstruct a scoped client as the original user.
+   */
+  authHeaders?: Record<string, string | string[]>;
+}
+
+export interface DataStreamParams {
   integrationId: string;
   dataStreamId: string;
-  esClient: ElasticsearchClient;
-  model: InferenceChatModel;
 }
 
 export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
-  private taskWorkflow?: (params: DataStreamTaskParams) => void | Promise<void>;
+  private agentService: AgentService;
+  private core: CoreSetup<AutomaticImportV2PluginStartDependencies>;
 
-  constructor(logger: LoggerFactory, taskManagerSetup: TaskManagerSetupContract) {
+  constructor(
+    logger: LoggerFactory,
+    taskManagerSetup: TaskManagerSetupContract,
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+  ) {
     this.logger = logger.get('taskManagerService');
-
+    this.core = core;
+    this.agentService = new AgentService(new AutomaticImportSamplesIndexService(logger), logger);
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
       [DATA_STREAM_CREATION_TASK_TYPE]: {
@@ -50,23 +68,14 @@ export class TaskManagerService {
       },
     });
 
-    this.logger.info(`Task definition "${DATA_STREAM_CREATION_TASK_TYPE}" registered`);
+    this.logger.debug(`Task definition "${DATA_STREAM_CREATION_TASK_TYPE}" registered`);
   }
 
   // for lifecycle start phase
-  public initialize(
-    taskManager: TaskManagerStartContract,
-    options?: {
-      taskWorkflow?: (params: DataStreamTaskParams) => void | Promise<void>;
-    }
-  ): void {
+  public initialize(taskManager: TaskManagerStartContract): void {
     this.taskManager = taskManager;
 
-    if (options?.taskWorkflow) {
-      this.taskWorkflow = options.taskWorkflow;
-    }
-
-    this.logger.debug('TaskManagerService initialized');
+    this.logger.info('Automatic Import TaskManagerService initialized');
   }
 
   public async scheduleDataStreamCreationTask(
@@ -74,7 +83,10 @@ export class TaskManagerService {
   ): Promise<{ taskId: string }> {
     assert(this.taskManager, 'TaskManager not initialized');
 
-    const taskId = this.generateDataStreamTaskId(params);
+    const taskId = this.generateDataStreamTaskId({
+      integrationId: params.integrationId,
+      dataStreamId: params.dataStreamId,
+    });
 
     const taskInstance = await this.taskManager.schedule({
       id: taskId,
@@ -89,11 +101,9 @@ export class TaskManagerService {
     return { taskId: taskInstance.id };
   }
 
-  public async removeDataStreamCreationTask(
-    dataStreamTaskParams: DataStreamTaskParams
-  ): Promise<void> {
+  public async removeDataStreamCreationTask(dataStreamParams: DataStreamParams): Promise<void> {
     assert(this.taskManager, 'TaskManager not initialized');
-    const taskId = this.generateDataStreamTaskId(dataStreamTaskParams);
+    const taskId = this.generateDataStreamTaskId(dataStreamParams);
     try {
       await this.taskManager.removeIfExists(taskId);
       this.logger.info(`Task deleted: ${taskId}`);
@@ -121,33 +131,94 @@ export class TaskManagerService {
     }
   }
 
-  private async runTask(taskInstance: ConcreteTaskInstance) {
-    const { id: taskId, params } = taskInstance;
-
-    this.logger.info(`Running task ${taskId}`, params);
+  public async getTaskResult(taskId: string): Promise<{
+    result: Record<string, unknown>;
+  }> {
+    if (!this.taskManager) {
+      throw new Error('TaskManager not initialized');
+    }
 
     try {
-      if (this.taskWorkflow) {
-        const { integrationId, dataStreamId } = params;
-        if (!integrationId || !dataStreamId) {
-          throw new Error('Task params must include integrationId and dataStreamId');
-        }
+      const task = await this.taskManager.get(taskId);
 
-        // Note: esClient and model are optional as they can't be serialized in task params
-        // They should be provided by the workflow implementation if needed
-        await this.taskWorkflow(params as DataStreamTaskParams);
-        this.logger.debug(`Task ${taskId}: Workflow executed successfully`);
-      } else {
-        this.logger.warn(
-          `Task ${taskId}: No workflow provided, task will complete without processing`
-        );
+      return {
+        result: task.state?.result,
+      };
+    } catch (error: any) {
+      this.logger.error(`Failed to get task result for ${taskId}:`, error);
+      throw new Error(`Task ${taskId} not found or inaccessible`);
+    }
+  }
+
+  private async runTask(taskInstance: ConcreteTaskInstance) {
+    assert(this.agentService, 'Agent service not initialized');
+
+    const { id: taskId, params } = taskInstance;
+    const { integrationId, dataStreamId, connectorId, authHeaders } =
+      params as DataStreamTaskParams;
+
+    this.logger.debug(
+      `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
+    );
+
+    try {
+      if (!integrationId || !dataStreamId || !connectorId) {
+        throw new Error('Task params must include integrationId, dataStreamId, and connectorId');
       }
 
-      this.logger.info(`Task ${taskId} completed successfully`);
+      // Get core services and plugins
+      const [coreStart, pluginsStart] = await this.core.getStartServices();
 
-      return { state: { task_status: TASK_STATUSES.completed } };
-    } catch (error: any) {
-      this.logger.error(`Task ${taskId} failed:`, error);
+      // Recreate a fake request with the original auth headers so we can run as that user
+      const fakeRequest = kibanaRequestFactory({
+        headers: authHeaders ?? {},
+        path: '/',
+      });
+
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
+      const esClient = scopedClusterClient.asCurrentUser;
+
+      const model = await pluginsStart.inference.getChatModel({
+        request: fakeRequest,
+        connectorId,
+        chatModelOptions: {
+          temperature: 0.05,
+          // Prevent long internal retries; Task Manager handles retries at task level
+          maxRetries: 1,
+          disableStreaming: true,
+          maxConcurrency: 50,
+          telemetryMetadata: { pluginId: 'automatic_import_v2' },
+        },
+      });
+
+      const result = await this.agentService.invokeAutomaticImportAgent(
+        integrationId,
+        dataStreamId,
+        esClient,
+        model
+      );
+
+      this.logger.debug(`Task ${taskId} completed successfully`);
+
+      // Extract and convert the pipeline to JSON string
+      const pipelineString = JSON.stringify(result.current_pipeline || {});
+
+      // Extract docs from pipeline_generation_results and convert to string array
+      const pipelineGenerationResults = (result.pipeline_generation_results?.docs || []).map(
+        (doc) => JSON.stringify(doc)
+      );
+
+      return {
+        state: {
+          task_status: TASK_STATUSES.completed,
+          result: {
+            ingest_pipeline: pipelineString,
+            pipeline_generation_results: pipelineGenerationResults,
+          },
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Task ${taskId} failed: ${JSON.stringify(error)}`);
       return { state: { task_status: TASK_STATUSES.failed }, error };
     }
   }
@@ -158,7 +229,7 @@ export class TaskManagerService {
     return { state: { task_status: TASK_STATUSES.cancelled } };
   }
 
-  private generateDataStreamTaskId(params: DataStreamTaskParams): string {
+  private generateDataStreamTaskId(params: DataStreamParams): string {
     return `data-stream-task-${params.integrationId}-${params.dataStreamId}`;
   }
 }

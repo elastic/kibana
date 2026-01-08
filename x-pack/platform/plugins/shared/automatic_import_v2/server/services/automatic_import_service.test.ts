@@ -9,6 +9,7 @@ import expect from 'expect';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { AutomaticImportService } from './automatic_import_service';
 import type { SavedObjectsServiceSetup, SavedObjectsClient } from '@kbn/core/server';
 import type {
@@ -32,12 +33,14 @@ describe('AutomaticImportSetupService', () => {
   let mockSavedObjectsClient: SavedObjectsClient;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   let mockTaskManagerStart: jest.Mocked<TaskManagerStartContract>;
+  let mockCoreSetup: ReturnType<typeof createCoreSetupMock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockLoggerFactory = loggerMock.create();
     mockSavedObjectsSetup = savedObjectsServiceMock.createSetupContract();
     mockSavedObjectsClient = savedObjectsClientMock.create() as unknown as SavedObjectsClient;
+    mockCoreSetup = createCoreSetupMock();
 
     // Mock TaskManager contracts
     mockTaskManagerSetup = {
@@ -54,7 +57,8 @@ describe('AutomaticImportSetupService', () => {
     service = new AutomaticImportService(
       mockLoggerFactory,
       mockSavedObjectsSetup,
-      mockTaskManagerSetup
+      mockTaskManagerSetup,
+      mockCoreSetup as any
     );
   });
 

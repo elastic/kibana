@@ -28,6 +28,13 @@ import {
 } from './constants';
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 
+export interface UpdateDataStreamParams {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+  status: keyof typeof TASK_STATUSES;
+}
+
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClient;
   private logger: Logger;
@@ -96,7 +103,7 @@ export class AutomaticImportSavedObjectService {
     }
 
     try {
-      this.logger.debug(`Creating integration: ${integrationId}`);
+      this.logger.info(`***********insertIntegration: Creating integration: ${integrationId}`);
 
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
@@ -568,6 +575,47 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(
         `Failed to update integration ${parentIntegrationId} after deleting data stream ${dataStreamId}: ${integrationError}`
       );
+    }
+  }
+
+  public async updateDataStreamSavedObjectAttributes(
+    updateDataStreamParams: UpdateDataStreamParams
+  ): Promise<void> {
+    const { integrationId, dataStreamId, ingestPipeline, status } = updateDataStreamParams;
+
+    if (!integrationId) {
+      throw new Error('Integration ID is required');
+    }
+
+    if (!dataStreamId) {
+      throw new Error('Data stream ID is required');
+    }
+
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      if (!dataStream) {
+        throw new Error(`Data stream ${dataStreamId} not found`);
+      }
+
+      const updatedDataStreamData: DataStreamAttributes = {
+        ...dataStream.attributes,
+        result: {
+          ingestPipeline,
+        },
+        job_info: {
+          ...dataStream.attributes.job_info,
+          status,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        dataStreamId,
+        updatedDataStreamData
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId}: ${error}`);
+      throw error;
     }
   }
 }

@@ -8,7 +8,6 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import type {
   CreateAutoImportIntegrationResponse,
@@ -149,12 +148,10 @@ const createIntegrationRoute = (
         },
       },
       async (context, request, response) => {
+        const { automaticImportService, getCurrentUser, esClient } =
+          await context.automaticImportv2;
+        const { integrationId, title, logo, description, connectorId, dataStreams } = request.body;
         try {
-          const { automaticImportService, getCurrentUser, esClient, inference } =
-            await context.automaticImportv2;
-          const { integrationId, title, logo, description, connectorId, dataStreams } =
-            request.body;
-          const abortSignal = getRequestAbortedSignal(request.events.aborted$);
           const authenticatedUser = await getCurrentUser();
 
           const integrationParams: IntegrationParams = {
@@ -164,32 +161,20 @@ const createIntegrationRoute = (
             description,
           };
 
-          const model = await inference.getChatModel({
-            request,
-            connectorId,
-            chatModelOptions: {
-              // not passing specific `model`, we'll always use the connector default model
-              // temperature may need to be parametrized in the future
-              temperature: 0.05,
-              // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
-              maxRetries: 1,
-              // Disable streaming explicitly
-              disableStreaming: true,
-              // Set a hard limit of 50 concurrent requests
-              maxConcurrency: 50,
-              telemetryMetadata: { pluginId: 'automatic_import_v2' },
-              signal: abortSignal,
-            },
-          });
-
           await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+
+          const authHeaders: Record<string, string | string[]> = {};
+          if (request.headers.authorization) {
+            authHeaders.authorization = request.headers.authorization;
+          }
+          if (request.headers['kbn-xsrf']) {
+            authHeaders['kbn-xsrf'] = request.headers['kbn-xsrf'] as string | string[];
+          }
 
           if (dataStreams) {
             const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
               ...dataStream,
               integrationId,
-              esClient,
-              model,
               metadata: { createdAt: new Date().toISOString() },
             }));
             await Promise.all(
@@ -198,16 +183,20 @@ const createIntegrationRoute = (
                   authenticatedUser,
                   dataStreamParams,
                   esClient,
-                  model,
+                  connectorId,
+                  authHeaders,
                 })
               )
             );
           }
+
           const body: CreateAutoImportIntegrationResponse = {
             integration_id: integrationId,
           };
           return response.ok({ body });
         } catch (err) {
+          logger.info(err);
+          await automaticImportService.deleteIntegration(integrationId);
           logger.error(`createIntegrationRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, SavedObjectsClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createRootWithCorePlugins,
@@ -23,6 +23,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { IntegrationParams, DataStreamParams } from '../routes/types';
 import { mockAuthenticatedUser } from '../__mocks__/saved_objects';
+import type { AutomaticImportV2PluginStartDependencies } from '..';
 
 const taskManagerSetupSpy = jest.spyOn(TaskManagerPlugin.prototype, 'setup');
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
@@ -56,7 +57,8 @@ describe('TaskManagerService Integration Tests', () => {
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
         coreSetup.savedObjects,
-        taskManagerSetup
+        taskManagerSetup,
+        coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>
       );
 
       // Start Kibana to boot taskManager
@@ -154,8 +156,7 @@ describe('TaskManagerService Integration Tests', () => {
       const taskParams = {
         integrationId: integrationSavedObject.id,
         dataStreamId: 'test-ds-456', // Use the ID we plan to create
-        esClient,
-        model: {} as any, // Mock InferenceChatModel
+        connectorId: 'test-connector-id',
       };
 
       const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(taskParams);
@@ -243,8 +244,7 @@ describe('TaskManagerService Integration Tests', () => {
           const taskParams = {
             integrationId: integration.id,
             dataStreamId,
-            esClient,
-            model: {} as any, // Mock InferenceChatModel
+            connectorId: 'test-connector-id',
           };
 
           const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(taskParams);
@@ -291,8 +291,7 @@ describe('TaskManagerService Integration Tests', () => {
         const duplicateTaskParams = {
           integrationId: firstObject.integration.id,
           dataStreamId: firstObject.dataStream.attributes.data_stream_id,
-          esClient,
-          model: {} as any, // Mock InferenceChatModel
+          connectorId: 'test-connector-id',
         };
 
         const duplicateTaskResponse = await taskManagerService.scheduleDataStreamCreationTask(
