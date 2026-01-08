@@ -17,6 +17,11 @@ import {
   generateGithubGetPullRequestWorkflow,
   generateGithubGetFileContentsWorkflow,
   generateGithubListBranchesWorkflow,
+  generateGithubSearchRepoContentsWorkflow,
+  generateGithubGetDocWorkflow,
+  generateGithubGetIssueCommentsWorkflow,
+  generateGithubGetPullRequestCommentsWorkflow,
+  generateGithubGetPullRequestFilesWorkflow,
 } from './workflows';
 
 export const githubDataSource: DataTypeDefinition = {
@@ -64,6 +69,26 @@ export const githubDataSource: DataTypeDefinition = {
       },
       {
         content: generateGithubListBranchesWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchRepoContentsWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubGetDocWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubGetIssueCommentsWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubGetPullRequestCommentsWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubGetPullRequestFilesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
     ];

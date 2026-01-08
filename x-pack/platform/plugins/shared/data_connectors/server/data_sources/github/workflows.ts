@@ -210,3 +210,142 @@ steps:
       perPage: "\${{inputs.perPage}}"
 `;
 }
+
+export function generateGithubSearchRepoContentsWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.github.search_repo_contents'
+description: 'Search for code and files in a GitHub repository'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: query
+    type: string
+    required: false
+steps:
+  - name: search-repo-contents
+    type: github.searchRepoContents
+    connector-id: ${stackConnectorId}
+    with:
+      owner: "\${{inputs.owner}}"
+      repo: "\${{inputs.repo}}"
+      query: "\${{inputs.query}}"
+`;
+}
+
+export function generateGithubGetDocWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.github.get_doc'
+description: 'Get a single markdown or documentation file from a GitHub repository'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: path
+    type: string
+  - name: ref
+    type: string
+    default: "main"
+    required: false
+steps:
+  - name: get-doc
+    type: github.getDoc
+    connector-id: ${stackConnectorId}
+    with:
+      owner: "\${{inputs.owner}}"
+      repo: "\${{inputs.repo}}"
+      path: "\${{inputs.path}}"
+      ref: "\${{inputs.ref}}"
+`;
+}
+
+export function generateGithubGetIssueCommentsWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.github.get_issue_comments'
+description: 'Get comments for a specific issue in a GitHub repository'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: issueNumber
+    type: number
+  - name: page
+    type: number
+    required: false
+  - name: perPage
+    type: number
+    required: false
+steps:
+  - name: get-issue-comments
+    type: github.getIssueComments
+    connector-id: ${stackConnectorId}
+    with:
+      owner: "\${{inputs.owner}}"
+      repo: "\${{inputs.repo}}"
+      issueNumber: "\${{inputs.issueNumber}}"
+      page: "\${{inputs.page}}"
+      perPage: "\${{inputs.perPage}}"
+`;
+}
+
+export function generateGithubGetPullRequestCommentsWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.github.get_pull_request_comments'
+description: 'Get comments for a specific pull request in a GitHub repository'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: pullNumber
+    type: number
+steps:
+  - name: get-pull-request-comments
+    type: github.getPullRequestComments
+    connector-id: ${stackConnectorId}
+    with:
+      owner: "\${{inputs.owner}}"
+      repo: "\${{inputs.repo}}"
+      pullNumber: "\${{inputs.pullNumber}}"
+`;
+}
+
+export function generateGithubGetPullRequestFilesWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.github.get_pull_request_files'
+description: 'Get files changed in a specific pull request'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: pullNumber
+    type: number
+steps:
+  - name: get-pull-request-files
+    type: github.getPullRequestFiles
+    connector-id: ${stackConnectorId}
+    with:
+      owner: "\${{inputs.owner}}"
+      repo: "\${{inputs.repo}}"
+      pullNumber: "\${{inputs.pullNumber}}"
+`;
+}
