@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { FetchStatus } from '../../application/types';
-import { useDataState } from '../../application/main/hooks/use_data_state';
+import { useCustomDataState, useDataState } from '../../application/main/hooks/use_data_state';
 
 export enum HitsCounterMode {
   standalone = 'standalone',
@@ -28,7 +28,12 @@ export interface HitsCounterProps {
 
 export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }) => {
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
-  const totalHitsState = useDataState(totalHits$);
+  // Sometimes state can jump from one complete to another complete state
+  // without passing through loading, so be sure to check the result before discarding the update
+  const totalHitsState = useCustomDataState(
+    totalHits$,
+    (next, current) => next.fetchStatus === current.fetchStatus && next.result !== current.result
+  );
   let hitsTotal = totalHitsState.result;
   const hitsStatus = totalHitsState.fetchStatus;
 

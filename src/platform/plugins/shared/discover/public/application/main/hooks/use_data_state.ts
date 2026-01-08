@@ -24,3 +24,20 @@ export function useDataState<T extends DataMsg>(data$: BehaviorSubject<T>) {
   }, [data$, fetchState, setFetchState]);
   return fetchState;
 }
+
+export function useCustomDataState<T extends DataMsg>(
+  data$: BehaviorSubject<T>,
+  customCheck: (next: T, current: T) => boolean
+) {
+  const [fetchState, setFetchState] = useState<T>(data$.getValue());
+
+  useEffect(() => {
+    const subscription = data$.subscribe((next) => {
+      if (next.fetchStatus !== fetchState.fetchStatus || customCheck(next, fetchState)) {
+        setFetchState({ ...fetchState, ...next, ...(next.error ? {} : { error: undefined }) });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [data$, fetchState, setFetchState, customCheck]);
+  return fetchState;
+}
