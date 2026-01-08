@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../../../common/detection_engine/mitre/types';
+export type * from '../../../common/detection_engine/mitre/types';
