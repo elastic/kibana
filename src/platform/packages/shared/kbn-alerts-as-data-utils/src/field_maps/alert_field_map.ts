@@ -304,6 +304,7 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 32766,
   },
   [DATA_STREAM_TYPE]: {
     type: 'keyword',
