@@ -10,7 +10,6 @@
 export {
   AiPromptStepCommonDefinition,
   AiPromptStepTypeId,
-  type AiPromptStepConfigSchema,
   type AiPromptStepInputSchema,
   type AiPromptStepOutputSchema,
 } from './ai_prompt_step';

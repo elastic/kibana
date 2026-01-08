@@ -14,9 +14,6 @@ import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry
 
 export const AiSummarizeStepDefinition: PublicStepDefinition = {
   ...AiSummarizeStepCommonDefinition,
-  // Simple type assertion - assumes the types are compatible
-  dynamicOutputSchema:
-    AiSummarizeStepCommonDefinition.dynamicOutputSchema as PublicStepDefinition['dynamicOutputSchema'],
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
