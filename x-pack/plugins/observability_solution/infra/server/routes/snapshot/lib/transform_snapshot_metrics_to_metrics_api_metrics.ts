@@ -22,19 +22,34 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
           SnapshotCustomMetricInputRT.is(m) ? m.id === metric.id : false
         );
         const customId = isUniqueId ? metric.id : `custom_${index}`;
+
         if (metric.aggregation === 'rate') {
           return { id: customId, aggregations: networkTraffic(customId, metric.field) };
-        }
-        return {
-          id: customId,
-          aggregations: {
-            [customId]: {
-              [metric.aggregation]: {
-                field: metric.field,
+        } else if (metric.aggregation === 'last_value') {
+          return {
+            id: customId,
+            aggregations: {
+              [customId]: {
+                top_metrics: {
+                  metrics: { field: metric.field },
+                  size: 1,
+                  sort: { '@timestamp': 'desc' },
+                },
               },
             },
-          },
-        };
+          };
+        } else {
+          return {
+            id: customId,
+            aggregations: {
+              [customId]: {
+                [metric.aggregation]: {
+                  field: metric.field,
+                },
+              },
+            },
+          };
+        }
       }
       return { id: metric.type, aggregations };
     })
