@@ -128,10 +128,12 @@ describe('convertFormBasedToTextBasedLayer', () => {
     jest.clearAllMocks();
 
     coreStart = coreMock.createStart();
-    coreStart.uiSettings.get.mockImplementation(defaultUiSettingsGet);
+    (coreStart.uiSettings.get as jest.Mock).mockImplementation(defaultUiSettingsGet);
 
     startDependencies = createMockStartDependencies() as unknown as LensPluginStartDependencies;
-    startDependencies.data.nowProvider.get.mockReturnValue(new Date('2024-01-01T00:00:00.000Z'));
+    (startDependencies.data.nowProvider.get as jest.Mock).mockReturnValue(
+      new Date('2024-01-01T00:00:00.000Z')
+    );
   });
 
   it('returns undefined when layersToConvert is empty', () => {
