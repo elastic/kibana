@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiPageHeader,
   EuiText,
@@ -50,7 +50,7 @@ import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
-import { routeToRules } from '../../../constants';
+import { routeToHome, routeToRules } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -93,6 +93,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   refreshToken,
 }) => {
   const history = useHistory();
+  const location = useLocation();
   const {
     application,
     ruleTypeRegistry,
@@ -237,7 +238,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   ]);
 
   const goToRulesList = () => {
-    history.push(routeToRules);
+    // If we're in the standalone rules app (/app/rules), navigate to root (/)
+    // Otherwise, use the routeToRules constant for management plugin context
+    if (location.pathname.includes('/rule/')) {
+      history.push(routeToHome);
+    } else {
+      history.push(routeToRules);
+    }
   };
 
   const getRuleStatusErrorReasonText = () => {
