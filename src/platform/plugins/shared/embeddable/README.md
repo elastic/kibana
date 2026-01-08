@@ -205,7 +205,7 @@ Transforms decouple REST API state from stored state, allowing embeddables to ha
 
 Containers use schemas to
 - Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
-- Validate embeddable state, failing requests when schema validation fails.
+- Validate embeddable state, failing REST API requests when schema validation fails.
 
 ```
 embeddableServerSetup.registerTransforms(
