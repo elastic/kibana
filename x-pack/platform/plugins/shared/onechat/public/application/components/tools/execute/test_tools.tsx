@@ -69,9 +69,11 @@ const i18nMessages = {
       defaultMessage: 'Enter {label}',
       values: { label },
     }),
-  title: i18n.translate('xpack.onechat.tools.testFlyout.title', {
-    defaultMessage: 'Test Tool',
-  }),
+  title: (toolName: string) =>
+    i18n.translate('xpack.onechat.tools.testFlyout.title', {
+      defaultMessage: 'Test tool: {toolName}',
+      values: { toolName },
+    }),
   inputsTitle: i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
     defaultMessage: 'Inputs',
   }),
@@ -139,6 +141,39 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
       optional: !requiredParams.has(paramName),
     };
   });
+};
+
+export const parseFormData = (
+  formData: Record<string, any>,
+  parameters: Array<{ name: string; type: string }>
+): Record<string, any> => {
+  const parsedFormData: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(formData)) {
+    // Skip empty string values
+    if (typeof value === 'string' && value.trim() === '') {
+      continue;
+    }
+
+    const param = parameters.find((p) => p.name === key);
+    if (
+      param &&
+      (param.type === 'object' || param.type === 'array') &&
+      typeof value === 'string' &&
+      value.trim() !== ''
+    ) {
+      try {
+        parsedFormData[key] = JSON.parse(value);
+      } catch {
+        // If parsing fails, use the original string value
+        parsedFormData[key] = value;
+      }
+    } else {
+      parsedFormData[key] = value;
+    }
+  }
+
+  return parsedFormData;
 };
 
 const renderFormField = ({
@@ -221,6 +256,7 @@ export interface ToolTestFlyoutProps {
 
 export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const { docLinksService } = useAgentBuilderServices();
   const [response, setResponse] = useState<string>('{}');
   // Re-mount new responses, needed for virtualized EuiCodeBlock
   // https://github.com/elastic/eui/issues/9034
@@ -252,9 +288,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   });
 
   const onSubmit = async (formData: Record<string, any>) => {
+    const parameters = getParameters(tool);
+    const parsedFormData = parseFormData(formData, parameters);
+
     await executeTool({
       toolId: tool!.id,
-      toolParams: formData,
+      toolParams: parsedFormData,
     });
   };
 
@@ -266,7 +305,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">{i18nMessages.title}</h2>
+              <h2 id="flyoutTitle">{i18nMessages.title(tool.id)}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -300,7 +339,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                 <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
                   <EuiFlexGroup direction="column" gutterSize="none">
                     {getParameters(tool).map((parameter) => {
-                      const { name, label, description, optional } = parameter;
+                      const { name, label, description, type, optional } = parameter;
                       return (
                         <EuiFormRow
                           key={name}
@@ -312,7 +351,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                               </EuiText>
                             )
                           }
-                          helpText={description}
+                          helpText={
+                            <>
+                              <code>{type}</code>
+                              {description && ` - ${description}`}
+                            </>
+                          }
                           isInvalid={!!errors[name]}
                           error={errors[name]?.message as string}
                           fullWidth
