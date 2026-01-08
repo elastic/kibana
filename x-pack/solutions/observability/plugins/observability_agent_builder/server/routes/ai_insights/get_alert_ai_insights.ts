@@ -14,6 +14,7 @@ import moment from 'moment';
 import type { Observable } from 'rxjs';
 import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type { AiInsightResult, ContextEvent } from './types';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -44,10 +45,7 @@ interface GetAlertAiInsightParams {
   logger: Logger;
 }
 
-export interface AlertAiInsightResult {
-  events$: Observable<ChatCompletionEvent | { type: 'context'; context: string }>;
-  context: string;
-}
+export type AlertAiInsightResult = AiInsightResult;
 
 export async function getAlertAiInsight({
   alertDoc,
@@ -58,7 +56,7 @@ export async function getAlertAiInsight({
   logger,
 }: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
   const relatedContext = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
-  const events$ = generateAlertSummary({
+  const events$: Observable<ChatCompletionEvent> = generateAlertSummary({
     inferenceClient,
     connectorId,
     alertDoc,
@@ -66,7 +64,7 @@ export async function getAlertAiInsight({
   });
 
   const streamWithContext$ = concat(
-    of({ type: 'context' as const, context: relatedContext }),
+    of<ContextEvent>({ type: 'context', context: relatedContext }),
     events$
   );
 

@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { filter, map, scan, takeUntil, Observable } from 'rxjs';
+import { filter, map, scan, takeUntil, finalize, Observable, type Subscription } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 interface ParsedEvent {
@@ -49,12 +49,11 @@ export function useStreamingAiInsight(
   const [context, setContext] = useState('');
   const [wasStopped, setWasStopped] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const subscriptionRef = useRef<Subscription | undefined>(undefined);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      setIsLoading(false);
       setWasStopped(true);
     }
   }, []);
@@ -66,7 +65,7 @@ export function useStreamingAiInsight(
 
     if (subscriptionRef.current) {
       subscriptionRef.current.unsubscribe();
-      subscriptionRef.current = null;
+      subscriptionRef.current = undefined;
     }
 
     setIsLoading(true);
@@ -122,35 +121,29 @@ export function useStreamingAiInsight(
           },
           { summary: '', context: '' }
         ),
-        takeUntil(abort$)
+        takeUntil(abort$),
+        finalize(() => {
+          setIsLoading(false);
+        })
       );
 
-      const subscription = observable$.subscribe({
-        next: (state) => {
+      subscriptionRef.current = observable$.subscribe({
+        next: (state: InsightResponse) => {
           setSummary(state.summary);
           setContext(state.context);
         },
         error: (err: unknown) => {
           if (err instanceof AbortError) {
-            setIsLoading(false);
             return;
           }
           setError(err instanceof Error ? err.message : 'Failed to load AI insight');
-          setIsLoading(false);
-        },
-        complete: () => {
-          setIsLoading(false);
         },
       });
-
-      subscriptionRef.current = subscription;
     } catch (e) {
       if (e instanceof AbortError) {
-        setIsLoading(false);
         return;
       }
       setError(e instanceof Error ? e.message : 'Failed to load AI insight');
-      setIsLoading(false);
     }
   }, [createStream]);
 
@@ -165,8 +158,6 @@ export function useStreamingAiInsight(
     };
   }, []);
 
-  const regenerate = fetch;
-
   return {
     isLoading,
     error,
@@ -175,6 +166,6 @@ export function useStreamingAiInsight(
     wasStopped,
     fetch,
     stop,
-    regenerate,
+    regenerate: fetch,
   };
 }

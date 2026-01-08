@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/logging';
 import { MessageRole, type ChatCompletionEvent } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import dedent from 'dedent';
-import type { Observable } from 'rxjs';
 import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
@@ -20,6 +19,7 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
+import type { AiInsightResult, ContextEvent } from '../types';
 
 const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   You are an expert SRE Assistant within Elastic Observability. Your job is to analyze an APM error using ONLY the provided context (APM trace items, related errors, downstream dependencies, and log categories).
@@ -79,10 +79,7 @@ export interface GenerateErrorAiInsightParams {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
-export interface GenerateErrorAiInsightResult {
-  events$: Observable<ChatCompletionEvent | { type: 'context'; context: string }>;
-  context: string;
-}
+export type GenerateErrorAiInsightResult = AiInsightResult;
 
 export async function generateErrorAiInsight({
   core,
@@ -124,7 +121,7 @@ export async function generateErrorAiInsight({
   });
 
   const streamWithContext$ = concat(
-    of({ type: 'context' as const, context: errorContext }),
+    of<ContextEvent>({ type: 'context', context: errorContext }),
     events$
   );
 
