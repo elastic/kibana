@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConversationRoundStep, ToolResult } from '@kbn/agent-builder-common';
+import type {
+  ConversationRound,
+  ConversationRoundStep,
+  ToolResult,
+} from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { CleanedHistoryResult } from '@kbn/agent-builder-server';
 import type { ToolRegistry } from '../../../tools';
