@@ -25,7 +25,6 @@ steps:
       machineType: c4d-standard-16-lssd
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
@@ -40,7 +39,6 @@ steps:
       machineType: c3d-standard-8-lssd
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -68,7 +66,6 @@ steps:
       machineType: c3d-standard-30-lssd
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -82,7 +79,6 @@ steps:
       machineType: c3d-standard-30-lssd
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
     retry:

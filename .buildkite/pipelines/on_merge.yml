@@ -55,7 +55,6 @@ steps:
       machineType: c3d-standard-8-lssd
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -84,7 +83,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d‑standard‑30‑lssd
+      machineType: c3d‑standard‑30-lssd
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -100,7 +99,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d‑standard‑30‑lssd
+      machineType: c3d‑standard‑30-lssd
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
