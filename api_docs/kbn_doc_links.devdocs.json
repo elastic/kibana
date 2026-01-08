@@ -221,7 +221,7 @@
             "label": "cloud",
             "description": [],
             "signature": [
-              "{ readonly beatsAndLogstashConfiguration: string; readonly elasticsearchBillingManagingCosts: string; readonly indexManagement: string; readonly cloudConnect: string; readonly connectToAutoops: string; }"
+              "{ readonly beatsAndLogstashConfiguration: string; readonly elasticsearchBillingManagingCosts: string; readonly indexManagement: string; readonly cloudConnect: string; readonly connectToAutoops: string; readonly deploymentSignup: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1154,6 +1154,31 @@
             "description": [],
             "signature": [
               "{ readonly componentTemplate: string; readonly indexAlias: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.subscriptions",
+            "type": "string",
+            "tags": [],
+            "label": "subscriptions",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "{ readonly casesPermissions: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
