@@ -7,7 +7,6 @@
 
 import { apm, timerange } from '@kbn/synthtrace-client';
 
-const SERVICE_PREFIX = 'service';
 // generates traces, metrics for services
 export function generateAddServicesToExistingHost({
   from,
@@ -26,7 +25,7 @@ export function generateAddServicesToExistingHost({
     .map((_, serviceIdx) =>
       apm
         .service({
-          name: `${SERVICE_PREFIX}-${serviceIdx}`,
+          name: `service-${serviceIdx}`,
           environment: 'production',
           agentName: 'nodejs',
         })

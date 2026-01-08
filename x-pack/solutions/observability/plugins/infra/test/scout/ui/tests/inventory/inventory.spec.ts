@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Infrastructure Inventory - Sequential', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Infrastructure Inventory - Onboarding', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await inventoryPage.goToPage();

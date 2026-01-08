@@ -28,7 +28,7 @@ export function generatePodsData({
     .generator((timestamp) =>
       pods.flatMap((pod, idx) => [
         pod.metrics().timestamp(timestamp),
-        pod.container(`container-${idx}`).metrics().timestamp(timestamp),
+        pod.container(`k8s-container-${idx}`).metrics().timestamp(timestamp),
       ])
     );
 }

@@ -94,7 +94,7 @@ export const DATE_WITH_DOCKER_DATA = moment()
 export const CONTAINER_COUNT = 1;
 export const CONTAINER_NAMES = Array.from(
   { length: CONTAINER_COUNT },
-  (_, i) => `container-container-id-${i}`
+  (_, i) => `container-container-${i}`
 );
 
 export const DATE_WITH_POD_DATA_FROM = moment().subtract(94, 'minutes').toISOString();
