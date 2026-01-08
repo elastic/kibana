@@ -10,11 +10,9 @@ import { z } from '@kbn/zod';
 /**
  * Base schema for all Security Solution agent-builder attachments.
  *
- * Each attachment can override its UI label by providing an `attachmentLabel`.
+ * Each attachment can override its UI label by providing an `attachmentLabel`,
+ * which must be included in the schema in order for the attachment validate method to persist the label
  */
 export const securityAttachmentDataSchema = z.object({
   attachmentLabel: z.string(),
 });
-
-export type SecurityAttachmentData = z.infer<typeof securityAttachmentDataSchema>;
-
