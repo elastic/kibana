@@ -341,24 +341,12 @@ export const GithubConnector: ConnectorSpec = {
           autoInit?: boolean;
         };
 
-        const requestBody: {
-          name: string;
-          description?: string;
-          private?: boolean;
-          auto_init?: boolean;
-        } = {
+        const requestBody = {
           name: typedInput.name,
+          ...(typedInput.description !== undefined && { description: typedInput.description }),
+          ...(typedInput.private !== undefined && { private: typedInput.private }),
+          ...(typedInput.autoInit !== undefined && { auto_init: typedInput.autoInit }),
         };
-
-        if (typedInput.description !== undefined) {
-          requestBody.description = typedInput.description;
-        }
-        if (typedInput.private !== undefined) {
-          requestBody.private = typedInput.private;
-        }
-        if (typedInput.autoInit !== undefined) {
-          requestBody.auto_init = typedInput.autoInit;
-        }
 
         const response = await ctx.client.post('https://api.github.com/user/repos', requestBody, {
           headers: {
@@ -491,22 +479,13 @@ export const GithubConnector: ConnectorSpec = {
           perPage?: number;
         };
 
-        const params: {
-          page?: number;
-          per_page?: number;
-        } = {};
-
-        if (typedInput.page !== undefined) {
-          params.page = typedInput.page;
-        }
-        if (typedInput.perPage !== undefined) {
-          params.per_page = typedInput.perPage;
-        }
-
         const response = await ctx.client.get(
           `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}/comments`,
           {
-            ...(Object.keys(params).length > 0 ? { params } : {}),
+            params: {
+              ...(typedInput.page && { page: typedInput.page }),
+              ...(typedInput.perPage && { per_page: typedInput.perPage }),
+            },
             headers: {
               Accept: 'application/vnd.github.v3+json',
             },
@@ -681,22 +660,13 @@ export const GithubConnector: ConnectorSpec = {
           perPage?: number;
         };
 
-        const params: {
-          page?: number;
-          per_page?: number;
-        } = {};
-
-        if (typedInput.page !== undefined) {
-          params.page = typedInput.page;
-        }
-        if (typedInput.perPage !== undefined) {
-          params.per_page = typedInput.perPage;
-        }
-
         const response = await ctx.client.get(
           `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/branches`,
           {
-            ...(Object.keys(params).length > 0 ? { params } : {}),
+            params: {
+              ...(typedInput.page && { page: typedInput.page }),
+              ...(typedInput.perPage && { per_page: typedInput.perPage }),
+            },
             headers: {
               Accept: 'application/vnd.github.v3+json',
             },

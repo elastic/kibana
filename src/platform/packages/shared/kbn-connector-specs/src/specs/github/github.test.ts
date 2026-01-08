@@ -1415,6 +1415,7 @@ describe('GithubConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.github.com/repos/owner/repo/issues/42/comments',
         {
+          params: {},
           headers: {
             Accept: 'application/vnd.github.v3+json',
           },
@@ -1756,6 +1757,7 @@ index abc123..def456 100644
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.github.com/repos/owner/repo/branches',
         {
+          params: {},
           headers: {
             Accept: 'application/vnd.github.v3+json',
           },
