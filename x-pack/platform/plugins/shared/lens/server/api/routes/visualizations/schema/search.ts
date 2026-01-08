@@ -51,7 +51,7 @@ const lensSearchResponseMetaSchema = schema.object(
 
 export const lensSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(lensResponseItemSchema),
+    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
     meta: lensSearchResponseMetaSchema,
   },
   { unknowns: 'forbid' }
