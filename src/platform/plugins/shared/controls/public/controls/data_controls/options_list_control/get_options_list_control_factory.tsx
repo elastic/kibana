@@ -241,6 +241,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .pipe(debounceTime(0))
         .subscribe(
           ([dataViews, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
+            console.log({ sectionId });
             const dataView = dataViews?.[0];
             if (!dataView) return;
 

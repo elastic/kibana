@@ -62,6 +62,7 @@ function filterByMetaData<FilterType extends ESQLControlVariable | Filter>(
   filters: FilterType[] | undefined
 ): FilterType[] | undefined {
   const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+  console.log({ uuid, filters, sectionId });
   return filters?.filter(
     (current) =>
       current.meta?.controlledBy !== uuid &&
@@ -201,6 +202,7 @@ export const useFetchContext = (api: unknown): FetchContext => {
   }, []);
 
   useEffect(() => {
+    console.log({ api });
     const subscription = fetch$(api).subscribe((nextContext) => context$.next(nextContext));
 
     return () => subscription.unsubscribe();

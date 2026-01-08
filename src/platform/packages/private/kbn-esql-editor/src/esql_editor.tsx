@@ -312,6 +312,7 @@ const ESQLEditorInternal = function ESQLEditor({
   // The "Create control" suggestion is also enabled/disabled here based on the supportsControls flag
   useEffect(() => {
     const variables = variablesService?.esqlVariables;
+    // console.log({ variables, esqlVariables });
     if (!isEqual(variables, esqlVariables)) {
       variablesService?.clearVariables();
       esqlVariables?.forEach((variable) => {

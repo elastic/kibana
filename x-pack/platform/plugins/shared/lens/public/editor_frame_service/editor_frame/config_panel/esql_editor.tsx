@@ -10,7 +10,7 @@ import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useFetchContext, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
@@ -112,12 +112,8 @@ export function ESQLEditor({
 
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
-  const esqlVariables = useStateFromPublishingSubject(
-    apiPublishesESQLVariables(parentApi)
-      ? parentApi?.esqlVariables$
-      : new BehaviorSubject(undefined)
-  );
-
+  const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
+  console.log({ panelId, esqlVariables });
   const dispatch = useLensDispatch();
 
   useEffect(() => {

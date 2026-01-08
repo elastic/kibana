@@ -82,7 +82,7 @@ export function initializeESQLControlManager(
   setDataLoading: (loading: boolean) => void
 ) {
   const sectionId$ = apiHasSections(parentApi) ? parentApi.getPanelSection$(uuid) : of(undefined);
-
+  console.log({ sectionId$ });
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -236,7 +236,7 @@ export function initializeESQLControlManager(
       // Multi-select: return array of all selected values
       value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
     }
-
+    console.log({ sectionId });
     return {
       key: variableName$.value,
       value,
@@ -247,7 +247,10 @@ export function initializeESQLControlManager(
       },
     };
   };
-  const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
+
+  const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(
+    getEsqlVariable(parentApi.getPanelSection(uuid))
+  );
   const variableSubscriptions = combineLatest([
     sectionId$,
     variableName$,

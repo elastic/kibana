@@ -616,6 +616,9 @@ export function initializeLayoutManager(
         });
         trackPanel.scrollToBottom$.next();
       },
+      getPanelSection: (uuid: string) => {
+        return layout$.getValue().panels[uuid]?.grid?.sectionId;
+      },
       getPanelSection$: (uuid: string) => {
         return layout$.pipe(
           // pinned panels and panels in global section are treated identically; i.e. their section is `undefined`
