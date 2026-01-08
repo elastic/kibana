@@ -13,10 +13,7 @@ export class ProfilingSettingsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);
-    await this.page
-      .getByTestId('profilingPageTemplate')
-      .getByText('Universal Profiling')
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page.getByTestId('profilingPageTemplate').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Settings Form methods
