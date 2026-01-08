@@ -402,6 +402,52 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    listIssues: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        state: z.enum(['open', 'closed', 'all']).optional(),
+        sort: z.enum(['created', 'updated', 'comments']).optional(),
+        direction: z.enum(['asc', 'desc']).optional(),
+        since: z.string().optional(),
+        labels: z.array(z.string()).optional(),
+        page: z.coerce.number().min(1).optional(),
+        perPage: z.coerce.number().min(1).max(100).optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          state?: 'open' | 'closed' | 'all';
+          sort?: 'created' | 'updated' | 'comments';
+          direction?: 'asc' | 'desc';
+          since?: string;
+          labels?: string[];
+          page?: number;
+          perPage?: number;
+        };
+
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues`,
+          {
+            params: {
+              ...(typedInput.state && { state: typedInput.state }),
+              ...(typedInput.sort && { sort: typedInput.sort }),
+              ...(typedInput.direction && { direction: typedInput.direction }),
+              ...(typedInput.since && { since: typedInput.since }),
+              ...(typedInput.labels && typedInput.labels.length > 0 && { labels: typedInput.labels.join(',') }),
+              ...(typedInput.page && { page: typedInput.page }),
+              ...(typedInput.perPage && { per_page: typedInput.perPage }),
+            },
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
     getIssue: {
       isTool: false,
       input: z.object({

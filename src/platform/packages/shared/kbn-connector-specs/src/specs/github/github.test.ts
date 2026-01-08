@@ -1060,6 +1060,289 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('listIssues action', () => {
+    it('should list issues without optional parameters', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 1,
+            title: 'Issue 1',
+            state: 'open',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
+          },
+          {
+            number: 2,
+            title: 'Issue 2',
+            state: 'open',
+            created_at: '2024-01-02T00:00:00Z',
+            updated_at: '2024-01-02T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {},
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list issues with state parameter', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 3,
+            title: 'Closed Issue',
+            state: 'closed',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-03T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        state: 'closed',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {
+            state: 'closed',
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list issues with sort and direction parameters', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 2,
+            title: 'Issue 2',
+            state: 'open',
+            created_at: '2024-01-02T00:00:00Z',
+            updated_at: '2024-01-02T00:00:00Z',
+          },
+          {
+            number: 1,
+            title: 'Issue 1',
+            state: 'open',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        sort: 'created',
+        direction: 'desc',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {
+            sort: 'created',
+            direction: 'desc',
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list issues with labels parameter', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 5,
+            title: 'Bug Issue',
+            state: 'open',
+            labels: [{ name: 'bug', color: 'd73a4a' }],
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        labels: ['bug', 'urgent'],
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {
+            labels: 'bug,urgent',
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list issues with pagination parameters', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 10,
+            title: 'Issue 10',
+            state: 'open',
+            created_at: '2024-01-10T00:00:00Z',
+            updated_at: '2024-01-10T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        page: 2,
+        perPage: 10,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {
+            page: 2,
+            per_page: 10,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list issues with since parameter', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 7,
+            title: 'Recent Issue',
+            state: 'open',
+            created_at: '2024-01-15T00:00:00Z',
+            updated_at: '2024-01-15T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        since: '2024-01-01T00:00:00Z',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {
+            since: '2024-01-01T00:00:00Z',
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list issues with all optional parameters', async () => {
+      const mockResponse = {
+        data: [
+          {
+            number: 8,
+            title: 'Complex Issue',
+            state: 'open',
+            labels: [{ name: 'enhancement', color: 'a2eeef' }],
+            created_at: '2024-01-08T00:00:00Z',
+            updated_at: '2024-01-08T00:00:00Z',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        state: 'open',
+        sort: 'updated',
+        direction: 'asc',
+        since: '2024-01-01T00:00:00Z',
+        labels: ['enhancement'],
+        page: 1,
+        perPage: 20,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/issues',
+        {
+          params: {
+            state: 'open',
+            sort: 'updated',
+            direction: 'asc',
+            since: '2024-01-01T00:00:00Z',
+            labels: 'enhancement',
+            page: 1,
+            per_page: 20,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should handle empty issue list', async () => {
+      const mockResponse = {
+        data: [],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+      });
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getIssue action', () => {
     it('should get an issue by number', async () => {
       const mockResponse = {
