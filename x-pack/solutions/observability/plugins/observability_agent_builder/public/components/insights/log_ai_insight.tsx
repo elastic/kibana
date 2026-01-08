@@ -8,16 +8,11 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  createRepositoryClient,
-  type DefaultClientOptions,
-} from '@kbn/server-route-repository-client';
-import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
-import { useKibana } from '../../hooks/use_kibana';
-import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
 } from '../../../common';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
+import { useApiClient } from '../../hooks/use_api_client';
 
 export interface LogAiInsightDocument {
   fields: {
@@ -38,14 +33,7 @@ const explainLogMessageButtonLabel = i18n.translate(
 );
 
 export function LogAiInsight({ doc }: LogAiInsightProps) {
-  const {
-    services: { http },
-  } = useKibana();
-
-  const apiClient = createRepositoryClient<
-    ObservabilityAgentBuilderServerRouteRepository,
-    DefaultClientOptions
-  >({ http });
+  const apiClient = useApiClient();
 
   const { index, id } = useMemo(() => {
     return {

@@ -7,17 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  createRepositoryClient,
-  type DefaultClientOptions,
-} from '@kbn/server-route-repository-client';
-import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
 } from '../../../common';
-import { useKibana } from '../../hooks/use_kibana';
+import { useApiClient } from '../../hooks/use_api_client';
 
 export interface AlertAiInsightProps {
   alertId: string;
@@ -25,14 +20,7 @@ export interface AlertAiInsightProps {
 }
 
 export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
-  const {
-    services: { http },
-  } = useKibana();
-
-  const apiClient = createRepositoryClient<
-    ObservabilityAgentBuilderServerRouteRepository,
-    DefaultClientOptions
-  >({ http });
+  const apiClient = useApiClient();
 
   const fetchInsight = async (signal?: AbortSignal) => {
     const response = (await apiClient.fetch(
