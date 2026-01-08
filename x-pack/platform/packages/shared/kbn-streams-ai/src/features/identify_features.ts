@@ -40,28 +40,17 @@ export async function identifyFeatures({
 }> {
   logger.debug(`Identifying features for stream ${stream.name}`);
 
-  const [analysis, { hits: sampleDocuments }] = await Promise.all([
-    describeDataset({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-    }),
-    getSampleDocuments({
-      esClient,
-      index: stream.name,
-      start,
-      end,
-      size: 10,
-    }),
-  ]);
+  const { hits: sampleDocuments } = await getSampleDocuments({
+    esClient,
+    index: stream.name,
+    start,
+    end,
+    size: 20,
+  });
 
   const response = await withSpan('invoke_prompt', () =>
     inferenceClient.prompt({
       input: {
-        dataset_analysis: JSON.stringify(
-          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: false })
-        ),
         sample_documents: JSON.stringify(sampleDocuments),
       },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt: prompt }),

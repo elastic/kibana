@@ -97,4 +97,4 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 }
 ```
 
-Extract all features that meet the confidence threshold and have supporting evidence from the dataset analysis and sample documents provided.
+Extract all features that meet the confidence threshold and have supporting evidence from the sample documents provided.

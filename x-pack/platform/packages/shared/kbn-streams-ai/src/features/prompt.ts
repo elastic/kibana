@@ -80,7 +80,6 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
   return createPrompt({
     name: 'identify_features',
     input: z.object({
-      dataset_analysis: z.string(),
       sample_documents: z.string(),
     }),
   })
