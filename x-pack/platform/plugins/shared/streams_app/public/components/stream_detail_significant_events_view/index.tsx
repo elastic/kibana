@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
@@ -22,14 +21,13 @@ import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
 import { EmptyState } from './empty_state';
-import { useAIFeatures } from '../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
 } from '../../constants';
-import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { formatChangePoint } from './utils/change_point';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -39,30 +37,22 @@ interface Props {
 export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
   const {
-    core: { notifications },
     dependencies: {
       start: { unifiedSearch },
     },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
-
   const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
     return niceTimeFormatter([timeState.start, timeState.end]);
   }, [timeState.start, timeState.end]);
 
-  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
-  const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
-  const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
-  const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
-  const [detectedFeatures, setDetectedFeatures] = useState<Feature[]>([]);
+  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
 
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
-    start: timeState.start,
-    end: timeState.end,
     query,
   });
 
@@ -73,36 +63,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
-
-  const identifyFeaturesCallback = useCallback(() => {
-    setIsFeatureDetectionLoading(true);
-    setIsFeatureDetectionFlyoutOpen(true);
-
-    identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!)
-      .then((data) => {
-        setDetectedFeatures(data.features);
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') {
-          return;
-        }
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.streams.streamDetailView.featureIdentification.errorTitle', {
-            defaultMessage: 'Failed to identify features',
-          }),
-        });
-      })
-      .finally(() => {
-        setIsFeatureDetectionLoading(false);
-      });
-  }, [
-    identifyFeatures,
-    aiFeatures?.genAiConnectors.selectedConnector,
-    setIsFeatureDetectionLoading,
-    setIsFeatureDetectionFlyoutOpen,
-    setDetectedFeatures,
-    notifications.toasts,
-  ]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -128,25 +88,11 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   }, [features]);
 
   if (
-    !significantEventsFetchState.value &&
-    (featuresLoading || significantEventsFetchState.loading)
+    !significantEventsFetchState.data &&
+    (featuresLoading || significantEventsFetchState.isLoading)
   ) {
     return <LoadingPanel size="xxl" />;
   }
-
-  const featureDetectionFlyout = isFeatureDetectionFlyoutOpen ? (
-    <StreamFeaturesFlyout
-      definition={definition.stream}
-      features={detectedFeatures}
-      isLoading={isFeatureDetectionLoading}
-      closeFlyout={() => {
-        abort();
-        refreshFeatures();
-        setIsFeatureDetectionFlyoutOpen(false);
-      }}
-      setFeatures={setDetectedFeatures}
-    />
-  ) : null;
 
   const editFlyout = (generateOnMount: boolean) => (
     <EditSignificantEventFlyout
@@ -154,14 +100,14 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
       refreshDefinition={refreshDefinition}
-      refresh={significantEventsFetchState.refresh}
+      refresh={significantEventsFetchState.refetch}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
       selectedFeatures={selectedFeatures}
       setSelectedFeatures={setSelectedFeatures}
       features={features}
-      onFeatureIdentificationClick={identifyFeaturesCallback}
+      refreshFeatures={refreshFeatures}
       generateOnMount={generateOnMount}
       aiFeatures={aiFeatures}
     />
@@ -169,9 +115,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
 
   const noSignificantEvents =
     !query &&
-    !significantEventsFetchState.loading &&
-    significantEventsFetchState.value &&
-    significantEventsFetchState.value.significant_events.length === 0;
+    !significantEventsFetchState.isLoading &&
+    significantEventsFetchState.data &&
+    significantEventsFetchState.data.significant_events.length === 0;
 
   if (noSignificantEvents) {
     return (
@@ -180,7 +126,8 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           features={features}
           selectedFeatures={selectedFeatures}
           onFeaturesChange={setSelectedFeatures}
-          onFeatureIdentificationClick={identifyFeaturesCallback}
+          definition={definition.stream}
+          refreshFeatures={refreshFeatures}
           onManualEntryClick={() => {
             setQueryToEdit(undefined);
             setInitialFlow('manual');
@@ -192,7 +139,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           }}
           aiFeatures={aiFeatures}
         />
-        {featureDetectionFlyout}
         {editFlyout(true)}
       </>
     );
@@ -226,7 +172,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                   query,
                   language: 'text',
                 }}
-                isLoading={significantEventsFetchState.loading}
+                isLoading={significantEventsFetchState.isLoading}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -259,7 +205,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                     defaultMessage: 'Detected event occurrences ({count})',
                     values: {
                       count: (
-                        significantEventsFetchState.value?.aggregated_occurrences ?? []
+                        significantEventsFetchState.data?.aggregated_occurrences ?? []
                       ).reduce((acc, point) => acc + point.y, 0),
                     },
                   }
@@ -270,9 +216,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             <EuiFlexItem grow={false}>
               <SignificantEventsHistogramChart
                 id={'all-events'}
-                occurrences={significantEventsFetchState.value?.aggregated_occurrences ?? []}
+                occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
                 changes={compact(
-                  (significantEventsFetchState.value?.significant_events ?? []).map((item) =>
+                  (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
                     formatChangePoint({
                       query: item.query,
                       change_points: item.change_points,
@@ -289,23 +235,22 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
-            loading={significantEventsFetchState.loading}
+            loading={significantEventsFetchState.isLoading}
             definition={definition.stream}
-            items={significantEventsFetchState.value?.significant_events ?? []}
+            items={significantEventsFetchState.data?.significant_events ?? []}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
               setQueryToEdit({ ...item.query });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {
-                significantEventsFetchState.refresh();
+                significantEventsFetchState.refetch();
               });
             }}
             xFormatter={xFormatter}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {featureDetectionFlyout}
       {editFlyout(false)}
     </>
   );
