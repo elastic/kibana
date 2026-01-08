@@ -21,6 +21,7 @@ export function isRouteWithTimeRange({
       route.path === '/services' ||
       route.path === '/traces' ||
       route.path === '/service-map' ||
+      route.path === '/react-flow-service-map' ||
       route.path === '/dependencies' ||
       route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||
@@ -47,6 +48,7 @@ export function isRouteWithComparison({
     return (
       route.path === '/services' ||
       route.path === '/service-map' ||
+      route.path === '/react-flow-service-map' ||
       route.path === '/dependencies' ||
       route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||

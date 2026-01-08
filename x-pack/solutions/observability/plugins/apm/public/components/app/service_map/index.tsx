@@ -31,6 +31,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
+import { ReactFlowServiceMap } from './react_flow_service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -70,6 +71,22 @@ export function ServiceMapHome() {
   );
 }
 
+export function ReactFlowServiceMapHome() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
+  } = useApmParams('/react-flow-service-map');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  return (
+    <ServiceMapWithReactFlow
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      serviceGroupId={serviceGroup}
+    />
+  );
+}
+
 export function ServiceMapServiceDetail() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
@@ -82,19 +99,15 @@ export function ServiceMapServiceDetail() {
   return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
-export function ServiceMap({
-  environment,
-  kuery,
-  start,
-  end,
-  serviceGroupId,
-}: {
+interface ServiceMapProps {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
-}) {
+}
+
+export function ServiceMap({ environment, kuery, start, end, serviceGroupId }: ServiceMapProps) {
   const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -202,6 +215,118 @@ export function ServiceMap({
               end={end}
             />
           </Cytoscape>
+        </div>
+      </EuiPanel>
+    </>
+  );
+}
+
+/**
+ * React Flow Service Map implementation (POC)
+ * Uses the same data as the Cytoscape version but renders with React Flow
+ */
+export function ServiceMapWithReactFlow({
+  environment,
+  kuery,
+  start,
+  end,
+  serviceGroupId,
+}: ServiceMapProps) {
+  const license = useLicenseContext();
+  const serviceName = useServiceName();
+
+  const { config } = useApmPluginContext();
+  const { onPageReady } = usePerformanceContext();
+
+  const subscriptions = useRef<Subscription>(new Subscription());
+
+  useEffect(() => {
+    const currentSubscriptions = subscriptions.current;
+    return () => {
+      currentSubscriptions.unsubscribe();
+    };
+  }, []);
+
+  const { data, status, error } = useServiceMap({
+    environment,
+    kuery,
+    start,
+    end,
+    serviceGroupId,
+    serviceName,
+  });
+
+  const { ref, height } = useRefDimensions();
+
+  // Temporary hack to work around bottom padding introduced by EuiPage
+  const PADDING_BOTTOM = 24;
+  const heightWithPadding = height - PADDING_BOTTOM;
+
+  if (!license) {
+    return null;
+  }
+
+  if (!isActivePlatinumLicense(license)) {
+    return (
+      <PromptContainer>
+        <LicensePrompt text={invalidLicenseMessage} />
+      </PromptContainer>
+    );
+  }
+
+  if (!config.serviceMapEnabled) {
+    return (
+      <PromptContainer>
+        <DisabledPrompt />
+      </PromptContainer>
+    );
+  }
+
+  if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
+    return (
+      <PromptContainer>
+        <EmptyPrompt />
+      </PromptContainer>
+    );
+  }
+
+  if (
+    status === FETCH_STATUS.FAILURE &&
+    error &&
+    'body' in error &&
+    error.body?.statusCode === 500 &&
+    error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
+  ) {
+    return (
+      <PromptContainer>
+        <TimeoutPrompt isGlobalServiceMap={!serviceName} />
+      </PromptContainer>
+    );
+  }
+
+  if (status === FETCH_STATUS.SUCCESS) {
+    onPageReady({
+      customMetrics: {
+        key1: 'num_of_nodes',
+        value1: data.nodesCount,
+        key2: 'num_of_traces',
+        value2: data.tracesCount,
+      },
+      meta: { rangeFrom: start, rangeTo: end },
+    });
+  }
+
+  return (
+    <>
+      <SearchBar showTimeComparison />
+      <EuiPanel hasBorder={true} paddingSize="none">
+        <div data-test-subj="reactFlowServiceMap" style={{ height: heightWithPadding }} ref={ref}>
+          <ReactFlowServiceMap
+            elements={data.elements}
+            height={heightWithPadding}
+            serviceName={serviceName}
+            status={status}
+          />
         </div>
       </EuiPanel>
     </>

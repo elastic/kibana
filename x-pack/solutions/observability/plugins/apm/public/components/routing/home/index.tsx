@@ -33,6 +33,9 @@ const ServiceInventory = dynamic(() =>
 const ServiceMapHome = dynamic(() =>
   import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapHome }))
 );
+const ReactFlowServiceMapHome = dynamic(() =>
+  import('../../app/service_map').then((mod) => ({ default: mod.ReactFlowServiceMapHome }))
+);
 const TopTracesOverview = dynamic(() =>
   import('../../app/top_traces_overview').then((mod) => ({ default: mod.TopTracesOverview }))
 );
@@ -98,6 +101,12 @@ export const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInve
 export const ServiceMapTitle = i18n.translate('xpack.apm.views.serviceMap.title', {
   defaultMessage: 'Service map',
 });
+export const ReactFlowServiceMapTitle = i18n.translate(
+  'xpack.apm.views.reactFlowServiceMap.title',
+  {
+    defaultMessage: 'React Flow Service map',
+  }
+);
 
 export const DependenciesOperationsTitle = i18n.translate(
   'xpack.apm.views.dependenciesOperations.title',
@@ -151,6 +160,12 @@ export const homeRoute = {
         title: ServiceMapTitle,
         element: <ServiceMapHome />,
         serviceGroupContextTab: 'service-map',
+      }),
+      ...serviceGroupPage({
+        path: '/react-flow-service-map',
+        title: ReactFlowServiceMapTitle,
+        element: <ReactFlowServiceMapHome />,
+        serviceGroupContextTab: 'react-flow-service-map',
       }),
       '/traces': {
         element: (

@@ -6,7 +6,7 @@
  */
 
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon, EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -36,7 +36,7 @@ export function ServiceGroupTemplate({
   const {
     query,
     query: { serviceGroup: serviceGroupId },
-  } = useAnyOfApmParams('/services', '/service-map');
+  } = useAnyOfApmParams('/services', '/service-map', '/react-flow-service-map');
 
   const { data } = useFetcher(
     (callApmApi) => {
@@ -156,13 +156,13 @@ export function ServiceGroupTemplate({
 }
 
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'service-inventory' | 'service-map';
+  key: 'service-inventory' | 'service-map' | 'react-flow-service-map';
   breadcrumbLabel?: string;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/service-map');
+  const { query } = useAnyOfApmParams('/services', '/service-map', '/react-flow-service-map');
 
   const tabs: ServiceGroupContextTab[] = [
     {
@@ -187,6 +187,35 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
         defaultMessage: 'Service map',
       }),
       href: router.link('/service-map', { query }),
+    },
+    {
+      key: 'react-flow-service-map',
+      label: (
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.serviceGroup.reactFlowServiceMap', {
+              defaultMessage: 'React Flow Service map',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate('xpack.apm.serviceGroup.reactFlowServiceMap.pocBadge', {
+                defaultMessage: 'POC',
+              })}
+              size="s"
+              color="hollow"
+              tooltipContent={i18n.translate(
+                'xpack.apm.serviceGroup.reactFlowServiceMap.pocTooltip',
+                {
+                  defaultMessage:
+                    'This is a proof of concept implementation using React Flow to replace Cytoscape.js for improved accessibility.',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      href: router.link('/react-flow-service-map', { query }),
     },
   ];
 
