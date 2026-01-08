@@ -14,6 +14,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
+  const queryBar = getService('queryBar');
+  const dashboardSettings = getService('dashboardSettings');
 
   const { dashboard, header, dashboardControls } = getPageObjects([
     'dashboardControls',
@@ -36,9 +38,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('cat');
       await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
       await header.waitUntilLoadingHasFinished();
-      await dashboardControls.verifyApplyButtonEnabled();
+      await queryBar.verifyQueryUpdateButtonEnabled();
 
-      await dashboardControls.updateShowApplyButtonSetting(false);
+      await dashboard.openSettingsFlyout();
+      await dashboardSettings.toggleAutoApplyFilters(true);
+      await dashboardSettings.clickApplyButton();
+
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
@@ -53,13 +58,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSelectOption('cat');
         await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
       });
 
       it('waits to apply filters until button is pressed', async () => {
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.clickApplyButton();
+        await queryBar.clickQuerySubmitButton();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
@@ -72,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSelectOption('dog');
         await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
 
         await dashboard.clickDiscardChanges();
         await header.waitUntilLoadingHasFinished();
@@ -87,13 +92,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('range slider selections', () => {
       it('making selection enables apply button', async () => {
         await dashboardControls.rangeSliderSetUpperBound(rangeSliderId, '30');
-        await dashboardControls.verifyApplyButtonEnabled();
+        await dashboardControls.hideHoverActions();
+        await queryBar.verifyQueryUpdateButtonEnabled();
       });
 
       it('waits to apply filters until apply button is pressed', async () => {
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.clickApplyButton();
+        await queryBar.clickQuerySubmitButton();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
@@ -105,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetLowerBound(rangeSliderId, '15');
         await dashboardControls.rangeSliderEnsurePopoverIsClosed(rangeSliderId);
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
 
         await dashboard.clickDiscardChanges();
         await header.waitUntilLoadingHasFinished();
@@ -133,13 +139,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.gotoNextTimeSlice();
         await dashboardControls.gotoNextTimeSlice(); // go to an empty timeslice
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
       });
 
       it('waits to apply timeslice until apply button is pressed', async () => {
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.clickApplyButton();
+        await queryBar.clickQuerySubmitButton();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
@@ -149,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('hitting dashboard resets selections + unapplies timeslice', async () => {
         await dashboardControls.gotoNextTimeSlice();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
 
         await dashboard.clickDiscardChanges();
         await header.waitUntilLoadingHasFinished();

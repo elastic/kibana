@@ -104,6 +104,10 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
+  async gotoAttachmentsTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'attachments');
+  }
+
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
   }
@@ -931,6 +935,118 @@ export class StreamsApp {
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
+  }
+
+  // Attachments utility methods
+  async expectAttachmentsEmptyPromptVisible() {
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+  }
+
+  async clickAddAttachmentsButton() {
+    await this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton').click();
+  }
+
+  async expectAddAttachmentFlyoutVisible() {
+    await expect(
+      this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable')
+    ).toBeVisible();
+  }
+
+  async expectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    await expect(flyoutTable.getByText(attachmentTitle)).toBeVisible();
+  }
+
+  async closeAddAttachmentFlyout() {
+    await this.page.getByTestId('streamsAppAddAttachmentFlyoutCancelButton').click();
+  }
+
+  async selectAllAttachmentsInFlyout() {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    // Click the header checkbox to select all
+    await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async clickAddToStreamButton() {
+    await this.page.getByTestId('streamsAppAddAttachmentFlyoutAddAttachmentsButton').click();
+  }
+
+  async expectAttachmentsTableVisible() {
+    await expect(this.page.getByTestId('streamsAppStreamDetailAttachmentsTable')).toBeVisible();
+  }
+
+  async expectAttachmentInTable(attachmentTitle: string) {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    await expect(table.getByText(attachmentTitle)).toBeVisible();
+  }
+
+  async expectAttachmentsCount(count: number) {
+    // Use exact match to avoid matching toast notifications like "3 attachments were added to..."
+    await expect(this.page.getByText(`${count} Attachments`, { exact: true })).toBeVisible();
+  }
+
+  async selectAllAttachmentsInTable() {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    // Click the header checkbox to select all
+    await table.locator('thead input[type="checkbox"]').click();
+  }
+
+  async clickSelectedAttachmentsLink() {
+    await this.page.getByTestId('streamsAppStreamDetailSelectedAttachmentsLink').click();
+  }
+
+  async clickRemoveAttachmentsInPopover() {
+    await this.page.getByText('Remove attachments').click();
+  }
+
+  async confirmRemoveAttachments() {
+    await this.page.getByTestId('streamsAppConfirmAttachmentModalConfirmButton').click();
+  }
+
+  async clickAttachmentDetailsButton(attachmentTitle: string) {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    // Find the row containing the attachment title, then click the expand button within that row
+    const row = table.locator('tr').filter({ hasText: attachmentTitle });
+    await row.getByTestId('streamsAppAttachmentDetailsButton').click();
+  }
+
+  async expectAttachmentDetailsFlyoutVisible() {
+    await expect(
+      this.page.getByTestId('streamsAppAttachmentDetailsFlyoutGoToButton')
+    ).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutTitle(title: string) {
+    // The title is in an h2 element within the flyout header
+    const flyoutTitle = this.page.locator('.euiFlyoutHeader h2');
+    await expect(flyoutTitle).toHaveText(title);
+  }
+
+  async expectAttachmentDetailsFlyoutDescription(description: string) {
+    // The description is shown in the first InfoPanel - scope to the flyout
+    const flyout = this.page.locator('.euiFlyout');
+    const descriptionText = flyout.getByText(description);
+    await expect(descriptionText).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutType(typeLabel: string) {
+    // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
+    const flyout = this.page.locator('.euiFlyout');
+    const typeBadge = flyout.getByText(typeLabel, { exact: true });
+    await expect(typeBadge).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutHasStream(streamName: string) {
+    const streamLink = this.page.getByTestId('streamsAppAttachmentDetailsFlyoutStreamLink');
+    await expect(streamLink).toHaveText(streamName);
+  }
+
+  async closeAttachmentDetailsFlyout() {
+    await this.page.getByTestId('euiFlyoutCloseButton').click();
+  }
+
+  async clickUnlinkInDetailsFlyout() {
+    await this.page.getByTestId('streamsAppAttachmentDetailsFlyoutUnlinkButton').click();
   }
 
   async clickProcessorPreviewTab(label: string) {
