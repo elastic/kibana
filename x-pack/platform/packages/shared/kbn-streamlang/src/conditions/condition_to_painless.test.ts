@@ -325,7 +325,10 @@ describe('conditionToPainless', () => {
     expect(conditionToPainless(condition)).toMatchInlineSnapshot(`
       "
         try {
+        
         def val_log = $('log', null); if (val_log instanceof List && val_log.size() == 1) { val_log = val_log[0]; }
+        
+        
         if (val_log !== null) {
           return true;
         }
@@ -352,8 +355,11 @@ describe('conditionToPainless', () => {
     expect(conditionToPainless(condition)).toMatchInlineSnapshot(`
       "
         try {
+        
         def val_log_logger_name = $('log.logger.name', null); if (val_log_logger_name instanceof List && val_log_logger_name.size() == 1) { val_log_logger_name = val_log_logger_name[0]; }
         def val_log_level = $('log.level', null); if (val_log_level instanceof List && val_log_level.size() == 1) { val_log_level = val_log_level[0]; }
+        
+        
         if ((val_log_logger_name !== null && ((val_log_logger_name instanceof Number && val_log_logger_name.toString() == \\"nginx_proxy\\") || val_log_logger_name == \\"nginx_proxy\\")) && ((val_log_level !== null && ((val_log_level instanceof Number && val_log_level.toString() == \\"error\\") || val_log_level == \\"error\\")) || (val_log_level !== null && ((val_log_level instanceof Number && val_log_level.toString() == \\"ERROR\\") || val_log_level == \\"ERROR\\")))) {
           return true;
         }
