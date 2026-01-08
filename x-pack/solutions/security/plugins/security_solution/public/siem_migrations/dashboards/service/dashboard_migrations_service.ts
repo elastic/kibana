@@ -100,6 +100,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     if (dashboardsCount === 0) {
       const emptyDashboardError = new Error(i18n.EMPTY_DASHBOARDS_ERROR);
       this.telemetry.reportSetupMigrationCreated({
+        vendor,
         count: dashboardsCount,
         error: emptyDashboardError,
       });

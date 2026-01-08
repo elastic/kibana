@@ -104,7 +104,7 @@ export interface ReportSetupMigrationOpenResourcesActionParams {
   eventName: string;
   migrationId: string;
   missingResourcesCount: number;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupQueryCopiedActionParams {
   eventName: string;
@@ -143,7 +143,7 @@ export interface ReportSetupResourcesUploadedActionParams extends BaseResultActi
 export interface ReportStartMigrationActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
   connectorId: string;
   skipPrebuiltRulesMatching: boolean;
   isRetry: boolean;

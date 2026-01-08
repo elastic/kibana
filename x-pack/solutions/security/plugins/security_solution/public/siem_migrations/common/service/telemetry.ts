@@ -76,7 +76,7 @@ export class SiemBaseMigrationsTelemetry {
 
   reportSetupMigrationCreated = (params: {
     migrationId?: string;
-    vendor?: SiemMigrationVendor;
+    vendor: SiemMigrationVendor;
     count: number;
     error?: Error;
   }) => {
