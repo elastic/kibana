@@ -154,7 +154,12 @@ function getRelatedPanelsByAppliedFilters({
   ] of childrenBySectionAndFilterApplication.entries()) {
     for (const uuid of appliesFilters) {
       const relatedPanels = [
-        ...doesNotApplyFilters,
+        // Apply global panels to everything; apply others only to panels in the same section
+        ...(sectionId === GLOBAL
+          ? childrenBySectionAndFilterApplication
+              .values()
+              .flatMap((section) => section.doesNotApplyFilters)
+          : [...doesNotApplyFilters]),
         // If this panel uses global filters, other filter-applying panels should be `related`
         // to this panel as well
         ...(uuidsUsingGlobalFilters.has(uuid)
@@ -172,7 +177,6 @@ function getRelatedPanelsByAppliedFilters({
         ...Array.from(appliesFilters).filter((id) => id !== uuid),
         ...(sectionId === GLOBAL ? [] : [...globalAppliesFilters]),
       ];
-
       filterRelatedPanels.set(uuid, relatedPanels);
     }
   }
