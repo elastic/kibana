@@ -50,12 +50,11 @@ import {
   getToolTypeDefaultValues,
 } from './form/registry/tools_form_registry';
 import { TOOL_TYPE_QUERY_PARAM, TEST_TOOL_ID_QUERY_PARAM } from './create_tool';
-import { ToolTestFlyout } from './execute/test_tools';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
-import { useFlyoutState } from '../../hooks/use_flyout_state';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useToolsActions } from '../../context/tools_provider';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -112,12 +111,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { control, reset, formState, handleSubmit, getValues } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const [isCancelling, setIsCancelling] = useState(false);
-  const {
-    isOpen: showTestFlyout,
-    openFlyout: openTestFlyout,
-    closeFlyout: closeTestFlyout,
-  } = useFlyoutState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+  const { testTool } = useToolsActions();
   const { services } = useKibana();
   const {
     application: { navigateToUrl },
@@ -165,8 +160,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   );
 
   const handleTestTool = useCallback(() => {
-    openTestFlyout();
-  }, [openTestFlyout]);
+    if (currentToolId) {
+      testTool(currentToolId);
+    }
+  }, [currentToolId, testTool]);
 
   const handleSaveAndTest = useCallback(
     async (data: ToolFormData) => {
@@ -418,15 +415,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           </KibanaPageTemplate.BottomBar>
         </KibanaPageTemplate>
       </FormProvider>
-      {showTestFlyout && currentToolId && (
-        <ToolTestFlyout
-          toolId={currentToolId}
-          formMode={mode}
-          onClose={() => {
-            closeTestFlyout();
-          }}
-        />
-      )}
     </>
   );
 };
