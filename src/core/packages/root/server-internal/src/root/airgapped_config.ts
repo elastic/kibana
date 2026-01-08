@@ -23,4 +23,3 @@ export const airgappedConfig: ServiceConfigDescriptor<AirgappedConfigType> = {
   path: 'airgapped',
   schema: airgappedConfigSchema,
 };
-
