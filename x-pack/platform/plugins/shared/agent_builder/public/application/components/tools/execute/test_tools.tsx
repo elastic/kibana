@@ -143,6 +143,39 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
   });
 };
 
+export const parseFormData = (
+  formData: Record<string, any>,
+  parameters: Array<{ name: string; type: string }>
+): Record<string, any> => {
+  const parsedFormData: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(formData)) {
+    // Skip empty string values
+    if (typeof value === 'string' && value.trim() === '') {
+      continue;
+    }
+
+    const param = parameters.find((p) => p.name === key);
+    if (
+      param &&
+      (param.type === 'object' || param.type === 'array') &&
+      typeof value === 'string' &&
+      value.trim() !== ''
+    ) {
+      try {
+        parsedFormData[key] = JSON.parse(value);
+      } catch {
+        // If parsing fails, use the original string value
+        parsedFormData[key] = value;
+      }
+    } else {
+      parsedFormData[key] = value;
+    }
+  }
+
+  return parsedFormData;
+};
+
 const renderFormField = ({
   parameter,
   control,
@@ -256,31 +289,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
 
   const onSubmit = async (formData: Record<string, any>) => {
     const parameters = getParameters(tool);
-    const parsedFormData: Record<string, any> = {};
-
-    for (const [key, value] of Object.entries(formData)) {
-      // Skip empty string values
-      if (typeof value === 'string' && value.trim() === '') {
-        continue;
-      }
-
-      const param = parameters.find((p) => p.name === key);
-      if (
-        param &&
-        (param.type === 'object' || param.type === 'array') &&
-        typeof value === 'string' &&
-        value.trim() !== ''
-      ) {
-        try {
-          parsedFormData[key] = JSON.parse(value);
-        } catch {
-          // If parsing fails, use the original string value
-          parsedFormData[key] = value;
-        }
-      } else {
-        parsedFormData[key] = value;
-      }
-    }
+    const parsedFormData = parseFormData(formData, parameters);
 
     await executeTool({
       toolId: tool!.id,
