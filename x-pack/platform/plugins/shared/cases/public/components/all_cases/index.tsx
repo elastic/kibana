@@ -13,12 +13,17 @@ import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
 import { CasesTableHeader } from './header';
+import { useKibana } from '../../common/lib/kibana';
 
 export const AllCases: React.FC = () => {
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
 
+  const { docLinks } = useKibana().services;
   const { data: actionLicense = null } = useGetActionLicense();
-  const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
+  const actionsErrors = useMemo(
+    () => getActionLicenseError(actionLicense, docLinks),
+    [actionLicense, docLinks]
+  );
 
   return (
     <>
