@@ -31,18 +31,19 @@ import type { TabItem } from '../../types';
 import { TabPreview } from '../tab_preview';
 
 interface OptionData {
-  tabItem: RecentlyClosedTabItem;
-  momentClosedAt: moment.Moment;
+  tabItem: RecentlyClosedTabItem | TabItem;
+  momentClosedAt?: moment.Moment;
 }
 
 const getOpenedTabsList = (
   tabItems: TabItem[],
   selectedTab: TabItem | null
-): EuiSelectableOption[] => {
+): EuiSelectableOption<OptionData>[] => {
   return tabItems.map((tab) => ({
     label: tab.label,
     checked: selectedTab && tab.id === selectedTab.id ? 'on' : undefined,
     key: tab.id,
+    tabItem: tab,
   }));
 };
 
@@ -57,7 +58,6 @@ const getRecentlyClosedTabsList = (
         momentClosedAt.isValid() ? ` (${momentClosedAt.format('LL LT')})` : ''
       }`,
       key: tab.id,
-      isGroupLabel: false,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
       tabItem: tab,
       momentClosedAt,
@@ -87,7 +87,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
   }) => {
     const { euiTheme } = useEuiTheme();
 
-    const openedTabsList = useMemo(
+    const openedTabsList: EuiSelectableOption<OptionData>[] = useMemo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
     );
@@ -115,22 +115,24 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       },
     } as Partial<EuiSelectableOptionsListProps>;
 
-    const renderRecentlyClosedOption = useCallback(
+    const renderOption = useCallback(
       (option: EuiSelectableOption<OptionData>) => {
         const closedAt = option?.momentClosedAt;
         const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
 
+        const itemContents = (
+          <>
+            {option.label}
+            {formattedTime && (
+              <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                {formattedTime}
+              </EuiText>
+            )}
+          </>
+        );
+
         if (!getPreviewData) {
-          return (
-            <>
-              {option.label}
-              {formattedTime && (
-                <EuiText size="xs" color="subdued" className="eui-displayBlock">
-                  {formattedTime}
-                </EuiText>
-              )}
-            </>
-          );
+          return itemContents;
         }
 
         const previewData = getPreviewData(option.tabItem);
@@ -146,14 +148,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             previewDelay={0}
             position="left"
           >
-            <div>
-              {option.label}
-              {formattedTime && (
-                <EuiText size="xs" color="subdued" className="eui-displayBlock">
-                  {formattedTime}
-                </EuiText>
-              )}
-            </div>
+            <div>{itemContents}</div>
           </TabPreview>
         );
       },
@@ -199,6 +194,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               closePopover();
             }
           }}
+          renderOption={renderOption}
           singleSelection="always"
           listProps={selectableListProps}
         >
@@ -226,7 +222,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                 ...selectableListProps,
                 rowHeight: parseInt(euiTheme.size.xxxl, 10),
               }}
-              renderOption={renderRecentlyClosedOption}
+              renderOption={renderOption}
               onChange={(newOptions) => {
                 const clickedTabId = newOptions.find((option) => option.checked)?.key;
                 const tabToNavigate = recentlyClosedItems.find((tab) => tab.id === clickedTabId);

@@ -96,7 +96,7 @@ export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
     selectedItemId: '3',
     recentlyClosedItems: [
       {
-        id: '1',
+        id: '4',
         label: 'Closed Tab',
         closedAt: 123456789,
       },
