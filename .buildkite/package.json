@@ -30,7 +30,8 @@
     "nock": "^12.0.2",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "yarn": "^1.22.22"
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
