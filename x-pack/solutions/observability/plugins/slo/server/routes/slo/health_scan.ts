@@ -15,7 +15,7 @@ import {
   type PostHealthScanResponse,
 } from '@kbn/slo-schema';
 import { v7 } from 'uuid';
-import { HEALTH_DATA_STREAM_NAME } from '../../services/health_scan/health_index_installer';
+import { HEALTH_DATA_STREAM_NAME } from '../../../common/constants';
 import {
   HEALTH_SCAN_TASK_TYPE,
   type HealthScanTaskParams,
@@ -133,7 +133,7 @@ export const getHealthScanRoute = createSloServerRoute({
     }
 
     try {
-      const result = await scopedClusterClient.asCurrentUser.search<HealthDocument>({
+      const result = await scopedClusterClient.asInternalUser.search<HealthDocument>({
         index: HEALTH_DATA_STREAM_NAME,
         size,
         query: {
@@ -205,7 +205,7 @@ export const listHealthScanRoute = createSloServerRoute({
     const { size = 10, searchAfter } = params?.query ?? {};
 
     try {
-      const result = await scopedClusterClient.asCurrentUser.search({
+      const result = await scopedClusterClient.asInternalUser.search({
         index: HEALTH_DATA_STREAM_NAME,
         size: 0,
         aggs: {
