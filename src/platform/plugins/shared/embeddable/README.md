@@ -217,10 +217,13 @@ embeddableServerSetup.registerTransforms(
         references: extractReferences(state)
       };
     },
-    transformOut: (state: StoredEmbeddableState, references?: Reference[]) => {
+    transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
       return convertAndInjectReferences(state, references);
     },
-    schema
+    schema: schema.object({
+      required_field: schema.string(),
+      optional_field: schema.maybe(schema.string()),
+    })
   }
 });
 ```
