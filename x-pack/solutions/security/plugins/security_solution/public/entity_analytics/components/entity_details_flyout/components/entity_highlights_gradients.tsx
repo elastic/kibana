@@ -33,7 +33,7 @@ const lightModeColors = {
 };
 
 const darkModeColors = {
-  // TODO: AI generated gradients, please replace it with UX designed gradients when they are available.
+  // TODO: AI generated gradients, please replace it with UX designed gradients when they are available. https://github.com/elastic/security-team/issues/15312
   panelBackgroundGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, rgba(11, 100, 221, 0.14) ${panelBackgroundGradientStartPercent}%, rgba(115, 29, 207, 0.14) ${panelBackgroundGradientEndPercent}%)`,
   panelBorderGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, rgba(96, 165, 250, 0.4) ${gradientStartPercent}%, rgba(192, 132, 252, 0.4) ${gradientEndPercent}%)`,
   buttonGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, #123A79 ${panelBackgroundGradientStartPercent}%, #3B1D66 ${panelBackgroundGradientEndPercent}%)`,

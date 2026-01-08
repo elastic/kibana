@@ -208,7 +208,7 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.loadingMessage"
-                defaultMessage="Generating AI summary and recommended actions…"
+                defaultMessage="Generating AI summary and recommended actions..."
               />
               <EuiSpacer size="xs" />
             </EuiText>

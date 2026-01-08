@@ -168,11 +168,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               </EuiPopoverTitle>
             ),
           },
-          // {
-          //   isSeparator: true as const,
-          //   key: 'entity-highlights-settings-options-separator',
-          //   margin: 'xs' as const,
-          // },
           {
             key: 'anonymize-values',
             renderItem: () => (
