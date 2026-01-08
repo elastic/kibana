@@ -53,7 +53,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-highcpu-8
+      machineType: n2d-highcpu-16
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -69,7 +69,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-4
+      machineType: n2d-standard-8
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -101,7 +101,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-32
+      machineType: n2d-standard-48
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
