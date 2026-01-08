@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getValidThreat } from '../../../../detections/mitre/valid_threat_mock';
+import { getValidThreat } from '../../../../../common/detection_engine/mitre/valid_threat_mock';
 import { hasSubtechniqueOptions } from './helpers';
 
 const mockTechniques = getValidThreat()[0].technique ?? [];
