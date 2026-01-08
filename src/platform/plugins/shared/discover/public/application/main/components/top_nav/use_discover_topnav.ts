@@ -10,6 +10,7 @@
 import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -28,9 +29,11 @@ import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 export const useDiscoverTopNav = ({
   stateContainer,
   persistedDiscoverSession,
+  embeddableState,
 }: {
   stateContainer: DiscoverStateContainer;
   persistedDiscoverSession: DiscoverSession | undefined;
+  embeddableState: EmbeddableEditorState | undefined;
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
@@ -74,6 +77,7 @@ export const useDiscoverTopNav = ({
     shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
     persistedDiscoverSession,
+    embeddableState,
   });
 
   return {

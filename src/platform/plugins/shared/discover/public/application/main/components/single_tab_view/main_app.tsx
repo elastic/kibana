@@ -9,6 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { useInternalStateSelector } from '../../state_management/redux';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
@@ -24,9 +25,10 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
+  embeddableState: EmbeddableEditorState | undefined;
 }
 
-export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
+export function DiscoverMainApp({ stateContainer, embeddableState }: DiscoverMainProps) {
   const services = useDiscoverServices();
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const { chrome, docLinks, spaces, history } = services;
@@ -46,7 +48,7 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
 
   return (
     <RootDragDropProvider>
-      <DiscoverLayoutMemoized stateContainer={stateContainer} />
+      <DiscoverLayoutMemoized stateContainer={stateContainer} embeddableState={embeddableState} />
     </RootDragDropProvider>
   );
 }

@@ -75,7 +75,13 @@ export const DiscoverMainRoute = ({
         useHashQuery: customizationContext.displayMode !== 'embedded',
       })
   );
-  const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({
+  const {
+    internalState,
+    runtimeStateManager,
+    searchSessionManager,
+    isEmbeddableEditor,
+    embeddableState,
+  } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,
@@ -92,6 +98,8 @@ export const DiscoverMainRoute = ({
         internalState={internalState}
         runtimeStateManager={runtimeStateManager}
         searchSessionManager={searchSessionManager}
+        isEmbeddableEditor={isEmbeddableEditor()}
+        embeddableState={embeddableState}
       />
     </InternalStateProvider>
   );
@@ -104,7 +112,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
+  const tabsEnabled = !props.isEmbeddableEditor && discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(

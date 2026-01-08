@@ -24,6 +24,7 @@ import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -66,6 +67,7 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
   persistedDiscoverSession,
+  embeddableState,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -78,6 +80,7 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
+  embeddableState: EmbeddableEditorState | undefined;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -305,10 +308,20 @@ export const useTopNavLinks = ({
         testId: 'discoverSaveButton',
         iconType: 'save',
         emphasize: true,
+        fill: false,
+        color: 'success',
         run: (anchorElement: HTMLElement) => {
           onSaveDiscoverSession({
             services,
             state,
+            onSaveCb: () => {
+              const app = embeddableState?.originatingApp;
+              const path = embeddableState?.originatingPath;
+
+              if (app && path) {
+                services.application.navigateToApp(app, { path });
+              }
+            },
             onClose: () => {
               anchorElement?.focus();
             },
@@ -316,6 +329,35 @@ export const useTopNavLinks = ({
         },
       };
       entries.push(saveSearch);
+    }
+
+    if (
+      services.capabilities.discover_v2.save &&
+      !defaultMenu?.saveItem?.disabled &&
+      embeddableState
+    ) {
+      const cancelSearch = {
+        id: 'cancel',
+        label: i18n.translate('discover.localMenu.cancelTitle', {
+          defaultMessage: 'Cancel',
+        }),
+        description: i18n.translate('discover.localMenu.cancelSearchDescription', {
+          defaultMessage: 'Cancel edit session',
+        }),
+        testId: 'discoverCancelButton',
+        emphasize: true,
+        fill: false,
+        color: 'text',
+        run: () => {
+          const app = embeddableState?.originatingApp;
+          const path = embeddableState?.originatingPath;
+
+          if (app && path) {
+            services.application.navigateToApp(app, { path });
+          }
+        },
+      };
+      entries.push(cancelSearch);
     }
 
     return entries;
@@ -328,5 +370,6 @@ export const useTopNavLinks = ({
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
+    embeddableState,
   ]);
 };

@@ -13,6 +13,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlState } from '@kbn/esql-types';
 import useLatest from 'react-use/lib/useLatest';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -54,6 +55,8 @@ export interface SingleTabViewProps {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   searchSessionManager: DiscoverSearchSessionManager;
+  isEmbeddableEditor: boolean;
+  embeddableState: EmbeddableEditorState | undefined;
 }
 
 export const SingleTabView = ({
@@ -63,6 +66,7 @@ export const SingleTabView = ({
   internalState,
   runtimeStateManager,
   searchSessionManager,
+  embeddableState,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -190,7 +194,10 @@ export const SingleTabView = ({
             scopedProfilesManager={scopedProfilesManager}
             scopedEBTManager={scopedEbtManager}
           >
-            <DiscoverMainApp stateContainer={currentStateContainer} />
+            <DiscoverMainApp
+              stateContainer={currentStateContainer}
+              embeddableState={embeddableState}
+            />
           </ScopedServicesProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>
