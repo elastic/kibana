@@ -202,7 +202,12 @@ export function createSearchBar({
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
+      if (
+        !useDefaultBehaviors ||
+        disableSubscribingToGlobalDataServices ||
+        !onQuerySubmitRef.current
+      )
+        return;
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
@@ -210,7 +215,7 @@ export function createSearchBar({
         },
         true
       );
-    }, [query, timeRange, useDefaultBehaviors]);
+    }, [query, timeRange, useDefaultBehaviors, disableSubscribingToGlobalDataServices]);
 
     const showSaveQuery = canShowSavedQuery({
       allowSavingQueries,
