@@ -22,14 +22,13 @@ import {
   getExtractFunction,
   getInjectFunction,
   getMigrateFunction,
-  getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
 import { EnhancementsRegistry } from '../common/enhancements/registry';
 import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
-export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
+export interface EmbeddableSetup extends Omit<PersistableStateService<EmbeddableStateWithType>, 'telemetry'> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   /*
    * Use registerTransforms to register transforms and schema for an embeddable type.
@@ -46,7 +45,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
   transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+export type EmbeddableStart = Omit<PersistableStateService<EmbeddableStateWithType>, 'telemetry'> & {
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
@@ -78,10 +77,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
       transformEnhancementsIn: this.enhancementsRegistry.transformIn,
       transformEnhancementsOut: this.enhancementsRegistry.transformOut,
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
       extract: getExtractFunction(
         this.getEmbeddableFactory,
         this.enhancementsRegistry.getEnhancement
@@ -108,10 +103,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
       extract: getExtractFunction(
         this.getEmbeddableFactory,
         this.enhancementsRegistry.getEnhancement
@@ -139,7 +130,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.embeddableFactories.set(factory.id, {
       id: factory.id,
-      telemetry: factory.telemetry || ((state, stats) => stats),
       inject: factory.inject || identity,
       extract: factory.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
       migrations: factory.migrations || {},
@@ -148,13 +138,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   private getEmbeddableFactory = (
     embeddableFactoryId: string
-  ): PersistableState<EmbeddableStateWithType> => {
+  ): Omit<PersistableState<EmbeddableStateWithType>, 'telemetry'> => {
     return (
       this.embeddableFactories.get(embeddableFactoryId) || {
-        telemetry: (
-          state: EmbeddableStateWithType,
-          stats: Record<string, string | number | boolean>
-        ) => stats,
         inject: (state: EmbeddableStateWithType) => state,
         extract: (state: EmbeddableStateWithType) => {
           return { state, references: [] };

@@ -13,8 +13,6 @@ import {
   collectPanelsByType,
   collectSectionsAndAccessControl,
 } from './dashboard_telemetry';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import type { DashboardHit } from './types';
 
 const visualizationType1ByValue = {
@@ -98,27 +96,7 @@ const lensXYSeriesB = {
   },
 } as unknown as SavedDashboardPanel;
 
-const embeddablePersistableStateService = createEmbeddablePersistableStateServiceMock();
-
 describe('dashboard telemetry', () => {
-  beforeAll(() => {
-    embeddablePersistableStateService.extract.mockImplementationOnce((state) => {
-      const { HARDCODED_ID, ...restOfState } = state as unknown as Record<string, unknown>;
-      return {
-        state: restOfState as EmbeddableStateWithType,
-        references: [{ id: HARDCODED_ID as string, name: 'refName', type: 'type' }],
-      };
-    });
-
-    embeddablePersistableStateService.inject.mockImplementationOnce((state, references) => {
-      const ref = references.find((r) => r.name === 'refName');
-      return {
-        ...state,
-        HARDCODED_ID: ref!.id,
-      };
-    });
-  });
-
   it('collects information about dashboard panels', () => {
     const panels = [
       visualizationType1ByValue,
@@ -126,7 +104,7 @@ describe('dashboard telemetry', () => {
       visualizationType2ByReference,
     ];
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(panels, collectorData);
 
     expect(collectorData.panels.total).toBe(panels.length);
     expect(collectorData.panels.by_value).toBe(2);
@@ -142,7 +120,7 @@ describe('dashboard telemetry', () => {
     ];
 
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(panels, collectorData);
 
     expect(collectorData.panels.by_type.visualization.total).toBe(panels.length);
     expect(collectorData.panels.by_type.visualization.by_value).toBe(3);
@@ -161,7 +139,7 @@ describe('dashboard telemetry', () => {
     ];
 
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(panels, collectorData);
 
     expect(collectorData.panels.by_type.lens.total).toBe(panels.length);
     expect(collectorData.panels.by_type.lens.by_value).toBe(6);
@@ -181,7 +159,7 @@ describe('dashboard telemetry', () => {
     ];
 
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(panels, collectorData);
 
     expect(collectorData.panels.total).toBe(panels.length);
     expect(collectorData.panels.by_type.lens.total).toBe(5);

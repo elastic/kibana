@@ -14,8 +14,8 @@ import type { EmbeddableStateWithType } from './types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 
 export const getInjectFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
-  getEnhancement: (enhancementId: string) => PersistableState
+  getEmbeddableFactory: (embeddableFactoryId: string) => Pick<PersistableState<EmbeddableStateWithType>, 'inject'>,
+  getEnhancement: (enhancementId: string) => Pick<PersistableState, 'inject'>
 ) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const enhancements = state.enhancements || {};

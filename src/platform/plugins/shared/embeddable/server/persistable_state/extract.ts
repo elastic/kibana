@@ -13,8 +13,8 @@ import type { EmbeddableStateWithType } from './types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
 export const getExtractFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
-  getEnhancement: (enhancementId: string) => PersistableState
+  getEmbeddableFactory: (embeddableFactoryId: string) => Pick<PersistableState<EmbeddableStateWithType>, 'extract'>,
+  getEnhancement: (enhancementId: string) => Pick<PersistableState, 'extract'>
 ) => {
   return (state: EmbeddableStateWithType) => {
     const enhancements = state.enhancements || {};

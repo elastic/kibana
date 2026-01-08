@@ -14,7 +14,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type {
   CoreSetup,
   Logger,
@@ -46,9 +45,8 @@ export function initializeDashboardTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  embeddable: EmbeddableSetup
 ) {
-  registerDashboardTelemetryTask(logger, core, taskManager, embeddable);
+  registerDashboardTelemetryTask(logger, core, taskManager);
 }
 
 export function scheduleDashboardTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -59,14 +57,13 @@ function registerDashboardTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  embeddable: EmbeddableSetup
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Dashboard telemetry collection task',
       timeout: '2m',
       stateSchemaByVersion,
-      createTaskRunner: dashboardTaskRunner(logger, core, embeddable),
+      createTaskRunner: dashboardTaskRunner(logger, core),
     },
   });
 }
@@ -84,7 +81,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable: EmbeddableSetup) {
+export function dashboardTaskRunner(logger: Logger, core: CoreSetup) {
   return ({ taskInstance }: RunContext) => {
     const state = taskInstance.state as LatestTaskStateSchema;
 
@@ -104,12 +101,12 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
               const panels = JSON.parse(
                 dashboard.attributes.panelsJSON as string
               ) as unknown as SavedDashboardPanel[];
-              collectPanelsByType(panels, dashboardData, embeddable);
+              collectPanelsByType(panels, dashboardData);
 
               const controls = JSON.parse(
                 dashboard.attributes.controlGroupInput?.panelsJSON as string
               ) as unknown as StoredControlGroupInput['panels'];
-              collectPinnedControls(controls, dashboardData, embeddable);
+              collectPinnedControls(controls, dashboardData);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }

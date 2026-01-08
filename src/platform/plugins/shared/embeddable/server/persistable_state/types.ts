@@ -15,4 +15,4 @@ export type EmbeddableStateWithType = {
   type: string;
 };
 
-export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
+export type EmbeddablePersistableStateService = Omit<PersistableStateService<EmbeddableStateWithType>, 'telemetry'>;

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import type { SavedDashboardPanel, StoredControlGroupInput } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState } from './task_state';
 import type { DashboardCollectorData, DashboardHit } from './types';
+import { embeddableTelemetry } from '../bwc/embeddable_telemetry';
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
   panels: {
@@ -46,7 +46,6 @@ export const getEmptyControlTypeData = () => ({
 export const collectPanelsByType = (
   panels: SavedDashboardPanel[],
   collectorData: DashboardCollectorData,
-  embeddableService: EmbeddablePersistableStateService
 ) => {
   collectorData.panels.total += panels.length;
 
@@ -66,7 +65,7 @@ export const collectPanelsByType = (
     // the following "details" need a follow-up that will actually properly consolidate
     // the data from all embeddables - right now, the only data that is kept is the
     // telemetry for the **final** embeddable of that type
-    collectorData.panels.by_type[type].details = embeddableService.telemetry(
+    collectorData.panels.by_type[type].details = embeddableTelemetry(
       {
         ...panel.embeddableConfig,
         type: panel.type,
@@ -92,7 +91,6 @@ export const collectSectionsAndAccessControl = (
 export const collectPinnedControls = (
   controls: StoredControlGroupInput['panels'],
   collectorData: DashboardCollectorData,
-  embeddableService: EmbeddablePersistableStateService
 ) => {
   const controlValues = Object.values(controls);
   collectorData.controls.total += controlValues.length;

@@ -95,5 +95,5 @@ export interface EmbeddableStart {
     type: string
   ) => Promise<EmbeddableTransforms['transformOut'] | undefined>;
   hasLegacyURLTransform: (type: string) => boolean;
-  getEnhancement: (enhancementId: string) => PersistableState;
+  getEnhancement: (enhancementId: string) => Omit<PersistableState, 'telemetry'>;
 }

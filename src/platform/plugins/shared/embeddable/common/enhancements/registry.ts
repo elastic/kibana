@@ -21,7 +21,6 @@ export class EnhancementsRegistry {
     }
     this.registry.set(enhancement.id, {
       id: enhancement.id,
-      telemetry: enhancement.telemetry || ((state, stats) => stats),
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
@@ -40,7 +39,6 @@ export class EnhancementsRegistry {
     return (
       this.registry.get(id) || {
         id: 'unknown',
-        telemetry: (state, stats) => stats,
         inject: identity,
         extract: (state: SerializableRecord) => {
           return { state, references: [] };

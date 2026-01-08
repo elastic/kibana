@@ -13,12 +13,12 @@ import type { EmbeddableStateWithType } from './persistable_state/types';
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
 
 export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = EmbeddableStateWithType>
-  extends PersistableState<P> {
+  extends Omit<PersistableState<P>, 'telemetry'> {
   id: string;
 }
 
 export interface EmbeddableRegistryDefinition<
   P extends EmbeddableStateWithType = EmbeddableStateWithType
-> extends PersistableStateDefinition<P> {
+> extends Omit<PersistableStateDefinition<P>,'telemetry'> {
   id: string;
 }
