@@ -11,7 +11,6 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { SearchSLODefinitionResponse } from '@kbn/slo-schema';
-import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 
 interface Props {
