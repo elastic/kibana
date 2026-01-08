@@ -23,9 +23,9 @@ export class BrowseIntegrationPage {
   async sortIntegrations(sort: 'z-a' | 'a-z') {
     await this.page.getByTestId('browseIntegrations.searchBar.sortBtn').click();
     if (sort === 'z-a') {
-      this.page.getByTestId('browseIntegrations.searchBar.sortByZAOption').click();
+      await this.page.getByTestId('browseIntegrations.searchBar.sortByZAOption').click();
     } else {
-      this.page.getByTestId('browseIntegrations.searchBar.sortByAZOption').click();
+      await this.page.getByTestId('browseIntegrations.searchBar.sortByAZOption').click();
     }
   }
 
