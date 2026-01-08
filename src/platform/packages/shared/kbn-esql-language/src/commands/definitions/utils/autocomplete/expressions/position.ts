@@ -20,12 +20,15 @@ export type ExpressionPosition =
   | 'after_not'
   | 'after_operator'
   | 'after_complete'
+  | 'after_cast'
   | 'empty_expression';
 
 /** Matches " not" at end of string (case insensitive) */
 const NOT_PATTERN = / not$/i;
 /** Matches all regex special characters: . * + ? ^ $ { } ( ) | [ ] \ */
 const REGEX_SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g;
+/** Matches "::" or "::bool" at end of string */
+const INLINE_CAST_PATTERN = /::\s*([\w]*)$/;
 
 /** Determines the position of the cursor within an expression */
 export function getPosition(
@@ -42,6 +45,10 @@ export function getPosition(
 
   if (endsWithNot && !isNullCheck) {
     return 'after_not';
+  }
+
+  if (INLINE_CAST_PATTERN.test(innerText)) {
+    return 'after_cast';
   }
 
   if (!expressionRoot) {
