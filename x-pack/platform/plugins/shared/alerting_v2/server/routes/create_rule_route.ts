@@ -18,8 +18,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { createRuleDataSchema, type CreateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-
-const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
+import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
 
 const createRuleParamsSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -28,7 +27,7 @@ const createRuleParamsSchema = schema.object({
 @injectable()
 export class CreateRuleRoute implements RouteHandler {
   static method = 'post' as const;
-  static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id?}`;
+  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id?}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
