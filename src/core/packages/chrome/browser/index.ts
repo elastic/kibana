@@ -32,6 +32,7 @@ export type {
   ChromeNavLinks,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeSetup,
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,

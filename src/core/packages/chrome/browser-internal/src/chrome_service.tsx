@@ -69,7 +69,7 @@ import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import type { InternalChromeStart } from './types';
+import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
@@ -96,7 +96,7 @@ export interface StartDeps {
   docLinks: DocLinksStart;
   http: InternalHttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
-  notifications: NotificationsStart;
+  getNotifications: () => Promise<NotificationsStart>;
   customBranding: CustomBrandingStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
@@ -163,9 +163,10 @@ export class ChromeService {
 
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
 
-  public setup({ analytics }: SetupDeps) {
+  public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
+    return {};
   }
 
   public async start({
@@ -173,7 +174,7 @@ export class ChromeService {
     docLinks,
     http,
     injectedMetadata,
-    notifications,
+    getNotifications,
     customBranding,
     i18n: i18nService,
     theme,
@@ -191,7 +192,7 @@ export class ChromeService {
     });
 
     handleSystemColorModeChange({
-      notifications,
+      getNotifications,
       coreStart: { i18n: i18nService, theme, userProfile },
       stop$: this.stop$,
       http,
@@ -342,13 +343,15 @@ export class ChromeService {
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.legacyBrowserWarning"
-            defaultMessage="Your browser does not meet the security requirements for Kibana."
-          />
-        ),
+      getNotifications().then((notifications) => {
+        notifications.toasts.addWarning({
+          title: mountReactNode(
+            <FormattedMessage
+              id="core.chrome.legacyBrowserWarning"
+              defaultMessage="Your browser does not meet the security requirements for Kibana."
+            />
+          ),
+        });
       });
     }
 

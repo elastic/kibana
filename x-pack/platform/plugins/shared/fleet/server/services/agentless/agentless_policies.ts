@@ -239,7 +239,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
             `Rolling back: deleting created cloud connector ${createdCloudConnectorId}`
           );
           await cloudConnectorService
-            .delete(this.soClient, createdCloudConnectorId, true)
+            .delete(this.soClient, this.esClient, createdCloudConnectorId, true)
             .catch((e: Error) => {
               this.logger.error(
                 `Failed to delete cloud connector ${createdCloudConnectorId}: ${e.message}`,
