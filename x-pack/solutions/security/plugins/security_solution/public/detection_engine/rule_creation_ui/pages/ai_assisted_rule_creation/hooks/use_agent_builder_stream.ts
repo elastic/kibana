@@ -14,17 +14,27 @@ import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-commo
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
 import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { KibanaServices } from '../../../../../common/lib/kibana/services';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import {
+  AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+  AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM,
+  AI_ASSISTED_RULE_CREATION_ERROR_STARTING,
+  AI_ASSISTED_RULE_CREATION_ERROR_ABORTING,
+  AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING,
+} from '../translations';
 
 const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
 
 export const useAgentBuilderStream = () => {
+  const { addError } = useAppToasts();
   const [isStreaming, setIsStreaming] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const [updates, setUpdates] = useState<Array<{ message: string; timestamp: Date }>>([]);
-  const [rule, setRule] = useState<Record<string, unknown> | null>(null);
+  const [rule, setRule] = useState<RuleResponse | null>(null);
   
   const streamRuleCreation = useCallback(
     async ({ message, connectorId }: { message: string; connectorId: string }) => {
@@ -62,7 +72,6 @@ export const useAgentBuilderStream = () => {
         // Subscribe to events - only track tool_progress for updates, extract rule from tool_result
         const subscription = events$.subscribe({
           next: (event) => {
-            // Only add tool_progress messages to updates array with timestamp
             if (isToolProgressEvent(event)) {
               const eventMessage = event.data?.message || '';
               if (eventMessage) {
@@ -77,13 +86,15 @@ export const useAgentBuilderStream = () => {
             ) {
               const result = event.data?.results?.[0];
               if (result?.type === 'other' && result.data?.success && result.data?.rule) {
-                setRule(result.data.rule as Record<string, unknown>);
+                setRule(result.data.rule as RuleResponse);
               }
             }
           },
           error: (error) => {
-            // eslint-disable-next-line no-console
-            console.error('Error during agent builder stream:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM(errorMessage)), {
+              title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+            });
             setIsStreaming(false);
           },
           complete: () => {
@@ -94,8 +105,10 @@ export const useAgentBuilderStream = () => {
 
         subscriptionRef.current = subscription;
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error starting agent builder stream:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_STARTING(errorMessage)), {
+          title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+        });
         setIsStreaming(false);
         subscriptionRef.current = null;
       }
@@ -108,8 +121,10 @@ export const useAgentBuilderStream = () => {
       try {
         abortControllerRef.current.abort();
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error aborting agent builder stream:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_ABORTING(errorMessage)), {
+          title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+        });
       }
     }
 
@@ -117,15 +132,17 @@ export const useAgentBuilderStream = () => {
       try {
         subscriptionRef.current.unsubscribe();
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error unsubscribing from stream:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        addError(new Error(AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING(errorMessage)), {
+          title: AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
+        });
       }
       subscriptionRef.current = null;
     }
 
     setIsStreaming(false);
     setIsCancelled(true);
-  }, []);
+  }, [addError]);
 
   useEffect(() => {
     return () => {

@@ -19,7 +19,6 @@ interface GenerateEsqlQueryParams {
   inference: InferenceServerStart;
   logger: Logger;
   request: KibanaRequest;
-  createLlmInstance: () => Promise<InferenceChatModel>;
   events?: ToolEventEmitter;
 }
 
@@ -29,7 +28,6 @@ export const generateEsqlQueryNode = async ({
   inference,
   logger,
   request,
-  createLlmInstance,
   events,
   model,
 }: GenerateEsqlQueryParams) => {
@@ -37,7 +35,6 @@ export const generateEsqlQueryNode = async ({
     events?.reportProgress('Generating ES|QL query from natural language...');
 
     try {
-      // Get inference client and connector for ScopedModel
       const inferenceClient = inference.getClient({
         request,
         bindTo: { connectorId },
@@ -66,16 +63,15 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
 
       // Use provided events or create a no-op event emitter as fallback
       const toolEvents: ToolEventEmitter = events || {
-        reportProgress: () => {
-          // No-op fallback if events are not provided
-        },
+        reportProgress: () => {},
+        sendUiEvent: () => {},
       };
 
       // Generate ES|QL query using agent_builder tool
       const esqlResponse = await generateEsql({
         nlQuery: state.userQuery,
         additionalInstructions,
-        executeQuery: false, // Don't execute, just generate the query
+        executeQuery: false,
         maxRetries: 3,
         model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
         esClient,

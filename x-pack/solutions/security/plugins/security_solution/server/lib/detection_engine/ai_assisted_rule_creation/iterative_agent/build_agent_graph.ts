@@ -71,7 +71,6 @@ export const getBuildAgent = async ({
   inference,
   logger,
   request,
-  createLlmInstance,
   model,
   savedObjectsClient,
   rulesClient,
@@ -86,12 +85,10 @@ export const getBuildAgent = async ({
     inference,
     logger,
     request,
-    createLlmInstance,
     events,
   });
 
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
-    //  .addNode(GET_INDEX_PATTERN, getIndexPatternNode({ createLlmInstance, esClient }))
     .addNode(ESQL_QUERY_CREATION, esqlQuerySubGraph)
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
@@ -110,7 +107,7 @@ export const getBuildAgent = async ({
     .addEdge(ADD_DEFAULT_FIELDS_TO_RULES, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
-  graph.name = 'Build Agent Graph';
+  graph.name = 'Detection Engine AI Assisted Rule Creation Graph';
   return graph;
 };
 

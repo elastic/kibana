@@ -20,24 +20,15 @@ export interface GetEsqlQueryGraphWithToolParams {
   inference: InferenceServerStart;
   logger: Logger;
   request: KibanaRequest;
-  createLlmInstance: () => Promise<InferenceChatModel>;
   events?: ToolEventEmitter;
 }
 
-/**
- * ES|QL query graph using agent_builder generateEsql tool.
- * This implementation uses the platform's agent_builder generateEsql tool
- * which provides built-in validation, self-healing, and retry logic.
- * The agent_builder tool handles validation and error correction internally,
- * so this graph simply generates the query and returns it.
- */
 export const getEsqlQueryGraphWithTool = async ({
   esClient,
   connectorId,
   inference,
   logger,
   request,
-  createLlmInstance,
   model,
   events,
 }: GetEsqlQueryGraphWithToolParams) => {
@@ -51,7 +42,6 @@ export const getEsqlQueryGraphWithTool = async ({
         inference,
         logger,
         request,
-        createLlmInstance,
         events,
       })
     )
