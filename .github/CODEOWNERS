@@ -1266,10 +1266,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
 
-# Utility Scripts
-x-pack/platform/packages/shared/kbn-inference-cli/scripts/eis.ts @elastic/search-inference-team
-x-pack/platform/packages/shared/kbn-inference-cli/src/eis @elastic/search-inference-team
-
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-data-discovery
