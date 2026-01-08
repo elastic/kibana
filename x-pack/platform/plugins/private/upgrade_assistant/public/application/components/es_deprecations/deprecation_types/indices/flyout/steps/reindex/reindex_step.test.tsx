@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
+import { fireEvent, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import type {
-  EnrichedDeprecationInfo,
-  ReindexAction,
-} from '../../../../../../../../../common/types';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexFlyoutStep } from './reindex_step';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 jest.mock('../../../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
@@ -26,7 +24,7 @@ jest.mock('../../../../../../../app_context', () => {
       return {
         services: {
           api: {
-            useLoadNodeDiskSpace: () => [],
+            useLoadNodeDiskSpace: () => ({ data: [] }),
           },
           core: {
             docLinks: docLinksServiceMock.createStartContract(),
@@ -39,19 +37,9 @@ jest.mock('../../../../../../../app_context', () => {
 
 describe('ReindexStep', () => {
   const defaultProps = {
-    indexName: 'myIndex',
     closeFlyout: jest.fn(),
-    confirmInputValue: 'CONFIRM',
-    onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
     cancelReindex: jest.fn(),
-    startReadonly: jest.fn(),
-    http: {
-      basePath: {
-        prepend: jest.fn(),
-      },
-    } as any,
-    renderGlobalCallouts: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
       lastCompletedStep: undefined,
@@ -71,72 +59,60 @@ describe('ReindexStep', () => {
         isFollowerIndex: false,
       },
     } as ReindexState,
-    deprecation: {
-      level: 'critical',
-      resolveDuringUpgrade: false,
-      type: 'index_settings',
-      message: 'Index created before 7.0',
-      details: 'deprecation details',
-      url: 'doc_url',
-      index: 'myIndex',
-      correctiveAction: {
-        type: 'reindex',
-      },
-    } as EnrichedDeprecationInfo,
   };
 
   it('renders', () => {
-    expect(shallow(<ReindexFlyoutStep {...defaultProps} />)).toMatchSnapshot();
+    renderWithI18n(<ReindexFlyoutStep {...defaultProps} />);
+
+    expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent('Reindexing process');
+    expect(screen.getByTestId('startReindexingButton')).toHaveTextContent('Start reindexing');
   });
 
   it('renders for frozen indices', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.meta.isFrozen = true;
-    expect(shallow(<ReindexFlyoutStep {...props} />)).toMatchSnapshot();
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+
+    expect(screen.getByText('This index is frozen')).toBeInTheDocument();
   });
 
   it('disables button while reindexing', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.inProgress;
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect((wrapper.find('EuiButton').props() as any).isLoading).toBe(true);
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.getByTestId('startReindexingButton')).toBeDisabled();
+    expect(screen.getByTestId('startReindexingButton')).toHaveTextContent('Reindexing…');
   });
 
   it('hides button if hasRequiredPrivileges is false', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.hasRequiredPrivileges = false;
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.exists('EuiButton')).toBe(false);
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.queryByTestId('startReindexingButton')).not.toBeInTheDocument();
   });
 
   it('hides button if has error', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.fetchFailed;
     props.reindexState.errorMessage = 'Index not found';
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.exists('EuiButton')).toBe(false);
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.queryByTestId('startReindexingButton')).not.toBeInTheDocument();
   });
 
   it('shows fetch failed error callout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.fetchFailed;
     props.reindexState.errorMessage = 'Index not found';
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.find('FetchFailedCallOut').exists()).toBe(true);
-    expect(wrapper.find('FetchFailedCallOut').props()).toEqual({
-      errorMessage: 'Index not found',
-    });
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.getByTestId('fetchFailedCallout')).toHaveTextContent('Index not found');
   });
 
   it('shows reindexing callout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.failed;
     props.reindexState.errorMessage = 'Reindex failed';
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.find('ReindexingFailedCallOut').exists()).toBe(true);
-    expect(wrapper.find('ReindexingFailedCallOut').props()).toEqual({
-      errorMessage: 'Reindex failed',
-    });
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.getByTestId('reindexingFailedCallout')).toHaveTextContent('Reindex failed');
   });
 
   it('calls startReindex when button is clicked', () => {
@@ -148,9 +124,8 @@ describe('ReindexStep', () => {
         status: undefined,
       },
     };
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-
-    wrapper.find('EuiButton').simulate('click');
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    fireEvent.click(screen.getByTestId('startReindexingButton'));
     expect(props.startReindex).toHaveBeenCalled();
   });
 
@@ -166,8 +141,9 @@ describe('ReindexStep', () => {
     statuses.forEach((status) => {
       const props = cloneDeep(defaultProps);
       props.reindexState.status = status;
-      const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-      expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(false);
+      const { unmount } = renderWithI18n(<ReindexFlyoutStep {...props} />);
+      expect(screen.queryByTestId('startIndexReadonlyButton')).not.toBeInTheDocument();
+      unmount();
     });
   });
 
@@ -176,8 +152,8 @@ describe('ReindexStep', () => {
     props.reindexState.status = ReindexStatus.failed;
     props.reindexState.errorMessage = 'Reindex failed';
     props.reindexState.meta.isReadonly = true;
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(false);
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.queryByTestId('startIndexReadonlyButton')).not.toBeInTheDocument();
   });
 
   it('does not show read-only button when read-only is excluded', () => {
@@ -188,15 +164,8 @@ describe('ReindexStep', () => {
         status: ReindexStatus.failed,
         errorMessage: 'Reindex failed',
       },
-      deprecation: {
-        ...defaultProps.deprecation,
-        correctiveAction: {
-          ...defaultProps.deprecation.correctiveAction,
-          excludedActions: ['readOnly'],
-        } as ReindexAction,
-      },
     };
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(false);
+    renderWithI18n(<ReindexFlyoutStep {...props} />);
+    expect(screen.queryByTestId('startIndexReadonlyButton')).not.toBeInTheDocument();
   });
 });
