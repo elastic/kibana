@@ -62,7 +62,7 @@ export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
 
 export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
-    defaultMessage: 'Supplied configuration',
+    defaultMessage: 'Supplied configurations',
   }),
   appId: `anomaly_detection`,
   path: 'ad_supplied_configurations',
