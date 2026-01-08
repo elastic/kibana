@@ -15807,6 +15807,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ESQL_NAMED_PARAMS_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_NAMED_PARAMS_TYPE",
+        "description": [],
+        "signature": [
+          "\"function_named_parameters\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.ESQLAst",
         "type": "Type",
         "tags": [
