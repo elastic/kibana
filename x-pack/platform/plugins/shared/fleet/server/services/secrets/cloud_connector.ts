@@ -199,3 +199,52 @@ async function extractAzureCloudConnectorSecrets(
       `tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=${!!azureCredentials}`
   );
 }
+
+/**
+ * Extracts secret IDs from cloud connector variables for cleanup during deletion
+ * This function handles extracting secret references from both AWS and Azure cloud connectors.
+ *
+ * @param cloudProvider - The cloud provider (aws, azure, gcp)
+ * @param cloudConnectorVars - The cloud connector variables containing secret references
+ * @returns Array of secret IDs to delete
+ */
+export function extractSecretIdsFromCloudConnectorVars(
+  cloudProvider: CloudProvider,
+  cloudConnectorVars: CloudConnectorVars
+): string[] {
+  const secretIds: string[] = [];
+
+  if (cloudProvider === 'aws') {
+    const awsVars = cloudConnectorVars as any;
+    // AWS has external_id as a secret
+    if (
+      awsVars.external_id?.value &&
+      typeof awsVars.external_id.value === 'object' &&
+      awsVars.external_id.value.isSecretRef &&
+      awsVars.external_id.value.id
+    ) {
+      secretIds.push(awsVars.external_id.value.id);
+    }
+  } else if (cloudProvider === 'azure') {
+    const azureVars = cloudConnectorVars as any;
+    // Azure has tenant_id and client_id as secrets
+    if (
+      azureVars.tenant_id?.value &&
+      typeof azureVars.tenant_id.value === 'object' &&
+      azureVars.tenant_id.value.isSecretRef &&
+      azureVars.tenant_id.value.id
+    ) {
+      secretIds.push(azureVars.tenant_id.value.id);
+    }
+    if (
+      azureVars.client_id?.value &&
+      typeof azureVars.client_id.value === 'object' &&
+      azureVars.client_id.value.isSecretRef &&
+      azureVars.client_id.value.id
+    ) {
+      secretIds.push(azureVars.client_id.value.id);
+    }
+  }
+
+  return secretIds;
+}

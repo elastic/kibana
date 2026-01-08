@@ -293,7 +293,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     category = SuggestionCategory.FUNCTION_SCALAR;
   }
 
-  return withAutoSuggest({
+  return {
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -319,7 +319,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
       id: 'editor.action.triggerParameterHints',
       title: '',
     },
-  });
+  };
 }
 
 export function checkFunctionInvocationComplete(
