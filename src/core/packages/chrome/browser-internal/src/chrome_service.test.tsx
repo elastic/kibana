@@ -61,6 +61,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
+  const notifications = notificationServiceMock.createStartContract();
   const deps = {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     i18n: i18nServiceMock.createStartContract(),
@@ -70,7 +71,8 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
-    notifications: notificationServiceMock.createStartContract(),
+    getNotifications: () => Promise.resolve(notifications),
+    notifications, // Keep for test assertions
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
     featureFlags: coreFeatureFlagsMock.createStart(),
@@ -223,8 +225,8 @@ describe('start', () => {
     const [firstCallArg] = mockhandleSystemColorModeChange.mock.calls[0];
     expect(Object.keys(firstCallArg).sort()).toEqual([
       'coreStart',
+      'getNotifications',
       'http',
-      'notifications',
       'stop$',
       'uiSettings',
     ]);
@@ -233,7 +235,7 @@ describe('start', () => {
       http: expect.any(Object),
       coreStart: expect.any(Object),
       uiSettings: expect.any(Object),
-      notifications: expect.any(Object),
+      getNotifications: expect.any(Function),
       stop$: expect.any(Object),
     });
   });

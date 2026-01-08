@@ -10,6 +10,8 @@ import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-p
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
+import { CancellationInProgressError } from './cancellation_in_progress_error';
+import { AcknowledgingIncompleteError } from './acknowledging_incomplete_error';
 
 interface TaskRequest<TaskType, TParams extends {}> {
   task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
@@ -24,7 +26,9 @@ export class TaskClient<TaskType extends string> {
     private readonly logger: Logger
   ) {}
 
-  public async get<TPayload extends {} = {}>(id: string): Promise<PersistedTask<TPayload>> {
+  public async get<TParams extends {} = {}, TPayload extends {} = {}>(
+    id: string
+  ): Promise<PersistedTask<TParams, TPayload>> {
     try {
       this.logger.debug(`Getting task ${id}`);
 
@@ -37,7 +41,7 @@ export class TaskClient<TaskType extends string> {
         throw new Error(`Task ${id} has no source`);
       }
 
-      return response._source as PersistedTask<TPayload>;
+      return response._source as PersistedTask<TParams, TPayload>;
     } catch (error) {
       if (isNotFoundError(error)) {
         return {
@@ -47,6 +51,9 @@ export class TaskClient<TaskType extends string> {
           space: '',
           stream: '',
           type: '',
+          task: {
+            params: {} as TParams,
+          },
         };
       }
 
@@ -58,9 +65,17 @@ export class TaskClient<TaskType extends string> {
     task,
     params,
     request,
-  }: TaskRequest<TaskType, TParams>): Promise<PersistedTask> {
-    const taskDoc: PersistedTask = {
+  }: TaskRequest<TaskType, TParams>) {
+    const storedTask = await this.get(task.id);
+    if (storedTask.status === 'being_canceled') {
+      throw new CancellationInProgressError('Previous task run is still being canceled');
+    }
+
+    const taskDoc: PersistedTask<TParams> = {
       ...task,
+      task: {
+        params,
+      },
       status: 'in_progress',
       created_at: new Date().toISOString(),
     };
@@ -94,13 +109,44 @@ export class TaskClient<TaskType extends string> {
         throw error;
       }
     }
+  }
+
+  public async cancel(id: string) {
+    this.logger.debug(`Canceling task ${id}`);
+
+    const task = await this.get(id);
+    if (task.status !== 'in_progress') {
+      return;
+    }
+
+    await this.update({
+      ...task,
+      status: 'being_canceled',
+    });
+  }
+
+  public async acknowledge<TParams extends {} = {}, TPayload extends {} = {}>(id: string) {
+    const task = await this.get<TParams, TPayload>(id);
+
+    if (task.status !== 'completed') {
+      throw new AcknowledgingIncompleteError('Only completed tasks can be acknowledged');
+    }
+
+    this.logger.debug(`Acknowledging task ${id}`);
+
+    const taskDoc = {
+      ...task,
+      status: 'acknowledged' as const,
+    };
+
+    await this.update(taskDoc);
 
     return taskDoc;
   }
 
-  public async update<TPayload extends {} = {}>(
-    task: PersistedTask<TPayload>
-  ): Promise<PersistedTask<TPayload>> {
+  public async update<TParams extends {} = {}, TPayload extends {} = {}>(
+    task: PersistedTask<TParams, TPayload>
+  ) {
     this.logger.debug(`Updating task ${task.id}`);
 
     await this.storageClient.index({
@@ -109,7 +155,5 @@ export class TaskClient<TaskType extends string> {
       // This might cause issues if there are many updates in a short time from multiple tasks running concurrently
       refresh: true,
     });
-
-    return task;
   }
 }

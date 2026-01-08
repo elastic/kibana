@@ -131,7 +131,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       showFragment ? React.Fragment : EuiToolTip,
       // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
       {
-        ...(props.disableButton
+        ...(showFragment
           ? { key: props.label || props.id! }
           : {
               content: upperFirst(props.label || props.id!),
