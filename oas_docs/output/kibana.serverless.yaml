@@ -20115,7 +20115,7 @@ paths:
                                   type: string
                               required:
                                 - id
-                            maxItems: 1000
+                            maxItems: 10000
                             type: array
                           signed:
                             additionalProperties: false
@@ -20580,7 +20580,7 @@ paths:
                 properties:
                   dataPreview:
                     items: {}
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                   items:
                     items:
@@ -20790,14 +20790,14 @@ paths:
                                     - type
                                     - status
                                     - message
-                                maxItems: 1000
+                                maxItems: 10000
                                 type: array
                             required:
                               - id
                               - type
                               - status
                               - message
-                          maxItems: 1000
+                          maxItems: 10000
                           type: array
                         default_api_key:
                           type: string
@@ -20877,7 +20877,7 @@ paths:
                         packages:
                           items:
                             type: string
-                          maxItems: 1000
+                          maxItems: 10000
                           type: array
                         policy_id:
                           type: string
@@ -20930,7 +20930,7 @@ paths:
                         upgrade_attempts:
                           items:
                             type: string
-                          maxItems: 1000
+                          maxItems: 10000
                           nullable: true
                           type: array
                         upgrade_details:
@@ -21082,7 +21082,7 @@ paths:
                   items:
                     items:
                       type: string
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -21262,14 +21262,14 @@ paths:
                                   - type
                                   - status
                                   - message
-                              maxItems: 1000
+                              maxItems: 10000
                               type: array
                           required:
                             - id
                             - type
                             - status
                             - message
-                        maxItems: 1000
+                        maxItems: 10000
                         type: array
                       default_api_key:
                         type: string
@@ -21349,7 +21349,7 @@ paths:
                       packages:
                         items:
                           type: string
-                        maxItems: 1000
+                        maxItems: 10000
                         type: array
                       policy_id:
                         type: string
@@ -21402,7 +21402,7 @@ paths:
                       upgrade_attempts:
                         items:
                           type: string
-                        maxItems: 1000
+                        maxItems: 10000
                         nullable: true
                         type: array
                       upgrade_details:
@@ -21614,14 +21614,14 @@ paths:
                                   - type
                                   - status
                                   - message
-                              maxItems: 1000
+                              maxItems: 10000
                               type: array
                           required:
                             - id
                             - type
                             - status
                             - message
-                        maxItems: 1000
+                        maxItems: 10000
                         type: array
                       default_api_key:
                         type: string
@@ -21701,7 +21701,7 @@ paths:
                       packages:
                         items:
                           type: string
-                        maxItems: 1000
+                        maxItems: 10000
                         type: array
                       policy_id:
                         type: string
@@ -21754,7 +21754,7 @@ paths:
                       upgrade_attempts:
                         items:
                           type: string
-                        maxItems: 1000
+                        maxItems: 10000
                         nullable: true
                         type: array
                       upgrade_details:
@@ -22268,7 +22268,7 @@ paths:
                         - createTime
                         - status
                         - actionId
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -22435,7 +22435,7 @@ paths:
                         - nbAgentsActioned
                         - status
                         - creationTime
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -22570,7 +22570,7 @@ paths:
                   items:
                     items:
                       type: string
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -23906,7 +23906,7 @@ paths:
                         - id
                         - title
                         - count
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -24434,7 +24434,7 @@ paths:
                                 required:
                                   - id
                                   - type
-                              maxItems: 1000
+                              maxItems: 10000
                               type: array
                             installed_kibana:
                               items:
@@ -24465,7 +24465,7 @@ paths:
                                 required:
                                   - id
                                   - type
-                              maxItems: 1000
+                              maxItems: 10000
                               type: array
                             installed_kibana_space_id:
                               type: string
@@ -24613,7 +24613,7 @@ paths:
                         - version
                         - title
                         - id
-                    maxItems: 1000
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -24890,7 +24890,7 @@ paths:
                                         required:
                                           - id
                                           - type
-                                  maxItems: 1000
+                                  maxItems: 10000
                                   type: array
                                 error: {}
                                 installSource:
@@ -25630,7 +25630,7 @@ paths:
                               required:
                                 - id
                                 - type
-                            maxItems: 1000
+                            maxItems: 10000
                             type: array
                           installed_kibana:
                             items:
@@ -25661,7 +25661,7 @@ paths:
                               required:
                                 - id
                                 - type
-                            maxItems: 1000
+                            maxItems: 10000
                             type: array
                           installed_kibana_space_id:
                             type: string
@@ -26279,7 +26279,7 @@ paths:
                               required:
                                 - id
                                 - type
-                            maxItems: 1000
+                            maxItems: 10000
                             type: array
                           installed_kibana:
                             items:
@@ -26310,7 +26310,7 @@ paths:
                               required:
                                 - id
                                 - type
-                            maxItems: 1000
+                            maxItems: 10000
                             type: array
                           installed_kibana_space_id:
                             type: string
@@ -26967,7 +26967,7 @@ paths:
                             required:
                               - name
                               - title
-                          maxItems: 1000
+                          maxItems: 10000
                           type: array
                         description:
                           type: string
