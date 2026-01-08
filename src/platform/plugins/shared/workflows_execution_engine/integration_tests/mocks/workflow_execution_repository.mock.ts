@@ -100,24 +100,49 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     }));
   }
 
-  public async getRunningExecutionsByWorkflowId(
+  public async hasRunningExecution(
     workflowId: string,
     spaceId: string,
     triggeredBy?: string
-  ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
-    const terminalStatuses = [
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
+  ): Promise<boolean> {
+    const inProgressStatuses = [
+      ExecutionStatus.PENDING,
+      ExecutionStatus.WAITING,
+      ExecutionStatus.WAITING_FOR_INPUT,
+      ExecutionStatus.RUNNING,
     ];
 
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
         exec.workflowId === workflowId &&
         exec.spaceId === spaceId &&
-        !terminalStatuses.includes(exec.status)
+        inProgressStatuses.includes(exec.status)
+    );
+
+    if (triggeredBy) {
+      results = results.filter((exec) => exec.triggeredBy === triggeredBy);
+    }
+
+    return results.length > 0;
+  }
+
+  public async getRunningExecutionsByWorkflowId(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string
+  ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
+    const inProgressStatuses = [
+      ExecutionStatus.PENDING,
+      ExecutionStatus.WAITING,
+      ExecutionStatus.WAITING_FOR_INPUT,
+      ExecutionStatus.RUNNING,
+    ];
+
+    let results = Array.from(this.workflowExecutions.values()).filter(
+      (exec) =>
+        exec.workflowId === workflowId &&
+        exec.spaceId === spaceId &&
+        inProgressStatuses.includes(exec.status)
     );
 
     if (triggeredBy) {

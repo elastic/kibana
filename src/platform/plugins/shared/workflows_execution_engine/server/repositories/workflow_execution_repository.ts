@@ -126,47 +126,105 @@ export class WorkflowExecutionRepository {
   }
 
   /**
+   * Checks if there are any running (non-terminal) workflow executions for a workflow ID.
+   *
+   * Optimized query using:
+   * - filter context (no scoring) instead of must (faster)
+   * - direct status match instead of must_not exclusion (more efficient)
+   * - terminate_after: 1 to stop scanning after finding one match
+   * - size: 0 to avoid fetching document source
+   *
+   * @param workflowId - The ID of the workflow.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param triggeredBy - Optional filter for the trigger type (e.g., 'scheduled').
+   * @returns A promise that resolves to true if there's a running execution, false otherwise.
+   */
+  public async hasRunningExecution(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string
+  ): Promise<boolean> {
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { workflowId } },
+      { term: { spaceId } },
+      // Direct match on in-progress statuses is faster than must_not on terminal statuses
+      {
+        terms: {
+          status: [
+            ExecutionStatus.PENDING,
+            ExecutionStatus.WAITING,
+            ExecutionStatus.WAITING_FOR_INPUT,
+            ExecutionStatus.RUNNING,
+          ],
+        },
+      },
+    ];
+
+    if (triggeredBy) {
+      filterClauses.push({ term: { triggeredBy } });
+    }
+
+    const response = await this.esClient.search<EsWorkflowExecution>({
+      index: this.indexName,
+      size: 0, // Don't need the document, just checking existence
+      terminate_after: 1, // Stop after finding 1 match
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+    });
+
+    const total = response.hits.total;
+    return typeof total === 'number' ? total > 0 : total.value > 0;
+  }
+
+  /**
    * Retrieves running (non-terminal) workflow executions by workflow ID.
    *
    * @param workflowId - The ID of the workflow.
    * @param spaceId - The ID of the space associated with the workflow execution.
    * @param triggeredBy - Optional filter for the trigger type (e.g., 'scheduled').
    * @returns A promise that resolves to the list of search hits for running executions.
+   * @deprecated Use hasRunningExecution() for overlap checks - it's more efficient.
    */
   public async getRunningExecutionsByWorkflowId(
     workflowId: string,
     spaceId: string,
     triggeredBy?: string
   ) {
-    const mustClauses: Array<Record<string, unknown>> = [
+    const filterClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
-    ];
-
-    if (triggeredBy) {
-      mustClauses.push({ term: { triggeredBy } });
-    }
-
-    return this.searchWorkflowExecutions(
+      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
-        bool: {
-          must: mustClauses,
-          must_not: [
-            {
-              terms: {
-                status: [
-                  ExecutionStatus.COMPLETED,
-                  ExecutionStatus.FAILED,
-                  ExecutionStatus.CANCELLED,
-                  ExecutionStatus.SKIPPED,
-                  ExecutionStatus.TIMED_OUT,
-                ],
-              },
-            },
+        terms: {
+          status: [
+            ExecutionStatus.PENDING,
+            ExecutionStatus.WAITING,
+            ExecutionStatus.WAITING_FOR_INPUT,
+            ExecutionStatus.RUNNING,
           ],
         },
       },
-      1
-    );
+    ];
+
+    if (triggeredBy) {
+      filterClauses.push({ term: { triggeredBy } });
+    }
+
+    const response = await this.esClient.search<EsWorkflowExecution>({
+      index: this.indexName,
+      size: 1,
+      terminate_after: 1, // Stop after finding 1 match
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+    });
+
+    return response.hits.hits;
   }
 }
