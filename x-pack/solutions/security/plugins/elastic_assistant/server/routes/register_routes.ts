@@ -44,7 +44,6 @@ import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_r
 import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/public/get/get_attack_discovery_generations';
 import { getAttackDiscoveryGenerationRoute } from './attack_discovery/public/get/get_attack_discovery_generation';
 import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/public/post/post_attack_discovery_generations_dismiss';
-import { getConnectorsRoute } from './attack_discovery/public/get/get_connectors';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/create';
@@ -133,8 +132,6 @@ export const registerRoutes = (
   postAttackDiscoveryGenerateRoute(router);
 
   getMissingIndexPrivilegesInternalRoute(router);
-
-  getConnectorsRoute(router);
 
   // Attack Discovery Schedules
   createAttackDiscoverySchedulesRoute(router);

@@ -91,7 +91,6 @@ export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 export const ATTACK_DISCOVERY = '/api/attack_discovery';
 export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
 export const ATTACK_DISCOVERY_FIND = `${ATTACK_DISCOVERY}/_find` as const;
-export const ATTACK_DISCOVERY_CONNECTORS = `${ATTACK_DISCOVERY}/connectors` as const;
 export const ATTACK_DISCOVERY_GENERATE = `${ATTACK_DISCOVERY}/_generate` as const;
 export const ATTACK_DISCOVERY_GENERATIONS = `${ATTACK_DISCOVERY}/generations` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_BY_ID =

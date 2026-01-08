@@ -24,7 +24,7 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { useAttackDiscoveryConnectors } from '../../../attack_discovery/pages/use_attack_discovery_connectors';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
@@ -80,7 +80,8 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     settings,
   });
   const { from } = useGlobalTime();
-  const { data: aiConnectorNames } = useAttackDiscoveryConnectors({ http, from });
+  const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true, start: from });
+  const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
@@ -150,7 +151,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <FiltersSection
             dataView={dataView}
             pageFilters={pageFilters}
-            assignees={assignees}
             setStatusFilter={setStatusFilter}
             setPageFilters={setPageFilters}
             setPageFilterHandler={setPageFilterHandler}
