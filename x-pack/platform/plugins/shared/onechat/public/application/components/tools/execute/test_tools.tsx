@@ -256,7 +256,6 @@ export interface ToolTestFlyoutProps {
 
 export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const { docLinksService } = useAgentBuilderServices();
   const [response, setResponse] = useState<string>('{}');
   // Re-mount new responses, needed for virtualized EuiCodeBlock
   // https://github.com/elastic/eui/issues/9034
