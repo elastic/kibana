@@ -181,6 +181,24 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "uppercase": Object {
+        "field": "message",
+        "target_field": "message_uppercase",
+      },
+    },
+    Object {
+      "lowercase": Object {
+        "field": "message",
+        "target_field": "message_lowercase",
+      },
+    },
+    Object {
+      "trim": Object {
+        "field": "message",
+        "target_field": "message_trimmed",
+      },
+    },
+    Object {
       "drop": Object {
         "if": "
   try {
