@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class FlamegraphPage {
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -16,7 +17,9 @@ export class FlamegraphPage {
         'profiling'
       )}/flamegraphs/flamegraph?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page
+      .getByRole('tab', { name: 'Differential flamegraph' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   async getWebGLWarning() {
