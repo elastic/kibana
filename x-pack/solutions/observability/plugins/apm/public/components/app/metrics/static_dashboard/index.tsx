@@ -66,7 +66,7 @@ async function getCreationOptions(
   uiActions: UiActionsStart
 ): Promise<DashboardCreationOptions> {
   try {
-    const { dataView, apmIndices } = dashboardProps;
+    const { dataView } = dashboardProps;
     const controlGroupState = {};
 
     await controlGroupStateBuilder.addDataControlFromField(
@@ -80,7 +80,7 @@ async function getCreationOptions(
       },
       uiActions
     );
-    const panels = await convertSavedDashboardToPanels(dashboardProps, dataView);
+    const panels = await convertSavedDashboardToPanels(dashboardProps);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');
