@@ -181,8 +181,6 @@ describe('unsavedChangesManager', () => {
         let backupState: any;
 
         beforeEach(async () => {
-          setBackupStateMock.mockReset();
-
           child1Api = {
             uuid: 'child1',
             hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
