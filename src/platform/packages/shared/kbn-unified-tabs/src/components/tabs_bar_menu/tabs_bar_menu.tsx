@@ -54,9 +54,6 @@ const getRecentlyClosedTabsList = (
     const momentClosedAt = moment(tab.closedAt);
     return {
       label: tab.label,
-      title: `${tab.label}${
-        momentClosedAt.isValid() ? ` (${momentClosedAt.format('LL LT')})` : ''
-      }`,
       key: tab.id,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
       tabItem: tab,
@@ -71,7 +68,7 @@ export interface TabsBarMenuProps {
   recentlyClosedItems: RecentlyClosedTabItem[];
   getPreviewData?: (item: TabItem) => TabPreviewData;
   onSelect: (item: TabItem) => Promise<void>;
-  onSelectRecentlyClosed: (item: TabItem) => Promise<void>;
+  onSelectRecentlyClosed: (item: RecentlyClosedTabItem) => Promise<void>;
   onClearRecentlyClosed: () => void;
 }
 
