@@ -161,6 +161,7 @@ import {
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
+import { VersionSpecificPoliciesTask } from './tasks/version_specific_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -223,6 +224,7 @@ export interface FleetAppContext {
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
+  versionSpecificPoliciesTask?: VersionSpecificPoliciesTask;
 }
 
 export type FleetSetupContract = void;
@@ -333,6 +335,7 @@ export class FleetPlugin
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
   private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
+  private versionSpecificPoliciesTask?: VersionSpecificPoliciesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -721,6 +724,14 @@ export class FleetPlugin
         taskInterval: config.agentStatusChange?.taskInterval,
       },
     });
+    this.versionSpecificPoliciesTask = new VersionSpecificPoliciesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: '30s', // config.versionSpecificPolicies?.taskInterval,
+      },
+    });
     this.fleetPolicyRevisionsCleanupTask = new FleetPolicyRevisionsCleanupTask({
       core,
       taskManager: deps.taskManager,
@@ -792,6 +803,7 @@ export class FleetPlugin
       agentStatusChangeTask: this.agentStatusChangeTask,
       fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
+      versionSpecificPoliciesTask: this.versionSpecificPoliciesTask,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -821,6 +833,7 @@ export class FleetPlugin
     this.fleetPolicyRevisionsCleanupTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
+    this.versionSpecificPoliciesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
 
     const logger = appContextService.getLogger();
 

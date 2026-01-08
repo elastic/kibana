@@ -26,6 +26,9 @@ import {
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
+import { _compilePackagePolicyInputs } from '../package_policy';
+import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { appContextService } from '../app_context';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -99,6 +102,7 @@ export const storedPackagePolicyToAgentInputs = (
           version: packagePolicy.package.version ?? packageInfo?.version,
           ...(input.policy_template ? { policy_template: input.policy_template } : {}),
           ...(packageInfo?.release ? { release: packageInfo.release } : {}),
+          agentVersion: packageInfo?.conditions?.agent?.version,
         },
       };
     }
@@ -178,7 +182,8 @@ export const storedPackagePoliciesToAgentInputs = async (
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyOutputId: string = DEFAULT_OUTPUT.name,
   agentPolicyNamespace?: string,
-  globalDataTags?: GlobalDataTag[]
+  globalDataTags?: GlobalDataTag[],
+  agentVersion?: string
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -197,9 +202,30 @@ export const storedPackagePoliciesToAgentInputs = async (
         ? globalDataTagsToAddFields(filteredGlobalDataTags)
         : undefined;
 
+    let packagePolicyWithUpdatedInputs = packagePolicy;
+    // recompile inputs to apply agent version conditions
+    if (agentVersion) {
+      const logger = appContextService.getLogger();
+      const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+      const assetsMap = await getAgentTemplateAssetsMap({
+        logger,
+        packageInfo: packageInfo!,
+        savedObjectsClient: soClient,
+      });
+
+      const inputs = _compilePackagePolicyInputs(
+        packageInfo!,
+        packagePolicy.vars || {},
+        packagePolicy.inputs,
+        assetsMap,
+        agentVersion
+      );
+      packagePolicyWithUpdatedInputs = { ...packagePolicy, inputs };
+    }
+
     fullInputs.push(
       ...storedPackagePolicyToAgentInputs(
-        packagePolicy,
+        packagePolicyWithUpdatedInputs,
         packageInfo,
         agentPolicyOutputId,
         agentPolicyNamespace,

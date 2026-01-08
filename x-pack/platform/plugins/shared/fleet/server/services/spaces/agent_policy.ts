@@ -9,6 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
+import * as AgentService from '../agents';
 import {
   AGENTS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -209,4 +210,36 @@ export async function updateAgentPolicySpaces({
       await closePointInTime(esClient, pitId);
     }
   }
+}
+
+// TODO move to separate file
+export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPolicyId: string) {
+  const esClient = appContextService.getInternalUserESClient();
+  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const [agentPolicyId, version] = versionedAgentPolicyId.split('#');
+
+  try {
+    const { total } = await getAgentsByKuery(esClient, soClient, {
+      kuery: `policy_id:"${agentPolicyId}" AND agent.version:${version}.*`,
+      showInactive: false,
+      perPage: 0,
+    });
+    if (total === 0) {
+      appContextService
+        .getLogger()
+        .debug(`No agents to reassign for versioned policy ${versionedAgentPolicyId}`);
+      return;
+    }
+  } catch (error) {
+    appContextService.getLogger().debug(error);
+    return;
+  }
+
+  await AgentService.reassignAgents(
+    soClient,
+    esClient,
+    { kuery: `policy_id:"${agentPolicyId}" AND agent.version:${version}.*` },
+    versionedAgentPolicyId
+  );
 }

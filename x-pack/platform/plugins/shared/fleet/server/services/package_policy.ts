@@ -653,6 +653,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
+          hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo),
         }
       );
     }
@@ -668,6 +669,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
   }
 
+  private hasAgentVersionCondition(pkgInfo: PackageInfo): boolean {
+    return !!pkgInfo.conditions?.agent?.version || pkgInfo.name === 'auth0';
+  }
+
   private async bumpAgentPoliciesRevision(
     deps: { soClient: SavedObjectsClientContract; esClient: ElasticsearchClient },
     policyIds: string[],
@@ -675,6 +680,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       removeProtectionFn?: (policyId: string) => undefined | boolean;
       asyncDeploy?: boolean;
+      hasAgentVersionConditions?: boolean;
     } = {}
   ) {
     return runWithCache(() =>
@@ -687,6 +693,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
+            hasAgentVersionConditions: options?.hasAgentVersionConditions,
           }),
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
@@ -905,6 +912,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
         user: options?.user,
         asyncDeploy: options?.asyncDeploy,
+        hasAgentVersionConditions: packageInfos
+          .values()
+          .some((pkgInfo) => this.hasAgentVersionCondition(pkgInfo)),
       });
     }
     logger.debug(`Created new package policies`);
@@ -1575,6 +1585,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             (!assignedInOldPolicy && assignedInNewPolicy)
           );
         },
+        hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo),
       }
     );
 
@@ -1966,6 +1977,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           return removeProtection;
         },
+        hasAgentVersionConditions: packageInfos
+          .values()
+          .some((pkgInfo) => this.hasAgentVersionCondition(pkgInfo)),
       }
     ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
@@ -2254,6 +2268,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         {
           user: options?.user,
           removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
+          // TODO get packageInfos to reset hasAgentVersionConditions flag if package policy is deleted
+          // hasAgentVersionConditions: packageInfos.values().some((pkgInfo) => this.hasAgentVersionCondition(pkgInfo)),
         }
       );
     }
@@ -3271,11 +3287,26 @@ export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  agentVersion?: string
 ): PackagePolicyInput[] {
   return inputs.map((input) => {
-    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
-    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
+    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap, agentVersion);
+    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap, agentVersion);
+    // if (input.type === 'cel') {
+    //   console.log('PackagePolicyInput: ' + agentVersion);
+    //   console.log(
+    //     JSON.stringify(
+    //       {
+    //         ...input,
+    //         compiled_input: compiledInput,
+    //         streams: compiledStreams,
+    //       },
+    //       null,
+    //       2
+    //     )
+    //   );
+    // }
     return {
       ...input,
       compiled_input: compiledInput,
@@ -3288,7 +3319,8 @@ function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  agentVersion?: string
 ) {
   const packagePolicyTemplate = input.policy_template
     ? pkgInfo.policy_templates?.find(
@@ -3329,7 +3361,7 @@ function _compilePackagePolicyInput(
   return compileTemplate(
     // Populate template variables from package- and input-level vars
     Object.assign({}, vars, input.vars),
-    getMetaVariables(pkgInfo, input),
+    getMetaVariables(pkgInfo, input, undefined, agentVersion),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3338,10 +3370,11 @@ function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  agentVersion?: string
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, agentVersion)
   );
 }
 
@@ -3433,7 +3466,8 @@ function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  agentVersion?: string
 ) {
   let stream = streamIn;
 
@@ -3491,7 +3525,7 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    getMetaVariables(pkgInfo, input, streamIn),
+    getMetaVariables(pkgInfo, input, streamIn, agentVersion),
     pkgStreamTemplate.buffer.toString()
   );
 

@@ -326,7 +326,9 @@ export function useFetchAgentsData() {
           throw new Error('Invalid GET /agents response - no status summary');
         }
         // Fetch agent policies, use a local cache
-        const policyIds = agentsResponse.items.map((agent) => agent.policy_id as string);
+        const policyIds = agentsResponse.items.map(
+          (agent) => (agent.policy_id as string).split('#')[0]
+        ); // policy ID without version
 
         const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
 

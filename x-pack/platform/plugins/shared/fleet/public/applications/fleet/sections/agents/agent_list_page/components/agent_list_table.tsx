@@ -198,7 +198,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '220px',
       render: (policyId: string, agent: Agent) => {
-        const agentPolicy = agentPoliciesIndexedById[policyId];
+        const agentPolicy = agentPoliciesIndexedById[policyId.split('#')[0]]; // policy ID without version
 
         return (
           agentPolicy && (

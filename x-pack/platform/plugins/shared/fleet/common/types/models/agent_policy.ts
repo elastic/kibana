@@ -66,6 +66,7 @@ export interface NewAgentPolicy {
     };
   };
   required_versions?: AgentTargetVersion[] | null;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentTargetVersion {
@@ -140,6 +141,7 @@ export interface FullAgentPolicyMetaPackage {
   version: string;
   policy_template?: string;
   release?: string;
+  agentVersion?: string;
 }
 
 export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
