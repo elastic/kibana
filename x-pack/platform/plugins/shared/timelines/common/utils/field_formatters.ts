@@ -141,9 +141,11 @@ export const getDataFromFieldsHits = (
 
     const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
     const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
+    const isThreatEnrichment = isThreatEnrichmentFieldOrSubfield(field, prependField);
 
-    // Handle simple fields
-    if (!isObjectArray || (!isEcsField && !isRuleParameters)) {
+    // Handle simple fields - but don't treat threat enrichments as simple fields
+    // even if they're not in ecsFieldMap (they were excluded as nested type)
+    if (!isObjectArray || (!isEcsField && !isRuleParameters && !isThreatEnrichment)) {
       const simpleItem = processSimpleField(dotField, strArr, isObjectArray, fieldCategory);
       resultMap.set(dotField, simpleItem);
       // eslint-disable-next-line no-continue
@@ -151,7 +153,7 @@ export const getDataFromFieldsHits = (
     }
 
     // Handle threat enrichment
-    if (isThreatEnrichmentFieldOrSubfield(field, prependField)) {
+    if (isThreatEnrichment) {
       const enrichmentItem = createFieldItem(fieldCategory, dotField, strArr, isObjectArray);
       resultMap.set(dotField, enrichmentItem);
     }
@@ -161,7 +163,7 @@ export const getDataFromFieldsHits = (
       item,
       dotField,
       fieldCategory,
-      isRuleParameters || isThreatEnrichmentFieldOrSubfield(field, prependField)
+      isRuleParameters || isThreatEnrichment
     );
     // Merge results
     for (const nestedItem of nestedFields) {
