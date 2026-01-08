@@ -15,116 +15,44 @@ import type { Logger } from '@kbn/logging';
 import type { EntityType } from '../domain/definitions/entity_type';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
+import type { Task } from '../domain/tasks';
 
 function getTaskName(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
   return `${config.type}:${entityType}`;
 }
 
-function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCreatorFunction {
-  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    const taskLogger = logger.get(taskInstance.id);
-    return {
-      run: async () => await run({ taskInstance, entityType, logger: taskLogger }),
-      cancel: async () => await cancel({ logger: taskLogger }),
-    };
-  };
-}
+export class ExtractEntityTask implements Task {
+  // Here we could inject whatever has the logic of extracting entities
+  constructor(
+    private taskManagerStart: TaskManagerStartContract,
+    private taskManagerSetup: TaskManagerSetupContract,
+    private logger: Logger
+  ) {}
 
-async function run({
-  taskInstance,
-  entityType,
-  logger,
-}: {
-  taskInstance: ConcreteTaskInstance;
-  entityType: EntityType;
-  logger: Logger;
-}): Promise<RunResult> {
-  // Read the current state from the previous run (or default empty object)
-  const currentState = taskInstance.state;
-  const runs = currentState.runs || 0;
-
-  logger.info(`Running extract entity task, runs: ${runs}`);
-  try {
-    // TODO: Implement your entity extraction logic here
-    // Example: await this.extractEntities(this.entityType);
-
-    // Update state with execution information
-    const updatedState = {
-      lastExecutionTimestamp: new Date().toISOString(),
-      runs: runs + 1,
-      entityType,
-    };
-
-    return {
-      state: updatedState,
-    };
-  } catch (e) {
-    logger.error(`Error running task, received ${e.message}`);
-    return {
-      state: {
-        ...currentState,
-        lastError: e.message,
-        lastErrorTimestamp: new Date().toISOString(),
-      },
-    };
-  }
-}
-
-async function cancel({ logger }: { logger: Logger }): Promise<RunResult | void> {
-  // The cancel method is called when the task is cancelled (e.g., due to timeout or manual cancellation)
-  // This is a good place to:
-  // 1. Set cancellation flags if you have long-running operations
-  // 2. Clean up any resources
-  // 3. Log the cancellation
-
-  // If you have async operations that support cancellation, you should:
-  // - Check for abortController.signal.aborted in your run method
-  // - Abort any ongoing operations here
-  logger.warn('Cancellation requested');
-}
-
-export function registerExtractEntityTasks({
-  taskManager,
-  logger,
-  entityTypes,
-}: {
-  taskManager: TaskManagerSetupContract;
-  logger: Logger;
-  entityTypes: EntityType[];
-}): void {
-  try {
-    const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    entityTypes.forEach((type) => {
-      const taskName = getTaskName(type);
-      taskManager.registerTaskDefinitions({
+  registerExtractEntityTasks(entityType: EntityType) {
+    try {
+      const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+      const taskName = getTaskName(entityType);
+      this.taskManagerSetup.registerTaskDefinitions({
         [taskName]: {
           title: config.title,
           timeout: config.timeout,
-          createTaskRunner: createRunnerFactory(type, logger),
+          createTaskRunner: this.createRunnerFactory(entityType),
         },
       });
-    });
-  } catch (e) {
-    logger.error(`Error registering tasks: ${e}`);
-    throw e;
+    } catch (e) {
+      this.logger.error(`Error registering tasks: ${e}`);
+      throw e;
+    }
   }
-}
 
-export async function scheduleExtractEntityTasks({
-  taskManager,
-  logger,
-  entityTypes,
-}: {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  entityTypes: EntityType[];
-}): Promise<void> {
-  try {
-    const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    for (const type of entityTypes) {
-      const taskName = getTaskName(type);
-      await taskManager.ensureScheduled({
+  async schedule(entityType: EntityType) {
+    const logger = this.logger.get(entityType);
+    try {
+      const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+      const taskName = getTaskName(entityType);
+      await this.taskManagerStart.ensureScheduled({
         id: taskName,
         taskType: taskName,
         schedule: {
@@ -133,9 +61,75 @@ export async function scheduleExtractEntityTasks({
         params: {},
         state: {},
       });
+    } catch (e) {
+      logger.error(`Error scheduling task: ${e}`);
+      throw e;
     }
-  } catch (e) {
-    logger.error(`Error scheduling task: ${e}`);
-    throw e;
+  }
+
+  async run({
+    taskInstance,
+    entityType,
+    logger,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    entityType: EntityType;
+    logger: Logger;
+  }): Promise<RunResult> {
+    // Read the current state from the previous run (or default empty object)
+    const currentState = taskInstance.state;
+    const runs = currentState.runs || 0;
+
+    logger.info(`Running extract entity task, runs: ${runs}`);
+    try {
+      // TODO: Implement your entity extraction logic here, using what was injected
+
+      // Update state with execution information
+      const updatedState = {
+        lastExecutionTimestamp: new Date().toISOString(),
+        runs: runs + 1,
+        entityType,
+      };
+
+      return {
+        state: updatedState,
+      };
+    } catch (e) {
+      logger.error(`Error running task, received ${e.message}`);
+      return {
+        state: {
+          ...currentState,
+          lastError: e.message,
+          lastErrorTimestamp: new Date().toISOString(),
+        },
+      };
+    }
+  }
+
+  private createRunnerFactory(entityType: EntityType): TaskRunCreatorFunction {
+    return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+      const taskLogger = this.logger.get(taskInstance.id);
+      return {
+        run: async () => await this.run({ taskInstance, entityType, logger: taskLogger }),
+        cancel: async () => await this.cancel({ logger: taskLogger }),
+      };
+    };
+  }
+
+  async cancel({ logger }: { logger: Logger }): Promise<RunResult | void> {
+    // The cancel method is called when the task is cancelled (e.g., due to timeout or manual cancellation)
+    // This is a good place to:
+    // 1. Set cancellation flags if you have long-running operations
+    // 2. Clean up any resources
+    // 3. Log the cancellation
+
+    // If you have async operations that support cancellation, you should:
+    // - Check for abortController.signal.aborted in your run method
+    // - Abort any ongoing operations here
+    logger.warn('Cancellation requested');
+  }
+
+  stopSchedule(type: EntityType): void {
+    throw new Error('Method not implemented.');
   }
 }

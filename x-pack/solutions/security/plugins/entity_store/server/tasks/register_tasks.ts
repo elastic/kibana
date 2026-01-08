@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { ALL_ENTITY_TYPES } from '../domain/definitions/entity_type';
-import { registerExtractEntityTasks } from './extract_entity_task';
+import type { EntityStoreApiRequestHandlerContext } from '../types';
 
-export function registerTasks(taskManager: TaskManagerSetupContract, logger: Logger) {
-  registerExtractEntityTasks({ taskManager, logger, entityTypes: ALL_ENTITY_TYPES });
+export function registerTasks(deps: Omit<EntityStoreApiRequestHandlerContext, 'core'>) {
+  const extractEntitiesTask = deps.getExtractEntitiesTask();
+  ALL_ENTITY_TYPES.forEach(extractEntitiesTask.schedule);
 }

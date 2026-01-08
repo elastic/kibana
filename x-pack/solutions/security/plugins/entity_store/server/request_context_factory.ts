@@ -8,33 +8,36 @@
 import { memoize } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type {
-  EntityStoreApiRequestHandlerContext,
-  EntityStorePlugins,
-  EntityStoreRequestHandlerContext,
-} from './types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EntityStoreApiRequestHandlerContext, EntityStorePlugins } from './types';
 import { ResourcesService } from './domain/resources_service';
-import { getTaskManagers } from './tasks/task_manager';
+import { ExtractEntityTask } from './tasks/extract_entity_task';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
   plugins: EntityStorePlugins;
-  context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
 }
 
-export async function createRequestHandlerContext({
+// this one seems bad, maybe Or knows a better way
+export async function createEntityStoreDependencies({
   logger,
-  context,
   core,
   plugins,
-}: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
-  const coreCtx = await context.core;
-  const taskManagers = await getTaskManagers(core, plugins);
+}: EntityStoreApiRequestHandlerContextDeps): Promise<
+  Omit<EntityStoreApiRequestHandlerContext, 'core'>
+> {
+  const [, startPlugins] = await core.getStartServices();
+  const taskManagerStart = (startPlugins as { taskManager: TaskManagerStartContract }).taskManager;
+  const taskManagerSetup = plugins.taskManager;
+
+  const getExtractEntitiesTask = memoize(
+    () => new ExtractEntityTask(taskManagerStart, taskManagerSetup, logger)
+  );
 
   return {
-    core: coreCtx,
+    getExtractEntitiesTask,
     getLogger: memoize(() => logger),
-    getResourcesService: memoize(() => new ResourcesService(logger, taskManagers)),
+    getResourcesService: memoize(() => new ResourcesService(logger, getExtractEntitiesTask())),
   };
 }
