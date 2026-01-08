@@ -32,7 +32,7 @@ import { TabPreview } from '../tab_preview';
 
 interface OptionData {
   tabItem: RecentlyClosedTabItem | TabItem;
-  momentClosedAt?: moment.Moment;
+  formattedTime?: string;
 }
 
 const getOpenedTabsList = (
@@ -52,12 +52,14 @@ const getRecentlyClosedTabsList = (
 ): Array<EuiSelectableOption<OptionData>> => {
   return tabItems.map((tab) => {
     const momentClosedAt = moment(tab.closedAt);
+    const formattedTime = momentClosedAt?.isValid() ? momentClosedAt.fromNow() : '';
+
     return {
       label: tab.label,
       key: tab.id,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
       tabItem: tab,
-      momentClosedAt,
+      formattedTime,
     };
   });
 };
@@ -88,9 +90,14 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
     );
+
+    const [menuOpenCount, setMenuOpenCount] = useState(0);
+
     const recentlyClosedTabsList = useMemo(
       () => getRecentlyClosedTabsList(recentlyClosedItems),
-      [recentlyClosedItems]
+      // disabling eslint rule because we want the formattedTimes to update whenever the popover opens
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [recentlyClosedItems, menuOpenCount]
     );
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -114,15 +121,12 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
 
     const renderOption = useCallback(
       (option: EuiSelectableOption<OptionData>) => {
-        const closedAt = option?.momentClosedAt;
-        const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
-
         const itemContents = (
           <>
             {option.label}
-            {formattedTime && (
+            {option.formattedTime && (
               <EuiText size="xs" color="subdued" className="eui-displayBlock">
-                {formattedTime}
+                {option.formattedTime}
               </EuiText>
             )}
           </>
@@ -173,7 +177,15 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               color="text"
               data-test-subj="unifiedTabs_tabsBarMenuButton"
               iconType="arrowDown"
-              onClick={() => setPopover((prev) => !prev)}
+              onClick={() => {
+                setPopover((prev) => {
+                  const willOpen = !prev;
+                  if (willOpen) {
+                    setMenuOpenCount((count) => count + 1);
+                  }
+                  return willOpen;
+                });
+              }}
             />
           </EuiToolTip>
         }
