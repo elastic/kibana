@@ -35,7 +35,7 @@ ruleTester.run('@kbn/eslint/scout_no_es_archiver_in_parallel_tests', rule, {
     },
     // Test without esArchiver
     {
-      code: `spaceTest('should work', async ({ page }) => {});`,
+      code: `test('should work', async ({ page }) => {});`,
       filename: '/path/to/plugin/test/scout/ui/parallel_tests/my_test.spec.ts',
     },
     // Test outside parallel_tests directory
@@ -46,9 +46,9 @@ ruleTester.run('@kbn/eslint/scout_no_es_archiver_in_parallel_tests', rule, {
   ],
 
   invalid: [
-    // spaceTest with esArchiver
+    // test with esArchiver
     {
-      code: `spaceTest('should work', async ({ esArchiver }) => {});`,
+      code: `test('should work', async ({ esArchiver }) => {});`,
       filename: '/path/to/plugin/test/scout/ui/parallel_tests/my_test.spec.ts',
       errors: [{ message: ERROR_MSG }],
     },

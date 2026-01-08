@@ -14,7 +14,7 @@ const path = require('path');
 const ERROR_MSG =
   '`esArchiver` should not be used in parallel tests. Use `globalSetupHook` in `global.setup.ts` to load archives before tests run.';
 
-const TEST_FIXTURES = new Set(['spaceTest', 'test', 'apiTest']);
+const TEST_FIXTURES = new Set(['test', 'apiTest']);
 
 /** @type {Rule} */
 module.exports = {
