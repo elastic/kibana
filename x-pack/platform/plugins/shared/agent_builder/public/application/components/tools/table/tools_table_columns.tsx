@@ -69,6 +69,7 @@ export const useToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
           const status = mcpHealthState.status as McpToolUnhealthyStatus;
           return (
             <EuiIconTip
+              data-test-subj={`agentBuilderToolHealthBadge-${tool.id}-${status}`}
               type={mcpUnhealthyStatusIconMap[status]}
               color="danger"
               title={healthStatusMessages[status].title}

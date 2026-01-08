@@ -24,15 +24,16 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
   describe('MCP tools', function () {
     let mcpServer: McpServerSimulator;
+    let mcpServerUrl: string;
     let connectorId: string;
 
     before(async () => {
       // Start mock MCP server
       mcpServer = createTestMcpServer();
-      await mcpServer.start();
+      mcpServerUrl = await mcpServer.start();
 
       // Create MCP connector pointing to mock server
-      const connector = await createMcpConnector(mcpServer, supertest);
+      const connector = await createMcpConnector(mcpServerUrl, supertest);
       connectorId = connector.id;
     });
 
@@ -232,6 +233,30 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
         // The 'add' tool returns the sum as text, expect "8"
         expect(response).to.contain('8');
+      });
+    });
+
+    describe('error handling', function () {
+      it('should show error banner when MCP server is unavailable during tool creation', async () => {
+        // Stop the MCP server to simulate unavailability
+        await mcpServer.stop();
+
+        // Create a NEW connector after stopping the server.
+        // The MCP connector has a 15-minute backend cache for listTools results (see LIST_TOOLS_CACHE_TTL_MS).
+        // If we reuse the existing connector, cached tools would be returned even though the server is down.
+        // A new connector has a different cache key, so it will actually try to reach the (now stopped) server.
+        const errorTestConnector = await createMcpConnector(mcpServerUrl, supertest, {
+          name: 'ftr-error-test-connector',
+        });
+
+        await agentBuilder.navigateToToolsLanding();
+        await agentBuilder.navigateToNewTool();
+
+        await testSubjects.existOrFail('agentBuilderToolFormPage');
+        await agentBuilder.selectToolType(ToolType.mcp);
+        await agentBuilder.selectMcpConnector(errorTestConnector.id);
+
+        await testSubjects.existOrFail('agentBuilderMcpHealthBanner-list_tools_failed');
       });
     });
   });

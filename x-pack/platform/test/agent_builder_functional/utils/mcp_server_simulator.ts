@@ -33,7 +33,6 @@ export class McpServerSimulator {
   private tools: Map<string, McpTool> = new Map();
   private serverName: string;
   private serverVersion: string;
-  private initialized = false;
 
   constructor(options: McpServerSimulatorOptions = {}) {
     this.serverName = options.serverName ?? 'mcp-test-server';
@@ -82,7 +81,6 @@ export class McpServerSimulator {
         this.server.close(() => {
           this.server = null;
           this.port = null;
-          this.initialized = false;
           resolve();
         });
       } else {
@@ -168,9 +166,6 @@ export class McpServerSimulator {
   }
 
   private handleInitialize(id: string | number, params: any): any {
-    // Always allow initialization since each Kibana request creates a new MCP client connection
-    this.initialized = true;
-
     // Use the client's requested protocol version if provided, otherwise default
     const clientVersion = params?.protocolVersion ?? '2025-03-26';
 
@@ -304,19 +299,6 @@ export function createTestMcpServer(): McpServerSimulator {
     handler: async (args) => ({
       content: [{ type: 'text', text: String(Number(args.a) + Number(args.b)) }],
     }),
-  });
-
-  // Add a tool that simulates an error for error handling tests
-  simulator.registerTool({
-    name: 'fail',
-    description: 'A tool that always fails (for testing error handling)',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-    handler: async () => {
-      throw new Error('Intentional failure for testing');
-    },
   });
 
   return simulator;

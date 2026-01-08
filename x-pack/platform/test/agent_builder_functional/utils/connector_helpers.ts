@@ -8,7 +8,6 @@
 import type SuperTest from 'supertest';
 import type { AgentBuilderApiFtrProviderContext } from '../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
-import type { McpServerSimulator } from './mcp_server_simulator';
 /**
  * Creates a basic auth connector for the LLM proxy
  */
@@ -70,10 +69,10 @@ export async function teardownConnector(
 }
 
 /**
- * Creates an MCP connector pointing to the MCP server simulator
+ * Creates an MCP connector pointing to an MCP server URL
  */
 export async function createMcpConnector(
-  mcpServer: McpServerSimulator,
+  serverUrl: string,
   supertest: SuperTest.Agent,
   options: { name?: string } = {}
 ): Promise<{ id: string }> {
@@ -83,7 +82,7 @@ export async function createMcpConnector(
     .send({
       name: options.name ?? 'mcp-test-connector',
       config: {
-        serverUrl: mcpServer.getUrl(),
+        serverUrl,
         hasAuth: false,
       },
       secrets: {},
@@ -99,11 +98,11 @@ export async function createMcpConnector(
  */
 export async function setupMcpConnector(
   getService: AgentBuilderApiFtrProviderContext['getService'],
-  mcpServer: McpServerSimulator,
+  serverUrl: string,
   options: { name?: string } = {}
 ): Promise<{ id: string }> {
   const supertest = getService('supertest');
-  return createMcpConnector(mcpServer, supertest, options);
+  return createMcpConnector(serverUrl, supertest, options);
 }
 
 /**
