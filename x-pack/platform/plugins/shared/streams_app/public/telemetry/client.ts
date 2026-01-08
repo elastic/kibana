@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
@@ -24,10 +25,10 @@ import type {
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
-  StreamsFeatureIdentificationIdentifiedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
+  StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
 } from './types';
 import {
@@ -48,11 +49,11 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 
@@ -83,36 +84,8 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE, params);
   }
 
-  public startTrackingAIGrokSuggestionLatency(
-    params: Pick<StreamsAIGrokSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
-  ) {
-    const start = Date.now();
-    return (count: number, rates: number[]) => {
-      this.analytics.reportEvent(STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE, {
-        ...params,
-        duration_ms: Date.now() - start,
-        suggestion_count: count,
-        match_rate: rates,
-      });
-    };
-  }
-
   public trackAIGrokSuggestionAccepted(params: StreamsAIGrokSuggestionAcceptedProps) {
     this.analytics.reportEvent(STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
-  }
-
-  public startTrackingAIDissectSuggestionLatency(
-    params: Pick<StreamsAIDissectSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
-  ) {
-    const start = Date.now();
-    return (count: number, rates: number[]) => {
-      this.analytics.reportEvent(STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE, {
-        ...params,
-        duration_ms: Date.now() - start,
-        suggestion_count: count,
-        match_rate: rates,
-      });
-    };
   }
 
   public trackAIDissectSuggestionAccepted(params: StreamsAIDissectSuggestionAcceptedProps) {
@@ -153,10 +126,6 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
   }
 
-  public trackFeaturesIdentified(params: StreamsFeatureIdentificationIdentifiedProps) {
-    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
-  }
-
   public trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps) {
     this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE, params);
   }
@@ -169,24 +138,86 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
   }
 
+  public trackTabVisited(params: StreamsTabVisitedProps) {
+    this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
+  }
+
+  public startTrackingAIDissectSuggestionLatency(
+    params: Pick<StreamsAIDissectSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
+  ) {
+    const start = performance.now();
+    return (count: number, rates: number[]) => {
+      reportPerformanceMetricEvent(this.analytics, {
+        eventName: STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
+        duration: performance.now() - start,
+        key1: 'suggestion_count',
+        value1: count,
+        meta: {
+          name: params.name,
+          field: params.field,
+          connector_id: params.connector_id,
+          match_rate: rates,
+        },
+      });
+    };
+  }
+
+  public startTrackingAIGrokSuggestionLatency(
+    params: Pick<StreamsAIGrokSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
+  ) {
+    const start = performance.now();
+    return (count: number, rates: number[]) => {
+      reportPerformanceMetricEvent(this.analytics, {
+        eventName: STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
+        duration: performance.now() - start,
+        key1: 'suggestion_count',
+        value1: count,
+        meta: {
+          name: params.name,
+          field: params.field,
+          connector_id: params.connector_id,
+          match_rate: rates,
+        },
+      });
+    };
+  }
+
   public startTrackingSimulationSamplesFetchLatency(
     params: Pick<
       StreamsProcessingSimulationSamplesFetchLatencyProps,
       'stream_name' | 'stream_type' | 'data_source_type'
     >
   ) {
-    const start = Date.now();
+    const start = performance.now();
 
     return () => {
-      this.analytics.reportEvent(STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE, {
-        ...params,
-        duration_ms: Date.now() - start,
+      reportPerformanceMetricEvent(this.analytics, {
+        eventName: STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+        duration: performance.now() - start,
+        meta: {
+          stream_name: params.stream_name,
+          stream_type: params.stream_type,
+          data_source_type: params.data_source_type,
+        },
       });
     };
   }
 
-  public trackTabVisited(params: StreamsTabVisitedProps) {
-    this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
+  public startTrackingPartitioningSamplesFetchLatency(
+    params: Pick<StreamsPartitioningSamplesFetchLatencyProps, 'stream_name' | 'stream_type'>
+  ) {
+    const start = performance.now();
+
+    return () => {
+      reportPerformanceMetricEvent(this.analytics, {
+        eventName: STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+        duration: performance.now() - start,
+        meta: {
+          stream_name: params.stream_name,
+          stream_type: params.stream_type,
+        },
+      });
+    };
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {

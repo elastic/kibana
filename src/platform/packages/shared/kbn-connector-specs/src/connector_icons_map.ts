@@ -41,6 +41,14 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.github',
+    lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
+  ],
+  [
+    '.jina',
+    lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
+  ],
+  [
     '.sharepointOnline',
     lazy(
       () =>

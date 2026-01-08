@@ -479,6 +479,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.populate_file_data',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Enable collection of entropy and header bytes on file events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1335,6 +1346,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           "Prevent permission checking from using the 'open'/'openat' syscalls when running on kernels which require 'FAN_OPEN_PERM' (older than 5.0). This will avoid potential deadlocks with other antivirus products at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.enable_ns_jumping',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.enable_ns_jumping',
+      {
+        defaultMessage:
+          'Enter the mount namespace of processes when they generate fanotify events. For 9.2 and earlier, default: false. For 9.3 and later, default: true.',
       }
     ),
   },

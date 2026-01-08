@@ -204,6 +204,7 @@ export const EntityAnalyticsAnomalies = () => {
             loading={isSearchLoading}
             id={TABLE_QUERY_ID}
             sorting={TABLE_SORTING}
+            tableCaption={i18n.ANOMALIES_TITLE}
           />
         </>
       )}

@@ -4,21 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { ComponentType } from 'react';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityAgentBuilderPluginPublicStart {}
+export interface ObservabilityAgentBuilderPluginPublicStart {
+  getAlertAIInsight: () => ComponentType<AlertAiInsightProps>;
+  getErrorSampleAIInsight: () => ComponentType<ErrorSampleAiInsightProps>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginSetupDependencies {}
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
-  onechat: OnechatPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
   licensing: LicensingPluginStart;
 }

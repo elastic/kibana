@@ -189,6 +189,14 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderAIInsight?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityLogsAiInsightFeatureRenderDeps",
+            "text": "ObservabilityLogsAiInsightFeatureRenderDeps"
+          },
           ") => JSX.Element) | undefined; renderFlyoutStreamField?: ((deps: ",
           {
             "pluginId": "discoverShared",
@@ -495,6 +503,14 @@
             "docId": "kibDiscoverSharedPluginApi",
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; renderAIInsight?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityLogsAiInsightFeatureRenderDeps",
+            "text": "ObservabilityLogsAiInsightFeatureRenderDeps"
           },
           ") => JSX.Element) | undefined; renderFlyoutStreamField?: ((deps: ",
           {

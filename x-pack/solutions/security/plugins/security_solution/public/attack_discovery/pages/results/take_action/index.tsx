@@ -17,10 +17,13 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
+import * as agentBuilderI18n from '../../../../agent_builder/components/translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
@@ -207,14 +210,43 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
-  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
+    useAgentBuilderAvailability();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
-
+  const reportAddToChatClick = useReportAddToChat();
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
+    reportAddToChatClick({
+      pathway: 'attack_discovery_take_action',
+      attachments: ['alert'],
+    });
     openAgentBuilderFlyout();
-  }, [closePopover, openAgentBuilderFlyout]);
+  }, [closePopover, openAgentBuilderFlyout, reportAddToChatClick]);
+
+  const isAddToChatDisabled = !hasValidAgentBuilderLicense;
+  const viewInAgentBuilderItem = useMemo(() => {
+    const item = (
+      <EuiContextMenuItem
+        data-test-subj="viewInAgentBuilder"
+        disabled={isAddToChatDisabled}
+        key="viewInAgentBuilder"
+        onClick={onViewInAgentBuilder}
+      >
+        {i18n.ADD_TO_CHAT}
+      </EuiContextMenuItem>
+    );
+
+    if (!isAddToChatDisabled) {
+      return item;
+    }
+
+    return (
+      <EuiToolTip content={agentBuilderI18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>
+        <span>{item}</span>
+      </EuiToolTip>
+    );
+  }, [isAddToChatDisabled, onViewInAgentBuilder]);
 
   // button for the popover:
   const button = useMemo(
@@ -257,15 +289,7 @@ const TakeActionComponent: React.FC<Props> = ({
         attackDiscoveries.length === 1
           ? isAgentChatExperienceEnabled
             ? hasAgentBuilderPrivilege
-              ? [
-                  <EuiContextMenuItem
-                    data-test-subj="viewInAgentBuilder"
-                    key="viewInAgentBuilder"
-                    onClick={onViewInAgentBuilder}
-                  >
-                    {i18n.ADD_TO_CHAT}
-                  </EuiContextMenuItem>,
-                ]
+              ? [viewInAgentBuilderItem]
               : []
             : [
                 <EuiContextMenuItem
@@ -286,8 +310,8 @@ const TakeActionComponent: React.FC<Props> = ({
       isAgentChatExperienceEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
-      onViewInAgentBuilder,
       onViewInAiAssistant,
+      viewInAgentBuilderItem,
       viewInAiAssistantDisabled,
     ]
   );

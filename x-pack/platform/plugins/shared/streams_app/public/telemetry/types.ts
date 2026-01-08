@@ -11,6 +11,8 @@ import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
+type ConfigurationMode = 'interactive' | 'yaml';
+
 type StreamsAttachmentCountProps = {
   name: string;
 } & Record<AttachmentType, number>;
@@ -83,6 +85,7 @@ interface WiredStreamsStatusChangedProps {
 interface StreamsProcessingSavedProps {
   processors_count: number;
   stream_type: StreamType;
+  configuration_mode: ConfigurationMode;
 }
 
 interface StreamsRetentionChangedProps {
@@ -99,12 +102,14 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
+export type CountByFeatureType = Record<FeatureType, number>;
+
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
   input_tokens_used: number;
   output_tokens_used: number;
   count: number;
-  count_by_feature_type: Record<FeatureType, number>;
+  count_by_feature_type: CountByFeatureType;
   features_selected: number;
   features_total: number;
   stream_name: string;
@@ -113,30 +118,21 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
-  count_by_feature_type: Record<FeatureType, number>;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsFeatureIdentificationIdentifiedProps {
-  count: number;
-  count_by_type: Record<FeatureType, number>;
-  input_tokens_used: number;
-  output_tokens_used: number;
+  count_by_feature_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
+  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
+  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -152,6 +148,12 @@ interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   stream_name: string;
   stream_type: StreamType;
   data_source_type: EnrichmentDataSource['type'];
+  duration_ms: number;
+}
+
+interface StreamsPartitioningSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
   duration_ms: number;
 }
 
@@ -172,6 +174,7 @@ interface StreamsTabVisitedProps {
 }
 
 export {
+  type ConfigurationMode,
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
   type StreamsAttachmentLinkChangedProps,
@@ -190,9 +193,9 @@ export {
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
-  type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
 };

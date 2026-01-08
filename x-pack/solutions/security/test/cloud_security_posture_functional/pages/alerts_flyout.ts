@@ -81,6 +81,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
@@ -201,6 +203,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -209,6 +213,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+
+      // assert the grouped items are rendered correctly
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+      await expandedFlyoutGraph.assertGroupedItemActorAndTargetValues(
+        2,
+        'admin@example.com',
+        'projects/your-project-id/roles/customRole'
+      );
     });
 
     it('show related alerts', async () => {
@@ -229,6 +242,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
@@ -241,7 +256,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    describe('ECS fields only', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/246821
+    describe.skip('ECS fields only', function () {
       const entitiesIndex = '.entities.v1.latest.security_*';
       const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
       const enrichIndexName = `.enrich-${enrichPolicyName}`;

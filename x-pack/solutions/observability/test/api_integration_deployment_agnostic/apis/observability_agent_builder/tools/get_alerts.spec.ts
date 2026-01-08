@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import type { ToolResult, OtherResult } from '@kbn/onechat-common';
-import { isOtherResult } from '@kbn/onechat-common/tools';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import { generateApmErrorData, indexAll } from '@kbn/synthtrace';
+import type { ToolResult, OtherResult } from '@kbn/agent-builder-common';
+import { isOtherResult } from '@kbn/agent-builder-common/tools';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
 import {
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
@@ -28,7 +30,6 @@ import {
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
 import { setupObservabilityAlertsToolThenAnswer } from '../utils/llm_proxy/scenarios';
-import { createSyntheticApmData } from '../utils/synthtrace_scenarios';
 import { createRule, deleteRules } from '../utils/alerts/alerting_rules';
 
 const LLM_EXPOSED_TOOL_NAME_FOR_GET_ALERTS = 'observability_get_alerts';
@@ -77,7 +78,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         internalReqHeader = samlAuth.getInternalRequestHeader();
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
+        const synthtrace = getService('synthtrace');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+        const range = timerange('now-15m', 'now');
+
+        await indexAll(
+          generateApmErrorData({
+            range,
+            apmEsClient: apmSynthtraceEsClient,
+            serviceName: 'test-service',
+            environment: 'production',
+            language: 'go',
+          })
+        );
 
         llmProxy = await createLlmProxy(log);
         connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });

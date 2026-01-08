@@ -166,8 +166,10 @@ export function LifecycleBadge({
 
 export function DiscoverBadgeButton({
   definition,
+  isWiredStream,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  isWiredStream: boolean;
 }) {
   const {
     dependencies: {
@@ -177,7 +179,9 @@ export function DiscoverBadgeButton({
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
   const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+  const esqlQuery = indexPatterns
+    ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
+    : undefined;
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(

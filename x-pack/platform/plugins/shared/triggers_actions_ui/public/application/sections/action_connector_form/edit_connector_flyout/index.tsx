@@ -100,6 +100,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
   >({});
+
+  const onEditAction = useCallback(
+    (field: string, value: unknown) =>
+      setTestExecutionActionParams((oldParams) => ({ ...oldParams, [field]: value })),
+    []
+  );
+
   const [testExecutionResult, setTestExecutionResult] =
     useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
 
@@ -327,7 +334,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         connector={connector}
         executeEnabled={!isFormModified}
         actionParams={testExecutionActionParams}
-        setActionParams={setTestExecutionActionParams}
+        onEditAction={onEditAction}
         onExecutionAction={onExecutionAction}
         isExecutingAction={isExecutingConnector}
         executionResult={testExecutionResult}
@@ -336,12 +343,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
-    actionTypeRegistry,
-    isExecutingConnector,
     isFormModified,
     testExecutionActionParams,
-    testExecutionResult,
+    onEditAction,
     onExecutionAction,
+    isExecutingConnector,
+    testExecutionResult,
+    actionTypeRegistry,
   ]);
 
   const renderConnectorRulesList = useCallback(() => {

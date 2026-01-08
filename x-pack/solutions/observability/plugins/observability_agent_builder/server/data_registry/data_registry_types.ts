@@ -38,7 +38,7 @@ interface ServiceSummary {
   deployments: Array<{ '@timestamp': string }>;
 }
 
-interface APMDownstreamDependency {
+export interface APMDownstreamDependency {
   'service.name'?: string | undefined;
   'span.destination.service.resource': string;
   'span.type'?: string | undefined;
@@ -86,7 +86,7 @@ interface APMTransaction {
   };
 }
 
-interface ServicesItemsItem {
+export interface ServicesItemsItem {
   serviceName: string;
   transactionType?: string;
   environments?: string[];
@@ -103,6 +103,52 @@ interface ServicesItemsResponse {
   maxCountExceeded: boolean;
   serviceOverflowCount: number;
 }
+
+// Infra host types
+type InfraEntityMetricType =
+  | 'cpu'
+  | 'cpuV2'
+  | 'normalizedLoad1m'
+  | 'diskSpaceUsage'
+  | 'memory'
+  | 'memoryFree'
+  | 'rx'
+  | 'tx'
+  | 'rxV2'
+  | 'txV2';
+
+type InfraEntityMetadataType = 'cloud.provider' | 'host.ip' | 'host.os.name';
+
+interface InfraEntityMetrics {
+  name: InfraEntityMetricType;
+  value: number | null;
+}
+
+interface InfraEntityMetadata {
+  name: InfraEntityMetadataType;
+  value: string | number | null;
+}
+
+export interface InfraEntityMetricsItem {
+  name: string;
+  metrics: InfraEntityMetrics[];
+  metadata: InfraEntityMetadata[];
+  hasSystemMetrics: boolean;
+  alertsCount?: number;
+}
+
+interface InfraHostsResponse {
+  nodes: InfraEntityMetricsItem[];
+}
+
+export interface TraceMetricsItem {
+  group: string;
+  latency: number | null;
+  throughput: number;
+  failureRate: number;
+}
+
+type TraceMetricsResponse = TraceMetricsItem[];
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
@@ -166,4 +212,21 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: string;
     searchQuery?: string;
   }) => Promise<ServicesItemsResponse>;
+
+  infraHosts: (params: {
+    request: KibanaRequest;
+    from: string;
+    to: string;
+    limit: number;
+    query: Record<string, unknown> | undefined;
+    hostNames?: string[];
+  }) => Promise<InfraHostsResponse>;
+
+  traceMetrics: (params: {
+    request: KibanaRequest;
+    start: string;
+    end: string;
+    kqlFilter?: string;
+    groupBy: string;
+  }) => Promise<TraceMetricsResponse>;
 }

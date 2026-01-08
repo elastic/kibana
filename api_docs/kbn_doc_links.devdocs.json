@@ -129,6 +129,17 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.aiAssistantSettings",
+            "type": "string",
+            "tags": [],
+            "label": "aiAssistantSettings",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.elasticStackGetStarted",
             "type": "string",
             "tags": [],
@@ -210,7 +221,7 @@
             "label": "cloud",
             "description": [],
             "signature": [
-              "{ readonly beatsAndLogstashConfiguration: string; readonly elasticsearchBillingManagingCosts: string; readonly indexManagement: string; readonly cloudConnect: string; readonly connectToAutoops: string; }"
+              "{ readonly beatsAndLogstashConfiguration: string; readonly elasticsearchBillingManagingCosts: string; readonly indexManagement: string; readonly cloudConnect: string; readonly connectToAutoops: string; readonly deploymentSignup: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -294,7 +305,7 @@
             "label": "searchHomepage",
             "description": [],
             "signature": [
-              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly customerEngineerRequestForm: string; readonly elasticCommunity: string; }"
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly customerEngineerRequestForm: string; readonly elasticCommunity: string; readonly elasticCloud: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1128,7 +1139,7 @@
             "label": "agentBuilder",
             "description": [],
             "signature": [
-              "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; }"
+              "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; readonly learnMore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1143,6 +1154,31 @@
             "description": [],
             "signature": [
               "{ readonly componentTemplate: string; readonly indexAlias: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.subscriptions",
+            "type": "string",
+            "tags": [],
+            "label": "subscriptions",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "{ readonly casesPermissions: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
