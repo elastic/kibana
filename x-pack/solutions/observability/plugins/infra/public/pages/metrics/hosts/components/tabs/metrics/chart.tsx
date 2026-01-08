@@ -21,22 +21,6 @@ import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build'
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
-/**
- * Determines whether charts should be loaded based on the hosts view state.
- * Charts should not be loaded if the table API failed or returned no data or is still being loaded.
- */
-const shouldLoadCharts = ({
-  loading,
-  error,
-  hostNodesLength,
-}: {
-  loading: boolean;
-  error: unknown;
-  hostNodesLength: number;
-}): boolean => {
-  return !error && !loading && hostNodesLength > 0;
-};
-
 export type ChartProps = LensConfig & {
   id: string;
   dataView: DataView | undefined;
@@ -81,7 +65,7 @@ export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
     shouldUseSearchCriteria,
   ]);
 
-  if (!shouldLoadCharts({ loading, error, hostNodesLength: hostNodes.length })) {
+  if (!loading && (!hostNodes.length || error)) {
     return (
       <EuiPanel
         hasBorder

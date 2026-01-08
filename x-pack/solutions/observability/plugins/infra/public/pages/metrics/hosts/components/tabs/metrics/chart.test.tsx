@@ -151,7 +151,7 @@ describe('Chart', () => {
   });
 
   describe('when loading', () => {
-    it('should render ChartPlaceholder when loading even with no hosts', async () => {
+    it('should render LensChart when loading even with no hosts', async () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: true,
@@ -160,9 +160,7 @@ describe('Chart', () => {
 
       await renderChart();
 
-      // When loading, shouldLoadCharts returns false, so ChartPlaceholder is shown
-      expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
-      // ChartPlaceholder shows loading state (no text, just loading indicator)
+      expect(screen.getByTestId('lensChart')).toBeInTheDocument();
     });
   });
 
@@ -190,7 +188,7 @@ describe('Chart', () => {
 
       await renderChart();
 
-      expect(screen.queryByTestId('lensChart')).not.toBeInTheDocument();
+      expect(screen.getByTestId('lensChart')).toBeInTheDocument();
     });
   });
 });
