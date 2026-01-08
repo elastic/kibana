@@ -8,11 +8,10 @@
  */
 
 /*
- * AUTO-GENERATED FILE - DO NOT EDIT
+ * OVERRIDE FILE
  *
  * Source: elasticsearch-specification repository, operations: search, search-1, search-2, search-3
- *
- * To regenerate: node scripts/generate_workflow_es_contracts.js
+ * This override is used to add the `index` parameter to the paramsSchema
  */
 
 import { z } from '@kbn/zod/v4';

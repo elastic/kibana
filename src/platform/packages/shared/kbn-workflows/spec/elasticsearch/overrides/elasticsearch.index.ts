@@ -8,11 +8,10 @@
  */
 
 /*
- * AUTO-GENERATED FILE - DO NOT EDIT
+ * OVERRIDE FILE
  *
  * Source: elasticsearch-specification repository, operations: index, index-1, index-2
- *
- * To regenerate: node scripts/generate_workflow_es_contracts.js
+ * This override is used to add the `document` parameter (body in OpenAPI) to the paramsSchema
  */
 
 import { z } from '@kbn/zod/v4';
@@ -178,18 +177,18 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     bodyParams: [],
   },
   paramsSchema: z.union([
-    z.object({
-      document: index_request.shape.body,
+    z.strictObject({
+      document: index_request.shape.body.optional(),
       ...getShapeAt(index_request, 'path'),
       ...getShapeAt(index_request, 'query'),
     }),
-    z.object({
-      document: index1_request.shape.body,
+    z.strictObject({
+      document: index1_request.shape.body.optional(),
       ...getShapeAt(index1_request, 'path'),
       ...getShapeAt(index1_request, 'query'),
     }),
-    z.object({
-      document: index2_request.shape.body,
+    z.strictObject({
+      document: index2_request.shape.body.optional(),
       ...getShapeAt(index2_request, 'path'),
       ...getShapeAt(index2_request, 'query'),
     }),

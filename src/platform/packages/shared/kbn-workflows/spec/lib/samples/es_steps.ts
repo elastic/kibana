@@ -65,7 +65,7 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
-    name: 'index-document',
+    name: 'index-empty-document',
     type: 'elasticsearch.index',
     with: {
       index: 'test-index',
@@ -152,7 +152,7 @@ export const ES_INVALID_SAMPLE_STEPS = [
   },
   {
     step: {
-      name: 'create-document',
+      name: 'create-document-with-extra-field',
       type: 'elasticsearch.index',
       with: {
         index: 'test-index',
@@ -163,5 +163,7 @@ export const ES_INVALID_SAMPLE_STEPS = [
         notValidField: {},
       },
     },
+    zodErrorMessage: '"Unrecognized key:',
+    diagnosticErrorMessage: 'DisallowedExtraPropWarning',
   },
 ];
