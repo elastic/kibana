@@ -10,8 +10,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from './translations';
+import { useKibana } from '../../common/lib/kibana';
 
 const PlatinumLicenseCalloutComponent: React.FC = () => {
+  const { docLinks } = useKibana().services;
+
   return (
     <EuiCallOut
       title={i18n.UPGRADE_TO_PLATINUM}
@@ -24,15 +27,12 @@ const PlatinumLicenseCalloutComponent: React.FC = () => {
         id="xpack.cases.platinumLicenseCalloutMessage"
         values={{
           appropriateLicense: (
-            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+            <EuiLink href={docLinks.links.subscriptions} target="_blank">
               {i18n.LINK_APPROPRIATE_LICENSE}
             </EuiLink>
           ),
           cloud: (
-            <EuiLink
-              href="https://www.elastic.co/cloud/elasticsearch-service/signup"
-              target="_blank"
-            >
+            <EuiLink href={docLinks.links.cloud.deploymentSignup} target="_blank">
               {i18n.LINK_CLOUD_DEPLOYMENT}
             </EuiLink>
           ),

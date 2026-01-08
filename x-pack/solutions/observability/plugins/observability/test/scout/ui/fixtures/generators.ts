@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApiServicesFixture } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout-oblt';
 import type { ApmFields, LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
 import { apm, log, timerange } from '@kbn/synthtrace-client';
+import { AxiosError } from 'axios';
 
 export const TEST_START_DATE = '2024-01-01T00:00:00.000Z';
 export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
@@ -24,10 +25,12 @@ export async function generateLogsData({
   from,
   to,
   client,
+  opts,
 }: {
   from: number;
   to: number;
   client: Pick<SynthtraceEsClient<LogDocument>, 'index'>;
+  opts?: { dataset?: string };
 }): Promise<void> {
   const range = timerange(from, to);
 
@@ -39,7 +42,7 @@ export async function generateLogsData({
         .create()
         .message('Test log message')
         .timestamp(timestamp)
-        .dataset('synth.test')
+        .dataset(opts?.dataset ?? 'synth.test')
         .namespace('default')
         .logLevel(Math.random() > 0.5 ? 'info' : 'warn')
         .defaults({
@@ -120,3 +123,41 @@ export async function generateRulesData(apiServices: ApiServicesFixture) {
     });
   }
 }
+
+/**
+ * Creates a data view in Kibana
+ */
+export const createDataView = async (
+  kbnClient: KbnClient,
+  dataViewParams: { id: string; name: string; title: string }
+) => {
+  const { id, title, name } = dataViewParams;
+
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/api/content_management/rpc/create',
+      body: {
+        contentTypeId: 'index-pattern',
+        data: {
+          fieldAttrs: '{}',
+          title,
+          timeFieldName: '@timestamp',
+          sourceFilters: '[]',
+          fields: '[]',
+          fieldFormatMap: '{}',
+          typeMeta: '{}',
+          runtimeFieldMap: '{}',
+          name,
+        },
+        options: { id },
+        version: 1,
+      },
+    });
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      return;
+    }
+    throw error;
+  }
+};
