@@ -42,6 +42,7 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = 
 > & {
   appName: string;
   useDefaultBehaviors?: boolean;
+  disableSubscribingToGlobalDataServices?: boolean;
   savedQueryId?: string;
   /**
    * Determines if saving queries is allowed within the saved query management popover (still requires privileges).
@@ -163,7 +164,8 @@ export function createSearchBar({
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
-    const { useDefaultBehaviors, allowSavingQueries } = props;
+    const { useDefaultBehaviors, allowSavingQueries, disableSubscribingToGlobalDataServices } =
+      props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
@@ -173,14 +175,17 @@ export function createSearchBar({
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({
+      disabled: disableSubscribingToGlobalDataServices,
       filters: props.filters,
       filterManager: data.query.filterManager,
     });
     const { query } = useQueryStringManager({
+      disabled: disableSubscribingToGlobalDataServices,
       query: props.query,
       queryStringManager: data.query.queryString,
     }) as { query: QT };
     const { timeRange, refreshInterval, minRefreshInterval } = useTimefilter({
+      disabled: disableSubscribingToGlobalDataServices,
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
       refreshInterval: props.refreshInterval,

@@ -237,8 +237,6 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
-  console.log('DiscoverTopNav rendered with tabId:', tabId, searchDraftUiState?.query);
-
   const onSearchDraftChange = useCallback(
     (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
@@ -288,6 +286,7 @@ export const DiscoverTopNav = ({
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
+        disableSubscribingToGlobalDataServices={true}
         dataViewPickerOverride={
           searchBarCustomization?.CustomDataViewPicker ? (
             <searchBarCustomization.CustomDataViewPicker />
