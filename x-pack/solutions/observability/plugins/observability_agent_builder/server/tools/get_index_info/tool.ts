@@ -12,6 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { castArray } from 'lodash';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import dedent from 'dedent';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -21,6 +22,10 @@ import type {
 import { getIndexInfoHandler, type IndexInfoResult } from './get_index_info_handler';
 import { getIndexFieldsHandler, type IndexFieldsResult } from './get_index_fields_handler';
 import { getFieldValuesHandler, type MultiFieldValuesResult } from './get_field_values_handler';
+import { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from '../get_trace_metrics/tool';
+import { OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID } from '../get_metric_change_points/tool';
+import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '../get_hosts/tool';
+import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '../get_log_categories/tool';
 
 export const OBSERVABILITY_GET_INDEX_INFO_TOOL_ID = 'observability.get_index_info';
 
@@ -33,45 +38,45 @@ const getIndexInfoSchema = z.object({
     .string()
     .optional()
     .describe(
-      `Index pattern to get fields from. Supports cross-cluster search.
+      dedent(`Index pattern to get fields from. Supports cross-cluster search.
 
 Examples:
 - "logs-*" — local cluster
 - "cluster_one:logs-*" — specific remote cluster
 - "*:logs-*,logs-*" — all remote and local clusters
 
-When omitted, returns available data sources (index patterns) for observability data.`
+When omitted, returns available data sources (index patterns) for observability data.`)
     ),
   field: z
     .union([z.string(), z.array(z.string()).max(10)])
     .optional()
     .describe(
-      `Field(s) to get values for. Requires 'index'.
+      dedent(`Field(s) to get values for. Requires 'index' parameter.
 
-For keyword fields: returns up to 50 distinct values.
-For numeric fields: returns min/max range.
-For date fields: returns min/max date range.
+        For keyword fields: returns up to 50 distinct values.
+        For numeric fields: returns min/max range.
+        For date fields: returns min/max date range.
 
-Examples:
-- "service.name" → { type: "keyword", values: ["payment", "order"] }
-- "http.response.status_code" → { type: "numeric", min: 200, max: 503 }
-- "@timestamp" → { type: "date", min: "2024-01-01T00:00:00Z", max: "2024-01-07T23:59:59Z" }`
+        Examples:
+        - "service.name" → { type: "keyword", values: ["payment", "order"] }
+        - "http.response.status_code" → { type: "numeric", min: 200, max: 503 }
+        - "@timestamp" → { type: "date", min: "2024-01-01T00:00:00Z", max: "2024-01-07T23:59:59Z" }`)
     ),
   userIntentDescription: z
     .string()
     .optional()
     .describe(
-      `Describe the user's investigation intent to filter fields to only relevant ones.
+      dedent(`Describe the user's investigation intent to filter fields to only relevant ones. Requires "index" parameter.
 
-Include:
-- The symptom or problem (latency, errors, OOM, crashes)
-- Entities involved (service name, host, container, pod)
-- What aspect to analyze (performance, errors, resources, dependencies)
+        Include:
+        - The symptom or problem (latency, errors, OOM, crashes)
+        - Entities involved (service name, host, container, pod)
+        - What aspect to analyze (performance, errors, resources, dependencies)
 
-Transform user questions into focused investigation descriptions:
-- User: "Why is checkout slow?" → "High latency in checkout service - need transaction duration and service fields"
-- User: "Pod keeps crashing" → "Pod crashes and restarts - need kubernetes, container, and error fields"
-- User: "Memory issues on prod" → "Memory pressure on production hosts - need memory metrics and host fields"`
+        Transform user questions and conversation context into intent descriptions:
+        - User: "Why is checkout slow?" → "High latency in checkout service - need transaction duration and service fields"
+        - User: "Pod keeps crashing" → "Pod crashes and restarts - need kubernetes, container, and error fields"
+        - User: "Memory issues on prod" → "Memory pressure on production hosts - need memory metrics and host fields"`)
     ),
 });
 
@@ -90,32 +95,27 @@ export function createGetIndexInfoTool({
   const toolDefinition: BuiltinToolDefinition<typeof getIndexInfoSchema> = {
     id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
     type: ToolType.builtin,
-    description: `Returns index patterns, fields, and field values from the user's Elasticsearch cluster.
+    description:
+      dedent(`**IMPORTANT: Call this tool FIRST before using tools that require field names as parameters.**
 
-**Three call patterns:**
+        Tools like \`${OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID}\`, \`${OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID}\`, \`${OBSERVABILITY_GET_HOSTS_TOOL_ID}\`, and \`${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}\` accept field names in parameters like 'groupBy', 'kqlFilter', and 'aggregation.field'. Calling get_index_info first ensures you are aware of the fields that exist in the cluster and avoid using non-existent fields.
 
-1. **get_index_info()** — Get data sources
-   Returns categorized index patterns: { apm: {...}, logs: [...], metrics: [...] }
-   Use FIRST to know which indices to query.
+        **Three call patterns:**
 
-2. **get_index_info({ index: "logs-*", userIntentDescription?: "..." })** — Get fields from index
-   Returns fields grouped by type (keyword, text, long, date, etc.)
-   Pass 'userIntentDescription' with the investigation goal to get only relevant fields.
-   Use to find available fields for filtering or aggregation.
+        1. **get_index_info()** — Get data sources and curated fields
+          Returns index patterns for observability data (logs, metrics, traces) and commonly-used fields.
 
-3. **get_index_info({ index, field: "service.name" })** — Get field values
-   Returns distinct values for keyword fields, or min/max range for numeric/date fields.
-   Use before building filters to know valid values.
+        2. **get_index_info({ index, userIntentDescription? })** — Get all fields from index
+          Returns fields and their type (keyword, text, long, date, etc.)
+          Pass 'userIntentDescription' to filter to relevant fields only.
 
-**When to use:**
-- Before constructing queries to validate field names exist
-- To discover valid values for building filters
-- To get index patterns for observability data
-- With 'userIntentDescription' to get fields relevant to the investigation
+        3. **get_index_info({ index, field })** — Get field values
+          Returns distinct values for keyword fields, or min/max range for numeric/date fields.
+          Use before building filters to know valid values.
 
-**When NOT to use:**
-- For full-text log search (use get_correlated_logs)
-- For pre-defined entities (use get_services, get_hosts)`,
+        **Examples:**
+        - Before calling \`${OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID}\` with groupBy, call get_index_info() to discover which fields exist
+        - Before calling \`${OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID}\` with aggregation.field, call get_index_info({ index: "metrics-*", userIntentDescription: "..." }) to find numeric fields to aggregate on`),
     schema: getIndexInfoSchema,
     tags: ['observability', 'index', 'fields'],
     availability: {
