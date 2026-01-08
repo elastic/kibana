@@ -51,7 +51,7 @@ describe('Inline Cast Autocomplete Suggestions', () => {
 
   it('suggests operators after inline cast', async () => {
     const { assertSuggestions } = await setup('^');
-    await assertSuggestions('FROM index_a | WHERE false::boolean ^', [
+    await assertSuggestions('FROM index_a | WHERE "false"::boolean ^', [
       '| ',
       ...getFunctionSignaturesByReturnType(
         Location.WHERE,
