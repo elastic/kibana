@@ -30,7 +30,7 @@ import { resolveTimeShift } from './time_shift_utils';
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 // Need a more complex logic for decimals percentiles
 
-export function getESQLForLayer(
+export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
   indexPattern: IndexPattern,

@@ -44,8 +44,8 @@ import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_sessi
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
-import { useEsqlConversion } from './use_esql_conversion';
-import { convertToEsql } from './convert_to_esql';
+import { useEsqlConversionCheck } from './use_esql_conversion_check';
+import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -320,7 +320,7 @@ export function LensEditConfigurationFlyout({
   }, [isDevMode, textBasedMode]);
 
   const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
-    useEsqlConversion(
+    useEsqlConversionCheck(
       showConvertToEsqlButton,
       { datasourceId, layerIds, visualization, activeVisualization },
       { framePublicAPI, coreStart, startDependencies }
@@ -333,7 +333,7 @@ export function LensEditConfigurationFlyout({
 
   const handleConvertToEsql = useCallback(
     ({ layersToConvert }: { layersToConvert: string[] }) => {
-      const newAttributes = convertToEsql({
+      const newAttributes = convertFormBasedToTextBasedLayer({
         layersToConvert,
         attributes,
         visualizationState: visualization.state,

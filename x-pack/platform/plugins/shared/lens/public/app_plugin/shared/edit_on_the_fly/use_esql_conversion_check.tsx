@@ -18,7 +18,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 
-import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
+import { generateEsqlQuery } from '../../../datasources/form_based/generate_esql_query';
 import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -43,7 +43,7 @@ const getEsqlConversionDisabledSettings = (
   convertibleLayers: [],
 });
 
-export const useEsqlConversion = (
+export const useEsqlConversionCheck = (
   showConvertToEsqlButton: boolean,
   {
     datasourceId,
@@ -130,7 +130,7 @@ export const useEsqlConversion = (
 
     let esqlLayer;
     try {
-      esqlLayer = getESQLForLayer(
+      esqlLayer = generateEsqlQuery(
         esAggEntries,
         singleLayer,
         framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
