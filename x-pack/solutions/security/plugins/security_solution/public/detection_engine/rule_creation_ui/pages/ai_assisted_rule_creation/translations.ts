@@ -97,3 +97,11 @@ export const AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE = i18n.translate(
     defaultMessage: 'The AI-assisted rule creation process was cancelled.',
   }
 );
+
+export const AI_ASSISTED_RULE_CREATION_PROMPT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.promptPlaceholder',
+  {
+    defaultMessage:
+      'What do you want to detect or check, and in which service, system, or technology...',
+  }
+);

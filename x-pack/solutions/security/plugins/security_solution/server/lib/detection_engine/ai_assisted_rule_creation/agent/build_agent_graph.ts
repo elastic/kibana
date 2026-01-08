@@ -15,7 +15,6 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { RuleCreationState } from './state';
 import { RuleCreationAnnotation } from './state';
@@ -53,18 +52,12 @@ export interface GetBuildAgentParams {
   inference: InferenceServerStart;
   logger: Logger;
   request: KibanaRequest;
-  createLlmInstance: () => Promise<InferenceChatModel>;
   savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
-  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null;
   events?: ToolEventEmitter;
 }
 
-/**
- * Creates a build agent graph that uses the agent_builder ES|QL generation tool.
- * This is a copy of the iterative agent graph but uses the new generateEsqlWithToolNode
- * which leverages the platform's agent_builder generateEsql tool.
- */
+
 export const getBuildAgent = async ({
   esClient,
   connectorId,
@@ -74,22 +67,18 @@ export const getBuildAgent = async ({
   model,
   savedObjectsClient,
   rulesClient,
-  kbDataClient,
   events,
 }: GetBuildAgentParams) => {
-  // This sub-graph uses the new implementation with agent_builder generateEsql tool
-  const esqlQuerySubGraph = await getEsqlQueryGraphWithTool({
-    model,
-    esClient,
-    connectorId,
-    inference,
-    logger,
-    request,
-    events,
-  });
-
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
-    .addNode(ESQL_QUERY_CREATION, esqlQuerySubGraph)
+    .addNode(ESQL_QUERY_CREATION, await getEsqlQueryGraphWithTool({
+      model,
+      esClient,
+      connectorId,
+      inference,
+      logger,
+      request,
+      events,
+    }))
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))

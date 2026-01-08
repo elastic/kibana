@@ -8,6 +8,7 @@
 import { EuiTextArea } from '@elastic/eui';
 import React, { useCallback, forwardRef } from 'react';
 import { css } from '@emotion/react';
+import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   setUserPrompt: (value: string) => void;
@@ -51,13 +52,13 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         `}
         className="eui-scrollBar"
         inputRef={ref}
-        id={'prompt-textarea'}
-        data-test-subj={'prompt-textarea'}
+        id="prompt-textarea"
+        data-test-subj="prompt-textarea"
         fullWidth
         autoFocus
         resize="none"
         disabled={isDisabled}
-        placeholder="What do you want to detect or check, and in which service, system, or technology..."
+        placeholder={i18n.AI_ASSISTED_RULE_CREATION_PROMPT_PLACEHOLDER}
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}

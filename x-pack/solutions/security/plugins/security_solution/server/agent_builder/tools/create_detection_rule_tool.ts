@@ -81,12 +81,6 @@ export function createDetectionRuleTool(
           };
         }
 
-        // Create LLM instance factory
-        const createLlmInstance = async () => {
-          return modelConfig.chatModel;
-        };
-
-        // Get required services
         const [coreStart, startPlugins] = await core.getStartServices();
         const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
 
@@ -95,7 +89,6 @@ export function createDetectionRuleTool(
           model,
           logger,
           inference: startPlugins.inference,
-          createLlmInstance,
           connectorId,
           request,
           esClient: esClient.asCurrentUser,
@@ -120,7 +113,7 @@ export function createDetectionRuleTool(
           };
         }
 
-        logger.debug(`Successfully created detection rule: ${result.rule.name || 'Unnamed rule'}`);
+        logger.debug(`Successfully created detection rule: ${result.rule.name}`);
 
         return {
           results: [
