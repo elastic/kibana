@@ -60,10 +60,6 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        include:
-          - language: javascript
-            build-mode: none
-            query: codeql/javascript-queries:AlertSuppression.ql
     steps:
     - name: Checkout repository
       uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -83,7 +79,7 @@ jobs:
         output: sarif-results
 
     - name: Dismiss alerts
-      uses: advanced-security/dismiss-alerts@v2
+      uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
       with:

@@ -19,10 +19,6 @@ jobs:
       matrix:
         language: [ 'javascript' ]
         branch: [ 'main', '8.19' ]
-        include:
-          - language: javascript
-            build-mode: none
-            query: codeql/javascript-queries:AlertSuppression.ql
 
     steps:
     - name: Checkout repository
@@ -53,6 +49,7 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+      id: analyze
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
@@ -60,6 +57,14 @@ jobs:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
         sha: ${{ env.CHECKOUT_SHA }}
+        output: sarif-results
+    - name: Dismiss alerts
+      uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
+      env:
+        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+      with:
+        sarif-id: ${{ steps.analyze.outputs.sarif-id }}
+        sarif-file: sarif-results/${{ matrix.language }}.sarif
   alert:
     name: Alert
     runs-on: ubuntu-latest
