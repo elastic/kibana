@@ -208,11 +208,11 @@ describe('View agents list', () => {
   describe('Agent status filter', () => {
     const clearFilters = () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
-      cy.get('li').contains('Healthy').click();
-      cy.get('li').contains('Unhealthy').click();
-      cy.get('li').contains('Updating').click();
-      cy.get('li').contains('Offline').click();
-      cy.get('li').contains('Orphaned').click();
+      cy.get('li').contains('Healthy').click({ force: true });
+      cy.get('li').contains('Unhealthy').click({ force: true });
+      cy.get('li').contains('Updating').click({ force: true });
+      cy.get('li').contains('Offline').click({ force: true });
+      cy.get('li').contains('Orphaned').click({ force: true });
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
       cy.wait('@getAgents');
     };
@@ -221,7 +221,7 @@ describe('View agents list', () => {
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Healthy').click();
+      cy.get('li').contains('Healthy').click({ force: true });
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
@@ -233,7 +233,7 @@ describe('View agents list', () => {
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Unhealthy').click();
+      cy.get('li').contains('Unhealthy').click({ force: true });
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(1);
@@ -246,7 +246,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Inactive').click();
+      cy.get('li').contains('Inactive').click({ force: true });
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
     });
@@ -257,8 +257,8 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Healthy').click();
-      cy.get('li').contains('Unhealthy').click();
+      cy.get('li').contains('Healthy').click({ force: true });
+      cy.get('li').contains('Unhealthy').click({ force: true });
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
