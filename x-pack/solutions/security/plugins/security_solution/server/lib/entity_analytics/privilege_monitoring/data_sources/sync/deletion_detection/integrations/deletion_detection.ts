@@ -10,21 +10,13 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ErrorCause } from 'elasticsearch-8.x/lib/api/types';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import { createSyncMarkersService } from '../sync_markers/sync_markers';
-import { findStaleUsersFactory } from '../../stale_users';
-import { timeStampsAreValid } from './utils';
+import { createSyncMarkersService } from '../../sync_markers';
+import { findStaleUsersFactory } from '../stale_users';
 import { createBulkUtilsService } from '../../../bulk';
 import { getErrorFromBulkResponse } from '../../utils';
-import { buildFindUsersSearchBody } from './queries';
-
-export type AfterKey = Record<string, string> | undefined;
-
-export interface StaleUsersAggregations {
-  users?: {
-    after_key?: AfterKey;
-    buckets: Array<{ key: { username: string }; doc_count: number }>;
-  };
-}
+import { buildFindUsersSearchBodyWithTimeStamps, getAllUserNamesInAggregation } from '../queries';
+import { DEFAULT_COMPOSITE_PAGE_SIZE } from '../constants';
+import { timeStampsAreValid } from './utils';
 
 export const createDeletionDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
@@ -66,12 +58,18 @@ export const createDeletionDetectionService = (
       // Proceed with deletion detection
       dataClient.log('debug', `Full sync detected for ${source.id}. Running deletion detection...`);
       // get all users in the integrations docs between the two timestamps
-      const allIntegrationsUserNames = await getUsersInFullSync({
-        source,
-        startedEventTimeStamp,
-        completedEventTimeStamp,
+      const allIntegrationsUserNames = await getAllUserNamesInAggregation({
+        dataClient,
+        indexPattern: source.indexPattern,
+        buildQuery: ({ afterKey, pageSize }) =>
+          buildFindUsersSearchBodyWithTimeStamps({
+            timeGte: startedEventTimeStamp,
+            timeLt: completedEventTimeStamp,
+            afterKey,
+            pageSize,
+          }),
+        pageSize: DEFAULT_COMPOSITE_PAGE_SIZE,
       });
-
       // get all users in the privileged index for this source that are not in integrations docs
       const staleUsers = await findStaleUsers(
         source.id,
@@ -98,45 +96,11 @@ export const createDeletionDetectionService = (
       if (failures.length > 0) {
         dataClient.log(
           'error',
-          `${failures.length} errors upserting users with bulk operations.
+          `${failures.length} errors soft deleting users with bulk operations.
           The first error is: ${JSON.stringify(failures[0])}`
         );
       }
     }
-  };
-
-  const getUsersInFullSync = async ({
-    completedEventTimeStamp,
-    startedEventTimeStamp,
-    source,
-  }: {
-    completedEventTimeStamp: string;
-    startedEventTimeStamp: string;
-    source: MonitoringEntitySource;
-  }) => {
-    let afterKey: AfterKey | undefined;
-    const pageSize = 100;
-    let fetchMore = true;
-
-    const usersToDelete: string[] = [];
-    while (fetchMore) {
-      const privilegedMonitoringUsers = await esClient.search<never, StaleUsersAggregations>({
-        index: source.indexPattern,
-        ...buildFindUsersSearchBody({
-          timeGte: startedEventTimeStamp,
-          timeLt: completedEventTimeStamp,
-          afterKey,
-          pageSize,
-        }),
-      });
-      const buckets = privilegedMonitoringUsers?.aggregations?.users?.buckets;
-      if (buckets) {
-        usersToDelete.push(...buckets.map((bucket) => bucket.key.username));
-      }
-      afterKey = privilegedMonitoringUsers.aggregations?.users?.after_key;
-      fetchMore = Boolean(afterKey);
-    }
-    return usersToDelete;
   };
 
   return { deletionDetection };
