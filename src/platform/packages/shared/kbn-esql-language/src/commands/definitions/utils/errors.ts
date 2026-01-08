@@ -44,6 +44,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'unknownColumnWarning':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownColumnWarning', {
+          defaultMessage: `"{name}" column isn't mapped in any searched indices. If you are not intentionally referencing an unmapped field, check that the field exists or that it is spelled correctly in your query.`,
+          values: { name: out.name },
+        }),
+        type: 'warning',
+      };
     case 'unknownIndex':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownIndex', {
@@ -475,6 +483,12 @@ export const errors = {
   unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
     tagSemanticError(
       errors.byId('unknownColumn', column.location, { name: column.name }),
+      'getColumnsFor'
+    ),
+
+  unknownColumnWarning: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownColumnWarning', column.location, { name: column.name }),
       'getColumnsFor'
     ),
 

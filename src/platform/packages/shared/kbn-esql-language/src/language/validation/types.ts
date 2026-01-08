@@ -8,7 +8,7 @@
  */
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLMessage, EditorError } from '../../types';
-import type { ESQLColumnData } from '../../commands/registry/types';
+import type { ESQLColumnData, UnmappedFieldsTreatment } from '../../commands/registry/types';
 import type { ESQLPolicy } from '../../commands/registry/types';
 
 export interface ReferenceMaps {
@@ -17,6 +17,7 @@ export interface ReferenceMaps {
   policies: Map<string, ESQLPolicy>;
   query: string;
   joinIndices: IndexAutocompleteItem[];
+  unmappedFieldsTreatment?: UnmappedFieldsTreatment;
 }
 
 export interface ValidationResult {

@@ -240,6 +240,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string | number };
   };
+  unknownColumnWarning: {
+    message: string;
+    type: { name: string | number };
+  };
   unknownFunction: {
     message: string;
     type: { name: string };

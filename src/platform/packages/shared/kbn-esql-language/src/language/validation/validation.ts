@@ -19,6 +19,7 @@ import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
+import { getUnmappedFieldsTreatment } from '../../commands/definitions/utils/settings';
 
 /**
  * ES|QL validation public API
@@ -115,6 +116,8 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
+  const unmappedFieldsTreatment = getUnmappedFieldsTreatment(headerCommands);
+
   /**
    * Even though we are validating single commands, we work with subqueries.
    *
@@ -140,6 +143,7 @@ async function validateAst(
       policies: availablePolicies,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
+      unmappedFieldsTreatment,
     };
 
     const commandMessages = validateCommand(currentCommand, references, rootCommands, {

@@ -153,6 +153,7 @@ export interface ICommandContext {
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
   isCursorInSubquery?: boolean;
+  unmappedFieldsTreatment?: UnmappedFieldsTreatment;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -241,4 +242,10 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+}
+
+export enum UnmappedFieldsTreatment {
+  FAIL = 'FAIL',
+  NULLIFY = 'NULLIFY',
+  LOAD = 'LOAD',
 }

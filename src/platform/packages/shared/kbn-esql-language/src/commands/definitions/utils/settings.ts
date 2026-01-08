@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { withAutoSuggest } from '../../../..';
-import type { ISuggestionItem } from '../../registry/types';
+import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../types';
+import { isBinaryExpression, isIdentifier, withAutoSuggest } from '../../../..';
+import { UnmappedFieldsTreatment, type ISuggestionItem } from '../../registry/types';
 import { SuggestionCategory } from '../../../shared/sorting/types';
 import { settings } from '../generated/settings';
 
@@ -30,4 +31,50 @@ export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionI
         })
       )
   );
+}
+
+/**
+ * Given a SET command, it returs the name and the value of the setting, or undefined if some is not present.
+ */
+export function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
+  settingName?: string;
+  settingValue?: string;
+} {
+  const settingArg = settingCommand.args[0];
+  const leftSide = isBinaryExpression(settingArg) ? settingArg.args[0] : undefined;
+  const rigthSide = isBinaryExpression(settingArg) ? settingArg.args[1] : undefined;
+
+  const settingName = isIdentifier(leftSide) ? leftSide.text : undefined;
+  const settingValue = isIdentifier(rigthSide) ? rigthSide.text : undefined;
+
+  return {
+    settingName,
+    settingValue,
+  };
+}
+
+/**
+ * Checks the headers commmands looking for an unmapped_fields setting and returns its treatment value.
+ * Default is FAIL.
+ */
+export function getUnmappedFieldsTreatment(
+  headers: ESQLAstHeaderCommand[]
+): UnmappedFieldsTreatment {
+  let unmappedFieldsTreatment: UnmappedFieldsTreatment = UnmappedFieldsTreatment.FAIL;
+  headers.forEach((comand) => {
+    if (comand.name.toLowerCase() === 'set') {
+      const { settingName, settingValue } = getSettingData(comand as ESQLAstSetHeaderCommand);
+      if (settingName === 'unmapped_fields') {
+        switch (settingValue) {
+          case 'NULLIFY':
+            unmappedFieldsTreatment = UnmappedFieldsTreatment.NULLIFY;
+            break;
+          case 'LOAD':
+            unmappedFieldsTreatment = UnmappedFieldsTreatment.LOAD;
+            break;
+        }
+      }
+    }
+  });
+  return unmappedFieldsTreatment;
 }

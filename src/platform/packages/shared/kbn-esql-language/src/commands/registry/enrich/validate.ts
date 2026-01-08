@@ -66,7 +66,7 @@ export const validate = (
       if (isAssignment(arg) && Array.isArray(arg.args[1]) && isColumn(arg.args[1][0])) {
         const column = arg.args[1][0];
         if (!policy.enrichFields.includes(column.parts.join('.'))) {
-          messages.push(errors.unknownColumn(column));
+          messages.push(errors.unknownColumn(column)); // HD
         }
       }
     });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
-import type { ICommandContext } from '../../../registry/types';
+import { UnmappedFieldsTreatment, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
 import { isParametrized } from '../../../../ast/is';
@@ -28,8 +28,14 @@ export class ColumnValidator {
   ) {}
 
   validate(): ESQLMessage[] {
+    const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
+
     if (!this.exists) {
-      return [errors.unknownColumn(this.column)];
+      if (unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
+        return [errors.unknownColumn(this.column)];
+      } else {
+        return [errors.unknownColumnWarning(this.column)];
+      }
     }
 
     return [];
