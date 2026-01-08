@@ -15,7 +15,7 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerDashboardAgent } from './register_agent';
-import { createDashboardTool, updateDashboardTool } from './tools';
+import { updateDashboardTool, buildDashboardTool } from './tools';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
 
@@ -75,7 +75,7 @@ export class DashboardAgentPlugin
     }
 
     setupDeps.agentBuilder.tools.register(
-      createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
+      buildDashboardTool({
         dashboardLocator,
         spaces: startDeps.spaces,
       })

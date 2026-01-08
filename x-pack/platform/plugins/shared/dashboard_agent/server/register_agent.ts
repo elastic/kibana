@@ -26,66 +26,43 @@ export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
       research: {
         instructions: `## Dashboard Tools
 
-- ${dashboardTools.createDashboard}: Creates a new dashboard with visualization panels
-- ${dashboardTools.updateDashboard}: Modifies an existing dashboard
-- ${platformCoreTools.createVisualization}: Generates visualization configurations for dashboard panels
+- ${dashboardTools.buildDashboard}: Build a complete dashboard from a natural language description
+- ${dashboardTools.updateDashboard}: Modify an existing saved dashboard
 
 ## Creating a Dashboard
 
-When the user asks to create a dashboard:
+Call ${dashboardTools.buildDashboard} with the user's high-level intent. The tool handles everything automatically:
+- Index discovery and field mapping
+- Visualization planning based on available data
+- Panel creation and live preview
 
-1. **Discover data first** - Before creating any visualizations, you MUST identify what data exists:
-   - Use ${platformCoreTools.listIndices} to find relevant indices
-   - Use ${platformCoreTools.getIndexMapping} to discover actual field names
-   - If no relevant data exists, inform the user and suggest what data IS available
+Parameters:
+- \`query\`: The user's intent (e.g., "server metrics", "log analysis"). Do NOT pre-plan specific visualizations - the tool does this based on actual fields.
+- \`title\` (optional): Dashboard title
+- \`description\` (optional): Dashboard description
+- \`index\` (optional): Only if already known from prior conversation
 
-2. **Create visualizations based on real data** - Call ${platformCoreTools.createVisualization} for each panel:
-   - The \`query\` parameter MUST reference actual index names and field names you discovered
-   - Example: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
-   - Pass \`index\` when you know the target index pattern to avoid extra discovery work (improves performance)
-   - Pass \`esql\` if you have a pre-generated query (improves performance)
-   - Pass \`chartType\` (Metric, Gauge, Tagcloud, or XY) to skip chart type detection
-   - After ${platformCoreTools.createVisualization} returns, save the returned \`tool_result_id\` - you will pass this as a panel reference to ${dashboardTools.createDashboard} (preferred to reduce tokens)
-     - Example result structure:
-       \`\`\`
-       {
-         "type": "visualization",
-         "tool_result_id": "...",
-         "data": {
-           "query": "...",
-           "visualization": "<VISUALIZATION_CONFIG>",
-           "chart_type": "...",
-           "esql": "..."
-         }
-       }
-       \`\`\`
+### Example
 
-3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
-   - \`title\`: Dashboard title
-   - \`description\`: Dashboard description
-   - \`panels\`: Array of panel definitions, either:
-     - the visualization configs (from \`data.visualization\`), OR
-     - the visualization \`tool_result_id\` values from previous ${platformCoreTools.createVisualization} calls (preferred)
-   - \`markdownContent\`: A markdown summary that will be displayed at the top of the dashboard
-     - This should describe what the dashboard shows and provide helpful context
-     - Use markdown formatting (headers, lists, bold text) to make it readable
-     - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends over time\\n- **Memory usage** patterns\\n- **Disk I/O** performance"
+User says: "Create a dashboard for server metrics"
 
+\`\`\`
+buildDashboard(
+  query: "server metrics",
+  title: "Server Metrics Dashboard"
+)
+\`\`\`
 
-**CRITICAL RULES:**
-- NEVER call ${platformCoreTools.createVisualization} without first discovering what data exists
-- NEVER invent index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
-- Only when creating a dashboard (i.e. the user asked for a dashboard): ALWAYS call ${dashboardTools.createDashboard} to complete the request
+The tool will discover the index, analyze available fields, and plan appropriate visualizations automatically.
 
+## Updating an Existing Dashboard
 
-## Updating a Dashboard
-
-When updating existing dashboards:
-- Use ${dashboardTools.updateDashboard} to modify existing dashboards
-- You may need to call ${platformCoreTools.createVisualization} for new panels to add
-- ALWAYS pass \`panels\` containing the full set of panels you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
-  - Panels can be full visualization configs, or visualization \`tool_result_id\` references from previous ${platformCoreTools.createVisualization} calls (preferred)
-- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
+When modifying existing saved dashboards:
+- Use ${dashboardTools.updateDashboard} to modify the dashboard
+- Call ${platformCoreTools.createVisualization} for any new panels to add
+- ALWAYS pass \`panels\` containing the FULL set of panels you want in the dashboard (not just new ones) - this tool replaces all existing visualization panels
+  - Panels can be \`tool_result_id\` references from ${platformCoreTools.createVisualization} calls (preferred) or full visualization configs
+- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel
 `,
       },
       answer: {
@@ -94,7 +71,7 @@ When updating existing dashboards:
       tools: [
         {
           tool_ids: [
-            dashboardTools.createDashboard,
+            dashboardTools.buildDashboard,
             dashboardTools.updateDashboard,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createDashboardTool } from './create_dashboard';
 export { updateDashboardTool } from './update_dashboard';
+export { buildDashboardTool, type BuildDashboardToolDependencies } from './build_dashboard';

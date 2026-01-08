@@ -6,3 +6,6 @@
  */
 
 export { createVisualizationTool } from './create_visualization';
+export { createVisualizationGraph } from './graph_lens';
+export { guessChartType } from './guess_chart_type';
+export { getSchemaForChartType } from './schema_utils';

@@ -25,3 +25,8 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export {
+  createVisualizationGraph,
+  guessChartType,
+  getSchemaForChartType,
+} from './tools/create_visualization';

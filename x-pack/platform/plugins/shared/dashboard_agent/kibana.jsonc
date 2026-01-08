@@ -14,7 +14,8 @@
     ],
     "requiredPlugins": [
       "agentBuilder",
-      "dashboard"
+      "dashboard",
+      "lens"
     ],
     "optionalPlugins": [
       "share",

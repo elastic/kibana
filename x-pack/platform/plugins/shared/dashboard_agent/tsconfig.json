@@ -10,6 +10,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-platform-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/zod",
     "@kbn/spaces-plugin",
@@ -18,6 +20,7 @@
     "@kbn/lens-common-2",
     "@kbn/share-plugin",
     "@kbn/dashboard-markdown",
+    "@kbn/langchain"
   ],
   "exclude": ["target/**/*"]
 }

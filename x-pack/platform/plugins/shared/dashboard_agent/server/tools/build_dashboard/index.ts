@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export { DASHBOARD_NAMESPACE, dashboardTools } from './constants';
-export {
-  DASHBOARD_EVENTS,
-  type DashboardSessionCreatedData,
-  type DashboardPanelAddedData,
-  type DashboardFinalizedData,
-} from './events';
+export { buildDashboardTool, type BuildDashboardToolDependencies } from './build_dashboard';

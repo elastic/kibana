@@ -9,25 +9,11 @@ import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import parse from 'joi-to-json';
-
-import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
-import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
-import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
-
-const metricSchema = parse(esqlMetricState.getSchema()) as object;
-const gaugeSchema = parse(gaugeStateSchemaESQL.getSchema()) as object;
-const tagcloudSchema = parse(tagcloudStateSchemaESQL.getSchema()) as object;
-const xySchema = parse(xyStateSchema.getSchema()) as object;
-const regionMapSchema = parse(regionMapStateSchemaESQL.getSchema()) as object;
-const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
+import { getSchemaForChartType } from './schema_utils';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -105,21 +91,7 @@ This tool will:
 
         // Step 2: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        // Select appropriate schema based on chart type
-        let schema: object;
-        if (selectedChartType === SupportedChartType.Gauge) {
-          schema = gaugeSchema;
-        } else if (selectedChartType === SupportedChartType.Tagcloud) {
-          schema = tagcloudSchema;
-        } else if (selectedChartType === SupportedChartType.XY) {
-          schema = xySchema;
-        } else if (selectedChartType === SupportedChartType.RegionMap) {
-          schema = regionMapSchema;
-        } else if (selectedChartType === SupportedChartType.Heatmap) {
-          schema = heatmapSchema;
-        } else {
-          schema = metricSchema;
-        }
+        const schema = getSchemaForChartType(selectedChartType);
 
         // Create and invoke the validation retry graph
         const graph = createVisualizationGraph(model, logger, events, esClient);
