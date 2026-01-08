@@ -67,6 +67,9 @@ describe('EndpointActionsClient', () => {
     // @ts-expect-error mocking this for testing purposes
     classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
       true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement =
+      true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -707,6 +710,50 @@ describe('EndpointActionsClient', () => {
         }),
         expect.anything()
       );
+    });
+  });
+
+  describe('#getCustomScripts()', () => {
+    it.each(['responseActionsEndpointRunScript', 'responseActionsScriptLibraryManagement'])(
+      'should error if feature flag [%s] is disabled',
+      async (featureFlag) => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures[featureFlag] = false;
+
+        await expect(endpointActionsClient.getCustomScripts()).rejects.toThrow(
+          `Elastic Defend runscript operation is not enabled`
+        );
+      }
+    );
+
+    it('should return list of scripts', async () => {
+      const expectedScriptResponse = ScriptsLibraryMock.generateScriptEntry();
+
+      await expect(endpointActionsClient.getCustomScripts()).resolves.toEqual({
+        data: [
+          {
+            id: expectedScriptResponse.id,
+            name: expectedScriptResponse.name,
+            description: expectedScriptResponse.description ?? '',
+            meta: expectedScriptResponse,
+          },
+        ],
+      });
+    });
+
+    it('should support filtering by OS Type', async () => {
+      await expect(endpointActionsClient.getCustomScripts({ osType: 'linux' })).resolves.toEqual(
+        expect.any(Object)
+      );
+
+      expect(
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').list as jest.Mock
+      ).toHaveBeenCalledWith({
+        kuery: 'platform: "linux"',
+        pageSize: 10000,
+        sortDirection: 'asc',
+        sortField: 'name',
+      });
     });
   });
 
