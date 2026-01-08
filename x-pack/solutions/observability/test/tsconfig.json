@@ -92,10 +92,11 @@
     "@kbn/serverless-observability-settings",
     "@kbn/streams-schema",
     "@kbn/data-quality",
-    "@kbn/onechat-common",
-    "@kbn/onechat-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-plugin",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/observability-agent-builder-plugin",
+    "@kbn/maintenance-windows-plugin",
     "@kbn/product-doc-common"
   ]
 }

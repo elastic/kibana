@@ -8,18 +8,12 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiPortal } from '@elastic/eui';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-
-import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
@@ -28,9 +22,7 @@ import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
-  const [hasControls, setHasControls] = useState(false);
   const [
-    controlGroupApi,
     dashboardTitle,
     description,
     expandedPanelId,
@@ -39,11 +31,10 @@ export const DashboardViewport = () => {
     useMargins,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.controlGroupApi$,
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
-    dashboardInternalApi.layout$,
+    dashboardApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
@@ -70,18 +61,6 @@ export const DashboardViewport = () => {
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
-  useEffect(() => {
-    if (!controlGroupApi) {
-      return;
-    }
-    const subscription = controlGroupApi.children$.subscribe((children) => {
-      setHasControls(Object.keys(children).length > 0);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [controlGroupApi]);
-
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (
@@ -92,19 +71,6 @@ export const DashboardViewport = () => {
       })}
       css={styles.wrapper}
     >
-      {viewMode !== 'print' ? (
-        <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
-          <EmbeddableRenderer<object, ControlGroupApi>
-            key={dashboardApi.uuid}
-            hidePanelChrome={true}
-            panelProps={{ hideLoader: true }}
-            type={CONTROLS_GROUP_TYPE}
-            maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
-            getParentApi={() => dashboardApi}
-            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
-          />
-        </div>
-      ) : null}
       {fullScreenMode && (
         <EuiPortal>
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />

@@ -716,7 +716,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<Context>) => ",
+                  "<Context, {}>) => ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -724,7 +724,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+                  "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -732,7 +732,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+                  "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -740,7 +740,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+                  "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -748,7 +748,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<any>>) => void; readonly getAction: (id: string) => Promise<",
+                  "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -756,7 +756,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+                  "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -764,7 +764,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+                  "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -772,7 +772,7 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+                  "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -1252,7 +1252,7 @@
           "CommonProps",
           " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
           "EuiListGroupItemProps",
-          "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
+          "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
           "Property",
           ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => React.JSX.Element"
         ],
@@ -1272,7 +1272,7 @@
               "CommonProps",
               " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
               "EuiListGroupItemProps",
-              "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
+              "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
               "Property",
               ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
@@ -1675,7 +1675,7 @@
         "label": "useControlPanels",
         "description": [],
         "signature": [
-          "(controlPanelConfigs: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }, dataView: ",
+          "(controlPanelConfigs: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }, dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1683,7 +1683,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }) => void]"
+          " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }) => void]"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
         "deprecated": false,
@@ -1697,7 +1697,7 @@
             "label": "controlPanelConfigs",
             "description": [],
             "signature": [
-              "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
+              "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
             "deprecated": false,
@@ -3711,7 +3711,7 @@
         "label": "ControlPanels",
         "description": [],
         "signature": [
-          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
+          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
         "deprecated": false,
@@ -3802,7 +3802,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -3877,7 +3877,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -4012,7 +4012,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"rel\" | \"color\" | \"onClick\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"target\" | \"onClick\" | \"rel\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",

@@ -19,18 +19,25 @@ import type {
 } from '@kbn/storage-adapter';
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
-import { from, map, catchError } from 'rxjs';
+import { catchError, from, map } from 'rxjs';
+import { BooleanFromString } from '@kbn/zod-helpers';
+import { conflict } from '@hapi/boom';
+import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
+import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
+import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
+import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
+import type { FeatureIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/feature_identification';
+import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
-import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
+import type { StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -283,6 +290,21 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
+export type FeatureIdentificationTaskResult =
+  | {
+      status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
+    }
+  | {
+      status: 'failed';
+      error: string;
+    }
+  | ({
+      status: 'completed';
+    } & IdentifyFeaturesResult)
+  | ({
+      status: 'acknowledged';
+    } & IdentifyFeaturesResult);
+
 export const identifyFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_identify',
   options: {
@@ -292,15 +314,23 @@ export const identifyFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
+      schedule: BooleanFromString.optional(),
+      cancel: BooleanFromString.optional(),
+      acknowledge: BooleanFromString.optional(),
     }),
   }),
   handler: async ({
@@ -309,24 +339,18 @@ export const identifyFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<IdentifiedFeaturesEvent>> => {
-    const {
-      featureClient,
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-    } = await getScopedClients({
-      request,
-    });
+  }): Promise<FeatureIdentificationTaskResult> => {
+    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { connectorId: connectorIdParam, from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -335,52 +359,94 @@ export const identifyFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const [{ hits }, stream] = await Promise.all([
-      featureClient.getFeatures(name),
-      streamsClient.getStream(name),
-    ]);
-
-    const esClient = scopedClusterClient.asCurrentUser;
-
-    const boundInferenceClient = inferenceClient.bindTo({ connectorId });
-    const signal = getRequestAbortSignal(request);
-    const featureRegistry = getDefaultFeatureRegistry();
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
+    const connectorId = await resolveConnectorId({
+      connectorId: connectorIdParam,
+      uiSettingsClient,
       logger,
     });
 
-    const { featurePromptOverride, descriptionPromptOverride } =
-      await promptsConfigService.getPrompt();
+    if (params.query.schedule) {
+      try {
+        await taskClient.schedule<FeatureIdentificationTaskParams>({
+          task: {
+            type: 'streams_feature_identification',
+            id: `streams_feature_identification_${name}`,
+            space: '*',
+            stream: name,
+          },
+          params: {
+            connectorId,
+            start: start.getTime(),
+            end: end.getTime(),
+          },
+          request,
+        });
 
-    return from(
-      featureRegistry.identifyFeatures({
-        start: start.getTime(),
-        end: end.getTime(),
-        esClient,
-        inferenceClient: boundInferenceClient,
-        logger: logger.get('feature_identification'),
-        stream,
-        features: hits,
-        signal,
-        featurePromptOverride,
-        descriptionPromptOverride,
-      })
-    ).pipe(
-      map(({ features, tokensUsed }) => {
         return {
-          type: 'identified_features' as const,
-          features,
-          tokensUsed,
+          status: 'in_progress',
         };
-      }),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
+      } catch (error) {
+        if (error instanceof CancellationInProgressError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    } else if (params.query.cancel) {
+      await taskClient.cancel(`streams_feature_identification_${name}`);
+
+      return {
+        status: 'being_canceled',
+      };
+    } else if (params.query.acknowledge) {
+      try {
+        const task = await taskClient.acknowledge<
+          FeatureIdentificationTaskParams,
+          IdentifyFeaturesResult
+        >(`streams_feature_identification_${name}`);
+
+        return {
+          status: 'acknowledged',
+          ...task.task.payload,
+        };
+      } catch (error) {
+        if (error instanceof AcknowledgingIncompleteError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    }
+
+    const task = await taskClient.get<FeatureIdentificationTaskParams, IdentifyFeaturesResult>(
+      `streams_feature_identification_${name}`
     );
+
+    if (task.status === 'in_progress') {
+      if (isStale(task.created_at)) {
+        return {
+          status: 'stale',
+        };
+      }
+
+      return {
+        status: 'in_progress',
+      };
+    } else if (task.status === 'failed') {
+      return {
+        status: 'failed',
+        error: task.task.error,
+      };
+    } else if (task.status === 'completed' || task.status === 'acknowledged') {
+      return {
+        status: task.status,
+        ...task.task.payload,
+      };
+    }
+
+    return {
+      status: task.status,
+    };
   },
 });
 
@@ -399,7 +465,12 @@ export const describeStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
     }),
@@ -426,7 +497,7 @@ export const describeStreamRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { connectorId: connectorIdParam, from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -436,6 +507,12 @@ export const describeStreamRoute = createServerRoute({
         `Cannot generate stream description for ${name}, insufficient privileges`
       );
     }
+
+    const connectorId = await resolveConnectorId({
+      connectorId: connectorIdParam,
+      uiSettingsClient,
+      logger,
+    });
 
     // Get connector info for error enrichment
     const connector = await inferenceClient.getConnectorById(connectorId);

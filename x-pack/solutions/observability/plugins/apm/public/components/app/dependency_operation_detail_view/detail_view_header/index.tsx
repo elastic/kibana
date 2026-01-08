@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
 
 export function DetailViewHeader({
   backLabel,
@@ -30,7 +30,7 @@ export function DetailViewHeader({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <EuiText>{title}</EuiText>
+          <h4>{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
