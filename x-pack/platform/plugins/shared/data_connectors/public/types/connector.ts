@@ -12,7 +12,6 @@ export interface Connector {
   name: string;
   type: string;
   category: ConnectorCategory;
-  icon?: string; // For dummy connectors - EUI icon names
 }
 
 export interface Agent {

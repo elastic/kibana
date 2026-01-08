@@ -25,7 +25,10 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
-import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
+import {
+  DEFAULT_ITEMS_PER_PAGE,
+  PAGINATION_ITEMS_PER_PAGE_OPTIONS,
+} from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
 import { getConnectorIcon, toStackConnectorType } from '../../utils';
 
@@ -140,7 +143,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
 }) => {
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
   const [activePage, setActivePage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
   const handleChangeItemsPerPage = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);

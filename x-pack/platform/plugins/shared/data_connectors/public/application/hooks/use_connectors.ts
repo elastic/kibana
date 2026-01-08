@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
-import { DUMMY_CONNECTORS } from '../../data/dummy_connectors';
 import type { Connector } from '../../types/connector';
 import { DataConnectorTypesService } from '../../services';
 import { useKibana } from './use_kibana';
@@ -25,21 +24,19 @@ const transformDataSourceType = (dataTypeDefinition: DataTypeDefinition): Connec
 };
 
 /**
- * Hook to fetch and manage connectors from the Data Sources Registry and dummy data.
+ * Hook to fetch and manage connectors from the Data Sources Registry.
  *
- * - "Popular" connectors: Fetched from Data Sources Registry via /api/data_connectors/types
- * - "All" connectors: Currently dummy data (TODO: replace with proper API)
+ * All connectors are fetched from Data Sources Registry via /api/data_connectors/types
  */
 export const useConnectors = () => {
   const {
     services: { http },
   } = useKibana();
 
-  const [popularConnectors, setPopularConnectors] = useState<Connector[]>([]);
+  const [connectors, setConnectors] = useState<Connector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch popular connectors from Data Sources Registry via our plugin's routes
   useEffect(() => {
     const fetchConnectorTypes = async () => {
       setIsLoading(true);
@@ -50,8 +47,8 @@ export const useConnectors = () => {
         const connectorTypes = await service.list();
 
         // Transform connector types to our internal Connector interface
-        const connectors = connectorTypes.map(transformDataSourceType);
-        setPopularConnectors(connectors);
+        const transformedConnectors = connectorTypes.map(transformDataSourceType);
+        setConnectors(transformedConnectors);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch connector types'));
         // eslint-disable-next-line no-console
@@ -64,20 +61,8 @@ export const useConnectors = () => {
     fetchConnectorTypes();
   }, [http]);
 
-  // All connectors come from dummy data for now
-  // TODO: Replace with proper API when available
-  const allConnectors = useMemo(() => DUMMY_CONNECTORS, []);
-
-  // Combined list
-  const connectors = useMemo(
-    () => [...popularConnectors, ...allConnectors],
-    [popularConnectors, allConnectors]
-  );
-
   return {
     connectors,
-    popularConnectors,
-    allConnectors,
     isLoading,
     error,
   };

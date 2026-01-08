@@ -14,7 +14,7 @@ import type { Connector } from '../types/connector';
 /**
  * Utility function to get the appropriate icon for a connector.
  *
- * @param connector - The connector object
+ * @param connector - The connector object from Data Sources Registry
  * @param size - Icon size (default: 'l')
  * @param fallbackIcon - Fallback EUI icon name (default: 'application')
  * @returns JSX element representing the icon
@@ -36,11 +36,6 @@ export function getConnectorIcon(
         </Suspense>
       );
     }
-  }
-
-  // Then, try standard EUI icon (for dummy connectors)
-  if (connector.icon) {
-    return <EuiIcon type={connector.icon} size={size} />;
   }
 
   // Fallback: Default icon

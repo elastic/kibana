@@ -10,7 +10,6 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiSpacer,
-  EuiTitle,
   EuiTablePagination,
   EuiFlexGroup,
   EuiLoadingSpinner,
@@ -21,24 +20,27 @@ import { ConnectorCard } from './connector_card';
 import { useConnectors } from '../hooks/use_connectors';
 import { useAddConnectorFlyout } from '../hooks/use_add_connector_flyout';
 import type { Connector } from '../../types/connector';
-import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
+import {
+  DEFAULT_ITEMS_PER_PAGE,
+  PAGINATION_ITEMS_PER_PAGE_OPTIONS,
+} from '../../../common/constants';
 
 export const ConnectorsView: React.FC = () => {
-  const { popularConnectors, allConnectors, isLoading } = useConnectors();
+  const { connectors, isLoading } = useConnectors();
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
   const [activePage, setActivePage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
   const { openFlyout, flyout } = useAddConnectorFlyout({
     dataSourceType: selectedConnector?.id,
   });
 
-  const paginatedAllConnectors = useMemo(() => {
+  const paginatedConnectors = useMemo(() => {
     const start = activePage * itemsPerPage;
-    return allConnectors.slice(start, start + itemsPerPage);
-  }, [allConnectors, activePage, itemsPerPage]);
+    return connectors.slice(start, start + itemsPerPage);
+  }, [connectors, activePage, itemsPerPage]);
 
-  const pageCount = Math.ceil(allConnectors.length / itemsPerPage);
+  const pageCount = Math.ceil(connectors.length / itemsPerPage);
 
   const handleChangeItemsPerPage = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
@@ -49,7 +51,7 @@ export const ConnectorsView: React.FC = () => {
     (connector: Connector) => {
       setSelectedConnector(connector);
       // Open the flyout with the connector's action type ID
-      // For popular connectors from registry, this will be the stackConnector.type (e.g., '.notion')
+      // For connectors from registry, this will be the stackConnector.type (e.g., '.notion')
       openFlyout(connector.type);
     },
     [openFlyout]
@@ -67,7 +69,7 @@ export const ConnectorsView: React.FC = () => {
 
   return (
     <>
-      {popularConnectors.length === 0 && allConnectors.length === 0 ? (
+      {connectors.length === 0 ? (
         <EuiEmptyPrompt
           iconType="search"
           title={
@@ -87,70 +89,33 @@ export const ConnectorsView: React.FC = () => {
         />
       ) : (
         <>
-          {popularConnectors.length > 0 && (
-            <>
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('xpack.dataConnectors.connectors.popularSection', {
-                    defaultMessage: 'Popular',
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiFlexGrid columns={4} gutterSize="m">
-                {popularConnectors.map((connector) => (
-                  <EuiFlexItem key={connector.id}>
-                    <ConnectorCard
-                      connector={connector}
-                      onClick={handleConnectorClick}
-                      isDisabled={false}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-              <EuiSpacer size="xl" />
-            </>
-          )}
+          <EuiFlexGrid columns={4} gutterSize="m">
+            {paginatedConnectors.map((connector) => (
+              <EuiFlexItem key={connector.id}>
+                <ConnectorCard
+                  connector={connector}
+                  onClick={handleConnectorClick}
+                  isDisabled={false}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
 
-          {allConnectors.length > 0 && (
+          {connectors.length > itemsPerPage && (
             <>
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('xpack.dataConnectors.connectors.allSection', {
-                    defaultMessage: 'All',
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiFlexGrid columns={4} gutterSize="m">
-                {paginatedAllConnectors.map((connector) => (
-                  <EuiFlexItem key={connector.id}>
-                    <ConnectorCard
-                      connector={connector}
-                      onClick={handleConnectorClick}
-                      isDisabled={true}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-
-              {allConnectors.length > 0 && (
-                <>
-                  <EuiSpacer size="l" />
-                  <EuiTablePagination
-                    aria-label={i18n.translate('xpack.dataConnectors.connectors.paginationLabel', {
-                      defaultMessage: 'Connector pagination',
-                    })}
-                    pageCount={pageCount}
-                    activePage={activePage}
-                    onChangePage={setActivePage}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={PAGINATION_ITEMS_PER_PAGE_OPTIONS}
-                    onChangeItemsPerPage={handleChangeItemsPerPage}
-                    data-test-subj="connectorsPagination"
-                  />
-                </>
-              )}
+              <EuiSpacer size="l" />
+              <EuiTablePagination
+                aria-label={i18n.translate('xpack.dataConnectors.connectors.paginationLabel', {
+                  defaultMessage: 'Connector pagination',
+                })}
+                pageCount={pageCount}
+                activePage={activePage}
+                onChangePage={setActivePage}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={PAGINATION_ITEMS_PER_PAGE_OPTIONS}
+                onChangeItemsPerPage={handleChangeItemsPerPage}
+                data-test-subj="connectorsPagination"
+              />
             </>
           )}
         </>
