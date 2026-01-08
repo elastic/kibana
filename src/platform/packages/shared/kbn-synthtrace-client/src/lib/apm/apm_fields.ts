@@ -153,6 +153,7 @@ export type ApmFields = Fields<{
     'http.response.status_code': number;
     'kubernetes.pod.name': string;
     'kubernetes.pod.uid': string;
+    'kubernetes.namespace': string;
     'labels.name': string;
     'labels.telemetry_auto_version': string;
     'labels.lifecycle_state': string;
@@ -213,6 +214,7 @@ export type ApmFields = Fields<{
     'url.original': string;
     'url.domain': string;
     'url.full': string;
+    'url.path': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;
