@@ -113,6 +113,7 @@ export class CloudConnectedPlugin
 
     this.licenseSubscription = registerCloudConnectLicenseSync({
       savedObjects: core.savedObjects,
+      elasticsearchClient: core.elasticsearch.client.asInternalUser,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       licensing: plugins.licensing,
       logger: this.logger,

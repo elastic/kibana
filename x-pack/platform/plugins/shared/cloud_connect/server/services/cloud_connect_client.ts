@@ -14,7 +14,7 @@ import type {
   OnboardClusterResponse,
   ApiKeyValidationResult,
   SubscriptionResponse,
-  SelfManagedClusterLicense,
+  UpdateClusterRequest,
 } from '../types';
 
 export class CloudConnectClient {
@@ -198,20 +198,19 @@ export class CloudConnectClient {
   }
 
   /**
-   * Updates cluster services configuration
-   * Used to enable or disable services for a cluster
+   * Updates cluster configuration, including services and license
    */
-  async updateClusterServices(
+  async updateCluster(
     apiKey: string,
     clusterId: string,
-    services: Record<string, { enabled: boolean }>
+    clusterData: Partial<UpdateClusterRequest>
   ): Promise<OnboardClusterResponse> {
     try {
       this.logger.debug(`Updating services for cluster ID: ${clusterId}`);
 
       const response = await this.axiosInstance.patch<OnboardClusterResponse>(
         `/cloud-connected/clusters/${clusterId}`,
-        { services },
+        clusterData,
         {
           headers: {
             Authorization: `apiKey ${apiKey}`,
@@ -224,35 +223,6 @@ export class CloudConnectClient {
       return response.data;
     } catch (error) {
       this.logger.error(`Failed to update services for cluster ID: ${clusterId}`, { error });
-      throw error;
-    }
-  }
-
-  /**
-   * Updates a cluster's reported license information.
-   */
-  async updateClusterLicense(
-    apiKey: string,
-    clusterId: string,
-    license: SelfManagedClusterLicense
-  ): Promise<OnboardClusterResponse> {
-    try {
-      this.logger.debug(`Updating license for cluster ID: ${clusterId}`);
-
-      const response = await this.axiosInstance.patch<OnboardClusterResponse>(
-        `/cloud-connected/clusters/${clusterId}`,
-        { license },
-        {
-          headers: {
-            Authorization: `apiKey ${apiKey}`,
-          },
-        }
-      );
-
-      this.logger.debug(`Successfully updated license for cluster: ${response.data.id}`);
-      return response.data;
-    } catch (error) {
-      this.logger.error(`Failed to update license for cluster ID: ${clusterId}`, { error });
       throw error;
     }
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -14,9 +14,11 @@ import type { Subscription } from 'rxjs';
 import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { StorageService } from '../services/storage';
+import type { SelfManagedClusterLicense, SelfManagedCluster } from '../types';
 
 export interface RegisterCloudConnectLicenseSyncOptions {
   savedObjects: CoreStart['savedObjects'];
+  elasticsearchClient: ElasticsearchClient;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
   logger: Logger;
@@ -29,6 +31,7 @@ export interface RegisterCloudConnectLicenseSyncOptions {
  */
 export function registerCloudConnectLicenseSync({
   savedObjects,
+  elasticsearchClient,
   encryptedSavedObjects,
   licensing,
   logger,
@@ -49,6 +52,30 @@ export function registerCloudConnectLicenseSync({
 
   const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
 
+  let cachedClusterInfo: SelfManagedCluster | undefined;
+  let clusterInfoPromise: Promise<SelfManagedCluster | undefined>;
+  const getClusterVersion = async (): Promise<SelfManagedCluster | undefined> => {
+    if (cachedClusterInfo) return cachedClusterInfo;
+    if (!clusterInfoPromise) {
+      clusterInfoPromise = elasticsearchClient
+        .info()
+        .then((info) => {
+          cachedClusterInfo = {
+            name: info.name,
+            id: info.cluster_uuid,
+            version: info.version.number,
+          };
+          return cachedClusterInfo;
+        })
+        .catch((error) => {
+          logger.warn('Failed to fetch cluster version for Cloud Connect license sync', { error });
+          return undefined;
+        });
+    }
+
+    return clusterInfoPromise;
+  };
+
   return licensing.license$.subscribe({
     next: async ({ type, uid }: Pick<ILicense, 'type' | 'uid'>) => {
       try {
@@ -58,9 +85,17 @@ export function registerCloudConnectLicenseSync({
           return;
         }
 
-        await cloudConnectClient.updateClusterLicense(apiKeyData.apiKey, apiKeyData.clusterId, {
+        const clusterInfo = await getClusterVersion();
+
+        const license: SelfManagedClusterLicense = {
           type: String(type),
           uid: String(uid),
+          ...(clusterInfo?.version ? { version: clusterInfo.version } : {}),
+        };
+
+        await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+          license,
+          self_managed_cluster: clusterInfo,
         });
       } catch (error) {
         logger.warn('Failed to sync license to Cloud Connect', { error });
