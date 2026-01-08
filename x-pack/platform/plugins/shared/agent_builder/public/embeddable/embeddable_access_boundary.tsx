@@ -6,13 +6,7 @@
  */
 
 import React, { type ReactNode, useEffect, useState } from 'react';
-import {
-  EuiLoadingSpinner,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiButtonIcon,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
@@ -81,7 +75,6 @@ export interface EmbeddableAccessBoundaryProps {
 }
 
 interface AccessState {
-  isLoading: boolean;
   hasRequiredLicense: boolean;
   hasLlmConnector: boolean;
 }
@@ -93,42 +86,28 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   const { accessChecker } = useAgentBuilderServices();
   const { show: hasShowPrivilege } = useUiPrivileges();
 
+  // Default to access granted to optimize for the happy path and avoid loading spinner flash
   const [accessState, setAccessState] = useState<AccessState>({
-    isLoading: true,
-    hasRequiredLicense: false,
-    hasLlmConnector: false,
+    hasRequiredLicense: true,
+    hasLlmConnector: true,
   });
 
   useEffect(() => {
-    const checkAccess = async () => {
-      try {
-        await accessChecker.initAccess();
-        const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
-
+    accessChecker.getAccess().then(
+      ({ hasRequiredLicense, hasLlmConnector }) => {
         setAccessState({
-          isLoading: false,
           hasRequiredLicense,
           hasLlmConnector,
         });
-      } catch (error) {
+      },
+      () => {
         setAccessState({
-          isLoading: false,
           hasRequiredLicense: false,
           hasLlmConnector: false,
         });
       }
-    };
-
-    checkAccess();
-  }, [accessChecker]);
-
-  if (accessState.isLoading) {
-    return (
-      <AccessDeniedWrapper onClose={onClose}>
-        <EuiLoadingSpinner size="xl" />
-      </AccessDeniedWrapper>
     );
-  }
+  }, [accessChecker]);
 
   if (!accessState.hasRequiredLicense) {
     return (

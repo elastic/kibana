@@ -14,21 +14,9 @@ export interface AgentBuilderAccess {
   hasLlmConnector: boolean;
 }
 
-type PromiseValues<T> = {
-  [Key in keyof T]: Promise<T[Key]>;
-};
-
-const resolveValues = async <T>(promiseObject: PromiseValues<T>): Promise<T> => {
-  const entries = await Promise.all(
-    Object.entries(promiseObject).map(async ([key, promise]) => [key, await promise])
-  );
-  return Object.fromEntries(entries);
-};
-
 export class AgentBuilderAccessChecker {
   private readonly licensing: LicensingPluginStart;
   private readonly inference: InferencePublicStart;
-  private access: AgentBuilderAccess | null = null;
 
   constructor({
     licensing,
@@ -41,37 +29,30 @@ export class AgentBuilderAccessChecker {
     this.inference = inference;
   }
 
-  private async hasRequiredLicense() {
+  private async hasRequiredLicense(): Promise<boolean> {
     const license = await firstValueFrom(this.licensing.license$);
     return license.hasAtLeast('enterprise') && license.isActive;
   }
 
-  private async hasLlmConnector() {
+  private async hasLlmConnector(): Promise<boolean> {
     const connectors = await this.inference.getConnectors();
     return connectors.length > 0;
   }
 
-  public async initAccess() {
-    if (this.access !== null) {
-      return;
-    }
+  /**
+   * Fetches the current access state.
+   * This method fetches fresh data each time it's called to ensure
+   * the access state reflects the current state (e.g., newly created connectors).
+   */
+  public async getAccess(): Promise<AgentBuilderAccess> {
+    const [hasRequiredLicense, hasLlmConnector] = await Promise.all([
+      this.hasRequiredLicense(),
+      this.hasLlmConnector(),
+    ]);
 
-    const accessPromise: PromiseValues<AgentBuilderAccess> = {
-      hasRequiredLicense: this.hasRequiredLicense(),
-      hasLlmConnector: this.hasLlmConnector(),
+    return {
+      hasRequiredLicense,
+      hasLlmConnector,
     };
-
-    try {
-      this.access = await resolveValues(accessPromise);
-    } catch (error) {
-      throw new Error('Unable to determine Agent Builder access', { cause: error });
-    }
-  }
-
-  public getAccess() {
-    if (!this.access) {
-      throw new Error('Agent Builder access was not initialized');
-    }
-    return this.access;
   }
 }
