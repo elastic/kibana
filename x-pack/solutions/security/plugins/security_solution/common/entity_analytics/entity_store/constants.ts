@@ -19,6 +19,10 @@ export const getLinkEntitiesUrl = (entityType: string) =>
   `${RESOLUTION_URL}/${entityType}` as const;
 export const getResolutionUrl = (entityType: string, entityId: string) =>
   `${RESOLUTION_URL}/${entityType}/${encodeURIComponent(entityId)}` as const;
+export const getListResolutionsUrl = (entityType: string) =>
+  `${RESOLUTION_URL}/${entityType}` as const;
+export const getListGroupedEntitiesUrl = (entityType: string) =>
+  `${RESOLUTION_URL}/${entityType}/grouped` as const;
 
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',

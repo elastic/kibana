@@ -7,3 +7,5 @@
 
 export { linkEntities } from './link_entities';
 export { getResolution } from './get_resolution';
+export { listResolutions } from './list_resolutions';
+export { listGroupedEntities } from './list_grouped_entities';

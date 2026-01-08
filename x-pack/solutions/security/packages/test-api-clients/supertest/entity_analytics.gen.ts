@@ -68,7 +68,12 @@ import type {
   LinkEntitiesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/link_entities.gen';
 import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  ListGroupedEntitiesRequestQueryInput,
+  ListGroupedEntitiesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_grouped_entities.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
+import type { ListResolutionsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_resolutions.gen';
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
@@ -535,6 +540,25 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * Returns entities grouped by resolution_id, with complete entity data for each group.
+Uses ES|QL LOOKUP JOIN to efficiently join entities with resolutions.
+Groups are sorted by max risk score descending.
+
+      */
+  listGroupedEntities(props: ListGroupedEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/grouped', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1.0.0')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
   listPrivMonUsers(props: ListPrivMonUsersProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
@@ -542,6 +566,23 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  /**
+      * Returns all resolution documents for the given entity type.
+Each document maps an entity_id to a resolution_id (group).
+
+      */
+  listResolutions(props: ListResolutionsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
@@ -835,8 +876,15 @@ export interface ListEntitiesProps {
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
 }
+export interface ListGroupedEntitiesProps {
+  query: ListGroupedEntitiesRequestQueryInput;
+  params: ListGroupedEntitiesRequestParamsInput;
+}
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListResolutionsProps {
+  params: ListResolutionsRequestParamsInput;
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;

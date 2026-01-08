@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: List Grouped Entities API
+  version: 1.0.0
+paths:
+  /api/entity_store/resolution/{entityType}/grouped:
+    get:
+      x-codegen-enabled: true
+      operationId: ListGroupedEntities
+      x-labels: [ess, serverless]
+      summary: List entities grouped by resolution
+      description: |
+        Returns entities grouped by resolution_id, with complete entity data for each group.
+        Uses ES|QL LOOKUP JOIN to efficiently join entities with resolutions.
+        Groups are sorted by max risk score descending.
+      tags:
+        - Security Entity Analytics API
+        - Entity Store
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [user, host, service, generic]
+          description: The entity type to query
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+          description: Maximum number of groups to return
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - groups
+                  - total_groups
+                  - total_entities
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityGroup'
+                  total_groups:
+                    type: integer
+                    description: Total number of groups
+                  total_entities:
+                    type: integer
+                    description: Total number of entities across all groups
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    EntityGroup:
+      type: object
+      required:
+        - group_id
+        - is_resolved
+        - entities
+        - max_risk_score
+      properties:
+        group_id:
+          type: string
+          description: The resolution_id for resolved groups, or synthetic ID for unresolved entities
+        resolution_id:
+          type: string
+          nullable: true
+          description: The resolution_id if this is a resolved group, null otherwise
+        is_resolved:
+          type: boolean
+          description: Whether this group contains resolved (linked) entities
+        max_risk_score:
+          type: number
+          nullable: true
+          description: Maximum risk score among entities in this group
+        max_risk_level:
+          type: string
+          nullable: true
+          description: Risk level corresponding to max risk score
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupedEntity'
+    GroupedEntity:
+      type: object
+      required:
+        - id
+        - name
+        - type
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        risk_score:
+          type: number
+          nullable: true
+        risk_level:
+          type: string
+          nullable: true

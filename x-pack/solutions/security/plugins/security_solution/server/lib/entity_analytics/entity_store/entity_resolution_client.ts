@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { LinkEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/link_entities.gen';
 import type { GetResolutionResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/get_resolution.gen';
+import type { ListResolutionsResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/list_resolutions.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import { EngineNotRunningError, BadCRUDRequestError } from './errors';
@@ -401,5 +402,52 @@ export class EntityResolutionClient {
       group_members: members.map((m) => m.entity_id),
       '@timestamp': timestamp,
     };
+  }
+
+  /**
+   * List all resolutions for an entity type
+   *
+   * API-4: List Resolutions
+   *
+   * Returns all resolution documents for the given entity type.
+   */
+  public async listResolutions(entityType: APIEntityType): Promise<ListResolutionsResponse> {
+    const type = EntityType[entityType];
+    this.logger.debug(`Listing resolutions for entity type: ${entityType}`);
+
+    // Verify engine is running
+    const engineRunning = await this.dataClient.isEngineRunning(type);
+    if (!engineRunning) {
+      throw new EngineNotRunningError(entityType);
+    }
+
+    const indexName = getResolutionIndexName(type, this.namespace);
+
+    try {
+      const result = await this.esClient.search<ResolutionDocument>({
+        index: indexName,
+        size: 10000,
+        query: {
+          match_all: {},
+        },
+        sort: [{ resolution_id: 'asc' }, { entity_id: 'asc' }],
+      });
+
+      const resolutions = result.hits.hits
+        .filter((h) => h._source)
+        .map((h) => ({
+          entity_id: h._source!.entity_id,
+          resolution_id: h._source!.resolution_id,
+          '@timestamp': h._source!['@timestamp'],
+        }));
+
+      return { resolutions };
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 404) {
+        // Index doesn't exist yet - return empty list
+        return { resolutions: [] };
+      }
+      throw error;
+    }
   }
 }

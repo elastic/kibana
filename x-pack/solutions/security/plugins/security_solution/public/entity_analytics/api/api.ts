@@ -21,6 +21,8 @@ import type {
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   LinkEntitiesResponse,
+  ListGroupedEntitiesResponse,
+  ListResolutionsResponse,
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
@@ -47,6 +49,8 @@ import {
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
   getLinkEntitiesUrl,
+  getListGroupedEntitiesUrl,
+  getListResolutionsUrl,
   getPrivmonMonitoringSourceByIdUrl,
   getResolutionUrl,
   LIST_ENTITIES_URL,
@@ -501,6 +505,34 @@ export const useEntityAnalyticsRoutes = () => {
         signal: params.signal,
       });
 
+    /**
+     * List all resolutions for an entity type
+     */
+    const fetchListResolutions = async (params: {
+      entityType: string;
+      signal?: AbortSignal;
+    }): Promise<ListResolutionsResponse> =>
+      http.fetch<ListResolutionsResponse>(getListResolutionsUrl(params.entityType), {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal: params.signal,
+      });
+
+    /**
+     * List entities grouped by resolution using ES|QL
+     */
+    const fetchListGroupedEntities = async (params: {
+      entityType: string;
+      limit?: number;
+      signal?: AbortSignal;
+    }): Promise<ListGroupedEntitiesResponse> =>
+      http.fetch<ListGroupedEntitiesResponse>(getListGroupedEntitiesUrl(params.entityType), {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: params.limit ? { limit: params.limit } : undefined,
+        signal: params.signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -533,6 +565,8 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityDetailsHighlights,
       linkEntities,
       fetchResolution,
+      fetchListResolutions,
+      fetchListGroupedEntities,
     };
   }, [http]);
 };

@@ -298,6 +298,15 @@ import type {
   LinkEntitiesResponse,
 } from './entity_analytics/entity_store/resolution/link_entities.gen';
 import type {
+  ListGroupedEntitiesRequestQueryInput,
+  ListGroupedEntitiesRequestParamsInput,
+  ListGroupedEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/list_grouped_entities.gen';
+import type {
+  ListResolutionsRequestParamsInput,
+  ListResolutionsResponse,
+} from './entity_analytics/entity_store/resolution/list_resolutions.gen';
+import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
@@ -2440,6 +2449,26 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Returns entities grouped by resolution_id, with complete entity data for each group.
+Uses ES|QL LOOKUP JOIN to efficiently join entities with resolutions.
+Groups are sorted by max risk score descending.
+
+    */
+  async listGroupedEntities(props: ListGroupedEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListGroupedEntities`);
+    return this.kbnClient
+      .request<ListGroupedEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/grouped', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1.0.0',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -2451,6 +2480,23 @@ providing you with the most current and effective threat detection capabilities.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Returns all resolution documents for the given entity type.
+Each document maps an entity_id to a resolution_id (group).
+
+    */
+  async listResolutions(props: ListResolutionsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListResolutions`);
+    return this.kbnClient
+      .request<ListResolutionsResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3649,8 +3695,15 @@ export interface ListEntitiesProps {
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
 }
+export interface ListGroupedEntitiesProps {
+  query: ListGroupedEntitiesRequestQueryInput;
+  params: ListGroupedEntitiesRequestParamsInput;
+}
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListResolutionsProps {
+  params: ListResolutionsRequestParamsInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;

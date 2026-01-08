@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: List All Resolutions
+  description: API to list all entity resolutions for a given entity type
+  version: '1'
+paths:
+  /api/entity_store/resolution/{entityType}:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListResolutions
+      summary: List all entity resolutions
+      description: |
+        Returns all resolution documents for the given entity type.
+        Each document maps an entity_id to a resolution_id (group).
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type (user, host, etc.)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - resolutions
+                properties:
+                  resolutions:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - entity_id
+                        - resolution_id
+                      properties:
+                        entity_id:
+                          type: string
+                          description: The entity ID
+                        resolution_id:
+                          type: string
+                          description: The resolution group ID
+                        '@timestamp':
+                          type: string
+                          format: date-time
+                          description: When this resolution was created/updated
+        '400':
+          description: Invalid request

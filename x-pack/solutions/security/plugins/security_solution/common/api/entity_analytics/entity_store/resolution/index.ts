@@ -8,3 +8,5 @@
 export * from './common.gen';
 export * from './link_entities.gen';
 export * from './get_resolution.gen';
+export * from './list_resolutions.gen';
+export * from './list_grouped_entities.gen';
