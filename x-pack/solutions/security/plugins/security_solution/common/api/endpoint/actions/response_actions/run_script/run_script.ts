@@ -85,7 +85,7 @@ const EndpointRunScriptActionRequestParamsSchema = schema.object({
   scriptInput: schema.maybe(getNonEmptyString('scriptInput')),
 
   /**
-   * Timeout for executing the script on the host
+   * Timeout for executing the script on the host. Value should be in **seconds**.
    */
   timeout: schema.maybe(schema.number({ min: 1 })),
 });
