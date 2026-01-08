@@ -736,7 +736,13 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
-    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    if (!tabRuntimeState?.scopedEbtManager$) {
+      return;
+    }
+
+    const { scopedEbtManager$ } = tabRuntimeState;
     const scopedEbtManager = scopedEbtManager$.getValue();
     const { fieldsMetadata } = services;
 
