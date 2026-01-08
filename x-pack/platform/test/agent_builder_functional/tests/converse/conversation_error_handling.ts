@@ -21,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
@@ -28,6 +29,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       llmProxy = await createLlmProxy(log);
       await createConnector(llmProxy, supertest);
+      await kibanaServer.uiSettings.update({
+        'aiAssistant:preferredChatExperience': 'agent',
+      });
       await agentBuilder.navigateToApp('conversations/new');
       await browser.setLocalStorageItem(AGENT_BUILDER_TOUR_STORAGE_KEY, 'true');
     });
@@ -75,15 +79,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Wait for the successful response to appear
+      // Wait for error to disappear first
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
       });
 
-      // Assert the successful response is visible
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
+      // Wait for the successful response to appear
+      await retry.try(async () => {
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText.length).to.be.greaterThan(0);
+        expect(responseText).to.contain(MOCKED_RESPONSE);
+      });
 
       // Assert the error is no longer visible
       const isErrorStillVisible = await agentBuilder.isErrorVisible();
@@ -127,12 +135,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
-
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
     });
 
     it('an error does not persist across conversations', async () => {
@@ -211,14 +217,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Wait for the successful response to appear
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
-      });
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(NEW_RESPONSE);
 
-      // Assert the error is cleared and no longer visible
-      const isErrorStillVisible = await agentBuilder.isErrorVisible();
-      expect(isErrorStillVisible).to.be(false);
+        // Assert the error is cleared and no longer visible
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
+      });
     });
 
     it('keeps the previous conversation rounds visible when there is an error', async () => {
