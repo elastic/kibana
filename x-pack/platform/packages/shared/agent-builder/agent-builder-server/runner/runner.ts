@@ -130,9 +130,10 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    */
   toolCallId?: string;
   /**
-   * Optional source of the tool invocation
+   * Optional source of the tool invocation.
+   * Defaults to 'unknown'.
    */
-  source?: 'agent' | 'user' | 'unknown';
+  source?: 'agent' | 'user' | 'mcp' | 'unknown';
   /**
    * Optional prompt storage state to use for tool invocation.
    */
