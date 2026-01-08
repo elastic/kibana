@@ -9,6 +9,7 @@
 
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
@@ -21,12 +22,16 @@ import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
+import { serializeLayout } from './layout_manager/serialize_layout';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));
 
 const forcePublishOnReset$ = new Subject<void>();
 
-const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
+const layoutUnsavedChanges$ = new BehaviorSubject<{
+  panels?: DashboardState['panels'];
+  controlGroupInput?: DashboardState['controlGroupInput'];
+}>({});
 const layoutManagerMock = {
   api: {
     children$: new BehaviorSubject<DashboardChildren>({}),
@@ -34,11 +39,13 @@ const layoutManagerMock = {
   internalApi: {
     startComparing$: () => layoutUnsavedChanges$,
     serializeLayout: () => {
-      const panels = layoutUnsavedChanges$.getValue()?.panels ?? [];
+      const panels = layoutUnsavedChanges$.getValue()?.panels;
+      const controlGroupInput = layoutUnsavedChanges$.getValue()?.controlGroupInput;
       return {
-        panels,
+        ...(panels && { panels }),
+        ...(controlGroupInput && { controlGroupInput }),
         // create one reference per panel
-        references: panels
+        references: (panels ?? [])
           .filter((panel) => !isDashboardSection(panel))
           .map((panel, index) => ({
             name: 'savedObjectRef',
@@ -162,6 +169,120 @@ describe('unsavedChangesManager', () => {
               },
             } as unknown as DashboardPanel,
           ],
+        });
+      });
+
+      describe('should backup control and panel children changes independently', () => {
+        let child1Api: any;
+        let child2Api: any;
+        let apiMockWithChildren: ReturnType<typeof initializeLayoutManager>;
+
+        beforeEach(async () => {
+          child1Api = {
+            uuid: 'child1',
+            hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+            resetUnsavedChanges: () => undefined,
+          };
+          child2Api = {
+            uuid: 'child2',
+            hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+            resetUnsavedChanges: () => undefined,
+          };
+          const children$ = new BehaviorSubject<DashboardChildren>({
+            child1: child1Api as unknown as DefaultEmbeddableApi,
+            child2: child2Api as unknown as DefaultEmbeddableApi,
+          });
+          apiMockWithChildren = {
+            api: {
+              children$,
+            },
+            internalApi: {
+              startComparing$: () => layoutUnsavedChanges$,
+              serializeLayout: (subset: string[]) =>
+                serializeLayout(
+                  {
+                    panels: {
+                      child1: { type: 'lens', grid: { x: 0, y: 0, w: 12, h: 12 } },
+                    },
+                    sections: {},
+                    controls: {
+                      child2: { type: 'optionsListControl', order: 0 },
+                    },
+                  },
+                  {
+                    child1: { rawState: { title: 'child1' } },
+                    child2: { rawState: { title: 'child2' } },
+                  },
+                  subset
+                ),
+            },
+          } as unknown as ReturnType<typeof initializeLayoutManager>;
+
+          initializeUnsavedChangesManager({
+            viewMode$,
+            storeUnsavedChanges: true,
+            lastSavedState: DEFAULT_DASHBOARD_STATE,
+            layoutManager: apiMockWithChildren,
+            savedObjectId$,
+            settingsManager: settingsManagerMock,
+            unifiedSearchManager: unifiedSearchManagerMock,
+            projectRoutingManager: projectRoutingManagerMock,
+            forcePublishOnReset$,
+          });
+        });
+
+        test('backs up panel state', async () => {
+          setBackupStateMock.mockImplementation((id, backupState) => {
+            expect(id).toBe(savedObjectId$.value);
+            expect(backupState).toMatchInlineSnapshot(`
+            Object {
+              "panels": Array [
+                Object {
+                  "config": Object {
+                    "title": "child1",
+                  },
+                  "grid": Object {
+                    "h": 12,
+                    "w": 12,
+                    "x": 0,
+                    "y": 0,
+                  },
+                  "type": "lens",
+                  "uid": "child1",
+                },
+              ],
+              "references": Array [],
+              "viewMode": "edit",
+            }
+          `);
+          });
+          await new Promise((resolve) => setTimeout(resolve, 1)); // wait for first emit of `unsavedChangesSubscription`
+          child1Api.hasUnsavedChanges$.next(true);
+        });
+
+        test('backs up control state', async () => {
+          setBackupStateMock.mockImplementation((id, backupState) => {
+            expect(id).toBe(savedObjectId$.value);
+            expect(backupState).toMatchInlineSnapshot(`
+            Object {
+              "controlGroupInput": Object {
+                "controls": Array [
+                  Object {
+                    "config": Object {
+                      "title": "child2",
+                    },
+                    "type": "optionsListControl",
+                    "uid": "child2",
+                  },
+                ],
+              },
+              "references": Array [],
+              "viewMode": "edit",
+            }
+          `);
+          });
+          await new Promise((resolve) => setTimeout(resolve, 1)); // wait for first emit of `unsavedChangesSubscription`
+          child2Api.hasUnsavedChanges$.next(true);
         });
       });
     });
