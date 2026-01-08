@@ -33,6 +33,7 @@ export interface StoredFeature {
   [FEATURE_STATUS]: FeatureStatus;
   [FEATURE_LAST_SEEN]: string;
   [FEATURE_TAGS]: string[];
+  [FEATURE_META]: Record<string, any>;
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
@@ -47,4 +48,5 @@ export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
   [FEATURE_STATUS]: featureStatusSchema,
   [FEATURE_LAST_SEEN]: z.string(),
   [FEATURE_TAGS]: z.array(z.string()),
+  [FEATURE_META]: z.record(z.string(), z.any()),
 });

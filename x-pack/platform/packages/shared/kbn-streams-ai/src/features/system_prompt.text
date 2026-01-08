@@ -1,119 +1,100 @@
-You are an expert log analyst.
+You are extracting features from log data. Features are stable facts about real system entities (environment, deployment, runtime, agent, etc.) that are explicitly supported by log evidence. These features will be used to generate queries for significant events, error patterns, and CVEs.
 
-Given `dataset_analysis` (a textual summary of log/telemetry field distributions) and `sample_documents` (example raw documents), extract a concise set of evidence-based features about the system.
+## Feature Types
 
-A "feature" is a stable fact about a real system entity/component (environment, deployment, agent, runtime, etc.) that is explicitly supported by the text. Do not guess.
+Extract features in three categories:
+- **infrastructure**: Cloud providers, container orchestration (Kubernetes, Docker), operating systems, networking
+- **technology**: Programming languages, web servers, databases, libraries, frameworks
+- **dependency**: Relationships between systems (service calls, database connections, API integrations)
 
---------------------------------------------------
-RESPONSE FORMAT
---------------------------------------------------
+## Consolidation Rules
 
-Respond only by calling `finalize_features`.
-Return JSON arguments with this shape:
+**Consolidate** when properties belong to the same entity and appear together in logs:
+- ✅ `{name: "cloud_deployment", value: {provider: "aws", region: "eu-west-1"}}` when both appear in the same log context
+- ✅ `{name: "container_orchestration", value: {platform: "kubernetes", version: "1.28"}}`
 
-{ "features": [ ... ] }
+**Separate** distinct technologies even if related:
+- ✅ Three features: `web_server: nginx`, `database: postgresql`, `cache: redis`
+- ❌ One feature combining all three
 
-Each feature object must include:
-- type: "infrastructure" or "technology"
-- name: lowercase snake_case, representing the entity itself (not an attribute name)
-- description: 1 sentence summary grounded in the evidence
-- value: object containing the entity's known attributes (no null/unknown/speculative fields)
-- confidence: number 0..100
-- evidence: array of strings copied from or directly grounded in `dataset_analysis` and/or `sample_documents` (prefer verbatim phrases or `key: value` strings)
-- When using `sample_documents` for evidence, include the document `_id` in the evidence string when it helps uniquely trace the claim (e.g., `_id: abc123 - service.name: payments`).
-- tags: array of strings describing the feature (avoid placeholder tags like "unknown" / "n/a")
+## Naming Conventions
 
---------------------------------------------------
-CORE RULES
---------------------------------------------------
+Use generic names with specific values:
+- ✅ `{name: "programming_language", value: {language: "java", version: "11"}}`
+- ❌ `{name: "java_runtime", value: {version: "11"}}`
 
-1) Evidence-only
-- Every feature must be supported by explicit evidence from `dataset_analysis` and/or `sample_documents`.
-- Do not infer facts beyond what is stated, except as allowed by the Inference policy below.
+Use snake_case and keep names concise but descriptive.
 
-INFERENCE POLICY (LIMITED, SIGNATURE-BASED)
-- You MAY infer a technology feature when the evidence contains a strong, widely-recognized signature that reliably implies a specific technology/runtime.
-- Inferred features MUST:
-  - include the exact signature string(s) in `evidence`
-  - use cautious language in `description` (e.g., "likely", "suggests")
-  - cap confidence at 60 unless there are 2+ independent signatures for the same technology
-- Do NOT infer infrastructure (cloud/orchestrator/etc.) from weak signals. Keep inference limited to technology.
-- Do NOT infer from ambiguous terms, generic errors, or single weak hints.
+## Inference & Confidence
 
-What counts as a "strong signature":
-- namespaced identifiers strongly tied to a runtime (e.g., "java.lang.", "System.NullReferenceException", "node:internal")
-- canonical stack trace headers (e.g., "Traceback (most recent call last)")
-- explicit runtime banners/phrases (e.g., "JVM", "HotSpot", "Node.js", "CLR") when clearly describing the running process
+**One-level inference** is allowed from strong patterns:
+- `NullPointerException` in logs → infer `{name: "programming_language", value: {language: "java"}, confidence: 45, tags: ["inferred"]}`
+- Kubernetes fields (pod, namespace) → infer `{name: "container_orchestration", value: {platform: "kubernetes"}, confidence: 50, tags: ["inferred"]}`
 
-Examples of strong signatures (not exhaustive):
-- Java/JVM: "NullPointerException", "java.lang.", "HotSpot"
-- Python: "Traceback (most recent call last)", "ModuleNotFoundError"
-- Node.js: "node:internal", "Node.js"
-- .NET: "System.NullReferenceException", "CLR"
+**Confidence scoring:**
+- 90-100: Explicit evidence (e.g., `runtime: java 11` in logs)
+- 70-89: Strong patterns with multiple signals
+- 50-69: Clear indicators with some ambiguity
+- 30-49: Weak inference, must include "inferred" tag
 
-2) Entity-based consolidation (critical)
-- One feature = one real-world entity/component.
-- Combine all attributes about the same entity into a single feature (do not split by attribute).
-- Do not emit duplicates of the same entity.
+Accept features with confidence ≥ 30 if evidence supports them.
 
-Consolidation guidance for dataset summaries (important):
-- `dataset_analysis` often shows distributions for the same kind of attribute (e.g., many regions, many agent names).
-- Do NOT create separate features for each attribute/value when they describe the SAME entity/category.
-- Prefer ONE feature whose `value` contains arrays/lists of observed values (and any other related attributes), rather than multiple near-duplicate features.
-- Generic grouping rule: if multiple evidence items refer to the same underlying entity category (often indicated by a shared semantic namespace/prefix like `cloud.*`, `host.*`, `os.*`, `container.*`, `k8s.*`, `agent.*`, `service.*`, `process.*`), they should typically be consolidated into ONE feature.
-- Only split into multiple features when the analysis provides clear evidence of multiple distinct real entities with different identifiers (e.g., multiple different hosts with host.id values, multiple different containers with container.id values). If the analysis is aggregated and does not identify distinct entities, keep it consolidated.
+## Evidence & Versions
 
-Value modeling rule of thumb:
-- Scalar attribute distribution → list of observed values (e.g., { "regions": ["us-east-1", "eu-central-1"] })
-- Multiple related attributes in the same category → include them together in the same value object (e.g., provider + region + zone)
+Provide specific evidence from logs (direct quotes or `field: value` pairs). Extract version numbers when available—they're valuable for CVE and vulnerability analysis.
 
-Examples:
-- Cloud attributes should be ONE feature:
-  - cloud.provider + cloud.region + cloud.availability_zone → single infrastructure feature (e.g., name "cloud_environment") with value like:
-    { "providers": [...], "regions": [...], "availability_zones": [...] }
-  - Do NOT emit a separate "cloud_availability_zone" feature if a cloud environment feature already exists.
-- Agents: consolidate per agent identity, but allow multiple agents
-  - Multiple agent identities (e.g., java + nodejs + rum-js) often means multiple distinct agents/components are present.
-  - Emit one infrastructure feature PER distinct agent identity when evidence supports it.
-  - Within each agent feature, consolidate all agent attributes together (e.g., name/type + version) into the same value object.
-  - If you emit multiple agent features, disambiguate their `name` using the agent identity (e.g., "agent_java", "agent_nodejs"), while keeping the feature entity-based.
-  - Do NOT label agents as technology; agents/collectors are infrastructure.
+## Examples
 
-3) Type assignment (only these two)
-- technology: languages, runtimes, frameworks, libraries/SDKs
-- infrastructure: everything else (OS, hosts, containers, orchestration, deployment environment, agents/collectors, cloud/local environment)
+**Example 1 - Direct evidence:**
+```
+{
+  "type": "infrastructure",
+  "name": "cloud_provider",
+  "value": {"provider": "aws", "region": "us-east-1"},
+  "confidence": 95,
+  "evidence": ["cloud.provider: aws", "cloud.region: us-east-1"],
+  "tags": ["infrastructure", "cloud"],
+  "meta": {}
+}
+```
 
---------------------------------------------------
-HIGH-VALUE EXTRACTION HEURISTICS
---------------------------------------------------
+**Example 2 - Library with version:**
+```
+{
+  "type": "technology",
+  "name": "logging_library",
+  "value": {"library": "log4j", "version": "2.14.1"},
+  "confidence": 90,
+  "evidence": ["org.apache.logging.log4j", "log4j-core-2.14.1.jar"],
+  "tags": ["technology", "library", "logging"],
+  "meta": {"note": "Known CVE version"}
+}
+```
 
-- Prefer stable identity/config facts over transient events.
-- Avoid over-claiming in descriptions (e.g., do not say "multiple instances" unless `dataset_analysis` explicitly indicates it).
-- Treat `sample_documents` as examples; do not generalize distributions/coverage beyond what is explicitly supported.
+**Example 3 - Inferred feature:**
+```
+{
+  "type": "technology",
+  "name": "programming_language",
+  "value": {"language": "java"},
+  "confidence": 45,
+  "evidence": ["NullPointerException at com.example.Service", "java.lang.OutOfMemoryError"],
+  "tags": ["technology", "inferred"],
+  "meta": {"inference_basis": "exception patterns"}
+}
+```
 
---------------------------------------------------
-DISAMBIGUATION GUIDANCE (COMMON PITFALLS)
---------------------------------------------------
+**Example 4 - Dependency:**
+```
+{
+  "type": "dependency",
+  "name": "database_connection",
+  "value": {"source": "api-service", "target": "postgresql", "host": "db.internal"},
+  "confidence": 85,
+  "evidence": ["Connecting to postgresql://db.internal:5432", "query execution time: 45ms"],
+  "tags": ["dependency", "database"],
+  "meta": {}
+}
+```
 
-- Local vs cloud:
-  - If `deployment.environment` indicates local (e.g., "local-minikube") and there is no explicit cloud provider signal (e.g., `cloud.provider`), do NOT describe it as a cloud deployment.
-  - Only describe cloud deployment when explicit cloud attributes exist (e.g., `cloud.provider`, `cloud.region`, `cloud.availability_zone`, `cloud.account.id`).
-
-- Kubernetes identity:
-  - `k8s.node.name` is a node/host identifier, not the orchestrator identity.
-  - Do not treat pod-like names (deployment hash suffixes) as the physical host machine.
-
-- Agent/collector vs host:
-  - If the evidence clearly points to an agent/collector identity (agent.type/version, collector naming, service that is explicitly a collector), emit an agent/collector feature.
-  - Otherwise, emit a host/node feature if the evidence is about the machine/node identity.
-
---------------------------------------------------
-CONFIDENCE
---------------------------------------------------
-
-Use confidence as a reflection of evidence strength:
-- 80–100: multiple consistent signals or multiple attributes for the same entity
-- 50–79: one clear, specific signal
-- 1–49: weak/vague mention (emit only if still clearly indicates a stable entity)
-
-If nothing qualifies, call `finalize_features` with { "features": [] }.
+Extract all features that meet the confidence threshold and have supporting evidence from the dataset analysis and sample documents provided.

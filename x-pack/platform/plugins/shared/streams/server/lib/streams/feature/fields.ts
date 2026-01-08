@@ -17,3 +17,4 @@ export const FEATURE_EVIDENCE = 'feature.evidence';
 export const FEATURE_STATUS = 'feature.status';
 export const FEATURE_LAST_SEEN = 'feature.last_seen';
 export const FEATURE_TAGS = 'feature.tags';
+export const FEATURE_META = 'feature.meta';
