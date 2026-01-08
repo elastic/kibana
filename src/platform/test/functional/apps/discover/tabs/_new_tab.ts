@@ -11,10 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover, unifiedTabs } = getPageObjects([
-    'discover',
-    'unifiedTabs',
-  ]);
+  const { discover, unifiedTabs } = getPageObjects(['discover', 'unifiedTabs']);
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
