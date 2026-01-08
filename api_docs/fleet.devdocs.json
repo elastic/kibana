@@ -30901,6 +30901,21 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FLEET_LOG_INDICES",
+        "type": "Array",
+        "tags": [],
+        "label": "FLEET_LOG_INDICES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FLEET_SERVER_ARTIFACTS_INDEX",
         "type": "string",
         "tags": [],
