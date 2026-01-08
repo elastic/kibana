@@ -7,7 +7,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-const EXPECTED_CONTROLS = ['Statusactive1', 'Rule', 'Group', 'Tags'];
+const EXPECTED_CONTROLS = ['Status', 'Rule', 'Group', 'Tags'];
 
 test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -47,10 +47,8 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
       const controlTitles = serviceDetailsPage.alertsTab.controlTitles;
       await expect(controlTitles).toHaveCount(4);
 
-      const titles = (await controlTitles.allTextContents()).map((title: string) => title.trim());
-
       for (const expectedControl of EXPECTED_CONTROLS) {
-        expect(titles).toContain(expectedControl);
+        await expect(controlTitles.getByText(expectedControl)).toBeVisible();
       }
     });
   });
@@ -60,6 +58,7 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
     pageObjects: { serviceDetailsPage },
   }) => {
     await serviceDetailsPage.alertsTab.goToTab();
+    await serviceDetailsPage.alertsTab.alertsTableEmptyState.waitFor();
     const { violations } = await page.checkA11y({ include: ['main'] });
     expect(violations).toHaveLength(0);
   });
