@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -501,8 +501,7 @@ export function getTextBasedDatasource({
       const counters = flatten(
         Object.values(state?.layers ?? {}).map((layer) => {
           if (isOfAggregateQueryType(layer.query)) {
-            const language = getAggregateQueryMode(layer.query);
-            return [`render_lens_${language}_chart`];
+            return ['esql_chart'];
           }
           return [];
         })

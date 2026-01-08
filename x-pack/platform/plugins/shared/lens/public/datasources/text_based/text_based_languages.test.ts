@@ -1061,7 +1061,7 @@ describe('Textbased Data Source', () => {
         TextBasedDatasource.getRenderEventCounters &&
         TextBasedDatasource.getRenderEventCounters(state);
 
-      expect(counters).toEqual(['render_lens_esql_chart']);
+      expect(counters).toEqual(['esql_chart']);
     });
   });
 });
