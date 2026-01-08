@@ -8,6 +8,7 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { EXTENDED_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
   public saveButton: Locator;
@@ -66,7 +67,7 @@ export class CustomLinksPage {
     // Click edit button for a specific custom link by finding its row first
     const row = this.getCustomLinkRow(labelText);
     // Wait for the row to be visible before clicking to avoid race conditions
-    await row.waitFor({ state: 'visible', timeout: 30000 });
+    await row.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     const editButton = row.getByTestId('editCustomLink');
     await editButton.click();
   }

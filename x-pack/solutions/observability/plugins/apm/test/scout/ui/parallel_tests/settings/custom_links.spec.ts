@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
   test('Viewer should show disabled create button and no edit button', async ({
@@ -48,7 +49,7 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
     // Wait for the custom link row to be visible in the table (with extended timeout for slow loading)
     await customLinksPage
       .getCustomLinkRow(uniqueLabel)
-      .waitFor({ state: 'visible', timeout: 30000 });
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
     await test.step('shows create button', async () => {
       await customLinksPage.goto();
@@ -70,7 +71,7 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page).toHaveURL(/.*custom-links$/);
       await customLinksPage
         .getCustomLinkRow(uniqueDeleteLabel)
-        .waitFor({ state: 'visible', timeout: 30000 });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
       // Then delete the specific link we created
       await customLinksPage.clickEditCustomLinkForRow(uniqueDeleteLabel);
@@ -83,7 +84,7 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
       // Verify the previously created link row is still present
       await customLinksPage
         .getCustomLinkRow(uniqueLabel)
-        .waitFor({ state: 'visible', timeout: 30000 });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
   });
 });
