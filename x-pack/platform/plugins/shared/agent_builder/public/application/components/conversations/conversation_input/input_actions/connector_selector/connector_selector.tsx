@@ -19,6 +19,7 @@ import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
@@ -102,6 +103,7 @@ const manageConnectorsAriaLabel = i18n.translate(
 
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
+  const { showManagement } = useUiPrivileges();
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
@@ -112,6 +114,7 @@ const ConnectorListFooter: React.FC = () => {
             color="text"
             aria-label={manageConnectorsAriaLabel}
             href={manageConnectorsUrl}
+            disabled={!showManagement}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
