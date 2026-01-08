@@ -138,6 +138,7 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
+      spotZones: us-central1-f,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 105
     key: build_api_docs
     timeout_in_minutes: 90
