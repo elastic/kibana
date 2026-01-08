@@ -200,10 +200,6 @@ export const defaultConfig: ScoutServerConfig = {
           hosts: ['https://localhost:9200'],
         },
       ])}`,
-      // Temporary while on a feature flag for Fleet new UX
-      `--xpack.fleet.experimentalFeatures=${JSON.stringify({
-        newBrowseIntegrationUx: true,
-      })}`,
       // Agent policies are now created via Fleet API using the helper function from @kbn-scout
       // SAML configuration
       ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
