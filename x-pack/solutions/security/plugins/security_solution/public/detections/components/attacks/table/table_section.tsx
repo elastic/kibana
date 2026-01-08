@@ -76,7 +76,7 @@ function buildConnectorIdFilter(connectorNames: string[]): Filter {
     meta: {
       key: 'kibana.alert.attack_discovery.api_config.name',
       type: 'term',
-      index: '.internal.adhoc.alerts-security.attack',
+      index: '.alerts-security.attack.discovery.alerts',
     },
     query: {
       terms: {
