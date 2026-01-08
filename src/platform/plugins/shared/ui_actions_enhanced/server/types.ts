@@ -14,12 +14,12 @@ import type { SerializedAction, SerializedEvent, DynamicActionsState } from '../
 export type ActionFactoryRegistry = Map<string, ActionFactory>;
 
 export interface ActionFactoryDefinition<P extends SerializedEvent = SerializedEvent>
-  extends PersistableStateDefinition<P> {
+  extends Omit<PersistableStateDefinition<P>, 'telemetry'> {
   id: string;
 }
 
 export interface ActionFactory<P extends SerializedEvent = SerializedEvent>
-  extends PersistableState<P> {
+  extends Omit<PersistableState<P>, 'telemetry'> {
   id: string;
 }
 

@@ -35,7 +35,7 @@ export interface UiActionsServiceEnhancementsParams {
 }
 
 export class UiActionsServiceEnhancements
-  implements PersistableStateDefinition<DynamicActionsState>
+  implements Omit<PersistableStateDefinition<DynamicActionsState>, 'telemetry'>
 {
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
@@ -121,7 +121,6 @@ export class UiActionsServiceEnhancements
     supportedTriggers,
     isCompatible,
     isConfigurable,
-    telemetry,
     extract,
     inject,
   }: DrilldownDefinition<Config, ExecutionContext, FactoryContext>): void => {
@@ -136,7 +135,6 @@ export class UiActionsServiceEnhancements
       isConfigValid,
       getDisplayName,
       supportedTriggers,
-      telemetry,
       extract,
       inject,
       getIconType: () => euiIcon,
@@ -168,21 +166,6 @@ export class UiActionsServiceEnhancements
         definition.minimalLicense
       );
     }
-  };
-
-  public readonly telemetry = (
-    state: DynamicActionsState,
-    telemetry: Record<string, string | number | boolean> = {}
-  ) => {
-    let telemetryData = telemetry;
-    state.events.forEach((event: SerializedEvent) => {
-      if (this.actionFactories.has(event.action.factoryId)) {
-        telemetryData = this.actionFactories
-          .get(event.action.factoryId)!
-          .telemetry(event, telemetryData);
-      }
-    });
-    return telemetryData;
   };
 
   public readonly extract = (state: DynamicActionsState) => {

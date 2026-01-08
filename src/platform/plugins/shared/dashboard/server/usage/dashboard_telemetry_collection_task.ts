@@ -44,7 +44,7 @@ export const TASK_ID = `Dashboard-${TELEMETRY_TASK_TYPE}`;
 export function initializeDashboardTelemetryTask(
   logger: Logger,
   core: CoreSetup,
-  taskManager: TaskManagerSetupContract,
+  taskManager: TaskManagerSetupContract
 ) {
   registerDashboardTelemetryTask(logger, core, taskManager);
 }
@@ -56,7 +56,7 @@ export function scheduleDashboardTelemetry(logger: Logger, taskManager: TaskMana
 function registerDashboardTelemetryTask(
   logger: Logger,
   core: CoreSetup,
-  taskManager: TaskManagerSetupContract,
+  taskManager: TaskManagerSetupContract
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {

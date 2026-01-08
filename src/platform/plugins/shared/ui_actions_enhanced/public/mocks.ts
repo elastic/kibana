@@ -34,7 +34,6 @@ const createStartContract = (): Start => {
     getActionFactory: jest.fn(),
     hasActionFactory: jest.fn(),
     DrilldownManager: jest.fn(),
-    telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
   };

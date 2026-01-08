@@ -37,7 +37,7 @@ export interface DrilldownDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
   ExecutionContext extends object = object,
   FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
-> extends PersistableStateDefinition<SerializedEvent> {
+> extends Omit<PersistableStateDefinition<SerializedEvent>, 'telemetry'> {
   /**
    * Globally unique identifier for this drilldown.
    */

@@ -30,7 +30,7 @@ export interface ActionFactoryDefinition<
   FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext>,
-    PersistableStateDefinition<SerializedEvent> {
+    Omit<PersistableStateDefinition<SerializedEvent>, 'telemetry'> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
    * factory in the registry as well as to construct actions of this type and

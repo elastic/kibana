@@ -45,7 +45,7 @@ export const getEmptyControlTypeData = () => ({
 
 export const collectPanelsByType = (
   panels: SavedDashboardPanel[],
-  collectorData: DashboardCollectorData,
+  collectorData: DashboardCollectorData
 ) => {
   collectorData.panels.total += panels.length;
 
@@ -90,7 +90,7 @@ export const collectSectionsAndAccessControl = (
 
 export const collectPinnedControls = (
   controls: StoredControlGroupInput['panels'],
-  collectorData: DashboardCollectorData,
+  collectorData: DashboardCollectorData
 ) => {
   const controlValues = Object.values(controls);
   collectorData.controls.total += controlValues.length;

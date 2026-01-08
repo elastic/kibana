@@ -64,7 +64,6 @@ export class AdvancedUiActionsServerPlugin
 
     this.actionFactories.set(definition.id, {
       id: definition.id,
-      telemetry: definition.telemetry || ((state, stats) => stats),
       inject: definition.inject || identity,
       extract:
         definition.extract ||

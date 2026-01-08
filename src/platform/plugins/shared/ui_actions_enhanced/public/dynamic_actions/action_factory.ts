@@ -43,7 +43,7 @@ export class ActionFactory<
 > implements
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
-    PersistableState<SerializedEvent>
+    Omit<PersistableState<SerializedEvent>, 'telemetry'>
 {
   public readonly id: string;
   public readonly isBeta: boolean;
@@ -141,13 +141,6 @@ export class ActionFactory<
         );
       });
     }
-  }
-
-  public telemetry(
-    state: SerializedEvent,
-    telemetryData: Record<string, string | number | boolean>
-  ) {
-    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : telemetryData;
   }
 
   public extract(state: SerializedEvent) {

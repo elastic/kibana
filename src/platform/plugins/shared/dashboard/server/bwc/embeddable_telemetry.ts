@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from "@kbn/utility-types";
+import type { SerializableRecord } from '@kbn/utility-types';
+import { dynamicActionsTelemetry } from './dynamic_actions_telemetry';
 
 export function embeddableTelemetry(
   state: SerializableRecord,
-  telemetryData: Record<string, any> = {}) {
-    let outputTelemetryData = telemetryData;
-
-    /*Object.keys(enhancements).map((key) => {
-      if (!enhancements[key]) return;
-      outputTelemetryData = getEnhancement(key).telemetry(
-        enhancements[key] as Record<string, SerializableRecord>,
-        outputTelemetryData
-      );
-    });*/
-
-    return outputTelemetryData;
+  telemetryData: Record<string, any> = {}
+) {
+  return (state as { enhancements?: { dynamicActions?: SerializableRecord } }).enhancements
+    ?.dynamicActions
+    ? dynamicActionsTelemetry(state, telemetryData)
+    : telemetryData;
 }

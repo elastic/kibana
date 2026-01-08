@@ -138,26 +138,6 @@ describe('UiActionsService', () => {
       expect(inject).toBeCalledWith(actionState.events[0], []);
     });
 
-    test('action factory telemetry function gets called when calling uiactions telemetry', () => {
-      const service = new UiActionsServiceEnhancements(deps);
-      const actionState = {
-        events: [
-          {
-            eventId: 'test',
-            triggers: [],
-            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
-          },
-        ],
-      };
-      const telemetry = jest.fn().mockImplementation((state) => ({}));
-      service.registerActionFactory({
-        ...factoryDefinition1,
-        telemetry,
-      });
-      service.telemetry(actionState);
-      expect(telemetry).toBeCalledWith(actionState.events[0], {});
-    });
-
     describe('registerFeature for licensing', () => {
       const spy = jest.spyOn(deps.featureUsageSetup!, 'register');
       beforeEach(() => {

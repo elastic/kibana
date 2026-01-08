@@ -43,7 +43,6 @@ export interface StartContract
       | 'getActionFactory'
       | 'hasActionFactory'
       | 'getActionFactories'
-      | 'telemetry'
       | 'extract'
       | 'inject'
     > {

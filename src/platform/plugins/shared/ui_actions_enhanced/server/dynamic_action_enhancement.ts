@@ -11,24 +11,12 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
-import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
-import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
 
 export const dynamicActionEnhancement = (
   getActionFactory: (id: string) => undefined | ActionFactory
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (
-      serializableState: SerializableRecord,
-      stats: Record<string, string | number | boolean>
-    ) => {
-      const state = serializableState as DynamicActionsState;
-      stats = dynamicActionsCollector(state, stats as Record<string, number>);
-      stats = dynamicActionFactoriesCollector(getActionFactory, state, stats);
-
-      return stats;
-    },
     extract: (state: SerializableRecord) => {
       const references: SavedObjectReference[] = [];
       const newState: DynamicActionsState = {
