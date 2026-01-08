@@ -16,7 +16,6 @@ import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 import { ChartPlaceholder } from '../../../lens/chart_placeholder';
 import { KPI_CHART_HEIGHT } from '../../../../common/visualizations/constants';
 import type { InfraHttpError } from '../../../../types';
-import { shouldLoadCharts } from '../../../../pages/metrics/hosts/hooks/use_hosts_view';
 
 export interface HostKpiChartsProps {
   dataView?: DataView;
@@ -27,7 +26,7 @@ export interface HostKpiChartsProps {
   getSubtitle?: (formulaValue: string) => string;
   loading?: boolean;
   error?: InfraHttpError;
-  hostNodesLength?: number;
+  hasData?: boolean;
   schema?: DataSchemaFormat | null;
 }
 
@@ -40,7 +39,7 @@ export const HostKpiCharts = ({
   lastReloadRequestTime,
   loading = false,
   error,
-  hostNodesLength = 0,
+  hasData = true,
   schema,
 }: HostKpiChartsProps) => {
   const charts = useHostKpiCharts({
@@ -49,7 +48,7 @@ export const HostKpiCharts = ({
     schema,
   });
 
-  if (!shouldLoadCharts({ loading, error, hostNodesLength })) {
+  if (!loading && (!hasData || error)) {
     return (
       <>
         {charts.map((_chartProps, index) => (
@@ -66,7 +65,7 @@ export const HostKpiCharts = ({
                 justify-content: center;
               `}
             >
-              <ChartPlaceholder error={error} isEmpty={hostNodesLength === 0} />
+              <ChartPlaceholder error={error} isEmpty={!hasData} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

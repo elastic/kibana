@@ -114,7 +114,7 @@ export const KpiCharts = () => {
       getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
       error={error}
-      hostNodesLength={hostNodes.length}
+      hasData={!!hostNodes.length}
       schema={searchCriteria.preferredSchema}
     />
   );

@@ -16,10 +16,26 @@ import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/con
 import { LensChart } from '../../../../../../components/lens';
 import { ChartPlaceholder } from '../../../../../../components/lens/chart_placeholder';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { useHostsViewContext, shouldLoadCharts } from '../../../hooks/use_hosts_view';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
+
+/**
+ * Determines whether charts should be loaded based on the hosts view state.
+ * Charts should not be loaded if the table API failed or returned no data or is still being loaded.
+ */
+const shouldLoadCharts = ({
+  loading,
+  error,
+  hostNodesLength,
+}: {
+  loading: boolean;
+  error: unknown;
+  hostNodesLength: number;
+}): boolean => {
+  return !error && !loading && hostNodesLength > 0;
+};
 
 export type ChartProps = LensConfig & {
   id: string;

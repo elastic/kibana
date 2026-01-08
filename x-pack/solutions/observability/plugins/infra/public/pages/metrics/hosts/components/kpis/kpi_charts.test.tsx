@@ -25,19 +25,16 @@ jest.mock('../../hooks/use_after_loaded_state');
 jest.mock('../../../../../hooks/use_reload_request_time');
 jest.mock('../../../../../containers/metrics_source');
 jest.mock('../../../../../components/asset_details', () => ({
-  HostKpiCharts: ({ error, hostNodesLength, loading }: any) => {
-    const { shouldLoadCharts } = jest.requireActual('../../hooks/use_hosts_view');
-    if (!shouldLoadCharts({ loading, error, hostNodesLength })) {
+  HostKpiCharts: ({ error, loading, hasData }: any) => {
+    // Real component logic: if (!loading && (!hasData || error)) show ChartPlaceholder
+    // Otherwise show Kpi charts
+    if (!loading && (!hasData || error)) {
       const HOST_KPI_CHARTS_COUNT = 4;
       return (
         <>
           {Array.from({ length: HOST_KPI_CHARTS_COUNT }).map((_, index) => (
             <div key={index} data-test-subj="chartPlaceholder">
-              {error ? (
-                <div>{error.message}</div>
-              ) : hostNodesLength === 0 ? (
-                <div>No results found</div>
-              ) : null}
+              {error ? <div>{error.message}</div> : <div>No results found</div>}
             </div>
           ))}
         </>
@@ -153,7 +150,7 @@ describe('KpiCharts', () => {
   });
 
   describe('when there is no data', () => {
-    it('should render ChartPlaceholder with no data state when not loading and no hosts', () => {
+    it('should render ChartPlaceholder when not loading and no hosts', () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: false,
@@ -162,14 +159,13 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      // ChartPlaceholder renders 4 length placeholder panels
       expect(screen.getAllByText('No results found')).toHaveLength(4);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
   });
 
   describe('when loading', () => {
-    it('should render ChartPlaceholder when loading even with no hosts', () => {
+    it('should render HostKpiCharts when loading even with no hosts', () => {
       mockUseHostsViewContext.mockReturnValue({
         hostNodes: [],
         loading: true,
@@ -178,10 +174,8 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      // When loading is true, shouldLoadCharts returns false, so ChartPlaceholder is shown
-      expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
-      // ChartPlaceholder shows "No results found" when isEmpty is true
-      expect(screen.getAllByText('No results found')).toHaveLength(4);
+      expect(screen.getByTestId('hostKpiCharts')).toBeInTheDocument();
+      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
     });
   });
 
