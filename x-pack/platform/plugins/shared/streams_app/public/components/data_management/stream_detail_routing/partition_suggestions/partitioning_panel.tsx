@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AssetImage } from '../../../asset_image';
 
-export function SuggestPartitionPanel({ children }: React.PropsWithChildren) {
+interface PartitioningPanelProps {
+  message: string;
+  children?: React.ReactNode;
+}
+export function PartitioningPanel({ message, children }: PartitioningPanelProps) {
   return (
     <EuiPanel
       hasBorder
@@ -28,19 +32,12 @@ export function SuggestPartitionPanel({ children }: React.PropsWithChildren) {
               {i18n.translate(
                 'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.panelTitle',
                 {
-                  defaultMessage: 'Suggest partitioning',
+                  defaultMessage: 'Partition your data',
                 }
               )}
             </h4>
           </EuiTitle>
-          <EuiText size="m">
-            {i18n.translate(
-              'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardDescription',
-              {
-                defaultMessage: 'Use the power of AI to generate the most effective partitioning',
-              }
-            )}
-          </EuiText>
+          <EuiText size="s">{message}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AssetImage type="routingSuggestionEmptyState" size={100} />
