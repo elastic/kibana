@@ -47,7 +47,7 @@ async function run({
   // Extract the resources service from the task instance params
   const {resourcesService} = taskInstance.params as {resourcesService: ResourcesService};
 
-  logger.info(`Running extract entity task, runs: ${runs}`);
+  logger.info(`Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}`);
   try {
     // TODO: Implement your entity extraction logic here 
     // use resourcesService domain related operations
@@ -113,21 +113,23 @@ export function registerExtractEntityTasks({
   }
 }
 
-export async function scheduleExtractEntityTasks({ taskManager, logger, entityTypes, resourcesService }: {
+export async function scheduleExtractEntityTasks({ taskManager, logger, entityTypes, resourcesService, frequency }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   entityTypes: EntityType[];
   resourcesService: ResourcesService;
+  frequency?: number;
 }): Promise<void> {
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+    const interval = frequency ? `${frequency}s` : config.interval;
     for (const type of entityTypes) {
       const taskName = getTaskName(type);
       await taskManager.ensureScheduled({
         id: taskName,
         taskType: taskName,
         schedule: {
-          interval: config.interval,
+          interval,
         },
         params: {resourcesService},
         state: {},

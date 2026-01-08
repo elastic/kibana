@@ -15,6 +15,7 @@ import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional(),
+  frequency: z.number().min(30).max(600).optional(),
 });
 
 export function registerInstall(router: EntityStorePluginRouter) {
@@ -41,7 +42,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         const logger = entityStoreCtx.getLogger();
         const resourcesService = entityStoreCtx.getResourcesService();
         const {taskManagerStart} = entityStoreCtx.getTaskManagers();
-        const {entityTypes = ALL_ENTITY_TYPES} = req.body;
+        const {entityTypes = ALL_ENTITY_TYPES, frequency} = req.body;
         logger.debug('Install api called');
         resourcesService.install(entityTypes);
 
@@ -50,6 +51,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           logger,
           entityTypes,
           resourcesService,
+          frequency,
         });
 
         return res.ok({
