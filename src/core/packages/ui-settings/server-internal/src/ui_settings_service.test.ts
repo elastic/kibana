@@ -17,6 +17,7 @@ import {
   MockUiSettingsGlobalClientConstructor,
   MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
+  getCoreGlobalSettingsMock,
 } from './ui_settings_service.test.mock';
 import type { SetupDeps } from './ui_settings_service';
 import { UiSettingsService } from './ui_settings_service';
@@ -46,7 +47,9 @@ describe('uiSettings', () => {
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
-    coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
+    coreContext.configService.atPath.mockReturnValue(
+      new BehaviorSubject({ overrides, globalOverrides: {} })
+    );
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
     setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
@@ -58,6 +61,7 @@ describe('uiSettings', () => {
     MockUiSettingsClientConstructor.mockClear();
     MockUiSettingsGlobalClientConstructor.mockClear();
     getCoreSettingsMock.mockClear();
+    getCoreGlobalSettingsMock.mockClear();
   });
 
   describe('#preboot', () => {
@@ -197,6 +201,7 @@ describe('uiSettings', () => {
             overrides: {
               custom: 42,
             },
+            globalOverrides: {},
           })
         );
         const customizedService = new UiSettingsService(coreContext);
@@ -220,6 +225,7 @@ describe('uiSettings', () => {
             overrides: {
               custom: 42,
             },
+            globalOverrides: {},
           })
         );
         const customizedService = new UiSettingsService(coreContext);
