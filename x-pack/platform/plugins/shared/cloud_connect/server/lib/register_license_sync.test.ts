@@ -36,8 +36,8 @@ describe('registerCloudConnectLicenseSync', () => {
     const getApiKey = jest.fn().mockResolvedValue(undefined);
     StorageService.mockImplementation(() => ({ getApiKey }));
 
-    const updateClusterLicense = jest.fn();
-    CloudConnectClient.mockImplementation(() => ({ updateClusterLicense }));
+    const updateCluster = jest.fn();
+    CloudConnectClient.mockImplementation(() => ({ updateCluster }));
 
     const sub = registerCloudConnectLicenseSync({
       savedObjects: { createInternalRepository: jest.fn(() => ({})) },
@@ -53,7 +53,7 @@ describe('registerCloudConnectLicenseSync', () => {
 
     expect(getApiKey).toHaveBeenCalled();
     expect(esInfo).not.toHaveBeenCalled();
-    expect(updateClusterLicense).not.toHaveBeenCalled();
+    expect(updateCluster).not.toHaveBeenCalled();
     sub.unsubscribe();
     license$.complete();
   });
@@ -73,8 +73,8 @@ describe('registerCloudConnectLicenseSync', () => {
     });
     StorageService.mockImplementation(() => ({ getApiKey }));
 
-    const updateClusterLicense = jest.fn().mockResolvedValue(undefined);
-    CloudConnectClient.mockImplementation(() => ({ updateClusterLicense }));
+    const updateCluster = jest.fn().mockResolvedValue(undefined);
+    CloudConnectClient.mockImplementation(() => ({ updateCluster }));
 
     const sub = registerCloudConnectLicenseSync({
       savedObjects: { createInternalRepository: jest.fn(() => ({})) },
@@ -88,10 +88,17 @@ describe('registerCloudConnectLicenseSync', () => {
     license$.next({ type: 'basic', uid: 7 });
     await flushPromises();
 
-    expect(updateClusterLicense).toHaveBeenCalledWith('k-123', 'c-456', {
-      type: 'basic',
-      uid: '7',
-      version: '8.0.0',
+    expect(updateCluster).toHaveBeenCalledWith('k-123', 'c-456', {
+      license: {
+        type: 'basic',
+        uid: '7',
+        version: '8.0.0',
+      },
+      self_managed_cluster: {
+        name: undefined,
+        id: undefined,
+        version: '8.0.0',
+      },
     });
     sub.unsubscribe();
     license$.complete();
@@ -113,8 +120,8 @@ describe('registerCloudConnectLicenseSync', () => {
     StorageService.mockImplementation(() => ({ getApiKey }));
 
     const err = new Error('boom');
-    const updateClusterLicense = jest.fn().mockRejectedValue(err);
-    CloudConnectClient.mockImplementation(() => ({ updateClusterLicense }));
+    const updateCluster = jest.fn().mockRejectedValue(err);
+    CloudConnectClient.mockImplementation(() => ({ updateCluster }));
 
     const sub = registerCloudConnectLicenseSync({
       savedObjects: { createInternalRepository: jest.fn(() => ({})) },
