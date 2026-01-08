@@ -23,12 +23,20 @@ interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   ruleType: ApmRuleType | null;
+  /** Optional service name override. If provided, will be used instead of the URL-based service name */
+  serviceName?: string;
 }
 
 export function AlertingFlyout(props: Props) {
-  const { addFlyoutVisible, setAddFlyoutVisibility, ruleType } = props;
+  const {
+    addFlyoutVisible,
+    setAddFlyoutVisibility,
+    ruleType,
+    serviceName: serviceNameProp,
+  } = props;
 
-  const serviceName = useServiceName();
+  const serviceNameFromUrl = useServiceName();
+  const serviceName = serviceNameProp ?? serviceNameFromUrl;
   const { query, path } = useApmParams('/*');
 
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;

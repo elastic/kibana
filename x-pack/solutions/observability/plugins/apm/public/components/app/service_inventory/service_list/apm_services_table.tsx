@@ -16,10 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ApmRuleType } from '@kbn/rule-data-utils';
+import rison from '@kbn/rison';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
@@ -49,6 +51,7 @@ import type {
   ITableColumn,
   SortFunction,
   TableSearchBar,
+  TableActions,
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
@@ -333,6 +336,33 @@ export function ApmServicesTable({
     kuery,
   });
 
+  // Alert rule flyout state
+  const [alertFlyoutState, setAlertFlyoutState] = useState<{
+    isOpen: boolean;
+    ruleType: ApmRuleType | null;
+    serviceName: string | undefined;
+  }>({
+    isOpen: false,
+    ruleType: null,
+    serviceName: undefined,
+  });
+
+  const openAlertFlyout = useCallback((ruleType: ApmRuleType, serviceName: string) => {
+    setAlertFlyoutState({
+      isOpen: true,
+      ruleType,
+      serviceName,
+    });
+  }, []);
+
+  const closeAlertFlyout = useCallback(() => {
+    setAlertFlyoutState({
+      isOpen: false,
+      ruleType: null,
+      serviceName: undefined,
+    });
+  }, []);
+
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
       // removes pagination and sort instructions from the query so it won't be passed down to next route
@@ -375,6 +405,111 @@ export function ApmServicesTable({
       techPreview: true,
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
+
+  const serviceActions: TableActions<ServiceListItem> = useMemo(
+    () => [
+      {
+        groupLabel: i18n.translate('xpack.apm.servicesTable.actions.alertsGroupLabel', {
+          defaultMessage: 'Alerts',
+        }),
+        actions: [
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createThresholdRule', {
+              defaultMessage: 'Create threshold rule',
+            }),
+            items: [
+              {
+                name: i18n.translate('xpack.apm.servicesTable.actions.createLatencyRule', {
+                  defaultMessage: 'Latency',
+                }),
+                onClick: (item) => {
+                  openAlertFlyout(ApmRuleType.TransactionDuration, item.serviceName);
+                },
+              },
+              {
+                name: i18n.translate(
+                  'xpack.apm.servicesTable.actions.createFailedTransactionRateRule',
+                  {
+                    defaultMessage: 'Failed transaction rate',
+                  }
+                ),
+                onClick: (item) => {
+                  openAlertFlyout(ApmRuleType.TransactionErrorRate, item.serviceName);
+                },
+              },
+            ],
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createAnomalyRule', {
+              defaultMessage: 'Create anomaly rule',
+            }),
+            onClick: (item) => {
+              openAlertFlyout(ApmRuleType.Anomaly, item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createErrorCountRule', {
+              defaultMessage: 'Create error count rule',
+            }),
+            onClick: (item) => {
+              openAlertFlyout(ApmRuleType.ErrorCount, item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.manageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'tableOfContents',
+            onClick: (item) => {
+              const { basePath } = core.http;
+              const rulesUrl = basePath.prepend(
+                `/app/observability/alerts/rules?_a=${rison.encode({
+                  search: `service.name:${item.serviceName}`,
+                })}`
+              );
+              window.location.href = rulesUrl;
+            },
+          },
+        ],
+      },
+      {
+        groupLabel: i18n.translate('xpack.apm.servicesTable.actions.slosGroupLabel', {
+          defaultMessage: 'SLOs',
+        }),
+        actions: [
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createLatencySlo', {
+              defaultMessage: 'Create APM latency SLO',
+            }),
+            onClick: (item) => {
+              // eslint-disable-next-line no-console
+              console.log('Create APM latency SLO', item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createAvailabilitySlo', {
+              defaultMessage: 'Create APM availability SLO',
+            }),
+            onClick: (item) => {
+              // eslint-disable-next-line no-console
+              console.log('Create APM availability SLO', item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.manageSlos', {
+              defaultMessage: 'Manage SLOs',
+            }),
+            icon: 'tableOfContents',
+            onClick: (item) => {
+              // eslint-disable-next-line no-console
+              console.log('Manage SLOs', item.serviceName);
+            },
+          },
+        ],
+      },
+    ],
+    [openAlertFlyout, core.http]
+  );
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -432,8 +567,19 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
+          actions={serviceActions}
         />
       </EuiFlexItem>
+      <AlertingFlyout
+        addFlyoutVisible={alertFlyoutState.isOpen}
+        setAddFlyoutVisibility={(visible) => {
+          if (!visible) {
+            closeAlertFlyout();
+          }
+        }}
+        ruleType={alertFlyoutState.ruleType}
+        serviceName={alertFlyoutState.serviceName}
+      />
     </EuiFlexGroup>
   );
 }
