@@ -19,6 +19,15 @@ import { getInstallations, reinstallPackageForInstallation } from '../epm/packag
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../constants';
 
+import type { Installation } from '../../types';
+
+import { appContextService } from '../app_context';
+
+interface GlobalAssetResult {
+  isCreated: boolean;
+  name: string;
+}
+
 /**
  * Ensure ES assets shared by all Fleet index template are installed
  */
@@ -36,6 +45,13 @@ export async function ensureFleetGlobalEsAssets(
     reinstallPackages?: boolean;
   }
 ) {
+  const config = appContextService.getConfig();
+  const skipGlobalAssetPackageReinstall =
+    config?.startupOptimization?.skipGlobalAssetPackageReinstall ?? false;
+  const maxConcurrency =
+    config?.startupOptimization?.maxConcurrentPackageOperations ??
+    MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS;
+
   // Ensure Global Fleet ES assets are installed
   logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
@@ -45,13 +61,46 @@ export async function ensureFleetGlobalEsAssets(
   ]);
 
   if (options?.reinstallPackages) {
-    const assetResults = globalAssetsRes.flat();
-    if (assetResults.some((asset) => asset.isCreated)) {
-      // Update existing index template
+    const assetResults = globalAssetsRes.flat() as GlobalAssetResult[];
+    const createdAssets = assetResults.filter((asset) => asset.isCreated);
+
+    if (createdAssets.length > 0) {
+      if (skipGlobalAssetPackageReinstall) {
+        logger.info(
+          `Skipping package reinstallation after global asset changes (skipGlobalAssetPackageReinstall=true). ` +
+            `${createdAssets.length} assets were created: ${createdAssets
+              .map((a) => a.name)
+              .join(', ')}`
+        );
+        return;
+      }
+
+      logger.info(
+        `Global Fleet assets changed (${createdAssets.length} created). ` +
+          `Checking which packages need reinstallation...`
+      );
+
+      // Get all installed packages
       const installedPackages = await getInstallations(soClient);
+      const installations = installedPackages.saved_objects.map((so) => so.attributes);
+
+      // Filter packages that actually need reinstallation based on the changed assets
+      const packagesToReinstall = filterPackagesNeedingReinstall(
+        installations,
+        createdAssets,
+        logger
+      );
+
+      if (packagesToReinstall.length === 0) {
+        logger.debug('No packages require reinstallation after global asset changes');
+        return;
+      }
+
+      logger.info(`Reinstalling ${packagesToReinstall.length} packages after global asset changes`);
+
       await pMap(
-        installedPackages.saved_objects,
-        async ({ attributes: installation }) => {
+        packagesToReinstall,
+        async (installation) => {
           await reinstallPackageForInstallation({
             soClient,
             esClient,
@@ -63,8 +112,62 @@ export async function ensureFleetGlobalEsAssets(
             );
           });
         },
-        { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+        { concurrency: maxConcurrency }
       );
     }
   }
+}
+
+/**
+ * Filter packages that actually need reinstallation based on changed global assets.
+ *
+ * For example:
+ * - If only ingest pipelines changed, packages without data streams may not need reinstall
+ * - If component templates changed, only packages using those templates need reinstall
+ */
+function filterPackagesNeedingReinstall(
+  installedPackages: Installation[],
+  createdAssets: GlobalAssetResult[],
+  logger: Logger
+): Installation[] {
+  const componentTemplatesCreated = createdAssets.some(
+    (a) =>
+      a.name.includes('component_template') ||
+      a.name.includes('.fleet_globals') ||
+      a.name.includes('.fleet_agent_id_verification')
+  );
+
+  const pipelinesCreated = createdAssets.some(
+    (a) =>
+      a.name.includes('pipeline') ||
+      a.name.includes('.fleet_final_pipeline') ||
+      a.name.includes('.fleet-event-ingest')
+  );
+
+  return installedPackages.filter((pkg) => {
+    // If package has no ES assets, it doesn't need reinstall
+    if (!pkg.installed_es || pkg.installed_es.length === 0) {
+      logger.debug(`Skipping ${pkg.name}: no ES assets installed`);
+      return false;
+    }
+
+    const hasIndexTemplates = pkg.installed_es.some((asset) => asset.type === 'index_template');
+
+    const hasIngestPipelines = pkg.installed_es.some((asset) => asset.type === 'ingest_pipeline');
+
+    if (componentTemplatesCreated && hasIndexTemplates) {
+      logger.debug(
+        `Including ${pkg.name}: has index templates affected by component template changes`
+      );
+      return true;
+    }
+
+    if (pipelinesCreated && !componentTemplatesCreated && hasIngestPipelines) {
+      logger.debug(`Including ${pkg.name}: has pipelines affected by pipeline changes`);
+      return true;
+    }
+
+    logger.debug(`Skipping ${pkg.name}: not affected by global asset changes`);
+    return false;
+  });
 }

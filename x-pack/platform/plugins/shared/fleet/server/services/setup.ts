@@ -222,7 +222,18 @@ async function createSetupSideEffects(
 
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
-  await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  const config = appContextService.getConfig();
+  const shouldDeferPackageUpgrade = config?.startupOptimization?.deferPackageUpgrade ?? false;
+
+  if (shouldDeferPackageUpgrade) {
+    logger.info('Deferring package install version upgrade to background task');
+    await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
+      type: 'upgradePackageInstallVersion',
+    });
+  } else {
+    await upgradePackageInstallVersion({ soClient, esClient, logger });
+  }
   stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');

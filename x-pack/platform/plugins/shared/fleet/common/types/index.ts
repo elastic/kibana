@@ -68,6 +68,12 @@ export interface FleetConfigType {
     agentPolicySchemaUpgradeBatchSize?: number;
     uninstallTokenVerificationBatchSize?: number;
   };
+  startupOptimization?: {
+    deferPackageUpgrade?: boolean;
+    maxConcurrentPackageOperations?: number;
+    skipGlobalAssetPackageReinstall?: boolean;
+    packagePolicyUpgradeBatchSize?: number;
+  };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;

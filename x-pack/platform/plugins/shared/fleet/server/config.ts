@@ -241,6 +241,21 @@ export const config: PluginConfigDescriptor = {
           uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
         })
       ),
+      /**
+       * Startup optimization settings to reduce memory usage during Fleet initialization.
+       */
+      startupOptimization: schema.maybe(
+        schema.object({
+          /** Defer package upgrade operations to background tasks */
+          deferPackageUpgrade: schema.boolean({ defaultValue: false }),
+          /** Maximum packages to process concurrently during startup */
+          maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
+          /** Skip package reinstalls when global Fleet assets change */
+          skipGlobalAssetPackageReinstall: schema.boolean({ defaultValue: false }),
+          /** Batch size for package policy upgrades */
+          packagePolicyUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
+        })
+      ),
       developer: schema.object({
         maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
