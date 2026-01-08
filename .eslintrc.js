@@ -2739,6 +2739,7 @@ module.exports = {
         'src/platform/plugins/shared/**/*.ts',
         'x-pack/solutions/**/*.ts',
         'x-pack/plugins/**/*.ts',
+        'x-pack/platform/plugins/shared/**/*.ts',
       ],
       excludedFiles: [
         '**/*.{test,spec}.ts',
@@ -2754,12 +2755,21 @@ module.exports = {
         '**/json_schemas/**',
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
+        'x-pack/solutions/security/packages/test-api-clients/**',
+        // Will be migrated to automatic_import_v2 that relies on SOs
+        'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {
         '@kbn/eslint/require_kbn_fs': [
-          'warn',
+          'error',
           {
-            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            restrictedMethods: [
+              'writeFile',
+              'writeFileSync',
+              'createWriteStream',
+              'appendFile',
+              'appendFileSync',
+            ],
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },
