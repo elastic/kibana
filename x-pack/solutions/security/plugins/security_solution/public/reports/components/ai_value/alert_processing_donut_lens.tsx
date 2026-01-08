@@ -9,6 +9,7 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { TOTAL_ALERTS_PROCESSED } from './translations';
 import { PageScope } from '../../../data_view_manager/constants';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -72,7 +73,7 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         width={'100%'}
         id={visualizationId}
         isDonut={true}
-        donutTitleLabel={'Total alerts processed'}
+        donutTitleLabel={TOTAL_ALERTS_PROCESSED}
         donutTextWrapperClassName={'donutText'}
         scopeId={PageScope.alerts}
         timerange={{ from, to }}
