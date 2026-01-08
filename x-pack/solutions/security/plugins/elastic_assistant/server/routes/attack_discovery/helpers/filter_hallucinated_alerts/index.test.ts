@@ -391,7 +391,7 @@ describe('filterHallucinatedAlerts', () => {
   });
 
   describe('edge cases', () => {
-    it('handles discoveries with empty alertIds array', async () => {
+    describe('when some discoveries have empty alertIds', () => {
       const discoveryWithNoAlerts: AttackDiscovery = {
         alertIds: [],
         detailsMarkdown: 'Details',
@@ -400,12 +400,120 @@ describe('filterHallucinatedAlerts', () => {
         title: 'Discovery with no alerts',
       };
 
-      const result = await filterHallucinatedAlerts({
-        ...defaultProps,
-        attackDiscoveries: [discoveryWithNoAlerts, mockDiscovery1],
+      it('filters out discoveries with empty alertIds arrays', async () => {
+        const result = await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts, mockDiscovery1],
+        });
+
+        expect(result).toEqual([mockDiscovery1]);
       });
 
-      expect(result).toEqual([mockDiscovery1]);
+      it('still includes the alertIds from NON-empty discoveries in the ES query', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts, mockDiscovery1],
+        });
+
+        const searchCall = mockEsClient.search.mock.calls[0][0] as estypes.SearchRequest;
+        const queryValues = (searchCall.query as { ids: { values: string[] } }).ids.values;
+
+        expect(queryValues).toEqual(expect.arrayContaining(['alert-1', 'alert-2', 'alert-3']));
+      });
+
+      it('logs the expected info message about filtered empty discoveries', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts, mockDiscovery1],
+        });
+
+        expect(getInfoMessage()).toBe(
+          'Attack discovery: Filtered out 1 hallucinated discovery(ies) with empty alertIds'
+        );
+      });
+
+      it('logs the expected debug message that includes the discovery title', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts, mockDiscovery1],
+        });
+
+        expect(getDebugMessage()).toContain('Discovery with no alerts');
+      });
+
+      it('logs a debug message mentioning empty alertIds', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts, mockDiscovery1],
+        });
+
+        expect(getDebugMessage()).toContain('empty alertIds');
+      });
+    });
+
+    describe('when all discoveries have empty alertIds', () => {
+      const discoveryWithNoAlerts1: AttackDiscovery = {
+        alertIds: [],
+        detailsMarkdown: 'Details 1',
+        summaryMarkdown: 'Summary 1',
+        timestamp: '2024-01-01T00:00:00.000Z',
+        title: 'Discovery 1 with no alerts',
+      };
+
+      const discoveryWithNoAlerts2: AttackDiscovery = {
+        alertIds: [],
+        detailsMarkdown: 'Details 2',
+        summaryMarkdown: 'Summary 2',
+        timestamp: '2024-01-02T00:00:00.000Z',
+        title: 'Discovery 2 with no alerts',
+      };
+
+      it('returns an empty array', async () => {
+        const result = await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts1, discoveryWithNoAlerts2],
+        });
+
+        expect(result).toEqual([]);
+      });
+
+      it('does NOT query ES', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts1, discoveryWithNoAlerts2],
+        });
+
+        expect(mockEsClient.search).not.toHaveBeenCalled();
+      });
+
+      it('logs info message about all discoveries being filtered', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts1, discoveryWithNoAlerts2],
+        });
+
+        expect(getInfoMessage()).toBe(
+          'Attack discovery: Filtered out 2 hallucinated discovery(ies) with empty alertIds'
+        );
+      });
+
+      it('logs a debug message for the first discovery', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts1, discoveryWithNoAlerts2],
+        });
+
+        expect(getDebugMessage(0)).toContain('Discovery 1 with no alerts');
+      });
+
+      it('logs a debug message for the second discovery', async () => {
+        await filterHallucinatedAlerts({
+          ...defaultProps,
+          attackDiscoveries: [discoveryWithNoAlerts1, discoveryWithNoAlerts2],
+        });
+
+        expect(getDebugMessage(1)).toContain('Discovery 2 with no alerts');
+      });
     });
   });
 });
