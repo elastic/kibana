@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'
-  - '@kbn/navigation-plugin'
   - '@kbn/core-rendering-browser'
   - '@kbn/shared-ux-router'
   - '@kbn/core-mount-utils-browser'
