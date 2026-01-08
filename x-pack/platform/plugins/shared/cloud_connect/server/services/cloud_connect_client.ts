@@ -14,6 +14,7 @@ import type {
   OnboardClusterResponse,
   ApiKeyValidationResult,
   SubscriptionResponse,
+  SelfManagedClusterLicense,
 } from '../types';
 
 export class CloudConnectClient {
@@ -223,6 +224,35 @@ export class CloudConnectClient {
       return response.data;
     } catch (error) {
       this.logger.error(`Failed to update services for cluster ID: ${clusterId}`, { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Updates a cluster's reported license information.
+   */
+  async updateClusterLicense(
+    apiKey: string,
+    clusterId: string,
+    license: SelfManagedClusterLicense
+  ): Promise<OnboardClusterResponse> {
+    try {
+      this.logger.debug(`Updating license for cluster ID: ${clusterId}`);
+
+      const response = await this.axiosInstance.patch<OnboardClusterResponse>(
+        `/cloud-connected/clusters/${clusterId}`,
+        { license },
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(`Successfully updated license for cluster: ${response.data.id}`);
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Failed to update license for cluster ID: ${clusterId}`, { error });
       throw error;
     }
   }
