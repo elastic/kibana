@@ -28,7 +28,7 @@ interface Query {
 
 /**
  * Generate significant event definitions, based on:
- * - the description of the feature (or stream if feature is undefined)
+ * - the description of the system (or stream if system is undefined)
  * - dataset analysis
  * - for the given significant event types
  */

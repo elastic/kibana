@@ -13,20 +13,25 @@ import type {
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
 import type { Observable } from 'rxjs';
-import { from, map, catchError } from 'rxjs';
-import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
+import { catchError, from, map } from 'rxjs';
+import { BooleanFromString } from '@kbn/zod-helpers';
+import { conflict } from '@hapi/boom';
+import { generateStreamDescription, type IdentifySystemsResult, sumTokens } from '@kbn/streams-ai';
+import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
+import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
+import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
+import type { SystemIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/system_identification';
+import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import type { IdentifiedSystemsEvent, StreamDescriptionEvent } from './types';
+import type { StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { identifySystemsWithDescription } from '../../../../lib/streams/system/identify_systems';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -265,6 +270,21 @@ export const bulkSystemsRoute = createServerRoute({
   },
 });
 
+export type SystemIdentificationTaskResult =
+  | {
+      status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
+    }
+  | {
+      status: 'failed';
+      error: string;
+    }
+  | ({
+      status: 'completed';
+    } & IdentifySystemsResult)
+  | ({
+      status: 'acknowledged';
+    } & IdentifySystemsResult);
+
 export const identifySystemsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/systems/_identify',
   options: {
@@ -274,15 +294,18 @@ export const identifySystemsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z.string().optional(),
       from: dateFromString,
       to: dateFromString,
+      schedule: BooleanFromString.optional(),
+      cancel: BooleanFromString.optional(),
+      acknowledge: BooleanFromString.optional(),
     }),
   }),
   handler: async ({
@@ -291,72 +314,113 @@ export const identifySystemsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<IdentifiedSystemsEvent>> => {
-    const {
-      systemClient,
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-    } = await getScopedClients({
-      request,
-    });
+  }): Promise<SystemIdentificationTaskResult> => {
+    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
     if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
     }
 
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-    const [{ systems }, stream, { descriptionPromptOverride }] = await Promise.all([
-      systemClient.getSystems(name),
-      streamsClient.getStream(name),
-      new PromptsConfigService({
-        soClient,
-        logger,
-      }).getPrompt(),
-    ]);
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
 
-    const esClient = scopedClusterClient.asCurrentUser;
+    if (params.query.schedule) {
+      try {
+        await taskClient.schedule<SystemIdentificationTaskParams>({
+          task: {
+            type: 'streams_system_identification',
+            id: `streams_system_identification_${name}`,
+            space: '*',
+            stream: name,
+          },
+          params: {
+            connectorId,
+            start: start.getTime(),
+            end: end.getTime(),
+          },
+          request,
+        });
 
-    const boundInferenceClient = inferenceClient.bindTo({ connectorId });
-    const signal = getRequestAbortSignal(request);
-
-    return from(
-      identifySystemsWithDescription({
-        start: start.getTime(),
-        end: end.getTime(),
-        esClient,
-        inferenceClient: boundInferenceClient,
-        logger: logger.get('system_identification'),
-        stream,
-        systems,
-        signal,
-        descriptionPrompt: descriptionPromptOverride,
-        dropUnmapped: true,
-      })
-    ).pipe(
-      map(({ systems: identifiedSystems, tokensUsed }) => {
         return {
-          type: 'identified_systems' as const,
-          systems: identifiedSystems,
-          tokensUsed,
+          status: 'in_progress',
         };
-      }),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
+      } catch (error) {
+        if (error instanceof CancellationInProgressError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    } else if (params.query.cancel) {
+      await taskClient.cancel(`streams_system_identification_${name}`);
+
+      return {
+        status: 'being_canceled',
+      };
+    } else if (params.query.acknowledge) {
+      try {
+        const task = await taskClient.acknowledge<
+          SystemIdentificationTaskParams,
+          IdentifySystemsResult
+        >(`streams_system_identification_${name}`);
+
+        return {
+          status: 'acknowledged',
+          ...task.task.payload,
+        };
+      } catch (error) {
+        if (error instanceof AcknowledgingIncompleteError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    }
+
+    const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
+      `streams_system_identification_${name}`
     );
+
+    if (task.status === 'in_progress') {
+      if (isStale(task.created_at)) {
+        return {
+          status: 'stale',
+        };
+      }
+
+      return {
+        status: 'in_progress',
+      };
+    } else if (task.status === 'failed') {
+      return {
+        status: 'failed',
+        error: task.task.error,
+      };
+    } else if (task.status === 'completed' || task.status === 'acknowledged') {
+      return {
+        status: task.status,
+        ...task.task.payload,
+      };
+    }
+
+    return {
+      status: task.status,
+    };
   },
 });
 

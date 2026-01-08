@@ -31,6 +31,11 @@ export interface IdentifySystemsOptions {
   maxSteps?: number;
 }
 
+export interface IdentifySystemsResult {
+  systems: System[];
+  tokensUsed: ChatCompletionTokenCount;
+}
+
 /**
  * Identifies systems in a stream, by:
  * - describing the dataset (via sampled documents)
@@ -49,7 +54,7 @@ export async function identifySystems({
   signal,
   maxSteps: initialMaxSteps,
   dropUnmapped,
-}: IdentifySystemsOptions): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
+}: IdentifySystemsOptions): Promise<IdentifySystemsResult> {
   logger.debug(`Identifying systems for stream ${stream.name}`);
 
   const analysis = await withSpan('describe_dataset_for_system_identification', () =>
@@ -90,7 +95,7 @@ export async function identifySystems({
           description: stream.description || 'This stream has no description.',
         },
         dataset_analysis: JSON.stringify(
-          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: true })
+          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
         ),
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,

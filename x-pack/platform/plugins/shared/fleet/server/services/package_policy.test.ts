@@ -3113,7 +3113,7 @@ describe('Package policy service', () => {
 
         calls.forEach((call, idx) => {
           expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
-          expect(call[3]).toMatchObject({ removeProtection: false });
+          expect(call[3]).toMatchObject({ removeProtection: undefined });
         });
       });
 
