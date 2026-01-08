@@ -59,7 +59,7 @@ import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser/src';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
 // import { handleEuiDevProviderWarning } from './handle_eui_dev_provider_warning';
@@ -211,9 +211,7 @@ export class ChromeService {
     const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
       []
     );
-    const breadcrumbsBadgesExtension$ = new BehaviorSubject<
-      ChromeBreadcrumbsAppendExtension | undefined
-    >(undefined);
+    const breadcrumbsBadges$ = new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
@@ -284,16 +282,7 @@ export class ChromeService {
       breadcrumbs$.next([]);
       badge$.next(undefined);
       appMenu$.next(undefined);
-
-      // Remove badges extension from breadcrumbsAppendExtensions
-      const currentBadgesExtension = breadcrumbsBadgesExtension$.getValue();
-      if (currentBadgesExtension) {
-        breadcrumbsAppendExtensions$.next(
-          breadcrumbsAppendExtensions$.getValue().filter((ext) => ext !== currentBadgesExtension)
-        );
-      }
-      breadcrumbsBadgesExtension$.next(undefined);
-
+      breadcrumbsBadges$.next([]);
       docTitle.reset();
     });
 
@@ -395,7 +384,7 @@ export class ChromeService {
         badge$={badge$.pipe(takeUntil(this.stop$))}
         basePath={http.basePath}
         breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
         kibanaDocLink={docLinks.links.kibana.guide}
         docLinks={docLinks}
@@ -416,6 +405,22 @@ export class ChromeService {
         appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
       />
     );
+
+    const breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]> =
+      combineLatest([breadcrumbsAppendExtensions$, breadcrumbsBadges$]).pipe(
+        map(([extensions, badges]) => {
+          if (badges.length === 0) {
+            return extensions;
+          }
+          return [
+            ...extensions,
+            {
+              content: mountReactNode(<HeaderBreadcrumbsBadges badges={badges} />),
+            },
+          ];
+        }),
+        takeUntil(this.stop$)
+      );
 
     // create observables once here to avoid re-renders, TODO: do it for everything else
     const navLinks$ = navLinks.getNavLinks$();
@@ -476,7 +481,7 @@ export class ChromeService {
         actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
         appMenu$={includeAppMenu ? appMenu$.pipe(takeUntil(this.stop$)) : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customBranding$={customBranding$}
         helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
         helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
@@ -645,27 +650,7 @@ export class ChromeService {
       },
 
       setBreadcrumbsBadges: (badges: ChromeBreadcrumbsBadge[]) => {
-        // Remove previous badges extension if it exists
-        const currentBadgesExtension = breadcrumbsBadgesExtension$.getValue();
-        if (currentBadgesExtension) {
-          breadcrumbsAppendExtensions$.next(
-            breadcrumbsAppendExtensions$.getValue().filter((ext) => ext !== currentBadgesExtension)
-          );
-        }
-
-        // Add new badges extension if badges provided
-        if (badges.length > 0) {
-          const newBadgesExtension: ChromeBreadcrumbsAppendExtension = {
-            content: mountReactNode(<HeaderBreadcrumbsBadges badges={badges} />),
-          };
-          breadcrumbsBadgesExtension$.next(newBadgesExtension);
-          breadcrumbsAppendExtensions$.next([
-            ...breadcrumbsAppendExtensions$.getValue(),
-            newBadgesExtension,
-          ]);
-        } else {
-          breadcrumbsBadgesExtension$.next(undefined);
-        }
+        breadcrumbsBadges$.next(badges);
       },
 
       getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),

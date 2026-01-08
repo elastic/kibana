@@ -141,19 +141,25 @@ export interface ChromeStart {
 
   /**
    * Set badges to be displayed in the breadcrumbs area.
-   * The badges will always be displayed as the last extension in the breadcrumbs.
+   * The badges will always be displayed as the last {@link ChromeBreadcrumbsAppendExtension} in the breadcrumbs.
+   * By default, when navigating within the same application, badges are not cleared automatically, you need to handle
+   * their removal manually.
    *
-   * @param badges - Array of badge configurations to display
+   * @param badges - Array of {@link ChromeBreadcrumbsBadge} to display in the breadcrumbs area.
    *
    * @example
    * ```tsx
-   * chrome.setBreadcrumbsBadges([
-   *   {
-   *     badgeText: 'Beta',
-   *     color: 'hollow',
-   *     toolTipProps: { content: 'This feature is in beta' }
-   *   }
-   * ]);
+   * useEffect(() => {
+   *  const badges: ChromeBreadcrumbsBadge[] = [
+   *   { text: 'Example', tooltip: 'This is an example badge' },
+   *  ];
+   *
+   *  core.chrome.setBreadcrumbsBadges(badges);
+   *  return () => {
+   *    // Clear badges when component unmounts
+   *    core.chrome.setBreadcrumbsBadges([]);
+   *  };
+   * }, [core.chrome]);
    * ```
    */
   setBreadcrumbsBadges(badges: ChromeBreadcrumbsBadge[]): void;
