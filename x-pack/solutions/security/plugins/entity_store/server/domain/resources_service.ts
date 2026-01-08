@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { EntityType } from './definitions/entity_type';
 import { ALL_ENTITY_TYPES } from './definitions/entity_type';
-import { TaskManagers } from '../tasks/task_manager';
+import type { TaskManagers } from '../tasks/task_manager';
 import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
 
 export class ResourcesService {

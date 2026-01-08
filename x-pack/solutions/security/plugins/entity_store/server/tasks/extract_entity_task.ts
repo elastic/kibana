@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance, TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { RunResult, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { EntityType } from '../domain/definitions/entity_type';
@@ -27,7 +31,11 @@ function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCre
   };
 }
 
-async function run({ taskInstance, entityType, logger }: {
+async function run({
+  taskInstance,
+  entityType,
+  logger,
+}: {
   taskInstance: ConcreteTaskInstance;
   entityType: EntityType;
   logger: Logger;
@@ -76,14 +84,18 @@ async function cancel({ logger }: { logger: Logger }): Promise<RunResult | void>
   logger.warn('Cancellation requested');
 }
 
-export function registerExtractEntityTasks({ taskManager, logger, entityTypes }: {
+export function registerExtractEntityTasks({
+  taskManager,
+  logger,
+  entityTypes,
+}: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   entityTypes: EntityType[];
 }): void {
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    entityTypes.forEach(type => {
+    entityTypes.forEach((type) => {
       const taskName = getTaskName(type);
       taskManager.registerTaskDefinitions({
         [taskName]: {
@@ -99,7 +111,11 @@ export function registerExtractEntityTasks({ taskManager, logger, entityTypes }:
   }
 }
 
-export async function scheduleExtractEntityTasks({ taskManager, logger, entityTypes }: {
+export async function scheduleExtractEntityTasks({
+  taskManager,
+  logger,
+  entityTypes,
+}: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   entityTypes: EntityType[];

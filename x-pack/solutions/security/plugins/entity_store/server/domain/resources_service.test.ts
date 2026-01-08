@@ -17,7 +17,9 @@ describe('ResourcesService', () => {
   let resourcesService: ResourcesService;
   let mockLogger: jest.Mocked<Logger>;
   let mockTaskManagers: jest.Mocked<TaskManagers>;
-  let mockScheduleExtractEntityTasks: jest.MockedFunction<typeof extractEntityTaskModule.scheduleExtractEntityTasks>;
+  let mockScheduleExtractEntityTasks: jest.MockedFunction<
+    typeof extractEntityTaskModule.scheduleExtractEntityTasks
+  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,7 +40,10 @@ describe('ResourcesService', () => {
       taskManagerStart: mockTaskManagerStart as any,
     } as unknown as jest.Mocked<TaskManagers>;
 
-    mockScheduleExtractEntityTasks = extractEntityTaskModule.scheduleExtractEntityTasks as jest.MockedFunction<typeof extractEntityTaskModule.scheduleExtractEntityTasks>;
+    mockScheduleExtractEntityTasks =
+      extractEntityTaskModule.scheduleExtractEntityTasks as jest.MockedFunction<
+        typeof extractEntityTaskModule.scheduleExtractEntityTasks
+      >;
     mockScheduleExtractEntityTasks.mockResolvedValue(undefined);
 
     resourcesService = new ResourcesService(mockLogger, mockTaskManagers);

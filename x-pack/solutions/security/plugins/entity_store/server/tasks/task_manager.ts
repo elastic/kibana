@@ -6,7 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { EntityStorePlugins } from '../types';
 
 export interface TaskManagers {
