@@ -31,10 +31,7 @@ export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
 /**
  * A saved sticky dashboard control parsed directly from the Dashboard Attributes control panels JSON
  */
-export type StoredControlState = Pick<
-  ControlsGroupState['controls'][number],
-  'grow' | 'type' | 'width'
-> & {
+export type StoredControlState = Pick<ControlsGroupState[number], 'grow' | 'type' | 'width'> & {
   order: number; // order is generated from the array order
   id: string; // id is required
   explicitInput: ControlsGroupState[number]['config'] & { dataViewRefName?: string };
