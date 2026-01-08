@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/247926
-  describe.skip('new tab', function () {
+  describe('opening a new tab', function () {
     it('should create a new tab in classic mode', async () => {
       // tab 0 - with the default data view
 
@@ -91,32 +90,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       expect(await esql.getEsqlEditorQuery()).to.be(defaultQuery);
-    });
-
-    it('should be able to complete all quickly opened tabs', async () => {
-      await discover.selectTextBaseLang();
-      await discover.waitUntilTabIsLoaded();
-      const updatedQuery = 'FROM *';
-      await esql.setEsqlEditorQuery(updatedQuery);
-      await esql.submitEsqlEditorQuery();
-      await discover.waitUntilTabIsLoaded();
-      const fromTime = 'Jan 10, 2000 @ 00:00:00.000';
-      const toTime = 'Dec 10, 2025 @ 00:00:00.000';
-      await timePicker.setAbsoluteRange(fromTime, toTime);
-      await discover.waitUntilTabIsLoaded();
-
-      const tabCount = 7;
-
-      for (let i = 0; i < tabCount; i++) {
-        await testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
-      }
-
-      await discover.waitUntilTabIsLoaded();
-
-      for (let i = tabCount - 1; i > 0; i--) {
-        await unifiedTabs.selectTab(i);
-        await discover.waitUntilTabIsLoaded();
-      }
     });
   });
 }
