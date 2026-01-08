@@ -40,8 +40,8 @@ export const EisPromotionalTour = ({
   children,
 }: EisPromotionalTourProps) => {
   const { euiTheme } = useEuiTheme();
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
+    promoId: `${promoId}EisPromoTour`,
   });
   const dataId = `${promoId}-eis-promo-tour`;
 
@@ -51,7 +51,6 @@ export const EisPromotionalTour = ({
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={EIS_PROMO_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
@@ -64,9 +63,13 @@ export const EisPromotionalTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onDismissTour}
+      onFinish={onDismissPromo}
       footerAction={[
-        <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onDismissTour}>
+        <EuiButtonEmpty
+          data-test-subj="eisPromoTourCloseBtn"
+          data-telemetry-id={`${dataId}-dismiss-btn`}
+          onClick={onDismissPromo}
+        >
           {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
@@ -74,6 +77,7 @@ export const EisPromotionalTour = ({
               <EuiButton
                 href={ctaLink}
                 data-test-subj="eisPromoTourCtaBtn"
+                data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
                 iconType="popout"

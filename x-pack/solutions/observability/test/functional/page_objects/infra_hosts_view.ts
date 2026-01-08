@@ -127,7 +127,9 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async getAllMetricsCharts() {
       const container = await this.getChartsContainer();
-      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="hostsView-metricChart-"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async clickAndValidateMetricChartActionOptions() {
