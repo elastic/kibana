@@ -489,6 +489,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
 
         if (isCalledWithoutChanges) {
+          console.log('called without changes');
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
           if (isFilterProcessDescendantsSelected) {
@@ -496,8 +497,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           }
 
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
+          console.log('duplicatefield', hasDuplicateFields);
           return;
         } else {
+          console.log('called with changes and no duplicate field');
           setHasDuplicateFields(false);
         }
 
