@@ -90,6 +90,18 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
     [onCancel]
   );
 
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      // Don't cancel if focus moved to any other element within the component I.e. save/cancel buttons.
+      const relatedTarget = e.relatedTarget as HTMLElement | null;
+      if (relatedTarget?.closest('[data-test-subj="renameConversationInput"]')) {
+        return;
+      }
+      onCancel();
+    },
+    [onCancel]
+  );
+
   if (!conversationId) {
     return null;
   }
@@ -110,6 +122,7 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
       editModeProps={{
         inputProps: {
           inputRef: inputRefCallback,
+          onBlur: handleBlur,
           'data-test-subj': 'renameConversationInputField',
         },
         saveButtonProps: {
