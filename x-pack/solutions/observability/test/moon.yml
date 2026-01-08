@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/maintenance-windows-plugin'
   - '@kbn/product-doc-common'
 tags:
   - test-helper
