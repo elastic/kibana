@@ -42,7 +42,8 @@
       "workflowsManagement",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "kibanaUtils",
     ]
   }
 }
