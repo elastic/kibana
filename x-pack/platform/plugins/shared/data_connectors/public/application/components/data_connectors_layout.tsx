@@ -27,8 +27,8 @@ export const DataConnectorsLayout: React.FC<DataConnectorsLayoutProps> = ({ chil
     {
       label: (
         <>
-          {i18n.translate('xpack.dataConnectors.tabs.connectors', {
-            defaultMessage: 'Connectors',
+          {i18n.translate('xpack.dataConnectors.tabs.catalog', {
+            defaultMessage: 'Catalog',
           })}{' '}
           <EuiBadge color="hollow">{connectors.length}</EuiBadge>
         </>
