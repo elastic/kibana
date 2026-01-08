@@ -22,7 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const response = await supertest
         .get(`/api/alerting/rules/_find?search=${name}&search_fields=name`)
         .expect(200);
-      return response.body.data[0].id;
+      const found = response.body.data.find((rule: { name: string }) => rule.name === name);
+      return found ? found.id : undefined;
     };
 
     before(async () => {
@@ -140,10 +141,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       // Get the rule ID for verification
-      const ruleId = await getRuleIdByName(ruleName);
-      objectRemover.add(ruleId, 'rule', 'alerting');
 
       // Wait for automatic redirect to rule details page (not manual navigation)
+
+      let ruleId: string | undefined;
+
+      await retry.try(
+        async () => {
+          ruleId = await getRuleIdByName(ruleName);
+          if (!ruleId) {
+            throw new Error(`Rule with name ${ruleName} not found`);
+          }
+          objectRemover.add(ruleId, 'rule', 'alerting');
+        },
+        undefined,
+        3000
+      );
+
       await retry.try(async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
