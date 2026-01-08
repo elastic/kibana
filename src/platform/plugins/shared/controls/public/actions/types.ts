@@ -12,7 +12,7 @@ import type { BehaviorSubject } from 'rxjs';
 
 export interface PublishesControlsLayout {
   layout$: BehaviorSubject<{
-    controls: {
+    pinnedPanels: {
       [id: string]: PinnedControlLayoutState;
     };
   }>;

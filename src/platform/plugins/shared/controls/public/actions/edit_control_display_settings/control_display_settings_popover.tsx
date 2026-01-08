@@ -46,10 +46,11 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   const [isPopoverOpen, setIsPopoverOpen] = useState(isPopoverOpenInitialState);
 
   const layoutState = useStateFromPublishingSubject(api.parentApi.layout$);
-  const layoutEntry = useMemo(() => layoutState.controls[api.uuid], [layoutState, api.uuid]);
+  const layoutEntry = useMemo(() => layoutState.pinnedPanels[api.uuid], [layoutState, api.uuid]);
   const isToRightOfGrowControl = useMemo(
-    () => layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,
-    [layoutEntry.order, layoutState.controls]
+    () =>
+      layoutEntry.order > 0 && Object.values(layoutState.pinnedPanels)[layoutEntry.order - 1].grow,
+    [layoutEntry.order, layoutState.pinnedPanels]
   );
 
   const grow = useMemo(() => layoutEntry.grow ?? DEFAULT_CONTROL_GROW, [layoutEntry]);
@@ -60,8 +61,8 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
       const currentLayout = api.parentApi.layout$.getValue();
       api.parentApi.layout$.next({
         ...currentLayout,
-        controls: {
-          ...currentLayout.controls,
+        pinnedPanels: {
+          ...currentLayout.pinnedPanels,
           [api.uuid]: {
             ...layoutEntry,
             grow: nextGrow,

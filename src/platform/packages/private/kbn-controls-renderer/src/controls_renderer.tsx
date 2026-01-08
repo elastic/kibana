@@ -39,9 +39,9 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
   }, []);
 
-  const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
+  const [controlState, setControlState] = useState(parentApi.layout$.getValue().pinnedPanels);
 
-  const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
+  const controlsInOrder: Array<ControlsLayout['pinnedPanels'][string] & { id: string }> =
     useMemo(() => {
       return Object.entries(controlState)
         .map(([id, control]) => {
@@ -55,7 +55,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
   useEffect(() => {
     const layoutSubscription = parentApi.layout$
       .pipe(
-        map(({ controls }) => controls),
+        map(({ pinnedPanels }) => pinnedPanels),
         distinctUntilChanged(deepEqual)
       )
       .subscribe((controls) => {
@@ -82,7 +82,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
         parentApi.layout$.next({
           ...parentApi.layout$.getValue(),
           // based on the result of `arrayMove`, assign the order to each control
-          controls: result.reduce((prev, control, index) => {
+          pinnedPanels: result.reduce((prev, control, index) => {
             const { id, ...rest } = control;
             return { ...prev, [id!]: { ...rest, order: index } };
           }, {}),

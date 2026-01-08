@@ -27,7 +27,7 @@ export interface ControlRendererServices {
 }
 
 export interface ControlsLayout {
-  controls: {
+  pinnedPanels: {
     [id: string]: PinnedControlLayoutState;
   };
 }

@@ -55,7 +55,7 @@ export const ControlPanel = ({
 
   const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
   const initialState = useMemo(() => {
-    return parentApi.layout$.getValue().controls[uuid];
+    return parentApi.layout$.getValue().pinnedPanels[uuid];
   }, [parentApi, uuid]);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -80,7 +80,7 @@ export const ControlPanel = ({
   useEffect(() => {
     const stateSubscription = parentApi.layout$
       .pipe(
-        map(({ controls }) => pick(controls[uuid], ['grow', 'width'])),
+        map(({ pinnedPanels }) => pick(pinnedPanels[uuid], ['grow', 'width'])),
         distinctUntilChanged(deepEqual)
       )
       .subscribe((newState) => {
