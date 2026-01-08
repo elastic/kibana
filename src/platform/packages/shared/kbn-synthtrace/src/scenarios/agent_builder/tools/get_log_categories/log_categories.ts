@@ -1,27 +1,60 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange, log } from '@kbn/synthtrace-client';
-import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+/**
+ * SCENARIO: Generated Log Categories
+ *
+ * Story: Generates diverse log patterns for `payment-service` to verify `get_log_categories`.
+ *
+ * Patterns:
+ * - "Processing payment transaction for order #..." (Info, Frequent, High Cardinality)
+ * - "Payment transaction completed successfully" (Info, Frequent, Low Cardinality)
+ * - "Payment processing failed: connection timeout" (Error, Occasional)
+ * - "Payment gateway response time exceeded threshold" (Warn, Occasional)
+ * - "Debug: Payment API called with request_id=..." (Debug, Very Frequent, High Cardinality)
+ *
+ * Validate via:
+ *
+ * ```
+ * POST kbn:///api/agent_builder/tools/_execute
+ * {
+ *   "tool_id": "observability.get_log_categories",
+ *   "tool_params": {
+ *     "start": "now-1h",
+ *     "end": "now",
+ *     "terms": {
+ *       "service.name": "payment-service"
+ *     }
+ *   }
+ * }
+ * ```
+ */
 
-export async function createSyntheticLogsWithCategories({
-  getService,
+import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
+import { log } from '@kbn/synthtrace-client';
+import { createCliScenario } from '../../../../lib/utils/create_scenario';
+import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
+import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
+
+/**
+ * Generates log data with various categories/patterns for a service.
+ * Can be used both by CLI (via default export) and by API tests (via direct import).
+ */
+export function generateLogCategoriesData({
+  range,
+  logsEsClient,
   serviceName,
 }: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
+  range: Timerange;
+  logsEsClient: LogsSynthtraceEsClient;
   serviceName: string;
-}): Promise<{ logsSynthtraceEsClient: LogsSynthtraceEsClient }> {
-  const synthtrace = getService('synthtrace');
-  const logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-  await logsSynthtraceEsClient.clean();
-
-  const range = timerange('now-15m', 'now');
-
+}): ScenarioReturnType<LogDocument> {
   // Create multiple log patterns for categorization
   const paymentProcessingLogs = range
     .interval('30s')
@@ -90,7 +123,7 @@ export async function createSyntheticLogsWithCategories({
   const debugLogs = range
     .interval('15s')
     .rate(10)
-    .generator((timestamp, index) =>
+    .generator((timestamp) =>
       log
         .create()
         .message(
@@ -105,13 +138,15 @@ export async function createSyntheticLogsWithCategories({
         .timestamp(timestamp)
     );
 
-  await logsSynthtraceEsClient.index([
+  return withClient(logsEsClient, [
     paymentProcessingLogs,
     paymentCompleteLogs,
     errorLogs,
     warningLogs,
     debugLogs,
   ]);
-
-  return { logsSynthtraceEsClient };
 }
+
+export default createCliScenario(({ range, clients: { logsEsClient } }) =>
+  generateLogCategoriesData({ range, logsEsClient, serviceName: 'payment-service' })
+);

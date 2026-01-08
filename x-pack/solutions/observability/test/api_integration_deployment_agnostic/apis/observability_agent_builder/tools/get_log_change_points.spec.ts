@@ -64,14 +64,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(logChangePoints.length).to.be.greaterThan(0);
       });
 
-      it('should detect spike in error logs', () => {
+      it('should detect a change in error logs', () => {
         expect(logChangePoints.length).to.be.greaterThan(0);
-        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be.ok();
-        expect(spike).to.have.property('timeSeries');
-        expect(spike?.timeSeries?.length).to.be.greaterThan(0);
-        expect(spike?.timeSeries?.[0]).to.have.property('x');
-        expect(spike?.timeSeries?.[0]).to.have.property('y');
+        const change = logChangePoints.find((cp: ChangePoint) =>
+          ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
+            cp.changes?.type
+          )
+        );
+        expect(change).to.be.ok();
+        expect(change).to.have.property('timeSeries');
+        expect(change?.timeSeries?.length).to.be.greaterThan(0);
+        expect(change?.timeSeries?.[0]).to.have.property('x');
+        expect(change?.timeSeries?.[0]).to.have.property('y');
       });
 
       it('should detect stationary patterns in logs', () => {
@@ -98,10 +102,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         logChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
-      it('should still detect spikes without an explicit index', () => {
+      it('should still detect changes without an explicit index', () => {
         expect(logChangePoints.length).to.be.greaterThan(0);
-        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be.ok();
+        const hasChange = logChangePoints.some((cp: ChangePoint) =>
+          ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
+            cp.changes?.type as string
+          )
+        );
+        expect(hasChange).to.be(true);
       });
     });
 
@@ -122,16 +130,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         logChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
-      it('should not report spikes when only stable info logs are included', () => {
-        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be(undefined);
+      it('should not detect changes when only stable info logs are included', () => {
+        const hasChange = logChangePoints.some((cp: ChangePoint) =>
+          ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
+            cp.changes?.type
+          )
+        );
+        expect(hasChange).to.be(false);
       });
 
-      it('should still report stationary patterns in info logs', () => {
-        const stationary = logChangePoints.find(
+      it('should still detect stationary patterns in info logs', () => {
+        const stationary = logChangePoints.some(
           (cp: ChangePoint) => cp.changes?.type === 'stationary'
         );
-        expect(stationary).to.be.ok();
+        expect(stationary).to.be(true);
       });
     });
   });

@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { apm, httpExitSpan, log, timerange } from '@kbn/synthtrace-client';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 export interface DistributedTraceData {
   traceId: string;

@@ -6,13 +6,12 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -24,12 +23,16 @@ import { useHasActiveConversation } from '../../../../../hooks/use_conversation'
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
-import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
+import {
+  getMaxListHeight,
+  selectorPopoverPanelStyles,
+  useSelectorListStyles,
+} from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 import { AgentAvatar } from '../../../../common/agent_avatar';
 
-const AGENT_OPTION_ROW_HEIGHT = 88;
+const AGENT_OPTION_ROW_HEIGHT = 44;
 
 const selectAgentAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
@@ -87,7 +90,8 @@ const AgentListFooter: React.FC = () => {
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButton
+          <EuiButtonEmpty
+            size="s"
             iconType="gear"
             color="text"
             aria-label={manageAgentsAriaLabel}
@@ -97,10 +101,11 @@ const AgentListFooter: React.FC = () => {
               id="xpack.onechat.conversationInput.agentSelector.manageAgents"
               defaultMessage="Manage"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton
+          <EuiButtonEmpty
+            size="s"
             iconType="plus"
             aria-label={createAgentAriaLabel}
             {...(manageAgents ? { href: createAgentHref } : { disabled: true })}
@@ -109,7 +114,7 @@ const AgentListFooter: React.FC = () => {
               id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
               defaultMessage="New"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
@@ -127,13 +132,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   onAgentChange,
   agents = [],
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxl} * 11);
-  `;
 
   const { agentOptions, renderAgentOption } = useAgentOptions({
     agents,
@@ -152,7 +151,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
 
   return (
     <EuiPopover
-      panelProps={{ css: panelStyles }}
+      panelProps={{ css: selectorPopoverPanelStyles }}
       panelPaddingSize="none"
       button={
         <AgentSelectPopoverButton
