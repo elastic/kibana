@@ -98,10 +98,10 @@ describe('registerRoutes', () => {
             workflowIds: ['workflow-1'],
             toolIds: ['tool-1'],
             kscIds: ['ksc-1'],
-            createdAt: '2024-01-01T00:00:00.000Z',
-            updatedAt: '2024-01-01T00:00:00.000Z',
           },
           references: [],
+          created_at: '2024-01-01T00:00:00.000Z',
+          updated_at: '2024-01-01T00:00:00.000Z',
         },
         {
           id: 'connector-2',
@@ -112,10 +112,10 @@ describe('registerRoutes', () => {
             workflowIds: ['workflow-2'],
             toolIds: ['tool-2'],
             kscIds: ['ksc-2'],
-            createdAt: '2024-01-02T00:00:00.000Z',
-            updatedAt: '2024-01-02T00:00:00.000Z',
           },
           references: [],
+          created_at: '2024-01-02T00:00:00.000Z',
+          updated_at: '2024-01-02T00:00:00.000Z',
         },
       ];
 
@@ -128,7 +128,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[0][1];
+      const routeHandler = mockRouter.get.mock.calls[2][1]; // Index 2: GET /api/data_connectors
       const mockRequest = httpServerMock.createKibanaRequest();
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -154,7 +154,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[0][1];
+      const routeHandler = mockRouter.get.mock.calls[2][1]; // Index 2: GET /api/data_connectors
       const mockRequest = httpServerMock.createKibanaRequest();
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -180,17 +180,17 @@ describe('registerRoutes', () => {
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],
           kscIds: ['ksc-1'],
-          createdAt: '2024-01-01T00:00:00.000Z',
-          updatedAt: '2024-01-01T00:00:00.000Z',
         },
         references: [],
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
       };
 
       mockSavedObjectsClient.get.mockResolvedValue(mockConnector);
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[1][1];
+      const routeHandler = mockRouter.get.mock.calls[3][1]; // Index 3: GET /api/data_connectors/:id
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'connector-1' },
       });
@@ -215,7 +215,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[1][1];
+      const routeHandler = mockRouter.get.mock.calls[3][1]; // Index 3: GET /api/data_connectors/:id
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'nonexistent' },
       });
