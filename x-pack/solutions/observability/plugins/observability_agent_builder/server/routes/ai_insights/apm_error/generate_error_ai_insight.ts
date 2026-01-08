@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MessageRole, type ChatCompletionEvent } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import dedent from 'dedent';
 import { concat, of } from 'rxjs';
