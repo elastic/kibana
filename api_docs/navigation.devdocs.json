@@ -1091,9 +1091,7 @@
               "section": "def-common.AggregateQuery",
               "text": "AggregateQuery"
             },
-            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; TopNavMenuBeta: ({ config, visible, }: { config: ",
-            "TopNavMenuConfigBeta",
-            "; visible?: boolean | undefined; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; createTopNavWithCustomContext: (customUnifiedSearch?: ",
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; createTopNavWithCustomContext: (customUnifiedSearch?: ",
             {
               "pluginId": "unifiedSearch",
               "scope": "public",
