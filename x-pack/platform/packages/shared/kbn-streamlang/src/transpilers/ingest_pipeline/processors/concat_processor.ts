@@ -32,7 +32,10 @@ import type { ConcatProcessor } from '../../../../types/processors';
     }
  */
 export const processConcatProcessor = (
-  processor: Omit<ConcatProcessor, 'where'> & { if?: string; field: string }
+  processor: Omit<ConcatProcessor, 'where' | 'action' | 'to'> & {
+    if?: string;
+    field: string;
+  }
 ): IngestProcessorContainer => {
   let value = '';
   // value is the concatenation of the fields and literals in the from array
@@ -51,6 +54,7 @@ export const processConcatProcessor = (
       description: processor.description,
       if: processor.if,
       ignore_failure: processor.ignore_failure,
+      tag: processor.customIdentifier,
     },
   };
 
