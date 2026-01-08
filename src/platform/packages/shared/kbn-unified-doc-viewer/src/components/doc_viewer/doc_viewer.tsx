@@ -40,7 +40,13 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
       .map((docView: DocView) => ({
         id: getFullTabId(docView.id), // `id` value is used to persist the selected tab in localStorage
         name: docView.title,
-        content: <DocViewerTab key={docView.id} docView={docView} renderProps={renderProps} />,
+        content: (
+          <DocViewerTab
+            key={`${renderProps.hit.id}_${docView.id}`}
+            docView={docView}
+            renderProps={renderProps}
+          />
+        ),
         ['data-test-subj']: `docViewerTab-${docView.id}`,
       }));
 
