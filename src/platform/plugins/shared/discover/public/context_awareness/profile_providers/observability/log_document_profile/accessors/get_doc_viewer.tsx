@@ -7,24 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  UnifiedDocViewerLogsOverview,
-  type UnifiedDocViewerLogsOverviewApi,
-} from '@kbn/unified-doc-viewer-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
-import { filter, skip } from 'rxjs';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { i18n } from '@kbn/i18n';
+import {
+  UnifiedDocViewerLogsOverview,
+  type UnifiedDocViewerLogsOverviewApi,
+} from '@kbn/unified-doc-viewer-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useEffect, useRef, useState } from 'react';
+import type { BehaviorSubject } from 'rxjs';
+import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
-import type { LogDocumentProfileProvider } from '../profile';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
+import type { LogDocumentProfileProvider } from '../profile';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -97,6 +97,26 @@ const LogOverviewTab = ({
   const [logsOverviewApi, setLogsOverviewApi] = useState<UnifiedDocViewerLogsOverviewApi | null>(
     null
   );
+  useAccordionExpansionEffect(logOverviewContext$, logsOverviewApi, props.hit.id);
+
+  return (
+    <UnifiedDocViewerLogsOverview
+      {...props}
+      ref={setLogsOverviewApi}
+      renderAIAssistant={logsAIAssistantFeature?.render}
+      renderAIInsight={logsAIInsightFeature?.render}
+      renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
+      renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+      indexes={indexes}
+    />
+  );
+};
+
+const useAccordionExpansionEffect = (
+  logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>,
+  logsOverviewApi: UnifiedDocViewerLogsOverviewApi | null,
+  recordId: string
+) => {
   const initialAccordionSection = useRef(logOverviewContext$.getValue()?.initialAccordionSection);
 
   useEffect(() => {
@@ -119,7 +139,7 @@ const LogOverviewTab = ({
           return (
             overviewContext !== undefined &&
             overviewContext.initialAccordionSection !== undefined &&
-            overviewContext.recordId === props.hit.id
+            overviewContext.recordId === recordId
           );
         })
       )
@@ -131,17 +151,5 @@ const LogOverviewTab = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [logOverviewContext$, logsOverviewApi, props.hit.id]);
-
-  return (
-    <UnifiedDocViewerLogsOverview
-      {...props}
-      ref={setLogsOverviewApi}
-      renderAIAssistant={logsAIAssistantFeature?.render}
-      renderAIInsight={logsAIInsightFeature?.render}
-      renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
-      renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
-      indexes={indexes}
-    />
-  );
+  }, [logOverviewContext$, logsOverviewApi, recordId]);
 };
