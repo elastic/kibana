@@ -39,6 +39,7 @@ import { getUiSettings } from './ui_settings';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
 import { SpacesLicenseService } from '../common/licensing';
+import { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -46,10 +47,12 @@ export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
   cloud?: CloudSetup;
+  cps: CPSServerSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
+  cps: CPSServerStart;
 }
 
 /**
@@ -132,7 +135,10 @@ export class SpacesPlugin
   }
 
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
-    const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
+    const spacesClientSetup = this.spacesClientService.setup(
+      { config$: this.config$ },
+      plugins.cps
+    );
     core.uiSettings.registerGlobal(getUiSettings());
 
     const spacesServiceSetup = this.spacesService.setup({
@@ -227,7 +233,7 @@ export class SpacesPlugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
+    const spacesClientStart = this.spacesClientService.start(core, plugins.features, plugins.cps);
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,

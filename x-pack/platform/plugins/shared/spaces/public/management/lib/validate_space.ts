@@ -189,6 +189,11 @@ export class SpaceValidator {
     return valid();
   }
 
+  public validateProjectRouting(space: CustomizeSpaceFormValues) {
+    //TODO
+    return valid();
+  }
+
   public validateEnabledFeatures(space: CustomizeSpaceFormValues) {
     return valid();
   }
@@ -210,6 +215,7 @@ export class SpaceValidator {
       isEditing,
       allowSolutionVisibility
     );
+    const { isInvalid: isProjectRoutingInvalid } = this.validateProjectRouting(space);
 
     if (
       isNameInvalid ||
@@ -219,7 +225,8 @@ export class SpaceValidator {
       isAvatarColorInvalid ||
       isAvatarImageInvalid ||
       areFeaturesInvalid ||
-      isSolutionViewInvalid
+      isSolutionViewInvalid ||
+      isProjectRoutingInvalid
     ) {
       return invalid();
     }

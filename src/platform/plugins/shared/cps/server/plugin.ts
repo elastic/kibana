@@ -7,20 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { NpreClient } from './npre/npre_client';
 import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
-import type { CPSServerSetup } from './types';
+import type { CPSServerSetup, CPSServerStart } from './types';
 
-export class CPSServerPlugin implements Plugin<CPSServerSetup> {
+export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart> {
   private readonly initContext: PluginInitializerContext;
   private readonly isServerless: boolean;
   private readonly config$: CPSConfig;
+  private readonly log: Logger;
 
   constructor(initContext: PluginInitializerContext) {
     this.initContext = { ...initContext };
     this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
     this.config$ = initContext.config.get();
+    this.log = initContext.logger.get();
   }
 
   public setup(core: CoreSetup) {
@@ -41,7 +51,10 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   }
 
   public start(core: CoreStart) {
-    return {};
+    return {
+      createNpreClient: (request: KibanaRequest) =>
+        new NpreClient(this.log, core.elasticsearch.client, request),
+    };
   }
 
   public stop() {}

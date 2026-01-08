@@ -19,6 +19,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
 import type { ConfigType } from '../config';
+import { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 
 /**
  * For consumption by the security plugin only.
@@ -74,15 +75,19 @@ export class SpacesClientService {
 
   private clientWrapper?: SpacesClientWrapper;
 
+  private cpsSetup?: CPSServerSetup;
+
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly buildFlavour: BuildFlavor
   ) {}
 
-  public setup({ config$ }: SetupDeps): SpacesClientServiceSetup {
+  public setup({ config$ }: SetupDeps, cpsSetup: CPSServerSetup): SpacesClientServiceSetup {
     config$.subscribe((nextConfig) => {
       this.config = nextConfig;
     });
+
+    this.cpsSetup = cpsSetup;
 
     return {
       setClientRepositoryFactory: (repositoryFactory: SpacesClientRepositoryFactory) => {
@@ -100,7 +105,11 @@ export class SpacesClientService {
     };
   }
 
-  public start(coreStart: CoreStart, features: FeaturesPluginStart): SpacesClientServiceStart {
+  public start(
+    coreStart: CoreStart,
+    features: FeaturesPluginStart,
+    cps: CPSServerStart
+  ): SpacesClientServiceStart {
     const nonGlobalTypes = coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
@@ -124,7 +133,9 @@ export class SpacesClientService {
           this.repositoryFactory!(request, coreStart.savedObjects),
           nonGlobalTypeNames,
           this.buildFlavour,
-          features
+          features,
+          this.cpsSetup,
+          cps.createNpreClient(request)
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

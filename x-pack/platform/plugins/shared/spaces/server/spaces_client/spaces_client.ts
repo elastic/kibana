@@ -21,6 +21,9 @@ import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
+import { INpreClient } from '@kbn/cps/server/npre';
 
 const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
@@ -98,7 +101,9 @@ export class SpacesClient implements ISpacesClient {
     private readonly repository: ISavedObjectsRepository,
     private readonly nonGlobalTypeNames: string[],
     private readonly buildFlavour: BuildFlavor,
-    private readonly features: FeaturesPluginStart
+    private readonly features: FeaturesPluginStart,
+    private readonly cpsSetup: CPSServerSetup | undefined,
+    private readonly npreClient: INpreClient
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
     this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
@@ -194,6 +199,19 @@ export class SpacesClient implements ISpacesClient {
 
     if (Object.hasOwn(space, 'solution') && !space.solution) {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
+    }
+
+    if (Object.hasOwn(space, 'projectRouting')) {
+      if (!this.cpsSetup?.getCpsEnabled()) {
+        throw Boom.badRequest(
+          'Unable to update Space, projectRouting property is only allowed when CPS is enabled'
+        );
+      } else {
+        await this.npreClient.putNpre(`kibana_space_${id}_default`, '');
+        const npre = await this.npreClient.getNpre(`kibana_space_${id}_default`);
+        console.log(npre, 'npre');
+        //TODO delete project routing from object
+      }
     }
 
     const attributes = this.generateSpaceAttributes(space);

@@ -21,11 +21,15 @@ import { getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
+import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { SpaceValidator } from '../lib';
 import type { CustomizeSpaceFormValues } from '../types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ProjectRouting } from '@kbn/es-query';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 interface Props {
   space: Space;
@@ -36,8 +40,13 @@ interface Props {
   reloadWindow: () => void;
 }
 
+interface KibanaServices {
+  cps?: CPSPluginStart;
+}
+
 export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history, ...props }) => {
   const imageAvatarSelected = Boolean(space.imageUrl);
+  const { services } = useKibana<KibanaServices>();
   const [formValues, setFormValues] = useState<CustomizeSpaceFormValues>({
     ...space,
     avatarType: imageAvatarSelected ? 'image' : 'initials',
@@ -58,6 +67,10 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     useEditSpaceServices();
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
+
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
+    services.cps?.cpsManager?.getProjectRouting()
+  );
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
@@ -102,6 +115,14 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onSolutionViewChange = useCallback(
     (updatedSpace: Partial<Space>) => {
       setSolution(updatedSpace.solution);
+      onChangeFeatures(updatedSpace);
+    },
+    [onChangeFeatures]
+  );
+
+  const onProjectRoutingChange = useCallback(
+    (updatedSpace: Partial<Space>) => {
+      setProjectRouting(updatedSpace.projectRouting);
       onChangeFeatures(updatedSpace);
     },
     [onChangeFeatures]
@@ -308,6 +329,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         validator={validator}
       />
 
+      <EuiSpacer />
+      <CustomizeCps
+        validator={validator}
+        space={getSpaceFromFormValues(formValues)}
+        editingExistingSpace={true}
+        onChange={onProjectRoutingChange}
+      />
       {doShowUserImpactWarning()}
 
       <EuiSpacer />

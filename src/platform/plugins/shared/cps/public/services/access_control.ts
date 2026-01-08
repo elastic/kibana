@@ -59,6 +59,9 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   discover: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
+  management: {
+    defaultAccess: ProjectRoutingAccess.EDITABLE,
+  },
   visualize: {
     defaultAccess: ProjectRoutingAccess.DISABLED,
     routeRules: [

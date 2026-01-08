@@ -8,6 +8,7 @@
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
 import type { SOLUTION_VIEW_CLASSIC } from '../../constants';
+import { ProjectRouting } from '@kbn/es-query';
 
 export type SolutionView = SolutionId | typeof SOLUTION_VIEW_CLASSIC;
 
@@ -69,6 +70,11 @@ export interface Space {
    * Solution selected for this space.
    */
   solution?: SolutionView;
+
+  /**
+   * Cross-project search project routing configuration for this space.
+   */
+  projectRouting?: ProjectRouting;
 }
 
 /**
