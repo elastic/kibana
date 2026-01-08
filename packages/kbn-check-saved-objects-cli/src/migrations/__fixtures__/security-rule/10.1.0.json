@@ -1,11 +1,11 @@
 {
-  "10.1.0": [
+  "10.0.0": [
     {
       "rule_id": "sample-rule-id",
       "version": 1
     }
   ],
-  "10.2.0": [
+  "10.1.0": [
     {
       "rule_id": "sample-rule-id",
       "version": 1
