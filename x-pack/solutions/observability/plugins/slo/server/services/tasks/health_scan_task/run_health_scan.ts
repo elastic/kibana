@@ -9,9 +9,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { keyBy } from 'lodash';
-import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  HEALTH_DATA_STREAM_NAME,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../../../common/constants';
 import { computeHealth } from '../../../domain/services/compute_health';
-import { HEALTH_DATA_STREAM_NAME } from '../../health_scan/health_index_installer';
 import type { HealthDocument, SLO } from './types';
 
 interface Dependencies {
@@ -127,7 +129,7 @@ async function fetchUniqueSloFromSummary(
     )}`
   );
 
-  const result = await scopedClusterClient.asCurrentUser.search<
+  const result = await scopedClusterClient.asInternalUser.search<
     unknown,
     {
       id_revision: {
@@ -213,7 +215,7 @@ async function bulkInsertHealthDocuments(
     doc,
   ]);
 
-  await scopedClusterClient.asCurrentUser.bulk(
+  await scopedClusterClient.asInternalUser.bulk(
     { operations, refresh: false },
     { signal: abortController.signal }
   );
