@@ -106,6 +106,7 @@ import type {
 import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 import type { TagcloudVisualization as TagcloudVisualizationType } from './visualizations/tagcloud';
+import type { GpuChartsVisualization as GpuChartsVisualizationType } from './visualizations/gpu_charts';
 
 import {
   APP_ID,
@@ -303,6 +304,7 @@ export class LensPlugin {
   private heatmapVisualization: HeatmapVisualizationType | undefined;
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private tagcloudVisualization: TagcloudVisualizationType | undefined;
+  private gpuChartsVisualization: GpuChartsVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
@@ -597,6 +599,7 @@ export class LensPlugin {
       HeatmapVisualization,
       GaugeVisualization,
       TagcloudVisualization,
+      GpuChartsVisualization,
       TextBasedDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
@@ -610,6 +613,7 @@ export class LensPlugin {
     this.heatmapVisualization = new HeatmapVisualization();
     this.gaugeVisualization = new GaugeVisualization();
     this.tagcloudVisualization = new TagcloudVisualization();
+    this.gpuChartsVisualization = new GpuChartsVisualization();
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
@@ -635,6 +639,7 @@ export class LensPlugin {
     this.heatmapVisualization.setup(core, dependencies);
     this.gaugeVisualization.setup(core, dependencies);
     this.tagcloudVisualization.setup(core, dependencies);
+    this.gpuChartsVisualization.setup(core, dependencies);
 
     this.queuedVisualizations.forEach((queuedVis) => {
       editorFrameSetupInterface.registerVisualization(queuedVis);

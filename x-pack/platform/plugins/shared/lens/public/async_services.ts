@@ -33,6 +33,8 @@ export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 export * from './visualizations/tagcloud/tagcloud_visualization';
 export * from './visualizations/tagcloud';
+export * from './visualizations/gpu_charts/gpu_charts_visualization';
+export * from './visualizations/gpu_charts';
 export { getEditLensConfiguration } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export * from './datasources/form_based/form_based';
