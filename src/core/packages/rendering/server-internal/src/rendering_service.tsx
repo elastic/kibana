@@ -106,11 +106,9 @@ export class RenderingService {
     userSettings,
     i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
-    this.coreContext.configService
-      .atPath<boolean>('airgapped')
-      .subscribe((value) => {
-        this.airgapped = value ?? false;
-      });
+    this.airgapped = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('airgapped')
+    ).catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
