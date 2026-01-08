@@ -356,9 +356,9 @@ export class PackageInstaller {
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
       this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
-      await downloadToDisk(artifactUrl, artifactPath);
+      const downloadedFullPath = await downloadToDisk(artifactUrl, artifactPath);
 
-      zipArchive = await openZipArchive(artifactPath);
+      zipArchive = await openZipArchive(downloadedFullPath);
       validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
