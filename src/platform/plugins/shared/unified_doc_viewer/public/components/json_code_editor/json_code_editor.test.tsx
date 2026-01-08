@@ -16,7 +16,7 @@ jest.mock('./json_code_editor_common', () => ({
   JsonCodeEditorCommon: jest.fn(() => <div data-test-subj="jsonCodeEditorCommon" />),
 }));
 
-const mockedJsonCodeEditorCommon = JsonCodeEditorCommon as jest.Mock;
+const mockedJsonCodeEditorCommon = jest.mocked(JsonCodeEditorCommon);
 
 describe('JsonCodeEditor', () => {
   beforeEach(() => {

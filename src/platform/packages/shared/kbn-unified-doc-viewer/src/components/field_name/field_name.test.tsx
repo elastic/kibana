@@ -15,9 +15,12 @@ import { render, screen } from '@testing-library/react';
 
 describe('FieldName', () => {
   test('renders a string field by providing fieldType and fieldName', () => {
-    const { container } = render(<FieldName fieldName="test" fieldType="string" />);
+    const FIELD_NAME = 'test';
 
-    expect(container.firstChild).toMatchSnapshot();
+    render(<FieldName fieldName={FIELD_NAME} fieldType="string" />);
+
+    expect(screen.getByText(FIELD_NAME)).toBeVisible();
+    expect(screen.getByText('String')).toBeVisible();
   });
 
   test('renders a number field by providing a field record', () => {
