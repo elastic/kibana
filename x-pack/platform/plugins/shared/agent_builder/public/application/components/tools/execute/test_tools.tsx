@@ -69,9 +69,11 @@ const i18nMessages = {
       defaultMessage: 'Enter {label}',
       values: { label },
     }),
-  title: i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
-    defaultMessage: 'Test Tool',
-  }),
+  title: (toolName: string) =>
+    i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
+      defaultMessage: 'Test tool: {toolName}',
+      values: { toolName },
+    }),
   inputsTitle: i18n.translate('xpack.agentBuilder.tools.testTool.inputsTitle', {
     defaultMessage: 'Inputs',
   }),
@@ -289,7 +291,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">{i18nMessages.title}</h2>
+              <h2 id="flyoutTitle">{i18nMessages.title(tool.id)}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
