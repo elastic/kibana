@@ -19,6 +19,9 @@ import { CreateRuleRoute } from './routes/create_rule_route';
 import { UpdateRuleRoute } from './routes/update_rule_route';
 import { initializeRuleExecutorTaskDefinition } from './lib/rule_executor';
 import { AlertingResourcesService } from './lib/services/alerting_resources_service';
+import { LoggerService } from './lib/services/logger_service';
+import { StorageService } from './lib/services/storage_service';
+import { EsqlService } from './lib/services/esql_service';
 import { registerSavedObjects } from './saved_objects';
 import type { AlertingServerStartDependencies } from './types';
 
@@ -37,6 +40,9 @@ export const module = new ContainerModule(({ bind }) => {
   // Singleton services
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(AlertingResourcesService).toSelf().inSingletonScope();
+  bind(LoggerService).toSelf().inSingletonScope();
+  bind(StorageService).toSelf().inSingletonScope();
+  bind(EsqlService).toSelf().inSingletonScope();
 
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);
