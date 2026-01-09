@@ -304,10 +304,7 @@ export type FeatureIdentificationTaskResult =
       error: string;
     }
   | ({
-      status: TaskStatus.Completed;
-    } & IdentifyFeaturesResult)
-  | ({
-      status: TaskStatus.Acknowledged;
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
     } & IdentifyFeaturesResult);
 
 export const featuresStatusRoute = createServerRoute({
@@ -365,17 +362,13 @@ export const featuresStatusRoute = createServerRoute({
       };
     } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
       return {
-        status: task.status as TaskStatus.Completed | TaskStatus.Acknowledged,
+        status: task.status,
         ...task.task.payload,
       };
     }
 
     return {
-      status: task.status as
-        | TaskStatus.InProgress
-        | TaskStatus.NotStarted
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled,
+      status: task.status,
     };
   },
 });
