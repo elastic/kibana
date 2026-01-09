@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validate as validateUuid } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
@@ -20,14 +19,10 @@ export async function resolveConnectorId(
     const defaultConnector = await inferencePlugin.getDefaultConnector(kibanaRequest);
 
     if (!defaultConnector) {
-      throw new Error('No default connector configured');
+      throw new Error('No default AI connector configured');
     }
 
     return defaultConnector.connectorId;
-  }
-
-  if (validateUuid(nameOrId)) {
-    return nameOrId;
   }
 
   const allConnectors = await inferencePlugin.getConnectorList(kibanaRequest);
@@ -36,12 +31,12 @@ export async function resolveConnectorId(
     throw new Error(`No AI connectors found.`);
   }
 
-  const connector = allConnectors.find((c) => c.name === nameOrId);
+  const connector = allConnectors.find((c) => c.name === nameOrId || c.connectorId === nameOrId);
 
   if (!connector) {
     throw new Error(
       `AI Connector '${nameOrId}' not found. Available AI connectors: ${allConnectors
-        .map((c) => c.name)
+        .map((c) => `${c.name} (ID: ${c.connectorId})`)
         .join(', ')}`
     );
   }
