@@ -11,7 +11,6 @@ import type {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
@@ -59,25 +58,10 @@ export function initializeDynamicActionsManager(
     } as StateComparators<DynamicActionsSerializedState>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
     getLatestState,
-    serializeState: () => {
-      const latestState = getLatestState();
-      if (!enhancement || !latestState.enhancements?.dynamicActions) {
-        return {
-          rawState: latestState,
-          references: [],
-        };
-      }
-
-      const extractResults = enhancement.extract(latestState.enhancements.dynamicActions);
-      return {
-        rawState: {
-          enhancements: {
-            dynamicActions: extractResults.state as DynamicActionsState,
-          },
-        },
-        references: extractResults.references,
-      };
-    },
+    serializeState: () => ({
+      rawState: getLatestState(),
+      references: [],
+    }),
     reinitializeState: (lastState: DynamicActionsSerializedState) => {
       api.setDynamicActions(lastState.enhancements);
     },
