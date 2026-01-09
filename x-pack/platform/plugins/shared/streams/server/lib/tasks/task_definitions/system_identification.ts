@@ -24,7 +24,8 @@ export interface SystemIdentificationTaskParams {
 
 export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
-    streams_system_identification: {
+    // TODO: rename to streams_system_identification
+    streams_feature_identification: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
