@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
-import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
@@ -124,7 +124,7 @@ export const RuleFormRoute = () => {
           if (returnApp === 'rules') {
             // Navigate to rule details page in the rules app
             application.navigateToApp('rules', {
-              path: getRuleDetailsRoute(ruleId),
+              path: getRulesAppDetailsRoute(ruleId),
             });
           } else if (returnApp && returnPath) {
             // Navigate back to the original app/path for other apps

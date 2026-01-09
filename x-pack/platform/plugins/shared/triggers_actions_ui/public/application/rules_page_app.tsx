@@ -10,7 +10,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -57,8 +57,9 @@ const AppWithoutRouter = () => {
     >
       <PerformanceContextProvider>
         <Routes>
+          <Route exact path="/logs" component={suspendedComponentWithProps(RulesPage, 'xl')} />
           <Route
-            path={ruleDetailsRoute}
+            path={rulesAppDetailsRoute}
             component={suspendedComponentWithProps(RuleDetailsRouteWrapper, 'xl')}
           />
           <Route path="/" component={suspendedComponentWithProps(RulesPage, 'xl')} />

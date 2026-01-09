@@ -13,6 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
 import {
   getRuleDetailsRoute,
+  getRulesAppDetailsRoute,
   triggersActionsRoute,
 } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
@@ -430,7 +431,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
           const pathToRuleDetails = isInRulesApp
-            ? `rules${getRuleDetailsRoute(rule.id)}`
+            ? `rules${getRulesAppDetailsRoute(rule.id)}`
             : `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
 
           const linkProps = getRouterLinkProps({

@@ -11,7 +11,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { getCreateRuleRoute, getEditRuleRoute } from '@kbn/rule-data-utils';
+import {
+  getCreateRuleRoute,
+  getEditRuleRoute,
+  getRulesAppDetailsRoute,
+  rulesAppDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
@@ -121,6 +126,7 @@ const RulesPage = () => {
           setHeaderActions={setHeaderActions}
           navigateToEditRuleForm={navigateToEditRuleForm}
           navigateToCreateRuleForm={navigateToCreateRuleForm}
+          ruleDetailsRoute={rulesAppDetailsRoute}
         />
       </KibanaPageTemplate.Section>
     );
@@ -134,6 +140,7 @@ const RulesPage = () => {
           'xl'
         )({
           setHeaderActions,
+          getRuleDetailsRoute: getRulesAppDetailsRoute,
         })}
       </KibanaPageTemplate.Section>
     );
