@@ -83,6 +83,7 @@ export const useAddConnectorFlyout = ({
       try {
         await http.post(`${API_BASE_PATH}`, {
           body: JSON.stringify({
+            name: connector.name,
             stack_connector_id: connector.id,
             type: dataSourceType,
           }),
