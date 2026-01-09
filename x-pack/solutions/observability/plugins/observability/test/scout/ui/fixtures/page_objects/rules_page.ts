@@ -441,6 +441,14 @@ export class RulesPage {
    * This waits for form elements to be initialized with default values
    */
   async waitForFormReady() {
+    // Wait for any loading spinners to disappear
+    const loadingSpinner = this.page.locator('.euiLoadingSpinner');
+    try {
+      await expect(loadingSpinner).toBeHidden({ timeout: 10000 });
+    } catch {
+      // Loading spinner might not appear at all, which is fine
+    }
+
     // Wait for the custom equation editor to be visible (indicates criteria initialized)
     const customEquationButton = this.page.testSubj.locator('customEquation');
     try {
@@ -461,7 +469,12 @@ export class RulesPage {
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
+    // Scroll the save button into view to ensure it's accessible
+    await this.ruleSaveButton.scrollIntoViewIfNeeded();
+
+    // Click the save button
     await this.ruleSaveButton.click();
+
     await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.confirmModalButton.click();
     // Wait for navigation to rule details page
