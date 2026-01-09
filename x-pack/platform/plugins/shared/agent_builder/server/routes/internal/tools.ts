@@ -126,30 +126,23 @@ export function registerInternalToolsRoutes({
       const [, { actions }] = await coreSetup.getStartServices();
       const registry = await toolService.getRegistry({ request });
 
-      try {
-        const result = await bulkCreateMcpTools({
-          registry,
-          actions,
-          request,
-          connectorId,
-          tools,
-          namespace,
-          tags,
-          skipExisting,
-          kibanaLogger: logger,
-        });
+      const { results, summary } = await bulkCreateMcpTools({
+        registry,
+        actions,
+        request,
+        connectorId,
+        tools,
+        namespace,
+        tags,
+        skipExisting,
+      });
 
-        return response.ok<BulkCreateMcpToolsResponse>({
-          body: result,
-        });
-      } catch (error) {
-        if (error instanceof Error && error.message.startsWith('Invalid namespace:')) {
-          return response.badRequest({
-            body: { message: error.message },
-          });
-        }
-        throw error;
-      }
+      return response.ok<BulkCreateMcpToolsResponse>({
+        body: {
+          results,
+          summary,
+        },
+      });
     })
   );
 
