@@ -37,11 +37,11 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
-export const trialCompanionNBASavedObject: SavedObjectsType = {
+export const trialCompanionNBASavedObjectType: SavedObjectsType = {
   name: NBA_SAVED_OBJECT_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'agnostic',
   mappings: savedObjectMappings,
   modelVersions: {
     1: version1,

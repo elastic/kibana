@@ -12,8 +12,8 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import { scriptsLibrarySavedObjectType } from './endpoint/lib/scripts_library';
 import type { ExperimentalFeatures } from '../common';
 import {
-  trialCompanionNBASavedObject,
-  trialCompanionNBAUserSeenSavedObject,
+  trialCompanionNBASavedObjectType,
+  trialCompanionNBAUserSeenSavedObjectType,
 } from './lib/trial_companion/saved_objects';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
@@ -58,8 +58,8 @@ const types = [
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
-  trialCompanionNBASavedObject,
-  trialCompanionNBAUserSeenSavedObject,
+  trialCompanionNBASavedObjectType,
+  trialCompanionNBAUserSeenSavedObjectType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

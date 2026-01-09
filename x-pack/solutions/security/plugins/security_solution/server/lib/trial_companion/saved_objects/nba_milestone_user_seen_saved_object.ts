@@ -45,7 +45,7 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
-export const trialCompanionNBAUserSeenSavedObject: SavedObjectsType = {
+export const trialCompanionNBAUserSeenSavedObjectType: SavedObjectsType = {
   name: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
