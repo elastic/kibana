@@ -10,7 +10,7 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { FeatureType, StreamQuery } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { buildEsqlQuery } from '@kbn/streams-schema';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
@@ -124,12 +124,12 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   const storageFields: QueryLinkStorageFields & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
-    [QUERY_FEATURE_TYPE]: FeatureType;
+    [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
   } = link as StoredQueryLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
-    [QUERY_FEATURE_TYPE]: FeatureType;
+    [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
   };
   return {
@@ -144,7 +144,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
         ? {
             name: storageFields[QUERY_FEATURE_NAME],
             filter: JSON.parse(storageFields[QUERY_FEATURE_FILTER]),
-            type: storageFields[QUERY_FEATURE_TYPE] ?? 'system',
+            type: storageFields[QUERY_FEATURE_TYPE],
           }
         : undefined,
       severity_score: storageFields[QUERY_SEVERITY_SCORE],

@@ -5,8 +5,7 @@
  * 2.0.
  */
 import {
-  featureSchema,
-  featureTypeSchema,
+  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
@@ -40,7 +39,7 @@ const previewSignificantEventsRoute = createServerRoute({
           .object({
             name: z.string(),
             filter: conditionSchema,
-            type: featureTypeSchema,
+            type: z.literal('system'),
           })
           .optional(),
         kql: z.object({
@@ -221,7 +220,7 @@ const generateSignificantEventsRoute = createServerRoute({
         ),
     }),
     body: z.object({
-      feature: featureSchema.optional(),
+      system: systemSchema.optional(),
     }),
   }),
   options: {
@@ -279,7 +278,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          feature: params.body?.feature,
+          system: params.body?.system,
           connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
