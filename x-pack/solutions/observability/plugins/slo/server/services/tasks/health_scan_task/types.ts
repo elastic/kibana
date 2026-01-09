@@ -7,12 +7,6 @@
 
 import type { TransformHealth } from '../../../domain/models/health';
 
-export interface SLO {
-  spaceId: string;
-  id: string;
-  revision: number;
-}
-
 export interface HealthDocument {
   '@timestamp': string;
   scanId: string;

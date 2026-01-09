@@ -6,7 +6,12 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
+import {
+  SavedObjectsClient,
+  type CoreSetup,
+  type Logger,
+  type LoggerFactory,
+} from '@kbn/core/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { runHealthScan } from './run_health_scan';
@@ -81,6 +86,9 @@ export class HealthScanTask {
 
               const [coreStart] = await core.getStartServices();
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
+              const soClient = new SavedObjectsClient(
+                coreStart.savedObjects.createInternalRepository()
+              );
 
               const params = taskInstance.params as HealthScanTaskParams;
 
@@ -89,6 +97,7 @@ export class HealthScanTask {
                   { scanId: params.scanId },
                   {
                     scopedClusterClient,
+                    soClient,
                     logger: this.logger,
                     abortController,
                   }

@@ -6,18 +6,16 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { keyBy } from 'lodash';
-import {
-  HEALTH_DATA_STREAM_NAME,
-  SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../../../common/constants';
+import type { IScopedClusterClient, Logger, SavedObjectsClient } from '@kbn/core/server';
+import { HEALTH_DATA_STREAM_NAME } from '../../../../common/constants';
+import type { StoredSLODefinition } from '../../../domain/models';
 import { computeHealth } from '../../../domain/services/compute_health';
-import type { HealthDocument, SLO } from './types';
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import type { HealthDocument } from './types';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
+  soClient: SavedObjectsClient;
   logger: Logger;
   abortController: AbortController;
 }
@@ -26,53 +24,50 @@ interface RunParams {
   scanId: string;
 }
 
-const COMPOSITE_BATCH_SIZE = 500;
+const PER_PAGE = 100;
 const BATCH_DELAY_MS = 500;
-const MAX_BATCHES = 100;
 const MAX_SLOS_PROCESSED = 10_000;
 
 export async function runHealthScan(
   params: RunParams,
   dependencies: Dependencies
 ): Promise<{ processed: number; problematic: number }> {
-  const { scopedClusterClient, logger } = dependencies;
+  const { scopedClusterClient, soClient, logger } = dependencies;
   const { scanId } = params;
 
-  let searchAfter: AggregationsCompositeAggregateKey | undefined;
   let totalProcessed = 0;
   let totalProblematic = 0;
-  let batchCount = 0;
+
+  const finder = soClient.createPointInTimeFinder<StoredSLODefinition>({
+    type: SO_SLO_TYPE,
+    perPage: PER_PAGE,
+    namespaces: ['*'],
+    fields: ['id', 'revision', 'name', 'enabled'],
+  });
 
   try {
-    do {
-      batchCount++;
-      logger.debug(`Processing batch ${batchCount}`);
-
-      const { list, nextSearchAfter } = await fetchUniqueSloFromSummary(searchAfter, dependencies);
-      searchAfter = nextSearchAfter;
-
-      if (list.length === 0) {
+    for await (const response of finder.find()) {
+      if (response.saved_objects.length === 0) {
         logger.debug('No more SLOs to process');
         break;
       }
 
-      const listById = keyBy(list, (slo) => slo.id);
+      const sloList = response.saved_objects.map((so) => ({
+        id: so.attributes.id,
+        revision: so.attributes.revision,
+        name: so.attributes.name,
+        enabled: so.attributes.enabled,
+        spaceId: so.namespaces?.[0] ?? 'default',
+      }));
+      const sloById = new Map(sloList.map((slo) => [slo.id, slo]));
 
-      const healthResults = await computeHealth(
-        list.map((slo) => ({
-          id: slo.id,
-          revision: slo.revision,
-          name: `SLO ${slo.id}`, // We don't have the name, using placeholder
-          enabled: true, // Assume enabled for health check
-        })),
-        { scopedClusterClient }
-      );
+      const healthResults = await computeHealth(sloList, { scopedClusterClient });
 
       const now = new Date().toISOString();
       const documents: HealthDocument[] = healthResults.map((result) => ({
         '@timestamp': now,
         scanId,
-        spaceId: listById[result.id]?.spaceId ?? 'default',
+        spaceId: sloById.get(result.id)?.spaceId ?? 'default',
         sloId: result.id,
         revision: result.revision,
         isProblematic: result.health.isProblematic,
@@ -85,20 +80,13 @@ export async function runHealthScan(
         totalProblematic += documents.filter((doc) => doc.isProblematic).length;
       }
 
-      if (searchAfter) {
-        await delay(BATCH_DELAY_MS);
-      }
-
-      if (batchCount >= MAX_BATCHES) {
-        logger.debug(`Reached maximum number of batches (${MAX_BATCHES}), stopping`);
-        break;
-      }
-
       if (totalProcessed >= MAX_SLOS_PROCESSED) {
         logger.debug(`Reached maximum SLOs processed (${MAX_SLOS_PROCESSED}), stopping`);
         break;
       }
-    } while (searchAfter);
+
+      await delay(BATCH_DELAY_MS);
+    }
   } catch (error) {
     if (error instanceof errors.RequestAbortedError) {
       logger.debug('Task aborted during execution');
@@ -106,6 +94,8 @@ export async function runHealthScan(
     }
     logger.debug(`Error during health scan: ${error}`);
     throw error;
+  } finally {
+    await finder.close();
   }
 
   logger.debug(
@@ -113,94 +103,6 @@ export async function runHealthScan(
   );
 
   return { processed: totalProcessed, problematic: totalProblematic };
-}
-
-async function fetchUniqueSloFromSummary(
-  searchAfter: AggregationsCompositeAggregateKey | undefined,
-  dependencies: Dependencies
-): Promise<{
-  nextSearchAfter: AggregationsCompositeAggregateKey | undefined;
-  list: SLO[];
-}> {
-  const { logger, scopedClusterClient, abortController } = dependencies;
-  logger.debug(
-    `Fetching unique SLO (id, revision) tuples from summary index after ${JSON.stringify(
-      searchAfter
-    )}`
-  );
-
-  const result = await scopedClusterClient.asInternalUser.search<
-    unknown,
-    {
-      id_revision: {
-        after_key: AggregationsCompositeAggregateKey;
-        buckets: Array<{
-          key: {
-            spaceId: string;
-            id: string;
-            revision: number;
-          };
-        }>;
-      };
-    }
-  >(
-    {
-      size: 0,
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      aggs: {
-        id_revision: {
-          composite: {
-            size: COMPOSITE_BATCH_SIZE,
-            sources: [
-              {
-                spaceId: {
-                  terms: {
-                    field: 'spaceId',
-                  },
-                },
-              },
-              {
-                id: {
-                  terms: {
-                    field: 'slo.id',
-                  },
-                },
-              },
-              {
-                revision: {
-                  terms: {
-                    field: 'slo.revision',
-                  },
-                },
-              },
-            ],
-            after: searchAfter,
-          },
-        },
-      },
-    },
-    { signal: abortController.signal }
-  );
-
-  const buckets = result.aggregations?.id_revision.buckets ?? [];
-  if (buckets.length === 0) {
-    return {
-      nextSearchAfter: undefined,
-      list: [],
-    };
-  }
-
-  return {
-    nextSearchAfter:
-      buckets.length < COMPOSITE_BATCH_SIZE
-        ? undefined
-        : result.aggregations?.id_revision.after_key,
-    list: buckets.map(({ key }) => ({
-      spaceId: String(key.spaceId),
-      id: String(key.id),
-      revision: Number(key.revision),
-    })),
-  };
 }
 
 async function bulkInsertHealthDocuments(
