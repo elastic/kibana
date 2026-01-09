@@ -89,6 +89,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
   private async createDataStream(dataStreamName: string) {
     try {
+      this.logger.debug(`Installing data stream [${dataStreamName}]`);
       await this.execute(() => this.esClient.indices.createDataStream({ name: dataStreamName }));
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
