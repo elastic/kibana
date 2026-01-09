@@ -12,7 +12,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { QueryService } from './query_service';
-import { LoggerService } from '../logger_service';
+import { LoggerService } from '../logger_service/logger_service';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 describe('QueryService', () => {

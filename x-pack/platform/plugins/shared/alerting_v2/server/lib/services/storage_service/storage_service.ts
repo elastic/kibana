@@ -7,13 +7,15 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { LoggerService } from '../logger_service';
+import { injectable } from 'inversify';
+import type { LoggerService } from '../logger_service/logger_service';
 
 interface BulkIndexDocsParams {
   index: string;
   docs: Record<string, any>[];
 }
 
+@injectable()
 export class StorageService {
   constructor(
     private readonly esClient: ElasticsearchClient,

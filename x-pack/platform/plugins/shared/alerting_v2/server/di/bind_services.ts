@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ContainerModuleLoadOptions } from 'inversify';
+import type { ElasticsearchServiceStart } from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, Request } from '@kbn/core-di-server';
+import { RulesClient } from '../lib/rules_client';
+import { AlertingResourcesService } from '../lib/services/alerting_resources_service';
+import { LoggerService } from '../lib/services/logger_service/logger_service';
+import { QueryService } from '../lib/services/query_service/query_service';
+import { AlertingRetryService } from '../lib/services/retry_service';
+import { StorageService } from '../lib/services/storage_service/storage_service';
+import {
+  StorageServiceInternalToken,
+  StorageServiceScopedToken,
+} from '../lib/services/storage_service/tokens';
+
+export function bindServices({ bind }: ContainerModuleLoadOptions) {
+  bind(RulesClient).toSelf().inRequestScope();
+
+  bind(AlertingRetryService).toSelf().inSingletonScope();
+  bind(AlertingResourcesService).toSelf().inSingletonScope();
+  bind(LoggerService).toSelf().inSingletonScope();
+
+  bind(QueryService)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const data = get(PluginStart('data')) as DataPluginStart;
+      const loggerService = get(LoggerService);
+      const searchClient = data.search.asScoped(request);
+      return new QueryService(searchClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(StorageServiceScopedToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const elasticsearch = get(CoreStart('elasticsearch')) as ElasticsearchServiceStart;
+      const loggerService = get(LoggerService);
+      const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      return new StorageService(esClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(StorageServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const elasticsearch = get(CoreStart('elasticsearch')) as ElasticsearchServiceStart;
+      const loggerService = get(LoggerService);
+      const esClient = elasticsearch.client.asInternalUser;
+      return new StorageService(esClient, loggerService);
+    })
+    .inSingletonScope();
+}
