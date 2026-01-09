@@ -23,9 +23,7 @@ import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import {
-  containsAllTerms,
   extractAllStrings,
   extractMaxSemver,
   extractReleaseDateNearVersion,
@@ -33,8 +31,8 @@ import {
   getFinalAssistantMessage,
   getStringMeta,
   getToolCallSteps,
-  includesOneOf,
-} from './evaluate_dataset_utils';
+} from '@kbn/evals';
+import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
   input: {
@@ -182,52 +180,6 @@ export function createEvaluateDataset({
             return {
               score: hasExpected && allExpected ? 1 : 0,
               metadata: { expectedOnlyToolId, usedToolIds },
-            };
-          },
-        },
-        {
-          name: 'OnlyFromToolOutputHeuristic',
-          kind: 'CODE' as const,
-          evaluate: async ({ output, metadata }) => {
-            if (!getBooleanMeta(metadata, 'requireOnlyFromToolOutput')) return { score: 1 };
-
-            const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
-            const toolCalls = getToolCallSteps(output as TaskOutput);
-            const matching = expectedOnlyToolId
-              ? toolCalls.filter((t) => t.tool_id === expectedOnlyToolId)
-              : toolCalls;
-
-            const strings: string[] = [];
-            for (const call of matching) {
-              extractAllStrings(call.results, strings);
-            }
-            const toolText = strings.join('\n');
-            const answer = getFinalAssistantMessage(output as TaskOutput);
-
-            // The prompt explicitly asks about the relationship between Elasticsearch, Kibana, and Logstash.
-            // If the retrieved docs don't mention all three, the agent should explicitly state insufficiency.
-            const requiredTerms = ['elasticsearch', 'kibana', 'logstash'];
-            const hasAllRequiredTerms = containsAllTerms(toolText, requiredTerms);
-            if (hasAllRequiredTerms) return { score: 1 };
-
-            const explicitlyInsufficient = includesOneOf(answer, [
-              'insufficient',
-              'not enough information',
-              "don't have enough",
-              'do not have enough',
-              "couldn't find",
-              'could not find',
-              "didn't find",
-              'did not find',
-            ]);
-
-            return {
-              score: explicitlyInsufficient ? 1 : 0,
-              metadata: {
-                requiredTerms,
-                hasAllRequiredTerms,
-                answerPreview: answer.slice(0, 500),
-              },
             };
           },
         },

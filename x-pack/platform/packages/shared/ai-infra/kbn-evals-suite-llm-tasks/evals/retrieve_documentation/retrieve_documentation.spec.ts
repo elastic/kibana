@@ -10,7 +10,7 @@ import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experime
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { evaluate, selectEvaluators } from '@kbn/evals';
+import { containsAllTerms, evaluate, selectEvaluators } from '@kbn/evals';
 import { SearchService } from '@kbn/product-doc-base-plugin/server/services/search/search_service';
 import { retrieveDocumentation } from '@kbn/llm-tasks-plugin/server/tasks/retrieve_documentation';
 import type { ProductName } from '@kbn/product-doc-common';
@@ -55,11 +55,6 @@ type RetrieveDocumentationTaskOutput = TaskOutput & {
     content: string;
     summarized: boolean;
   }>;
-};
-
-const containsAllTerms = (text: string, terms: string[]) => {
-  const lower = text.toLowerCase();
-  return terms.every((t) => lower.includes(t.toLowerCase()));
 };
 
 const createNoopLogger = (): Logger =>

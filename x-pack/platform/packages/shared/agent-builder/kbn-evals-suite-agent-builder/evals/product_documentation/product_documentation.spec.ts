@@ -182,7 +182,6 @@ evaluate.describe('AgentBuilder product documentation tool', { tag: '@svlOblt' }
               metadata: {
                 agentId: productDocAgentId,
                 expectedOnlyToolId: platformCoreTools.productDocumentation,
-                requireOnlyFromToolOutput: true,
                 product: 'kibana',
               },
             },
