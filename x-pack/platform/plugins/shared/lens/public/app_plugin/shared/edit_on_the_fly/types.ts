@@ -88,6 +88,8 @@ export interface EditConfigPanelProps {
   parentApi?: unknown;
   /** Text for the apply button. Defaults to "Apply and close" */
   applyButtonLabel?: string;
+  /** If true, hides the ES|QL editor in the flyout */
+  hideTextBasedEditor?: boolean;
 }
 
 export interface LayerConfigurationProps {

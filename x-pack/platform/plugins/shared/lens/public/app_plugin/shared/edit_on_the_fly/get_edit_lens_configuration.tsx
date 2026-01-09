@@ -175,6 +175,7 @@ export async function getEditLensConfiguration(
     isReadOnly,
     parentApi,
     applyButtonLabel,
+    hideTextBasedEditor,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -226,6 +227,7 @@ export async function getEditLensConfiguration(
           id: panelId ?? generateId(),
         },
         inlineEditing: true,
+        hideTextBasedEditor,
       })
     );
 
@@ -253,6 +255,7 @@ export async function getEditLensConfiguration(
       parentApi,
       panelId,
       applyButtonLabel,
+      hideTextBasedEditor,
     };
 
     return (
