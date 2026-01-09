@@ -16,7 +16,6 @@ import type { Observable } from 'rxjs';
 import {
   interval,
   of,
-  from,
   BehaviorSubject,
   map,
   distinctUntilChanged,
@@ -28,6 +27,7 @@ import {
   shareReplay,
   retry,
   timer,
+  defer,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -195,16 +195,16 @@ export const pollEsNodesVersion = ({
     switchMap((checkInterval) => interval(checkInterval)),
     startWith(0),
     exhaustMap(() => {
-      return from(
-        internalClient.nodes.info(
+      return defer(() => {
+        return internalClient.nodes.info(
           {
             node_id: '_all',
             metric: '_none',
             filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
           },
           { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
-        )
-      ).pipe(
+        );
+      }).pipe(
         retry({
           count: healthCheckRetry,
           delay: (e) => {
