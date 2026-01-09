@@ -24,7 +24,7 @@ interface RunParams {
   scanId: string;
 }
 
-const PER_PAGE = 100;
+const PER_PAGE = 500;
 const BATCH_DELAY_MS = 500;
 const MAX_SLOS_PROCESSED = 10_000;
 
