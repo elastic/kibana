@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { System, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import type { FeatureSelectorProps } from './feature_selector';
 import { FeaturesSelector } from './feature_selector';
@@ -42,7 +42,7 @@ export function SignificantEventsGenerationPanel({
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
   onManualEntryClick: () => void;
-  onGenerateSuggestionsClick: (features: Feature[]) => void;
+  onGenerateSuggestionsClick: (features: System[]) => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
   selectedFlow?: Flow;

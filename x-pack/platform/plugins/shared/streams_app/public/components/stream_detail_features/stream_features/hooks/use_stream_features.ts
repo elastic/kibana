@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import type { System } from '@kbn/streams-schema';
 import { useMemo } from 'react';
+import type { QueryFunctionContext } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
+import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
-export const useStreamFeatures = (definition: Streams.all.Definition) => {
+export const useStreamFeatures = (streamName: string) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+  const showFetchErrorToast = useFetchErrorToast();
 
-  const { value, loading, error, refresh } = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-          },
+  const fetchSystems = async ({ signal }: QueryFunctionContext) => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems', {
+      params: {
+        path: {
+          name: streamName,
         },
-      });
-    },
-    [definition.name, streamsRepositoryClient]
-  );
+      },
+      signal: signal ?? null,
+    });
+  };
 
-  const features = useMemo(() => value?.features ?? [], [value?.features]);
+  const { data, isLoading, error, refetch } = useQuery<{ systems: System[] }, Error>({
+    queryKey: ['features', streamName],
+    queryFn: fetchSystems,
+    onError: showFetchErrorToast,
+  });
+
+  const systems = useMemo(() => data?.systems ?? [], [data?.systems]);
 
   const featuresByName = useMemo(
-    () => Object.fromEntries(features.map((f) => [f.name, f])),
-    [features]
+    () => Object.fromEntries(systems.map((s) => [s.name, s])),
+    [systems]
   );
 
   return {
-    refreshFeatures: refresh,
-    features,
+    refreshFeatures: refetch,
+    features: systems,
     featuresByName,
-    featuresLoading: loading,
+    featuresLoading: isLoading,
     error,
   };
 };
