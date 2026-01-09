@@ -37,6 +37,12 @@ jest.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', ()
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
 }));
+jest.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => ({
+  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
+    // By default, pass through all discoveries (no filtering)
+    return Promise.resolve(attackDiscoveries);
+  }),
+}));
 jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/telemetry'),
   reportAttackDiscoveryGenerationFailure: jest.fn(),
@@ -269,6 +275,27 @@ describe('attackDiscoveryScheduleExecutor', () => {
       size: 123,
       start: 'now-24h',
       telemetry: mockTelemetry,
+    });
+  });
+
+  it('calls filterHallucinatedAlerts with the expected parameters', async () => {
+    const { filterHallucinatedAlerts } = jest.requireMock(
+      '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'
+    );
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
+      attackDiscoveries: mockAttackDiscoveries,
+      alertsIndexPattern: params.alertsIndexPattern,
+      esClient: services.scopedClusterClient.asCurrentUser,
+      logger: mockLogger,
     });
   });
 

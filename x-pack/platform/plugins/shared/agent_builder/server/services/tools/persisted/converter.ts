@@ -33,6 +33,9 @@ export const convertPersistedDefinition = ({
     tags,
     configuration,
     readonly: false,
+    confirmation: {
+      askUser: 'never',
+    },
     isAvailable: () => {
       // persisted tools are always available atm (space check is done via the persistence client)
       return { status: 'available' };
