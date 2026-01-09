@@ -9,7 +9,6 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
@@ -31,12 +30,11 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const euiTheme = useEuiTheme();
   const { chromeStyle } = useLayoutConfig();
 
   return (
     <div
-      css={styles.root(euiTheme, chromeStyle)}
+      css={styles.root(chromeStyle)}
       id={APP_MAIN_SCROLL_CONTAINER_ID}
       className="kbnChromeLayoutApplication"
       data-test-subj="kbnChromeLayoutApplication"
