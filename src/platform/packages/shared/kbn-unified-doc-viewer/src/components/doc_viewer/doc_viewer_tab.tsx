@@ -24,11 +24,7 @@ interface Props {
 export const DocViewerTab = ({ docView, renderProps }: Props) => {
   return (
     <KibanaSectionErrorBoundary sectionName={docView.title}>
-      {'component' in docView ? (
-        <docView.component {...renderProps} />
-      ) : (
-        docView.render(renderProps)
-      )}
+      {docView.render(renderProps)}
     </KibanaSectionErrorBoundary>
   );
 };

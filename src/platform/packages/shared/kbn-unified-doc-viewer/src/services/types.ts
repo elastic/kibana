@@ -50,19 +50,20 @@ export interface DocViewRenderProps {
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 
-interface DocViewBase {
+export interface DocView {
   id: string;
   order: number;
   title: string;
   enabled?: boolean;
-}
-
-interface DocViewWithComponent extends DocViewBase {
-  component: DocViewerComponent;
-}
-
-interface DocViewWithRenderFunction extends DocViewBase {
   render: (props: DocViewRenderProps) => ReactElement;
 }
 
-export type DocView = DocViewWithComponent | DocViewWithRenderFunction;
+// interface DocViewWithComponent extends DocViewBase {
+//   component: DocViewerComponent;
+// }
+
+// interface DocViewWithRenderFunction extends DocViewBase {
+//   render: (props: DocViewRenderProps) => ReactElement;
+// }
+
+// export type DocView = DocViewWithComponent | DocViewWithRenderFunction;
