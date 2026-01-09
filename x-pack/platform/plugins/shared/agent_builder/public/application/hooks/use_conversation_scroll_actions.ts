@@ -117,16 +117,19 @@ export const useConversationScrollActions = ({
     });
   }, [scrollContainer]);
 
-  // Scrolls the most recent round to the bottom of it's parent scroll container
-  const scrollToMostRecentRoundBottom = useCallback(() => {
+  // Smoothly scrolls to the bottom of the scroll container
+  const smoothScrollToBottom = useCallback(() => {
     if (!scrollContainer) return;
-    scrollToMostRecentRound({ scrollContainer, position: 'end' });
+    scrollContainer.scrollTo({
+      top: scrollContainer.scrollHeight,
+      behavior: 'smooth',
+    });
   }, [scrollContainer]);
 
   return {
     showScrollButton,
     scrollToMostRecentRoundTop,
-    scrollToMostRecentRoundBottom,
+    smoothScrollToBottom,
     stickToBottom,
   };
 };

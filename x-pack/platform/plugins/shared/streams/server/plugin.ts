@@ -170,7 +170,13 @@ export class StreamsPlugin
       };
     };
 
-    taskService.registerTasks({ getScopedClients });
+    const telemetryClient = this.ebtTelemetryService.getClient();
+
+    taskService.registerTasks({
+      getScopedClients,
+      logger: this.logger,
+      telemetry: telemetryClient,
+    });
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -226,7 +232,7 @@ export class StreamsPlugin
       dependencies: {
         features: featureService,
         server: this.server,
-        telemetry: this.ebtTelemetryService.getClient(),
+        telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
         getScopedClients,
       },
