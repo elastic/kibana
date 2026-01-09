@@ -5,54 +5,41 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-
 import type { HttpSetup } from '@kbn/core/public';
+import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { createMemoryHistory } from 'history';
 import { App } from '../../../public/application/app';
-import { WithAppDependencies } from '../helpers';
-
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/overview`],
-    componentRoutePath: '/overview',
-  },
-  doMountAsync: true,
-};
-
-export type AppTestBed = TestBed & {
-  actions: ReturnType<typeof createActions>;
-};
-
-const createActions = (testBed: TestBed) => {
-  const clickDeprecationToggle = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('deprecationLoggingToggle').simulate('click');
-    });
-
-    component.update();
-  };
-
-  return {
-    clickDeprecationToggle,
-  };
-};
+import { WithAppDependencies } from '../helpers/setup_environment';
 
 export const setupAppPage = async (
   httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
-): Promise<AppTestBed> => {
-  const initTestBed = registerTestBed(
-    WithAppDependencies(App, httpSetup, overrides),
-    testBedConfig
-  );
-  const testBed = await initTestBed();
+): Promise<{ history: ReturnType<typeof createMemoryHistory> }> => {
+  const history = createMemoryHistory({ initialEntries: ['/overview'] });
 
-  return {
-    ...testBed,
-    actions: createActions(testBed),
-  };
+  const servicesOverrides = (overrides?.services as Record<string, unknown> | undefined) ?? {};
+  const AppWithDependencies = WithAppDependencies(App, httpSetup, {
+    ...overrides,
+    services: {
+      ...servicesOverrides,
+      history,
+    },
+  });
+
+  renderWithI18n(<AppWithDependencies history={history as any} />);
+
+  // Wait for the initial render baseline (mount-time requests/async state).
+  await waitFor(() => {
+    const settledElement =
+      screen.queryByTestId('missingKibanaPrivilegesMessage') ??
+      screen.queryByTestId('isUpgradingMessage') ??
+      screen.queryByTestId('isUpgradeCompleteMessage') ??
+      screen.queryByTestId('overviewPageHeader');
+
+    expect(settledElement).not.toBeNull();
+  });
+
+  return { history };
 };

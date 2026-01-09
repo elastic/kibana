@@ -17,6 +17,8 @@ import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/ag
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { StructuredTool } from '@langchain/core/tools';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
@@ -69,8 +71,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   },
   context
 ) => {
-  const { logger, modelProvider, toolProvider, attachments, request, stateManager, events } =
-    context;
+  const {
+    logger,
+    modelProvider,
+    toolProvider,
+    attachments,
+    request,
+    stateManager,
+    events,
+    promptManager,
+  } = context;
 
   ensureValidInput({ input: nextInput, conversation });
 
@@ -90,6 +100,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
+    conversationAttachments: conversation?.attachments,
   });
 
   const selectedTools = await selectTools({
@@ -98,6 +109,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentConfiguration,
     attachmentsService: attachments,
     request,
+    runner: context.runner,
   });
 
   const {
@@ -180,6 +192,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      getConversationState: () => getConversationState({ promptManager }),
       pendingRound,
       startTime,
       modelProvider,
@@ -200,6 +213,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   return {
     round,
+  };
+};
+
+const getConversationState = ({
+  promptManager,
+}: {
+  promptManager: PromptManager;
+}): ConversationInternalState => {
+  return {
+    prompt: promptManager.dump(),
   };
 };
 

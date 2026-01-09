@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
 import { EuiDelayRender } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -87,11 +88,24 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           },
         ]}
       >
-        <EmbeddableRenderer
-          type="APM_TRACE_WATERFALL_EMBEDDABLE"
-          getParentApi={getParentApi}
-          hidePanelChrome
-        />
+        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
+        The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
+        This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
+        */}
+        <div
+          css={css`
+            width: 100%;
+            & .embPanel__content {
+              display: block;
+            }
+          `}
+        >
+          <EmbeddableRenderer
+            type="APM_TRACE_WATERFALL_EMBEDDABLE"
+            getParentApi={getParentApi}
+            hidePanelChrome
+          />
+        </div>
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}
