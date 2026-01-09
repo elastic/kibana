@@ -16,7 +16,10 @@ import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
-import type { SentinelOneRunScriptActionParameters } from '../command_render_components/run_script_action';
+import type {
+  EndpointRunScriptActionParameters,
+  SentinelOneRunScriptActionParameters,
+} from '../command_render_components/run_script_action';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -25,6 +28,7 @@ import { UploadActionResult } from '../command_render_components/upload_action';
 import {
   ArgumentFileSelector,
   CrowdstrikeScriptInputParams,
+  EndpointScriptInputParams,
   MicrosoftScriptInputParams,
 } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
@@ -505,7 +509,7 @@ export const getEndpointConsoleCommands = ({
     runscriptCommand.exampleUsage = (
       enteredCommand?: Command<
         CommandDefinition,
-        SentinelOneRunScriptActionParameters, // FIXME:PT adjust type
+        EndpointRunScriptActionParameters,
         { script: CustomScriptSelectorState<EndpointScript> }
       >
     ) => {
@@ -550,7 +554,7 @@ export const getEndpointConsoleCommands = ({
           { defaultMessage: 'Input arguments for the selected script' }
         ),
         mustHaveValue: 'non-empty-string',
-        SelectorComponent: SentinelOneScriptInputParams,
+        SelectorComponent: EndpointScriptInputParams,
       },
       ...commandCommentArgument(),
     };

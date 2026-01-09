@@ -39,11 +39,17 @@ export interface SentinelOneRunScriptActionParameters extends SupportedArguments
   inputParams: string;
 }
 
+export interface EndpointRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
+}
+
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
     | CrowdStrikeRunScriptActionParameters
     | MicrosoftDefenderEndpointRunScriptActionParameters
-    | SentinelOneRunScriptActionParameters,
+    | SentinelOneRunScriptActionParameters
+    | EndpointRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -82,9 +88,10 @@ export const RunScriptActionResult = memo<
         };
       }
 
-      if (agentType === 'sentinel_one') {
-        const { inputParams } =
-          args as ParsedCommandInput<SentinelOneRunScriptActionParameters>['args'];
+      if (agentType === 'sentinel_one' || agentType === 'endpoint') {
+        const { inputParams } = args as ParsedCommandInput<
+          SentinelOneRunScriptActionParameters | EndpointRunScriptActionParameters
+        >['args'];
         const scriptSelectionState: ArgSelectorState<CustomScriptSelectorState>[] | undefined =
           command.argState?.script;
 
