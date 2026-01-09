@@ -246,8 +246,8 @@ export const config: PluginConfigDescriptor = {
        */
       startupOptimization: schema.maybe(
         schema.object({
-          /** Defer package upgrade operations to background tasks */
-          deferPackageUpgrade: schema.boolean({ defaultValue: false }),
+          /** Defer package install version bump operations to background tasks */
+          deferPackageBumpInstallVersion: schema.boolean({ defaultValue: false }),
           /** Maximum packages to process concurrently during startup */
           maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
           /** Batch size for package upgrade operations */

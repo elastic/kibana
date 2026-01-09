@@ -69,7 +69,7 @@ export interface FleetConfigType {
     uninstallTokenVerificationBatchSize?: number;
   };
   startupOptimization?: {
-    deferPackageUpgrade?: boolean;
+    deferPackageBumpInstallVersion?: boolean;
     maxConcurrentPackageOperations?: number;
     packageUpgradeBatchSize?: number;
   };

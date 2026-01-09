@@ -224,9 +224,10 @@ async function createSetupSideEffects(
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
 
   const config = appContextService.getConfig();
-  const shouldDeferPackageUpgrade = config?.startupOptimization?.deferPackageUpgrade ?? false;
+  const shouldDeferPackageBumpInstallVersion =
+    config?.startupOptimization?.deferPackageBumpInstallVersion ?? false;
 
-  if (shouldDeferPackageUpgrade) {
+  if (shouldDeferPackageBumpInstallVersion) {
     logger.info('Deferring package install version upgrade to background task');
     await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
       type: 'upgradePackageInstallVersion',
