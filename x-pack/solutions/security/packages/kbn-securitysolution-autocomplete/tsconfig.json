@@ -17,6 +17,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/doc-links",
     "@kbn/securitysolution-utils",
+    "@kbn/unified-search-plugin",
   ],
   "exclude": [
     "target/**/*",
