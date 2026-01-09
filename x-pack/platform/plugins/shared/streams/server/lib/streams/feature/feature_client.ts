@@ -25,6 +25,8 @@ import {
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
+import { StatusError } from '../errors/status_error';
+import { isNotFoundError } from '@kbn/es-errors';
 
 interface FeatureBulkIndexOperation {
   index: { feature: Feature };
@@ -46,11 +48,11 @@ export class FeatureClient {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(name: string, operations: FeatureBulkOperation[]) {
+  async bulk(stream: string, operations: FeatureBulkOperation[]) {
     return await this.clients.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
-          const document = toStorage(name, operation.index.feature);
+          const document = toStorage(stream, operation.index.feature);
           return {
             index: {
               document,
@@ -105,8 +107,28 @@ export class FeatureClient {
     };
   }
 
-  async deleteFeatures(name: string) {
-    const features = await this.getFeatures(name);
+  async getFeature(stream: string, id: string) {
+    const hit = await this.clients.storageClient.get({ id }).catch((err) => {
+      if (isNotFoundError(err)) {
+        throw new StatusError(`Feature ${id} not found`, 404);
+      }
+      throw err;
+    });
+
+    const source = hit._source!;
+    if (source[STREAM_NAME] !== stream) {
+      throw new StatusError(`Feature ${id} not found`, 404);
+    }
+    return fromStorage(source);
+  }
+
+  async deleteFeature(stream: string, id: string) {
+    const feature = await this.getFeature(stream, id);
+    return await this.clients.storageClient.delete({ id: feature.id });
+  }
+
+  async deleteFeatures(stream: string) {
+    const features = await this.getFeatures(stream);
     return await this.clients.storageClient.bulk({
       operations: features.hits.map((feature) => ({
         delete: { _id: feature.id },
@@ -115,10 +137,10 @@ export class FeatureClient {
   }
 }
 
-function toStorage(name: string, feature: Feature): StoredFeature {
+function toStorage(stream: string, feature: Feature): StoredFeature {
   return {
     [FEATURE_TYPE]: feature.type,
-    [FEATURE_UUID]: getFeatureId(name, feature),
+    [FEATURE_UUID]: getFeatureId(stream, feature),
     [FEATURE_NAME]: feature.name,
     [FEATURE_DESCRIPTION]: feature.description,
     [FEATURE_VALUE]: feature.value,
@@ -127,7 +149,7 @@ function toStorage(name: string, feature: Feature): StoredFeature {
     [FEATURE_STATUS]: feature.status,
     [FEATURE_LAST_SEEN]: feature.last_seen,
     [FEATURE_TAGS]: feature.tags,
-    [STREAM_NAME]: name,
+    [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
   };
 }
@@ -148,10 +170,10 @@ function fromStorage(feature: StoredFeature): Feature {
   };
 }
 
-export function getFeatureId(name: string, feature: BaseFeature): string {
+export function getFeatureId(stream: string, feature: BaseFeature): string {
   return objectHash({
     [FEATURE_TYPE]: feature.type,
-    [STREAM_NAME]: name,
+    [STREAM_NAME]: stream,
     [FEATURE_NAME]: feature.name,
     [FEATURE_VALUE]: feature.value,
   });

@@ -68,6 +68,40 @@ export const upsertFeatureRoute = createServerRoute({
   },
 });
 
+export const deleteFeatureRoute = createServerRoute({
+  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Deletes a feature for a stream',
+    description: 'Deletes the specified feature',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string(), id: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const stream = await streamsClient.getStream(params.path.name);
+    await featureClient.deleteFeature(stream.name, params.path.id);
+
+    return { acknowledged: true };
+  },
+});
+
 export const listFeaturesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features',
   options: {
@@ -215,6 +249,7 @@ export const identifyFeaturesRoute = createServerRoute({
 
 export const featureRoutes = {
   ...upsertFeatureRoute,
+  ...deleteFeatureRoute,
   ...listFeaturesRoute,
   ...identifyFeaturesRoute,
 };
