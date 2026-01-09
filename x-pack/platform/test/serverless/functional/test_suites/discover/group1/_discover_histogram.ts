@@ -33,6 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
 
   describe('discover histogram', function describeIndexTests() {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/248077
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
