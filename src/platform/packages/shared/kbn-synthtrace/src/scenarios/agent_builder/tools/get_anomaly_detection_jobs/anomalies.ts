@@ -29,9 +29,9 @@ import type { ApmFields, Timerange } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { duration } from 'moment';
 import type { Client } from '@elastic/elasticsearch';
+import type { Scenario } from '../../../../cli/scenario';
 import type { KibanaClient } from '../../../../lib/shared/base_kibana_client';
 import type { Logger } from '../../../../lib/utils/create_logger';
-import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 import { withClient } from '../../../../lib/utils/with_client';
 import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
@@ -139,8 +139,8 @@ export async function cleanupApmAnomalyDetectionJobs(
   }
 }
 
-export default createCliScenario({
-  teardown: async (_, kibanaClient, esClient, { logger }) => {
+const scenario: Scenario<ApmFields> = async ({ logger }) => ({
+  teardown: async (_, kibanaClient, esClient) => {
     // Clean up existing jobs before creating new ones
     await cleanupApmAnomalyDetectionJobs(esClient, logger);
 
@@ -157,3 +157,5 @@ export default createCliScenario({
       language: 'node',
     }),
 });
+
+export default scenario;

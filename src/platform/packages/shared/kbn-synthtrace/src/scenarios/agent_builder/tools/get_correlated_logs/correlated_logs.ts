@@ -51,7 +51,7 @@
 
 import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
 import { log } from '@kbn/synthtrace-client';
-import { createCliScenario } from '../../../../lib/utils/create_scenario';
+import type { Scenario } from '../../../../cli/scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import { IndexTemplateName } from '../../../../lib/logs/custom_logsdb_index_templates';
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
@@ -164,10 +164,12 @@ export function generateCorrelatedLogsData({
   return withClient(logsEsClient, data);
 }
 
-export default createCliScenario({
+const scenario: Scenario<LogDocument> = async () => ({
   bootstrap: async ({ logsEsClient }) => {
     await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
   },
   generate: ({ range, clients: { logsEsClient } }) =>
     generateCorrelatedLogsData({ range, logsEsClient }),
 });
+
+export default scenario;
