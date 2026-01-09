@@ -54,8 +54,12 @@ export const defaultFields = [
 
 const getAlertsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  query: z.string().min(1).describe('Natural language query to guide relevant field selection.'),
-  kqlFilter: z.string().optional().describe('Filter alerts by field:value pairs'),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'Filter alerts by field:value pairs. Examples: "service.name: frontend", "host.name: web-*", or "kibana.alert.status: active".'
+    ),
   includeRecovered: z
     .boolean()
     .optional()
@@ -99,17 +103,14 @@ Supports filtering by status (active/recovered) and KQL queries.`,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
         includeRecovered,
-        query,
       } = toolParams;
 
       try {
-        const { alerts, selectedFields, total } = await getToolHandler({
+        const { alerts, total } = await getToolHandler({
           core,
           request,
-          logger,
           start,
           end,
-          query,
           kqlFilter,
           includeRecovered,
         });
@@ -121,7 +122,6 @@ Supports filtering by status (active/recovered) and KQL queries.`,
               data: {
                 total,
                 alerts,
-                selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,
               },
             },
           ],
