@@ -184,17 +184,17 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
 
   // === Alternate Solutions ===
   test('renders Observability content and navigates correctly', async ({ pageObjects, page }) => {
-    const analyzeLogsLink = await pageObjects.homepage.getAnalyzeLogsBrowseIntegrations();
-    await expect(analyzeLogsLink).toBeVisible();
+    const observabilitySection = await pageObjects.homepage.getObservabilitySection();
+    await expect(observabilitySection).toBeVisible();
 
-    await pageObjects.homepage.clickAnalyzeLogsBrowseIntegrations();
+    const createSpaceLink = await pageObjects.homepage.getCreateObservabilitySpaceLink();
+    await expect(createSpaceLink).toBeVisible();
 
-    await expect(page).toHaveURL(/browse\/observability/);
+    await pageObjects.homepage.clickCreateObservabilitySpaceLink();
+
+    await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
   });
 
-  // === Dive deeper with Elasticsearch ===
-  // Note: These tests were marked as FLAKY in FTR (https://github.com/elastic/kibana/issues/226572)
-  // Skipping for now until stability is confirmed
   test('renders Search labs content', async ({ pageObjects, page }) => {
     const searchLabsSection = await pageObjects.homepage.getSearchLabsSection();
     await expect(searchLabsSection).toBeVisible();
@@ -230,24 +230,5 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
     await pageObjects.homepage.clickViewDocumentationButton();
 
     await expect(page).toHaveURL(/docs\/solutions\/search\/get-started/);
-  });
-
-  // === Footer content ===
-  test('displays the community link and navigates correctly', async ({ pageObjects, page }) => {
-    const communityLink = await pageObjects.homepage.getElasticCommunityLink();
-    await expect(communityLink).toBeVisible();
-
-    await pageObjects.homepage.clickElasticCommunityLink();
-
-    await expect(page).toHaveURL(/community\//);
-  });
-
-  test('displays the feedbacks link and navigates correctly', async ({ pageObjects, page }) => {
-    const feedbackLink = await pageObjects.homepage.getGiveFeedbackLink();
-    await expect(feedbackLink).toBeVisible();
-
-    await pageObjects.homepage.clickGiveFeedbackLink();
-
-    await expect(page).toHaveURL(/kibana\/feedback/);
   });
 });

@@ -183,14 +183,18 @@ export class Homepage {
     return this.page.testSubj.locator('consoleEditorContainer');
   }
 
-  // V1 Homepage - Alternate Solutions
-  async getAnalyzeLogsBrowseIntegrations() {
-    return this.page.testSubj.locator('analyzeLogsBrowseIntegrations');
+  // V1 Homepage - Alternate Solutions (Observability section)
+  async getObservabilitySection() {
+    return this.page.testSubj.locator('observabilitySection');
   }
 
-  async clickAnalyzeLogsBrowseIntegrations() {
-    await this.page.testSubj.locator('analyzeLogsBrowseIntegrations').scrollIntoViewIfNeeded();
-    await this.page.testSubj.locator('analyzeLogsBrowseIntegrations').click();
+  async getCreateObservabilitySpaceLink() {
+    return this.page.testSubj.locator('createObservabilitySpaceLink');
+  }
+
+  async clickCreateObservabilitySpaceLink() {
+    await this.page.testSubj.locator('createObservabilitySpaceLink').scrollIntoViewIfNeeded();
+    await this.page.testSubj.locator('createObservabilitySpaceLink').click();
   }
 
   // V1 Homepage - Dive deeper with Elasticsearch
