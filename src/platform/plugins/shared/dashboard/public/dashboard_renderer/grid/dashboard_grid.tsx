@@ -240,7 +240,6 @@ const dashboardGridStyles = {
         {
           visibility: 'hidden !important' as 'hidden',
         },
-
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
         '.dshDashboardGrid__item--expanded': {
