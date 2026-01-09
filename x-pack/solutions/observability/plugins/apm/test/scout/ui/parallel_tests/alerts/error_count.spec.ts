@@ -64,8 +64,9 @@ test.describe.skip('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
       expect(alert).toBeDefined();
       const runDate = new Date();
       await apiServices.alerting.rules.runSoon(alert!.id);
-      await apiServices.alerting.waiting.waitForNextExecution(
+      await apiServices.alerting.waiting.waitForExecutionCount(
         alert!.id,
+        1,
         undefined,
         EXTENDED_TIMEOUT,
         runDate
