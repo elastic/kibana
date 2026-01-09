@@ -58,7 +58,7 @@ export const ProcessingButtonsManual = ({
             color: ${euiTheme.colors.textPrimary};
           `}
           data-test-subj="streamsAppStreamDetailEnrichmentCreateConditionButton"
-          iconType="logstashIf"
+          iconType="timeline"
           onClick={() => addCondition(undefined, { parentId: null })}
         >
           {createConditionText}

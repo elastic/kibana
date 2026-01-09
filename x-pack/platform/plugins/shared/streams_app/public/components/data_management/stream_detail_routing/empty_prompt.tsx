@@ -39,7 +39,7 @@ const CreatePartitionButton = ({ createNewRule }: { createNewRule: () => void })
         color: ${euiTheme.colors.textPrimary};
       `}
       data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-      iconType="logstashIf" // TODO: Replace with the "if" icon still not available in EUI
+      iconType="timeline" // TODO: Replace with the "if" icon still not available in EUI
       aria-label={i18n.translate(
         'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
         {
