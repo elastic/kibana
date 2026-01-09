@@ -107,27 +107,6 @@ if (params.new_privileged_status == false) {
   }
 }
 `;
-
-// TODO: this script is out of date see bulkUpsertOperationsFactory below
-export const INDEX_SCRIPT = `
-              if (ctx._source.labels == null) {
-                ctx._source.labels = new HashMap();
-              }
-              if (ctx._source.labels.source_ids == null) {
-                ctx._source.labels.source_ids = new ArrayList();
-              }
-              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
-                ctx._source.labels.source_ids.add(params.source_id);
-              }
-              if (!ctx._source.labels.sources.contains("index")) {
-                ctx._source.labels.sources.add("index");
-              }
-
-              ctx._source.user.is_privileged = true;
-              ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
-              ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
-              ctx._source.user.entity.attributes.Privileged = true;
-            `;
 /**
  * Builds a list of Elasticsearch bulk operations to upsert privileged users.
  *
@@ -270,16 +249,20 @@ export const bulkUpsertOperationsFactoryShared =
         ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
       }
     }
-    return ops;
+    return ops; // why using a separate sourceLabel vs monitoring label for buildUdateParams and buildCreateDoc? They are the same value.
   };
 
-export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
+export const makeOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-  return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) =>
-    buildOps({
+  return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) => {
+    let sourceLabel = 'entity_analytics_integration';
+    if (source.type === 'index') {
+      sourceLabel = 'index'; // want to update source label to index_sync. Currently just index. Related Issue: https://github.com/elastic/security-team/issues/14071
+    }
+    return buildOps({
       users: usersChunk,
       updateScriptSource: UPDATE_SCRIPT_SOURCE,
-      sourceLabel: 'entity_analytics_integration',
+      sourceLabel,
       buildUpdateParams: (user) => ({
         new_privileged_status: user.isPrivileged,
         monitoring_labels: user.monitoringLabels,
@@ -289,16 +272,5 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
       }),
       shouldCreate: (user) => user.isPrivileged,
     });
-};
-
-export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
-  const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-  const indexOperations = (usersChunk: PrivMonBulkUser[]) =>
-    buildOps({
-      users: usersChunk,
-      updateScriptSource: INDEX_SCRIPT,
-      sourceLabel: 'index_sync',
-      buildUpdateParams: (user) => ({ source_id: user.sourceId }),
-    });
-  return indexOperations || [];
+  };
 };

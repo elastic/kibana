@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceTaskProviderError } from '@kbn/inference-common';
 import {
   getConnectorModel,
   isInferenceProviderError,
@@ -61,22 +62,29 @@ function getErrorMessage(message: string, status?: number): string {
   return message;
 }
 
+export function formatInferenceProviderError(
+  error: InferenceTaskProviderError,
+  connector: InferenceConnector
+): string {
+  const model = getConnectorModel(connector);
+  const cause = getErrorMessage(error.message, error.meta?.status);
+
+  const lines = [
+    `Connector: ${connector.name}`,
+    model ? `Model: ${model}` : null,
+    `Cause: ${cause}`,
+  ].filter(Boolean);
+
+  return lines.join('\n');
+}
+
 /**
  * Creates a user-friendly SSE error with connector information.
  * Use this in catchError handlers for streaming endpoints that call LLM connectors.
  */
 export function createConnectorSSEError(error: Error, connector: InferenceConnector): Error {
   if (isInferenceProviderError(error)) {
-    const model = getConnectorModel(connector);
-    const cause = getErrorMessage(error.message, error.meta?.status);
-
-    const lines = [
-      `Connector: ${connector.name}`,
-      model ? `Model: ${model}` : null,
-      `Cause: ${cause}`,
-    ].filter(Boolean);
-
-    return createSSEInternalError(lines.join('\n'));
+    return createSSEInternalError(formatInferenceProviderError(error, connector));
   }
 
   // For non-provider errors, just return the message

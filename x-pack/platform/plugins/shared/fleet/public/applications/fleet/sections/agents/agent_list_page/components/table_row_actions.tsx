@@ -25,6 +25,7 @@ export const TableRowActions: React.FunctionComponent<{
   onMigrateAgentClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
   onViewAgentJsonClick: () => void;
+  onRollbackClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -37,6 +38,7 @@ export const TableRowActions: React.FunctionComponent<{
   onMigrateAgentClick,
   onChangeAgentPrivilegeLevelClick,
   onViewAgentJsonClick,
+  onRollbackClick,
 }) => {
   const { getHref } = useLink();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,6 +58,7 @@ export const TableRowActions: React.FunctionComponent<{
       onChangeAgentPrivilegeLevelClick,
       onUnenrollClick,
       onUninstallClick: onGetUninstallCommandClick,
+      onRollbackClick,
     }),
     [
       agent.id,
@@ -69,6 +72,7 @@ export const TableRowActions: React.FunctionComponent<{
       onChangeAgentPrivilegeLevelClick,
       onUnenrollClick,
       onGetUninstallCommandClick,
+      onRollbackClick,
     ]
   );
 

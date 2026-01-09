@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { Kpi } from './kpi';
 import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
+import { ChartPlaceholder } from '../../../lens/chart_placeholder';
+import { KPI_CHART_HEIGHT } from '../../../../common/visualizations/constants';
+import type { InfraHttpError } from '../../../../types';
 
 export interface HostKpiChartsProps {
   dataView?: DataView;
@@ -21,7 +25,8 @@ export interface HostKpiChartsProps {
   lastReloadRequestTime?: number;
   getSubtitle?: (formulaValue: string) => string;
   loading?: boolean;
-
+  error?: InfraHttpError;
+  hasData?: boolean;
   schema?: DataSchemaFormat | null;
 }
 
@@ -33,6 +38,8 @@ export const HostKpiCharts = ({
   query,
   lastReloadRequestTime,
   loading = false,
+  error,
+  hasData = true,
   schema,
 }: HostKpiChartsProps) => {
   const charts = useHostKpiCharts({
@@ -40,6 +47,31 @@ export const HostKpiCharts = ({
     getSubtitle,
     schema,
   });
+
+  if (!loading && (!hasData || error)) {
+    return (
+      <>
+        {charts.map((_chartProps, index) => (
+          <EuiFlexItem key={index}>
+            <EuiPanel
+              hasBorder
+              borderRadius="m"
+              hasShadow={false}
+              paddingSize="m"
+              css={css`
+                min-height: ${KPI_CHART_HEIGHT}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              <ChartPlaceholder error={error} isEmpty={!hasData} />
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </>
+    );
+  }
 
   return (
     <>
