@@ -14,10 +14,9 @@ import {
 } from './utils';
 import { type TabState } from './types';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
-import type { ControlPanelsState, ControlPanelState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { type ESQLControlState, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 
