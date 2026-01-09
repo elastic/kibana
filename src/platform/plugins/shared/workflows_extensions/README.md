@@ -238,16 +238,18 @@ export const myStepDefinition: PublicStepDefinition = {
   },
   actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
   editorHandlers: {
-    dynamicOutputSchema: ({ input }) => {
-      if (input.mode == 'partial') {
-        return z.object({
-          partialResult: z.string()
-        });
-      }
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (input.mode == 'partial') {
+          return z.object({
+            partialResult: z.string()
+          });
+        }
 
-      return z.object({
-          result: z.string()
-        });
+        return z.object({
+            result: z.string()
+          });
+      }
     }
   }
 };

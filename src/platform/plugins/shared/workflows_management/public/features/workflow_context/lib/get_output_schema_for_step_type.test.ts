@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import { stepSchemas } from '../../../../common/step_schemas';
 
@@ -187,22 +188,41 @@ describe('getOutputSchemaForStepType', () => {
   });
 
   describe('custom steps output schemas', () => {
-    it('should use dynamicOutputSchema when available and return its result', () => {
+    let originalGetStepDefinition: typeof stepSchemas.getStepDefinition;
+    let originalIsPublicStepDefinition: typeof stepSchemas.isPublicStepDefinition;
+
+    let mockStepDefinition: Partial<PublicStepDefinition>;
+
+    beforeEach(() => {
+      originalGetStepDefinition = stepSchemas.getStepDefinition;
+      originalIsPublicStepDefinition = stepSchemas.isPublicStepDefinition;
+      stepSchemas.getStepDefinition = jest.fn().mockImplementation(() => mockStepDefinition);
+      (stepSchemas.isPublicStepDefinition as unknown as jest.Mock) = jest
+        .fn()
+        .mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      stepSchemas.getStepDefinition = originalGetStepDefinition;
+      stepSchemas.isPublicStepDefinition = originalIsPublicStepDefinition;
+    });
+
+    it('should use getOutputSchema when available and return its result', () => {
       const mockDynamicSchema = {
         def: { type: 'string' },
         safeParse: (val: any) => ({ success: true, data: String(val) }),
       } as any;
 
-      const mockStepDefinition = {
+      mockStepDefinition = {
         id: 'dynamic-step',
         inputSchema: {} as any,
         outputSchema: { def: { type: 'unknown' } } as any,
-        dynamicOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
+        editorHandlers: {
+          dynamicSchema: {
+            getOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
+          },
+        },
       };
-
-      // Mock stepSchemas.getStepDefinition to return our mock
-      const originalGetStepDefinition = stepSchemas.getStepDefinition;
-      stepSchemas.getStepDefinition = jest.fn().mockReturnValue(mockStepDefinition);
 
       const mockNode = {
         id: 'test-id',
@@ -218,37 +238,36 @@ describe('getOutputSchemaForStepType', () => {
 
       const result = getOutputSchemaForStepType(mockNode);
 
-      // Should call dynamicOutputSchema with configuration.with
-      expect(mockStepDefinition.dynamicOutputSchema).toHaveBeenCalledWith({
+      // Should call getOutputSchema with configuration.with
+      expect(
+        mockStepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema
+      ).toHaveBeenCalledWith({
         customParam: 'dynamicValue',
       });
 
       // Should return the dynamic schema
       expect(result).toBe(mockDynamicSchema);
       expect(result.def.type).toBe('string');
-
-      // Restore original function
-      stepSchemas.getStepDefinition = originalGetStepDefinition;
     });
 
-    it('should fallback to static outputSchema when dynamicOutputSchema throws an error', () => {
+    it('should fallback to static outputSchema when getOutputSchema throws an error', () => {
       const mockStaticSchema = {
         def: { type: 'object' },
         safeParse: (val: any) => ({ success: true, data: val }),
       } as any;
 
-      const mockStepDefinition = {
+      mockStepDefinition = {
         id: 'error-step',
         inputSchema: {} as any,
         outputSchema: mockStaticSchema,
-        dynamicOutputSchema: jest.fn().mockImplementation(() => {
-          throw new Error('Dynamic schema generation failed');
-        }),
+        editorHandlers: {
+          dynamicSchema: {
+            getOutputSchema: jest.fn().mockImplementation(() => {
+              throw new Error('Dynamic schema generation failed');
+            }),
+          },
+        },
       };
-
-      // Mock stepSchemas.getStepDefinition to return our mock
-      const originalGetStepDefinition = stepSchemas.getStepDefinition;
-      stepSchemas.getStepDefinition = jest.fn().mockReturnValue(mockStepDefinition);
 
       const mockNode = {
         id: 'test-id',
@@ -262,33 +281,30 @@ describe('getOutputSchemaForStepType', () => {
 
       const result = getOutputSchemaForStepType(mockNode);
 
-      // Should call dynamicOutputSchema first
-      expect(mockStepDefinition.dynamicOutputSchema).toHaveBeenCalledWith({ param: 'value' });
+      // Should call getOutputSchema first
+      expect(mockStepDefinition.editorHandlers?.dynamicSchema.getOutputSchema).toHaveBeenCalledWith(
+        {
+          param: 'value',
+        }
+      );
 
       // Should fallback to static schema when dynamic throws
       expect(result).toBe(mockStaticSchema);
       expect(result.def.type).toBe('object');
-
-      // Restore original function
-      stepSchemas.getStepDefinition = originalGetStepDefinition;
     });
 
-    it('should use static outputSchema when dynamicOutputSchema is not defined', () => {
+    it('should use static outputSchema when getOutputSchema is not defined', () => {
       const mockStaticSchema = {
         def: { type: 'array' },
         safeParse: (val: any) => ({ success: true, data: val }),
       } as any;
 
-      const mockStepDefinition = {
+      mockStepDefinition = {
         id: 'static-step',
         inputSchema: {} as any,
         outputSchema: mockStaticSchema,
-        // no dynamicOutputSchema property
+        // no getOutputSchema property
       };
-
-      // Mock stepSchemas.getStepDefinition to return our mock
-      const originalGetStepDefinition = stepSchemas.getStepDefinition;
-      stepSchemas.getStepDefinition = jest.fn().mockReturnValue(mockStepDefinition);
 
       const mockNode = {
         id: 'test-id',
@@ -305,9 +321,6 @@ describe('getOutputSchemaForStepType', () => {
       // Should return the static schema directly
       expect(result).toBe(mockStaticSchema);
       expect(result.def.type).toBe('array');
-
-      // Restore original function
-      stepSchemas.getStepDefinition = originalGetStepDefinition;
     });
   });
 });
