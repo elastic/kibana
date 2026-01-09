@@ -45,6 +45,63 @@ import type {
 } from './install/types';
 import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
 
+type EsStdoutLogLevel = NonNullable<EsClusterExecOptions['esStdoutLogLevel']>;
+
+function parseEsStdoutLogLevel(value: unknown): EsStdoutLogLevel | undefined {
+  if (typeof value !== 'string') return;
+  switch (value.toLowerCase()) {
+    case 'all':
+    case 'info':
+    case 'warn':
+    case 'error':
+    case 'silent':
+      return value.toLowerCase() as EsStdoutLogLevel;
+    default:
+      return;
+  }
+}
+
+// ES logs include more granular levels than our CLI threshold; use numeric ranks to compare severity.
+function shouldForwardEsStdoutLine(esLevel: string | undefined, threshold: EsStdoutLogLevel) {
+  if (threshold === 'silent') return false;
+
+  const normalized = (esLevel || 'info').toLowerCase();
+  const rank = (lvl: string) => {
+    switch (lvl) {
+      case 'fatal':
+        return 50;
+      case 'error':
+        return 40;
+      case 'warn':
+        return 30;
+      case 'info':
+        return 20;
+      case 'debug':
+        return 10;
+      case 'trace':
+        return 0;
+      default:
+        // Unknown levels are treated as "info-ish"
+        return 20;
+    }
+  };
+
+  const minRank = (() => {
+    switch (threshold) {
+      case 'all':
+        return 0;
+      case 'info':
+        return 20;
+      case 'warn':
+        return 30;
+      case 'error':
+        return 40;
+    }
+  })();
+
+  return rank(normalized) >= minRank;
+}
+
 // listen to data on stream until map returns anything but undefined
 const firstResult = (stream: Readable, map: (data: Buffer) => string | true | undefined) =>
   new Promise((resolve) => {
@@ -463,6 +520,21 @@ export class Cluster {
     this.process.stdout!.on('data', (data) => {
       const chunk = data.toString();
       const lines = parseEsLog(chunk);
+
+      // If we are writing logs to a file, do not duplicate them per parsed line.
+      if (this.stdioTarget) {
+        this.stdioTarget.write(chunk);
+      }
+
+      const envStdoutLogLevel = process.env.KBN_ES_STDOUT_LOG_LEVEL;
+      const parsedStdoutLogLevel = parseEsStdoutLogLevel(envStdoutLogLevel);
+      if (envStdoutLogLevel && !parsedStdoutLogLevel) {
+        this.log.warning(
+          `Invalid KBN_ES_STDOUT_LOG_LEVEL="${envStdoutLogLevel}", defaulting to "all".`
+        );
+      }
+      const stdoutThreshold = opts.esStdoutLogLevel ?? parsedStdoutLogLevel ?? 'all';
+
       lines.forEach((line) => {
         if (!reportSent && line.message.includes('publish_address')) {
           reportSent = true;
@@ -471,10 +543,23 @@ export class Cluster {
           });
         }
 
-        if (this.stdioTarget) {
-          this.stdioTarget.write(chunk);
-        } else {
-          this.log.info(line.formattedMessage);
+        if (this.stdioTarget) return;
+        if (!shouldForwardEsStdoutLine(line.level, stdoutThreshold)) return;
+
+        switch (line.level) {
+          case 'fatal':
+          case 'error':
+            this.log.error(line.formattedMessage);
+            return;
+          case 'warn':
+            this.log.warning(line.formattedMessage);
+            return;
+          case 'debug':
+          case 'trace':
+            this.log.debug(line.formattedMessage);
+            return;
+          default:
+            this.log.info(line.formattedMessage);
         }
       });
     });
