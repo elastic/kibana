@@ -166,7 +166,7 @@ async function fetchDocumentsTimeRange({
     return { status: TimeRangeExtendingStatus.failed };
   }
 
-  const earliestTimestampRaw = (
+  const earliestTimestamp = (
     result.rawResponse?.aggregations?.earliest_timestamp as AggregationsSingleMetricAggregateBase
   )?.value_as_string;
   const latestTimestampRaw = (
@@ -174,16 +174,10 @@ async function fetchDocumentsTimeRange({
   )?.value_as_string;
 
   const isDateNanos = timeField.esTypes?.includes('date_nanos');
-
-  const earliestTimestamp =
-    isDateNanos && earliestTimestampRaw
-      ? // Round earliestTimestamp to the beginning of the current millisecond
-        new Date(new Date(earliestTimestampRaw).getTime()).toISOString()
-      : earliestTimestampRaw;
-
   const latestTimestamp =
     isDateNanos && latestTimestampRaw
-      ? // Round latestTimestamp to the beginning of the next millisecond
+      ? // round latestTimestamp to the beginning of the next millisecond
+        // because aggregations on date_nanos fields return the max value truncated to milliseconds precision
         new Date(new Date(latestTimestampRaw).getTime() + 1).toISOString()
       : latestTimestampRaw;
 

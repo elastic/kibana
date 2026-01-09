@@ -56,6 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         expect(await discover.hasNoResults()).to.be(false);
         expect(await discover.getHitCount()).to.be('9');
+        const entireTimeRange = await timePicker.getTimeConfig();
+        expect(entireTimeRange.start).to.be('Sep 19, 2015 @ 06:50:13.000');
+        expect(entireTimeRange.end).to.be('Sep 22, 2019 @ 23:50:13.254');
       });
     });
   });

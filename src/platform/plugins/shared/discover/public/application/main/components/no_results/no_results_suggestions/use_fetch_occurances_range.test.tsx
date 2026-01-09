@@ -235,10 +235,10 @@ describe('useFetchOccurrencesRange', () => {
         rawResponse: {
           aggregations: {
             earliest_timestamp: {
-              value_as_string: '2023-05-10T11:01:10.562306Z',
+              value_as_string: '2023-05-10T11:01:10.561Z',
             },
             latest_timestamp: {
-              value_as_string: '2023-05-11T11:01:10.562306Z',
+              value_as_string: '2023-05-11T11:01:10.562Z',
             },
           },
         },
@@ -254,7 +254,7 @@ describe('useFetchOccurrencesRange', () => {
 
       expect(fetchResult.status).toBe(TimeRangeExtendingStatus.succeedWithResults);
       expect(fetchResult.range).toEqual({
-        from: '2023-05-10T11:01:10.562Z', // Rounded down to current millisecond
+        from: '2023-05-10T11:01:10.561Z',
         to: '2023-05-11T11:01:10.563Z', // Rounded up by 1ms
       });
     });
