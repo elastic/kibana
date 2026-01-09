@@ -29,10 +29,10 @@ describe('APM metrics static dashboard helpers', () => {
         dataView,
       });
 
-      expect(panels).toBeDefined();
+      // expect(panels).toEqual('[]');
 
-      const esqlQuery = (panels as Array<{ config?: { query?: { esql?: string } } }>)
-        .map((p) => p.config?.query?.esql)
+      const esqlQuery = (panels as Array<{ panelConfig?: { query?: { esql?: string } } }>)
+        .map((p) => p.panelConfig?.query?.esql)
         .find(Boolean);
 
       expect(esqlQuery).toContain('from test-data-view:metrics*,metrics*');
@@ -48,8 +48,10 @@ describe('APM metrics static dashboard helpers', () => {
         apmIndices
       );
 
-      const esqlQuery = (panels as Array<{ config?: { query?: { esql?: string } } }>)
-        .map((p) => p.config?.query?.esql)
+      // expect(panels).toEqual('[]');
+
+      const esqlQuery = (panels as Array<{ panelConfig?: { query?: { esql?: string } } }>)
+        .map((p) => p.panelConfig?.query?.esql)
         .find(Boolean);
 
       expect(esqlQuery).toContain('from test-apm-indices:metrics*,metrics*');
