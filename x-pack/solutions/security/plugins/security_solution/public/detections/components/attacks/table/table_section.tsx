@@ -39,6 +39,7 @@ import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_h
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
+import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsContainer } from './empty_results/container';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
@@ -164,6 +165,16 @@ export const TableSection = React.memo(
         // attack is undefined for the generic group marked as `-` which means this is the group of alerts that do not belong to any attack.
         const attack =
           selectedGroup && fieldBucket ? getAttack(selectedGroup, fieldBucket) : undefined;
+
+        if (!attack) {
+          return (
+            <AlertsTab
+              groupingFilters={groupingFilters}
+              defaultFilters={defaultFilters}
+              isTableLoading={isLoading}
+            />
+          );
+        }
 
         return (
           <AttackDetailsContainer
