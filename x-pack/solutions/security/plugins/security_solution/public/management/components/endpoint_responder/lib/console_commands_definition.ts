@@ -52,6 +52,7 @@ import {
 } from '../command_render_components/execute_action';
 import type {
   EndpointPrivileges,
+  EndpointScript,
   ImmutableArray,
   SentinelOneScript,
 } from '../../../../../common/endpoint/types';
@@ -195,6 +196,7 @@ export const getEndpointConsoleCommands = ({
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
     responseActionsEndpointMemoryDump,
+    responseActionsEndpointRunScript,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -225,7 +227,7 @@ export const getEndpointConsoleCommands = ({
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
-  const consoleCommands: CommandDefinition[] = [
+  let consoleCommands: CommandDefinition[] = [
     {
       name: 'isolate',
       about: getCommandAboutInfo({
@@ -490,6 +492,119 @@ export const getEndpointConsoleCommands = ({
         (agentType === 'endpoint' && !doesEndpointSupportCommand('runscript')),
     },
   ];
+
+  // Adjust `runscript` for use with Endpoint
+  if (agentType === 'endpoint' && !responseActionsEndpointRunScript) {
+    consoleCommands = consoleCommands.filter((command) => command.name !== 'runscript');
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
+
+    runscriptCommand.helpDisabled = false;
+    runscriptCommand.mustHaveArgs = true;
+    runscriptCommand.exampleUsage = (
+      enteredCommand?: Command<
+        CommandDefinition,
+        SentinelOneRunScriptActionParameters, // FIXME:PT adjust type
+        { script: CustomScriptSelectorState<EndpointScript> }
+      >
+    ) => {
+      let exampleUsageText = `runscript --script="copy.sh" --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+
+      if (enteredCommand) {
+        const scriptArgState = enteredCommand?.argState?.script?.at(0);
+        const selectedScript = scriptArgState?.store?.selectedOption;
+
+        if (selectedScript?.meta?.example) {
+          exampleUsageText = i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptInputExample',
+            {
+              defaultMessage: '{scriptName} script input: {example}',
+              values: {
+                scriptName: scriptArgState?.valueText,
+                example: selectedScript?.meta?.example,
+              },
+            }
+          );
+        }
+      }
+
+      return exampleUsageText;
+    };
+    runscriptCommand.args = {
+      script: {
+        required: true,
+        allowMultiples: false,
+        about: i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg',
+          { defaultMessage: 'The script to run (selected from popup list)' }
+        ),
+        mustHaveValue: 'non-empty-string',
+        SelectorComponent: CustomScriptSelector,
+      },
+      inputParams: {
+        required: false,
+        allowMultiples: false,
+        about: i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg',
+          { defaultMessage: 'Input arguments for the selected script' }
+        ),
+        mustHaveValue: 'non-empty-string',
+        SelectorComponent: SentinelOneScriptInputParams,
+      },
+      ...commandCommentArgument(),
+    };
+
+    const priorValidateFn = runscriptCommand.validate;
+
+    runscriptCommand.validate = (
+      enteredCommand: Command<CommandDefinition, SentinelOneRunScriptActionParameters>
+    ) => {
+      // First do the base validation - like authz checks
+      const baseValidation = priorValidateFn ? priorValidateFn(enteredCommand) : true;
+
+      if (baseValidation !== true) {
+        return baseValidation;
+      }
+
+      const { argState, args } = enteredCommand;
+
+      // No need to validate display of command help `help`
+      if (args.hasArg('help')) {
+        return true;
+      }
+
+      // Validate the script that was selected
+      const scriptInfo = (argState?.script?.[0]?.store as CustomScriptSelectorState<EndpointScript>)
+        ?.selectedOption;
+      const script = args.args.script[0];
+      const inputParams = args.args?.inputParams?.[0];
+
+      if (!script) {
+        return i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArgValueMissing',
+          { defaultMessage: 'A script selection is required' }
+        );
+      }
+
+      if (scriptInfo?.meta?.requiresInput && !inputParams) {
+        return i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptInputParamsMissing',
+          {
+            defaultMessage:
+              'Script "{name}" requires input parameters to be entered{instructions, select, false {.} other {: {instructions}}}',
+            values: {
+              name: scriptInfo.name,
+              instructions:
+                (scriptInfo.meta.instructions || scriptInfo.meta.example || '').trim() || false,
+            },
+          }
+        );
+      }
+
+      return true;
+    };
+  }
 
   // `upload` command
   consoleCommands.push({
