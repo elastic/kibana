@@ -44,6 +44,5 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server",
     "@kbn/config-schema",
-    "@kbn/presentation-publishing-schemas",
   ]
 }

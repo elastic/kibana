@@ -138,7 +138,6 @@
     "@kbn/react-env",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
-    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }
