@@ -187,7 +187,7 @@ function ActionsCell<T extends object>({ item, actions }: { item: T; actions: Ta
           aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
             defaultMessage: 'Actions',
           })}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={togglePopover}
           color="text"
         />

@@ -510,7 +510,48 @@ export function ApmServicesTable({
               const { basePath } = core.http;
               const slosUrl = basePath.prepend(
                 `/app/slos?search=${rison.encode({
-                  kqlQuery: `service.name:${item.serviceName}`,
+                  filters: [
+                    {
+                      meta: {
+                        alias: null,
+                        disabled: false,
+                        key: 'service.name',
+                        negate: false,
+                        params: { query: item.serviceName },
+                        type: 'phrase',
+                      },
+                      query: {
+                        match_phrase: { 'service.name': item.serviceName },
+                      },
+                    },
+                    {
+                      meta: {
+                        alias: null,
+                        disabled: false,
+                        key: 'slo.indicator.type',
+                        negate: false,
+                        params: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+                        type: 'phrases',
+                      },
+                      query: {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              match_phrase: {
+                                'slo.indicator.type': 'sli.apm.transactionDuration',
+                              },
+                            },
+                            {
+                              match_phrase: {
+                                'slo.indicator.type': 'sli.apm.transactionErrorRate',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
                 })}`
               );
               window.location.href = slosUrl;
