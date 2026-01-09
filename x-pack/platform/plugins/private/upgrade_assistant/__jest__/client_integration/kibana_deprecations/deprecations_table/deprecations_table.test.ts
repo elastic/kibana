@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 import type { DeprecationsServiceStart } from '@kbn/core/public';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
-import type { KibanaTestBed } from '../kibana_deprecations.helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecations table', () => {
-  let testBed: KibanaTestBed;
   let deprecationService: jest.Mocked<DeprecationsServiceStart>;
 
   const {
@@ -26,15 +25,104 @@ describe('Kibana deprecations - Deprecations table', () => {
   } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpSetup = mockEnvironment.httpSetup;
     deprecationService = deprecationsServiceMock.createStartContract();
+  });
 
-    await act(async () => {
-      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
+  const setup = async (overrides?: Record<string, unknown>) => {
+    kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
-      testBed = await setupKibanaPage(httpSetup, {
+    await setupKibanaPage(httpSetup, {
+      services: {
+        core: {
+          deprecations: deprecationService,
+        },
+      },
+      ...overrides,
+    });
+
+    await screen.findByTestId('kibanaDeprecationsTable');
+  };
+
+  test('renders deprecations', async () => {
+    await setup();
+
+    expect(screen.getByTestId('kibanaDeprecations')).toBeInTheDocument();
+    const table = screen.getByTestId('kibanaDeprecationsTable');
+    expect(within(table).getAllByTestId('row')).toHaveLength(mockedKibanaDeprecations.length);
+  });
+
+  it('refreshes deprecation data', async () => {
+    await setup();
+
+    expect(deprecationService.getAllDeprecations).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('refreshButton'));
+
+    await waitFor(() => {
+      expect(deprecationService.getAllDeprecations).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('shows critical and warning deprecations count', async () => {
+    await setup();
+
+    expect(screen.getByTestId('criticalDeprecationsCount')).toHaveTextContent(
+      String(mockedCriticalKibanaDeprecations.length)
+    );
+    expect(screen.getByTestId('warningDeprecationsCount')).toHaveTextContent(
+      String(mockedWarningKibanaDeprecations.length)
+    );
+  });
+
+  describe('Search bar', () => {
+    const clickFilterByTitle = async (title: string) => {
+      await waitFor(() => {
+        const filterButton: HTMLElement | null = document.body.querySelector(
+          `.euiSelectableListItem[title="${title}"]`
+        );
+
+        expect(filterButton).not.toBeNull();
+        filterButton!.click();
+      });
+    };
+
+    it('filters by "critical" status', async () => {
+      await setup();
+
+      // Show only critical deprecations
+      fireEvent.click(screen.getByRole('button', { name: 'Status Selection' }));
+      await clickFilterByTitle('Critical');
+      await waitFor(() => {
+        expect(screen.getAllByTestId('row')).toHaveLength(mockedCriticalKibanaDeprecations.length);
+      });
+
+      // Show all deprecations (toggle off)
+      fireEvent.click(screen.getByRole('button', { name: 'Status Selection' }));
+      await clickFilterByTitle('Critical');
+      await waitFor(() => {
+        expect(screen.getAllByTestId('row')).toHaveLength(mockedKibanaDeprecations.length);
+      });
+    });
+
+    it('filters by type', async () => {
+      await setup();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Type Selection' }));
+      await clickFilterByTitle('Config');
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId('row')).toHaveLength(mockedConfigKibanaDeprecations.length);
+      });
+    });
+  });
+
+  describe('No deprecations', () => {
+    beforeEach(async () => {
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
+      await setupKibanaPage(httpSetup, {
         services: {
           core: {
             deprecations: deprecationService,
@@ -43,84 +131,9 @@ describe('Kibana deprecations - Deprecations table', () => {
       });
     });
 
-    testBed.component.update();
-  });
-
-  test('renders deprecations', () => {
-    const { exists, table } = testBed;
-
-    expect(exists('kibanaDeprecations')).toBe(true);
-
-    const { tableCellsValues } = table.getMetaData('kibanaDeprecationsTable');
-
-    expect(tableCellsValues.length).toEqual(mockedKibanaDeprecations.length);
-  });
-
-  it('refreshes deprecation data', async () => {
-    const { actions } = testBed;
-
-    expect(deprecationService.getAllDeprecations).toHaveBeenCalledTimes(1);
-
-    await actions.table.clickRefreshButton();
-
-    expect(deprecationService.getAllDeprecations).toHaveBeenCalledTimes(2);
-  });
-
-  it('shows critical and warning deprecations count', () => {
-    const { find } = testBed;
-
-    expect(find('criticalDeprecationsCount').text()).toContain(
-      String(mockedCriticalKibanaDeprecations.length)
-    );
-    expect(find('warningDeprecationsCount').text()).toContain(
-      String(mockedWarningKibanaDeprecations.length)
-    );
-  });
-
-  describe('Search bar', () => {
-    it('filters by "critical" status', async () => {
-      const { actions, table } = testBed;
-
-      // Show only critical deprecations
-      await actions.searchBar.openStatusFilterDropdown();
-      await actions.searchBar.filterByTitle('Critical');
-      const { rows: criticalRows } = table.getMetaData('kibanaDeprecationsTable');
-      expect(criticalRows.length).toEqual(mockedCriticalKibanaDeprecations.length);
-
-      // Show all deprecations
-      await actions.searchBar.openStatusFilterDropdown();
-      await actions.searchBar.filterByTitle('Critical');
-      const { rows: allRows } = table.getMetaData('kibanaDeprecationsTable');
-      expect(allRows.length).toEqual(mockedKibanaDeprecations.length);
-    });
-
-    it('filters by type', async () => {
-      const { table, actions } = testBed;
-
-      await actions.searchBar.openTypeFilterDropdown();
-      await actions.searchBar.filterByTitle('Config');
-
-      const { rows: configRows } = table.getMetaData('kibanaDeprecationsTable');
-
-      expect(configRows.length).toEqual(mockedConfigKibanaDeprecations.length);
-    });
-  });
-
-  describe('No deprecations', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setupKibanaPage(httpSetup);
-      });
-
-      const { component } = testBed;
-
-      component.update();
-    });
-
     test('renders prompt', () => {
-      const { exists, find } = testBed;
-      expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain(
+      expect(screen.getByTestId('noDeprecationsPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('noDeprecationsPrompt')).toHaveTextContent(
         'Your Kibana configuration is up to date'
       );
     });
