@@ -1246,8 +1246,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param index - index of th element in datatable
      */
-    async getDatatableHeaderText(index = 0) {
-      const el = await this.getDatatableHeader(index);
+    async getDatatableHeaderText(index = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableHeader(index, addRowNumberColumn);
       return el.getVisibleText();
     },
 
