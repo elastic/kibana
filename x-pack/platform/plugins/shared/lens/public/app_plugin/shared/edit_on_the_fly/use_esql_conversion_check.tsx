@@ -143,22 +143,28 @@ export const useEsqlConversionCheck = (
       // This prevents conversion errors from breaking the visualization
     }
 
-    const convertibleLayer: ConvertibleLayer = {
-      id: layerId,
-      icon: 'layers',
-      name: '',
-      type: layerTypes.DATA,
-      query: esqlLayer ? esqlLayer.esql : '',
-      isConvertibleToEsql: !!esqlLayer,
-    };
-
-    return {
-      isConvertToEsqlButtonDisabled: false,
-      convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
-        defaultMessage: 'Convert visualization to ES|QL',
-      }),
-      convertibleLayers: [convertibleLayer],
-    };
+    return esqlLayer
+      ? {
+          isConvertToEsqlButtonDisabled: false,
+          convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
+            defaultMessage: 'Convert visualization to ES|QL',
+          }),
+          convertibleLayers: [
+            {
+              id: layerId,
+              icon: 'layers',
+              name: '',
+              type: layerTypes.DATA,
+              query: esqlLayer.esql,
+              isConvertibleToEsql: true,
+            },
+          ],
+        }
+      : getEsqlConversionDisabledSettings(
+          i18n.translate('xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip', {
+            defaultMessage: 'The visualization has unsupported settings for query mode',
+          })
+        );
   }, [
     activeVisualization,
     coreStart.uiSettings,
