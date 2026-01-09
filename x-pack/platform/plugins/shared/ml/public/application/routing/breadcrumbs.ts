@@ -21,7 +21,7 @@ type ManagementBreadcrumbType = ChromeBreadcrumb & {
 const stackManagementBreadcrumbText = i18n.translate(
   'xpack.ml.settings.breadcrumbs.stackManagementLabel',
   {
-    defaultMessage: 'Stack management',
+    defaultMessage: 'Stack Management',
   }
 );
 
@@ -107,7 +107,7 @@ export const CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType 
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
-    defaultMessage: 'Machine learning',
+    defaultMessage: 'Machine Learning',
   }),
   href: '/',
 });
@@ -124,21 +124,21 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 // to each of the AIOps pages.
 export const AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps labs',
+    defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/log_rate_analysis_index_select',
 });
 
 export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps labs',
+    defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/log_categorization_index_select',
 });
 
 export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps labs',
+    defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/change_point_detection_index_select',
 });

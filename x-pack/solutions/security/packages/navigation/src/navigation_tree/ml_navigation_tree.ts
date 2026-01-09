@@ -25,7 +25,6 @@ export const createMachineLearningNavigationTree = (): NodeDefinition => ({
         },
         {
           link: 'ml:dataVisualizer',
-          title: i18nStrings.ml.dataVisualizer,
         },
         {
           link: 'ml:dataDrift',
