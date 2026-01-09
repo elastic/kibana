@@ -52,7 +52,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   return (
     <DashboardRenderer
-      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, uiActions)}
+      getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
     />
   );
