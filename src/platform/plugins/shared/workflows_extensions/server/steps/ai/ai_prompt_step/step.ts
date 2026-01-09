@@ -8,10 +8,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { resolveConnectorId } from './utils/resolve_connector_id';
-import { AiPromptStepCommonDefinition } from '../../../common/steps/ai';
-import { createServerStepDefinition } from '../../step_registry/types';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
+import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
+import { createServerStepDefinition } from '../../../step_registry/types';
+import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiPromptStepDefinition = (
   coreSetup: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>
