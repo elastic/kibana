@@ -45,17 +45,28 @@ export const GithubConnector: ConnectorSpec = {
     },
     searchIssues: {
       isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        type: z.enum(['issue', 'pr']),
-        query: z.string().optional(),
-        state: z.enum(['open', 'closed']).optional(),
-        author: z.string().optional(),
-        assignee: z.string().optional(),
-        label: z.string().optional(),
-        milestone: z.string().optional(),
-      }),
+      input: z
+        .object({
+          owner: z.string(),
+          repo: z.string(),
+          type: z.enum(['issue', 'pr']),
+          query: z.string().optional(),
+          state: z.enum(['open', 'closed']).optional(),
+          author: z.string().optional(),
+          assignee: z.string().optional(),
+          label: z.string().optional(),
+          milestone: z.string().optional(),
+        })
+        .refine(
+          (data) =>
+            ['query', 'state', 'author', 'assignee', 'label', 'milestone'].some(
+              (key) => data[key as keyof typeof data] !== undefined
+            ),
+          {
+            message:
+              'At least one query-building parameter (query, state, author, assignee, label, or milestone) must be provided',
+          }
+        ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
