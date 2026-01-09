@@ -43,27 +43,37 @@ export const convertRequestToMetricsAPIOptions = (
       ? options.groupInstance
       : [options.groupInstance];
   }
-
   if (options.kuery) {
+    // First, check if kuery is a JSON DSL query (sent by infrastructure tables)
     try {
-      metricsApiOptions.filters = {
-        bool: {
-          filter: [...kqlQuery(options.kuery)],
-        },
-      };
-    } catch (err) {
-      metricsApiOptions.filters = {
-        bool: {
-          must: [
-            {
-              query_string: {
-                query: options.kuery,
-                analyze_wildcard: true,
+      const parsed = JSON.parse(options.kuery);
+      // If it parses as JSON and looks like an ES DSL query, use it directly
+      if (typeof parsed === 'object' && parsed !== null) {
+        metricsApiOptions.filters = parsed;
+      }
+    } catch {
+      // Not JSON, try to parse as KQL
+      try {
+        metricsApiOptions.filters = {
+          bool: {
+            filter: [...kqlQuery(options.kuery)],
+          },
+        };
+      } catch (err) {
+        // Fallback to query_string for Lucene-style queries
+        metricsApiOptions.filters = {
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: options.kuery,
+                  analyze_wildcard: true,
+                },
               },
-            },
-          ],
-        },
-      };
+            ],
+          },
+        };
+      }
     }
   }
 

@@ -7,3 +7,4 @@
 
 export { HostMetricsTable } from './host_metrics_table';
 export { useHostMetricsTable } from './use_host_metrics_table';
+export { useOtelHostMetricsTable } from './use_otel_host_metrics_table';

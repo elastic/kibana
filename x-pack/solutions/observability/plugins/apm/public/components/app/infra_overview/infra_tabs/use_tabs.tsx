@@ -11,8 +11,9 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import { isOpenTelemetryAgentName } from '../../../../../common/agent_name';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { KUBERNETES_POD_NAME, HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
   id: 'containers' | 'pods' | 'hosts';
   hidden?: boolean;
@@ -30,16 +31,19 @@ export function useTabs({
   hostNames,
   start,
   end,
+  agentName,
 }: {
   containerIds: string[];
   podNames: string[];
   hostNames: string[];
   start: string;
   end: string;
+  agentName?: string;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const { metricsDataAccess } = services;
   const HostMetricsTable = metricsDataAccess?.HostMetricsTable;
+  const OtelHostMetricsTable = metricsDataAccess?.OtelHostMetricsTable;
   const ContainerMetricsTable = metricsDataAccess?.ContainerMetricsTable;
   const PodMetricsTable = metricsDataAccess?.PodMetricsTable;
 
@@ -57,7 +61,24 @@ export function useTabs({
         should: [
           {
             terms: {
-              [HOST_NAME]: hostNames,
+              ['host.name']: hostNames,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    }),
+    [hostNames]
+  );
+
+  // OTel uses resource.attributes.k8s.node.name for Kubernetes node names
+  const otelHostsFilter = useMemo(
+    (): QueryDslQueryContainer => ({
+      bool: {
+        should: [
+          {
+            terms: {
+              ['resource.attributes.k8s.node.name']: hostNames,
             },
           },
         ],
@@ -69,7 +90,7 @@ export function useTabs({
   const podsFilter = useMemo(
     () => ({
       bool: {
-        filter: [{ terms: { [KUBERNETES_POD_NAME]: podNames } }],
+        filter: [{ terms: { ['resource.attributes.k8s.pod.name']: podNames } }],
       },
     }),
     [podNames]
@@ -77,7 +98,7 @@ export function useTabs({
   const containersFilter = useMemo(
     () => ({
       bool: {
-        filter: [{ terms: { [CONTAINER_ID]: containerIds } }],
+        filter: [{ terms: { ['resource.attributes.k8s.container.id']: containerIds } }],
       },
     }),
     [containerIds]
@@ -105,13 +126,17 @@ export function useTabs({
     </>
   );
 
+  const isOtelAgent = agentName ? isOpenTelemetryAgentName(agentName as AgentName) : false;
+  const ActiveHostMetricsTable = isOtelAgent ? OtelHostMetricsTable : HostMetricsTable;
+  const activeHostsFilter = isOtelAgent ? otelHostsFilter : hostsFilter;
+
   const hostMetricsTable = (
     <>
       <EuiSpacer />
-      {HostMetricsTable &&
-        HostMetricsTable({
+      {ActiveHostMetricsTable &&
+        ActiveHostMetricsTable({
           timerange,
-          filterClauseDsl: hostsFilter,
+          filterClauseDsl: activeHostsFilter,
         })}
     </>
   );

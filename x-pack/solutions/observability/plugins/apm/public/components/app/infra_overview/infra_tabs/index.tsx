@@ -24,7 +24,7 @@ const INITIAL_STATE = {
 };
 
 export function InfraTabs() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, agentName } = useApmServiceContext();
   const history = useHistory();
   const {
     query: { environment, kuery, rangeFrom, rangeTo, detailTab },
@@ -58,6 +58,7 @@ export function InfraTabs() {
     hostNames,
     start,
     end,
+    agentName,
   });
 
   if (status === FETCH_STATUS.LOADING) {

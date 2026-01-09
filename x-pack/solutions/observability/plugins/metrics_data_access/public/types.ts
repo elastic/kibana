@@ -16,6 +16,7 @@ export interface MetricsDataPluginSetup {
 export interface MetricsDataPluginStart {
   metricsClient: MetricsDataClient;
   HostMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
+  OtelHostMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
   PodMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
   ContainerMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
 }

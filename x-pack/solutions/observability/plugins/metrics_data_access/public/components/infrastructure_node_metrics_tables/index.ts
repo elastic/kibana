@@ -6,5 +6,5 @@
  */
 
 export { ContainerMetricsTable, useContainerMetricsTable } from './container';
-export { HostMetricsTable, useHostMetricsTable } from './host';
+export { HostMetricsTable, useHostMetricsTable, useOtelHostMetricsTable } from './host';
 export { PodMetricsTable, usePodMetricsTable } from './pod';
