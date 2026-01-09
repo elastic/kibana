@@ -56,7 +56,6 @@ export class StaleInstancesCleanupTask {
             run: async () => {
               return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {},
           };
         },
       },
