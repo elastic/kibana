@@ -742,7 +742,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Restrict to default AI connector only',
     },
   },
-  'entityStore:enableV2': {
+  'securitySolution:entityStoreEnableV2': {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',

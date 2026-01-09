@@ -8,4 +8,4 @@
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
 
-export const FF_ENABLE_ENTITY_STORE_V2 = 'entityStore:enableV2';
+export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
