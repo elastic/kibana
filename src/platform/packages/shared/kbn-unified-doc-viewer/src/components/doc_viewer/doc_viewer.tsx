@@ -43,7 +43,7 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
         name: title,
         content: (
           <DocViewerTab
-            key={`${renderProps.hit.id}_${id}`}
+            key={id}
             id={id}
             title={title}
             component={component}
