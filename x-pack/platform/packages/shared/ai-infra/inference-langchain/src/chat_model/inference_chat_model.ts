@@ -244,12 +244,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       llmOutput: {
         ...(response.tokens
           ? {
-              tokenUsage: {
-                promptTokens: response.tokens.prompt,
-                completionTokens: response.tokens.completion,
-                totalTokens: response.tokens.total,
-              },
-            }
+            tokenUsage: {
+              promptTokens: response.tokens.prompt,
+              completionTokens: response.tokens.completion,
+              totalTokens: response.tokens.total,
+            },
+          }
           : {}),
       },
     };
@@ -320,7 +320,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
     const schema: InteropZodType<RunOutput> | Record<string, any> = outputSchema;
     const name = config?.name;
-    const description = schema.description ?? 'A function available to call.';
+    const description =
+      'description' in schema && typeof schema.description === 'string'
+        ? schema.description
+        : 'A function available to call.';
     const includeRaw = config?.includeRaw;
 
     let functionName = name ?? 'extract';
