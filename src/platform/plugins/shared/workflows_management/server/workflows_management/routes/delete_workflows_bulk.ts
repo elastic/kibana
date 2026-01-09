@@ -34,8 +34,8 @@ export function registerDeleteWorkflowsBulkRoute({
       try {
         const { ids } = request.body as { ids: string[] };
         const spaceId = spaces.getSpaceId(request);
-        await api.deleteWorkflows(ids, spaceId, request);
-        return response.ok();
+        const result = await api.deleteWorkflows(ids, spaceId, request);
+        return response.ok({ body: result });
       } catch (error) {
         return handleRouteError(response, error);
       }

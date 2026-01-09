@@ -40,13 +40,14 @@ export interface ChangePoint {
   key: string | number | Array<string | number>;
   pattern?: string;
   timeSeries?: Array<{ x: number; y: number }>;
+  summary: string;
   changes: ChangePointDetails & {
     time?: string;
     type: ChangePointType;
   };
 }
 
-function getMessage({
+function getSummary({
   changes,
   startTime,
   endTime,
@@ -102,7 +103,7 @@ export async function getChangePoints({ buckets }: { buckets: Bucket[] }): Promi
       return {
         key: bucket.key,
         pattern: bucket.regex,
-        message: getMessage({
+        summary: getSummary({
           changes,
           startTime: bucket.time_series.buckets[0]?.key_as_string ?? '',
           endTime:
