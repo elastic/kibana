@@ -415,7 +415,7 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Data stream ID is required');
     }
     try {
-      this.logger.debug(`Creating data stream: ${dataStreamId}`);
+      this.logger.info(`***********insertDataStream: Creating data stream: ${dataStreamId}`);
 
       const initialDataStreamData: DataStreamAttributes = {
         integration_id: integrationId,
@@ -437,6 +437,7 @@ export class AutomaticImportSavedObjectService {
       };
 
       const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+      this.logger.info(`***********insertDataStream: compositeId: ${compositeId}`);
 
       return await this.savedObjectsClient.create<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
@@ -468,6 +469,7 @@ export class AutomaticImportSavedObjectService {
     try {
       this.logger.debug(`Getting data stream: ${dataStreamId}`);
       const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+      this.logger.info(`***********getDataStream: compositeId: ${compositeId}`);
       return await this.savedObjectsClient.get<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         compositeId
@@ -600,7 +602,7 @@ export class AutomaticImportSavedObjectService {
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
         result: {
-          ingestPipeline,
+          ingest_pipeline: ingestPipeline,
         },
         job_info: {
           ...dataStream.attributes.job_info,

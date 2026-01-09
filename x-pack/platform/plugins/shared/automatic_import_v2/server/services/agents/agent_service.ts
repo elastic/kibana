@@ -122,7 +122,7 @@ export class AgentService {
       {
         callbacks: [...(traceOptions.tracers ?? [])],
         runName: 'automatic_import_agent',
-        tags: ['evaluation', 'automatic_import_agent'],
+        tags: ['automatic_import_agent'],
       }
     );
 

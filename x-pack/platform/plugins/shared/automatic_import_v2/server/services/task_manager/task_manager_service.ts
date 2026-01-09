@@ -19,6 +19,7 @@ import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
 import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import type { AutomaticImportV2PluginStartDependencies } from '../../types';
+import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
 
 export const DATA_STREAM_CREATION_TASK_TYPE = 'autoImport-dataStream-task';
 
@@ -42,7 +43,7 @@ export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
   private agentService: AgentService;
-  private core: CoreSetup<AutomaticImportV2PluginStartDependencies>;
+  private automaticImportSavedObjectService: AutomaticImportSavedObjectService | null = null;
 
   constructor(
     logger: LoggerFactory,
@@ -50,7 +51,6 @@ export class TaskManagerService {
     core: CoreSetup<AutomaticImportV2PluginStartDependencies>
   ) {
     this.logger = logger.get('taskManagerService');
-    this.core = core;
     this.agentService = new AgentService(new AutomaticImportSamplesIndexService(logger), logger);
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
@@ -62,7 +62,13 @@ export class TaskManagerService {
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
         createTaskRunner: ({ taskInstance }) => ({
-          run: async () => this.runTask(taskInstance),
+          run: async () => {
+            assert(
+              this.automaticImportSavedObjectService,
+              'Automatic import saved object service not initialized'
+            );
+            return this.runTask(taskInstance, core, this.automaticImportSavedObjectService);
+          },
           cancel: async () => this.cancelTask(taskInstance),
         }),
       },
@@ -72,9 +78,12 @@ export class TaskManagerService {
   }
 
   // for lifecycle start phase
-  public initialize(taskManager: TaskManagerStartContract): void {
+  public initialize(
+    taskManager: TaskManagerStartContract,
+    automaticImportSavedObjectService: AutomaticImportSavedObjectService
+  ): void {
     this.taskManager = taskManager;
-
+    this.automaticImportSavedObjectService = automaticImportSavedObjectService;
     this.logger.info('Automatic Import TaskManagerService initialized');
   }
 
@@ -150,8 +159,16 @@ export class TaskManagerService {
     }
   }
 
-  private async runTask(taskInstance: ConcreteTaskInstance) {
+  private async runTask(
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    automaticImportSavedObjectService: AutomaticImportSavedObjectService
+  ) {
     assert(this.agentService, 'Agent service not initialized');
+    assert(
+      automaticImportSavedObjectService,
+      'Automatic import saved object service not initialized'
+    );
 
     const { id: taskId, params } = taskInstance;
     const { integrationId, dataStreamId, connectorId, authHeaders } =
@@ -167,7 +184,7 @@ export class TaskManagerService {
       }
 
       // Get core services and plugins
-      const [coreStart, pluginsStart] = await this.core.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
 
       // Recreate a fake request with the original auth headers so we can run as that user
       const fakeRequest = kibanaRequestFactory({
@@ -198,7 +215,7 @@ export class TaskManagerService {
         model
       );
 
-      this.logger.debug(`Task ${taskId} completed successfully`);
+      this.logger.info(`Task ${taskId} completed successfully`);
 
       // Extract and convert the pipeline to JSON string
       const pipelineString = JSON.stringify(result.current_pipeline || {});
@@ -207,6 +224,16 @@ export class TaskManagerService {
       const pipelineGenerationResults = (result.pipeline_generation_results?.docs || []).map(
         (doc) => JSON.stringify(doc)
       );
+
+      await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        ingestPipeline: pipelineString,
+        status: TASK_STATUSES.completed,
+      });
+
+      this.logger.info(`Data stream ${dataStreamId} updated successfully`);
+      this.logger.info(`Task ${taskId} result: ${JSON.stringify(result)}`);
 
       return {
         state: {

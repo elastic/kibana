@@ -73,7 +73,7 @@ export class AutomaticImportService {
       this.loggerFactory,
       savedObjectsClient
     );
-    this.taskManagerService.initialize(taskManagerStart);
+    this.taskManagerService.initialize(taskManagerStart, this.savedObjectService);
   }
 
   public async createIntegration(params: CreateIntegrationParams): Promise<void> {
