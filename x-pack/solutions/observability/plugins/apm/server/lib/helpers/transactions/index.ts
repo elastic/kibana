@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { getHasTransactionsEvents } from '@kbn/apm-data-access-plugin/server/utils';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
@@ -21,38 +21,6 @@ import type { APMEventClient } from '../create_es_client/create_apm_event_client
 import { ApmDocumentType } from '../../../../common/document_type';
 
 export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/utils';
-
-export async function getHasTransactionsEvents({
-  start,
-  end,
-  apmEventClient,
-  kuery,
-}: {
-  start?: number;
-  end?: number;
-  apmEventClient: APMEventClient;
-  kuery?: string;
-}) {
-  const response = await apmEventClient.search('get_has_aggregated_transactions', {
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    track_total_hits: 1,
-    terminate_after: 1,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-          ...(start && end ? rangeQuery(start, end) : []),
-          ...kqlQuery(kuery),
-        ],
-      },
-    },
-  });
-
-  return response.hits.total.value > 0;
-}
 
 export async function getSearchTransactionsEvents({
   config,

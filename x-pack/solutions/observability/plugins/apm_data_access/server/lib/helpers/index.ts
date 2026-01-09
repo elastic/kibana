@@ -6,7 +6,12 @@
  */
 
 export { getDocumentTypeFilterForServiceDestinationStatistics } from './spans/get_is_using_service_destination_metrics';
-export { getDurationFieldForTransactions } from './transactions';
+export {
+  getDurationFieldForTransactions,
+  getHasTransactionsEvents,
+  getBackwardCompatibleDocumentTypeFilter,
+} from './transactions';
+export { getRollupIntervalForTimeRange } from './get_rollup_interval_for_time_range';
 export {
   APMEventClient,
   type APMEventESSearchRequest,

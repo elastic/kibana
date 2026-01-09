@@ -13,11 +13,14 @@ import {
   METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
 } from '@kbn/apm-types/es_fields';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import { termsQuery } from '@kbn/observability-utils-common/es/queries/terms_query';
 import { existsQuery } from '@kbn/observability-utils-common/es/queries/exists_query';
 import { RollupInterval } from '../../../../common/rollup';
 import { ApmDocumentType } from '../../../../common/document_type';
+import type { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 // The function returns Document type filter for 1m Transaction Metrics
 export function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions: boolean) {
@@ -86,4 +89,36 @@ export function getDurationFieldForTransactions(
   }
 
   return TRANSACTION_DURATION;
+}
+
+export async function getHasTransactionsEvents({
+  start,
+  end,
+  apmEventClient,
+  kuery,
+}: {
+  start?: number;
+  end?: number;
+  apmEventClient: APMEventClient;
+  kuery?: string;
+}) {
+  const response = await apmEventClient.search('get_has_aggregated_transactions', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    track_total_hits: 1,
+    terminate_after: 1,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+          ...(start && end ? rangeQuery(start, end) : []),
+          ...kqlQuery(kuery),
+        ],
+      },
+    },
+  });
+
+  return response.hits.total.value > 0;
 }

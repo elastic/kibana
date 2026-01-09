@@ -7,6 +7,9 @@
 export {
   getDocumentTypeFilterForServiceDestinationStatistics,
   getDurationFieldForTransactions,
+  getHasTransactionsEvents,
+  getBackwardCompatibleDocumentTypeFilter,
+  getRollupIntervalForTimeRange,
   callAsyncWithDebug,
   cancelEsRequestOnAbort,
   getDataTierFilterCombined,
