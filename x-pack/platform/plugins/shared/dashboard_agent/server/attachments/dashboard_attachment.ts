@@ -8,26 +8,44 @@
 import { z } from '@kbn/zod';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { dashboardAttachments, dashboardTools, type DashboardAttachmentData } from '../../common';
+import {
+  dashboardAttachments,
+  dashboardTools,
+  type DashboardAttachmentData,
+  type DashboardAttachmentPanel,
+  type DashboardAttachmentSection,
+} from '@kbn/dashboard-agent-common';
 
 /**
- * Schema for panel summary information
+ * Schema for full panel configuration
  */
-const panelSummarySchema = z.object({
+const dashboardAttachmentPanelSchema = z.object({
   type: z.string(),
-  title: z.string().optional(),
+  uid: z.string().optional(),
+  config: z.record(z.unknown()),
+});
+
+/**
+ * Schema for dashboard sections
+ */
+const dashboardAttachmentSectionSchema = z.object({
+  title: z.string(),
+  collapsed: z.boolean(),
+  panels: z.array(dashboardAttachmentPanelSchema),
 });
 
 /**
  * Schema for dashboard attachment data.
- * This should match the DashboardAttachmentData interface in common/types.ts
+ * This should match the DashboardAttachmentData interface in @kbn/dashboard-agent-common.
  */
 export const dashboardAttachmentDataSchema = z.object({
-  dashboardId: z.string(),
+  dashboardId: z.string().optional(),
   title: z.string(),
   description: z.string().optional(),
   panelCount: z.number(),
-  panels: z.array(panelSummarySchema).optional(),
+  panels: z.array(dashboardAttachmentPanelSchema).optional(),
+  sections: z.array(dashboardAttachmentSectionSchema).optional(),
+  attachmentLabel: z.string().optional(),
 });
 
 /**
@@ -72,7 +90,7 @@ DASHBOARD CONTEXT:
 ---
 When the user asks about the dashboard:
 1. Use the dashboard title and description to understand the context
-2. Review the panels to understand what visualizations are present
+2. Review the panels and their configurations to understand what visualizations are present
 3. If the user wants to modify the dashboard, use the ${dashboardTools.updateDashboard} tool
 4. If the user wants to create a new dashboard based on this one, use the ${dashboardTools.createDashboard} tool
 
@@ -86,26 +104,74 @@ You can help the user:
 };
 
 /**
+ * Formats a single panel for display to the LLM.
+ */
+const formatPanel = (panel: DashboardAttachmentPanel, index: number): string => {
+  const lines: string[] = [];
+  const title =
+    (panel.config as { title?: string })?.title ||
+    (panel.config as { attributes?: { title?: string } })?.attributes?.title ||
+    '(untitled)';
+
+  lines.push(`  ${index + 1}. ${title}`);
+  lines.push(`     Type: ${panel.type}`);
+  if (panel.uid) {
+    lines.push(`     UID: ${panel.uid}`);
+  }
+  lines.push(`     Config: ${JSON.stringify(panel.config, null, 2).split('\n').join('\n     ')}`);
+
+  return lines.join('\n');
+};
+
+/**
+ * Formats a section for display to the LLM.
+ */
+const formatSection = (section: DashboardAttachmentSection, sectionIndex: number): string => {
+  const lines: string[] = [];
+  lines.push(`\nSection ${sectionIndex + 1}: ${section.title}`);
+
+  if (section.panels.length > 0) {
+    section.panels.forEach((panel, panelIndex) => {
+      lines.push(formatPanel(panel, panelIndex));
+    });
+  } else {
+    lines.push('  (no panels in this section)');
+  }
+
+  return lines.join('\n');
+};
+
+/**
  * Formats dashboard data for display to the LLM.
  *
  * @param data - The dashboard attachment data
  * @returns Formatted string representation of the dashboard data
  */
 const formatDashboardData = (data: DashboardAttachmentData): string => {
-  const lines: string[] = [`Dashboard ID: ${data.dashboardId}`, `Title: ${data.title}`];
+  const lines: string[] = [
+    `Dashboard ID: ${data.dashboardId ?? '(unsaved)'}`,
+    `Title: ${data.title}`,
+  ];
 
   if (data.description) {
     lines.push(`Description: ${data.description}`);
   }
 
-  lines.push(`Number of panels: ${data.panelCount}`);
+  lines.push(`Total panels: ${data.panelCount}`);
 
+  // Format top-level panels
   if (data.panels && data.panels.length > 0) {
     lines.push('');
     lines.push('Panels:');
     data.panels.forEach((panel, index) => {
-      const panelTitle = panel.title || '(untitled)';
-      lines.push(`  ${index + 1}. ${panelTitle} (${panel.type})`);
+      lines.push(formatPanel(panel, index));
+    });
+  }
+
+  // Format sections
+  if (data.sections && data.sections.length > 0) {
+    data.sections.forEach((section, index) => {
+      lines.push(formatSection(section, index));
     });
   }
 

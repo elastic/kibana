@@ -7,55 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  DASHBOARD_AGENT_ID,
+  dashboardAttachments,
+  type DashboardAttachmentData,
+  type DashboardAttachmentPanel,
+  type DashboardAttachmentSection,
+} from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { agentBuilderService } from '../../services/kibana_services';
 import { isDashboardSection, type DashboardState } from '../../../common';
 
-// TODO: These constants and types are duplicated from @kbn/dashboard-agent-plugin/common
-// to avoid a circular dependency (dashboard -> dashboardAgent -> dashboard).
-// In the future, these should be moved to a shared package like @kbn/dashboard-agent-common.
-const DASHBOARD_NAMESPACE = 'platform.dashboard';
-const DASHBOARD_AGENT_ID = `${DASHBOARD_NAMESPACE}.dashboard_agent`;
-const DASHBOARD_ATTACHMENT_TYPE = `${DASHBOARD_NAMESPACE}.dashboard`;
-
-interface PanelSummary {
+/**
+ * Converts a panel to the attachment format
+ */
+const toAttachmentPanel = (panel: {
   type: string;
-  title?: string;
-}
+  uid?: string;
+  config: unknown;
+}): DashboardAttachmentPanel => ({
+  type: panel.type,
+  uid: panel.uid,
+  config: panel.config as Record<string, unknown>,
+});
 
 /**
- * Extracts panel summaries from the serialized dashboard state
+ * Extracts panels and sections from the serialized dashboard state
  */
-function getPanelSummariesFromState(panels: DashboardState['panels']): PanelSummary[] | undefined {
+function extractPanelsAndSections(panels: DashboardState['panels']): {
+  panels: DashboardAttachmentPanel[];
+  sections: DashboardAttachmentSection[];
+} {
   if (!panels || panels.length === 0) {
-    return undefined;
+    return { panels: [], sections: [] };
   }
 
-  const summaries: PanelSummary[] = [];
+  const topLevelPanels: DashboardAttachmentPanel[] = [];
+  const sections: DashboardAttachmentSection[] = [];
 
   for (const item of panels) {
     if (isDashboardSection(item)) {
-      // It's a section - extract panels from within the section
-      if (item.panels) {
-        for (const panel of item.panels) {
-          summaries.push({
-            type: panel.type,
-            title: (panel.config as { title?: string })?.title,
-          });
-        }
-      }
-    } else {
-      // It's a regular panel
-      summaries.push({
-        type: item.type,
-        title: (item.config as { title?: string })?.title,
+      sections.push({
+        title: item.title,
+        panels: item.panels?.map(toAttachmentPanel) ?? [],
       });
+    } else {
+      topLevelPanels.push(toAttachmentPanel(item));
     }
   }
 
-  return summaries.length > 0 ? summaries : undefined;
+  return { panels: topLevelPanels, sections };
 }
 
 /**
@@ -70,49 +73,34 @@ export function useAgentBuilderContext({
   dashboardApi: DashboardApi | undefined;
   savedDashboardId: string | undefined;
 }) {
-  const [title, setTitle] = useState<string | undefined>();
-  const [description, setDescription] = useState<string | undefined>();
-
-  useEffect(
-    function subscribeToTitleAndDescription() {
-      if (!dashboardApi) return;
-
-      const titleSubscription = dashboardApi.title$.subscribe(setTitle);
-      const descriptionSubscription = dashboardApi.description$.subscribe(setDescription);
-
-      return () => {
-        titleSubscription.unsubscribe();
-        descriptionSubscription.unsubscribe();
-      };
-    },
-    [dashboardApi]
-  );
-
   useEffect(
     function setDashboardAttachment() {
-      if (!agentBuilderService || !dashboardApi || !savedDashboardId) {
+      if (!agentBuilderService || !dashboardApi) {
         return;
       }
 
-      const dashboardTitle = title || 'Untitled Dashboard';
-
       const { attributes } = dashboardApi.getSerializedState();
-      const panelCount = dashboardApi.getPanelCount();
-      const panelSummaries = getPanelSummariesFromState(attributes.panels);
 
-      const attachmentData = {
+      const panelCount = dashboardApi.getPanelCount();
+      const { panels, sections } = extractPanelsAndSections(attributes.panels);
+
+      const dashboardTitle = attributes.title || 'Untitled Dashboard';
+      const dashboardDescription = attributes.description || undefined;
+
+      const attachmentData: DashboardAttachmentData = {
         dashboardId: savedDashboardId,
         title: dashboardTitle,
-        description: description || undefined,
+        description: dashboardDescription,
         panelCount,
-        panels: panelSummaries,
+        panels: panels.length > 0 ? panels : undefined,
+        sections: sections.length > 0 ? sections : undefined,
         attachmentLabel: dashboardTitle,
       };
 
       const dashboardAttachment: AttachmentInput = {
-        id: `dashboard-${savedDashboardId}`,
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: attachmentData,
+        id: savedDashboardId ? `dashboard-${savedDashboardId}` : undefined,
+        type: dashboardAttachments.dashboard,
+        data: attachmentData as unknown as Record<string, unknown>,
       };
 
       // Set the flyout configuration with the dashboard attachment
@@ -126,6 +114,6 @@ export function useAgentBuilderContext({
         agentBuilderService?.clearConversationFlyoutActiveConfig();
       };
     },
-    [dashboardApi, savedDashboardId, title, description]
+    [dashboardApi, savedDashboardId]
   );
 }

@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export { DASHBOARD_AGENT_FEATURE_FLAG, DASHBOARD_AGENT_FEATURE_FLAG_DEFAULT } from './constants';
+export {
+  DASHBOARD_NAMESPACE,
+  DASHBOARD_AGENT_ID,
+  dashboardTools,
+  dashboardAttachments,
+} from './constants';
+
+export type {
+  DashboardAttachmentPanel,
+  DashboardAttachmentSection,
+  DashboardAttachmentData,
+} from './types';

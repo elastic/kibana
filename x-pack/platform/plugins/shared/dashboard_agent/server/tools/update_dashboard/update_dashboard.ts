@@ -15,7 +15,7 @@ import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import { dashboardTools } from '../../../common';
+import { dashboardTools } from '@kbn/dashboard-agent-common';
 import { checkDashboardToolsAvailability, normalizePanels, buildMarkdownPanel } from '../utils';
 
 const updateDashboardSchema = z.object({

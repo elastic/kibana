@@ -102,7 +102,10 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/dashboard-agent-common"
   ],
   "exclude": ["target/**/*"]
 }

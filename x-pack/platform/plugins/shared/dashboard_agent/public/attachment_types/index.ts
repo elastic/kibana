@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { dashboardAttachments } from '../../common';
+import { dashboardAttachments } from '@kbn/dashboard-agent-common';
 
 /**
  * Attachment type with optional attachmentLabel in data

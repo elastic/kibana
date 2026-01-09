@@ -44,4 +44,3 @@ export class DashboardAgentPlugin
 
   public stop() {}
 }
-
