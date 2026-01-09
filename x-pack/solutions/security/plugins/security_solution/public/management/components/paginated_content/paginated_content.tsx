@@ -55,9 +55,6 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
   contentClassName?: string;
   // Artifact specific decorations to display in the cards
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
-  /**
-   * Timestamp from the last data update from React Query's dataUpdatedAt).
-   */
   dataUpdatedAt?: number;
   /**
    * Children can be used to define custom content if the default creation of items is not sufficient
