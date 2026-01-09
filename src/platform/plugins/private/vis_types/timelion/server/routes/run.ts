@@ -54,11 +54,17 @@ export function runRoute(
               es: schema.object({
                 filter: schema.object({
                   bool: schema.object({
-                    filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-                    must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-                    should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+                    filter: schema.maybe(
+                      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
+                    ),
+                    must: schema.maybe(
+                      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
+                    ),
+                    should: schema.maybe(
+                      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
+                    ),
                     must_not: schema.maybe(
-                      schema.arrayOf(schema.object({}, { unknowns: 'allow' }))
+                      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
                     ),
                   }),
                 }),
