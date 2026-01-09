@@ -396,4 +396,131 @@ export default ESQLEditor;`
       expect(exports.default.localName).toBe('ESQLEditor');
     });
   });
+
+  describe('import then export named handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-import-export-named-test-'));
+
+      // Source file with multiple exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'provider.ts'),
+        `export const I18nProvider = () => {};
+export const useI18n = () => {};`
+      );
+
+      // Barrel that imports then re-exports (no inline from)
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `import { I18nProvider, useI18n } from './provider';
+export { I18nProvider, useI18n };`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('traces import-then-export to source file', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // I18nProvider should trace to provider.ts, not the barrel
+      expect(exports.I18nProvider).toBeDefined();
+      expect(exports.I18nProvider.path).toBe(Path.join(tempDir, 'provider.ts'));
+      expect(exports.I18nProvider.localName).toBe('I18nProvider');
+
+      // useI18n should also trace to provider.ts
+      expect(exports.useI18n).toBeDefined();
+      expect(exports.useI18n.path).toBe(Path.join(tempDir, 'provider.ts'));
+      expect(exports.useI18n.localName).toBe('useI18n');
+    });
+  });
+
+  describe('mixed resolvable and external exports', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-mixed-exports-test-'));
+
+      // Source file with local exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'local.ts'),
+        `export const LocalComponent = () => {};`
+      );
+
+      // Barrel that:
+      // 1. Imports from local file AND external package (simulated by non-resolvable path)
+      // 2. Re-exports both
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `import { LocalComponent } from './local';
+import { ExternalThing } from 'non-existent-external-package';
+export { LocalComponent, ExternalThing };`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('captures resolvable exports and skips external ones', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // LocalComponent should be captured and traced to local.ts
+      expect(exports.LocalComponent).toBeDefined();
+      expect(exports.LocalComponent.path).toBe(Path.join(tempDir, 'local.ts'));
+      expect(exports.LocalComponent.localName).toBe('LocalComponent');
+
+      // ExternalThing should NOT be in the exports (external package, not resolvable)
+      // This is intentional - the transformer will leave these imports unchanged
+      expect(exports.ExternalThing).toBeUndefined();
+    });
+  });
+
+  describe('import with rename then export handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-rename-export-test-'));
+
+      // Source file
+      await Fsp.writeFile(
+        Path.join(tempDir, 'source.ts'),
+        `export const OriginalName = 'value';`
+      );
+
+      // Barrel that imports with rename and re-exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `import { OriginalName as RenamedLocally } from './source';
+export { RenamedLocally as PublicName };`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('handles import rename followed by export rename', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // PublicName should trace to source.ts with the original local name
+      expect(exports.PublicName).toBeDefined();
+      expect(exports.PublicName.path).toBe(Path.join(tempDir, 'source.ts'));
+      expect(exports.PublicName.localName).toBe('OriginalName');
+    });
+  });
 });

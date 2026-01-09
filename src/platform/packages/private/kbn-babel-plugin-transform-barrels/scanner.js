@@ -313,32 +313,59 @@ function parseBarrelExports(content, filePath) {
     },
 
     // Handle: export { Foo, Bar as Baz } from './source'
+    // Also handles: import { Foo } from './source'; export { Foo };
     ExportNamedDeclaration(nodePath) {
       const node = nodePath.node;
 
-      // Only process re-exports (has source)
-      if (!node.source) return;
+      if (node.source) {
+        // Re-export with inline source: export { X } from './source'
+        const sourcePath = node.source.value;
+        const resolvedPath = resolveModulePath(sourcePath, barrelDir);
 
-      const sourcePath = node.source.value;
-      const resolvedPath = resolveModulePath(sourcePath, barrelDir);
+        if (!resolvedPath) return;
 
-      if (!resolvedPath) return;
+        for (const specifier of node.specifiers) {
+          if (specifier.type === 'ExportSpecifier') {
+            const exported = specifier.exported;
+            const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
+            const localName = specifier.local.name;
 
-      for (const specifier of node.specifiers) {
-        if (specifier.type === 'ExportSpecifier') {
-          const exported = specifier.exported;
-          const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
-          const localName = specifier.local.name;
+            // Recursively follow the export chain to find the actual source file
+            const found = findExportSource(localName, resolvedPath, new Set());
 
-          // Recursively follow the export chain to find the actual source file
-          const found = findExportSource(localName, resolvedPath, new Set());
+            exports[exportedName] = {
+              path: found ? found.path : resolvedPath,
+              type: localName === 'default' ? 'default' : 'named',
+              localName: found ? found.localName : localName,
+              importedName: localName,
+            };
+          }
+        }
+      } else if (node.specifiers) {
+        // Export from imported variable: import { X } from './source'; export { X };
+        for (const specifier of node.specifiers) {
+          if (specifier.type === 'ExportSpecifier') {
+            const exported = specifier.exported;
+            const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
+            const localName = specifier.local.name;
 
-          exports[exportedName] = {
-            path: found ? found.path : resolvedPath,
-            type: localName === 'default' ? 'default' : 'named',
-            localName: found ? found.localName : localName,
-            importedName: localName,
-          };
+            // Check if this was imported from somewhere
+            const importInfo = importMap[localName];
+            if (importInfo) {
+              // Only include if we can resolve the source (internal packages)
+              const found = findExportSource(importInfo.importedName, importInfo.path, new Set());
+              if (found) {
+                exports[exportedName] = {
+                  path: found.path,
+                  type: found.isDefault ? 'default' : 'named',
+                  localName: found.localName,
+                  importedName: localName,
+                };
+              }
+              // If not found (external package), skip - transformer will leave unchanged
+            }
+            // If not in importMap, it's a local definition - skip (can't transform)
+          }
         }
       }
     },
@@ -692,7 +719,31 @@ function parseAllFileExports(filePath, visited) {
 
   const barrelDir = path.dirname(filePath);
 
+  // Track imports to resolve re-exported imports
+  /** @type {Record<string, { path: string, importedName: string }>} */
+  const importMap = {};
+
   traverse(ast, {
+    // Track ESM imports for resolving export { X } where X was imported
+    ImportDeclaration(nodePath) {
+      const node = nodePath.node;
+      const sourcePath = node.source.value;
+      const resolvedPath = resolveModulePath(sourcePath, barrelDir);
+
+      if (!resolvedPath) return;
+
+      for (const specifier of node.specifiers) {
+        if (specifier.type === 'ImportSpecifier') {
+          const localName = specifier.local.name;
+          const imported = specifier.imported;
+          const importedName = imported.type === 'Identifier' ? imported.name : imported.value;
+          importMap[localName] = { path: resolvedPath, importedName };
+        } else if (specifier.type === 'ImportDefaultSpecifier') {
+          importMap[specifier.local.name] = { path: resolvedPath, importedName: 'default' };
+        }
+      }
+    },
+
     ExportNamedDeclaration(nodePath) {
       const node = nodePath.node;
 
@@ -747,12 +798,27 @@ function parseAllFileExports(filePath, visited) {
       }
 
       // Direct export from local: export { X, Y }
+      // Could be: (1) locally defined, (2) imported then exported
       if (!node.source && node.specifiers) {
         for (const spec of node.specifiers) {
           if (spec.type === 'ExportSpecifier') {
             const exported = spec.exported;
             const expName = exported.type === 'Identifier' ? exported.name : exported.value;
-            exports.set(expName, { path: filePath, localName: spec.local.name, isDefault: false });
+            const localName = spec.local.name;
+
+            // Check if this was imported from somewhere
+            const importInfo = importMap[localName];
+            if (importInfo) {
+              // Trace to the actual source file
+              const found = findExportSource(importInfo.importedName, importInfo.path, new Set(visited));
+              if (found) {
+                exports.set(expName, found);
+              }
+              // If not found (external package), skip - will be handled by caller
+            } else {
+              // Locally defined - set path to current file
+              exports.set(expName, { path: filePath, localName, isDefault: false });
+            }
           }
         }
       }
