@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
@@ -32,4 +33,31 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
   },
   namespaceType: 'agnostic',
   mappings: prebuiltRuleAssetMappings,
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            rule_id: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'long',
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(
+          {
+            rule_id: schema.string(),
+            version: schema.number(),
+          },
+          { unknowns: 'allow' }
+        ),
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+  },
 };
