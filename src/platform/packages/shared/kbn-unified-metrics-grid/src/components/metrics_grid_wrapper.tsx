@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { EuiFocusTrap } from '@elastic/eui';
 import { cx } from '@emotion/css';
-import { css, Global } from '@emotion/react';
+import { css } from '@emotion/react';
 import { ChartSectionTemplate, type ChartSectionTemplateProps } from '@kbn/unified-histogram';
 import { useMetricsGridFullScreen } from '../hooks';
 import {
@@ -42,7 +42,6 @@ export const MetricsGridWrapper = ({
 
   const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];
   const metricsGridFullScreenClass = styles[METRICS_GRID_FULL_SCREEN_CLASS];
-  const tooltipZIndex = styles.tooltipZIndex;
 
   const fullHeightCss = css`
     height: 100%;
@@ -60,52 +59,41 @@ export const MetricsGridWrapper = ({
   }, [isFullscreen, restrictBodyClass]);
 
   return (
-    <>
-      {isFullscreen && tooltipZIndex && (
-        <Global
-          styles={css`
-            [id^='echTooltipPortalMainTooltip'] {
-              z-index: ${tooltipZIndex} !important;
-            }
-          `}
-        />
-      )}
-      <EuiFocusTrap
-        disabled={!isFullscreen}
-        css={css`
-          height: ${isComponentVisible ? '100%' : 0};
-          visibility: ${isComponentVisible ? 'visible' : 'hidden'};
-        `}
+    <EuiFocusTrap
+      disabled={!isFullscreen}
+      css={css`
+        height: ${isComponentVisible ? '100%' : 0};
+        visibility: ${isComponentVisible ? 'visible' : 'hidden'};
+      `}
+    >
+      <div
+        data-test-subj="metricsGridWrapper"
+        className={cx('metricsGridWrapper', {
+          [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+        })}
+        onKeyDown={onKeyDown}
+        ref={setMetricsGridWrapper}
+        css={fullHeightCss}
       >
         <div
-          data-test-subj="metricsGridWrapper"
-          className={cx('metricsGridWrapper', {
-            [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          id={metricsGridId}
+          data-test-subj="metricsExperienceGrid"
+          className={cx(METRICS_GRID_CLASS, {
+            [METRICS_GRID_FULL_SCREEN_CLASS]: isFullscreen,
+            [metricsGridFullScreenClass]: isFullscreen,
           })}
-          onKeyDown={onKeyDown}
-          ref={setMetricsGridWrapper}
           css={fullHeightCss}
         >
-          <div
-            id={metricsGridId}
-            data-test-subj="metricsExperienceGrid"
-            className={cx(METRICS_GRID_CLASS, {
-              [METRICS_GRID_FULL_SCREEN_CLASS]: isFullscreen,
-              [metricsGridFullScreenClass]: isFullscreen,
-            })}
-            css={fullHeightCss}
+          <ChartSectionTemplate
+            id={id}
+            toolbarCss={toolbarCss}
+            toolbarWrapAt={toolbarWrapAt}
+            toolbar={toolbar}
           >
-            <ChartSectionTemplate
-              id={id}
-              toolbarCss={toolbarCss}
-              toolbarWrapAt={toolbarWrapAt}
-              toolbar={toolbar}
-            >
-              {children}
-            </ChartSectionTemplate>
-          </div>
+            {children}
+          </ChartSectionTemplate>
         </div>
-      </EuiFocusTrap>
-    </>
+      </div>
+    </EuiFocusTrap>
   );
 };
