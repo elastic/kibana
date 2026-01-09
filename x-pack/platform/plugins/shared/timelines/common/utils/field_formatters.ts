@@ -140,6 +140,7 @@ export const getDataFromFieldsHits = (
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
 
     const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
+    const isFullPathEcsField = fieldMaps[dotField as keyof typeof fieldMaps] !== undefined;
     const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
     const isThreatEnrichment = isThreatEnrichmentFieldOrSubfield(field, prependField);
 
@@ -152,10 +153,16 @@ export const getDataFromFieldsHits = (
       continue;
     }
 
-    // Handle threat enrichment
+    // Handle threat enrichment - add the stringified value first
     if (isThreatEnrichment) {
       const enrichmentItem = createFieldItem(fieldCategory, dotField, strArr, isObjectArray);
       resultMap.set(dotField, enrichmentItem);
+
+      // Only recurse into known ECS subfields. Custom fields stay JSON-stringified.
+      if (!isFullPathEcsField && !isEcsField) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
     }
 
     // Process nested fields
