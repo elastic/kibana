@@ -126,10 +126,10 @@ export const ControlGroupRenderer = ({
       .pipe(
         map(([currentChildState, currentLayout]) => {
           const combinedState: ControlPanelsState = {};
-          Object.keys(currentLayout.controls).forEach((id) => {
+          Object.keys(currentLayout.pinnedPanels).forEach((id) => {
             combinedState[id] = {
               ...currentChildState[id].rawState,
-              ...currentLayout.controls[id],
+              ...currentLayout.pinnedPanels[id],
             } as ControlPanelState;
           });
           return { initialChildControlState: combinedState };
