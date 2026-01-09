@@ -14,6 +14,7 @@ import {
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
 } from './data';
+import { rerankStepDefinition } from './rerank';
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
@@ -22,4 +23,5 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(dataRegexExtractStepDefinition);
   stepRegistry.register(dataRegexReplaceStepDefinition);
   stepRegistry.register(AiPromptStepDefinition);
+  stepRegistry.register(rerankStepDefinition);
 };

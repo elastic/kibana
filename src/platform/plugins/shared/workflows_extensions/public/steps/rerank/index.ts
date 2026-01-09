@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export { DataMapStepTypeId } from './steps/data';
-
-export { RerankStepTypeId, rerankStepCommonDefinition } from './steps/rerank';
-export type { RerankInput, RerankOutput } from './steps/rerank';
+export { rerankStepDefinition } from './rerank_step';
