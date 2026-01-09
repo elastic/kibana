@@ -20,7 +20,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     handler: async (context) => {
       try {
         const { message, schema } = context.input;
-        const { agent_id: agentId, connector_id } = context.config;
+        const { 'agent-id': agentId, 'connector-id': connectorId } = context.config;
 
         context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
@@ -39,7 +39,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
 
         const { result } = await runner.runAgent({
           agentId: agentId || agentBuilderDefaultAgentId,
-          defaultConnectorId: connector_id,
+          defaultConnectorId: connectorId,
           request,
           abortSignal: context.abortSignal,
           agentParams: {
