@@ -17,11 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../asset_image';
 import { ProcessingPanel } from './pipeline_suggestions/processing_panel';
-import { css } from '@emotion/react';
 import {
   useInteractiveModeSelector,
   useStreamEnrichmentEvents,
