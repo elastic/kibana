@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 
 import { useLocalStorage } from '../../../../../common/components/local_storage';
 import { getSettingKey } from '../../../../../common/components/local_storage/helpers';
@@ -18,6 +18,7 @@ import {
   SELECTED_TAB_SETTING_NAME,
 } from '../../constants';
 import { AlertsTab } from './alerts_tab';
+import { SummaryTab } from './summary_tab';
 import * as i18n from './translations';
 
 export const ATTACK_SUMMARY_TAB = 'attackSummaryTab';
@@ -30,6 +31,10 @@ interface TabInfo {
   content: JSX.Element;
   id: string;
   name: string;
+  /**
+   * Places content after the tab content/children.
+   */
+  append?: React.ReactNode;
 }
 
 interface AttackDetailsContainerProps {
@@ -52,7 +57,7 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({ attack, groupingFilters, defaultFilters, isTableLoading }) => {
+  ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
     const [selectedTabId, setSelectedTabId] = useLocalStorage<string>({
       defaultValue: ATTACK_SUMMARY_TAB,
       key: getSettingKey({
@@ -72,8 +77,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
           content: (
             <>
               <EuiSpacer size="s" />
-              {/* TODO: Placeholder for `AttackSummaryTab` */}
-              <div data-test-subj="attackSummaryTabPlaceholder" />
+              <SummaryTab attack={attack} showAnonymized={showAnonymized} />
             </>
           ),
         });
@@ -92,10 +96,15 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             />
           </>
         ),
+        append: attack ? (
+          <EuiNotificationBadge size="m" color="subdued">
+            {attack.alertIds.length}
+          </EuiNotificationBadge>
+        ) : undefined,
       });
 
       return tabsList;
-    }, [attack, groupingFilters, defaultFilters, isTableLoading]);
+    }, [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]);
 
     const selectedTabContent = useMemo(() => {
       let content = tabs.find((obj) => obj.id === selectedTabId)?.content;
@@ -116,6 +125,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               key={index}
               isSelected={tab.id === selectedTabId}
               onClick={() => setSelectedTabId(tab.id)}
+              append={tab.append}
             >
               {tab.name}
             </EuiTab>
