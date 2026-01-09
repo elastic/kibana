@@ -18,7 +18,6 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAgents } from './agent_builder/agents';
@@ -137,7 +136,12 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { assistantTools } from './assistant/tools';
-import { GET_ALERTS_SKILL, getAlertTriageSkill, addAlertNoteTool } from './assistant/skills';
+import {
+  GET_ALERTS_SKILL,
+  getAlertTriageSkill,
+  getEntityAnalyticsSkill,
+} from './assistant/skills';
+import { registerAgentBuilderSkills } from './agent_builder/skills/register_skills';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
@@ -236,39 +240,27 @@ export class Plugin implements ISecuritySolutionPlugin {
   private registerOnechatAttachmentsAndTools(
     onechat: SecuritySolutionPluginSetupDependencies['onechat'],
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    plugins: SecuritySolutionPluginSetupDependencies
   ): void {
     if (!onechat) {
       return;
     }
 
-    // The featureFlags service is not available in the core setup, so we need
-    // to wait for the start services to be available to read the feature flags.
-    core
-      .getStartServices()
-      .then(async ([{ featureFlags }]) => {
-        const isAiAgentsEnabled = await featureFlags.getBooleanValue(
-          AI_AGENTS_FEATURE_FLAG,
-          AI_AGENTS_FEATURE_FLAG_DEFAULT
-        );
-
-        if (!isAiAgentsEnabled) {
-          return;
-        }
-
-        registerTools(onechat, core, logger).catch((error) => {
-          this.logger.error(`Error registering security tools: ${error}`);
-        });
-        registerAttachments(onechat).catch((error) => {
-          this.logger.error(`Error registering security attachments: ${error}`);
-        });
-        registerAgents(onechat, core, logger).catch((error) => {
-          this.logger.error(`Error registering security agent: ${error}`);
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking AI agents feature flag: ${error}`);
-      });
+    // Register Agent Builder/OneChat tools, attachments and agents.
+    //
+    // Note: These registrations are guarded by allow-lists and write operations require explicit `confirm: true`.
+    // We register them unconditionally when OneChat is present to avoid "Tool not found" failures when skills
+    // reference these tools.
+    registerTools(onechat, core, logger, plugins).catch((error) => {
+      this.logger.error(`Error registering security tools: ${error}`);
+    });
+    registerAttachments(onechat).catch((error) => {
+      this.logger.error(`Error registering security attachments: ${error}`);
+    });
+    registerAgents(onechat, core, logger).catch((error) => {
+      this.logger.error(`Error registering security agent: ${error}`);
+    });
   }
 
   public setup(
@@ -624,7 +616,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch(() => { }); // it shouldn't reject, but just in case
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
@@ -673,9 +665,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       // Register skills
       plugins.onechat.skills.register(GET_ALERTS_SKILL);
       plugins.onechat.skills.register(getAlertTriageSkill());
+      plugins.onechat.skills.register(getEntityAnalyticsSkill());
+      registerAgentBuilderSkills(plugins.onechat);
     }
-    
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, core, this.logger);
+
+    this.registerOnechatAttachmentsAndTools(plugins.onechat, core, this.logger, plugins);
 
     return {
       setProductFeaturesConfigurator:
@@ -799,7 +793,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)
-          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => { });
 
           // Migrate endpoint data if space awareness is enabled
           // (We don't need to `await` this. It can run in the background)
@@ -807,7 +801,7 @@ export class Plugin implements ISecuritySolutionPlugin {
             logger.error(e);
           });
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // License related start
       licenseService.start(this.licensing$);
@@ -831,7 +825,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           taskManager: plugins.taskManager,
           esClient: core.elasticsearch.client.asInternalUser,
         })
-        .catch(() => {}); // it shouldn't refuse, but just in case
+        .catch(() => { }); // it shouldn't refuse, but just in case
     }
 
     let queryConfig: TelemetryQueryConfiguration | undefined;
@@ -855,7 +849,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         packageService,
         queryConfig
       )
-      .catch(() => {});
+      .catch(() => { });
 
     if (this.config.cdn?.url && this.config.cdn?.publicKey) {
       const cdnConfig: CdnConfig = {
@@ -863,10 +857,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         pubKey: this.config.cdn.publicKey,
       };
       this.logger.info('Starting artifact service with custom CDN config');
-      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => { });
     } else {
       this.logger.info('Starting artifact service with default CDN config');
-      artifactService.start(this.telemetryReceiver).catch(() => {});
+      artifactService.start(this.telemetryReceiver).catch(() => { });
     }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
@@ -882,7 +876,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         registerDefendInsightsCallback: plugins.elasticAssistant.registerCallback,
       })
-      .catch(() => {});
+      .catch(() => { });
 
     const endpointPkgInstallationPromise = this.endpointContext.service
       .getInternalFleetServices()
@@ -900,7 +894,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           await this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
         }
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch(() => { }); // it shouldn't reject, but just in case
 
     if (registerIngestCallback) {
       registerIngestCallback(
@@ -951,12 +945,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   public stop() {
     this.logger.debug('Stopping plugin');
-    this.asyncTelemetryEventsSender.stop().catch(() => {});
+    this.asyncTelemetryEventsSender.stop().catch(() => { });
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     this.telemetryWatcher?.stop();
-    this.completeExternalResponseActionsTask.stop().catch(() => {});
+    this.completeExternalResponseActionsTask.stop().catch(() => { });
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();

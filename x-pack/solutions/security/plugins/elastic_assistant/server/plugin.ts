@@ -61,15 +61,15 @@ interface FeatureFlagDefinition {
 
 export class ElasticAssistantPlugin
   implements
-    Plugin<
-      ElasticAssistantPluginSetup,
-      ElasticAssistantPluginStart,
-      ElasticAssistantPluginSetupDependencies,
-      ElasticAssistantPluginStartDependencies
-    >
-{
+  Plugin<
+    ElasticAssistantPluginSetup,
+    ElasticAssistantPluginStart,
+    ElasticAssistantPluginSetupDependencies,
+    ElasticAssistantPluginStartDependencies
+  > {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
+  private adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
@@ -108,7 +108,7 @@ export class ElasticAssistantPlugin
       pluginStop$: this.pluginStop$,
     });
 
-    const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
+    this.adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
       core,
       plugins,
     });
@@ -119,7 +119,7 @@ export class ElasticAssistantPlugin
       plugins,
       kibanaVersion: this.kibanaVersion,
       assistantService: this.assistantService,
-      adhocAttackDiscoveryDataClient,
+      adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
     });
 
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
@@ -182,11 +182,15 @@ export class ElasticAssistantPlugin
         if (res?.total)
           this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return {
       actions: plugins.actions,
       inference: plugins.inference,
+      // Expose assistantService for use by other plugins
+      assistantService: this.assistantService,
+      // Expose adhocAttackDiscoveryDataClient for use by other plugins
+      adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },

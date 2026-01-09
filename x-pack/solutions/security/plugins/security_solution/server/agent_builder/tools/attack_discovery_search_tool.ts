@@ -60,9 +60,8 @@ export const attackDiscoverySearchTool = (
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check attack discovery index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
+            reason: `Failed to check attack discovery index availability: ${error instanceof Error ? error.message : 'Unknown error'
+              }`,
           };
         }
       },
@@ -116,6 +115,14 @@ export const attackDiscoverySearchTool = (
               query: esqlQuery,
               columns: esqlResponse.columns,
               values: esqlResponse.values,
+            },
+          },
+          {
+            type: ToolResultType.other,
+            data: {
+              operation: 'search',
+              index: `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`,
+              alertIds,
             },
           },
         ];

@@ -44,6 +44,7 @@ import {
   ConnectorMappingsService,
   AttachmentService,
   AlertService,
+  createNoOpAttackDiscoveryIntegrationService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -54,6 +55,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import type { AttackDiscoveryIntegrationService } from '../services/attack_discovery_integration';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -70,6 +72,9 @@ interface CasesClientFactoryArgs {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
+  attackDiscoveryIntegrationService?:
+  | AttackDiscoveryIntegrationService
+  | ((params: { getRequest: () => KibanaRequest }) => AttackDiscoveryIntegrationService);
 }
 
 /**
@@ -142,6 +147,7 @@ export class CasesClientFactory {
       request,
       auditLogger,
       alertsClient,
+      getRequest: () => request, // Store request getter for attack discovery service
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -180,6 +186,7 @@ export class CasesClientFactory {
     request,
     auditLogger,
     alertsClient,
+    getRequest,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
@@ -187,6 +194,7 @@ export class CasesClientFactory {
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
+    getRequest: () => KibanaRequest;
   }): CasesServices {
     this.validateInitialization();
 
@@ -236,6 +244,13 @@ export class CasesClientFactory {
       attachmentService,
       licensingService,
       notificationService,
+      // Use provided attack discovery integration service or default to no-op
+      // If a service factory was provided, create it with the request getter
+      attackDiscoveryIntegrationService: this.options.attackDiscoveryIntegrationService
+        ? typeof this.options.attackDiscoveryIntegrationService === 'function'
+          ? this.options.attackDiscoveryIntegrationService({ getRequest })
+          : this.options.attackDiscoveryIntegrationService
+        : createNoOpAttackDiscoveryIntegrationService(),
     };
   }
 

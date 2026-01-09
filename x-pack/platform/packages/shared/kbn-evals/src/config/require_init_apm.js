@@ -9,6 +9,11 @@
 // OpenTelemetry tracing. Right now they would conflict with Elastic
 // APM. See https://github.com/elastic/kibana/issues/220914
 
+// Kibana tooling treats Node.js process warnings as fatal and will terminate the process.
+// Node emits a warning when both FORCE_COLOR and NO_COLOR are set; Playwright can set FORCE_COLOR,
+// and some environments set NO_COLOR by default. Ensure we don't set both.
+delete process.env.NO_COLOR;
+
 const { UndiciInstrumentation } = require('@opentelemetry/instrumentation-undici');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');

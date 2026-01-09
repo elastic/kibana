@@ -5,6 +5,7 @@
  * 2.0.
  */
 import pLimit from 'p-limit';
+import pRetry from 'p-retry';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
 import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -108,42 +109,60 @@ export class KibanaPhoenixClient {
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
     return withInferenceContext(async () => {
-      const { datasetId } = await this.syncDataSet(dataset);
+      // Phoenix can occasionally reset connections locally (e.g., container restart or transient overload).
+      // Retry to avoid flaking the entire suite.
+      const ranExperiment = await pRetry(
+        async () => {
+          const { datasetId } = await this.syncDataSet(dataset);
 
-      const experiments = await import('@arizeai/phoenix-client/experiments');
+          const experiments = await import('@arizeai/phoenix-client/experiments');
 
-      const ranExperiment = await experiments.runExperiment({
-        client: this.phoenixClient,
-        dataset: { datasetId },
-        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
-        task,
-        experimentMetadata: {
-          ...experimentMetadata,
-          model: this.options.model,
-          runId: this.options.runId,
-        },
-        setGlobalTracerProvider: false,
-        evaluators: evaluators.map((evaluator) => {
-          return {
-            ...evaluator,
-            evaluate: ({ input, output, expected, metadata }) => {
-              return evaluator.evaluate({
-                expected: expected ?? null,
-                input,
-                metadata: metadata ?? {},
-                output,
-              });
+          return await experiments.runExperiment({
+            client: this.phoenixClient,
+            dataset: { datasetId },
+            experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
+            task,
+            experimentMetadata: {
+              ...experimentMetadata,
+              model: this.options.model,
+              runId: this.options.runId,
             },
-          };
-        }),
-        logger: {
-          error: this.options.log.error.bind(this.options.log),
-          info: this.options.log.info.bind(this.options.log),
-          log: this.options.log.info.bind(this.options.log),
+            setGlobalTracerProvider: false,
+            evaluators: evaluators.map((evaluator) => {
+              return {
+                ...evaluator,
+                evaluate: ({ input, output, expected, metadata }) => {
+                  return evaluator.evaluate({
+                    expected: expected ?? null,
+                    input,
+                    metadata: metadata ?? {},
+                    output,
+                  });
+                },
+              };
+            }),
+            logger: {
+              error: this.options.log.error.bind(this.options.log),
+              info: this.options.log.info.bind(this.options.log),
+              log: this.options.log.info.bind(this.options.log),
+            },
+            repetitions: this.options.repetitions ?? 1,
+            concurrency,
+          });
         },
-        repetitions: this.options.repetitions ?? 1,
-        concurrency,
-      });
+        {
+          retries: 2,
+          minTimeout: 1000,
+          onFailedAttempt: (err) => {
+            this.options.log.warning(
+              new Error(
+                `Phoenix runExperiment failed (attempt=${err.attemptNumber}); retrying...`,
+                { cause: err }
+              )
+            );
+          },
+        }
+      );
 
       this.experiments.push(ranExperiment);
 

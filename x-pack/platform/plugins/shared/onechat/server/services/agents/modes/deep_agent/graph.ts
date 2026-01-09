@@ -24,6 +24,7 @@ import { createResearchMiddleware } from './middlewares/researchAgentMiddleware'
 import type { FileData } from '@kbn/langchain-deep-agent';
 import type { DynamicStructuredTool } from 'langchain';
 import { createSkillSystemPromptMiddleware, createSkillToolExecutor } from './middlewares/skillMiddleware';
+import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
 
 export const createAgentGraph = ({
   chatModel,
@@ -34,6 +35,7 @@ export const createAgentGraph = ({
   capabilities,
   logger,
   events,
+  skillToolContext,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -43,6 +45,7 @@ export const createAgentGraph = ({
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
+  skillToolContext: Omit<ToolHandlerContext, 'resultStore'>;
 }) => {
 
   const systemPrompt = getSystemPrompt({
@@ -50,7 +53,7 @@ export const createAgentGraph = ({
     capabilities,
   });
 
-  const skillExecutorTool = createSkillToolExecutor(skillTools, events)
+  const skillExecutorTool = createSkillToolExecutor(skillTools, events, skillToolContext)
 
   const deepAgent = createDeepAgent({
     model: chatModel,
@@ -98,7 +101,13 @@ export const createAgentGraph = ({
         customInstructions: configuration.answer.instructions,
         capabilities,
         discussion: state.messages,
-      })
+      }),
+      {
+        // The answer agent must not call tools. When the connector defaults to simulated function calling,
+        // the model can still emit tool-call shaped output (e.g. "invoke_skill"), which then fails validation
+        // because no tools are provided for this step. Forcing native function calling prevents simulated parsing.
+        functionCallingMode: 'native',
+      }
     );
     return {
       messages: [response],

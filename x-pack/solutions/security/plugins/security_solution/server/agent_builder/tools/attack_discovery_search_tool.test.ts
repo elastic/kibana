@@ -104,12 +104,14 @@ describe('attackDiscoverySearchTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      expect(result.results).toHaveLength(2);
+      // query + tabular results + a small "other" metadata envelope
+      expect(result.results).toHaveLength(3);
       expect(result.results[0].type).toBe(ToolResultType.query);
       const tabularResult = result.results[1] as TabularDataResult;
       expect(tabularResult.type).toBe(ToolResultType.tabularData);
       expect(tabularResult.data.columns).toEqual(mockEsqlResponse.columns);
       expect(tabularResult.data.values).toEqual(mockEsqlResponse.values);
+      expect(result.results[2].type).toBe(ToolResultType.other);
     });
 
     it('limits results appropriately', async () => {

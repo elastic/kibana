@@ -450,7 +450,128 @@ export class CaseCommentModel {
       if (this.caseInfo.attributes.settings.syncAlerts) {
         await this.updateAlertsStatus(alerts);
       }
+
+      // Check if attack discoveries are being attached in this batch
+      const { ATTACK_DISCOVERY_ATTACHMENT_TYPE } = await import('@kbn/cases-plugin/common/constants');
+      const attackDiscoveryAttachments = attachments.filter(
+        (attachment) =>
+          attachment.type === AttachmentType.externalReference &&
+          attachment.externalReferenceAttachmentTypeId === ATTACK_DISCOVERY_ATTACHMENT_TYPE
+      );
+
+      // If attack discoveries are being attached, check if there are existing alerts or attack discoveries
+      if (attackDiscoveryAttachments.length > 0) {
+        const existingAlertIds = await this.params.services.attachmentService.getter.getAllAlertIds({
+          caseId: this.caseInfo.id,
+        });
+
+        // Check for existing attack discovery attachments
+        const allAttachments = await this.params.services.caseService.getAllCaseComments({
+          id: this.caseInfo.id,
+          options: {
+            filter: undefined,
+            sortField: 'created_at',
+          },
+        });
+
+        const existingAttackDiscoveryAttachments = allAttachments.saved_objects.filter(
+          (attachment) =>
+            attachment.attributes.type === AttachmentType.externalReference &&
+            attachment.attributes.externalReferenceAttachmentTypeId === ATTACK_DISCOVERY_ATTACHMENT_TYPE
+        );
+
+        // Don't trigger if attack discoveries are being attached and there are no existing alerts or attack discoveries
+        if (existingAlertIds.size === 0 && existingAttackDiscoveryAttachments.length === 0) {
+          this.params.logger.debug(
+            `Attack discovery is being attached to case ${this.caseInfo.id} but there are no existing alerts or attack discoveries, skipping attack discovery trigger`
+          );
+          return;
+        }
+      }
+
+      // Trigger attack discovery if service is available
+      if (this.params.services.attackDiscoveryIntegrationService) {
+        this.params.logger.debug(
+          `Attack discovery integration service available, triggering for case ${this.caseInfo.id}`
+        );
+        // Trigger asynchronously to avoid blocking alert attachment
+        this.triggerAttackDiscoveryForCase().catch((error) => {
+          this.params.logger.error(
+            `Failed to trigger attack discovery for case ${this.caseInfo.id}: ${error instanceof Error ? error.message : String(error)}`
+          );
+        });
+      } else {
+        this.params.logger.debug(
+          `Attack discovery integration service not available for case ${this.caseInfo.id}, skipping`
+        );
+      }
     }
+  }
+
+  /**
+   * Triggers attack discovery for the case
+   */
+  private async triggerAttackDiscoveryForCase(): Promise<void> {
+    const service = this.params.services.attackDiscoveryIntegrationService;
+    if (!service) {
+      return;
+    }
+
+    const caseId = this.caseInfo.id;
+
+    // Create a function to attach attack discoveries as external reference attachments
+    const attachAttackDiscoveries: (params: {
+      caseId: string;
+      attackDiscoveries: Array<{
+        attackDiscoveryAlertId: string;
+        index: string;
+        generationUuid: string;
+        title: string;
+        timestamp: string;
+      }>;
+      owner: string;
+    }) => Promise<void> = async ({ caseId: alertCaseId, attackDiscoveries, owner }) => {
+      // Create a new CaseCommentModel instance to attach the attack discoveries
+      // This avoids circular dependencies
+      const commentModel = await CaseCommentModel.create(alertCaseId, this.params);
+      const createdDate = new Date().toISOString();
+      const { v4: uuidv4 } = await import('uuid');
+      const { ATTACK_DISCOVERY_ATTACHMENT_TYPE } = await import('@kbn/cases-plugin/common/constants');
+      const { ExternalReferenceStorageType } = await import('@kbn/cases-plugin/common/types/domain/attachment/v1');
+
+      // Attach each attack discovery to the case as an external reference attachment
+      for (const discovery of attackDiscoveries) {
+        const attackDiscoveryAttachment: AttachmentRequest = {
+          type: AttachmentType.externalReference,
+          externalReferenceId: discovery.attackDiscoveryAlertId,
+          externalReferenceStorage: {
+            type: ExternalReferenceStorageType.elasticSearchDoc,
+          },
+          externalReferenceAttachmentTypeId: ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+          externalReferenceMetadata: {
+            attackDiscoveryAlertId: discovery.attackDiscoveryAlertId,
+            index: discovery.index,
+            generationUuid: discovery.generationUuid,
+            title: discovery.title,
+            timestamp: discovery.timestamp,
+          },
+          owner,
+        };
+
+        await commentModel.createComment({
+          createdDate,
+          commentReq: attackDiscoveryAttachment,
+          id: uuidv4(),
+        });
+      }
+    };
+
+    await service.triggerAttackDiscoveryForCase(
+      caseId,
+      this.params.services.attachmentService,
+      this.params.services.caseService,
+      attachAttackDiscoveries
+    );
   }
 
   private async updateAlertsStatus(alerts: AlertInfo[]) {

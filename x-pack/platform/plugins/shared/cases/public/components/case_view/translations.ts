@@ -206,6 +206,10 @@ export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observa
   defaultMessage: 'Observables',
 });
 
+export const ATTACK_DISCOVERIES_TAB = i18n.translate('xpack.cases.caseView.tabs.attackDiscoveries', {
+  defaultMessage: 'Attack Discoveries',
+});
+
 export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.similar', {
   defaultMessage: 'Similar cases',
 });

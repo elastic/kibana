@@ -12,12 +12,14 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { ALERTS_TAB, EVENTS_TAB, FILES_TAB, OBSERVABLES_TAB } from './translations';
+import { ALERTS_TAB, EVENTS_TAB, FILES_TAB, OBSERVABLES_TAB, ATTACK_DISCOVERIES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { AttachmentType } from '../../../common/types/domain';
+import { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from '../../../common/constants';
 
 const FilesBadge = ({
   activeTab,
@@ -109,21 +111,24 @@ export const AttachmentsBadge = ({
   isActive: boolean;
   count?: number;
   euiTheme: EuiThemeComputed<{}>;
-}) => (
-  <>
-    {
-      <EuiNotificationBadge
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        data-test-subj="case-view-attachments-badge"
-        color={isActive ? 'accent' : 'subdued'}
-      >
-        {count ?? 0}
-      </EuiNotificationBadge>
-    }
-  </>
-);
+}) => {
+  const displayCount = count != null && !isNaN(count) ? count : 0;
+  return (
+    <>
+      {
+        <EuiNotificationBadge
+          css={css`
+            margin-left: ${euiTheme.size.xs};
+          `}
+          data-test-subj="case-view-attachments-badge"
+          color={isActive ? 'accent' : 'subdued'}
+        >
+          {displayCount}
+        </EuiNotificationBadge>
+      }
+    </>
+  );
+};
 
 AttachmentsBadge.displayName = 'AttachmentsBadge';
 
@@ -206,44 +211,68 @@ export const useCaseAttachmentTabs = ({
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
-  const totalAttachments =
-    Number(features.alerts.enabled ? caseData.totalAlerts : 0) +
-    Number(features.events.enabled ? caseData.totalEvents : 0) +
-    Number(fileStatsData?.total) +
-    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
+  // Count attack discoveries
+  const attackDiscoveriesCount = useMemo(() => {
+    return caseData.comments.filter(
+      (comment) =>
+        comment.type === AttachmentType.externalReference &&
+        (comment as any).externalReferenceAttachmentTypeId === ATTACK_DISCOVERY_ATTACHMENT_TYPE
+    ).length;
+  }, [caseData.comments]);
+
+  const totalAttachments = useMemo(() => {
+    const alertsCount = features.alerts.enabled ? (caseData.totalAlerts ?? 0) : 0;
+    const eventsCount = features.events.enabled ? (caseData.totalEvents ?? 0) : 0;
+    const filesCount = fileStatsData?.total ?? 0;
+    const observablesCount = canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0;
+    const attackDiscoveriesCountValue = attackDiscoveriesCount ?? 0;
+
+    const total = alertsCount + eventsCount + filesCount + observablesCount + attackDiscoveriesCountValue;
+    return isNaN(total) ? 0 : total;
+  }, [
+    features.alerts.enabled,
+    features.events.enabled,
+    caseData.totalAlerts,
+    caseData.totalEvents,
+    fileStatsData?.total,
+    canShowObservableTabs,
+    isObservablesFeatureEnabled,
+    observables.length,
+    attackDiscoveriesCount,
+  ]);
 
   const tabsConfig = useMemo(
     () => [
       ...(features.alerts.enabled
         ? [
-            {
-              id: CASE_VIEW_PAGE_TABS.ALERTS,
-              name: ALERTS_TAB,
-              badge: (
-                <AlertsBadge
-                  isExperimental={features.alerts.isExperimental}
-                  totalAlerts={caseData.totalAlerts}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
-              ),
-            },
-          ]
+          {
+            id: CASE_VIEW_PAGE_TABS.ALERTS,
+            name: ALERTS_TAB,
+            badge: (
+              <AlertsBadge
+                isExperimental={features.alerts.isExperimental}
+                totalAlerts={caseData.totalAlerts}
+                activeTab={activeTab}
+                euiTheme={euiTheme}
+              />
+            ),
+          },
+        ]
         : []),
       ...(features.events.enabled
         ? [
-            {
-              id: CASE_VIEW_PAGE_TABS.EVENTS,
-              name: EVENTS_TAB,
-              badge: (
-                <EventsBadge
-                  totalEvents={caseData.totalEvents}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
-              ),
-            },
-          ]
+          {
+            id: CASE_VIEW_PAGE_TABS.EVENTS,
+            name: EVENTS_TAB,
+            badge: (
+              <EventsBadge
+                totalEvents={caseData.totalEvents}
+                activeTab={activeTab}
+                euiTheme={euiTheme}
+              />
+            ),
+          },
+        ]
         : []),
       {
         id: CASE_VIEW_PAGE_TABS.FILES,
@@ -259,23 +288,39 @@ export const useCaseAttachmentTabs = ({
       },
       ...(canShowObservableTabs && isObservablesFeatureEnabled
         ? [
-            {
-              id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
-              name: OBSERVABLES_TAB,
-              badge: (
-                <ObservablesBadge
-                  isLoading={isLoadingObservables}
-                  count={observables.length}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
-              ),
-            },
-          ]
+          {
+            id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
+            name: OBSERVABLES_TAB,
+            badge: (
+              <ObservablesBadge
+                isLoading={isLoadingObservables}
+                count={observables.length}
+                activeTab={activeTab}
+                euiTheme={euiTheme}
+              />
+            ),
+          },
+        ]
         : []),
+      {
+        id: CASE_VIEW_PAGE_TABS.ATTACK_DISCOVERIES,
+        name: ATTACK_DISCOVERIES_TAB,
+        badge: (
+          <EuiNotificationBadge
+            css={css`
+              margin-left: ${euiTheme.size.xs};
+            `}
+            data-test-subj="case-view-attack-discoveries-stats-badge"
+            color={activeTab === CASE_VIEW_PAGE_TABS.ATTACK_DISCOVERIES ? 'accent' : 'subdued'}
+          >
+            {attackDiscoveriesCount > 0 ? attackDiscoveriesCount : 0}
+          </EuiNotificationBadge>
+        ),
+      },
     ],
     [
       activeTab,
+      attackDiscoveriesCount,
       canShowObservableTabs,
       caseData.totalAlerts,
       caseData.totalEvents,

@@ -18,16 +18,16 @@ import { registerDashboardAgent } from './register_agent';
 import { createDashboardTool, updateDashboardTool } from './tools';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
+import { registerSkills } from './skills/register_skills';
 
 export class DashboardAgentPlugin
   implements
-    Plugin<
-      DashboardAgentPluginSetup,
-      DashboardAgentPluginStart,
-      DashboardAgentSetupDependencies,
-      DashboardAgentStartDependencies
-    >
-{
+  Plugin<
+    DashboardAgentPluginSetup,
+    DashboardAgentPluginStart,
+    DashboardAgentSetupDependencies,
+    DashboardAgentStartDependencies
+  > {
   private logger: Logger;
 
   constructor(context: PluginInitializerContext) {
@@ -89,6 +89,9 @@ export class DashboardAgentPlugin
 
     // Register the dashboard agent
     registerDashboardAgent(setupDeps.onechat);
+
+    // Register the dashboards skill (built-in) so agents can discover and invoke the dashboard tools via /skills.
+    registerSkills(setupDeps);
   }
 
   start(
@@ -98,5 +101,5 @@ export class DashboardAgentPlugin
     return {};
   }
 
-  stop() {}
+  stop() { }
 }

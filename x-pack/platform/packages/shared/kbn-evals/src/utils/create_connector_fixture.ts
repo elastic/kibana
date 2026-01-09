@@ -10,6 +10,7 @@ import { v5 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import { isAxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from '@kbn/test';
 
 export async function createConnectorFixture({
   predefinedConnector,
@@ -39,7 +40,12 @@ export async function createConnectorFixture({
       path: `/api/actions/connector/${connectorIdAsUuid}`,
       method: 'DELETE',
     }).catch((error) => {
-      if (isAxiosError(error) && error.status === 404) {
+      // Depending on the HttpHandler implementation, we might get either an AxiosError or a
+      // KbnClientRequesterError. Either way, "not found" should be ignored for idempotency.
+      if (isAxiosError(error) && (error.status === 404 || error.response?.status === 404)) {
+        return;
+      }
+      if (error instanceof KbnClientRequesterError && error.message.includes('Status: 404')) {
         return;
       }
       throw error;

@@ -44,7 +44,8 @@
       "discover",
       "ingestPipelines",
       "automaticImport",
-      "alerting"
+      "alerting",
+      "onechat"
     ],
     "requiredBundles": [
       "kibanaReact",

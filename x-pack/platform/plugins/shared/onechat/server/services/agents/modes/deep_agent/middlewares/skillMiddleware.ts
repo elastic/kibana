@@ -1,10 +1,11 @@
 import { FileData } from "@kbn/langchain-deep-agent";
 import { AgentEventEmitter } from "@kbn/onechat-server/agents";
 import { AIMessage, createMiddleware, DynamicStructuredTool, tool, ToolMessage } from "langchain";
-import { formatSkillsDirectoryTree } from "../utils/skills_directory_tree";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { z } from "zod";
 import { v4 as uuidv4 } from 'uuid';
+import type { ToolHandlerContext } from "@kbn/onechat-server/tools";
+import zodToJsonSchema from 'zod-to-json-schema';
 
 /**
  * The purpose of this middleware is to insert the skill frontmatter into the system prompt.
@@ -19,12 +20,12 @@ export const createSkillSystemPromptMiddleware = (
     return createMiddleware({
         name: 'skillSystemPromptMiddleware',
         wrapModelCall: (request, handler) => {
-            const formattedSkills = formatSkillsDirectoryTree(skills);
-            const skillSystemPrompt = `## Agent Skills
-In order to help achieve the highest-quality results possible, Elastic has compiled a set of "skills" which are essentially folders that contain a set of best practices for answering user questions. For instance, there is a skill that provides guidance on how to triage alerts. These skill folders have been heavily labored over and contain the condensed wisdom of a lot of trial and error working with LLMs to make really good, professional, outputs. Sometimes multiple skills may be required to get the best results, so one is not limited to just reading one.
-            
-Skills are stored in the filesystem. Here is an overview of the skills directory:
-\n${formattedSkills}`;
+            // IMPORTANT: keep this system prompt injection tiny to avoid exceeding model context length.
+            // Skill discovery is done dynamically via grep/read_file.
+            const skillSystemPrompt = `## Agent Skills (required)
+- Skills live under \`/skills\`.
+- Before acting, discover relevant skills with \`grep\` over \`/skills\`, then \`read_file\` the best 1–3 matches.
+- Prefer \`invoke_skill\` (skill tool name) over calling tools directly.`;
 
             return handler({
                 ...request,
@@ -35,13 +36,57 @@ Skills are stored in the filesystem. Here is an overview of the skills directory
 };
 
 
-export const createSkillToolExecutor = (tools: DynamicStructuredTool[], events: AgentEventEmitter) => {
+export const createSkillToolExecutor = (
+    tools: DynamicStructuredTool[],
+    events: AgentEventEmitter,
+    skillToolContext: Omit<ToolHandlerContext, 'resultStore'>
+) => {
     const toolNode = new ToolNode(tools)
+    const toolByName = new Map(tools.map((t) => [t.name, t]));
+
+    const selectOperationSchema = (jsonSchema: any, operation?: string) => {
+        if (!operation) return jsonSchema;
+        const candidates: any[] = jsonSchema?.oneOf ?? jsonSchema?.anyOf ?? [];
+        if (!Array.isArray(candidates) || candidates.length === 0) return jsonSchema;
+
+        const match = candidates.find((candidate) => {
+            const op = candidate?.properties?.operation;
+            if (!op) return false;
+            if (op.const && op.const === operation) return true;
+            if (Array.isArray(op.enum) && op.enum.includes(operation)) return true;
+            return false;
+        });
+
+        // If we found a specific op branch, return only that branch schema to keep the payload small & actionable.
+        return match ?? jsonSchema;
+    };
+
+    const toCompactJson = (value: unknown, maxChars = 6000) => {
+        try {
+            const s = JSON.stringify(value, null, 2);
+            if (s.length <= maxChars) return s;
+            return s.slice(0, maxChars) + `\n... (truncated, ${s.length - maxChars} chars omitted)`;
+        } catch (_e) {
+            return String(value);
+        }
+    };
+
+    const getExpectedSchemaForTool = (toolName: string) => {
+        const t = toolByName.get(toolName);
+        const schema = (t as any)?.schema;
+        if (!schema) return undefined;
+        try {
+            // Note: many skill tools use pass-through object schemas; this stays compact.
+            return zodToJsonSchema(schema, { $refStrategy: 'none' });
+        } catch (_e) {
+            return undefined;
+        }
+    };
 
     const skillExecutorTool = tool(async ({
         name,
         parameters,
-    }, config)=>{
+    }, config) => {
 
         // Create a message with the tool call that can be used to invoke the toolNode.
         const messageWithToolCalls = new AIMessage({
@@ -54,9 +99,53 @@ export const createSkillToolExecutor = (tools: DynamicStructuredTool[], events: 
             ]
         })
 
-        const result = await toolNode.invoke([messageWithToolCalls]) as ToolMessage[];
+        // If the tool doesn't exist in the currently enabled skills, return a helpful error.
+        if (!toolByName.has(name)) {
+            const available = Array.from(toolByName.keys()).sort();
+            return new ToolMessage({
+                content: toCompactJson({
+                    error: {
+                        message: `Skill tool "${name}" not found in enabled skills.`,
+                        tool: name,
+                    },
+                    available_tools_sample: available.slice(0, 50),
+                    available_tools_total: available.length,
+                }),
+                tool_call_id: config.toolCall.id,
+                status: 'error',
+            });
+        }
 
-        const toolMessage = result.at(0)
+        let toolMessage: ToolMessage | undefined;
+        try {
+            // Pass OneChat context to skill-tools via LangChain's configurable mechanism
+            const result = await toolNode.invoke(
+                [messageWithToolCalls],
+                { configurable: { onechat: skillToolContext } }
+            ) as ToolMessage[];
+
+            toolMessage = result.at(0)
+        } catch (e: any) {
+            const operation = (parameters as any)?.operation;
+            const expectedSchemaFull = getExpectedSchemaForTool(name);
+            const expectedSchema = expectedSchemaFull
+                ? selectOperationSchema(expectedSchemaFull, typeof operation === 'string' ? operation : undefined)
+                : undefined;
+            const errorMessage = e?.message ?? String(e);
+            return new ToolMessage({
+                content: toCompactJson({
+                    error: {
+                        message: errorMessage,
+                        tool: name,
+                    },
+                    ...(typeof operation === 'string' ? { operation } : {}),
+                    ...(expectedSchema ? { expected_schema: expectedSchema } : {}),
+                    hint: 'Fix the tool call arguments to match expected_schema and retry invoke_skill.',
+                }),
+                tool_call_id: config.toolCall.id,
+                status: 'error',
+            });
+        }
 
         if (!toolMessage) {
             return "Tool called"
@@ -71,10 +160,11 @@ export const createSkillToolExecutor = (tools: DynamicStructuredTool[], events: 
         })
     }, {
         name: 'invoke_skill',
-        description: 'Invoke a skill by its ID with the provided parameters.',
+        description:
+            'Invoke a skill tool (exposed by enabled skills) by name, with the provided parameters.',
         schema: z.object({
-            name: z.string().describe('The name of the skill to invoke.'),
-            parameters: z.object({}).passthrough().describe('The parameters to pass to the skill.'),
+            name: z.string().describe('The skill tool name to invoke (e.g. "platform.core.search").'),
+            parameters: z.object({}).passthrough().describe('The parameters to pass to the skill tool.'),
         })
     })
 

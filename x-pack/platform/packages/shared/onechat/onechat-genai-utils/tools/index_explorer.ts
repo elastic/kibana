@@ -107,6 +107,7 @@ export const indexExplorer = async ({
   indexPattern = '*',
   includeAliases = true,
   includeDatastream = true,
+  includeKibanaIndices,
   limit = 1,
   esClient,
   model,
@@ -116,6 +117,7 @@ export const indexExplorer = async ({
   indexPattern?: string;
   includeAliases?: boolean;
   includeDatastream?: boolean;
+  includeKibanaIndices?: boolean;
   limit?: number;
   esClient: ElasticsearchClient;
   model: ScopedModel;
@@ -123,12 +125,13 @@ export const indexExplorer = async ({
 }): Promise<IndexExplorerResponse> => {
   logger?.trace(() => `index_explorer - query="${nlQuery}", pattern="${indexPattern}"`);
 
+  const shouldIncludeKibanaIndices = includeKibanaIndices ?? indexPattern !== '*';
   const sources = await listSearchSources({
     pattern: indexPattern,
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     esClient,
-    includeKibanaIndices: indexPattern !== '*',
+    includeKibanaIndices: shouldIncludeKibanaIndices,
   });
 
   const indexCount = sources.indices.length;

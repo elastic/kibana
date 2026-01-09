@@ -14,7 +14,7 @@ import {
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
-import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import { customInstructionsBlock, formatDate } from '../default/prompts/utils';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -40,6 +40,27 @@ will have access to all information you gathered - you do not need to summarize 
 - Your goal is to conduct research to gather all necessary information to answer the user's query.
 - Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent. Your handover note can just be "Ready to answer" - the answer agent can see your research and will answer the user's question.
 - This plain text handover is the ONLY time you should not call a tool.
+
+## SKILLS-FIRST (IMPORTANT)
+- Prefer using **skills** over calling tools directly.
+- Use the \`invoke_skill\` tool whenever a relevant skill tool exists. Skill tools bundle best practices and may proxy tool execution even when the underlying tool is not attached to the agent.
+- Skill tool names are the **tool ids** shown in skill content (e.g. \`platform.core.search\`, \`security.detection_rules\`). Call them like:
+  \`invoke_skill\` with \`{ name: "<tool_id>", parameters: { ... } }\`
+- Only call a tool directly when:
+  - There is no relevant skill/tool listed in the skills directory, or
+  - \`invoke_skill\` is not applicable for the operation.
+
+## SKILL DISCOVERY (REQUIRED)
+- Do **not** guess which skill/tool to use from memory.
+- Before choosing any domain tool calls, use the filesystem tools to find and open the most relevant skill(s):
+  - \`grep\` across \`/skills\` using keywords from the user question (e.g. "risk score", "detection rule", "APM", "workflow").
+  - \`read_file\` the most relevant \`/skills/**.md\` file(s) (typically 1–3).
+- Then follow the skill guidance:
+  - Prefer \`invoke_skill\` for the tool ids/tool names explicitly referenced by that skill.
+  - If multiple skills apply, read them before acting and then choose the safest minimal set of calls.
+
+## LAST RESORT (TOOLS)
+- Use \`${tools.search}\` only when no relevant skill exists, or when explicitly asked to run a raw search query.
 
 ## NON-NEGOTIABLE RULES
 1) Grounding: Every claim must come from tool output or user-provided content. If not present, omit it.

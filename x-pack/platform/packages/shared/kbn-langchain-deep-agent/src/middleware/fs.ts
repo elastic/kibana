@@ -385,6 +385,16 @@ export interface FilesystemMiddlewareOptions {
   systemPrompt?: string | null;
   /** Optional custom tool descriptions override */
   customToolDescriptions?: Record<string, string> | null;
+  /**
+   * Optional maximum number of filesystem entries to include in the injected
+   * "Filesystem Overview" prompt. This prevents blowing the model context window
+   * when thousands of files are mounted (e.g., skills).
+   *
+   * Set to `0` or `null` to disable the overview entirely.
+   *
+   * Default: 50
+   */
+  maxOverviewEntries?: number | null;
   /** Optional token limit before evicting a tool result to the filesystem (default: 20000 tokens, ~80KB) */
   toolTokenLimitBeforeEvict?: number | null;
 }
@@ -399,6 +409,7 @@ export function createFilesystemMiddleware(
     backend = (stateAndStore: StateAndStore) => new StateBackend(stateAndStore),
     systemPrompt: customSystemPrompt = null,
     customToolDescriptions = null,
+    maxOverviewEntries = 50,
     toolTokenLimitBeforeEvict = 20000,
   } = options;
 
@@ -419,130 +430,137 @@ export function createFilesystemMiddleware(
     tools,
     wrapModelCall: systemPrompt
       ? async (request, handler: any) => {
-          const currentSystemPrompt = request.systemPrompt || "";
-          
-          // Build filesystem overview from state files
-          let filesystemOverview = "";
-          const state = request.state as { files?: Record<string, FileData> } | undefined;
-          const files = state?.files;
-          
-          if (files && Object.keys(files).length > 0) {
-            const fileEntries: string[] = [];
-            for (const [filePath, fileData] of Object.entries(files)) {
-              const description = fileData.description 
-                ? ` - ${fileData.description}`
-                : "";
-              fileEntries.push(`  ${filePath}${description}`);
+        const currentSystemPrompt = request.systemPrompt || "";
+
+        // Build filesystem overview from state files
+        let filesystemOverview = "";
+        const state = request.state as { files?: Record<string, FileData> } | undefined;
+        const files = state?.files;
+
+        if (files && Object.keys(files).length > 0) {
+          const fileEntries: string[] = [];
+          const entries = Object.entries(files);
+          const limit = maxOverviewEntries ?? 0;
+
+          if (limit > 0) {
+            for (const [filePath] of entries.slice(0, limit)) {
+              // IMPORTANT: omit per-file descriptions to keep the prompt small
+              fileEntries.push(`  ${filePath}`);
             }
-            
-            if (fileEntries.length > 0) {
-              filesystemOverview = `\n\nFilesystem Overview:\nThe following files are available in the virtual filesystem:\n${fileEntries.join("\n")}`;
+
+            if (entries.length > limit) {
+              fileEntries.push(`  ... (${entries.length - limit} more)`);
             }
           }
-          
-          const newSystemPrompt = currentSystemPrompt
-            ? `${currentSystemPrompt}\n\n${systemPrompt}${filesystemOverview}`
-            : `${systemPrompt}${filesystemOverview}`;
-          return handler({ ...request, systemPrompt: newSystemPrompt });
+
+          if (fileEntries.length > 0) {
+            filesystemOverview = `\n\nFilesystem Overview:\nThe following files are available in the virtual filesystem:\n${fileEntries.join("\n")}`;
+          }
         }
+
+        const newSystemPrompt = currentSystemPrompt
+          ? `${currentSystemPrompt}\n\n${systemPrompt}${filesystemOverview}`
+          : `${systemPrompt}${filesystemOverview}`;
+        return handler({ ...request, systemPrompt: newSystemPrompt });
+      }
       : undefined,
     wrapToolCall: toolTokenLimitBeforeEvict
       ? ((async (request: any, handler: any) => {
-          const result = await handler(request);
+        const result = await handler(request);
 
-          async function processToolMessage(msg: ToolMessage) {
-            if (
-              typeof msg.content === "string" &&
-              msg.content.length > toolTokenLimitBeforeEvict! * 4
-              && msg.name !== "read_file"
-            ) {
-              // Build StateAndStore from request
-              const stateAndStore: StateAndStore = {
-                state: request.state || {},
-                store: request.config?.store,
-              };
-              const resolvedBackend = getBackend(backend, stateAndStore);
-              const sanitizedId = sanitizeToolCallId(
-                request.toolCall?.id || msg.tool_call_id,
-              );
-              const evictPath = `/large_tool_results/${sanitizedId}`;
-
-              const writeResult = await awaitIfPromise(
-                resolvedBackend.write(evictPath, msg.content),
-              );
-
-              if (writeResult.error) {
-                return { message: msg, filesUpdate: null };
-              }
-
-              const truncatedMessage = new ToolMessage({
-                content: `Tool result too large (${Math.round(msg.content.length / 4)} tokens). Content saved to ${evictPath}`,
-                tool_call_id: msg.tool_call_id,
-                name: msg.name,
-              });
-
-              return {
-                message: truncatedMessage,
-                filesUpdate: writeResult.filesUpdate,
-              };
-            }
-            return { message: msg, filesUpdate: null };
-          }
-
-          if (result instanceof ToolMessage) {
-            const processed = await processToolMessage(result);
-
-            if (processed.filesUpdate) {
-              return new Command({
-                update: {
-                  files: processed.filesUpdate,
-                  messages: [processed.message],
-                },
-              });
-            }
-
-            return processed.message;
-          }
-
-          if (isCommand(result)) {
-            const update = result.update as any;
-            if (!update?.messages) {
-              return result;
-            }
-
-            let hasLargeResults = false;
-            const accumulatedFiles: Record<string, FileData> = {
-              ...(update.files || {}),
+        async function processToolMessage(msg: ToolMessage) {
+          if (
+            typeof msg.content === "string" &&
+            msg.content.length > toolTokenLimitBeforeEvict! * 4
+            && msg.name !== "read_file"
+          ) {
+            // Build StateAndStore from request
+            const stateAndStore: StateAndStore = {
+              state: request.state || {},
+              store: request.config?.store,
             };
-            const processedMessages: ToolMessage[] = [];
+            const resolvedBackend = getBackend(backend, stateAndStore);
+            const sanitizedId = sanitizeToolCallId(
+              request.toolCall?.id || msg.tool_call_id,
+            );
+            const evictPath = `/large_tool_results/${sanitizedId}`;
 
-            for (const msg of update.messages) {
-              if (msg instanceof ToolMessage) {
-                const processed = await processToolMessage(msg);
-                processedMessages.push(processed.message);
+            const writeResult = await awaitIfPromise(
+              resolvedBackend.write(evictPath, msg.content),
+            );
 
-                if (processed.filesUpdate) {
-                  hasLargeResults = true;
-                  Object.assign(accumulatedFiles, processed.filesUpdate);
-                }
-              } else {
-                processedMessages.push(msg);
-              }
+            if (writeResult.error) {
+              return { message: msg, filesUpdate: null };
             }
 
-            if (hasLargeResults) {
-              return new Command({
-                update: {
-                  ...update,
-                  messages: processedMessages,
-                  files: accumulatedFiles,
-                },
-              });
+            const truncatedMessage = new ToolMessage({
+              content: `Tool result too large (${Math.round(msg.content.length / 4)} tokens). Content saved to ${evictPath}`,
+              tool_call_id: msg.tool_call_id,
+              name: msg.name,
+            });
+
+            return {
+              message: truncatedMessage,
+              filesUpdate: writeResult.filesUpdate,
+            };
+          }
+          return { message: msg, filesUpdate: null };
+        }
+
+        if (result instanceof ToolMessage) {
+          const processed = await processToolMessage(result);
+
+          if (processed.filesUpdate) {
+            return new Command({
+              update: {
+                files: processed.filesUpdate,
+                messages: [processed.message],
+              },
+            });
+          }
+
+          return processed.message;
+        }
+
+        if (isCommand(result)) {
+          const update = result.update as any;
+          if (!update?.messages) {
+            return result;
+          }
+
+          let hasLargeResults = false;
+          const accumulatedFiles: Record<string, FileData> = {
+            ...(update.files || {}),
+          };
+          const processedMessages: ToolMessage[] = [];
+
+          for (const msg of update.messages) {
+            if (msg instanceof ToolMessage) {
+              const processed = await processToolMessage(msg);
+              processedMessages.push(processed.message);
+
+              if (processed.filesUpdate) {
+                hasLargeResults = true;
+                Object.assign(accumulatedFiles, processed.filesUpdate);
+              }
+            } else {
+              processedMessages.push(msg);
             }
           }
 
-          return result;
-        }) as any)
+          if (hasLargeResults) {
+            return new Command({
+              update: {
+                ...update,
+                messages: processedMessages,
+                files: accumulatedFiles,
+              },
+            });
+          }
+        }
+
+        return result;
+      }) as any)
       : undefined,
   });
 }

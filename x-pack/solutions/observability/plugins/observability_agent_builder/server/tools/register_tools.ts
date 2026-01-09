@@ -26,6 +26,7 @@ import {
   createGetAnomalyDetectionJobsTool,
 } from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
+import { OBSERVABILITY_GET_SLOS_TOOL_ID, createGetSlosTool } from './get_slos/get_slos';
 import {
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
   createGetLogCategoriesTool,
@@ -52,6 +53,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
+  OBSERVABILITY_GET_SLOS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
 ];
@@ -85,6 +87,7 @@ export async function registerTools({
     createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
+    createGetSlosTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
   ];

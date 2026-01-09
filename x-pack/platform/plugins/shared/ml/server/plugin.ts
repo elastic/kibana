@@ -74,6 +74,7 @@ import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 import { inferenceModelRoutes } from './routes/inference_models';
+import { registerAgentBuilderSkills } from './agent_builder/skills/register_skills';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -124,6 +125,10 @@ export class MlServerPlugin
     this.home = plugins.home;
     this.cases = plugins.cases;
     const { admin, user, apmUser } = getPluginPrivileges();
+
+    if (plugins.onechat) {
+      registerAgentBuilderSkills(plugins.onechat);
+    }
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,

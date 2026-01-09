@@ -46,8 +46,19 @@ export function httpHandlerFromKbnClient({
         retries: 0,
       })
       .catch((err) => {
-        const error = err instanceof KbnClientRequesterError ? err.axiosError : err;
-        throw error;
+        /**
+         * Prefer throwing the KbnClientRequesterError itself because its message includes:
+         * - HTTP status
+         * - error cause/code
+         * - response body (when present)
+         *
+         * The AxiosError stored on `.axiosError` is intentionally "cleaned" and does not include
+         * the response payload, which makes debugging eval failures much harder.
+         */
+        if (err instanceof KbnClientRequesterError) {
+          throw err;
+        }
+        throw err;
       });
 
     const undiciHeaders = new Headers();

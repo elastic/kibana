@@ -11,6 +11,7 @@ import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import { v5 } from 'uuid';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
@@ -64,7 +65,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
       ).evaluationConnector;
 
-      if (predefinedConnector.id !== connector.id) {
+      // Connector fixture normalizes IDs to a deterministic UUID (because only UUIDs are allowed for
+      // non-preconfigured connectors). Compare normalized IDs so we can safely reuse the same
+      // connector for both "main" and "evaluation" roles.
+      const evaluationConnectorIdAsUuid = v5(predefinedConnector.id, v5.DNS);
+
+      if (evaluationConnectorIdAsUuid !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it

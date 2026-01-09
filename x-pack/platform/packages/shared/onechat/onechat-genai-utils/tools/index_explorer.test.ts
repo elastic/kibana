@@ -106,4 +106,22 @@ describe('indexExplorer', () => {
       includeKibanaIndices: true,
     });
   });
+
+  it('allows overriding includeKibanaIndices', async () => {
+    await indexExplorer({
+      nlQuery: 'test query',
+      indexPattern: '.*',
+      includeKibanaIndices: false,
+      esClient,
+      model,
+    });
+
+    expect(listSearchSourcesMock).toHaveBeenCalledWith({
+      pattern: '.*',
+      excludeIndicesRepresentedAsDatastream: true,
+      excludeIndicesRepresentedAsAlias: false,
+      esClient,
+      includeKibanaIndices: false,
+    });
+  });
 });

@@ -63,6 +63,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getAttackDiscoveryAttachmentType } from './cases/attachments/attack_discovery/attack_discovery_attachment_type';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
@@ -256,6 +257,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
+    );
+
+    // Register Attack Discovery attachment type
+    cases?.attachmentFramework.registerExternalReference(
+      getAttackDiscoveryAttachmentType()
     );
 
     const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();

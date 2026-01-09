@@ -10,18 +10,19 @@ import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { ExampleWithId } from '../types';
 import { diffExamples } from './diff_examples';
 
-const UPSERT_DATASET = /* GraphQL */ `
-  mutation UpsertDataset(
-    $datasetId: ID!
-    $exampleIdsToDelete: [ID!]!
-    $examplesToAdd: [DatasetExampleInput!]!
-  ) {
-    deleteDatasetExamples(input: { exampleIds: $exampleIdsToDelete }) {
+const DELETE_DATASET_EXAMPLES = /* GraphQL */ `
+  mutation DeleteDatasetExamples($exampleIds: [ID!]!) {
+    deleteDatasetExamples(input: { exampleIds: $exampleIds }) {
       dataset {
         name
       }
     }
-    addExamplesToDataset(input: { datasetId: $datasetId, examples: $examplesToAdd }) {
+  }
+`;
+
+const ADD_DATASET_EXAMPLES = /* GraphQL */ `
+  mutation AddExamplesToDataset($datasetId: ID!, $examples: [DatasetExampleInput!]!) {
+    addExamplesToDataset(input: { datasetId: $datasetId, examples: $examples }) {
       dataset {
         name
       }
@@ -66,15 +67,26 @@ export async function upsertDataset({
 }) {
   const operations = diffExamples(storedExamples, nextExamples);
 
-  if (operations.toDelete.length || operations.toAdd.length) {
+  // Phoenix' GraphQL endpoint can be sensitive to very large payloads. Chunk deletes/additions so
+  // large suites (or repeated runs) don't fail with generic GraphQL errors.
+  const DELETE_CHUNK_SIZE = 200;
+  const ADD_CHUNK_SIZE = 50;
+
+  for (let i = 0; i < operations.toDelete.length; i += DELETE_CHUNK_SIZE) {
+    const exampleIds = operations.toDelete.slice(i, i + DELETE_CHUNK_SIZE);
+    await graphQLRequest<{ deleteDatasetExamples: { dataset: { name: string } } }>(
+      phoenixClient,
+      DELETE_DATASET_EXAMPLES,
+      { exampleIds }
+    );
+  }
+
+  for (let i = 0; i < operations.toAdd.length; i += ADD_CHUNK_SIZE) {
+    const examples = operations.toAdd.slice(i, i + ADD_CHUNK_SIZE);
     await graphQLRequest<{ addExamplesToDataset: { dataset: { name: string } } }>(
       phoenixClient,
-      UPSERT_DATASET,
-      {
-        datasetId,
-        exampleIdsToDelete: operations.toDelete,
-        examplesToAdd: operations.toAdd,
-      }
+      ADD_DATASET_EXAMPLES,
+      { datasetId, examples }
     );
   }
 }

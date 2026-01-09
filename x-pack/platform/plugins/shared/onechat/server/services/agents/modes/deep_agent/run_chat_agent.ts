@@ -8,13 +8,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
+import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
   extractRound,
-  selectProviderTools,
+  selectTools,
   conversationToLangchainMessages,
+  prepareConversation
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -23,10 +25,15 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { getSkillFilePath } from '@kbn/onechat-common/skills';
 import { DynamicStructuredTool } from 'langchain';
+import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
 
 const chatAgentGraphName = 'deep-onechat-agent';
 
-export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
+export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
+  browserApiTools?: BrowserApiToolMetadata[];
+  startTime?: Date;
+};
 
 export type RunChatAgentFn = (
   params: RunChatAgentParams,
@@ -39,25 +46,24 @@ export type RunChatAgentFn = (
 export const runDeepAgentMode: RunChatAgentFn = async (
   {
     nextInput,
-    conversation = [],
+    conversation,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
     agentId,
     abortSignal,
+    browserApiTools,
+    structuredOutput = false,
+    outputSchema,
+    startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, skillProvider, events }
+  context
 ) => {
+  const { logger, request, modelProvider, toolProvider, attachments, skillProvider, events } = context;
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
-
-  const selectedTools = await selectProviderTools({
-    provider: toolProvider,
-    selection: agentConfiguration.tools,
-    request,
-  });
 
   const skills = await skillProvider.list({ request });
 
@@ -66,12 +72,39 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
 
+  const processedConversation = await prepareConversation({
+    nextInput,
+    previousRounds: conversation?.rounds ?? [],
+    context,
+  });
+
+  const selectedTools = await selectTools({
+    conversation: processedConversation,
+    toolProvider,
+    agentConfiguration,
+    attachmentsService: attachments,
+    request,
+  });
+
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
     tools: selectedTools,
     logger,
     request,
     sendEvent: eventEmitter,
   });
+
+  let browserLangchainTools: any[] = [];
+  let browserIdMappings = new Map<string, string>();
+  if (browserApiTools && browserApiTools.length > 0) {
+    const browserToolResult = browserToolsToLangchain({
+      browserApiTools,
+    });
+    browserLangchainTools = browserToolResult.tools;
+    browserIdMappings = browserToolResult.idMappings;
+  }
+
+  const allTools = [...langchainTools, ...browserLangchainTools];
+  const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
 
   const cycleLimit = 100; // Deep agents are allowed to run for a longer time.
 
@@ -80,8 +113,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
   const initialMessages = conversationToLangchainMessages({
-    nextInput,
-    previousRounds: conversation,
+    conversation: processedConversation,
   });
 
   // Convert skills to FileData format for the agent's filesystem
@@ -99,15 +131,28 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     skillTools.push(...skill.tools);
   }
 
+  // Build skill tool context from agent handler context (same shape as ToolHandlerContext)
+  const skillToolContext: Omit<ToolHandlerContext, 'resultStore'> = {
+    request: context.request,
+    spaceId: context.spaceId,
+    logger: context.logger,
+    esClient: context.esClient,
+    modelProvider: context.modelProvider,
+    toolProvider: context.toolProvider,
+    runner: context.runner,
+    events: context.events,
+  };
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
     chatModel: model.chatModel,
-    tools: langchainTools,
+    tools: allTools,
     skillFiles: skillsFiles,
     skillTools: skillTools,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    skillToolContext,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -132,14 +177,20 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      toolIdMapping,
+      toolIdMapping: allToolIdMappings,
       logger,
+      startTime,
     }),
     finalize(() => manualEvents$.complete())
   );
 
+  const processedInput: RoundInput = {
+    message: processedConversation.nextInput.message,
+    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+  };
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: nextInput }),
+    addRoundCompleteEvent({ userInput: processedInput, startTime, modelProvider }),
     shareReplay()
   );
 

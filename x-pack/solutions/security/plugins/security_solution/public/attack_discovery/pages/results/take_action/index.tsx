@@ -175,6 +175,7 @@ const TakeActionComponent: React.FC<Props> = ({
       alertIds,
       markdownComments: [markdown],
       replacements,
+      attackDiscoveries,
     });
 
     await refetchFindAttackDiscoveries?.();
@@ -184,6 +185,7 @@ const TakeActionComponent: React.FC<Props> = ({
     alertIds,
     markdown,
     replacements,
+    attackDiscoveries,
     refetchFindAttackDiscoveries,
   ]);
 
@@ -194,8 +196,16 @@ const TakeActionComponent: React.FC<Props> = ({
       alertIds,
       markdownComments: [markdown],
       replacements,
+      attackDiscoveries,
     });
-  }, [closePopover, onAddToExistingCase, alertIds, markdown, replacements]);
+  }, [
+    closePopover,
+    onAddToExistingCase,
+    alertIds,
+    markdown,
+    replacements,
+    attackDiscoveries,
+  ]);
 
   const { showAssistantOverlay, disabled: viewInAiAssistantDisabled } = useViewInAiAssistant({
     attackDiscovery: attackDiscoveries[0],
@@ -258,25 +268,25 @@ const TakeActionComponent: React.FC<Props> = ({
           ? isAgentChatExperienceEnabled
             ? hasAgentBuilderPrivilege
               ? [
-                  <EuiContextMenuItem
-                    data-test-subj="viewInAgentBuilder"
-                    key="viewInAgentBuilder"
-                    onClick={onViewInAgentBuilder}
-                  >
-                    {i18n.ADD_TO_CHAT}
-                  </EuiContextMenuItem>,
-                ]
-              : []
-            : [
                 <EuiContextMenuItem
-                  data-test-subj="viewInAiAssistant"
-                  disabled={viewInAiAssistantDisabled}
-                  key="viewInAiAssistant"
-                  onClick={onViewInAiAssistant}
+                  data-test-subj="viewInAgentBuilder"
+                  key="viewInAgentBuilder"
+                  onClick={onViewInAgentBuilder}
                 >
-                  {i18n.VIEW_IN_AI_ASSISTANT}
+                  {i18n.ADD_TO_CHAT}
                 </EuiContextMenuItem>,
               ]
+              : []
+            : [
+              <EuiContextMenuItem
+                data-test-subj="viewInAiAssistant"
+                disabled={viewInAiAssistantDisabled}
+                key="viewInAiAssistant"
+                onClick={onViewInAiAssistant}
+              >
+                {i18n.VIEW_IN_AI_ASSISTANT}
+              </EuiContextMenuItem>,
+            ]
           : [],
       ].flat(),
     [
@@ -303,38 +313,38 @@ const TakeActionComponent: React.FC<Props> = ({
 
     const markAsOpenItem = !isOpen
       ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsOpen"
-            key="markAsOpen"
-            onClick={() => onUpdateWorkflowStatus('open')}
-          >
-            {i18n.MARK_AS_OPEN}
-          </EuiContextMenuItem>,
-        ]
+        <EuiContextMenuItem
+          data-test-subj="markAsOpen"
+          key="markAsOpen"
+          onClick={() => onUpdateWorkflowStatus('open')}
+        >
+          {i18n.MARK_AS_OPEN}
+        </EuiContextMenuItem>,
+      ]
       : [];
 
     const markAsAcknowledgedItem = !isAcknowledged
       ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsAcknowledged"
-            key="markAsAcknowledged"
-            onClick={() => onUpdateWorkflowStatus('acknowledged')}
-          >
-            {i18n.MARK_AS_ACKNOWLEDGED}
-          </EuiContextMenuItem>,
-        ]
+        <EuiContextMenuItem
+          data-test-subj="markAsAcknowledged"
+          key="markAsAcknowledged"
+          onClick={() => onUpdateWorkflowStatus('acknowledged')}
+        >
+          {i18n.MARK_AS_ACKNOWLEDGED}
+        </EuiContextMenuItem>,
+      ]
       : [];
 
     const markAsClosedItem = !isClosed
       ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsClosed"
-            key="markAsClosed"
-            onClick={() => onUpdateWorkflowStatus('closed')}
-          >
-            {i18n.MARK_AS_CLOSED}
-          </EuiContextMenuItem>,
-        ]
+        <EuiContextMenuItem
+          data-test-subj="markAsClosed"
+          key="markAsClosed"
+          onClick={() => onUpdateWorkflowStatus('closed')}
+        >
+          {i18n.MARK_AS_CLOSED}
+        </EuiContextMenuItem>,
+      ]
       : [];
 
     return [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem, ...items].flat();

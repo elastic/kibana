@@ -8,10 +8,26 @@
     "id": "agentBuilderPlatform",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "agentBuilderPlatform"],
-    "requiredPlugins": ["onechat"],
+    "configPath": [
+      "xpack",
+      "agentBuilderPlatform"
+    ],
+    "requiredPlugins": [
+      "onechat"
+    ],
     "requiredBundles": [],
-    "optionalPlugins": ["cases", "llmTasks", "workflowsManagement"],
+    "optionalPlugins": [
+      "actions",
+      "alerting",
+      "cases",
+      "dataViews",
+      "savedObjects",
+      "savedObjectsTagging",
+      "llmTasks",
+      "security",
+      "spaces",
+      "workflowsManagement"
+    ],
     "extraPublicDirs": []
   }
 }

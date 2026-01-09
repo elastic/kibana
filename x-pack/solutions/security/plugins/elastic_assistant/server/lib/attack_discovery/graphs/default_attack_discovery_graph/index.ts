@@ -79,6 +79,13 @@ export const getDefaultAttackDiscoveryGraph = ({
       size,
     });
 
+    logger?.error('index pattern: ' + JSON.stringify(alertsIndexPattern));
+
+    logger?.error('anonymizationFields: ' + JSON.stringify(anonymizationFields));
+
+    logger?.error('filter: ' + JSON.stringify(filter));
+
+
     const generationSchema = getAttackDiscoveriesGenerationSchema(prompts);
 
     const generateNode = getGenerateNode({

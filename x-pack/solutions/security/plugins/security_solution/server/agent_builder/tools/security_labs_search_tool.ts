@@ -15,6 +15,7 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import { otherResult } from '@kbn/onechat-genai-utils/tools/utils/results';
 
 const securityLabsSearchSchema = z.object({
   query: z
@@ -78,9 +79,8 @@ export const securityLabsSearchTool = (
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check Security Labs knowledge base availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
+            reason: `Failed to check Security Labs knowledge base availability: ${error instanceof Error ? error.message : 'Unknown error'
+              }`,
           };
         }
       },
@@ -104,7 +104,16 @@ export const securityLabsSearchTool = (
           events,
         });
 
-        return { results };
+        return {
+          results: [
+            otherResult({
+              operation: 'search',
+              index: knowledgeBaseIndex,
+              resource: SECURITY_LABS_RESOURCE,
+              raw: results,
+            }),
+          ],
+        };
       } catch (error) {
         logger.error(`Error in ${SECURITY_LABS_SEARCH_TOOL_ID} tool: ${error.message}`);
         return {

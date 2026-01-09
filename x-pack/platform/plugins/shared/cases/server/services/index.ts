@@ -14,6 +14,16 @@ export { ConnectorMappingsService } from './connector_mappings';
 export { AlertService } from './alerts';
 export { AttachmentService } from './attachments';
 export { UserProfileService } from './user_profiles';
+export type {
+  AttackDiscoveryIntegrationService,
+  TriggerAttackDiscoveryFn,
+  AttackDiscoveryTriggerResult,
+  AttackDiscoveryAlertInfo,
+} from './attack_discovery_integration';
+export {
+  createAttackDiscoveryIntegrationService,
+  createNoOpAttackDiscoveryIntegrationService,
+} from './attack_discovery_integration';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

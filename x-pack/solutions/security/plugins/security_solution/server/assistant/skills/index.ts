@@ -7,4 +7,6 @@
 
 export { GET_ALERTS_SKILL } from './get_alerts_skill';
 export { getAlertTriageSkill } from './alert_triage_skill';
+export { SECURITY_LABS_SEARCH_SKILL } from './security_labs_search_skill';
+export { getEntityAnalyticsSkill } from './entity_analytics_skill';
 

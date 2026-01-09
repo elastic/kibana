@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
-import { isToolMessage, ToolMessage } from '@langchain/core/messages';
+import { ToolMessage } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
 import {
@@ -33,6 +33,7 @@ import {
   createReasoningEvent,
   extractTextContent,
   extractToolCalls,
+  createThinkingCompleteEvent,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
@@ -53,14 +54,18 @@ export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
   logger,
+  startTime
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
   logger: Logger;
+  startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
     const messageId = uuidv4();
+
+    let isThinkingComplete = false;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -73,7 +78,15 @@ export const convertGraphEvents = ({
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            return of(createTextChunkEvent(textContent, { messageId }));
+            const events: ConvertedEvents[] = [];
+            if (!isThinkingComplete) {
+              // Emit thinking complete event when first chunk arrives
+              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
+              isThinkingComplete = true;
+            }
+            
+            events.push(createTextChunkEvent(textContent, { messageId }));
+            return of(...events);
           }
         }
 

@@ -23,16 +23,16 @@ import type {
 } from './types';
 import { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 import { registerServerRoutes } from './routes/register_routes';
+import { registerSkills } from './skills/register_skills';
 
 export class ObservabilityAgentBuilderPlugin
   implements
-    Plugin<
-      ObservabilityAgentBuilderPluginSetup,
-      ObservabilityAgentBuilderPluginStart,
-      ObservabilityAgentBuilderPluginSetupDependencies,
-      ObservabilityAgentBuilderPluginStartDependencies
-    >
-{
+  Plugin<
+    ObservabilityAgentBuilderPluginSetup,
+    ObservabilityAgentBuilderPluginStart,
+    ObservabilityAgentBuilderPluginSetupDependencies,
+    ObservabilityAgentBuilderPluginStartDependencies
+  > {
   private readonly logger: Logger;
   private readonly dataRegistry: ObservabilityAgentBuilderDataRegistry;
 
@@ -55,6 +55,8 @@ export class ObservabilityAgentBuilderPlugin
     registerTools({ core, plugins, logger: this.logger }).catch((error) => {
       this.logger.error(`Error registering observability tools: ${error}`);
     });
+
+    registerSkills(plugins);
 
     registerAttachments({
       core,
@@ -79,5 +81,5 @@ export class ObservabilityAgentBuilderPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }

@@ -24,6 +24,7 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
@@ -43,6 +44,7 @@ export interface SetupPlugins {
   telemetry?: TelemetryPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
+  onechat?: OnechatPluginSetup;
 }
 
 export interface StartPlugins {

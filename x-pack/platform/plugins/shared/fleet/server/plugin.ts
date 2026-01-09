@@ -31,6 +31,7 @@ import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -161,6 +162,7 @@ import {
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
+import { registerAgentBuilderSkills } from './agent_builder/skills/register_skills';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -170,6 +172,7 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
+  onechat?: OnechatPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
 }
@@ -363,6 +366,10 @@ export class FleetPlugin
     this.cloud = deps.cloud;
     this.securitySetup = deps.security;
     const config = this.configInitialValue;
+
+    if (deps.onechat) {
+      registerAgentBuilderSkills(deps.onechat);
+    }
 
     core.status.set(this.fleetStatus$.asObservable());
 

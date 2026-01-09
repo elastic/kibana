@@ -14,10 +14,10 @@ import { tool } from '@langchain/core/tools';
  * This skill provides knowledge about how to triage security alerts.
  */
 const ALERT_TRIAGE_SKILL: Omit<Skill, 'tools'> = {
-    namespace: 'security.alert_triage',
-    name: 'Alert Triage',
-    description: 'Step-by-step guide for triaging security alerts',
-    content: `# Alert Triage Guide
+  namespace: 'security.alert_triage',
+  name: 'Alert Triage',
+  description: 'Step-by-step guide for triaging security alerts',
+  content: `# Alert Triage Guide
 
 This skill provides comprehensive knowledge about triaging security alerts in Elastic Security.
 
@@ -45,6 +45,53 @@ Collect additional context to make informed decisions:
 - **Historical Activity**: Review past behavior of the entities involved
 - **Asset Criticality**: Determine if affected assets are critical to the organization
 - **Business Context**: Consider current business operations or known maintenance windows
+
+### Step 2b: De-duplication, correlation, and case scoping (REQUIRED)
+If you find **duplicate** or **related** alerts (same entities, same rule, same technique, or same incident window), you must:
+
+1. **Create a new case** to track the incident and avoid triaging duplicates independently.
+2. **Attach all related alerts to the case** (so the case becomes the single source of truth).
+3. **Extend triage to all alerts in the case**:
+   - Triage one representative alert first.
+   - Then apply the same triage decision framework to every attached alert, noting any differences (severity, hosts/users, timestamps).
+   - Document the consolidated outcome in the case (summary, key pivots, next steps).
+
+**Guardrails**
+- Creating a case and attaching alerts is a write operation: you must get explicit user confirmation and pass \`confirm: true\`.
+
+**Example (create case, then attach alerts)**
+\`\`\`
+tool("invoke_skill", {
+  name: "security.cases",
+  parameters: {
+    operation: "create_case",
+    params: {
+      title: "Potential incident: related security alerts",
+      description: "Grouping duplicate/related alerts for unified triage and documentation.",
+      tags: ["triage", "dedupe"],
+      confirm: true
+    }
+  }
+})
+\`\`\`
+
+Then attach alerts (you must know each alert id + its alerts index):
+\`\`\`
+tool("invoke_skill", {
+  name: "security.cases",
+  parameters: {
+    operation: "attach_alerts",
+    params: {
+      caseId: "<case_id>",
+      alerts: [
+        { "alertId": "<alert_id_1>", "index": "<alerts_index>" },
+        { "alertId": "<alert_id_2>", "index": "<alerts_index>" }
+      ],
+      confirm: true
+    }
+  }
+})
+\`\`\`
 
 ### Step 3: Threat Assessment
 Evaluate the potential threat:
@@ -175,25 +222,25 @@ Remember: Effective triage balances thoroughness with efficiency, ensuring real 
  * This is used in skills which require LangChain tools.
  */
 export const createAddAlertNoteLangChainTool = () => {
-    return tool(({ alertId, note }) => {
-        console.log(`Note ${note} been added to alert: ${alertId}`);
-        return "Note added"
-    }, {
-        name: 'add_alert_note',
-        description: 'Add a note to an alert to document triage decisions, investigation findings, or other relevant information',
-        schema: z.object({
-            alertId: z.string().describe('The ID of the alert to add a note to'),
-            note: z.string().describe('The note content to add to the alert'),
-        }),
-    })
+  return tool(({ alertId, note }) => {
+    console.log(`Note ${note} been added to alert: ${alertId}`);
+    return "Note added"
+  }, {
+    name: 'add_alert_note',
+    description: 'Add a note to an alert to document triage decisions, investigation findings, or other relevant information',
+    schema: z.object({
+      alertId: z.string().describe('The ID of the alert to add a note to'),
+      note: z.string().describe('The note content to add to the alert'),
+    }),
+  })
 };
 
 export const getAlertTriageSkill = (): Skill => {
-    // Skills require LangChain DynamicStructuredTool instances
-    const addAlertNoteLangChainTool = createAddAlertNoteLangChainTool();
+  // Skills require LangChain DynamicStructuredTool instances
+  const addAlertNoteLangChainTool = createAddAlertNoteLangChainTool();
 
-    return {
-        ...ALERT_TRIAGE_SKILL,
-        tools: [addAlertNoteLangChainTool],
-    };
+  return {
+    ...ALERT_TRIAGE_SKILL,
+    tools: [addAlertNoteLangChainTool],
+  };
 }

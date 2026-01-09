@@ -52,7 +52,7 @@ import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/serve
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
@@ -69,6 +69,7 @@ import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
+import { AIAssistantService } from './ai_assistant_service';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -88,6 +89,16 @@ export interface ElasticAssistantPluginStart {
    * Inference plugin start contract.
    */
   inference: InferenceServerStart;
+  /**
+   * Assistant service for creating data clients and managing AI Assistant functionality.
+   * @internal
+   */
+  assistantService?: AIAssistantService;
+  /**
+   * Adhoc attack discovery data client for attack discovery operations.
+   * @internal
+   */
+  adhocAttackDiscoveryDataClient?: IRuleDataClient;
   /**
    * Register features to be used by the elastic assistant.
    *

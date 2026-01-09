@@ -23,6 +23,12 @@ const indexExplorerSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
+  includeKibanaIndices: z
+    .boolean()
+    .optional()
+    .describe(
+      '(optional) Include Kibana/system indices (dot-prefixed). Defaults to false.'
+    ),
 });
 
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
@@ -35,6 +41,9 @@ The 'indexPattern' parameter can be used to filter indices by a specific pattern
 This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
 Otherwise, leave it empty to search against all indices.
 
+The 'includeKibanaIndices' optional parameter can be used to include Kibana/system indices (dot-prefixed).
+This is *off* by default and should only be enabled when you intentionally need to target system resources.
+
 *Example:*
 User: "Show me my latest alerts"
 You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
@@ -42,17 +51,23 @@ Tool result: [{ type: "index", name: '.alerts' }]
 `,
     schema: indexExplorerSchema,
     handler: async (
-      { query: nlQuery, indexPattern = '*', limit = 1 },
+      {
+        query: nlQuery,
+        indexPattern = '*',
+        limit = 1,
+        includeKibanaIndices = indexPattern !== '*',
+      },
       { esClient, modelProvider, logger }
     ) => {
       logger.debug(
-        `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
+        `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}, includeKibanaIndices: ${includeKibanaIndices}`
       );
       const model = await modelProvider.getDefaultModel();
       const response = await indexExplorer({
         nlQuery,
         indexPattern,
         limit,
+        includeKibanaIndices,
         esClient: esClient.asCurrentUser,
         model,
       });

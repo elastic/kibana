@@ -56,13 +56,12 @@ import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task
 
 export class CasePlugin
   implements
-    Plugin<
-      CasesServerSetup,
-      CasesServerStart,
-      CasesServerSetupDependencies,
-      CasesServerStartDependencies
-    >
-{
+  Plugin<
+    CasesServerSetup,
+    CasesServerStart,
+    CasesServerSetupDependencies,
+    CasesServerStartDependencies
+  > {
   private readonly caseConfig: ConfigType;
   private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -74,6 +73,9 @@ export class CasePlugin
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private readonly isServerless: boolean;
+  private attackDiscoveryIntegrationServiceFactory?: (
+    params: { getRequest: () => KibanaRequest }
+  ) => import('./services/attack_discovery_integration').AttackDiscoveryIntegrationService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -210,6 +212,13 @@ export class CasePlugin
         },
       },
       config: this.caseConfig,
+      registerAttackDiscoveryIntegrationService: (
+        factory: (params: {
+          getRequest: () => KibanaRequest;
+        }) => import('./services/attack_discovery_integration').AttackDiscoveryIntegrationService
+      ) => {
+        this.attackDiscoveryIntegrationServiceFactory = factory;
+      },
     };
   }
 
@@ -230,14 +239,14 @@ export class CasePlugin
         scheduleCAISchedulerTask({
           taskManager: plugins.taskManager,
           logger: this.logger,
-        }).catch(() => {}); // it shouldn't reject, but just in case
+        }).catch(() => { }); // it shouldn't reject, but just in case
         createCasesAnalyticsIndexes({
           esClient: core.elasticsearch.client.asInternalUser,
           logger: this.logger,
           isServerless: this.isServerless,
           taskManager: plugins.taskManager,
           savedObjectsClient: internalSavedObjectsClient,
-        }).catch(() => {}); // it shouldn't reject, but just in case
+        }).catch(() => { }); // it shouldn't reject, but just in case
       }
     }
 
@@ -272,6 +281,8 @@ export class CasePlugin
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
       filesPluginStart: plugins.files,
+      // Use registered factory if available
+      attackDiscoveryIntegrationService: this.attackDiscoveryIntegrationServiceFactory,
     });
 
     return {
@@ -310,13 +321,13 @@ export class CasePlugin
 
   private getCasesClientWithRequest =
     (core: CoreStart) =>
-    async (request: KibanaRequest): Promise<CasesClient> => {
-      const client = core.elasticsearch.client;
+      async (request: KibanaRequest): Promise<CasesClient> => {
+        const client = core.elasticsearch.client;
 
-      return this.clientFactory.create({
-        request,
-        scopedClusterClient: client.asScoped(request).asCurrentUser,
-        savedObjectsService: core.savedObjects,
-      });
-    };
+        return this.clientFactory.create({
+          request,
+          scopedClusterClient: client.asScoped(request).asCurrentUser,
+          savedObjectsService: core.savedObjects,
+        });
+      };
 }

@@ -28,6 +28,7 @@ import {
   EVENTS_TAB,
   FILES_TAB,
   OBSERVABLES_TAB,
+  ATTACK_DISCOVERIES_TAB,
 } from '../translations';
 
 const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
@@ -46,6 +47,10 @@ const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
 
     case CASE_VIEW_PAGE_TABS.OBSERVABLES: {
       return OBSERVABLES_TAB;
+    }
+
+    case CASE_VIEW_PAGE_TABS.ATTACK_DISCOVERIES: {
+      return ATTACK_DISCOVERIES_TAB;
     }
 
     // NOTE:this should not be called
@@ -69,18 +74,18 @@ export const CaseViewAttachments = ({
   const tabAsSelectableOptions = useMemo(() => {
     return caseViewTabs.map(
       (tab) =>
-        ({
-          label: tab.name,
-          'data-test-subj': `case-view-tab-title-${tab.id}`,
-          append: tab.badge,
-          isFocused: tab.id === activeTab,
-          onFocusBadge: false,
-          showIcons: false,
-          onClick: () => {
-            navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
-            trackSubTabClick(tab.id);
-          },
-        } as EuiSelectableOption)
+      ({
+        label: tab.name,
+        'data-test-subj': `case-view-tab-title-${tab.id}`,
+        append: tab.badge,
+        isFocused: tab.id === activeTab,
+        onFocusBadge: false,
+        showIcons: false,
+        onClick: () => {
+          navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
+          trackSubTabClick(tab.id);
+        },
+      } as EuiSelectableOption)
     );
   }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id, trackSubTabClick]);
 

@@ -18,6 +18,12 @@ const searchSchema = z.object({
     .describe(
       '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
     ),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe(
+      '(optional) Preferred output fields to keep in the final result (for ES|QL, use KEEP). When provided, the tool will strongly bias the generated query to include ONLY these fields (plus minimal metadata like @timestamp/_index when helpful).'
+    ),
 });
 
 export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
@@ -44,13 +50,21 @@ Note:
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
     schema: searchSchema,
-    handler: async (
-      { query: nlQuery, index = '*' },
-      { esClient, modelProvider, logger, events }
-    ) => {
+    handler: async ({ query: nlQuery, index = '*', fields }, { esClient, modelProvider, logger, events }) => {
+      const fieldsHint =
+        fields && fields.length > 0
+          ? ` Requested output fields (KEEP): ${fields.map((f) => `\`${f}\``).join(', ')}.`
+          : '';
+
+      const enhancedQuery = `${nlQuery}
+
+IMPORTANT: Return ONLY the fields required to answer the question. Avoid dumping full documents or large nested objects.
+When generating ES|QL you MUST use a KEEP clause to restrict output to a small set of relevant fields (ideally <= 12).${fieldsHint}
+Prefer returning a small sample (e.g. LIMIT 20–50) and include @timestamp when a time range is involved.`;
+
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const results = await runSearchTool({
-        nlQuery,
+        nlQuery: enhancedQuery,
         index,
         esClient: esClient.asCurrentUser,
         model: await modelProvider.getDefaultModel(),

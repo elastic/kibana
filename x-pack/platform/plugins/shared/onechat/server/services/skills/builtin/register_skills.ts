@@ -12,7 +12,8 @@ import type { BuiltinSkillRegistry } from './builtin_skill_registry';
  * This function can be extended to register default/platform skills.
  */
 export const registerBuiltinSkills = ({ registry }: { registry: BuiltinSkillRegistry }) => {
-  // No built-in skills registered yet
-  // Add platform skills here as needed
+  // OneChat-owned built-in skills live here. Solution/platform skills MUST register themselves
+  // from their owning plugins via `plugins.onechat.skills.register(...)`.
+  // (intentionally empty)
 };
 

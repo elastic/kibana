@@ -160,9 +160,8 @@ export const entityRiskScoreTool = (
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check risk score index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
+            reason: `Failed to check risk score index availability: ${error instanceof Error ? error.message : 'Unknown error'
+              }`,
           };
         }
       },
@@ -210,6 +209,7 @@ export const entityRiskScoreTool = (
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
                 data: {
+                  operation: 'list',
                   riskScores: riskScores.map((score) => {
                     // Exclude inputs and category details to reduce payload size when returning multiple entities
                     // Only include calculated_score_norm for clear prioity
@@ -307,6 +307,7 @@ export const entityRiskScoreTool = (
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
               data: {
+                operation: 'get',
                 riskScore: riskScoreData,
               },
             },

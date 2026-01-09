@@ -48,6 +48,15 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
+import {
+  getLiveQuerySkill,
+  getOsquerySkill,
+  getPacksSkill,
+  getSavedQueriesSkill,
+  getResultsSkill,
+  getSchemaSkill,
+  getStatusSkill,
+} from './onechat/skills';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -57,6 +66,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
+  private osqueryAppContext: OsqueryAppContext | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -85,6 +95,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       licensing: plugins.licensing,
     };
 
+    // Store context for use by skills
+    this.osqueryAppContext = osqueryContext;
+
     initSavedObjects(core.savedObjects);
 
     // TODO: We do not pass so client here.
@@ -108,6 +121,21 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+
+    // Register OneChat skills if available
+    if (plugins.onechat) {
+
+
+      const getOsqueryContext = () => this.osqueryAppContext;
+
+      plugins.onechat.skills.register(getOsquerySkill(getOsqueryContext));
+      plugins.onechat.skills.register(getLiveQuerySkill(getOsqueryContext));
+      plugins.onechat.skills.register(getPacksSkill(getOsqueryContext));
+      plugins.onechat.skills.register(getSavedQueriesSkill(getOsqueryContext));
+      plugins.onechat.skills.register(getResultsSkill(getOsqueryContext));
+      plugins.onechat.skills.register(getSchemaSkill(getOsqueryContext));
+      plugins.onechat.skills.register(getStatusSkill(getOsqueryContext));
+    }
 
     return {
       createActionService: this.createActionService,

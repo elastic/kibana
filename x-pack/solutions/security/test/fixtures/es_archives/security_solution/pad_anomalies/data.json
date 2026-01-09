@@ -1,0 +1,217 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-pad",
+    "id": "pad_linux_rare_process_executed_by_user_record_1761555600000_3600_0_1",
+    "source": {
+      "job_id": "pad_linux_rare_process_executed_by_user",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 92.5,
+      "initial_record_score": 92.5,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "root",
+      "function": "rare",
+      "function_description": "rare",
+      "field_name": "process.name",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "root"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "nc",
+            "wget",
+            "curl"
+          ]
+        }
+      ],
+      "user.name": [
+        "root"
+      ],
+      "process.name": [
+        "nc",
+        "wget",
+        "curl"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-pad",
+    "id": "pad_linux_rare_process_executed_by_user_record_1761555600000_3600_0_2",
+    "source": {
+      "job_id": "pad_linux_rare_process_executed_by_user",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 91.2,
+      "initial_record_score": 91.2,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "sudo-user-1",
+      "function": "rare",
+      "function_description": "rare",
+      "field_name": "process.name",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "sudo-user-1"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "python",
+            "-c",
+            "import os; os.system('rm -rf /tmp/*')"
+          ]
+        }
+      ],
+      "user.name": [
+        "sudo-user-1"
+      ],
+      "process.name": [
+        "python"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-pad",
+    "id": "pad_linux_high_count_privileged_process_events_by_user_record_1761555600000_10800_0_3",
+    "source": {
+      "job_id": "pad_linux_high_count_privileged_process_events_by_user",
+      "result_type": "record",
+      "probability": 0.002,
+      "record_score": 87.3,
+      "initial_record_score": 87.3,
+      "bucket_span": 10800,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "privileged-user-1",
+      "function": "high_non_zero_count",
+      "function_description": "high_non_zero_count",
+      "by_field_name": "event.action",
+      "by_field_value": "exec",
+      "typical": [
+        3.0
+      ],
+      "actual": [
+        38.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "privileged-user-1"
+          ]
+        },
+        {
+          "influencer_field_name": "event.action",
+          "influencer_field_values": [
+            "exec"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "linux-server-02"
+          ]
+        }
+      ],
+      "user.name": [
+        "privileged-user-1"
+      ],
+      "event.action": [
+        "exec"
+      ],
+      "host.name": [
+        "linux-server-02"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-pad",
+    "id": "pad_linux_high_count_privileged_process_events_by_user_record_1761555600000_10800_0_4",
+    "source": {
+      "job_id": "pad_linux_high_count_privileged_process_events_by_user",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 92.1,
+      "initial_record_score": 92.1,
+      "bucket_span": 10800,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "privileged-user-2",
+      "function": "high_non_zero_count",
+      "function_description": "high_non_zero_count",
+      "by_field_name": "event.action",
+      "by_field_value": "executed",
+      "typical": [
+        2.0
+      ],
+      "actual": [
+        45.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "privileged-user-2"
+          ]
+        },
+        {
+          "influencer_field_name": "event.action",
+          "influencer_field_values": [
+            "executed"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "linux-server-03"
+          ]
+        }
+      ],
+      "user.name": [
+        "privileged-user-2"
+      ],
+      "event.action": [
+        "executed"
+      ],
+      "host.name": [
+        "linux-server-03"
+      ]
+    },
+    "type": "_doc"
+  }
+}
