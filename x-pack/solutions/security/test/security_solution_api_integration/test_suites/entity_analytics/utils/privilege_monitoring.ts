@@ -12,7 +12,10 @@ import {
   PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
 } from '@kbn/security-solution-plugin/common/constants';
 import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
-import { PAD_INSTALL_URL, PAD_STATUS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
+import {
+  PAD_INSTALL_URL,
+  PAD_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 
 const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   if (response.status !== statusCode) {
@@ -117,7 +120,11 @@ export const privilegeMonitoringRouteHelpersFactory = (
       assertStatusCode(expectStatusCode, response);
       return response;
     },
-    updateUser: async (id: string,requestBody: Record<string, unknown>, expectStatusCode: number = 200) => {
+    updateUser: async (
+      id: string,
+      requestBody: Record<string, unknown>,
+      expectStatusCode: number = 200
+    ) => {
       const response = await supertest
         .put(routeWithNamespace(`/api/entity_analytics/monitoring/users/${id}`, namespace))
         .set('kbn-xsrf', 'true')
