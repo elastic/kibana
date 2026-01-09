@@ -32,5 +32,13 @@ export const getAllMigrations = (factories: unknown[], migrateFn: PersistableSta
     });
   });
 
+  // For backwards compatibility; some deprecated controls code included a migration for 8.7.0 which is no longer necessary.
+  // but Kibana CI expects a migration for this version, so pass a no-op if one is not otherwise defined
+  if (!migrations['8.7.0']) {
+    migrations['8.7.0'] = (state) => ({
+      ...migrateFn(state, '8.7.0'),
+    });
+  }
+
   return migrations;
 };

@@ -479,7 +479,9 @@ export class VisualizationsPlugin
               references: [],
             },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,

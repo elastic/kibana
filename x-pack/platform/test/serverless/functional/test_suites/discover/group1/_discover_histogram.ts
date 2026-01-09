@@ -33,6 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
 
   describe('discover histogram', function describeIndexTests() {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/248077
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -102,8 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
-      // to brush a different range in the histogram, resulting in a different duration
-      expect(Math.round(newDurationHours)).to.be(25);
+      // to brush a different range in the histogram, resulting in a different duration.
+      // Any visual change in the layout will change the brushed range and thus the duration
+      expect(Math.round(newDurationHours)).to.be(26);
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await PageObjects.discover.getDocTableField(1);

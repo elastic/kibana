@@ -81,10 +81,9 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery },
-      context
-    ) => {
+    handler: async (toolParams, context) => {
+      const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
+
       try {
         const esClient = context.esClient.asCurrentUser;
 

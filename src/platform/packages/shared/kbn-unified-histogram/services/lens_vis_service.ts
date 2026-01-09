@@ -395,14 +395,14 @@ export class LensVisService {
           dataType: 'string',
           isBucketed: true,
           label: i18n.translate('unifiedHistogram.breakdownColumnLabel', {
-            defaultMessage: 'Top 3 values of {fieldName}',
+            defaultMessage: 'Top 9 values of {fieldName}',
             values: { fieldName: breakdownField?.displayName },
           }),
           operationType: 'terms',
           scale: 'ordinal',
           sourceField: breakdownField.name,
           params: {
-            size: 3,
+            size: 9,
             orderBy: {
               type: 'column',
               columnId: 'count_column',
