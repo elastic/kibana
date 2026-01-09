@@ -284,7 +284,6 @@ export function createTestMcpServer(): McpServerSimulator {
     }),
   });
 
-  // Add a calculator tool for testing
   simulator.registerTool({
     name: 'add',
     description: 'Adds two numbers together',
@@ -298,6 +297,38 @@ export function createTestMcpServer(): McpServerSimulator {
     },
     handler: async (args) => ({
       content: [{ type: 'text', text: String(Number(args.a) + Number(args.b)) }],
+    }),
+  });
+
+  simulator.registerTool({
+    name: 'subtract',
+    description: 'Subtracts the second number from the first',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        a: { type: 'number', description: 'First number' },
+        b: { type: 'number', description: 'Second number to subtract' },
+      },
+      required: ['a', 'b'],
+    },
+    handler: async (args) => ({
+      content: [{ type: 'text', text: String(Number(args.a) - Number(args.b)) }],
+    }),
+  });
+
+  simulator.registerTool({
+    name: 'multiply',
+    description: 'Multiplies two numbers together',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        a: { type: 'number', description: 'First number' },
+        b: { type: 'number', description: 'Second number' },
+      },
+      required: ['a', 'b'],
+    },
+    handler: async (args) => ({
+      content: [{ type: 'text', text: String(Number(args.a) * Number(args.b)) }],
     }),
   });
 

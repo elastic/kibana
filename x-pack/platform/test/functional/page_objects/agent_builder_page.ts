@@ -386,6 +386,53 @@ export class AgentBuilderPageObject extends FtrService {
 
   /*
    * ==========================
+   * Tools: bulk import MCP helpers
+   * ==========================
+   */
+  async navigateToBulkImportMcp() {
+    await this.navigateToApp('tools/bulk_import_mcp');
+  }
+
+  async openManageMcpMenu() {
+    await this.testSubjects.click('agentBuilderManageMcpButton');
+  }
+
+  async clickBulkImportMcpMenuItem() {
+    await this.testSubjects.click('agentBuilderBulkImportMcpMenuItem');
+  }
+
+  async selectBulkImportConnector(connectorId: string) {
+    await this.testSubjects.click('bulkImportMcpConnectorSelect');
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`bulkImportMcpConnectorOption-${connectorId}`);
+    });
+  }
+
+  async waitForBulkImportToolsToLoad() {
+    await this.retry.try(async () => {
+      const table = await this.testSubjects.find('bulkImportMcpToolsTable');
+      const isLoading = await table.getAttribute('data-is-loading');
+      if (isLoading === 'true') {
+        throw new Error('Bulk import tools still loading');
+      }
+    });
+  }
+
+  async selectBulkImportToolCheckbox(toolName: string) {
+    // EuiInMemoryTable uses itemId="name", so checkbox is checkboxSelectRow-{toolName}
+    await this.testSubjects.click(`checkboxSelectRow-${toolName}`);
+  }
+
+  async setBulkImportNamespace(namespace: string) {
+    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace);
+  }
+
+  async clickBulkImportSubmit() {
+    await this.testSubjects.click('bulkImportMcpToolsImportButton');
+  }
+
+  /*
+   * ==========================
    * Tools: actions (save, context menu, delete, test flyout)
    * ==========================
    */

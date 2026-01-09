@@ -236,6 +236,43 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
       });
     });
 
+    describe('bulk importing MCP tools', function () {
+      it('should bulk import MCP tools via the UI', async () => {
+        const namespace = `${TOOL_PREFIX}bulk.${Date.now()}`;
+
+        // Navigate to bulk import page via the Manage MCP menu
+        await agentBuilder.navigateToToolsLanding();
+        await agentBuilder.openManageMcpMenu();
+        await agentBuilder.clickBulkImportMcpMenuItem();
+
+        // Wait for bulk import page to load
+        await testSubjects.existOrFail('agentBuilderBulkImportMcpToolsPage');
+
+        // Select the MCP connector
+        await agentBuilder.selectBulkImportConnector(connectorId);
+
+        // Wait for tools to load from the mock server
+        await agentBuilder.waitForBulkImportToolsToLoad();
+
+        // Select multiple tools to import (subtract and multiply)
+        await agentBuilder.selectBulkImportToolCheckbox('subtract');
+        await agentBuilder.selectBulkImportToolCheckbox('multiply');
+
+        // Set the namespace for imported tools
+        await agentBuilder.setBulkImportNamespace(namespace);
+
+        // Click import button
+        await agentBuilder.clickBulkImportSubmit();
+
+        // Should navigate back to tools list after successful import
+        await testSubjects.existOrFail('agentBuilderToolsTable');
+
+        // Verify both imported tools appear in the table
+        expect(await agentBuilder.isToolInTable(`${namespace}.subtract`)).to.be(true);
+        expect(await agentBuilder.isToolInTable(`${namespace}.multiply`)).to.be(true);
+      });
+    });
+
     describe('error handling', function () {
       it('should show error banner when MCP server is unavailable during tool creation', async () => {
         // Stop the MCP server to simulate unavailability

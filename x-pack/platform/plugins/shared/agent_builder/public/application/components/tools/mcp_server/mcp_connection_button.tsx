@@ -41,6 +41,7 @@ export const McpConnectionButton = () => {
           iconType="arrowDown"
           iconSide="right"
           onClick={toggleContextOpen}
+          data-test-subj="agentBuilderManageMcpButton"
         >
           <EuiText size="s">
             {i18n.translate('xpack.agentBuilder.tools.mcpServerConnectionButton', {
