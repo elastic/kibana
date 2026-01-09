@@ -41,7 +41,7 @@ export interface BucketChangePoints extends Bucket {
   time_series: {
     buckets: Array<
       Bucket & {
-        avg_latency: {
+        latency: {
           value: number | null;
         };
         throughput: {
@@ -60,6 +60,16 @@ type DocumentType =
   | ApmDocumentType.TransactionMetric
   | ApmDocumentType.TransactionEvent;
 
+function getChangePointsAggs(bucketsPath: string) {
+  const changePointAggs = {
+    change_point: {
+      buckets_path: bucketsPath,
+    },
+    // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
+  } as AggregationsAggregationContainer;
+  return changePointAggs;
+}
+
 export async function getTraceChangePoints({
   apmEventClient,
   apmDataAccessServices,
@@ -67,6 +77,7 @@ export async function getTraceChangePoints({
   end,
   kqlFilter,
   groupBy,
+  latencyType = 'avg',
 }: {
   apmEventClient: APMEventClient;
   apmDataAccessServices: ApmDataAccessServices;
@@ -74,6 +85,7 @@ export async function getTraceChangePoints({
   end: number;
   kqlFilter?: string;
   groupBy: string;
+  latencyType?: 'avg' | 'p95' | 'p99';
 }): Promise<BucketChangePoints[]> {
   const source = await getPreferredDocumentSource({
     apmDataAccessServices,
@@ -116,11 +128,26 @@ export async function getTraceChangePoints({
             },
             aggs: {
               ...outcomeAggs,
-              avg_latency: {
-                avg: {
-                  field: durationField,
-                },
-              },
+              latency:
+                // Avoid unsupported aggregation on downsampled index, see example error:
+                // "reason": {
+                //   "type": "unsupported_aggregation_on_downsampled_index",
+                //   "reason": "Field [transaction.duration.summary] of type [aggregate_metric_double] is not supported for aggregation [percentiles]"
+                // }
+                durationField !== 'transaction.duration.summary' &&
+                (latencyType === 'p95' || latencyType === 'p99')
+                  ? {
+                      percentiles: {
+                        field: durationField,
+                        percents: [Number(`${latencyType.split('p')[1]}.0`)],
+                        keyed: true,
+                      },
+                    }
+                  : {
+                      avg: {
+                        field: durationField,
+                      },
+                    },
               failure_rate:
                 documentType === ApmDocumentType.ServiceTransactionMetric
                   ? {
@@ -160,22 +187,9 @@ export async function getTraceChangePoints({
               },
             },
           },
-          changes_latency: {
-            change_point: {
-              buckets_path: 'time_series>avg_latency',
-            },
-            // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-          } as AggregationsAggregationContainer,
-          changes_throughput: {
-            change_point: {
-              buckets_path: 'time_series>throughput',
-            },
-          } as AggregationsAggregationContainer,
-          changes_failure_rate: {
-            change_point: {
-              buckets_path: 'time_series>failure_rate',
-            },
-          } as AggregationsAggregationContainer,
+          changes_latency: getChangePointsAggs('time_series>latency'),
+          changes_throughput: getChangePointsAggs('time_series>throughput'),
+          changes_failure_rate: getChangePointsAggs('time_series>failure_rate'),
         },
       },
     },

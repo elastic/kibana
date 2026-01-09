@@ -40,6 +40,10 @@ Use only low-cardinality fields. Using many fields or high-cardinality fields ca
 `
     )
     .optional(),
+  latencyType: z
+    .enum(['avg', 'p95', 'p99'])
+    .describe('Aggregation type for latency change points analysis. default is avg.')
+    .optional(),
 });
 
 export function createGetTraceChangePointsTool({
@@ -62,7 +66,10 @@ export function createGetTraceChangePointsTool({
     description: `TBD`,
     schema: getTraceChangePointsSchema,
     tags: ['observability', 'traces'],
-    handler: async ({ start, end, kqlFilter, groupBy = 'service.name' }, { request }) => {
+    handler: async (
+      { start, end, kqlFilter, groupBy = 'service.name', latencyType = 'avg' },
+      { request }
+    ) => {
       try {
         const changePoints = await getToolHandler({
           request,
@@ -71,6 +78,7 @@ export function createGetTraceChangePointsTool({
           end,
           kqlFilter,
           groupBy,
+          latencyType,
         });
 
         return {

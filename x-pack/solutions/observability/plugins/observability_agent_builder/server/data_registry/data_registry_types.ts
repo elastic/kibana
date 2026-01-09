@@ -166,7 +166,7 @@ export interface BucketChangePoints extends Bucket {
   time_series: {
     buckets: Array<
       Bucket & {
-        avg_latency: {
+        latency: {
           value: number | null;
         };
         throughput: {
@@ -258,5 +258,6 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: string;
     kqlFilter?: string;
     groupBy: string;
+    latencyType?: 'avg' | 'p95' | 'p99';
   }) => Promise<BucketChangePoints[]>;
 }

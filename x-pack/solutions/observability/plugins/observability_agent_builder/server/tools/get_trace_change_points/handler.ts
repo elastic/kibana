@@ -14,6 +14,7 @@ export async function getToolHandler({
   end,
   kqlFilter: kqlFilterValue,
   groupBy,
+  latencyType,
 }: {
   request: KibanaRequest;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -21,6 +22,7 @@ export async function getToolHandler({
   end: string;
   kqlFilter?: string;
   groupBy: string;
+  latencyType: 'avg' | 'p95' | 'p99' | undefined;
 }) {
   const items = await dataRegistry.getData('traceChangePoints', {
     request,
@@ -28,6 +30,7 @@ export async function getToolHandler({
     end,
     kqlFilter: kqlFilterValue,
     groupBy,
+    latencyType,
   });
   return items;
 }

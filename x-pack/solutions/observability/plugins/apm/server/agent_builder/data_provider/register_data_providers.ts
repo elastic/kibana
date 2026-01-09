@@ -187,7 +187,7 @@ export function registerDataProviders({
 
   observabilityAgentBuilder.registerDataProvider(
     'traceChangePoints',
-    async ({ request, start, end, kqlFilter, groupBy }) => {
+    async ({ request, start, end, kqlFilter, groupBy, latencyType }) => {
       const { apmEventClient, apmDataAccessServices } = await buildApmToolResources({
         core,
         plugins,
@@ -205,6 +205,7 @@ export function registerDataProviders({
         end: endMs,
         kqlFilter,
         groupBy,
+        latencyType,
       });
     }
   );
