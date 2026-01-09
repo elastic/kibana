@@ -51,6 +51,9 @@ const AGGREGATION_LABELS = {
   ['rate']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.rate', {
     defaultMessage: 'Rate',
   }),
+  ['last_value']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.lastValue', {
+    defaultMessage: 'Last value',
+  }),
 };
 
 interface Props {
