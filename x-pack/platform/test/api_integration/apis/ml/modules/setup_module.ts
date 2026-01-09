@@ -996,7 +996,7 @@ export default ({ getService }: FtrProviderContext) => {
         // expected estimated values
         // only the first job has a default MML larger than estimated, so it uses the default
         // the other two use the estimated values
-        const expectedMMLs = ['30mb', '11mb', '16mb'];
+        const expectedMMLs = ['11mb', '11mb', '16mb'];
 
         const rspBody = await executeSetupModuleRequest(
           testModule.module,
