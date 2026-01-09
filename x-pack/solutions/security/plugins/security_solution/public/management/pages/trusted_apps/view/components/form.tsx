@@ -696,65 +696,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }
       },
       [item, hasFormChanged, isProcessDescendantsSelected, processChanged]
-
-      /*console.log('check', arg.exceptionItems?.[0], hasFormChanged)
-      const currentItem = item;
-      const newEntries = arg.exceptionItems[0]?.entries;
-
-      // More robust change detection
-      const hasActualChanges =
-        newEntries && (!currentItem.entries || !isEqual(newEntries, currentItem.entries));
-
-      if (!hasActualChanges && hasFormChanged) {
-        // Only handle duplicate field detection for unchanged forms
-        if (newEntries) {
-          console.log('2')
-          const addedFields = newEntries.map((e) => e.field) || [''];
-          setConditionsState((prev) => ({
-            ...prev,
-            hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
-          }));
-          return;
-        }
-        console.log('3')
-      }
-
-      console.log('4')
-      // Batch all condition state updates
-      setConditionsState((prev) => ({
-        ...prev,
-        hasDuplicateFields: false,
-        hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard(arg.exceptionItems),
-        hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry(arg.exceptionItems),
-        areValid:
-          arg.exceptionItems[0] !== undefined
-            ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
-            : false,
-      }));
-
-      const updatedItem: ArtifactFormComponentProps['item'] =
-        arg.exceptionItems[0] !== undefined
-          ? ({
-            ...arg.exceptionItems[0],
-            name: currentItem?.name ?? '',
-            description: currentItem?.description ?? '',
-            comments: currentItem?.comments ?? [],
-            os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-            tags: currentItem?.tags ?? [],
-            meta: currentItem.meta,
-          } as ArtifactFormComponentProps['item'])
-          : {
-            ...currentItem,
-            entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-          };
-      processChanged(updatedItem);
-      if (!hasFormChanged) {
-        console.log('form changed via builder');
-        setHasFormChanged(true);
-      }
-    },
-    [hasFormChanged, processChanged, item]
-    */
     );
 
     // Stabilized memoization with minimal dependencies
