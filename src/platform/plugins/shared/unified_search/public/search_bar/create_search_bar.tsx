@@ -99,13 +99,12 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
-    const beforeUpdateQuery = props.disableSubscribingToGlobalDataServices
-      ? queryService.queryString.getQuery()
-      : currentQuery;
-
+    const currentTime = timefilter.getTime();
     const isUpdate =
-      !isEqual(timefilter.getTime(), payload.dateRange) ||
-      !isEqual(payload.query, beforeUpdateQuery);
+      !isEqual(currentTime, payload.dateRange) || !isEqual(payload.query, currentQuery);
+
+    let submittedTime = currentTime;
+    let submittedQuery = currentQuery;
 
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
@@ -114,18 +113,16 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
       } else {
         queryService.queryString.clearQuery();
       }
+      submittedTime = timefilter.getTime();
+      submittedQuery = queryService.queryString.getQuery() as QT | Query;
     }
 
     if ((!isUpdate || props.disableSubscribingToGlobalDataServices) && props.onQuerySubmit) {
-      const afterUpdateQuery = props.disableSubscribingToGlobalDataServices
-        ? queryService.queryString.getQuery()
-        : currentQuery;
-
       // Refresh button triggered for an update
       props.onQuerySubmit(
         {
-          dateRange: timefilter.getTime(),
-          query: afterUpdateQuery as QT | Query,
+          dateRange: submittedTime,
+          query: submittedQuery,
         },
         isUpdate
       );
