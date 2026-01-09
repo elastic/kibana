@@ -40,14 +40,6 @@ export class Homepage {
       .click();
   }
 
-  async getCloudResourceCards() {
-    return this.page.locator('[data-test-subj^="cloudResourceCard-"]');
-  }
-
-  async getCloudResourceCardLink(cardId: string) {
-    return this.page.testSubj.locator(cardId).getByRole('link');
-  }
-
   async getApiKeyButton() {
     return this.page.testSubj.locator('searchHomepageConnectToElasticsearchApiKeysButton');
   }
@@ -124,20 +116,8 @@ export class Homepage {
     return this.page.testSubj.locator('createApiKeyButton');
   }
 
-  async getManageApiKeysButton() {
-    return this.page.testSubj.locator('manageApiKeysButton');
-  }
-
-  async getActiveApiKeysBadge() {
-    return this.page.testSubj.locator('activeApiKeysBadge');
-  }
-
   async clickCreateApiKeyButton() {
     await this.page.testSubj.locator('createApiKeyButton').click();
-  }
-
-  async clickManageApiKeysButton() {
-    await this.page.testSubj.locator('manageApiKeysButton').click();
   }
 
   async getCreateApiKeyFlyoutHeader() {
@@ -200,26 +180,6 @@ export class Homepage {
     return this.page.testSubj.locator('observabilitySection');
   }
 
-  // Stateful (ESS) - "Create an Observability space"
-  async getCreateObservabilitySpaceLink() {
-    return this.page.testSubj.locator('createObservabilitySpaceLink');
-  }
-
-  async clickCreateObservabilitySpaceLink() {
-    await this.page.testSubj.locator('createObservabilitySpaceLink').scrollIntoViewIfNeeded();
-    await this.page.testSubj.locator('createObservabilitySpaceLink').click();
-  }
-
-  // Serverless - "Create an Observability project"
-  async getCreateObservabilityProjectLink() {
-    return this.page.testSubj.locator('createObservabilityProjectLink');
-  }
-
-  async clickCreateObservabilityProjectLink() {
-    await this.page.testSubj.locator('createObservabilityProjectLink').scrollIntoViewIfNeeded();
-    await this.page.testSubj.locator('createObservabilityProjectLink').click();
-  }
-
   // V1 Homepage - Alternate Solutions (Security section)
   async getSecuritySection() {
     return this.page.testSubj.locator('securitySection');
@@ -269,22 +229,5 @@ export class Homepage {
 
   async clickViewDocumentationButton() {
     await this.page.testSubj.locator('viewDocumentationButton').click();
-  }
-
-  // V1 Homepage - Footer content
-  async getElasticCommunityLink() {
-    return this.page.testSubj.locator('elasticCommunityLink');
-  }
-
-  async clickElasticCommunityLink() {
-    await this.page.testSubj.locator('elasticCommunityLink').click();
-  }
-
-  async getGiveFeedbackLink() {
-    return this.page.testSubj.locator('giveFeedbackLink');
-  }
-
-  async clickGiveFeedbackLink() {
-    await this.page.testSubj.locator('giveFeedbackLink').click();
   }
 }
