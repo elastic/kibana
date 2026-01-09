@@ -80,9 +80,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
-  // Setting undefined here because we don't have user privileges data in index management
-  // If the user doesn't have update mappings privileges we let the api handle the error
-
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
