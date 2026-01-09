@@ -44,45 +44,45 @@ export const initPrivilegeMonitoringEngineRoute = (
         validate: {},
       },
       withMinimumLicense(
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<InitMonitoringEngineResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<InitMonitoringEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
 
-        const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const soClient = dataClient.getScopedSoClient(request, {
-          includedHiddenTypes: [
-            PrivilegeMonitoringApiKeyType.name,
-            monitoringEntitySourceType.name,
-          ],
-        });
-        const service = createInitialisationService(dataClient, soClient);
-
-        try {
-          const initResult = await service.init();
-
-          if (initResult.status === PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR) {
-            return siemResponse.error({ statusCode: 500, body: initResult });
-          }
-
-          return response.ok({ body: initResult });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error initializing privilege monitoring engine: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = dataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
           });
-        }
-      },
+          const service = createInitialisationService(dataClient, soClient);
+
+          try {
+            const initResult = await service.init();
+
+            if (initResult.status === PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR) {
+              return siemResponse.error({ statusCode: 500, body: initResult });
+            }
+
+            return response.ok({ body: initResult });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error initializing privilege monitoring engine: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
         'platinum'
       )
     );

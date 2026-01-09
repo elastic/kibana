@@ -50,15 +50,15 @@ export const listMonitoringEntitySourceRoute = (
         async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
           const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
 
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.list(request.query);
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.list(request.query);
 
             return response.ok({ body });
           } catch (e) {

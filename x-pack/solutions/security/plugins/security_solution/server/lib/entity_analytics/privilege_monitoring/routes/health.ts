@@ -46,15 +46,15 @@ export const healthCheckPrivilegeMonitoringRoute = (
           const siemResponse = buildSiemResponse(response);
           const secSol = await context.securitySolution;
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-        const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const soClient = dataClient.getScopedSoClient(request);
-        const config = secSol.getConfig();
-        const maxUsersAllowed =
-          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = dataClient.getScopedSoClient(request);
+          const config = secSol.getConfig();
+          const maxUsersAllowed =
+            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
 
           const statusService = createEngineStatusService(dataClient, soClient);
 

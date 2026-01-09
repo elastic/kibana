@@ -44,44 +44,44 @@ export const scheduleNowMonitoringEngineRoute = (
       },
       withMinimumLicense(
         async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<ScheduleMonitoringEngineResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<ScheduleMonitoringEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
 
-        const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const soClient = dataClient.getScopedSoClient(request, {
-          includedHiddenTypes: [
-            PrivilegeMonitoringApiKeyType.name,
-            monitoringEntitySourceType.name,
-          ],
-        });
-        const service = createEngineStatusService(dataClient, soClient);
-
-        try {
-          const result = await service.scheduleNow();
-          logger.debug(`Privilege monitoring engine scheduled: ${result}`);
-          return response.ok({
-            body: {
-              success: true,
-            },
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = dataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
           });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error scheduling privilege monitoring engine: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      },
+          const service = createEngineStatusService(dataClient, soClient);
+
+          try {
+            const result = await service.scheduleNow();
+            logger.debug(`Privilege monitoring engine scheduled: ${result}`);
+            return response.ok({
+              body: {
+                success: true,
+              },
+            });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error scheduling privilege monitoring engine: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
         'platinum'
       )
     );

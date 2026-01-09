@@ -42,36 +42,38 @@ export const padInstallRoute = (
         validate: {},
       },
       withMinimumLicense(
-       async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<InstallPrivilegedAccessDetectionPackageResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<InstallPrivilegedAccessDetectionPackageResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
 
-        try {
-          const clientResponse = await secSol
-            .getPadPackageInstallationClient()
-            .installPrivilegedAccessDetectionPackage();
-          return response.ok({
-            body: {
-              ...clientResponse,
-            },
-          });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error PAD installation: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }, 'platinum')
+          try {
+            const clientResponse = await secSol
+              .getPadPackageInstallationClient()
+              .installPrivilegedAccessDetectionPackage();
+            return response.ok({
+              body: {
+                ...clientResponse,
+              },
+            });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error PAD installation: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

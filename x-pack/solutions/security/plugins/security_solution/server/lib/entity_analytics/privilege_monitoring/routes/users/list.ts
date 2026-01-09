@@ -45,17 +45,17 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
         },
       },
       withMinimumLicense(
-      async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
+        async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
 
-          const secSol = await context.securitySolution;
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const crudService = createPrivilegedUsersCrudService(dataClient);
+            const secSol = await context.securitySolution;
+            const dataClient = secSol.getPrivilegeMonitoringDataClient();
+            const crudService = createPrivilegedUsersCrudService(dataClient);
 
             const body = await crudService.list(request.query.kql);
             return response.ok({ body });
