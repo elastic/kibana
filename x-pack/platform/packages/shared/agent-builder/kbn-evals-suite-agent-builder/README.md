@@ -73,24 +73,37 @@ The EDOT Collector receives traces from Kibana via the HTTP exporter configured 
 
 ### Load AgentBuilder Datasets
 
-**Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up with your `@elastic.co` email address.
+The following options are available to load Knowledge bases:
 
-Load the required AgentBuilder datasets into Elasticsearch using the HuggingFace dataset loader:
+A. Restore the [snapshot](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting) from gcs-bucket, credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
+   
+B. Use the ETL pipeline from the workchat-solution-ds-experiments (internal) repo. **Recommended when restoring snapshot is not an option, e.g. serverless**. Estimated time: ~30 minutes (Serverless Cloud) or ~1 hour (local).
 
-```bash
-# Load Wix knowledge base and users datasets
-HUGGING_FACE_ACCESS_TOKEN=<your-token> \
-node --require ./src/setup_node_env/index.js \
-  x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
-  --datasets agent_builder/knowledge-base/* \
-  --clear
-  --kibana-url http://elastic:changeme@localhost:5620
-```
+C. Use Huggingface Loader in Kibana: Follow the steps below to load data into Elasticsearch using the HuggingFace dataset loader: 
+  
+  ```bash
+  # Load domain specific knowledge base
+  HUGGING_FACE_ACCESS_TOKEN=<your-token> \
+  node --require ./src/setup_node_env/index.js \
+    x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
+    --datasets "agent_builder/{REPLACE_WITH_A_KNOWLEDGE_BASE}/*" \
+    --clear \
+    --kibana-url http://elastic:changeme@localhost:5620
+  ```
 
-**Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
-Once done, documents with embeddings will be cached and re-used on subsequent data loads.
+  KNOWLEDGE BASE OPTIONS
+  1. Airline loyalty domain: `airline_loyalty_program_kb`
+  2. Customer support domain: `customer_support_kb`
+  3. Retail domain: `global_electronics_retailer_kb`
+  4. Healthcare survey domain: `hcahps_patient_survey_kb`
+  5. Elasticsearch customer support knowledge articles: `elastic_customer_support_kb`
 
-For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
+  **Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up   with your `@elastic.co` email address.
+
+  **Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
+  Once done, documents with embeddings will be cached and re-used on subsequent data loads.
+
+  For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
 
 ### Run Evaluations
 
@@ -115,7 +128,7 @@ SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright 
 # Override RAG evaluator K value (takes priority over config)
 RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
-# Retrieve traces from another (monitoring) closter
+# Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 ```

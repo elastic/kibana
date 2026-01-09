@@ -14,6 +14,7 @@ export enum ChatEventType {
   toolCall = 'tool_call',
   browserToolCall = 'browser_tool_call',
   toolProgress = 'tool_progress',
+  toolUi = 'tool_ui',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
@@ -75,6 +76,30 @@ export const isToolProgressEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is ToolProgressEvent => {
   return event.type === ChatEventType.toolProgress;
+};
+
+// Tool UI events
+
+export interface ToolUiEventData<TEvent = string, TData extends object = object> {
+  tool_id: string;
+  tool_call_id: string;
+  custom_event: TEvent;
+  data: TData;
+}
+
+export type ToolUiEvent<
+  TEvent extends string = string,
+  TData extends object = object
+> = ChatEventBase<ChatEventType.toolUi, ToolUiEventData<TEvent, TData>>;
+
+export const isToolUiEvent = <TEvent extends string = string, TData extends object = object>(
+  event: AgentBuilderEvent<string, any>,
+  customType?: TEvent
+): event is ToolUiEvent<TEvent, TData> => {
+  if (event.type !== ChatEventType.toolUi) {
+    return false;
+  }
+  return customType ? event.data.custom_event === customType : true;
 };
 
 // Tool result
@@ -261,6 +286,7 @@ export type ChatAgentEvent =
   | ToolCallEvent
   | BrowserToolCallEvent
   | ToolProgressEvent
+  | ToolUiEvent
   | ToolResultEvent
   | PromptRequestEvent
   | ReasoningEvent

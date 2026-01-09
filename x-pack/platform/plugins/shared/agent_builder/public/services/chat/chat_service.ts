@@ -19,6 +19,8 @@ import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
+import type { EventsService } from '../events';
+import { propagateEvents } from './propagate_events';
 
 interface BaseConverseParams {
   signal?: AbortSignal;
@@ -41,9 +43,11 @@ export type ResumeRoundParams = BaseConverseParams & {
 
 export class ChatService {
   private readonly http: HttpSetup;
+  private readonly events: EventsService;
 
-  constructor({ http }: { http: HttpSetup }) {
+  constructor({ http, events }: { http: HttpSetup; events: EventsService }) {
     this.http = http;
+    this.events = events;
   }
 
   chat(params: ChatParams): Observable<ChatEvent> {
@@ -83,7 +87,8 @@ export class ChatService {
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
-      unwrapAgentBuilderErrors()
+      unwrapAgentBuilderErrors(),
+      propagateEvents({ eventsService: this.events })
     );
   }
 }
