@@ -225,6 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-timelines',
         'session_cleanup',
         'slo:bulk-delete-task',
+        'slo:health-scan-task',
         'slo:temp-summary-cleanup-task',
         'streams_feature_identification',
         'task_manager:delete_inactive_background_task_nodes',
