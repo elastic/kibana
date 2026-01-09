@@ -243,12 +243,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       llmOutput: {
         ...(response.tokens
           ? {
-            tokenUsage: {
-              promptTokens: response.tokens.prompt,
-              completionTokens: response.tokens.completion,
-              totalTokens: response.tokens.total,
-            },
-          }
+              tokenUsage: {
+                promptTokens: response.tokens.prompt,
+                completionTokens: response.tokens.completion,
+                totalTokens: response.tokens.total,
+              },
+            }
           : {}),
       },
     };

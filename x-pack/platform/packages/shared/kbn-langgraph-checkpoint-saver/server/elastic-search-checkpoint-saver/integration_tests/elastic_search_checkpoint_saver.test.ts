@@ -227,7 +227,7 @@ describe('ElasticSearchSaver', () => {
           },
         },
         checkpoint2,
-        { source: 'update', step: -1, writes: null,parents: {} }
+        { source: 'update', step: -1, writes: null, parents: {} }
       );
 
       await saver.put(
