@@ -15,6 +15,8 @@ import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
+import type { ServiceMapConnectionInfoResponse } from './get_service_map_connection_info';
+import { getServiceMapConnectionInfo } from './get_service_map_connection_info';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
@@ -180,8 +182,51 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   },
 });
 
+const serviceMapConnectionRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/connection',
+  params: t.type({
+    query: t.intersection([
+      t.type({
+        sourceServiceName: t.string,
+        dependencyName: t.union([t.string, t.array(t.string)]),
+      }),
+      environmentRt,
+      rangeRt,
+      offsetRt,
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceMapConnectionInfoResponse> => {
+    const { config, context, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+    const apmEventClient = await getApmEventClient(resources);
+
+    const {
+      query: { sourceServiceName, dependencyName, environment, start, end, offset },
+    } = params;
+
+    return getServiceMapConnectionInfo({
+      apmEventClient,
+      sourceServiceName,
+      dependencyName,
+      start,
+      end,
+      environment,
+      offset,
+    });
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
+  ...serviceMapConnectionRoute,
 };
