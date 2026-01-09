@@ -14,8 +14,7 @@ import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 const STATE_EXPIRATION_MS = 10 * 60 * 1000; // 10 minutes
 
-export interface OAuthState {
-  id?: string;
+interface OAuthStateAttributes {
   state: string;
   codeVerifier: string;
   connectorId: string;
@@ -26,6 +25,10 @@ export interface OAuthState {
   createdAt: string;
   expiresAt: string;
   createdBy?: string;
+}
+
+export interface OAuthState extends OAuthStateAttributes {
+  id: string;
 }
 
 interface ConstructorOptions {
@@ -134,7 +137,7 @@ export class OAuthStateClient {
    */
   public async get(stateParam: string): Promise<OAuthState | null> {
     try {
-      const result = await this.unsecuredSavedObjectsClient.find<OAuthState>({
+      const result = await this.unsecuredSavedObjectsClient.find<OAuthStateAttributes>({
         type: OAUTH_STATE_SAVED_OBJECT_TYPE,
         filter: `${OAUTH_STATE_SAVED_OBJECT_TYPE}.attributes.state: "${stateParam}"`,
         perPage: 1,
@@ -156,7 +159,7 @@ export class OAuthStateClient {
 
       // Decrypt code verifier
       const decrypted =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<OAuthState>(
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<OAuthStateAttributes>(
           OAUTH_STATE_SAVED_OBJECT_TYPE,
           stateObject.id
         );
@@ -190,11 +193,13 @@ export class OAuthStateClient {
    */
   public async cleanupExpiredStates(): Promise<number> {
     try {
-      const finder = this.unsecuredSavedObjectsClient.createPointInTimeFinder<OAuthState>({
-        type: OAUTH_STATE_SAVED_OBJECT_TYPE,
-        filter: `${OAUTH_STATE_SAVED_OBJECT_TYPE}.attributes.expiresAt < "${new Date().toISOString()}"`,
-        perPage: 100,
-      });
+      const finder = this.unsecuredSavedObjectsClient.createPointInTimeFinder<OAuthStateAttributes>(
+        {
+          type: OAUTH_STATE_SAVED_OBJECT_TYPE,
+          filter: `${OAUTH_STATE_SAVED_OBJECT_TYPE}.attributes.expiresAt < "${new Date().toISOString()}"`,
+          perPage: 100,
+        }
+      );
 
       let totalDeleted = 0;
 

@@ -209,6 +209,7 @@ export const oauthCallbackRoute = (
         }
         const username = currentUser.username;
 
+        oauthRateLimiter.log(username, 'callback');
         if (oauthRateLimiter.isRateLimited(username, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${username}`);
           return res.ok({
@@ -222,9 +223,6 @@ export const oauthCallbackRoute = (
             }),
           });
         }
-
-        // Log the request
-        oauthRateLimiter.log(username, 'callback');
 
         // Handle OAuth errors or missing parameters
         if (error || !code || !stateParam) {
@@ -373,7 +371,7 @@ export const oauthCallbackRoute = (
           });
 
           // Clean up state
-          await oauthStateClient.delete(oauthState.id!);
+          await oauthStateClient.delete(oauthState.id);
 
           // Redirect to Kibana
           const returnUrl = new URL(oauthState.kibanaReturnUrl);
