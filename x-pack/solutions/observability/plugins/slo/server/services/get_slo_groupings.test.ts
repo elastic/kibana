@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
   selectedRemoteClusters: [],
   staleThresholdInHours: 1,
   useAllRemoteClusters: false,
+  staleInstancesCleanupEnabled: false,
 };
 
 describe('Get SLO Instances', () => {
