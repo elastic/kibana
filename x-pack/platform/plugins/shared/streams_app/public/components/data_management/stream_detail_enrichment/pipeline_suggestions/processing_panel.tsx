@@ -19,7 +19,12 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AssetImage } from '../../../asset_image';
 
-export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
+interface ProcessingPanelProps {
+  message: string;
+  children?: React.ReactNode;
+}
+
+export function ProcessingPanel({ message, children }: ProcessingPanelProps) {
   return (
     <EuiPanel
       hasBorder
@@ -36,8 +41,8 @@ export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
             <h4>
               <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
                 <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.streams.stepsEditor.h3.suggestAPipelineLabel', {
-                    defaultMessage: 'Suggest a pipeline',
+                  {i18n.translate('xpack.streams.stepsEditor.h3.processingPanelTitle', {
+                    defaultMessage: 'Extract fields from your data',
                   })}
                 </EuiFlexItem>
                 <EuiBetaBadge
@@ -60,11 +65,7 @@ export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
               </EuiFlexGroup>
             </h4>
           </EuiTitle>
-          <EuiText size="m">
-            {i18n.translate('xpack.streams.stepsEditor.useThePowerOfTextLabel', {
-              defaultMessage: 'Use the power of AI to generate the most effective pipeline',
-            })}
-          </EuiText>
+          <EuiText size="s">{message}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AssetImage type="suggestPipeline" size={100} />

@@ -15,6 +15,7 @@ interface PartitioningPanelProps {
   message: string;
   children?: React.ReactNode;
 }
+
 export function PartitioningPanel({ message, children }: PartitioningPanelProps) {
   return (
     <EuiPanel

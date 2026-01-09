@@ -27,6 +27,34 @@ interface NoDataEmptyPromptProps {
   children?: React.ReactNode;
 }
 
+const CreatePartitionButton = ({ createNewRule }: { createNewRule: () => void }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiButton
+      size="s"
+      color="text"
+      fill={false}
+      css={css`
+        color: ${euiTheme.colors.textPrimary};
+      `}
+      data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+      iconType="logstashIf" // TODO: Replace with the "if" icon still not available in EUI
+      aria-label={i18n.translate(
+        'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
+        {
+          defaultMessage: 'Create partition',
+        }
+      )}
+      onClick={createNewRule}
+    >
+      {i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton', {
+        defaultMessage: 'Create partition',
+      })}
+    </EuiButton>
+  );
+};
+
 export const NoDataEmptyPrompt = ({
   createNewRule,
   isLoading,
@@ -53,34 +81,7 @@ export const NoDataEmptyPrompt = ({
             <>
               <EuiFlexItem>
                 <PartitioningPanel message={message}>
-                  {isAiEnabled ? (
-                    children
-                  ) : (
-                    <EuiButton
-                      size="s"
-                      color="text"
-                      fill={false}
-                      css={css`
-                        color: ${euiTheme.colors.textPrimary};
-                      `}
-                      data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                      iconType="logstashIf" // TODO: Replace with the "if" icon still not available in EUI
-                      aria-label={i18n.translate(
-                        'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
-                        {
-                          defaultMessage: 'Create partition',
-                        }
-                      )}
-                      onClick={createNewRule}
-                    >
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
-                        {
-                          defaultMessage: 'Create partition',
-                        }
-                      )}
-                    </EuiButton>
-                  )}
+                  {isAiEnabled ? children : <CreatePartitionButton createNewRule={createNewRule} />}
                 </PartitioningPanel>
               </EuiFlexItem>
               {isAiEnabled && (
@@ -109,30 +110,7 @@ export const NoDataEmptyPrompt = ({
                   <EuiSpacer size="s" />
                   <EuiFlexItem>
                     <div>
-                      <EuiButton
-                        size="s"
-                        color="text"
-                        fill={false}
-                        css={css`
-                          color: ${euiTheme.colors.textPrimary};
-                        `}
-                        data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                        iconType="logstashIf" // TODO: Replace with the "if" icon still not available in EUI
-                        aria-label={i18n.translate(
-                          'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
-                          {
-                            defaultMessage: 'Create partition',
-                          }
-                        )}
-                        onClick={createNewRule}
-                      >
-                        {i18n.translate(
-                          'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
-                          {
-                            defaultMessage: 'Create partition',
-                          }
-                        )}
-                      </EuiButton>
+                      <CreatePartitionButton createNewRule={createNewRule} />
                     </div>
                   </EuiFlexItem>
                 </>
@@ -149,7 +127,7 @@ const cardDescriptionAiEnabled = i18n.translate(
   'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardDescription',
   {
     defaultMessage:
-      'Define how your data is split into streams. You can create partitions yourself, or let Elastic suggest an AI-generated proposal based on your data.',
+      'Define how your data is split into streams. Do it yourself, or let Elastic suggest an AI-generated proposal based on your data.',
   }
 );
 
