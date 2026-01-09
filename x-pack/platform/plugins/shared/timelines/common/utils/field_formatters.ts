@@ -51,8 +51,19 @@ export const isRuleParametersFieldOrSubfield = (field: string, prependField?: st
   (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
   !nonFlattenedFormatParamsFields.includes(field);
 
-export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
-  prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
+// Known threat enrichment subfields that should be recursively processed
+// These are the ECS-defined children of threat.enrichments
+const KNOWN_THREAT_ENRICHMENT_SUBFIELDS = ['indicator', 'matched'];
+
+export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) => {
+  // Build the full dotted path
+  const dotField = prependField ? `${prependField}.${field}` : field;
+  // Check if this is the threat.enrichments field itself or a subfield of it
+  return (
+    dotField === ENRICHMENT_DESTINATION_PATH ||
+    dotField.startsWith(ENRICHMENT_DESTINATION_PATH + '.')
+  );
+};
 
 // Helper functions
 const createFieldItem = (
@@ -158,11 +169,20 @@ export const getDataFromFieldsHits = (
       const enrichmentItem = createFieldItem(fieldCategory, dotField, strArr, isObjectArray);
       resultMap.set(dotField, enrichmentItem);
 
-      // Only recurse into known ECS subfields. Custom fields stay JSON-stringified.
-      if (!isFullPathEcsField && !isEcsField) {
-        // eslint-disable-next-line no-continue
-        continue;
+      // For threat enrichment subfields, only recurse into known ECS subfields (indicator, matched).
+      // Custom fields stay JSON-stringified to prevent over-flattening.
+      // Note: We can't use ecsFieldMap here because all threat.enrichments.* fields are excluded
+      // from ecsFieldMap (they're children of a nested type).
+      if (dotField !== ENRICHMENT_DESTINATION_PATH) {
+        // This is a subfield of threat.enrichments - check if it's a known ECS subfield
+        const isKnownThreatEnrichmentSubfield = KNOWN_THREAT_ENRICHMENT_SUBFIELDS.includes(field);
+        if (!isKnownThreatEnrichmentSubfield) {
+          // Don't recurse into custom/unknown fields like "lazer"
+          // eslint-disable-next-line no-continue
+          continue;
+        }
       }
+      // For threat.enrichments itself, always recurse to process its children
     }
 
     // Process nested fields
