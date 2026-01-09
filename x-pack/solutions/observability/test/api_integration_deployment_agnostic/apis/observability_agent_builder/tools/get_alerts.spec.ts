@@ -10,7 +10,7 @@ import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-fun
 import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { generateApmErrorData, indexAll } from '@kbn/synthtrace';
-import type { OtherResult } from '@kbn/agent-builder-common';
+import type { OtherResult } from '@kbn/onechat-common';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { APM_ALERTS_INDEX as APM_ALERTS_INDEX_PATTERN } from '../../apm/alerts/helpers/alerting_helper';

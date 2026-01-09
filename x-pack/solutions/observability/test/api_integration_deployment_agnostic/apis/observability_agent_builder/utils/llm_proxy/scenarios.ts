@@ -11,7 +11,7 @@ import {
   mockAgentToolCall,
   mockHandoverToAnswer,
   mockFinalAnswer,
-} from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/proxy_scenario/calls';
+} from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/proxy_scenario/calls';
 import { LLM_PROXY_FINAL_MESSAGE } from './constants';
 
 const MOCKED_TITLE = 'Mocked conversation title';
