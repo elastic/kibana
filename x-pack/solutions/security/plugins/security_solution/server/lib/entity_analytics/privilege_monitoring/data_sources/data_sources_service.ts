@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { POST_EXCLUDE_INDICES, PRE_EXCLUDE_INDICES } from '../constants';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
-import { createIndexSyncServiceWiP } from './sync/index_sync_v1';
+import { createIndexSyncService } from './sync/index_sync';
 import { createIntegrationsSyncService } from './sync/integrations_sync';
 
 export const createDataSourcesService = (
@@ -20,7 +20,7 @@ export const createDataSourcesService = (
 ) => {
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
-  const indexSyncService = createIndexSyncServiceWiP(dataClient, soClient);
+  const indexSyncService = createIndexSyncService(dataClient, soClient);
 
   /**
    * This creates an index for the user to populate privileged users.

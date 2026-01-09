@@ -137,22 +137,30 @@ const buildCreateDoc = (user: PrivMonBulkUser, sourceLabel: string) => ({
 });
 
 /**
- * Builds a list of Elasticsearch bulk operations to upsert privileged users.
+ * Builds a list of bulk operations to upsert privileged users.
+ *
+ * Allows customization of:
+ * - The update script source (updateScriptSource)
+ * - The source label used for new documents (sourceLabel)
+ * - The parameters passed to the update script (buildUpdateParams)
+ * - Creation of new users (shouldCreate)
  *
  * For each user:
- * - If the user already exists (has an ID), generates an `update` operation using a Painless script
- *   to append the source id to `labels.source_ids` and ensure `'index'` is listed in `labels.sources`.
- * - If the user is new, generates an `index` operation to create a new document with default labels.
+ * - If the user already exists (has existingUserId), generates update operation using
+ *   updateScriptSource with parameters built by buildUpdateParams(user).
+ * - If the user is new and shouldCreate(user) returns true, generates index operation
+ *   to create a new document with sourceLabel and user data.
  *
- * Logs key steps during operation generation and returns the bulk operations array, ready for submission to the ES Bulk API.
+ * Logs steps during ops generation and returns the bulk operations array, for Bulk API.
  *
  * @param dataClient - The Privilege Monitoring Data Client providing access to logging and dependencies.
- *
  * @param users - List of users to create or update.
- * @param userIndexName - Name of the Elasticsearch index where user documents are stored.
- * @returns An array of bulk operations suitable for the Elasticsearch Bulk API.
+ * @param updateScriptSource - The Painless script source to use for update operations.
+ * @param sourceLabel - The label to use for the source type when creating new documents.
+ * @param buildUpdateParams - Function to build parameters for the update script based on user data.
+ * @param shouldCreate - Optional function to determine if a new user should be created (defaults to always creating).
+ * @returns  Array of bulk operations suitable for the Elasticsearch Bulk API.
  */
-// TODO: update this comment, it was for non-generic version
 export const bulkUpsertOperationsFactoryShared =
   (dataClient: PrivilegeMonitoringDataClient) =>
   <T extends PrivMonBulkUser>({
@@ -180,7 +188,7 @@ export const bulkUpsertOperationsFactoryShared =
         ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
       }
     }
-    return ops; // why using a separate sourceLabel vs monitoring label for buildUdateParams and buildCreateDoc? They are the same value.
+    return ops;
   };
 
 export const makeOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {

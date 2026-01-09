@@ -12,12 +12,9 @@ import { createSourcesSyncService } from './sources_sync';
 import { createIndexUpdateDetectionService } from './update_detection/index/update_detection';
 import { createIndexDeletionDetectionService } from './deletion_detection/index/deletion_detection';
 
-export type IndexSyncService = ReturnType<typeof createIndexSyncServiceWiP>;
+export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
-/**
- * Behind a feature flag - when feature flag is ready to remove, update name and delete old version.
- */
-export const createIndexSyncServiceWiP = (
+export const createIndexSyncService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
 ) => {
