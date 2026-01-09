@@ -282,15 +282,16 @@ async function handleIncompleteOperator(
  * positions that corrupt location.min values.
  */
 function getRightmostOperatorInFunctionTree(fn: ESQLFunction): ESQLFunction {
-  if (fn.subtype !== 'binary-expression') {
-    return fn;
-  }
-
   const rightArg = fn.args[1];
 
-  if (!rightArg || Array.isArray(rightArg) || rightArg.type !== 'function') {
-    return fn;
+  if (
+    fn.subtype === 'binary-expression' &&
+    rightArg &&
+    !Array.isArray(rightArg) &&
+    rightArg.type === 'function'
+  ) {
+    return getRightmostOperatorInFunctionTree(rightArg as ESQLFunction);
   }
 
-  return getRightmostOperatorInFunctionTree(rightArg as ESQLFunction);
+  return fn;
 }
