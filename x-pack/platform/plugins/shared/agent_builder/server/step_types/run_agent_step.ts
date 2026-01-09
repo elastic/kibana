@@ -11,7 +11,7 @@ import type { ServiceManager } from '../services';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
 /**
- * Server step definition for the agentBuilder.runAgent step.
+ * Server step definition for the "ai.agent" step.
  * This step executes an agentBuilder agent using the internal runner service.
  */
 export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
@@ -20,43 +20,49 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     handler: async (context) => {
       try {
         const { message, schema } = context.input;
-        const { agent_id: agentId } = context.config;
+        const { agent_id: agentId, connector_id } = context.config;
 
-        context.logger.debug('agentBuilder.runAgent step started');
+        context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
         if (!request) {
           throw new Error('No request available in workflow context');
         }
 
-        context.logger.debug('Executing agentBuilder.runAgent step', {
+        context.logger.debug('Executing ai.agent step', {
           agentId: agentId || agentBuilderDefaultAgentId,
         });
 
-        const runner = await serviceManager.internalStart?.runnerFactory?.getRunner();
+        const runner = serviceManager.internalStart?.runnerFactory?.getRunner();
         if (!runner) {
           throw new Error('agent runner is not available');
         }
 
         const { result } = await runner.runAgent({
           agentId: agentId || agentBuilderDefaultAgentId,
+          defaultConnectorId: connector_id,
           request,
           abortSignal: context.abortSignal,
           agentParams: {
             structuredOutput: !!schema,
-            outputSchema: schema ? JSON.parse(schema) : undefined,
+            outputSchema: schema,
             nextInput: {
               message,
             },
           },
         });
 
-        context.logger.debug('agentBuilder.runAgent step completed successfully');
+        context.logger.debug('ai.agent step completed successfully');
 
         const outputMessage = schema
-          ? result.round.response.structured_output
-          : result.round.response.message ?? '';
+          ? JSON.stringify(result.round.response.structured_output)
+          : result.round.response.message;
 
-        return { output: outputMessage };
+        return {
+          output: {
+            message: outputMessage,
+            structured_output: result.round.response.structured_output,
+          },
+        };
       } catch (error) {
         context.logger.error(
           'agentBuilder.runAgent step failed',

@@ -20,7 +20,8 @@ export const InputSchema = z.object({
   /**
    * output schema for the run agent step, if provided agent will return structured output
    */
-  schema: z.string().optional().describe('The schema for the output of the agent.'),
+  // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
+  schema: z.any().optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */
@@ -30,7 +31,17 @@ export const InputSchema = z.object({
 /**
  * Output schema for the run agent step.
  */
-export const OutputSchema = z.union([z.string(), z.any()]);
+export const OutputSchema = z.object({
+  message: z
+    .string()
+    .describe(
+      'The text response from the agent. When schema is provided, contains a string version of the structured output'
+    ),
+  structured_output: z
+    .any()
+    .optional()
+    .describe('The structured output from the agent. Only here when schem was provided'),
+});
 
 /**
  * Config schema for the run agent step.
@@ -43,6 +54,13 @@ export const ConfigSchema = z.object({
     .string()
     .optional()
     .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+  /**
+   * The ID of the GenAI connector to use. Defaults to the default GenAI connector.
+   */
+  connector_id: z
+    .string()
+    .optional()
+    .describe('The ID of the connector to use. Defaults to the default GenAI connector.'),
 });
 
 export type RunAgentStepInputSchema = typeof InputSchema;
