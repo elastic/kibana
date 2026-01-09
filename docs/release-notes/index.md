@@ -306,6 +306,53 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
 * Fixes an issue with a null property being read in Playground [#230729]({{kib-pull}}230729).
 
+## 9.1.10 [kibana-9.1.10-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.10-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.10 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.1.10-fixes]
+
+**Alerting and cases**:
+* Adds maximum character validation to the email connector params and configuration [#246453]({{kib-pull}}246453).
+* Adds encoding to search terms in the **Cases** page to prevent decoding errors [#247992]({{kib-pull}}247992).
+
+**Dashboards and Visualizations**:
+* Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.10 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes createAuditEvents always returning failure as the outcome [#247152]({{kib-pull}}247152).
+
+**Kibana security**:
+* Adds case sensitivity to the index privileges fields on the **Edit roles** page [#246069]({{kib-pull}}246069).
+
+**Machine Learning**:
+* Fixes the display of map view in Data Visualizer for small screen sizes [#247615]({{kib-pull}}247615).
+
+**Platform**:
+* Unifies the flow for clients partially and fully authorized to saved objects, and applies the intersection of allowed and authorized lists [#244967]({{kib-pull}}244967).
+
+ [#244967]({{kib-pull}}244967).
+
+**Search**:
+* Fixes an issue where users running {{es}} with basic licenses would encounter errors when updating index mappings. Now, the Machine Learning saved object check will only run if saving semantic text mapping [#248462]({{kib-pull}}248462).
+
 ## 9.1.9 [kibana-9.1.9-release-notes]
 
 % ::::{NOTE}
