@@ -4977,6 +4977,22 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
                 "plugin": "features",
                 "path": "x-pack/platform/plugins/shared/features/server/routes/index.test.ts"
               },
@@ -7753,6 +7769,18 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
@@ -9891,6 +9919,30 @@
               {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
               },
               {
                 "plugin": "globalSearch",
