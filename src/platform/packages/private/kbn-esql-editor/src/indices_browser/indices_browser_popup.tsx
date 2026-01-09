@@ -15,6 +15,9 @@ import {
   EuiText,
   EuiFilterButton,
   EuiIcon,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -264,9 +267,23 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
         {(list, search) => (
           <div style={{ width: POPOVER_WIDTH, maxHeight: POPOVER_HEIGHT }}>
             <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('esqlEditor.indicesBrowser.title', {
-                defaultMessage: 'Data sources',
-              })}
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  {i18n.translate('esqlEditor.indicesBrowser.title', {
+                    defaultMessage: 'Data sources',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="text"
+                    aria-label={i18n.translate('esqlEditor.indicesBrowser.closeLabel', {
+                      defaultMessage: 'Close',
+                    })}
+                    onClick={onClose}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPopoverTitle>
             {search}
             <div style={{ maxHeight: POPOVER_HEIGHT - 100, overflowY: 'auto' }}>
