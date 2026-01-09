@@ -9,7 +9,7 @@ applies_to:
 
 # Jina Reader connector [jina-action-type]
 
-The Jina Reader connector communicates with the Jina API to turn any URL to markdown, and provide web search for better LLM grounding.
+The Jina Reader connector communicates with the Jina API to turn web pages into markdown from their URL, and provide web search for better LLM grounding.
 
 ## Create connectors in {{kib}} [define-jina-ui]
 
