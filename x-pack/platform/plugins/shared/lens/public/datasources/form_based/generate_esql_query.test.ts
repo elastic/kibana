@@ -47,7 +47,7 @@ describe('to_esql', () => {
   } as unknown as IndexPattern;
 
   it('should produce valid esql for date histogram and count', () => {
-    const esql = generateEsqlQuery(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -81,7 +81,8 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
+    expect(result.success).toBe(true);
+    expect(result.success && result.esql).toEqual(
       `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
@@ -89,8 +90,8 @@ describe('to_esql', () => {
     );
   });
 
-  it('should return undefined if missing row option is set', () => {
-    const esql = generateEsqlQuery(
+  it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -124,11 +125,12 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(undefined);
+    expect(result.success).toBe(false);
+    expect(!result.success && result.reason).toEqual('include_empty_rows_not_supported');
   });
 
-  it('should return undefined if lens formula is used', () => {
-    const esql = generateEsqlQuery(
+  it('should return failure with formula_not_supported reason if lens formula is used', () => {
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -151,11 +153,12 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(undefined);
+    expect(result.success).toBe(false);
+    expect(!result.success && result.reason).toEqual('formula_not_supported');
   });
 
   test('it should add a where condition to esql if timeField is set', () => {
-    const esql = generateEsqlQuery(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -189,7 +192,8 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
+    expect(result.success).toBe(true);
+    expect(result.success && result.esql).toEqual(
       `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
@@ -198,7 +202,7 @@ describe('to_esql', () => {
   });
 
   it('should not add a where condition to esql if timeField is not set', () => {
-    const esql = generateEsqlQuery(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -239,20 +243,21 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
+    expect(result.success).toBe(true);
+    expect(result.success && result.esql).toEqual(
       `FROM myIndexPattern
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
   | SORT order_date ASC`
     );
   });
 
-  it('should return undefined if timezone is not UTC', () => {
+  it('should return failure with non_utc_timezone reason if timezone is not UTC', () => {
     uiSettings.get.mockImplementation((key: string) => {
       if (key === 'dateFormat:tz') return 'America/Chicago';
       return defaultUiSettingsGet(key);
     });
 
-    const esql = generateEsqlQuery(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -286,7 +291,8 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(undefined);
+    expect(result.success).toBe(false);
+    expect(!result.success && result.reason).toEqual('non_utc_timezone');
   });
 
   it('should work with iana timezones that fall under UTC+0', () => {
@@ -296,7 +302,7 @@ describe('to_esql', () => {
       return defaultUiSettingsGet(key);
     });
 
-    const esql = generateEsqlQuery(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -330,7 +336,8 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
+    expect(result.success).toBe(true);
+    expect(result.success && result.esql).toEqual(
       `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
@@ -339,7 +346,7 @@ describe('to_esql', () => {
   });
 
   it('should work with custom filters on the layer', () => {
-    const esql = generateEsqlQuery(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -377,7 +384,8 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
+    expect(result.success).toBe(true);
+    expect(result.success && result.esql).toEqual(
       `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"") BY order_date = BUCKET(order_date, 30 minutes)

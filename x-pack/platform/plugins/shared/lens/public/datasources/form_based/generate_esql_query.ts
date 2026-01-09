@@ -28,6 +28,39 @@ import { resolveTimeShift } from './time_shift_utils';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
+
+/**
+ * Specific reasons why ES|QL conversion failed.
+ * These are used to provide granular user feedback.
+ */
+export type EsqlConversionFailureReason =
+  | 'non_utc_timezone'
+  | 'formula_not_supported'
+  | 'time_shift_not_supported'
+  | 'runtime_field_not_supported'
+  | 'reduced_time_range_not_supported'
+  | 'function_not_supported'
+  | 'drop_partials_not_supported'
+  | 'include_empty_rows_not_supported'
+  | 'unknown';
+
+/**
+ * Result type for generateEsqlQuery.
+ * Either a successful conversion with the ES|QL query,
+ * or a failure with a specific reason.
+ */
+export type EsqlQueryResult =
+  | {
+      success: true;
+      esql: string;
+      partialRows: boolean;
+      esAggsIdMap: Record<string, OriginalColumn[]>;
+    }
+  | {
+      success: false;
+      reason: EsqlConversionFailureReason;
+      operationType?: string;
+    };
 // Need a more complex logic for decimals percentiles
 
 export function generateEsqlQuery(
@@ -37,23 +70,41 @@ export function generateEsqlQuery(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date
-) {
+): EsqlQueryResult {
   // esql mode variables
   const partialRows = true;
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   const utcOffset = moment.tz(timeZone).utcOffset() / 60;
-  if (utcOffset !== 0) return;
+  if (utcOffset !== 0) {
+    return { success: false, reason: 'non_utc_timezone' };
+  }
 
-  if (
-    Object.values(layer.columns).find(
-      (col) =>
-        col.operationType === 'formula' ||
-        col.timeShift ||
-        ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)
-    )
-  )
-    return;
+  // Check for unsupported column features in layer.columns
+  for (const col of Object.values(layer.columns)) {
+    if (col.operationType === 'formula') {
+      return { success: false, reason: 'formula_not_supported' };
+    }
+    if (col.timeShift) {
+      return { success: false, reason: 'time_shift_not_supported' };
+    }
+    if ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime) {
+      return { success: false, reason: 'runtime_field_not_supported' };
+    }
+  }
+
+  // Also check esAggEntries for unsupported features (in case columns differ)
+  for (const [, col] of esAggEntries) {
+    if (col.operationType === 'formula') {
+      return { success: false, reason: 'formula_not_supported' };
+    }
+    if (col.timeShift) {
+      return { success: false, reason: 'time_shift_not_supported' };
+    }
+    if ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime) {
+      return { success: false, reason: 'runtime_field_not_supported' };
+    }
+  }
 
   // indexPattern.title is the actual es pattern
   let esqlCompose = from(indexPattern.title);
@@ -84,7 +135,8 @@ export function generateEsqlQuery(
   const metrics = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    if (!def.toESQL) return undefined;
+    if (!def.toESQL)
+      return { error: 'function_not_supported' as const, operationType: col.operationType };
 
     const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
@@ -95,7 +147,7 @@ export function generateEsqlQuery(
       indexPattern.timeFieldName;
 
     if (wrapInTimeFilter) {
-      return undefined;
+      return { error: 'reduced_time_range_not_supported' as const };
     }
 
     const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
@@ -151,7 +203,8 @@ export function generateEsqlQuery(
       dateRange
     );
 
-    if (!metricESQL) return undefined;
+    if (!metricESQL)
+      return { error: 'function_not_supported' as const, operationType: col.operationType };
 
     metricESQL = `${esAggsId} = ` + metricESQL;
 
@@ -161,19 +214,31 @@ export function generateEsqlQuery(
       } else if (col.filter?.language === 'lucene') {
         metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
       } else {
-        return;
+        return { error: 'function_not_supported' as const, operationType: col.operationType };
       }
     }
 
     return metricESQL;
   });
 
-  if (metrics.some((m) => !m)) return;
+  // Check for metric conversion errors
+  const metricError = metrics.find((m) => typeof m === 'object' && 'error' in m);
+  if (metricError && typeof metricError === 'object' && 'error' in metricError) {
+    return {
+      success: false,
+      reason: metricError.error,
+      ...('operationType' in metricError ? { operationType: metricError.operationType } : {}),
+    };
+  }
+  if (metrics.some((m) => !m)) {
+    return { success: false, reason: 'function_not_supported' };
+  }
 
   const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    if (!def.toESQL) return undefined;
+    if (!def.toESQL)
+      return { error: 'function_not_supported' as const, operationType: col.operationType };
 
     const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
@@ -247,44 +312,70 @@ export function generateEsqlQuery(
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const column = col;
+      // Check for includeEmptyRows
+      if (column.params?.includeEmptyRows) {
+        return { error: 'include_empty_rows_not_supported' as const };
+      }
       if (
         column.params?.dropPartials &&
         // set to false when detached from time picker
         (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
           !column.params?.ignoreTimeRange)
       ) {
-        return undefined;
+        return { error: 'drop_partials_not_supported' as const };
       }
     }
 
-    return (
-      `${esAggsId} = ` +
-      def.toESQL(
-        {
-          ...col,
-          timeShift: resolveTimeShift(
-            col.timeShift,
-            absDateRange,
-            histogramBarsTarget,
-            hasDateHistogram
-          ),
-        },
-        wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
-        indexPattern,
-        layer,
-        uiSettings,
-        dateRange
-      )
+    const bucketEsql = def.toESQL(
+      {
+        ...col,
+        timeShift: resolveTimeShift(
+          col.timeShift,
+          absDateRange,
+          histogramBarsTarget,
+          hasDateHistogram
+        ),
+      },
+      wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
+      indexPattern,
+      layer,
+      uiSettings,
+      dateRange
     );
+
+    if (!bucketEsql) {
+      return { error: 'function_not_supported' as const, operationType: col.operationType };
+    }
+
+    return `${esAggsId} = ` + bucketEsql;
   });
 
-  if (buckets.some((m) => !m)) return;
+  // Check for bucket conversion errors
+  const bucketError = buckets.find((b) => typeof b === 'object' && 'error' in b);
+  if (bucketError && typeof bucketError === 'object' && 'error' in bucketError) {
+    return {
+      success: false,
+      reason: bucketError.error,
+      ...('operationType' in bucketError ? { operationType: bucketError.operationType } : {}),
+    };
+  }
+  if (buckets.some((m) => !m)) {
+    return { success: false, reason: 'function_not_supported' };
+  }
 
-  if (buckets.length > 0) {
-    if (buckets.some((b) => !b || b.includes('undefined'))) return;
+  // Type assertion after error checks - we know these are all strings now
+  const validMetrics = metrics as string[];
+  const validBuckets = buckets as string[];
 
-    if (metrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
+  if (validBuckets.length > 0) {
+    if (validBuckets.some((b) => !b || b.includes('undefined'))) {
+      return { success: false, reason: 'function_not_supported' };
+    }
+
+    if (validMetrics.length > 0) {
+      esqlCompose = esqlCompose.pipe(
+        stats(`${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`)
+      );
     }
 
     const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
@@ -302,18 +393,19 @@ export function generateEsqlQuery(
 
     esqlCompose = esqlCompose.pipe(sort(...sorts));
   } else {
-    if (metrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(metrics.join(', ')));
+    if (validMetrics.length > 0) {
+      esqlCompose = esqlCompose.pipe(stats(validMetrics.join(', ')));
     }
   }
 
   try {
     return {
+      success: true,
       esql: esqlCompose.toString(),
       partialRows,
       esAggsIdMap,
     };
   } catch (e) {
-    return;
+    return { success: false, reason: 'unknown' };
   }
 }

@@ -96,7 +96,7 @@ describe('to_esql top N', () => {
 
   // Note: operationDefinitionMap for "terms" does not support toESQL
   // should generate a valid ESQL query for top N terms and average aggregation
-  it('should return undefined for top N terms and average aggregation', () => {
+  it('should return failure with function_not_supported reason for top N terms and average aggregation', () => {
     const result = generateEsqlQuery(
       mockAggEntries,
       mockLayer,
@@ -106,6 +106,7 @@ describe('to_esql top N', () => {
       mockNowInstant
     );
 
-    expect(result?.esql).toEqual(undefined);
+    expect(result.success).toBe(false);
+    expect(!result.success && result.reason).toEqual('function_not_supported');
   });
 });
