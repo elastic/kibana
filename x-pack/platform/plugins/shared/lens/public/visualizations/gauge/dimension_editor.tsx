@@ -55,8 +55,8 @@ export function GaugeDimensionEditor(
       continuity: 'all',
       colorStops: undefined,
       stops: undefined,
-      rangeMin: currentMinMax.min,
-      rangeMax: (currentMinMax.max * 3) / 4,
+      rangeMin: -Infinity,
+      rangeMax: Infinity,
     },
   };
 
