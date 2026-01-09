@@ -75,6 +75,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointExceptions,
       ProductFeatureKey.endpointTrustedDevices,
       ProductFeatureKey.endpointHostIsolationExceptions,
+      ProductFeatureKey.endpointScriptsManagement,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
       ProductFeatureKey.endpointAgentTamperProtection,
