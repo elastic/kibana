@@ -341,6 +341,36 @@ function parseBarrelExports(content, filePath) {
             };
           }
         }
+      } else if (node.declaration) {
+        // Handle local declarations: export const X = ..., export function X() {}, etc.
+        const decl = node.declaration;
+        /** @type {string[]} */
+        let names = [];
+
+        if (decl.type === 'VariableDeclaration') {
+          names = decl.declarations
+            .filter((d) => d.id.type === 'Identifier')
+            .map((d) => /** @type {import('@babel/types').Identifier} */ (d.id).name);
+        } else if (
+          (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
+          decl.id
+        ) {
+          names = [decl.id.name];
+        } else if (
+          (decl.type === 'TSTypeAliasDeclaration' || decl.type === 'TSInterfaceDeclaration') &&
+          decl.id
+        ) {
+          names = [decl.id.name];
+        }
+
+        for (const name of names) {
+          exports[name] = {
+            path: filePath,
+            type: 'named',
+            localName: name,
+            importedName: name,
+          };
+        }
       } else if (node.specifiers) {
         // Export from imported variable: import { X } from './source'; export { X };
         for (const specifier of node.specifiers) {
@@ -378,20 +408,19 @@ function parseBarrelExports(content, filePath) {
 
       if (!resolvedPath) return;
 
-      // For `export *`, we need to parse the source file to get all exports
-      // This is done synchronously within the async context (acceptable here)
-      try {
-        const sourceContent = fs.readFileSync(resolvedPath, 'utf-8');
-        const sourceExports = extractDirectExports(sourceContent, resolvedPath);
+      // Use parseAllFileExports to handle nested export * chains
+      const sourceExports = parseAllFileExports(resolvedPath, new Set());
 
-        for (const [name, info] of Object.entries(sourceExports)) {
-          if (name !== 'default') {
-            // export * doesn't re-export default
-            exports[name] = info;
-          }
+      for (const [name, info] of sourceExports) {
+        if (name !== 'default') {
+          // export * doesn't re-export default
+          exports[name] = {
+            path: info.path,
+            type: info.isDefault ? 'default' : 'named',
+            localName: info.localName,
+            importedName: name,
+          };
         }
-      } catch (err) {
-        // Skip if source can't be read
       }
     },
 
@@ -810,7 +839,11 @@ function parseAllFileExports(filePath, visited) {
             const importInfo = importMap[localName];
             if (importInfo) {
               // Trace to the actual source file
-              const found = findExportSource(importInfo.importedName, importInfo.path, new Set(visited));
+              const found = findExportSource(
+                importInfo.importedName,
+                importInfo.path,
+                new Set(visited)
+              );
               if (found) {
                 exports.set(expName, found);
               }

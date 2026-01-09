@@ -364,10 +364,7 @@ __exportStar(require("./operators"), exports);`
       tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-import-default-test-'));
 
       // Source file with named export
-      await Fsp.writeFile(
-        Path.join(tempDir, 'editor.ts'),
-        `export const ESQLEditor = () => {};`
-      );
+      await Fsp.writeFile(Path.join(tempDir, 'editor.ts'), `export const ESQLEditor = () => {};`);
 
       // Barrel that imports then exports as default
       await Fsp.writeFile(
@@ -493,10 +490,7 @@ export { LocalComponent, ExternalThing };`
       tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-rename-export-test-'));
 
       // Source file
-      await Fsp.writeFile(
-        Path.join(tempDir, 'source.ts'),
-        `export const OriginalName = 'value';`
-      );
+      await Fsp.writeFile(Path.join(tempDir, 'source.ts'), `export const OriginalName = 'value';`);
 
       // Barrel that imports with rename and re-exports
       await Fsp.writeFile(
@@ -521,6 +515,158 @@ export { RenamedLocally as PublicName };`
       expect(exports.PublicName).toBeDefined();
       expect(exports.PublicName.path).toBe(Path.join(tempDir, 'source.ts'));
       expect(exports.PublicName.localName).toBe('OriginalName');
+    });
+  });
+
+  describe('nested export * chain handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-nested-exportall-test-'));
+
+      // Create 3-level deep structure:
+      // index.ts -> export * from './middle'
+      // middle.ts -> export * from './deep'
+      // deep.ts -> export const DeepExport = ...
+
+      await Fsp.writeFile(
+        Path.join(tempDir, 'deep.ts'),
+        `export const DeepExport = 'deep';
+export const AnotherDeep = 'another';`
+      );
+
+      await Fsp.writeFile(
+        Path.join(tempDir, 'middle.ts'),
+        `export * from './deep';
+export const MiddleExport = 'middle';`
+      );
+
+      await Fsp.writeFile(Path.join(tempDir, 'index.ts'), `export * from './middle';`);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('follows nested export * chains to find the actual source files', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // DeepExport should resolve to deep.ts (2 levels deep)
+      expect(exports.DeepExport).toBeDefined();
+      expect(exports.DeepExport.path).toBe(Path.join(tempDir, 'deep.ts'));
+      expect(exports.DeepExport.localName).toBe('DeepExport');
+
+      // AnotherDeep should also resolve to deep.ts
+      expect(exports.AnotherDeep).toBeDefined();
+      expect(exports.AnotherDeep.path).toBe(Path.join(tempDir, 'deep.ts'));
+      expect(exports.AnotherDeep.localName).toBe('AnotherDeep');
+
+      // MiddleExport should resolve to middle.ts
+      expect(exports.MiddleExport).toBeDefined();
+      expect(exports.MiddleExport.path).toBe(Path.join(tempDir, 'middle.ts'));
+      expect(exports.MiddleExport.localName).toBe('MiddleExport');
+    });
+  });
+
+  describe('local exports in barrel files', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-local-exports-test-'));
+
+      // Source file
+      await Fsp.writeFile(Path.join(tempDir, 'source.ts'), `export const SourceExport = 'source';`);
+
+      // Barrel with both local exports and re-exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export const LocalConst = 'local';
+export function LocalFunction() { return 'func'; }
+export class LocalClass {}
+export { SourceExport } from './source';`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('captures local exports defined in the barrel file', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // LocalConst should be captured with path pointing to the barrel itself
+      expect(exports.LocalConst).toBeDefined();
+      expect(exports.LocalConst.path).toBe(Path.join(tempDir, 'index.ts'));
+      expect(exports.LocalConst.localName).toBe('LocalConst');
+
+      // LocalFunction should be captured
+      expect(exports.LocalFunction).toBeDefined();
+      expect(exports.LocalFunction.path).toBe(Path.join(tempDir, 'index.ts'));
+      expect(exports.LocalFunction.localName).toBe('LocalFunction');
+
+      // LocalClass should be captured
+      expect(exports.LocalClass).toBeDefined();
+      expect(exports.LocalClass.path).toBe(Path.join(tempDir, 'index.ts'));
+      expect(exports.LocalClass.localName).toBe('LocalClass');
+
+      // SourceExport should still trace to source.ts
+      expect(exports.SourceExport).toBeDefined();
+      expect(exports.SourceExport.path).toBe(Path.join(tempDir, 'source.ts'));
+      expect(exports.SourceExport.localName).toBe('SourceExport');
+    });
+  });
+
+  describe('mixed export * and local exports', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-mixed-exportall-test-'));
+
+      // Source file
+      await Fsp.writeFile(
+        Path.join(tempDir, 'source.ts'),
+        `export const SourceA = 'a';
+export const SourceB = 'b';`
+      );
+
+      // Barrel with export *, local exports, and named re-exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export * from './source';
+export const LocalExport = 'local';`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('captures both export * contents and local exports', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // SourceA and SourceB from export * should trace to source.ts
+      expect(exports.SourceA).toBeDefined();
+      expect(exports.SourceA.path).toBe(Path.join(tempDir, 'source.ts'));
+
+      expect(exports.SourceB).toBeDefined();
+      expect(exports.SourceB.path).toBe(Path.join(tempDir, 'source.ts'));
+
+      // LocalExport should point to the barrel itself
+      expect(exports.LocalExport).toBeDefined();
+      expect(exports.LocalExport.path).toBe(Path.join(tempDir, 'index.ts'));
+      expect(exports.LocalExport.localName).toBe('LocalExport');
     });
   });
 });
