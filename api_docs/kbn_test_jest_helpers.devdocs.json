@@ -353,18 +353,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "remoteClusters",
-            "path": "x-pack/platform/plugins/private/remote_clusters/__jest__/client_integration/helpers/index.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/kibana_deprecations/kibana_deprecations.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/kibana_deprecations/kibana_deprecations.helpers.ts"
-          },
-          {
             "plugin": "indexManagement",
             "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/index.ts"
           },
@@ -891,52 +879,12 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "remoteClusters",
-            "path": "x-pack/platform/plugins/private/remote_clusters/__jest__/client_integration/add/remote_clusters_add.helpers.tsx"
-          },
-          {
-            "plugin": "remoteClusters",
-            "path": "x-pack/platform/plugins/private/remote_clusters/__jest__/client_integration/add/remote_clusters_add.helpers.tsx"
-          },
-          {
             "plugin": "reporting",
             "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
           },
           {
             "plugin": "reporting",
             "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/es_deprecation_logs/es_deprecation_logs.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/es_deprecation_logs/es_deprecation_logs.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/es_deprecations/es_deprecations.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/es_deprecations/es_deprecations.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/kibana_deprecations/kibana_deprecations.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/kibana_deprecations/kibana_deprecations.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/overview/overview.helpers.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/overview/overview.helpers.ts"
           },
           {
             "plugin": "searchprofiler",
