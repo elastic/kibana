@@ -106,4 +106,144 @@ export class Homepage {
   async getSearchHomepageContainer() {
     return this.page.testSubj.locator('search-homepage');
   }
+
+  // V1 Homepage - Elasticsearch endpoint and API Keys
+  async getCopyEndpointButton() {
+    return this.page.testSubj.locator('copyEndpointButton');
+  }
+
+  async getCopyEndpointButtonCopied() {
+    return this.page.testSubj.locator('copyEndpointButton-copied');
+  }
+
+  async getEndpointValueField() {
+    return this.page.testSubj.locator('endpointValueField');
+  }
+
+  async getCreateApiKeyButton() {
+    return this.page.testSubj.locator('createApiKeyButton');
+  }
+
+  async getManageApiKeysButton() {
+    return this.page.testSubj.locator('manageApiKeysButton');
+  }
+
+  async getActiveApiKeysBadge() {
+    return this.page.testSubj.locator('activeApiKeysBadge');
+  }
+
+  async clickCreateApiKeyButton() {
+    await this.page.testSubj.locator('createApiKeyButton').click();
+  }
+
+  async clickManageApiKeysButton() {
+    await this.page.testSubj.locator('manageApiKeysButton').click();
+  }
+
+  async getCreateApiKeyFlyoutHeader() {
+    return this.page.locator('.euiFlyoutHeader');
+  }
+
+  // V1 Homepage - Connect To Elasticsearch Side Panel
+  async getUploadFileButton() {
+    // There are 2 elements with this test subject (a card div and a button), so we target the button specifically
+    return this.page.locator('button[data-test-subj="uploadFileButton"]');
+  }
+
+  async clickUploadFileButton() {
+    await this.page.locator('button[data-test-subj="uploadFileButton"]').click();
+  }
+
+  async getSampleDataSection() {
+    return this.page.testSubj.locator('sampleDataSection');
+  }
+
+  async getInstallSampleDataButton() {
+    return this.page.testSubj.locator('installSampleBtn');
+  }
+
+  async getViewDataButton() {
+    return this.page.testSubj.locator('viewDataBtn');
+  }
+
+  // V1 Homepage - Get started with API (Console Tutorials)
+  async getConsoleTutorial(tutorialId: string) {
+    return this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
+  }
+
+  async getConsoleTutorialButton(tutorialId: string) {
+    return this.page.testSubj.locator(`console_tutorials_${tutorialId}_console_btn`);
+  }
+
+  async clickConsoleTutorialButton(tutorialId: string) {
+    await this.page.testSubj.locator(`console_tutorials_${tutorialId}_console_btn`).click();
+  }
+
+  async getConsoleEditorContainer() {
+    return this.page.testSubj.locator('consoleEditorContainer');
+  }
+
+  // V1 Homepage - Alternate Solutions
+  async getAnalyzeLogsBrowseIntegrations() {
+    return this.page.testSubj.locator('analyzeLogsBrowseIntegrations');
+  }
+
+  async clickAnalyzeLogsBrowseIntegrations() {
+    await this.page.testSubj.locator('analyzeLogsBrowseIntegrations').scrollIntoViewIfNeeded();
+    await this.page.testSubj.locator('analyzeLogsBrowseIntegrations').click();
+  }
+
+  // V1 Homepage - Dive deeper with Elasticsearch
+  async getSearchLabsSection() {
+    return this.page.testSubj.locator('searchLabsSection');
+  }
+
+  async getSearchLabsButton() {
+    return this.page.testSubj.locator('searchLabsButton');
+  }
+
+  async clickSearchLabsButton() {
+    await this.page.testSubj.locator('searchLabsButton').click();
+  }
+
+  async getPythonNotebooksSection() {
+    return this.page.testSubj.locator('pythonNotebooksSection');
+  }
+
+  async getOpenNotebooksButton() {
+    return this.page.testSubj.locator('openNotebooksButton');
+  }
+
+  async clickOpenNotebooksButton() {
+    await this.page.testSubj.locator('openNotebooksButton').click();
+  }
+
+  async getElasticsearchDocumentationSection() {
+    return this.page.testSubj.locator('elasticsearchDocumentationSection');
+  }
+
+  async getViewDocumentationButton() {
+    return this.page.testSubj.locator('viewDocumentationButton');
+  }
+
+  async clickViewDocumentationButton() {
+    await this.page.testSubj.locator('viewDocumentationButton').click();
+  }
+
+  // V1 Homepage - Footer content
+  async getElasticCommunityLink() {
+    return this.page.testSubj.locator('elasticCommunityLink');
+  }
+
+  async clickElasticCommunityLink() {
+    await this.page.testSubj.locator('elasticCommunityLink').click();
+  }
+
+  async getGiveFeedbackLink() {
+    return this.page.testSubj.locator('giveFeedbackLink');
+  }
+
+  async clickGiveFeedbackLink() {
+    await this.page.testSubj.locator('giveFeedbackLink').click();
+  }
 }

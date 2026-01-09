@@ -9,17 +9,17 @@ import { expect } from '@kbn/scout-search';
 import { test } from '../fixtures';
 import { SEARCH_HOMEPAGE_V2_UI_FLAG } from '../../../../common';
 
+const INDEX_NAME = 'test-my-index';
+const SAMPLE_DATA_INDEX = 'kibana_sample_data_elasticsearch_documentation';
+
 test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
   // Disable the V2 homepage to test the old (V1) homepage
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
     await kbnClient.uiSettings.update({
       [SEARCH_HOMEPAGE_V2_UI_FLAG]: false,
     });
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
-    // Reset to default (V2 enabled)
-    await kbnClient.uiSettings.unset(SEARCH_HOMEPAGE_V2_UI_FLAG);
+    // Create a test index so homepage loads properly
+    await esClient.indices.create({ index: INDEX_NAME }).catch(() => {});
   });
 
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
@@ -30,44 +30,224 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
     await pageObjects.homepage.goto();
   });
 
-  test('should have embedded dev console', async ({ pageObjects }) => {
-    // Verify the console control bar exists
-    await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
-
-    // Verify console is initially closed
-    const consoleBodyInitial = await pageObjects.homepage.getEmbeddedConsoleBody();
-    await expect(consoleBodyInitial).toBeHidden();
-
-    // Click to open the console
-    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
-
-    // Verify fullscreen toggle is present
-    const fullscreenToggle = await pageObjects.homepage.getFullscreenToggleButton();
-    await expect(fullscreenToggle).toBeVisible();
-
-    // Verify console is now open
-    const consoleBodyOpen = await pageObjects.homepage.getEmbeddedConsoleBody();
-    await expect(consoleBodyOpen).toBeVisible();
-
-    // Click to close the console
-    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
-
-    // Verify console is closed again
-    const consoleBodyClosed = await pageObjects.homepage.getEmbeddedConsoleBody();
-    await expect(consoleBodyClosed).toBeHidden();
+  test.afterAll(async ({ kbnClient, esClient }) => {
+    // Reset to default (V2 enabled)
+    await kbnClient.uiSettings.unset(SEARCH_HOMEPAGE_V2_UI_FLAG);
+    // Clean up test indices
+    await esClient.indices.delete({ index: [INDEX_NAME, SAMPLE_DATA_INDEX] }).catch(() => {});
   });
 
+  // === Basic Page Load Tests ===
   test('should load search home page', async ({ pageObjects }) => {
-    // Verify the search homepage container is loaded
     const homepageContainer = await pageObjects.homepage.getSearchHomepageContainer();
     await expect(homepageContainer).toBeVisible();
   });
 
-  // TODO: Add more tests from FTR as they are migrated
-  // - Elasticsearch endpoint and API Keys
-  // - Connect To Elasticsearch Side Panel
-  // - Get started with API
-  // - Alternate Solutions
-  // - Dive deeper with Elasticsearch
-  // - Footer content
+  test('should have embedded dev console', async ({ pageObjects }) => {
+    await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
+
+    const consoleBodyInitial = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyInitial).toBeHidden();
+
+    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+    const fullscreenToggle = await pageObjects.homepage.getFullscreenToggleButton();
+    await expect(fullscreenToggle).toBeVisible();
+
+    const consoleBodyOpen = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyOpen).toBeVisible();
+
+    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+    const consoleBodyClosed = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyClosed).toBeHidden();
+  });
+
+  // === Elasticsearch endpoint and API Keys ===
+  test('renders Elasticsearch endpoint with copy functionality', async ({ pageObjects }) => {
+    const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(copyEndpointButton).toBeVisible();
+
+    const endpointValueField = await pageObjects.homepage.getEndpointValueField();
+    await expect(endpointValueField).toBeVisible();
+  });
+
+  test('shows checkmark icon feedback when copy button is clicked', async ({ pageObjects }) => {
+    const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(copyEndpointButton).toBeVisible();
+
+    await copyEndpointButton.click();
+
+    // After clicking, the button should show copied state
+    const copiedButton = await pageObjects.homepage.getCopyEndpointButtonCopied();
+    await expect(copiedButton).toBeVisible();
+
+    // After a short delay, it should revert back to normal state
+    const normalButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(normalButton).toBeVisible();
+  });
+
+  test('renders API keys button correctly', async ({ pageObjects }) => {
+    const createApiKeyButton = await pageObjects.homepage.getCreateApiKeyButton();
+    await expect(createApiKeyButton).toBeVisible();
+  });
+
+  test('opens create_api_key flyout on clicking CreateApiKey button', async ({ pageObjects }) => {
+    await pageObjects.homepage.clickCreateApiKeyButton();
+
+    const flyoutHeader = await pageObjects.homepage.getCreateApiKeyFlyoutHeader();
+    await expect(flyoutHeader).toBeVisible();
+    await expect(flyoutHeader).toContainText('Create API key');
+  });
+
+  // === Connect To Elasticsearch Side Panel ===
+  test('renders the "Upload a file" card and navigates correctly', async ({
+    pageObjects,
+    page,
+  }) => {
+    const uploadFileButton = await pageObjects.homepage.getUploadFileButton();
+    await expect(uploadFileButton).toBeVisible();
+
+    await pageObjects.homepage.clickUploadFileButton();
+
+    await expect(page).toHaveURL(/ml\/filedatavisualizer/);
+  });
+
+  test('renders the sample data section', async ({ pageObjects }) => {
+    const sampleDataSection = await pageObjects.homepage.getSampleDataSection();
+    await expect(sampleDataSection).toBeVisible();
+  });
+
+  test('renders the "Install sample data" button when sample data index does not exist', async ({
+    pageObjects,
+  }) => {
+    const installSampleBtn = await pageObjects.homepage.getInstallSampleDataButton();
+    await expect(installSampleBtn).toBeVisible();
+  });
+
+  test('renders the "View data" button when sample data index exists', async ({
+    pageObjects,
+    esClient,
+  }) => {
+    // Create the sample data index
+    await esClient.indices.create({ index: SAMPLE_DATA_INDEX }).catch(() => {});
+
+    // Refresh the page to see the updated state
+    await pageObjects.homepage.goto();
+
+    const viewDataBtn = await pageObjects.homepage.getViewDataButton();
+    await expect(viewDataBtn).toBeVisible();
+
+    // Clean up for other tests
+    await esClient.indices.delete({ index: SAMPLE_DATA_INDEX }).catch(() => {});
+  });
+
+  // === Get started with API (Console Tutorials) ===
+  test('clicking on search basics tutorial opens console', async ({ pageObjects }) => {
+    const tutorial = await pageObjects.homepage.getConsoleTutorial('search_basics');
+    await expect(tutorial).toBeVisible();
+
+    const tutorialButton = await pageObjects.homepage.getConsoleTutorialButton('search_basics');
+    await expect(tutorialButton).toBeVisible();
+
+    await pageObjects.homepage.clickConsoleTutorialButton('search_basics');
+
+    const consoleEditor = await pageObjects.homepage.getConsoleEditorContainer();
+    await expect(consoleEditor).toBeVisible();
+  });
+
+  test('clicking on semantic search tutorial opens console', async ({ pageObjects }) => {
+    const tutorial = await pageObjects.homepage.getConsoleTutorial('semantic_search');
+    await expect(tutorial).toBeVisible();
+
+    const tutorialButton = await pageObjects.homepage.getConsoleTutorialButton('semantic_search');
+    await expect(tutorialButton).toBeVisible();
+
+    await pageObjects.homepage.clickConsoleTutorialButton('semantic_search');
+
+    const consoleEditor = await pageObjects.homepage.getConsoleEditorContainer();
+    await expect(consoleEditor).toBeVisible();
+  });
+
+  test('clicking on esql tutorial opens console', async ({ pageObjects }) => {
+    const tutorial = await pageObjects.homepage.getConsoleTutorial('esql');
+    await expect(tutorial).toBeVisible();
+
+    const tutorialButton = await pageObjects.homepage.getConsoleTutorialButton('esql');
+    await expect(tutorialButton).toBeVisible();
+
+    await pageObjects.homepage.clickConsoleTutorialButton('esql');
+
+    const consoleEditor = await pageObjects.homepage.getConsoleEditorContainer();
+    await expect(consoleEditor).toBeVisible();
+  });
+
+  // === Alternate Solutions ===
+  test('renders Observability content and navigates correctly', async ({ pageObjects, page }) => {
+    const analyzeLogsLink = await pageObjects.homepage.getAnalyzeLogsBrowseIntegrations();
+    await expect(analyzeLogsLink).toBeVisible();
+
+    await pageObjects.homepage.clickAnalyzeLogsBrowseIntegrations();
+
+    await expect(page).toHaveURL(/browse\/observability/);
+  });
+
+  // === Dive deeper with Elasticsearch ===
+  // Note: These tests were marked as FLAKY in FTR (https://github.com/elastic/kibana/issues/226572)
+  // Skipping for now until stability is confirmed
+  test('renders Search labs content', async ({ pageObjects, page }) => {
+    const searchLabsSection = await pageObjects.homepage.getSearchLabsSection();
+    await expect(searchLabsSection).toBeVisible();
+
+    const searchLabsButton = await pageObjects.homepage.getSearchLabsButton();
+    await expect(searchLabsButton).toBeVisible();
+
+    await pageObjects.homepage.clickSearchLabsButton();
+
+    await expect(page).toHaveURL(/search-labs/);
+  });
+
+  test('renders Open Notebooks content', async ({ pageObjects, page }) => {
+    const pythonNotebooksSection = await pageObjects.homepage.getPythonNotebooksSection();
+    await expect(pythonNotebooksSection).toBeVisible();
+
+    const openNotebooksButton = await pageObjects.homepage.getOpenNotebooksButton();
+    await expect(openNotebooksButton).toBeVisible();
+
+    await pageObjects.homepage.clickOpenNotebooksButton();
+
+    await expect(page).toHaveURL(/search-labs\/tutorials\/examples/);
+  });
+
+  test('renders Elasticsearch Documentation content', async ({ pageObjects, page }) => {
+    const elasticsearchDocumentationSection =
+      await pageObjects.homepage.getElasticsearchDocumentationSection();
+    await expect(elasticsearchDocumentationSection).toBeVisible();
+
+    const viewDocumentationButton = await pageObjects.homepage.getViewDocumentationButton();
+    await expect(viewDocumentationButton).toBeVisible();
+
+    await pageObjects.homepage.clickViewDocumentationButton();
+
+    await expect(page).toHaveURL(/docs\/solutions\/search\/get-started/);
+  });
+
+  // === Footer content ===
+  test('displays the community link and navigates correctly', async ({ pageObjects, page }) => {
+    const communityLink = await pageObjects.homepage.getElasticCommunityLink();
+    await expect(communityLink).toBeVisible();
+
+    await pageObjects.homepage.clickElasticCommunityLink();
+
+    await expect(page).toHaveURL(/community\//);
+  });
+
+  test('displays the feedbacks link and navigates correctly', async ({ pageObjects, page }) => {
+    const feedbackLink = await pageObjects.homepage.getGiveFeedbackLink();
+    await expect(feedbackLink).toBeVisible();
+
+    await pageObjects.homepage.clickGiveFeedbackLink();
+
+    await expect(page).toHaveURL(/kibana\/feedback/);
+  });
 });
