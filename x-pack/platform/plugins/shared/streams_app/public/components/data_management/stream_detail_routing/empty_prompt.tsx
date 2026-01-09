@@ -61,8 +61,6 @@ export const NoDataEmptyPrompt = ({
   isAiEnabled,
   children,
 }: NoDataEmptyPromptProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const message = isAiEnabled ? cardDescriptionAiEnabled : cardDescriptionManual;
 
   return (
