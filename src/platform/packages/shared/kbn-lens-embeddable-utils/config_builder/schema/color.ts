@@ -81,6 +81,7 @@ export const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
     description: 'Array of ordered color steps defining the range each color is applied.',
   },
   minSize: 1,
+  maxSize: 100,
   validate(steps) {
     let trackingValue = steps[0].gte ?? steps[0].lt ?? -Infinity;
     for (const [i, step] of steps.entries()) {
@@ -169,9 +170,10 @@ const categoricalColorMappingSchema = schema.object({
   }),
   mapping: schema.arrayOf(
     schema.object({
-      values: schema.arrayOf(serializedValueSchema),
+      values: schema.arrayOf(serializedValueSchema, { maxSize: 1000 }),
       color: colorDefSchema,
-    })
+    }),
+    { maxSize: 1000 }
   ),
   unassignedColor: schema.maybe(colorCodeSchema),
 });
@@ -184,11 +186,12 @@ const gradientColorMappingSchema = schema.object({
   mapping: schema.maybe(
     schema.arrayOf(
       schema.object({
-        values: schema.arrayOf(serializedValueSchema),
-      })
+        values: schema.arrayOf(serializedValueSchema, { maxSize: 100 }),
+      }),
+      { maxSize: 100 }
     )
   ),
-  gradient: schema.maybe(schema.arrayOf(colorDefSchema)),
+  gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
   unassignedColor: schema.maybe(colorCodeSchema),
 });
 
