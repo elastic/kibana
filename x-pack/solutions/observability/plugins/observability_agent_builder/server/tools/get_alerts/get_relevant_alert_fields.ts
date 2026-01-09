@@ -12,7 +12,7 @@ import { groupBy, uniq } from 'lodash';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
-import { getHitsTotal } from '../../utils/get_hits_total';
+import { getTotalHits } from '../../utils/get_total_hits';
 import { getTypedSearch } from '../../utils/get_typed_search';
 
 export async function getRelevantAlertFields({
@@ -50,7 +50,7 @@ export async function getRelevantAlertFields({
     terminate_after: 1,
   });
 
-  const hitCount = getHitsTotal(hasAnyHitsResponse);
+  const hitCount = getTotalHits(hasAnyHitsResponse);
 
   // all fields are empty in this case, so get them all
   const includeEmptyFields = hitCount === 0;

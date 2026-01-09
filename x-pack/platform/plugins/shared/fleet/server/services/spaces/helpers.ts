@@ -75,6 +75,12 @@ export function getSpaceForPackagePolicy(packagePolicy: Pick<PackagePolicy, 'spa
   return getValidSpaceId(packagePolicy.spaceIds);
 }
 
+export function getSpaceForPackagePolicySO(
+  packagePolicySO: Pick<SavedObject<AgentPolicySOAttributes>, 'namespaces'>
+): string {
+  return getValidSpaceId(packagePolicySO.namespaces);
+}
+
 export function getValidSpaceId(spacedIds?: string[]) {
   const space = spacedIds?.[0];
 

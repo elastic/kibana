@@ -8,6 +8,7 @@
 import type {
   KibanaRequest,
   Logger,
+  SavedObjectsClientContract,
   SavedObjectsServiceStart,
   SecurityServiceStart,
   UiSettingsServiceStart,
@@ -41,19 +42,18 @@ export class MaintenanceWindowClientFactory {
     this.uiSettings = options.uiSettings;
   }
 
+  private getSoClient(request: KibanaRequest, withAuth: boolean): SavedObjectsClientContract {
+    return this.savedObjectsService.getScopedClient(request, {
+      includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
+      ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
+    });
+  }
+
   private createMaintenanceWindowClient(
     request: KibanaRequest,
-    withAuth: boolean,
-    excludedExtensions?: ['spaces']
+    savedObjectsClient: SavedObjectsClientContract
   ) {
     const { securityService } = this;
-    const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
-      ...(withAuth
-        ? {}
-        : { excludedExtensions: [...(excludedExtensions ?? []), SECURITY_EXTENSION_ID] }),
-    });
-
     const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
 
     return new MaintenanceWindowClient({
@@ -68,10 +68,19 @@ export class MaintenanceWindowClientFactory {
   }
 
   public createWithAuthorization(request: KibanaRequest) {
-    return this.createMaintenanceWindowClient(request, true);
+    const soClient = this.getSoClient(request, true);
+    return this.createMaintenanceWindowClient(request, soClient);
   }
 
-  public create(request: KibanaRequest, excludedExtension?: ['spaces']) {
-    return this.createMaintenanceWindowClient(request, false, excludedExtension);
+  public createWithoutAuthorization(request: KibanaRequest) {
+    const soClient = this.getSoClient(request, false);
+    return this.createMaintenanceWindowClient(request, soClient);
+  }
+
+  public createInternal(request: KibanaRequest) {
+    const savedObjectsInternalClient = this.savedObjectsService.createInternalRepository([
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+    ]);
+    return this.createMaintenanceWindowClient(request, savedObjectsInternalClient);
   }
 }

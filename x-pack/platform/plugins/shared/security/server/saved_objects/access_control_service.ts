@@ -18,6 +18,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { SecurityAction } from '.';
 
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
+const UPDATE_ACTION = 'update';
 
 interface AccessControlServiceParams {
   typeRegistry?: ISavedObjectTypeRegistry;
@@ -109,16 +110,18 @@ export class AccessControlService {
   enforceAccessControl<A extends string>({
     authorizationResult,
     typesRequiringAccessControl,
+    typesRequiringRbac,
     currentSpace,
     addAuditEventFn,
   }: {
     authorizationResult: CheckAuthorizationResult<A>;
     typesRequiringAccessControl: Set<string>;
+    typesRequiringRbac: Set<string>;
     currentSpace: string;
     addAuditEventFn?: (types: string[]) => void;
   }) {
     if (authorizationResult.status === 'unauthorized') {
-      const typeList = [...typesRequiringAccessControl].sort();
+      const typeList = [...new Set([...typesRequiringAccessControl, ...typesRequiringRbac])].sort();
       addAuditEventFn?.(typeList);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(`Access denied: Unable to manage access control for ${typeList}`)
@@ -128,25 +131,33 @@ export class AccessControlService {
     const { typeMap } = authorizationResult;
     const unauthorizedTypes: Set<string> = new Set();
 
-    for (const type of typesRequiringAccessControl) {
-      if (!this.typeRegistry?.supportsAccessControl(type)) {
-        continue;
-      }
+    const addUnauthorizedTypes = (type: string, action: A): void => {
       const typeAuth = typeMap.get(type);
-      const accessControlAuth = typeAuth?.[MANAGE_ACCESS_CONTROL_ACTION as A];
-      if (!accessControlAuth) {
+      const actionAuth = typeAuth?.[action];
+      if (!actionAuth) {
         unauthorizedTypes.add(type);
       } else {
-        // Check if user has global authorization or authorization in at least one space
+        // Check if user has global authorization or authorization in the current space
         if (
-          !accessControlAuth.isGloballyAuthorized &&
-          (!accessControlAuth.authorizedSpaces ||
-            !accessControlAuth.authorizedSpaces.includes(currentSpace))
+          !actionAuth.isGloballyAuthorized &&
+          (!actionAuth.authorizedSpaces || !actionAuth.authorizedSpaces.includes(currentSpace))
         ) {
           unauthorizedTypes.add(type);
         }
       }
+    };
+
+    for (const type of typesRequiringAccessControl) {
+      if (!this.typeRegistry?.supportsAccessControl(type)) {
+        continue;
+      }
+      addUnauthorizedTypes(type, MANAGE_ACCESS_CONTROL_ACTION as A);
     }
+
+    for (const type of typesRequiringRbac) {
+      addUnauthorizedTypes(type, UPDATE_ACTION as A);
+    }
+
     // If we found unauthorized types, throw an error
     if (unauthorizedTypes.size > 0) {
       const typeList = [...unauthorizedTypes].sort();

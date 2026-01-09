@@ -519,6 +519,22 @@
           },
           {
             "parentPluginId": "workflowsExtensions",
+            "id": "def-server.StepHandlerContext.rawInput",
+            "type": "Any",
+            "tags": [],
+            "label": "rawInput",
+            "description": [
+              "\nThe raw input configuration before template rendering.\nHas the same shape as input, but values may contain template strings."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.contextManager",
             "type": "Object",
             "tags": [],
@@ -980,7 +996,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.DataMapStepTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "DataMapStepTypeId",
+        "description": [],
+        "signature": [
+          "\"data.map\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/steps/data/data_map_step.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

@@ -61,6 +61,8 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/field-formats-common",
     "@kbn/core-application-browser-mocks",
+    "@kbn/cps",
+    "@kbn/cps-utils",
   ],
   "exclude": ["target/**/*"]
 }

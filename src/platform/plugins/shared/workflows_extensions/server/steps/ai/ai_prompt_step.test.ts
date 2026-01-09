@@ -29,8 +29,8 @@ jest.mock('../../step_registry/types', () => ({
 
 import { aiPromptStepDefinition } from './ai_prompt_step';
 import { resolveConnectorId } from './utils/resolve_connector_id';
-import { createServerStepDefinition } from '../../step_registry/types';
 import type { ContextManager, StepHandlerContext } from '../../step_registry/types';
+import { createServerStepDefinition } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
 
 const mockResolveConnectorId = resolveConnectorId as jest.MockedFunction<typeof resolveConnectorId>;
@@ -79,6 +79,11 @@ describe('aiPromptStepDefinition', () => {
     mockContext = {
       config: {},
       input: {
+        prompt: 'Test prompt',
+        connectorId: 'test-connector-id',
+        temperature: 0.7,
+      },
+      rawInput: {
         prompt: 'Test prompt',
         connectorId: 'test-connector-id',
         temperature: 0.7,

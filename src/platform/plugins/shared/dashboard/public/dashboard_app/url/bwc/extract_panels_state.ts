@@ -115,7 +115,7 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       );
     }
 
-    // <9.3 panel state included "i" in grid
+    // <9.4 panel state included "i" in grid
     if (panel.grid) {
       const { i, ...rest } = panel.grid;
       panel.grid = rest;

@@ -458,12 +458,15 @@ export const WorkflowYAMLEditor = ({
       const yamlDocumentCurrent = yamlDocumentRef.current;
       const cursorPosition = editorRef.current?.getPosition();
       const editor = editorRef.current;
-      if (!model || !yamlDocumentCurrent || !editor) {
+      if (!model || !editor) {
         return;
       }
       if (isTriggerType(action.id)) {
         insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
       } else {
+        if (!yamlDocumentCurrent) {
+          return;
+        }
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
       closeActionsPopover();
@@ -578,6 +581,7 @@ export const WorkflowYAMLEditor = ({
           options={options}
           schemas={schemas}
           value={workflowYaml}
+          enableFindAction={true}
         />
       </div>
       <div css={styles.validationErrorsContainer}>
