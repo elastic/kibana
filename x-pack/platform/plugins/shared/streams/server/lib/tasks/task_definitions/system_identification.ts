@@ -7,23 +7,24 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition, type FeatureType } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import type { IdentifySystemsResult } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
-import type { IdentifyFeaturesResult } from '../../streams/feature/feature_type_registry';
-import { getDefaultFeatureRegistry } from '../../streams/feature/feature_type_registry';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
+import { identifySystemsWithDescription } from '../../streams/system/identify_systems';
 
-export interface FeatureIdentificationTaskParams {
+export interface SystemIdentificationTaskParams {
   connectorId: string;
   start: number;
   end: number;
 }
 
-export function createStreamsFeatureIdentificationTask(taskContext: TaskContext) {
+export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
+    // TODO: rename to streams_system_identification
     streams_feature_identification: {
       createTaskRunner: (runContext) => {
         return {
@@ -34,13 +35,13 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
               }
 
               const { connectorId, start, end, _task } = runContext.taskInstance
-                .params as TaskParams<FeatureIdentificationTaskParams>;
+                .params as TaskParams<SystemIdentificationTaskParams>;
               const { stream: name } = _task;
 
               const {
                 taskClient,
                 scopedClusterClient,
-                featureClient,
+                systemClient,
                 streamsClient,
                 inferenceClient,
                 soClient,
@@ -49,14 +50,13 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
               });
 
               try {
-                const [{ hits }, stream] = await Promise.all([
-                  featureClient.getFeatures(name),
+                const [{ systems }, stream] = await Promise.all([
+                  systemClient.getSystems(name),
                   streamsClient.getStream(name),
                 ]);
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
-                const featureRegistry = getDefaultFeatureRegistry();
 
                 const promptsConfigService = new PromptsConfigService({
                   soClient,
@@ -66,37 +66,29 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 const { featurePromptOverride, descriptionPromptOverride } =
                   await promptsConfigService.getPrompt();
 
-                const results = await featureRegistry.identifyFeatures({
+                const results = await identifySystemsWithDescription({
                   start,
                   end,
                   esClient,
                   inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('feature_identification'),
+                  logger: taskContext.logger.get('system_identification'),
                   stream,
-                  features: hits,
+                  systems,
                   signal: runContext.abortController.signal,
-                  featurePromptOverride,
+                  systemsPromptOverride: featurePromptOverride,
                   descriptionPromptOverride,
+                  dropUnmapped: true,
                 });
 
-                taskContext.telemetry.trackFeaturesIdentified({
-                  count: results.features.length,
-                  count_by_type: results.features.reduce<Record<FeatureType, number>>(
-                    (acc, feature) => {
-                      acc[feature.type] = (acc[feature.type] || 0) + 1;
-                      return acc;
-                    },
-                    {
-                      system: 0,
-                    }
-                  ),
+                taskContext.telemetry.trackSystemsIdentified({
+                  count: results.systems.length,
                   stream_name: stream.name,
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: results.tokensUsed.prompt,
                   output_tokens_used: results.tokensUsed.completion,
                 });
 
-                await taskClient.update<FeatureIdentificationTaskParams, IdentifyFeaturesResult>({
+                await taskClient.update<SystemIdentificationTaskParams, IdentifySystemsResult>({
                   ..._task,
                   status: 'completed',
                   task: {
@@ -127,7 +119,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.update<FeatureIdentificationTaskParams>({
+                await taskClient.update<SystemIdentificationTaskParams>({
                   ..._task,
                   status: 'failed',
                   task: {
