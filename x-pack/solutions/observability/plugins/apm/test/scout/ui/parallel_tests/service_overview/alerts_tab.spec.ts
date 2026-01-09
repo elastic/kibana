@@ -51,6 +51,15 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
         await expect(controlTitles.getByText(expectedControl)).toBeVisible();
       }
     });
+
+    await test.step("status control has 'active' selected by default", async () => {
+      const statusControl = serviceDetailsPage.alertsTab.controlTitles.filter({
+        hasText: 'Status',
+      });
+
+      await expect(statusControl.getByText('active')).toBeVisible();
+      await expect(statusControl.getByText('1')).toBeVisible();
+    });
   });
 
   test('Has no detectable a11y violations on load', async ({
