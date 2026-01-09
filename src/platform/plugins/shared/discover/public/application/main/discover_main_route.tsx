@@ -75,17 +75,12 @@ export const DiscoverMainRoute = ({
         useHashQuery: customizationContext.displayMode !== 'embedded',
       })
   );
-  const {
-    internalState,
-    runtimeStateManager,
-    searchSessionManager,
-    isEmbeddableEditor,
-    embeddableState,
-  } = useStateManagers({
-    services,
-    urlStateStorage,
-    customizationContext,
-  });
+  const { internalState, runtimeStateManager, searchSessionManager, embeddableState } =
+    useStateManagers({
+      services,
+      urlStateStorage,
+      customizationContext,
+    });
 
   useUnsavedChanges({ internalState, runtimeStateManager, onAppLeave });
 
@@ -98,7 +93,6 @@ export const DiscoverMainRoute = ({
         internalState={internalState}
         runtimeStateManager={runtimeStateManager}
         searchSessionManager={searchSessionManager}
-        isEmbeddableEditor={isEmbeddableEditor()}
         embeddableState={embeddableState}
       />
     </InternalStateProvider>
@@ -112,7 +106,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = !props.isEmbeddableEditor && discoverFeatureFlags.getTabsEnabled();
+  const tabsEnabled =
+    !props.embeddableState.isByValueEditor() && discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(

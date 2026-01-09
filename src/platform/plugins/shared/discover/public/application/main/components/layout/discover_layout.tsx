@@ -35,7 +35,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
@@ -69,6 +68,7 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -82,7 +82,7 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
 
 export interface DiscoverLayoutProps {
   stateContainer: DiscoverStateContainer;
-  embeddableState: EmbeddableEditorState | undefined;
+  embeddableState: EmbeddedState;
 }
 
 export function DiscoverLayout({ stateContainer, embeddableState }: DiscoverLayoutProps) {

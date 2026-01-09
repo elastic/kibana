@@ -9,7 +9,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
@@ -21,7 +20,7 @@ import { createTabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from '../discover_search_session';
-import { useEmbeddedState } from '../../hooks/use_embedded_state';
+import { type EmbeddedState, useEmbeddedState } from '../../hooks/use_embedded_state';
 
 interface UseStateManagers {
   customizationContext: DiscoverCustomizationContext;
@@ -33,8 +32,7 @@ interface UseStateManagersReturn {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   searchSessionManager: DiscoverSearchSessionManager;
-  embeddableState: EmbeddableEditorState | undefined;
-  isEmbeddableEditor: () => boolean;
+  embeddableState: EmbeddedState;
 }
 
 export const useStateManagers = ({
@@ -42,9 +40,10 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
-  const { isEmbeddableEditor, embeddableState } = useEmbeddedState();
+  const embeddableState = useEmbeddedState();
 
-  const tabsEnabled = !isEmbeddableEditor() && services.discoverFeatureFlags.getTabsEnabled();
+  const tabsEnabled =
+    !embeddableState.isByValueEditor() && services.discoverFeatureFlags.getTabsEnabled();
 
   // syncing with the _tab part URL
   const [tabsStorageManager] = useState(() =>
@@ -93,9 +92,8 @@ export const useStateManagers = ({
       internalState,
       runtimeStateManager,
       searchSessionManager,
-      isEmbeddableEditor,
       embeddableState,
     }),
-    [internalState, runtimeStateManager, searchSessionManager, isEmbeddableEditor, embeddableState]
+    [internalState, runtimeStateManager, searchSessionManager, embeddableState]
   );
 };

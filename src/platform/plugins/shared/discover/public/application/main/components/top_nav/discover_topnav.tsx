@@ -16,7 +16,6 @@ import {
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -38,11 +37,12 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
+import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
   stateContainer: DiscoverStateContainer;
-  embeddableState: EmbeddableEditorState | undefined;
+  embeddableState: EmbeddedState;
   esqlModeErrors?: Error;
   esqlModeWarning?: string;
   onFieldEdited: (options: {

@@ -7,22 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
-export function useEmbeddedState() {
-  const { embeddable } = useDiscoverServices();
-  const embeddedState = useRef(
-    embeddable.getStateTransfer().getIncomingEditorState('discover', true)
-  );
+export interface EmbeddedState {
+  isByValueEditor(): boolean;
+  isEmbeddedEditor(): boolean;
+  transferBackToEditor(): void;
+}
 
-  const isEmbeddableEditor = useCallback(() => Boolean(embeddedState.current), []);
+export function useEmbeddedState() {
+  const { embeddable, application } = useDiscoverServices();
+  const embeddedTransfer = useRef(embeddable.getStateTransfer());
+  const embeddableState = useMemo(
+    () => embeddedTransfer.current.getIncomingEditorState('discover'),
+    []
+  );
 
   return useMemo(
     () => ({
-      embeddableState: embeddedState.current,
-      isEmbeddableEditor,
+      isByValueEditor: () => !Boolean(embeddableState?.searchSessionId),
+      isEmbeddedEditor: () => Boolean(embeddableState),
+      transferBackToEditor: () => {
+        if (embeddableState) {
+          const app = embeddableState.originatingApp;
+          const path = embeddableState.originatingPath;
+
+          if (app && path) {
+            embeddedTransfer.current.clearEditorState('discover');
+            application.navigateToApp(app, { path });
+          }
+        }
+      },
     }),
-    [isEmbeddableEditor]
+    [embeddableState, application]
   );
 }

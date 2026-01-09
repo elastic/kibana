@@ -10,7 +10,6 @@
 import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
-import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -25,6 +24,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
+import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -33,7 +33,7 @@ export const useDiscoverTopNav = ({
 }: {
   stateContainer: DiscoverStateContainer;
   persistedDiscoverSession: DiscoverSession | undefined;
-  embeddableState: EmbeddableEditorState | undefined;
+  embeddableState: EmbeddedState;
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
