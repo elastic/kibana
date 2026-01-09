@@ -61,7 +61,7 @@ export class HealthScanTask {
                 return {
                   state: {
                     isDone: true,
-                    error: 'Task is disabled',
+                    error: 'Health scan task is disabled via configuration',
                   } satisfies HealthScanTaskState,
                 };
               }
@@ -69,7 +69,7 @@ export class HealthScanTask {
               this.logger.debug('Starting health scan task');
 
               if (!fakeRequest) {
-                this.logger.debug('fakeRequest is not defined');
+                this.logger.warn('fakeRequest is not defined');
                 return {
                   state: {
                     isDone: true,
@@ -137,7 +137,6 @@ export class HealthScanTask {
                 };
               }
             },
-            cancel: async () => {},
           };
         },
       },
