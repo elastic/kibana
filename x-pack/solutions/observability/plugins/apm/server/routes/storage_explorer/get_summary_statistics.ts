@@ -8,6 +8,11 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  getBackwardCompatibleDocumentTypeFilter,
+  getDurationFieldForTransactions,
+  calculateThroughputWithRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
   getApmDiskSpacedUsedPct,
@@ -21,12 +26,9 @@ import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
-  getDurationFieldForTransactions,
   isRootTransaction,
 } from '../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface SharedOptions {

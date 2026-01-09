@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
+  TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
   METRICSET_INTERVAL,
   METRICSET_NAME,
@@ -16,6 +17,7 @@ import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query
 import { termsQuery } from '@kbn/observability-utils-common/es/queries/terms_query';
 import { existsQuery } from '@kbn/observability-utils-common/es/queries/exists_query';
 import { RollupInterval } from '../../../../common/rollup';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 // The function returns Document type filter for 1m Transaction Metrics
 export function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions: boolean) {
@@ -44,4 +46,44 @@ export function isDurationSummaryNotSupportedFilter(): QueryDslQueryContainer {
       must_not: [...existsQuery(TRANSACTION_DURATION_SUMMARY)],
     },
   };
+}
+
+export function isSummaryFieldSupportedByDocType(
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean
+) {
+  let type: ApmDocumentType;
+
+  if (typeOrSearchAgggregatedTransactions === true) {
+    type = ApmDocumentType.TransactionMetric;
+  } else if (typeOrSearchAgggregatedTransactions === false) {
+    type = ApmDocumentType.TransactionEvent;
+  } else {
+    type = typeOrSearchAgggregatedTransactions;
+  }
+
+  return (
+    type === ApmDocumentType.ServiceTransactionMetric || type === ApmDocumentType.TransactionMetric
+  );
+}
+
+export function getDurationFieldForTransactions(
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean,
+  useDurationSummaryField?: boolean
+) {
+  if (isSummaryFieldSupportedByDocType(typeOrSearchAgggregatedTransactions)) {
+    if (useDurationSummaryField) {
+      return TRANSACTION_DURATION_SUMMARY;
+    }
+    return TRANSACTION_DURATION_HISTOGRAM;
+  }
+
+  return TRANSACTION_DURATION;
 }
