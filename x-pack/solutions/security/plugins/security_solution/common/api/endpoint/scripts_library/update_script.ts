@@ -19,7 +19,7 @@ import {
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
 
-export const PatchUpdateRequestSchema = {
+export const PatchUpdateScriptRequestSchema = {
   body: schema.object(
     {
       name: schema.maybe(ScriptNameSchema),
@@ -45,5 +45,9 @@ export const PatchUpdateRequestSchema = {
   }),
 };
 
-export type PatchUpdateRequestParams = DeepMutable<TypeOf<typeof PatchUpdateRequestSchema.params>>;
-export type PatchUpdateRequestBody = DeepMutable<TypeOf<typeof PatchUpdateRequestSchema.body>>;
+export type PatchUpdateRequestParams = DeepMutable<
+  TypeOf<typeof PatchUpdateScriptRequestSchema.params>
+>;
+export type PatchUpdateRequestBody = DeepMutable<
+  TypeOf<typeof PatchUpdateScriptRequestSchema.body>
+>;

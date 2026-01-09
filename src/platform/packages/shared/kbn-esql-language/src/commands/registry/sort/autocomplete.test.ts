@@ -75,12 +75,13 @@ describe('SORT Autocomplete', () => {
         ...expectedFieldSuggestions,
         ...expectedFunctionSuggestions,
       ]);
+      const filteredFieldSuggestions = expectedFieldSuggestions.filter((s) => s !== 'keywordField');
       await sortExpectSuggestions('from a | sort keywordField, ', [
-        ...expectedFieldSuggestions,
+        ...filteredFieldSuggestions,
         ...expectedFunctionSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField, doubl', [
-        ...expectedFieldSuggestions,
+        ...filteredFieldSuggestions,
         ...expectedFunctionSuggestions,
       ]);
     });

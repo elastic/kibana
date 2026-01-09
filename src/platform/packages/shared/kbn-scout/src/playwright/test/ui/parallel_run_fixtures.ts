@@ -17,7 +17,6 @@ import {
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
-  CoreWorkerFixtures,
   EsClient,
   KbnClient,
   KibanaUrl,
@@ -63,34 +62,9 @@ export interface ScoutParallelWorkerFixtures {
   apiServices: ApiServicesFixture;
 }
 
-/**
- * Pre-creates Elasticsearch Security indexes (.security-tokens, .security-profile)
- * during global setup to prevent race conditions when parallel tests perform their first SAML authentication.
- */
-const preCreateSecurityIndexesFixture = coreWorkerFixtures.extend<
-  {},
-  { samlAuth: CoreWorkerFixtures['samlAuth']; preCreateSecurityIndexes: void }
->({
-  preCreateSecurityIndexes: [
-    async (
-      {
-        samlAuth,
-        log,
-      }: { samlAuth: CoreWorkerFixtures['samlAuth']; log: CoreWorkerFixtures['log'] },
-      use: (arg: void) => Promise<void>
-    ) => {
-      log.debug('Running SAML authentication to pre-create Elasticsearch .security indexes');
-      await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope('admin');
-      await use();
-    },
-    { scope: 'worker', auto: true },
-  ],
-});
-
 export const globalSetupFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   synthtraceFixture,
-  apiServicesFixture,
-  preCreateSecurityIndexesFixture
+  apiServicesFixture
 );

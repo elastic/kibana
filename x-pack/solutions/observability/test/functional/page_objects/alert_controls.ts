@@ -19,16 +19,16 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
       const errorText = `Control frame ${controlId} could not be found`;
       let controlElement: WebElementWrapper | undefined;
       await retry.try(async () => {
-        const controlFrames = await testSubjects.findAll('control-frame');
-        const framesWithIds = await Promise.all(
-          controlFrames.map(async (frame) => {
-            const id = await frame.getAttribute('data-control-id');
-            return { id, element: frame };
+        const controls = await find.allByCssSelector('[data-control-id]');
+        const controlsWithIds = await Promise.all(
+          controls.map(async (control) => {
+            const id = await control.getAttribute('data-control-id');
+            return { id, element: control };
           })
         );
-        const foundControlFrame = framesWithIds.find(({ id }) => id === controlId);
-        if (!foundControlFrame) throw new Error(errorText);
-        controlElement = foundControlFrame.element;
+        const foundControl = controlsWithIds.find(({ id }) => id === controlId);
+        if (!foundControl) throw new Error(errorText);
+        controlElement = foundControl.element;
       });
       if (!controlElement) throw new Error(errorText);
       return controlElement;
@@ -38,14 +38,19 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
       const elementToHover = await this.getControlElementById(controlId);
       await retry.try(async () => {
         await elementToHover.moveMouseTo();
-        await testSubjects.existOrFail(`control-action-${controlId}-erase`);
+        await testSubjects.existOrFail(`hover-actions-${controlId}`);
       });
     },
 
     async clearControlSelections(controlId: string) {
       log.debug(`clearing all selections from control ${controlId}`);
       await this.hoverOverExistingControl(controlId);
-      await testSubjects.click(`control-action-${controlId}-erase`);
+      const hoverActions = await testSubjects.find(`hover-actions-${controlId}`);
+      const clearButton = await testSubjects.findDescendant(
+        `embeddablePanelAction-clearControl`,
+        hoverActions
+      );
+      await clearButton.click();
     },
 
     async optionsListOpenPopover(controlId: string) {
