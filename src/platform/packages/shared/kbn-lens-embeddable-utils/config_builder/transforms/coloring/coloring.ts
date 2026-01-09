@@ -34,7 +34,7 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
 };
 
 export function fromColorByValueAPIToLensState(
-  config?: ColorByValueType | undefined
+  config?: ColorByValueType
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 

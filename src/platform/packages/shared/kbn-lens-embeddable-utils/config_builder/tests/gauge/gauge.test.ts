@@ -28,8 +28,7 @@ describe('Gauge', () => {
     it('should convert a gauge chart with full config and absolute color mode', () => {
       validateConverter(gaugeAttributes, gaugeStateSchema);
     });
-    //  rangeMax: null for percentage color mode -> throws validation error in the color schema
-    it.skip('should convert a gauge chart with full config and percentage color mode', () => {
+    it('should convert a gauge chart with full config and percentage color mode', () => {
       validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
     });
     it('should convert a gauge chart with ESQL dataset', () => {
