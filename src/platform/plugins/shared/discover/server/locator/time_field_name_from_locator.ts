@@ -21,7 +21,7 @@ export const timeFieldNameFromLocatorFactory = (services: LocatorServicesDeps) =
     params: DiscoverAppLocatorParams
   ): Promise<string | undefined> => {
     if (params.dataViewSpec && params.dataViewSpec.timeFieldName) {
-      return params.dataViewSpec.timeFieldName;
+      return params.dataViewSpec?.timeFieldName;
     }
   };
 
