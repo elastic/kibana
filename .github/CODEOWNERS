@@ -60,7 +60,7 @@ packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
-packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
+packages/kbn-eslint-plugin-i18n @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 packages/kbn-extract-plugin-translations @elastic/kibana-core
@@ -126,6 +126,8 @@ src/core/packages/capabilities/common @elastic/kibana-core
 src/core/packages/capabilities/server @elastic/kibana-core
 src/core/packages/capabilities/server-internal @elastic/kibana-core
 src/core/packages/capabilities/server-mocks @elastic/kibana-core
+src/core/packages/chrome/app-menu/core-chrome-app-menu @elastic/appex-sharedux
+src/core/packages/chrome/app-menu/core-chrome-app-menu-components @elastic/appex-sharedux
 src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
@@ -134,7 +136,7 @@ src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sha
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
-src/core/packages/chrome/navigation @elastic/eui-team
+src/core/packages/chrome/navigation @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
@@ -338,6 +340,7 @@ src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
+src/platform/packages/private/kbn-controls-renderer @elastic/kibana-presentation
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
@@ -419,6 +422,7 @@ src/platform/packages/shared/content-management/table_list_view @elastic/appex-s
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
+src/platform/packages/shared/controls/control-group-renderer @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-constants @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentation
 src/platform/packages/shared/dashboards/dashboards-selector @elastic/actionable-obs-team
@@ -506,7 +510,7 @@ src/platform/packages/shared/kbn-es-mappings @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-constants @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-es-types @elastic/kibana-core
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-esql-language @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
@@ -563,7 +567,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-wo
 src/platform/packages/shared/kbn-otel-demo @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-profiler @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-onboarding-team
@@ -592,20 +596,20 @@ src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-
 src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
 src/platform/packages/shared/kbn-server-http-tools @elastic/kibana-core
-src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-server-route-repository @elastic/observability-ui
+src/platform/packages/shared/kbn-server-route-repository-client @elastic/observability-ui
+src/platform/packages/shared/kbn-server-route-repository-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-shared-svg @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-shared-ux-utility @elastic/appex-sharedux
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
-src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-sse-utils @elastic/obs-ai-team
+src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-ai-team
+src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-ai-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui @elastic/kibana-core
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
-src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-team
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
@@ -621,7 +625,7 @@ src/platform/packages/shared/kbn-tracing-config @elastic/kibana-core
 src/platform/packages/shared/kbn-tracing-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
-src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-ui-actions-browser @elastic/appex-sharedux
 src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
@@ -657,6 +661,7 @@ src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
+src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
 src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
@@ -724,7 +729,7 @@ src/platform/packages/shared/shared-ux/router/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-presentation-team
+src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-exploration-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
@@ -968,7 +973,7 @@ x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
-x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
+x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/actionable-obs-team
@@ -1144,7 +1149,7 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/actionable-o
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/obs-ai-team
-x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-knowledge-team
+x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-presentation-team
@@ -1603,7 +1608,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/routes/log_analysis @elastic/obs-exploration-team
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-presentation-team @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/common/utils/synthtrace @elastic/obs-presentation-team @elastic/obs-exploration-team
-/x-pack/platform/test/common/utils/server_route_repository @elastic/obs-knowledge-team
+/x-pack/platform/test/common/utils/server_route_repository @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-presentation-team @elastic/obs-exploration-team
 
 ## Streams parts owned by Logs UX
@@ -2748,6 +2753,12 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai
 
+# MCP
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/mcp @elastic/workchat-eng
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/mcp @elastic/workchat-eng
+/x-pack/platform/plugins/shared/stack_connectors/common/mcp @elastic/workchat-eng
+/src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
+
 # Inference API
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
@@ -3053,7 +3064,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
-/src/core/packages/chrome/navigation @elastic/eui-team @elastic/appex-sharedux
+/src/core/packages/chrome/navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
 /src/platform/test/api_integration/apis/unused_urls_task/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/220138
