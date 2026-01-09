@@ -15,6 +15,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ApmRuleType } from '@kbn/rule-data-utils';
 import rison from '@kbn/rison';
@@ -22,6 +23,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
@@ -326,12 +328,13 @@ export function ApmServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core } = useApmPluginContext();
+  const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
-  const { kuery } = query;
+  const { kuery, environment } = query;
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -344,6 +347,18 @@ export function ApmServicesTable({
   }>({
     isOpen: false,
     ruleType: null,
+    serviceName: undefined,
+  });
+
+  // SLO flyout state
+  type SloIndicatorType = 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
+  const [sloFlyoutState, setSloFlyoutState] = useState<{
+    isOpen: boolean;
+    indicatorType: SloIndicatorType | null;
+    serviceName: string | undefined;
+  }>({
+    isOpen: false,
+    indicatorType: null,
     serviceName: undefined,
   });
 
@@ -362,6 +377,39 @@ export function ApmServicesTable({
       serviceName: undefined,
     });
   }, []);
+
+  const openSloFlyout = useCallback((indicatorType: SloIndicatorType, serviceName: string) => {
+    setSloFlyoutState({
+      isOpen: true,
+      indicatorType,
+      serviceName,
+    });
+  }, []);
+
+  const closeSloFlyout = useCallback(() => {
+    setSloFlyoutState({
+      isOpen: false,
+      indicatorType: null,
+      serviceName: undefined,
+    });
+  }, []);
+
+  const CreateSloFlyout =
+    sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName
+      ? slo?.getCreateSLOFormFlyout({
+          initialValues: {
+            name: `APM SLO for ${sloFlyoutState.serviceName}`,
+            indicator: {
+              type: sloFlyoutState.indicatorType,
+              params: {
+                service: sloFlyoutState.serviceName,
+                environment: environment === 'ENVIRONMENT_ALL' ? '*' : environment,
+              },
+            },
+          },
+          onClose: closeSloFlyout,
+        })
+      : null;
 
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
@@ -488,8 +536,7 @@ export function ApmServicesTable({
               defaultMessage: 'Create APM latency SLO',
             }),
             onClick: (item) => {
-              // eslint-disable-next-line no-console
-              console.log('Create APM latency SLO', item.serviceName);
+              openSloFlyout('sli.apm.transactionDuration', item.serviceName);
             },
           },
           {
@@ -497,8 +544,7 @@ export function ApmServicesTable({
               defaultMessage: 'Create APM availability SLO',
             }),
             onClick: (item) => {
-              // eslint-disable-next-line no-console
-              console.log('Create APM availability SLO', item.serviceName);
+              openSloFlyout('sli.apm.transactionErrorRate', item.serviceName);
             },
           },
           {
@@ -560,7 +606,7 @@ export function ApmServicesTable({
         ],
       },
     ],
-    [openAlertFlyout, core.http]
+    [openAlertFlyout, openSloFlyout, core.http]
   );
 
   return (
@@ -632,6 +678,7 @@ export function ApmServicesTable({
         ruleType={alertFlyoutState.ruleType}
         serviceName={alertFlyoutState.serviceName}
       />
+      {CreateSloFlyout}
     </EuiFlexGroup>
   );
 }
