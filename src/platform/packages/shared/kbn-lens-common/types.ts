@@ -1393,6 +1393,9 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export interface LensState {

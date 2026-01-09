@@ -25,7 +25,13 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
 import { useIsDevMode } from '@kbn/react-env';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
-import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  useLensDispatch,
+  selectCanEditTextBasedQuery,
+  selectHideTextBasedEditor,
+} from '../../../state_management';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   getAbsoluteDateRange,
@@ -79,9 +85,6 @@ export function LensEditConfigurationFlyout({
   // Derive datasourceId from attributes - this updates when converting between formBased and textBased
   const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
 
-  // Derive whether we can edit text-based queries from the query type
-  const canEditTextBasedQuery = isOfAggregateQueryType(attributes.state.query);
-
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
@@ -89,6 +92,8 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
+  const hideTextBasedEditor = useLensSelector(selectHideTextBasedEditor);
 
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
@@ -408,7 +413,7 @@ export function LensEditConfigurationFlyout({
   );
 
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
-  if (!canEditTextBasedQuery && hidesSuggestions) {
+  if (hideTextBasedEditor) {
     return (
       <>
         {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}

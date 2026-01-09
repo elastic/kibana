@@ -74,7 +74,6 @@ export function LayerConfiguration({
     parentApi,
     panelId,
     closeFlyout,
-    canEditTextBasedQuery: isTextBasedMode,
     editorContainer,
   };
   return (

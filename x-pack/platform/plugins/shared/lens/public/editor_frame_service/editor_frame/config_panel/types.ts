@@ -44,7 +44,6 @@ export interface LensConfigPanelBaseProps {
   parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
 }
 
