@@ -21,6 +21,446 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+
+% FEATURES, ENHANCEMENTS, FIXES
+% Paste in index.md
+
+## 9.3.0 [kibana-9.3.0-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.3.0-features-enhancements]
+
+**Alerting**:
+* Added the possibility to search scheduled reports by title and creator [#243841]({{kib-pull}}243841).
+* Adds email cc, bcc, subject and message fields to scheduled reports email [#242922]({{kib-pull}}242922).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds new fields to the schedule export form email notification section:  cc and bcc recipients, subject and message with Mustache templating support
+* Enable cases numerical id service [#238555]({{kib-pull}}238555).
+* Added support for deleting export schedules [#238197]({{kib-pull}}238197).
+* Alert deletion feature is now GA [#247465]({{kib-pull}}247465).
+* Adds search in attachment tab [#246265]({{kib-pull}}246265).
+* Adds support for searching rules by their actions' params via API [#246123]({{kib-pull}}246123).
+* Scheduled exports is GA [#245882]({{kib-pull}}245882).
+* Slack connector can be configured to send messages to any channel using channel names [#245423]({{kib-pull}}245423).
+* Expand search in all cases page [#245321]({{kib-pull}}245321).
+* Allow users to enable scheduled reports [#244202]({{kib-pull}}244202).
+* Disable flapping per rule - schema only changes [#243855]({{kib-pull}}243855).
+* One Attachments tab [#243708]({{kib-pull}}243708).
+* Adds time range to all cases [#243409]({{kib-pull}}243409).
+* Allow users to edit schedule config [#241928]({{kib-pull}}241928).
+* IBM Resilient form improvements [#238869]({{kib-pull}}238869).
+* Adds agent id as default observables type [#238533]({{kib-pull}}238533).
+
+**Connectivity**:
+* Introduces a connector for web search via Brave Search [#245329]({{kib-pull}}245329).
+* The webhook connector now allows the following HTTP request methods: POST(default), PUT, PATCH, GET, or DELETE [#238072]({{kib-pull}}238072).
+
+**Dashboards and Visualizations**:
+* [Metric] Improve Primary Metric editor by removing "Supporting visualization" title in *Lens* [#245979]({{kib-pull}}245979).
+% !!TODO!! The above PR had a lengthy release note description:
+% Removed the "Supporting visualization" section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under "Appearance". The "Type" field has been renamed to "Background chart" and the "Panel" option has been renamed to "None".
+* [Metric] Improve "Supporting visualization" section in *Lens* [#243608]({{kib-pull}}243608).
+% !!TODO!! The above PR had a lengthy release note description:
+% The color settings in the Primary Metric editor have been reorganized and renamed. For numeric metrics, the "Color by value" and "Color mapping" / "Color" settings are now located under the chart type field. The settings have been renamed as follows: "Color by value" is now "Color mode", "Color mapping" is now "Dynamic color mapping", and "Color" is now "Select color".
+* Use flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings in *Lens* [#240804]({{kib-pull}}240804).
+% !!TODO!! The above PR had a lengthy release note description:
+% In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel.
+* Moves the Lens visualization toolbar from the workspace section to the config panel. in *Lens* [#239879]({{kib-pull}}239879).
+* Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header. in *Lens* [#239176]({{kib-pull}}239176).
+* Top Nav Save Menu [#237211]({{kib-pull}}237211).
+* Display layers as tabs instead of vertically stacked panels in *Lens* [#235372]({{kib-pull}}235372).
+% !!TODO!! The above PR had a lengthy release note description:
+% The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines.
+
+**Data ingestion and Fleet**:
+* Adds integration knowledge opt out UI setting and enable feature flag [#245080]({{kib-pull}}245080).
+* Support integrations rollback to previous versions [#240761]({{kib-pull}}240761).
+* Adds a functionality for removing root privilege from Fleet managed agents if applicable [#237790]({{kib-pull}}237790).
+* Adds agent internal yaml settings [#245819]({{kib-pull}}245819).
+* Agent actions menu redesign [#245174]({{kib-pull}}245174).
+% !!TODO!! The above PR had a lengthy release note description:
+% Redesigned single and bulk agent actions menus in Fleet. Commonly used actions are organized at the top level of the menus, while other actions are now organized into nested menus by use-case.
+* Auto migrate component template ilms in setup task [#243333]({{kib-pull}}243333).
+* Adds fleet policy revisions cleanup task [#242612]({{kib-pull}}242612).
+% !!TODO!! The above PR had a lengthy release note description:
+% * Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index
+* Use type@lifecycle ILMs for new package installs [#241992]({{kib-pull}}241992).
+* Adds `xpack.fleet.experimentalFeatures` config setting [#238840]({{kib-pull}}238840).
+* "Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes [#237528]({{kib-pull}}237528).
+* Adds missing settings to set up Elastic Agent > Fleet Server SSL support [#236959]({{kib-pull}}236959).
+* Fleet agent list table now persists state of filters while navigating within a session [#228875]({{kib-pull}}228875).
+
+**Discover**:
+* Supports chain controls [#242909]({{kib-pull}}242909).
+* Support subqueries in pretty printer [#241473]({{kib-pull}}241473).
+* Adds subqueries support for walker and visitor [#241451]({{kib-pull}}241451).
+* Support subqueries in AST [#241227]({{kib-pull}}241227).
+* Computed suggestions for expression [#246421]({{kib-pull}}246421).
+* Toggle Icon type for add/remove field column [#246024]({{kib-pull}}246024).
+* Show multi-fields in the DocViewer by default [#245890]({{kib-pull}}245890).
+* Adds example plugin tests [#245792]({{kib-pull}}245792).
+* Supports filtering for multivalue fields [#245554]({{kib-pull}}245554).
+* Adds “Copy as Markdown” option for selected results [#245545]({{kib-pull}}245545).
+* Don't make redundant requests when breakdown or chart interval changes [#245523]({{kib-pull}}245523).
+* String-Only Suggestions for Like and RLike Operators [#244903]({{kib-pull}}244903).
+* Lookup index editor - New layout and controls [#244480]({{kib-pull}}244480).
+* Precise validation and autocomplete for CASE [#244280]({{kib-pull}}244280).
+* Adds context-aware suggestion ordering with categorization [#243312]({{kib-pull}}243312).
+* Suggest adding curly braces after the WITH keyword for Rerank and Completion [#243047]({{kib-pull}}243047).
+* Support new exponential_histogram ES Field type [#242748]({{kib-pull}}242748).
+* Wrap the fork subcommands inside the parens node [#242369]({{kib-pull}}242369).
+* Adds support for subqueries in FROM clauses across tools [#242166]({{kib-pull}}242166).
+* Simplified search visor [#242123]({{kib-pull}}242123).
+* Supports subqueries in our apps [#241921]({{kib-pull}}241921).
+* Subquery Autocomplete Support With Context Awareness And Nesting Restrictions [#241912]({{kib-pull}}241912).
+* Index editor - Allow selecting column type [#241637]({{kib-pull}}241637).
+* Adds Subquery Support for Columns After and Validation [#241567]({{kib-pull}}241567).
+* Making the Expression Suggestor More Semantically Intelligent [#241081]({{kib-pull}}241081).
+* Lookup join ON expressions client side validation [#240930]({{kib-pull}}240930).
+* Support Expressions in Lookup Join Autocomplete [#240735]({{kib-pull}}240735).
+* Applies the breakdown first and then the date_histogram [#239685]({{kib-pull}}239685).
+* Supports multi values variables in MV_CONTAINS [#239266]({{kib-pull}}239266).
+* Discover to dashboard with controls, saving the histogram [#237070]({{kib-pull}}237070).
+* Support expressions in functions [#236343]({{kib-pull}}236343).
+* Displays inline suggestions [#235162]({{kib-pull}}235162).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Adds cross-tab syncing to PersistedLog [#242467]({{kib-pull}}242467).
+* Make Elastic logo click open custom home page in solution view [#241571]({{kib-pull}}241571).
+* Adds deployment name to breadcrumbs in ECH [#238078]({{kib-pull}}238078).
+
+**Kibana security**:
+* API Keys management page now defaults to showing personal API Keys only [#245261]({{kib-pull}}245261).
+* Added a warning when deleting API keys currently in use by alerting rules [#243353]({{kib-pull}}243353).
+* Enforce object_src in our CSP [#241029]({{kib-pull}}241029).
+% !!TODO!! The above PR had a lengthy release note description:
+% Enforces the `object_src 'none'` directive in Kibana's Content Security Policy. Introduces a new `csp.object_src` configuration option to control its behavior.
+* Adds origin configuration to authc providers [#239993]({{kib-pull}}239993).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds the ability to specify the origin(s) where an authentication provider will appear to users in the Login Selector UI.
+* Enhanced the error message to include detailed information about why the role is considered malformed [#239098]({{kib-pull}}239098).
+
+**Machine Learning**:
+* Adds Security ML modules for GCP Audit and Azure Activity Logs [#236849]({{kib-pull}}236849).
+* Chat experience documentation links [#246334]({{kib-pull}}246334).
+* Inference/AI Connector and Inference endpoint creation providers: adds icon for Groq [#244962]({{kib-pull}}244962).
+* Redesign of the file upload section of the lookup join flyout [#244550]({{kib-pull}}244550).
+* Removes median line length categorization check [#243827]({{kib-pull}}243827).
+* Preconfigured Connectors: adds new connectors and updates existing one [#242791]({{kib-pull}}242791).
+* Inference endpoints creation: adds custom header support [#242187]({{kib-pull}}242187).
+* Improve layout for custom inference endpoint [#241779]({{kib-pull}}241779).
+* File upload: Adds ability to cancel file upload [#241297]({{kib-pull}}241297).
+* Anomaly Detection: Adds an action to create an anomaly detection alerting rule [#241274]({{kib-pull}}241274).
+* Makes update space APIs public [#241109]({{kib-pull}}241109).
+* Data Visualizer: Improves display of long fields values in top values list [#241006]({{kib-pull}}241006).
+* Enable alerts filtering with KQL bar [#240100]({{kib-pull}}240100).
+* Anomaly Detection: Adds feedback button to the Anomaly Explorer and Single Metric Viewer [#239883]({{kib-pull}}239883).
+* Adds new temperature parameter to AI Connector and OpenAI, Bedrock, Gemini connectors [#239806]({{kib-pull}}239806).
+* Adds new temperature parameter to AI Connector config schema [#239626]({{kib-pull}}239626).
+* Removes `AI Assistants Settings` privilege [#239144]({{kib-pull}}239144).
+* Adds support for headers in the OpenAI integration [#238710]({{kib-pull}}238710).
+
+**Management**:
+* Adds SLO attachments and migrate UI to attachments API [#244092]({{kib-pull}}244092).
+* Processing: Suggest ingest pipeline [#243950]({{kib-pull}}243950).
+* Adds Attachments API [#243597]({{kib-pull}}243597).
+* Drop processor UI [#243131]({{kib-pull}}243131).
+* 🌊 Dissect suggestions [#242377]({{kib-pull}}242377).
+* Show partial results after search has been canceled [#242346]({{kib-pull}}242346).
+* Replace processor [#242310]({{kib-pull}}242310).
+* Adds Drop processor [#242161]({{kib-pull}}242161).
+* Show field data type in partitioning UI [#242134]({{kib-pull}}242134).
+* Enable by default [#242105]({{kib-pull}}242105).
+* Show field data types in Processing table and step editor [#241825]({{kib-pull}}241825).
+* Adds timezone and locale parameters to Streamlang [#241369]({{kib-pull}}241369).
+* Support convert processor for stream data processing [#240023]({{kib-pull}}240023).
+* Edit feature condition and add feature discover url [#238646]({{kib-pull}}238646).
+* Adds abort support and silent mode for stream description generation [#247082]({{kib-pull}}247082).
+* Adds classic stream creation flyout to Streams page [#245975]({{kib-pull}}245975).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds a new flyout to create classic streams directly from the Streams page. The UI includes validation to prevent duplicate stream names and detect index template priority conflicts and ensuring streams are created with the expected configuration.
+* Improve attachment filters with multi-type selection, server-side filtering, and suggestions limit [#245248]({{kib-pull}}245248).
+* Empty state for Partitioning tab [#244893]({{kib-pull}}244893).
+* Improve attachments feature with details flyout and better UX [#244880]({{kib-pull}}244880).
+* Adds UI Streams Tour [#244808]({{kib-pull}}244808).
+* Better handling of missing stream [#244366]({{kib-pull}}244366).
+* Adds classic streams geo point field type support [#244356]({{kib-pull}}244356).
+* 🌊 Streams: Allow permission per space [#244285]({{kib-pull}}244285).
+* Disable conflicting actions in partitioning tab [#244228]({{kib-pull}}244228).
+* 🌊 Streams: Disallow invalid stuff [#244221]({{kib-pull}}244221).
+* Adds custom processor description [#243998]({{kib-pull}}243998).
+* Improve error messaging when expensive queries are disabled in Streams schema editor [#243406]({{kib-pull}}243406).
+* 🌊 : Adding autocomplete for values [#241119]({{kib-pull}}241119).
+% !!TODO!! The above PR had a lengthy release note description:
+% In Streams, value autocomplete is now available in the Partitioning and Processing tabs. This means when users are configuring stream partitions or processing rules, typing in a field value will trigger suggestions, helping them find matching values more quickly and with less manual lookup.
+* Provides a better message feedback into the collapsed Processors/Conditions for the user [#240778]({{kib-pull}}240778).
+* Improve processing warnings [#239188]({{kib-pull}}239188).
+* Generate significant events from Advanced tab and UI improvements [#239070]({{kib-pull}}239070).
+* Adds ingest pipeline processor template suggestions to manual ingest pipeline processor editor [#236919]({{kib-pull}}236919).
+
+**Operations**:
+* Set heap limit to min(75%, 4gb) for containers if unset [#246073]({{kib-pull}}246073).
+% !!TODO!! The above PR had a lengthy release note description:
+% Containers now set the default Node.js heap to 75% of available memory up to a maximum of 4096mb.  Previously this was set to 50%.
+
+**Platform**:
+* Allows basic filtering in ES|QL charts [#243439]({{kib-pull}}243439).
+
+**Search**:
+* Deprecate feature flag (part 1 of 2) [#245311]({{kib-pull}}245311).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds a new getting started page within the Elasticsearch solution which offers hands on feature tutorials. This page defaults as the initial destination for users creating a new Elasticsearch project.
+* Search Homepage design is updated [#246777]({{kib-pull}}246777).
+* Enhances the copy behavior by providing clear visual confirmation [#246090]({{kib-pull}}246090).
+* Adds targeted EIS callouts and tours for ECH/Serverless users in Kibana [#244626]({{kib-pull}}244626).
+% !!TODO!! The above PR had a lengthy release note description:
+% Targeted EIS callouts and guided tours have been added to Kibana for ECH/Serverless users to improve discoverability of Elastic Inference Service endpoints. Users can dismiss callouts and tours, which will not reappear after dismissal.
+* Export as x language [#242487]({{kib-pull}}242487).
+% !!TODO!! The above PR had a lengthy release note description:
+% Improves the Console UI to make key actions more intuitive. The Play button is now more prominent, a new "Copy to language" button provides quick access to export the selected command in the user's preferred coding language, and the context menu has been updated to allow users to set a default language preference. These enhancements improve the discoverability of both query execution and export.
+* Remove global empty state redirect [#237612]({{kib-pull}}237612).
+% !!TODO!! The above PR had a lengthy release note description:
+% Users will now land on the Elasticsearch home page by default instead of being redirected to the create index page. This ensures immediate access to tutorials and educational content, improving discoverability of Kibana features while removing the previous global empty state redirect.
+* Gap auto fill scheduler UI and API [#244719]({{kib-pull}}244719).
+* Feature branch [#224552]({{kib-pull}}224552).
+% !!TODO!! The above PR had a lengthy release note description:
+% Kibana Dashboards now support ownership and "write_restricted" mode. Users can now keep dashboards publicly editable or in a write-restricted state until they are ready to publish, giving them more control over who can edit their dashboards, regardless of broader space permissions.
+* Linux now supports populate_file_data advanced option which enables entropy and header_bytes fields in file events [#246197]({{kib-pull}}246197).
+* Adds new gap fill status for rules [#242595]({{kib-pull}}242595).
+* Adds rows per page selector to tools, agents, and agent tools selection [#242207]({{kib-pull}}242207).
+* Remove workflow execution details from tool calls [#241040]({{kib-pull}}241040).
+% !!TODO!! The above PR had a lengthy release note description:
+% Changes the output of Agent Builder tools based on Workflows. This optimizes workflow output to consume fewer LLM tokens, and can improve your Agent performance and reliability.
+* Adds kibana.alert.index_pattern to all alerts [#239450]({{kib-pull}}239450).
+
+
+### Fixes [kibana-9.3.0-fixes]
+
+**Alerting**:
+* Update total event in ES document when attaching an event [#247996]({{kib-pull}}247996).
+* Encode search term in cases page [#247992]({{kib-pull}}247992).
+* Adds max character validation to the email connector params and config [#246453]({{kib-pull}}246453).
+* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode [#245253]({{kib-pull}}245253).
+* Adds consecutiveMatches to action context [#244997]({{kib-pull}}244997).
+* Fixes stale submitting [#244543]({{kib-pull}}244543).
+* Allow spaces in file paths in Observables [#244350]({{kib-pull}}244350).
+* Catch connector errors but do not interrupt the case creation flow [#244188]({{kib-pull}}244188).
+* Improve IBM error message [#244012]({{kib-pull}}244012).
+* Verify the alert exists before muting [#242847]({{kib-pull}}242847).
+* Fixes auto extraction in event bulk actions [#242325]({{kib-pull}}242325).
+* Fixes a bug that caused the alerts tables pagination to be stuck in the Rule pages [#242275]({{kib-pull}}242275).
+* Use the real dimensions when taking a screenshot [#242127]({{kib-pull}}242127).
+* Only take tags-changes into account when connector supports them [#241944]({{kib-pull}}241944).
+* Improve all cases table loading to prevent flashing [#240155]({{kib-pull}}240155).
+* A11y - Fix missing announcements in form row [#240132]({{kib-pull}}240132).
+* Adds manual focus to action buttons' actions [#239504]({{kib-pull}}239504).
+* Remove `autoFocus` to preserve proper focus when modal closed [#239366]({{kib-pull}}239366).
+* Fixes auto extract observables in EASE [#239000]({{kib-pull}}239000).
+* Update `nodemailer` [#238816]({{kib-pull}}238816).
+* Adds Jira's `otherFields` JSON editor to case creation flow [#238435]({{kib-pull}}238435).
+* Connector api update [#236863]({{kib-pull}}236863).
+* Enable auto-extraction by default and add user actions for observable actions [#236524]({{kib-pull}}236524).
+* Separate sync alert and auto-extract updates in activity [#236519]({{kib-pull}}236519).
+
+**Dashboards and Visualizations**:
+* Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
+* Use max_value instead of infinity [#243572]({{kib-pull}}243572).
+* Fixes Can not save Dashboard after switching a Dashboard Link to an External Link [#243134]({{kib-pull}}243134).
+* Silence URL restore errors for Discover & Dashboards [#242788]({{kib-pull}}242788).
+* Fixes print mode regression in Dashboard [#242780]({{kib-pull}}242780).
+* Fixes 'sync colors' and 'sync tooltips' must be ON by default [#242442]({{kib-pull}}242442).
+* Fixes deselecting (blank) option from options list [#242036]({{kib-pull}}242036).
+* Fixes layout issues for markdown embeddables in small panels [#240806]({{kib-pull}}240806).
+* Show labels after saving edits while staying on Vector tiles (… [#240728]({{kib-pull}}240728).
+% !!TODO!! The above PR had a lengthy release note description:
+% **Fix:** Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle.
+* Fixes unable to reset unsaved change when enabling timeRestore and setting time range [#239992]({{kib-pull}}239992).
+* Fixes search session restoration bug [#239822]({{kib-pull}}239822).
+* Fixes error when selecting "(blank)" value in options list [#239791]({{kib-pull}}239791).
+* Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references [#239431]({{kib-pull}}239431).
+* Pause fetch until initialized [#239228]({{kib-pull}}239228).
+* Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. in *Lens* [#239222]({{kib-pull}}239222).
+* Fixes metric color assignment when breakdown and a max dimension are defined in *Lens* [#238901]({{kib-pull}}238901).
+* Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
+* Improve list error handling in *Visualize* [#238355]({{kib-pull}}238355).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.
+* Soften validation on filter schema [#237477]({{kib-pull}}237477).
+* Fixes panels in sections from URL state are not transformed [#237382]({{kib-pull}}237382).
+* Fixs controls cause double fetch [#237169]({{kib-pull}}237169).
+
+**Data ingestion and Fleet**:
+* Use long expiration for upgrade agents [#243443]({{kib-pull}}243443).
+* Fixes retrying stuck agents in auto upgrade logic [#243326]({{kib-pull}}243326).
+* * Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered [#243105]({{kib-pull}}243105).
+* Fixes docker image in Add agent k8s manifest [#242691]({{kib-pull}}242691).
+* Fixes package icons loading [#242406]({{kib-pull}}242406).
+* Show warnings on sync integrations UI when referencing other entities [#241623]({{kib-pull}}241623).
+* Adds proxy ssl options to download sources [#241115]({{kib-pull}}241115).
+* Omit system properties when syncing ingest pipelines [#241096]({{kib-pull}}241096).
+* Fixes `template_path` asset selection for some cases of integration packages [#240750]({{kib-pull}}240750).
+* * Allows fleet setup retries on start in all environments [#240342]({{kib-pull}}240342).
+* Fixes fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+* Fixes `ignore_above` mapping for `flattened` fields [#238890]({{kib-pull}}238890).
+* Fixes "package not found" error when skipping cloud onboarding for a prerelease package [#238629]({{kib-pull}}238629).
+* * Fixes on integration policy upgrade [#238542]({{kib-pull}}238542).
+* Fixes error when deleting orphaned integration policies [#237875]({{kib-pull}}237875).
+* Enable storing secrets in Fleet Server Host config if fleet-server is running at a minimum supported version [#237464]({{kib-pull}}237464).
+* 233750 msi commands [#236994]({{kib-pull}}236994).
+
+**Discover**:
+* Fixes not recognized GROK patterns [#246871]({{kib-pull}}246871).
+* Fixes default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
+* Fixes Discover tab initialization [#245752]({{kib-pull}}245752).
+* Fixes truncation for longer text in table [#241440]({{kib-pull}}241440).
+* Fixes the autocomplete of timeseries sources after comma [#241402]({{kib-pull}}241402).
+* Adds FORK with KEEP/STATS in the transformational commands [#240011]({{kib-pull}}240011).
+* Displays the available options when editing an existing variable control [#239315]({{kib-pull}}239315).
+* Fixes KEEP behavior in ESQL when a query initially returns no results [#239063]({{kib-pull}}239063).
+* Fixes missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting [#238945]({{kib-pull}}238945).
+* This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there [#237575]({{kib-pull}}237575).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes createAuditEvents always returning failure as outcome [#247152]({{kib-pull}}247152).
+* Fixes "now" and mixed format date handling in share modal [#245539]({{kib-pull}}245539).
+* Fixes favicon CSS specifity [#243351]({{kib-pull}}243351).
+* Reduce re-renders on resize and items change [#239888]({{kib-pull}}239888).
+* Fixes files management flyout crashing [#237588]({{kib-pull}}237588).
+
+**Kibana security**:
+* Fixes case sensitivity of fields in role page [#246069]({{kib-pull}}246069).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an issue where fields were not case-sensitive in Kibana's user interface for creating and updating roles, though fields are case-sensitive in Elasticsearch.
+* Fixes a bug preventing IDP initiated login with multiple OIDC providers [#243869]({{kib-pull}}243869).
+* Fixes infinite loading of roles on edit spaces screen [#242954]({{kib-pull}}242954).
+* Introduced a separate error for empty login attempt with `saml/oidc` providers [#237611]({{kib-pull}}237611).
+
+**Machine Learning**:
+* Disable ES|QL field stats for TS command [#247641]({{kib-pull}}247641).
+* Data Visualizer: fixes display of map view for small screen sizes [#247615]({{kib-pull}}247615).
+* Fixing anomaly chart empty query bug [#246841]({{kib-pull}}246841).
+* Anomaly detection: Fixes creating new jobs from Discover sessions with no data view [#246410]({{kib-pull}}246410).
+* Anomaly Detection result views: ensures chart tooltips are always shown correctly [#246077]({{kib-pull}}246077).
+* Anomaly Explorer: Do not clear cell selection after hiding the alerts table popover [#244183]({{kib-pull}}244183).
+* Log Rate Analysis: Optimizes & Re-enables text field analysis in contextual insights [#244109]({{kib-pull}}244109).
+* Inference/AI Connector and Inference endpoint creation: ensures deleted text in form is not sent as empty string [#244059]({{kib-pull}}244059).
+* Data frame analytics: Fixes wizard for data view with runtime fields [#242557]({{kib-pull}}242557).
+* Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
+* Fixes public update space APIs [#242136]({{kib-pull}}242136).
+* Anthropic endpoint creation: ensures max tokens parameter is passed as expected [#241212]({{kib-pull}}241212).
+* Anthropic Connector: ensure max tokens parameter is passed as expected by service [#241188]({{kib-pull}}241188).
+* Removes default fallback region for Bedrock Connector [#241157]({{kib-pull}}241157).
+* Ensures all auth fields show up correctly [#240913]({{kib-pull}}240913).
+* Fixes index names causing incompatible cluster error when product docs are installed with for multiple Inference IDs [#240506]({{kib-pull}}240506).
+* Inference endpoints UI: Ensures list loads when provider is custom [#240189]({{kib-pull}}240189).
+* GenAI Settings: Reflect selected `AI Assistants Visibility` value from header selector on the Settings page [#239555]({{kib-pull}}239555).
+* Fixes layout of fields in Overview and Notifications pages [#239113]({{kib-pull}}239113).
+* Adds unique accessible labels for Show top field values buttons [#237972]({{kib-pull}}237972).
+* Fixes tool calling unavailable tools [#237174]({{kib-pull}}237174).
+* Improving trained models list performance [#237072]({{kib-pull}}237072).
+* Single Metric Viewer: fixes partition field settings errors in the dashboard panel [#237046]({{kib-pull}}237046).
+* Alerting: Escape URL-like string from being displayed as links [#226849]({{kib-pull}}226849).
+
+**Management**:
+* Fixes Processing, field name autocomplete not working on new fields [#246934]({{kib-pull}}246934).
+* Disable geopoint mapping in the processing preview [#245506]({{kib-pull}}245506).
+* Manual ingest pipeline script validation [#245439]({{kib-pull}}245439).
+* Account for max headroom setting when showing low watermark warning [#243906]({{kib-pull}}243906).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes case where upgrade assistant would incorrectly warn about node breaching low watermark despite max headroom setting.
+* 🌊 🐞 Prevent retention page crash for certain ILM policies [#243826]({{kib-pull}}243826).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes a crash on UI Streams > retention page when a stream has defined an index lifecycle (ILM) policy that omits expected lifecycle phases or all of it phases starts at `0`.
+* 🐞 Fix Cell Actions populate undefined with empty cells [#243766]({{kib-pull}}243766).
+* Remove mentions of template snippets (Mustache Templates) from descriptions [#243656]({{kib-pull}}243656).
+* Child stream input validation [#242581]({{kib-pull}}242581).
+* 🌊 Streams: Decouple streams AI features from observability ai assistant [#242019]({{kib-pull}}242019).
+* 🌊 Streams: Fix simulation of geo points [#241824]({{kib-pull}}241824).
+* 🌊 Streams: Speed up field simulation [#241313]({{kib-pull}}241313).
+* Fixes invalid state for wired streams toggle [#241266]({{kib-pull}}241266).
+* Fixes wrapping issues in Processing and Streams partitions AI suggestions [#240883]({{kib-pull}}240883).
+* Only return valid queries for sig events [#239501]({{kib-pull}}239501).
+* Improve performance of clustering [#238394]({{kib-pull}}238394).
+* Fixes @custom component template creation [#237952]({{kib-pull}}237952).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data-streams and a popup would appear asking to rollover conflicting ones.
+* Fixes privileges for reindexing indices [#237055]({{kib-pull}}237055).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes privilege requirements when reindexing indices via Upgrade Assistant. Previously, the "superuser" role was required. Now "cluster: manage" and "all" privileges for the relevant indices are sufficient.
+
+**Monitoring**:
+* Fixes URL in Disk Usage alerting rule [#240279]({{kib-pull}}240279).
+
+**Platform**:
+* Fixes ECS-incompatible value in the logs [#245706]({{kib-pull}}245706).
+* Intersect allowed and authorized types [#244967]({{kib-pull}}244967).
+
+**Search**:
+* Fix: Only run ML saved object check if saving semantic text mapping [#248462]({{kib-pull}}248462).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an issue when running Elasticsearch with a Basic license, where users might encounter errors when updating index mappings, even when adding non-ML field types. This issue has been resolved so that mapping updates now work as expected, while advanced semantic text features continue to require the appropriate license.
+* Disabled 'API keys' button on Elasticsearch homepage when logged in user have insufficient permissions [#248072]({{kib-pull}}248072).
+* Fixes the issue related to token count [#246589]({{kib-pull}}246589).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes token count display showing "NaN" in Search Playground by preserving message annotations across the AI SDK v5 stream.
+* Update solution nav tour copy [#245718]({{kib-pull}}245718).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes the grammatical issues in the Solution Nav tour and simplifies the content by replacing multiple links with one link
+* Fixes the API Creation Flyout sizing issue [#244072]({{kib-pull}}244072).
+* Fixes a case on Index management page where screen reader text was different than visible one [#243802]({{kib-pull}}243802).
+* Fixed a case of keyboard focus getting trapped in pages using document preview [#243791]({{kib-pull}}243791).
+* Default semantic text endpoint select input to ELSER in EIS [#242436]({{kib-pull}}242436).
+% !!TODO!! The above PR had a lengthy release note description:
+% .`elser-2-elastic` (ELSER in EIS) is now automatically selected as the default inference endpoint when adding semantic text fields. The `SelectInferenceId` component has been refactored for clarity and stability, resolving a console warning and improving popover and flyout state handling.
+* Fixes Agents & Playground icons in the solution side navigation to render correctly when using dark mode [#240475]({{kib-pull}}240475).
+* Fix: Add styling to handle the text overflow [#239768]({{kib-pull}}239768).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixed data preview metadata popup visual issues when ID is too long. Added a tooltip and copy button to improve user experience.
+* Show error text when fields are invalid [#238284]({{kib-pull}}238284).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues.
+* Announce changes when resetting terms in synonyms panel [#237877]({{kib-pull}}237877).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset.
+* Fix: Add sync check for saved objects for trained models [#237812]({{kib-pull}}237812).
+% !!TODO!! The above PR had a lengthy release note description:
+% Index management mappings editor now syncs model deployment status correctly. This fixes a case where user couldn't save `semantic_text` fields during deployment without forcing.
+* Pass retriever query via body param instead of query in JS tutorial [#237654]({{kib-pull}}237654).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an issue where the retriever query copied from the "Search your data" JavaScript tutorial fails with a `parsing_exception` when passed via the query parameter in the Node.js Elasticsearch client. Retriever queries must be passed via the body parameter to ensure they are serialized correctly.
+* Fixes link's color contrast [#247721]({{kib-pull}}247721).
+* Improve anonymization error messages when NER model is not available [#247696]({{kib-pull}}247696).
+* Truncate text for value list column in value list modal [#246679]({{kib-pull}}246679).
+* Adds table caption for empty top categories in logs category table [#246041]({{kib-pull}}246041).
+* Fixes the alert history chart background color in dark mode [#246017]({{kib-pull}}246017).
+* Fix(security,uiam): bump UIAM containers health check timeouts and populate UIAM shared secret for Elasticsearch [#245238]({{kib-pull}}245238).
+* Serialize meta.error if it is an instance of Error in JSON layout [#244364]({{kib-pull}}244364).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes serialization of meta.error in JSON layouts: if the error is an Error instance, only message, name, and stack will be included — additional fields will no longer pollute the logs.
+* Adds refusal field to assistant conversations [#243423]({{kib-pull}}243423).
+* Disable custom suggestion on embedded console [#241516]({{kib-pull}}241516).
+* Fixed infinite loop bug in investigation guide editor [#240472]({{kib-pull}}240472).
+* Review of action response codes [#240420]({{kib-pull}}240420).
+* Hide filtering capabilities in Hosts Metrics [#239724]({{kib-pull}}239724).
+* Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
+
+
+
 ## 9.2.3 [kibana-9.2.3-release-notes]
 
 % ::::{NOTE}
