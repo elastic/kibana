@@ -6,8 +6,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
-import { API_BASE_PATH } from '@kbn/data-sources-registry-plugin';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
+import { API_BASE_PATH } from '@kbn/data-sources-registry-plugin/common';
 
 /**
  * Service for interacting with Data Connector types (from Data Sources Registry).

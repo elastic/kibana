@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
 import type { Connector } from '../../types/connector';
 import { DataConnectorTypesService } from '../../services';
 import { useKibana } from './use_kibana';
