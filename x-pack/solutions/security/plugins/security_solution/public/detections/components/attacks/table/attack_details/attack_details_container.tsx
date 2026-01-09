@@ -38,8 +38,8 @@ interface TabInfo {
 }
 
 interface AttackDetailsContainerProps {
-  /** The attack discovery alert document. If undefined, only the Alerts tab will be shown. */
-  attack?: AttackDiscoveryAlert;
+  /** The attack discovery alert document. */
+  attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
   /** Filters applied from grouping */
@@ -67,11 +67,9 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
       }),
     });
 
-    const tabs = useMemo<TabInfo[]>(() => {
-      const tabsList: TabInfo[] = [];
-
-      if (attack) {
-        tabsList.push({
+    const tabs = useMemo<TabInfo[]>(
+      () => [
+        {
           id: ATTACK_SUMMARY_TAB,
           name: i18n.ATTACK_SUMMARY,
           content: (
@@ -80,41 +78,32 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               <SummaryTab attack={attack} showAnonymized={showAnonymized} />
             </>
           ),
-        });
-      }
-
-      tabsList.push({
-        id: ALERTS_TAB,
-        name: i18n.ALERTS,
-        content: (
-          <>
-            <EuiSpacer size="s" />
-            <AlertsTab
-              groupingFilters={groupingFilters}
-              defaultFilters={defaultFilters}
-              isTableLoading={isTableLoading}
-            />
-          </>
-        ),
-        append: attack ? (
-          <EuiNotificationBadge size="m" color="subdued">
-            {attack.alertIds.length}
-          </EuiNotificationBadge>
-        ) : undefined,
-      });
-
-      return tabsList;
-    }, [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]);
+        },
+        {
+          id: ALERTS_TAB,
+          name: i18n.ALERTS,
+          content: (
+            <>
+              <EuiSpacer size="s" />
+              <AlertsTab
+                groupingFilters={groupingFilters}
+                defaultFilters={defaultFilters}
+                isTableLoading={isTableLoading}
+              />
+            </>
+          ),
+          append: attack ? (
+            <EuiNotificationBadge size="m" color="subdued">
+              {attack.alertIds.length}
+            </EuiNotificationBadge>
+          ) : undefined,
+        },
+      ],
+      [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]
+    );
 
     const selectedTabContent = useMemo(() => {
-      let content = tabs.find((obj) => obj.id === selectedTabId)?.content;
-      if (!content && tabs.length > 0) {
-        // Fallback to the existing tab if selectedTabId points to the tab that does not exist for the attack group.
-        // This can happen for the default group shown as "-" and representing the alerts that are not part of any attack.
-        // This will change once we have a "Summary tab" for the generic group as well.
-        content = tabs[0].content;
-      }
-      return content;
+      return tabs.find((obj) => obj.id === selectedTabId)?.content;
     }, [selectedTabId, tabs]);
 
     return (

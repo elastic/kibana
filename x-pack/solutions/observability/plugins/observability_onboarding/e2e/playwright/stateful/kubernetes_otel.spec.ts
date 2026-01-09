@@ -28,7 +28,6 @@ test.beforeEach(async ({ page }) => {
  */
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
-const isServerless = process.env.CLUSTER_ENVIRONMENT === 'serverless';
 
 test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
@@ -97,9 +96,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
       await otelKubernetesFlowPage.openServiceInventoryInNewTab()
     );
 
-    const serviceTestId = isServerless
-      ? 'serviceLink_java'
-      : 'serviceLink_opentelemetry/java/elastic';
+    const serviceTestId = 'serviceLink_opentelemetry/java/elastic';
 
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
