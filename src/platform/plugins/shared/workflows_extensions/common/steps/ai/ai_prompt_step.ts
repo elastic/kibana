@@ -32,7 +32,7 @@ export const InputSchema = z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  outputSchema: z.any().optional(),
+  schema: z.any().optional(),
   temperature: z.number().min(0).max(1).optional(),
 });
 

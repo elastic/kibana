@@ -32,8 +32,8 @@ export const AiPromptStepDefinition: PublicStepDefinition<
   editorHandlers: {
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
-        if (input.outputSchema) {
-          return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
+        if (input.schema) {
+          return getStructuredOutputSchema(convertJsonSchemaToZod(input.schema));
         }
 
         return OutputSchema;

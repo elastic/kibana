@@ -45,7 +45,7 @@ export const aiPromptStepDefinition = (
         },
       ];
 
-      if (context.input.outputSchema) {
+      if (context.input.schema) {
         const runnable = chatModel.withStructuredOutput(
           {
             type: 'object',
@@ -53,7 +53,7 @@ export const aiPromptStepDefinition = (
               // withStructuredOutput fails if outputSchema is not an object.
               // for example, if the user expects an array, we wrap it into an object here
               // and then unwrap it below
-              response: context.input.outputSchema,
+              response: context.input.schema,
             },
           },
           {
