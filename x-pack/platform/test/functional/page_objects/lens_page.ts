@@ -1263,11 +1263,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param colIndex - index of column of the cell
      * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableCellText(
-      rowIndex = 0,
-      colIndex = 0,
-      addRowNumberColumn: boolean | undefined
-    ) {
+    async getDatatableCellText(rowIndex = 0, colIndex = 0, addRowNumberColumn?: boolean) {
       const el = await this.getDatatableCell(rowIndex, colIndex, addRowNumberColumn);
       return el.getVisibleText();
     },
