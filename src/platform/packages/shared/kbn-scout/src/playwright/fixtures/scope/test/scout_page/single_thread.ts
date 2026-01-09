@@ -16,7 +16,7 @@ import { keyTo, checkA11y } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 
 /**
- * Types text into an input field character by character with a specified delay between each one.
+ * Types text into an input field character by character with a specified delay to mimic realistic user typing.
  */
 async function typeWithDelay(
   page: Page,
@@ -28,7 +28,7 @@ async function typeWithDelay(
   await page.locator(selector).click();
   for (const char of text) {
     await page.keyboard.insertText(char);
-    // it is important to delay characters input to avoid flakiness, default is 25 ms
+    // Delays character input by 50ms (default) to prevent flakiness from rushed automation.
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(delay);
   }
