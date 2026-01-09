@@ -26,8 +26,8 @@ jest.mock('./search_inject_extract', () => {
 
 const { transformEnhancementsIn, transformEnhancementsOut } = createEmbeddableSetupMock();
 transformEnhancementsIn.mockImplementation((state) => ({
-  enhancementsState: state,
-  enhancementsReferences: [],
+  state,
+  references: [],
 }));
 transformEnhancementsOut.mockImplementation((state) => state);
 

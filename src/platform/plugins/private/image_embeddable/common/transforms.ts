@@ -12,8 +12,8 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { ImageEmbeddableState } from '../server';
 
 export function getTransforms(
-  transformEnhancementsIn: EmbeddableSetup['extract'],
-  transformEnhancementsOut: EmbeddableSetup['inject']
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn'],
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
   return {
     transformIn: (state: ImageEmbeddableState) => {
