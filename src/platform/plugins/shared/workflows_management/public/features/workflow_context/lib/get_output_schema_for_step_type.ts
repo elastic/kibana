@@ -30,9 +30,10 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     if (stepDefinition && stepSchemas.isPublicStepDefinition(stepDefinition)) {
       try {
         if (stepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema) {
-          return stepDefinition.editorHandlers.dynamicSchema.getOutputSchema(
-            node.configuration.with
-          );
+          return stepDefinition.editorHandlers.dynamicSchema.getOutputSchema({
+            input: node.configuration.with,
+            config: node.configuration,
+          });
         }
       } catch (error) {
         // If dynamic schema generation fails, fallback to static output schema

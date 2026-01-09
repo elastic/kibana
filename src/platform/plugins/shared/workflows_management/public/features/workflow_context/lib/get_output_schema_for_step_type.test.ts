@@ -242,7 +242,10 @@ describe('getOutputSchemaForStepType', () => {
       expect(
         mockStepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema
       ).toHaveBeenCalledWith({
-        customParam: 'dynamicValue',
+        input: {
+          customParam: 'dynamicValue',
+        },
+        config: mockNode.configuration,
       });
 
       // Should return the dynamic schema
@@ -284,7 +287,10 @@ describe('getOutputSchemaForStepType', () => {
       // Should call getOutputSchema first
       expect(mockStepDefinition.editorHandlers?.dynamicSchema.getOutputSchema).toHaveBeenCalledWith(
         {
-          param: 'value',
+          input: {
+            param: 'value',
+          },
+          config: mockNode.configuration,
         }
       );
 
