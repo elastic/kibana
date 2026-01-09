@@ -424,7 +424,8 @@ export const GithubConnector: ConnectorSpec = {
               ...(typedInput.sort && { sort: typedInput.sort }),
               ...(typedInput.direction && { direction: typedInput.direction }),
               ...(typedInput.since && { since: typedInput.since }),
-              ...(typedInput.labels && typedInput.labels.length > 0 && { labels: typedInput.labels.join(',') }),
+              ...(typedInput.labels &&
+                typedInput.labels.length > 0 && { labels: typedInput.labels.join(',') }),
               ...(typedInput.page && { page: typedInput.page }),
               ...(typedInput.perPage && { per_page: typedInput.perPage }),
             },
