@@ -41,8 +41,12 @@ export function RedirectToHomeIfUnauthorized({
     chatExperience !== AIChatExperience.Agent;
 
   useEffect(() => {
-    if (!isServerlessSearchSolution && !allowed) {
-      navigateToApp('home');
+    if (!allowed) {
+      if (isServerlessSearchSolution) {
+        navigateToApp('searchHomepage');
+      } else {
+        navigateToApp('home');
+      }
     }
   }, [allowed, navigateToApp, isServerlessSearchSolution]);
 
