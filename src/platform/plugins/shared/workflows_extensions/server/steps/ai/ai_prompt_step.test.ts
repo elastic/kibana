@@ -27,11 +27,11 @@ jest.mock('../../step_registry/types', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
 }));
 
-import { aiPromptStepDefinition } from './step';
-import type { ContextManager, StepHandlerContext } from '../../../step_registry/types';
-import { createServerStepDefinition } from '../../../step_registry/types';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
-import { resolveConnectorId } from '../utils/resolve_connector_id';
+import { aiPromptStepDefinition } from './ai_prompt_step';
+import { resolveConnectorId } from './utils/resolve_connector_id';
+import type { ContextManager, StepHandlerContext } from '../../step_registry/types';
+import { createServerStepDefinition } from '../../step_registry/types';
+import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
 
 const mockResolveConnectorId = resolveConnectorId as jest.MockedFunction<typeof resolveConnectorId>;
 const mockCreateServerStepDefinition = createServerStepDefinition as jest.MockedFunction<
