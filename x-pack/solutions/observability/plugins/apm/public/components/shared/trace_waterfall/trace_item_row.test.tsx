@@ -34,14 +34,15 @@ jest.mock('./bar_details', () => ({
 jest.mock('./toggle_accordion_button', () => ({
   TOGGLE_BUTTON_WIDTH: 10,
   ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
-    <button
+    <div
       data-test-subj="toggle-btn"
       data-open={isOpen}
       data-count={childrenCount}
       onClick={onClick}
-    >
-      Toggle
-    </button>
+      onKeyDown={onClick}
+      role="button"
+      tabIndex={0}
+    />
   ),
 }));
 jest.mock('./trace_waterfall_context');

@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType, SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
@@ -17,7 +17,7 @@ import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_build
 import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
 import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
 import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
-import { getToolResultId } from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
@@ -31,6 +31,12 @@ const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+    ),
   existingConfig: z
     .string()
     .optional()
@@ -80,7 +86,7 @@ This tool will:
     },
     tags: [],
     handler: async (
-      { query: nlQuery, chartType, esql, existingConfig },
+      { query: nlQuery, index, chartType, esql, existingConfig },
       { esClient, modelProvider, logger, events }
     ) => {
       try {
@@ -120,6 +126,7 @@ This tool will:
 
         const finalState = await graph.invoke({
           nlQuery,
+          index,
           chartType: selectedChartType,
           schema,
           existingConfig,

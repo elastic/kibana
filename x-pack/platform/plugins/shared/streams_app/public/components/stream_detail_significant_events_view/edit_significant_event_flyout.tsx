@@ -27,7 +27,7 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
-  onFeatureIdentificationClick,
+  refreshFeatures,
   generateOnMount,
   aiFeatures,
 }: {
@@ -42,7 +42,7 @@ export const EditSignificantEventFlyout = ({
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onFeatureIdentificationClick: () => void;
+  refreshFeatures: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }) => {
@@ -55,11 +55,17 @@ export const EditSignificantEventFlyout = ({
     name: definition.stream.name,
   });
 
+  const onCloseFlyout = () => {
+    setIsEditFlyoutOpen(false);
+    setQueryToEdit(undefined);
+    setSelectedFeatures([]);
+  };
+
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
       refreshDefinition={refreshDefinition}
-      onFeatureIdentificationClick={onFeatureIdentificationClick}
+      refreshFeatures={refreshFeatures}
       definition={definition}
       query={queryToEdit}
       aiFeatures={aiFeatures}
@@ -77,7 +83,7 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
 
                 telemetryClient.trackSignificantEventsCreated({
@@ -135,7 +141,7 @@ export const EditSignificantEventFlyout = ({
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
               },
               (error) => {
@@ -151,11 +157,7 @@ export const EditSignificantEventFlyout = ({
             break;
         }
       }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedFeatures([]);
-      }}
+      onClose={onCloseFlyout}
       initialFlow={initialFlow}
       initialSelectedFeatures={selectedFeatures}
       features={features}

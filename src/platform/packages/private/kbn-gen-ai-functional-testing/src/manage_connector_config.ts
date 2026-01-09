@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const LOCAL_FILE = Path.join(
   REPO_ROOT,
-  'packages/kbn-gen-ai-functional-testing/connector_config.json'
+  'src/platform/packages/private/kbn-gen-ai-functional-testing/connector_config.json'
 );
 
 export const retrieveFromVault = async () => {

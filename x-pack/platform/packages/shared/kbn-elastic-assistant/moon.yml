@@ -54,7 +54,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/ai-agent-confirmation-modal'
   - '@kbn/ai-assistant-common'
-  - '@kbn/onechat-common'
+  - '@kbn/agent-builder-common'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-analytics-browser'
 tags:

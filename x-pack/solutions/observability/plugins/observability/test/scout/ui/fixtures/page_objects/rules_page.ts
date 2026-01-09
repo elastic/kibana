@@ -12,6 +12,7 @@ import {
   RULE_TYPE_MODAL_TEST_SUBJECTS,
   RULE_LIST_TEST_SUBJECTS,
   LOGS_TAB_TEST_SUBJECTS,
+  CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS,
   BIGGER_TIMEOUT,
   SHORTER_TIMEOUT,
 } from '../constants';
@@ -332,5 +333,121 @@ export class RulesPage {
   async closeEditRuleFlyout() {
     await this.editRuleFlyoutCancelButton.click();
     await expect(this.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  // Custom Threshold Rule Creation methods
+
+  /**
+   * Gets the custom threshold rule type card
+   */
+  public get customThresholdRuleTypeCard() {
+    return this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_THRESHOLD_RULE_TYPE_CARD
+    );
+  }
+
+  /**
+   * Gets the rule form locator
+   */
+  public get ruleForm() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_FORM);
+  }
+
+  /**
+   * Gets the rule name input field
+   */
+  public get ruleNameInput() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_NAME_INPUT);
+  }
+
+  /**
+   * Gets the data view expression button
+   */
+  public get dataViewExpression() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.DATA_VIEW_EXPRESSION);
+  }
+
+  /**
+   * Gets the index pattern switcher input
+   */
+  public get indexPatternInput() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.INDEX_PATTERN_INPUT);
+  }
+
+  /**
+   * Gets the explore matching indices button
+   */
+  public get exploreMatchingIndicesButton() {
+    return this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.EXPLORE_MATCHING_INDICES_BUTTON
+    );
+  }
+
+  /**
+   * Gets the rule save button
+   */
+  public get ruleSaveButton() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_SAVE_BUTTON);
+  }
+
+  /**
+   * Gets the confirm modal confirm button
+   */
+  public get confirmModalButton() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CONFIRM_MODAL_BUTTON);
+  }
+
+  /**
+   * Clicks the custom threshold rule type card
+   */
+  async clickCustomThresholdRuleType() {
+    await expect(this.customThresholdRuleTypeCard).toBeVisible({ timeout: BIGGER_TIMEOUT });
+    await this.customThresholdRuleTypeCard.click();
+    await expect(this.ruleForm).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Sets the rule name
+   */
+  async setRuleName(name: string) {
+    await expect(this.ruleNameInput).toBeVisible();
+    // Clear existing value
+    await this.ruleNameInput.fill('');
+    await this.ruleNameInput.fill(name);
+  }
+
+  /**
+   * Sets the index pattern and waits for the explore matching indices button
+   */
+  async setIndexPatternAndWaitForButton(pattern: string) {
+    await this.dataViewExpression.click();
+    await expect(this.indexPatternInput).toBeVisible();
+    await this.indexPatternInput.fill(pattern);
+    // Wait for debounce and button to appear
+    await expect(this.exploreMatchingIndicesButton).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Clicks the explore matching indices button to create ad-hoc data view
+   */
+  async clickExploreMatchingIndices() {
+    await this.exploreMatchingIndicesButton.click();
+    // Wait for data view to be selected
+    await expect(this.dataViewExpression).toContainText('.alerts-*', { timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Saves the rule by clicking save and confirming
+   */
+  async saveRule() {
+    await this.ruleSaveButton.click();
+    await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.confirmModalButton.click();
+    // Wait for navigation to rule details page
+    await expect(this.ruleDetails).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
+
+  public get observabilityCategory() {
+    return this.ruleTypeModal.locator('.euiFacetButton[title="Observability"]');
   }
 }
