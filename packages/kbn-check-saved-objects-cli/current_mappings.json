@@ -329,9 +329,6 @@
           }
         }
       },
-      "scheduledTaskId": {
-        "type": "keyword"
-      },
       "tags": {
         "type": "keyword"
       },

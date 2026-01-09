@@ -27,8 +27,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     lookbackWindow: { type: 'keyword' },
     groupingKey: { type: 'keyword' },
 
-    scheduledTaskId: { type: 'keyword' },
-
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },
