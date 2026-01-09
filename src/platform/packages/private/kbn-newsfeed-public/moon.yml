@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
+  - '@kbn/react-hooks'
 tags:
   - shared-browser
   - package
