@@ -6,16 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
-import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import {
   columnExists as _columnExists,
   getFragmentData,
+  withAutoSuggest,
 } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
-import type { ICommandCallbacks } from '../types';
-import { Location, type ICommandContext, type ISuggestionItem } from '../types';
+import {
+  Location,
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
+} from '../types';
 import {
   getNullsPrefixRange,
   getSortPos,
@@ -23,6 +27,7 @@ import {
   rightAfterColumn,
   sortModifierSuggestions,
 } from './utils';
+import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
@@ -46,6 +51,9 @@ export async function autocomplete(
   switch (pos) {
     case 'expression': {
       const columnExists = (name: string) => _columnExists(name, context);
+      const alreadyDeclaredFields = (command as ESQLCommand).args
+        .filter(isColumn)
+        .map((arg) => arg.parts.join('.'));
 
       const { suggestions: expressionSuggestions, computed } = await suggestForExpression({
         query,
@@ -59,6 +67,7 @@ export async function autocomplete(
           addSpaceAfterFirstField: false,
           addSpaceAfterOperator: true,
           openSuggestions: true,
+          ignoredColumnsForEmptyExpression: alreadyDeclaredFields,
         },
       });
 
