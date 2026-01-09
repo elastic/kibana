@@ -517,7 +517,7 @@ export const getReindexStatus = (sourceIndexName: string) => {
 
 export const useUserPrivileges = (indexName: string) => {
   return useRequest<UserStartPrivilegesResponse>({
-    path: `${API_BASE_PATH}/start_privileges/${indexName}`,
+    path: `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
     method: 'get',
   });
 };
