@@ -16,7 +16,6 @@ export const SharepointOnline: ConnectorSpec = {
     id: '.sharepoint-online',
     displayName: 'Sharepoint online',
     description: 'Kibana Stack Connector for Sharepoint Online.', // replace with i18n thing
-    defaultMessage: 'Search and explore SharePoint sites, pages and content',
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
@@ -44,6 +43,56 @@ export const SharepointOnline: ConnectorSpec = {
 
 
   actions: {
+   listAllSites: {
+      isTool: true,
+      input: z.object({}).optional(),
+      handler: async (ctx, input) => {
+        const url = 'https://graph.microsoft.com/v1.0/sites/getAllSites/';
+
+        ctx.log.debug('SharePoint listing all sites');
+        const response = await ctx.client.get(url);
+        return response.data;
+      },
+    },
+    listSitePages: {
+      isTool: true,
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          siteId: string,
+        };
+        const url = `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`;
+
+        ctx.log.debug(`Sharepoint listing all pages from siteId ${typedInput.siteId}`);
+        const response = await ctx.client.get(url);
+        return response.data;
+      },
+    },
+    getSite: {
+      isTool: true,
+      input: z.union([
+        z.object({ siteId: z.string().describe('Site ID') }).strict(),
+        z.object({ relativeUrl: z.string().describe('Relative URL path') }).strict(),
+      ]),
+      handler: async (ctx, input) => {
+        const typedInput = input as
+          | { siteId: string }
+          | { relativeUrl: string }
+
+        let url: string = 'https://graph.microsoft.com/v1.0/sites/';
+        if ('siteId' in typedInput) {
+          url += typedInput.siteId;
+        } else if ('relativeUrl' in typedInput) {
+          url += typedInput.relativeUrl;
+        }
+
+        ctx.log.debug(`Getting site info via ${url}`);
+        const response = await ctx.client.get(url);
+        return response.data;
+      },
+    },
     search: {
       isTool: true,
       input: z.object({
@@ -57,8 +106,8 @@ export const SharepointOnline: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
-          query: string,
-          entityTypes?: Array<'site` | `list` | `listItem` | `drive' | `driveItem`>;
+          query: string;
+          entityTypes?: Array<'site' | 'list' | 'listItem' | 'drive' | 'driveItem'>;
           from?: number;
           size?: number;
         };
@@ -79,20 +128,12 @@ export const SharepointOnline: ConnectorSpec = {
           ],
         };
 
-        try {
-          ctx.log.debug(`SharePoint search request: ${JSON.stringify(searchRequest, null, 2)}`);
-          const response = await ctx.client.post(
-            'https://graph.microsoft.com/v1.0/search/query',
-            searchRequest
-          );
-          return response.data;
-        } catch (error) {
-          ctx.log.error(
-            `SharePoint search failed: ${error.message}, Status: ${error.response?.status
-            }, Data: ${JSON.stringify(error.response?.data)}`
-          );
-          throw error;
-        }
+        ctx.log.debug(`SharePoint search request: ${JSON.stringify(searchRequest, null, 2)}`);
+        const response = await ctx.client.post(
+          'https://graph.microsoft.com/v1.0/search/query',
+          searchRequest
+        );
+        return response.data;
       },
     },
   },
