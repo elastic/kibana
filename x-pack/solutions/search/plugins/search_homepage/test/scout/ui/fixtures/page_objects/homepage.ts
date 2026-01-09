@@ -200,6 +200,7 @@ export class Homepage {
     return this.page.testSubj.locator('observabilitySection');
   }
 
+  // Stateful (ESS) - "Create an Observability space"
   async getCreateObservabilitySpaceLink() {
     return this.page.testSubj.locator('createObservabilitySpaceLink');
   }
@@ -207,6 +208,16 @@ export class Homepage {
   async clickCreateObservabilitySpaceLink() {
     await this.page.testSubj.locator('createObservabilitySpaceLink').scrollIntoViewIfNeeded();
     await this.page.testSubj.locator('createObservabilitySpaceLink').click();
+  }
+
+  // Serverless - "Create an Observability project"
+  async getCreateObservabilityProjectLink() {
+    return this.page.testSubj.locator('createObservabilityProjectLink');
+  }
+
+  async clickCreateObservabilityProjectLink() {
+    await this.page.testSubj.locator('createObservabilityProjectLink').scrollIntoViewIfNeeded();
+    await this.page.testSubj.locator('createObservabilityProjectLink').click();
   }
 
   // V1 Homepage - Alternate Solutions (Security section)

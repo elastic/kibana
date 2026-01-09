@@ -198,17 +198,35 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
   });
 
   // === Alternate Solutions ===
-  test('renders Observability content and navigates correctly', async ({ pageObjects, page }) => {
-    const observabilitySection = await pageObjects.homepage.getObservabilitySection();
-    await expect(observabilitySection).toBeVisible();
+  // Stateful (ESS): "Create an Observability space" - navigates internally
+  test(
+    'renders Observability section with space link',
+    { tag: ['@ess'] },
+    async ({ pageObjects, page }) => {
+      const observabilitySection = await pageObjects.homepage.getObservabilitySection();
+      await expect(observabilitySection).toBeVisible();
 
-    const createSpaceLink = await pageObjects.homepage.getCreateObservabilitySpaceLink();
-    await expect(createSpaceLink).toBeVisible();
+      const createSpaceLink = await pageObjects.homepage.getCreateObservabilitySpaceLink();
+      await expect(createSpaceLink).toBeVisible();
 
-    await pageObjects.homepage.clickCreateObservabilitySpaceLink();
+      await pageObjects.homepage.clickCreateObservabilitySpaceLink();
+      await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
+    }
+  );
 
-    await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
-  });
+  // Serverless: "Create an Observability project" - external link to cloud
+  test(
+    'renders Observability section with project link',
+    { tag: ['@svlSearch'] },
+    async ({ pageObjects }) => {
+      const observabilitySection = await pageObjects.homepage.getObservabilitySection();
+      await expect(observabilitySection).toBeVisible();
+
+      const createProjectLink = await pageObjects.homepage.getCreateObservabilityProjectLink();
+      await expect(createProjectLink).toBeVisible();
+      await expect(createProjectLink).toHaveAttribute('href', /projects/);
+    }
+  );
 
   test('renders Security content and navigates correctly', async ({ pageObjects, page }) => {
     const securitySection = await pageObjects.homepage.getSecuritySection();
