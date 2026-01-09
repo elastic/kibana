@@ -59,6 +59,11 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Updating ML jobs to v3', { config: 'trial', archives: [] }, () => {
+    before(async () => {
+      // Ensure a clean state before running the test suite
+      await ml.cleanMlIndices();
+    });
+
     describe('when there are no v2 jobs', () => {
       it('returns a 200/true', async () => {
         const { status, body } = await callUpdateEndpoint();
@@ -87,7 +92,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
         ).to.eql(['development', 'production']);
       });
 
-      after(() => ml.cleanMlIndices());
+      after(async () => {
+        await ml.cleanMlIndices();
+      });
     });
 
     describe('when there are both v2 and v3 jobs', () => {
@@ -97,7 +104,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
         await createV3Jobs(['production']);
       });
 
-      after(() => ml.cleanMlIndices());
+      after(async () => {
+        await ml.cleanMlIndices();
+      });
 
       it('only creates new jobs for environments that did not have a v3 job', async () => {
         await callUpdateEndpoint();
