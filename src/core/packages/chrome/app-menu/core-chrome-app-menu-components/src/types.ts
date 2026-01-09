@@ -160,7 +160,7 @@ export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | '
   /**
    * Adds a separator line above or below the item in the popover menu.
    */
-  seperator?: 'above' | 'below';
+  separator?: 'above' | 'below';
 };
 
 /**

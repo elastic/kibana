@@ -45,8 +45,8 @@ export const AppMenuPopover = ({
   onClose,
 }: AppMenuContextMenuProps) => {
   const panels = useMemo(
-    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
-    [items, primaryActionItem, secondaryActionItem]
+    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem, onClose }),
+    [items, primaryActionItem, secondaryActionItem, onClose]
   );
 
   if (panels.length === 0) {
