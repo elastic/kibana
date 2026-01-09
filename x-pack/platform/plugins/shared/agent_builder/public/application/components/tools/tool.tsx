@@ -156,13 +156,14 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     ) => {
       if (mode === ToolFormMode.View) return;
       setSubmittingButtonId(buttonId);
+      let response: CreateToolResponse | UpdateToolResponse | undefined;
       try {
         if (mode === ToolFormMode.Edit) {
           const updatePayload = getUpdatePayloadFromData(data);
-          await saveTool(updatePayload);
+          response = await saveTool(updatePayload);
         } else {
           const createPayload = getCreatePayloadFromData(data);
-          await saveTool(createPayload);
+          response = await saveTool(createPayload);
         }
       } finally {
         setSubmittingButtonId(undefined);
@@ -170,6 +171,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       if (navigateToListView) {
         deferNavigateToAgentBuilderUrl(appPaths.tools.list);
       }
+      return response;
     },
     [mode, saveTool, deferNavigateToAgentBuilderUrl]
   );
@@ -180,10 +182,19 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const handleSaveAndTest = useCallback(
     async (data: ToolFormData) => {
-      await handleSave(data, { navigateToListView: false, buttonId: BUTTON_IDS.SAVE_AND_TEST });
-      handleTestTool();
+      const response = await handleSave(data, {
+        navigateToListView: false,
+        buttonId: BUTTON_IDS.SAVE_AND_TEST,
+      });
+      if (mode === ToolFormMode.Create && response) {
+        deferNavigateToAgentBuilderUrl(appPaths.tools.details({ toolId: response.id }), {
+          [OPEN_TEST_FLYOUT_QUERY_PARAM]: 'true',
+        });
+      } else {
+        handleTestTool();
+      }
     },
-    [handleSave, handleTestTool]
+    [handleSave, handleTestTool, mode, deferNavigateToAgentBuilderUrl]
   );
 
   useEffect(() => {

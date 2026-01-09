@@ -56,7 +56,6 @@
       "kibanaReact",
       "unifiedSearch",
       "savedObjects",
-      "controls",
       "presentationPanel"
     ],
     "extraPublicDirs": ["common"]
