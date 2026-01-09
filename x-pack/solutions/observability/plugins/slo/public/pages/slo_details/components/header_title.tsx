@@ -19,7 +19,7 @@ import React from 'react';
 import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
 import { SloTagsBadge } from '../../../components/slo/slo_badges/slo_tags_badge';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
-import { SLOGroupings } from './groupings/slo_groupings';
+import { SloInstance } from './instance_selector/slo_instance';
 
 export interface Props {
   slo?: SLOWithSummaryResponse;
@@ -67,7 +67,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
           })}
         </EuiMarkdownFormat>
       </EuiFlexItem>
-      <SLOGroupings slo={slo} />
+      <SloInstance slo={slo} />
     </EuiFlexGroup>
   );
 }
