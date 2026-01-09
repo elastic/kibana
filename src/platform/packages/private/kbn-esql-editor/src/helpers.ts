@@ -25,6 +25,42 @@ import {
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
 
+export interface BaseTracking {
+  hasFirstSample: boolean;
+  startTime: number;
+  queryLengthBucket: number;
+  queryLengthBucketLabel: string;
+  interactionId: number;
+}
+
+// Numeric buckets for aggregatable metrics: 1(<=50), 2(<=200), 3(<=500), 4(<=1000), 5(>1000)
+export const getQueryLengthBucketInfo = (length: number) => {
+  if (length <= 50) return { bucket: 1, label: '0-50' };
+  if (length <= 200) return { bucket: 2, label: '51-200' };
+  if (length <= 500) return { bucket: 3, label: '201-500' };
+  if (length <= 1000) return { bucket: 4, label: '501-1000' };
+  return { bucket: 5, label: '1000+' };
+};
+
+export const startLatencyTracking = (
+  tracking: BaseTracking,
+  queryText: string,
+  interactionId: number
+): void => {
+  const { bucket, label } = getQueryLengthBucketInfo(queryText.length);
+  tracking.startTime = performance.now();
+  tracking.queryLengthBucket = bucket;
+  tracking.queryLengthBucketLabel = label;
+  tracking.interactionId = interactionId;
+};
+
+export const resetTracking = (tracking: BaseTracking): void => {
+  tracking.startTime = 0;
+  tracking.queryLengthBucket = 0;
+  tracking.queryLengthBucketLabel = '';
+  tracking.interactionId = 0;
+};
+
 export const useDebounceWithOptions = (
   fn: Function,
   { skipFirstRender }: { skipFirstRender: boolean } = { skipFirstRender: false },

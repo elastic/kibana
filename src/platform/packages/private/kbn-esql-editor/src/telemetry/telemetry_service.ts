@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { reportPerformanceMetricEvent, type PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { QuerySource } from '@kbn/esql-types';
 import type {
   TelemetryQuerySubmittedProps,
   ESQLVariableType,
   ControlTriggerSource,
+  InputLatencyPayload,
+  SuggestionsLatencyPayload,
+  ValidationLatencyPayload,
 } from '@kbn/esql-types';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
 import {
@@ -22,6 +26,10 @@ import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
   ESQL_CONTROL_SAVED,
+  ESQL_EDITOR_INIT_LATENCY,
+  ESQL_EDITOR_INPUT_LATENCY,
+  ESQL_EDITOR_SUGGESTIONS_LATENCY,
+  ESQL_EDITOR_VALIDATION_LATENCY,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
@@ -42,6 +50,15 @@ export class ESQLEditorTelemetryService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('Failed to report telemetry event', error);
+    }
+  }
+
+  private _reportPerformanceEvent(eventData: PerformanceMetricEvent) {
+    try {
+      reportPerformanceMetricEvent(this._analytics, eventData);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Failed to report performance metric event', error);
     }
   }
 
@@ -180,6 +197,58 @@ export class ESQLEditorTelemetryService {
     this._reportEvent(ESQL_CONTROL_CANCELLED, {
       control_kind: controlType,
       reason,
+    });
+  }
+
+  public trackInitLatency(duration: number) {
+    this._reportPerformanceEvent({
+      eventName: ESQL_EDITOR_INIT_LATENCY,
+      duration: Math.round(duration),
+    });
+  }
+
+  public trackInputLatency(payload: InputLatencyPayload) {
+    this._reportPerformanceEvent({
+      eventName: ESQL_EDITOR_INPUT_LATENCY,
+      duration: Math.round(payload.duration),
+      key1: 'query_length_bucket',
+      value1: payload.queryLengthBucket,
+      meta: {
+        query_length_bucket_label: payload.queryLengthBucketLabel,
+        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
+        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+      },
+    });
+  }
+
+  public trackSuggestionsLatency(payload: SuggestionsLatencyPayload) {
+    this._reportPerformanceEvent({
+      eventName: ESQL_EDITOR_SUGGESTIONS_LATENCY,
+      duration: Math.round(payload.duration),
+      key1: 'query_length_bucket',
+      value1: payload.queryLengthBucket,
+      meta: {
+        query_length_bucket_label: payload.queryLengthBucketLabel,
+        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
+        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+      },
+    });
+  }
+
+  public trackValidationLatency(payload: ValidationLatencyPayload) {
+    this._reportPerformanceEvent({
+      eventName: ESQL_EDITOR_VALIDATION_LATENCY,
+      duration: Math.round(payload.duration),
+      key1: 'query_length_bucket',
+      value1: payload.queryLengthBucket,
+      key2: 'errors',
+      value2: Math.round(payload.errorCount),
+      meta: {
+        result: payload.meta.result,
+        query_length_bucket_label: payload.queryLengthBucketLabel,
+        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
+        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+      },
     });
   }
 }

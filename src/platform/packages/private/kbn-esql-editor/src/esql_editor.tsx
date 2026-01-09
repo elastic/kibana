@@ -44,6 +44,7 @@ import type {
   ESQLControlVariable,
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
+  TelemetryLatencyMeta,
 } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -51,7 +52,8 @@ import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { ComponentProps } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
@@ -75,6 +77,8 @@ import {
   onMouseDownResizeHandler,
   parseErrors,
   parseWarning,
+  resetTracking,
+  startLatencyTracking,
   useDebounceWithOptions,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
@@ -131,6 +135,41 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
   );
+
+  const sessionIdRef = useRef<string>(uuidv4());
+  const interactionIdRef = useRef(0);
+
+  // Input latency: keystroke → React re-render
+  const inputTrackingRef = useRef({
+    hasFirstSample: false,
+    startTime: 0,
+    queryLengthBucket: 0,
+    queryLengthBucketLabel: '',
+    interactionId: 0,
+  });
+
+  // Validation latency: validation execution only (excludes debounce delay)
+  const validationTrackingRef = useRef({
+    hasFirstSample: false,
+    startTime: 0,
+    queryLengthBucket: 0,
+    queryLengthBucketLabel: '',
+    interactionId: 0,
+  });
+
+  // Suggestions latency: keystroke → suggestions data ready
+  const suggestionsTrackingRef = useRef({
+    hasFirstSample: false,
+    startTime: 0,
+    queryLengthBucket: 0,
+    queryLengthBucketLabel: '',
+    interactionId: 0,
+  });
+
+  // Init latency: component mount → editor ready
+  const initTrackingRef = useRef({
+    startTime: performance.now(),
+  });
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const isFirstFocusRef = useRef<boolean>(true);
@@ -209,6 +248,80 @@ const ESQLEditorInternal = function ESQLEditor({
     },
     [onTextLangQueryChange]
   );
+
+  const trackInputLatencyOnKeystroke = useCallback((queryText: string) => {
+    const interactionId = ++interactionIdRef.current;
+    const tracking = inputTrackingRef.current;
+
+    // Skip if measurement in progress, or sampling (first event always, then 10%)
+    if (tracking.startTime > 0 || (tracking.hasFirstSample && Math.random() > 0.1)) {
+      return;
+    }
+
+    startLatencyTracking(tracking, queryText, interactionId);
+  }, []);
+
+  const trackSuggestionsLatencyStart = useCallback((queryText: string) => {
+    const tracking = suggestionsTrackingRef.current;
+
+    // Skip if measurement in progress, or sampling (first event always, then 10%)
+    if (tracking.startTime > 0 || (tracking.hasFirstSample && Math.random() > 0.1)) {
+      return;
+    }
+
+    startLatencyTracking(tracking, queryText, interactionIdRef.current);
+  }, []);
+
+  const trackValidationLatencyStart = useCallback((queryText: string) => {
+    const tracking = validationTrackingRef.current;
+
+    // Skip if measurement in progress, or sampling (first event always, then 10%)
+    if (tracking.startTime > 0 || (tracking.hasFirstSample && Math.random() > 0.1)) {
+      return;
+    }
+
+    startLatencyTracking(tracking, queryText, interactionIdRef.current);
+  }, []);
+
+  const trackValidationLatencyEnd = useCallback(
+    (active: boolean, errorsCount: number) => {
+      const tracking = validationTrackingRef.current;
+
+      if (!active || tracking.startTime <= 0) {
+        return;
+      }
+
+      const duration = performance.now() - tracking.startTime;
+      const result: TelemetryLatencyMeta['result'] = errorsCount > 0 ? 'error' : 'ok';
+
+      telemetryService.trackValidationLatency({
+        duration,
+        queryLengthBucket: tracking.queryLengthBucket,
+        queryLengthBucketLabel: tracking.queryLengthBucketLabel,
+        sessionId: sessionIdRef.current,
+        errorCount: errorsCount,
+        interactionId: tracking.interactionId,
+        meta: { result },
+      });
+
+      tracking.hasFirstSample = true;
+      resetTracking(tracking);
+    },
+    [telemetryService]
+  );
+
+  const resetSuggestionsTracking = useCallback(() => {
+    resetTracking(suggestionsTrackingRef.current);
+  }, []);
+
+  const resetValidationTracking = useCallback(() => {
+    resetTracking(validationTrackingRef.current);
+  }, []);
+
+  const resetPendingTracking = useCallback(() => {
+    resetValidationTracking();
+    resetSuggestionsTracking();
+  }, [resetValidationTracking, resetSuggestionsTracking]);
 
   const onQuerySubmit = useCallback(
     (source: TelemetryQuerySubmittedProps['source']) => {
@@ -298,6 +411,29 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
+
+  // Input latency: measure keystroke → (before paint)
+  useLayoutEffect(() => {
+    const tracking = inputTrackingRef.current;
+
+    // startTime is 0 when we didn't start a measurement for this cycle.
+    if (tracking.startTime === 0) {
+      return;
+    }
+
+    const duration = performance.now() - tracking.startTime;
+    telemetryService.trackInputLatency({
+      duration,
+      queryLengthBucket: tracking.queryLengthBucket,
+      queryLengthBucketLabel: tracking.queryLengthBucketLabel,
+      sessionId: sessionIdRef.current,
+      interactionId: tracking.interactionId,
+    });
+
+    tracking.hasFirstSample = true;
+
+    resetTracking(tracking);
+  }, [code, telemetryService]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -551,6 +687,27 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
+      onSuggestionsReady: () => {
+        const tracking = suggestionsTrackingRef.current;
+        // startTime is 0 when we didn't start a measurement, e.g. in the 90% of cycles
+        // we skip (10% sampling), the "ready" signal arrives without a matching start timestamp.
+        if (tracking.startTime === 0) {
+          return;
+        }
+
+        const duration = performance.now() - tracking.startTime;
+
+        telemetryService.trackSuggestionsLatency({
+          duration,
+          queryLengthBucket: tracking.queryLengthBucket,
+          queryLengthBucketLabel: tracking.queryLengthBucketLabel,
+          sessionId: sessionIdRef.current,
+          interactionId: tracking.interactionId,
+        });
+
+        tracking.hasFirstSample = true;
+        resetTracking(tracking);
+      },
     }),
     [telemetryService]
   );
@@ -770,6 +927,8 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
+      trackValidationLatencyEnd(active, allErrors.length);
+
       if (active) {
         setEditorMessages({ errors: allErrors, warnings: allWarnings });
         monaco.editor.setModelMarkers(
@@ -789,6 +948,7 @@ const ESQLEditorInternal = function ESQLEditor({
       serverWarning,
       dataErrorsControl?.enabled,
       mergeExternalMessages,
+      trackValidationLatencyEnd,
     ]
   );
 
@@ -832,7 +992,11 @@ const ESQLEditorInternal = function ESQLEditor({
     async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
+      trackValidationLatencyStart(code);
+
       if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        resetValidationTracking();
+
         const parsedErrors = parseErrors(serverErrors || [], code);
         const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
         setEditorMessages({
@@ -906,12 +1070,14 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
+      resetPendingTracking();
+
       editorModel.current?.dispose();
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
     };
-  }, []);
+  }, [resetPendingTracking]);
 
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
@@ -1091,6 +1257,13 @@ const ESQLEditorInternal = function ESQLEditor({
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={async (editor) => {
+                    // Track editor init time (first event always captured)
+                    if (initTrackingRef.current.startTime > 0) {
+                      const initDuration = performance.now() - initTrackingRef.current.startTime;
+                      telemetryService.trackInitLatency(initDuration);
+                      initTrackingRef.current.startTime = 0;
+                    }
+
                     editorRef.current = editor;
                     const model = editor.getModel();
                     if (model) {
@@ -1168,6 +1341,8 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     editor.onDidChangeModelContent(async () => {
+                      trackInputLatencyOnKeystroke(editor.getValue() ?? '');
+                      trackSuggestionsLatencyStart(editor.getValue() ?? '');
                       await addLookupIndicesDecorator();
                       maybeTriggerSuggestions();
                     });
