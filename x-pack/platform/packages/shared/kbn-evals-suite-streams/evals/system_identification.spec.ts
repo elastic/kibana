@@ -14,6 +14,7 @@ import { omit, uniq } from 'lodash';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { WiredIngest } from '@kbn/streams-schema';
+import { descriptionPrompt } from '@kbn/streams-ai/src/description/prompt';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type { SystemIdentificationEvaluationDataset } from './system_identification_datasets';
@@ -250,6 +251,7 @@ evaluate.describe('Streams systems identification', { tag: '@svlOblt' }, () => {
             logger,
             stream,
             signal: new AbortController().signal,
+            descriptionPrompt,
             dropUnmapped: true,
           });
 
