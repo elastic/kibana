@@ -121,8 +121,7 @@
     "@kbn/react-query",
     "@kbn/controls-schemas",
     "@kbn/zod",
-    "@kbn/cps",
-    "@kbn/presentation-publishing-schemas"
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

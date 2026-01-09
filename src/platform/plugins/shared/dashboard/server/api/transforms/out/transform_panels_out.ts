@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';

@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';

@@ -7,7 +7,7 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
 import type { MapByValueState } from '../types';

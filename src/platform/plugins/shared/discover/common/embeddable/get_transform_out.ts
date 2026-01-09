@@ -10,7 +10,7 @@
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,

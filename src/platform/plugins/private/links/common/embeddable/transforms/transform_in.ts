@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 import { extractReferences } from './references';

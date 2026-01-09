@@ -6,7 +6,7 @@
  */
 
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { LensTransformDependencies } from '.';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';

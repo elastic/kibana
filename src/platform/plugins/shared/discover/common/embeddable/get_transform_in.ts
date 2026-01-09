@@ -10,7 +10,7 @@
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,

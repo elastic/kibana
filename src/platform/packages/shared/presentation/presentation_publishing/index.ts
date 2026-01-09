@@ -176,6 +176,7 @@ export {
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
+export { transformTitlesIn, transformTitlesOut } from './interfaces/titles/titles_transforms';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,

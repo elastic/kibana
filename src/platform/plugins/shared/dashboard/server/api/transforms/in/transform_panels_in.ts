@@ -10,7 +10,7 @@
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,

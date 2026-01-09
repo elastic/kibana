@@ -6,7 +6,7 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import type { LensTransformDependencies } from '.';
 import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';

@@ -8,7 +8,7 @@
 import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-detection/constants';
 import type { Reference } from '@kbn/content-management-utils';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 
 export function transformIn(state: ChangePointEmbeddableState): {

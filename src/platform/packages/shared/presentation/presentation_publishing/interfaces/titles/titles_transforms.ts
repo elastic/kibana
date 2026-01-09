@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedTitles, StoredTitles } from './types';
+import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
 
 export const transformTitlesIn = <ApiStateType extends SerializedTitles>(
   state: ApiStateType

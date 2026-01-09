@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { OverviewStatsStoredState } from './types';
 

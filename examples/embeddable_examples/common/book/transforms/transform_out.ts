@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { BookState } from '../../../server';
 import type { BookEmbeddableState, BookEmbeddableState910 } from '../types';
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';

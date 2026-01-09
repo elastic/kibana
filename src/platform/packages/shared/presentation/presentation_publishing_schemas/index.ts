@@ -11,5 +11,4 @@ export { type SerializedTitles } from './src/types';
 
 export { serializedTitlesSchema } from './src/titles_schema';
 export { storedTitlesSchema } from './src/stored_titles_schema';
-export { transformTitlesOut, transformTitlesIn } from './src/titles_transforms';
 export type { StoredTitles } from './src/types';

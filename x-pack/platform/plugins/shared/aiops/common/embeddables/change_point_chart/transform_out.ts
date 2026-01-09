@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 

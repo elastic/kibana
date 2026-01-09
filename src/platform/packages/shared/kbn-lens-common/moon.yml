@@ -66,7 +66,6 @@ dependsOn:
   - '@kbn/chart-icons'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cps'
-  - '@kbn/presentation-publishing-schemas'
   - '@kbn/control-group-renderer'
 tags:
   - shared-common

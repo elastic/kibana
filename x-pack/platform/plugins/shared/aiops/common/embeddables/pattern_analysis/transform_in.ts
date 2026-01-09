@@ -6,7 +6,7 @@
  */
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { Reference } from '@kbn/content-management-utils';
 import { PATTERN_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { PatternAnalysisEmbeddableState, StoredPatternAnalysisEmbeddableState } from './types';

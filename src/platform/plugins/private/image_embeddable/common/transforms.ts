@@ -9,11 +9,8 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import {
-  type StoredTitles,
-  transformTitlesIn,
-  transformTitlesOut,
-} from '@kbn/presentation-publishing-schemas';
+import { type StoredTitles } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesIn, transformTitlesOut } from '@kbn/presentation-publishing';
 import type { ImageConfig, ImageEmbeddableState } from '../server';
 
 type StoredImageEmbeddableState = { imageConfig: ImageConfig } & StoredTitles & {

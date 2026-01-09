@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import { injectVisReferences } from '../../references/inject_vis_references';
 import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
