@@ -10,12 +10,17 @@ import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
-import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
+import {
+  getKibanaDefaultAgentCapabilities,
+  type PromptResponse,
+} from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
+import type { EventsService } from '../events';
+import { propagateEvents } from './propagate_events';
 
 interface BaseConverseParams {
   signal?: AbortSignal;
@@ -33,14 +38,16 @@ export type ChatParams = BaseConverseParams & {
 
 export type ResumeRoundParams = BaseConverseParams & {
   conversationId: string;
-  confirm: boolean;
+  prompts: Record<string, PromptResponse>;
 };
 
 export class ChatService {
   private readonly http: HttpSetup;
+  private readonly events: EventsService;
 
-  constructor({ http }: { http: HttpSetup }) {
+  constructor({ http, events }: { http: HttpSetup; events: EventsService }) {
     this.http = http;
+    this.events = events;
   }
 
   chat(params: ChatParams): Observable<ChatEvent> {
@@ -64,7 +71,7 @@ export class ChatService {
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
-      confirm: params.confirm,
+      prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
     });
   }
@@ -80,7 +87,8 @@ export class ChatService {
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
-      unwrapAgentBuilderErrors()
+      unwrapAgentBuilderErrors(),
+      propagateEvents({ eventsService: this.events })
     );
   }
 }
