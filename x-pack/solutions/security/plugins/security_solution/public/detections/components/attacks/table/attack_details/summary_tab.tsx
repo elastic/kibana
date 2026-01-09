@@ -10,7 +10,6 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 
-import { useKibana } from '../../../../../common/lib/kibana';
 import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -34,10 +33,6 @@ interface SummaryTabProps {
  * and optionally the attack chain visualization.
  */
 export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized = false }) => {
-  const {
-    application: { capabilities },
-  } = useKibana().services;
-
   // TODO: Add cell actions support
   // https://github.com/elastic/kibana/issues/247850
   const supportsCellActions = false;
