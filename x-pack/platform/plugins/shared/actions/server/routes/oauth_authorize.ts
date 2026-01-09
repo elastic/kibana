@@ -132,7 +132,7 @@ export const oauthAuthorizeRoute = (
 
           // Build authorization URL
           const authorizationUrl = oauthService.buildAuthorizationUrl({
-            authorizationUrl: oauthConfig.authorizationUrl,
+            baseAuthorizationUrl: oauthConfig.authorizationUrl,
             clientId: oauthConfig.clientId,
             scope: oauthConfig.scope,
             redirectUri,

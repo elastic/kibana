@@ -385,6 +385,9 @@ export class ActionsPlugin
     const oauthRateLimiter = new OAuthRateLimiter({
       config: this.actionsConfig.oAuthRateLimit,
     });
+    this.logger.info(
+      `OAuth rate limiter initialized with authorize limit: ${this.actionsConfig.oAuthRateLimit.authorize.limit}`
+    );
 
     // Routes
     defineRoutes({

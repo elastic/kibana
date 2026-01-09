@@ -51,12 +51,19 @@ export interface OAuthConfig {
  * Parameters for building an OAuth authorization URL
  */
 interface BuildAuthorizationUrlParams {
-  authorizationUrl: string;
+  baseAuthorizationUrl: string;
   clientId: string;
   scope?: string;
   redirectUri: string;
   state: string;
   codeChallenge: string;
+}
+
+interface ConnectorWithOAuth {
+  actionTypeId: string;
+  name: string;
+  config: OAuthConnectorConfig;
+  secrets: OAuthConnectorSecrets;
 }
 
 /**
@@ -111,12 +118,11 @@ export class OAuthAuthorizationService {
     this.validateOAuthConnector(config);
 
     // Fetch connector with decrypted secrets
-    const rawAction = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<{
-      actionTypeId: string;
-      name: string;
-      config: OAuthConnectorConfig;
-      secrets: OAuthConnectorSecrets;
-    }>('action', connectorId);
+    const rawAction =
+      await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorWithOAuth>(
+        'action',
+        connectorId
+      );
 
     const secrets = rawAction.attributes.secrets;
 
@@ -131,8 +137,6 @@ export class OAuthAuthorizationService {
         'Connector missing required OAuth configuration (authorizationUrl, clientId)'
       );
     }
-
-    this.logger.debug(`Retrieved OAuth config for connector ${connectorId}`);
 
     return {
       authorizationUrl,
@@ -175,9 +179,9 @@ export class OAuthAuthorizationService {
    * @returns The complete authorization URL as a string
    */
   buildAuthorizationUrl(params: BuildAuthorizationUrlParams): string {
-    const { authorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
+    const { baseAuthorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
 
-    const authUrl = new URL(authorizationUrl);
+    const authUrl = new URL(baseAuthorizationUrl);
     authUrl.searchParams.set('client_id', clientId);
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('redirect_uri', redirectUri);
@@ -188,8 +192,6 @@ export class OAuthAuthorizationService {
     if (scope) {
       authUrl.searchParams.set('scope', scope);
     }
-
-    this.logger.debug(`Built OAuth authorization URL for client ${clientId}`);
 
     return authUrl.toString();
   }

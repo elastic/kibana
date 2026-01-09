@@ -23,6 +23,7 @@ export const NotionConnector: ConnectorSpec = {
 
   auth: {
     types: [
+      'bearer',
       {
         type: 'oauth_authorization_code',
         defaults: {

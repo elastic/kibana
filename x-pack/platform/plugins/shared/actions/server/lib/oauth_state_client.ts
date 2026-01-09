@@ -174,7 +174,7 @@ export class OAuthStateClient {
   }
 
   /**
-   * Delete OAuth state (should be called after successful token exchange)
+   * Delete OAuth state (should be called after a successful token exchange)
    */
   public async delete(id: string): Promise<void> {
     try {
@@ -196,10 +196,11 @@ export class OAuthStateClient {
         perPage: 100,
       });
 
-      await Promise.all(
-        result.saved_objects.map(async (obj) =>
-          this.unsecuredSavedObjectsClient.delete(OAUTH_STATE_SAVED_OBJECT_TYPE, obj.id)
-        )
+      await this.unsecuredSavedObjectsClient.bulkDelete(
+        result.saved_objects.map((obj) => ({
+          type: OAUTH_STATE_SAVED_OBJECT_TYPE,
+          id: obj.id,
+        }))
       );
 
       this.logger.debug(`Cleaned up ${result.saved_objects.length} expired OAuth states`);

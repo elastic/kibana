@@ -6,15 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { rawConnectorTokenSchema as rawConnectorTokenSchemaV1 } from './v1';
 
-export const rawConnectorTokenSchema = schema.object({
-  createdAt: schema.string(),
-  connectorId: schema.string(),
+export const rawConnectorTokenSchema = rawConnectorTokenSchemaV1.extends({
   expiresAt: schema.maybe(schema.string()), // turned into an optional field
-  token: schema.string(),
-  tokenType: schema.string(),
-  updatedAt: schema.string(),
-  // added optional fields
   refreshToken: schema.maybe(schema.string()),
   refreshTokenExpiresAt: schema.maybe(schema.string()),
 });
