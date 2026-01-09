@@ -99,8 +99,14 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
+    const beforeUpdateQuery = props.disableSubscribingToGlobalDataServices
+      ? queryService.queryString.getQuery()
+      : currentQuery;
+
     const isUpdate =
-      !isEqual(timefilter.getTime(), payload.dateRange) || !isEqual(payload.query, currentQuery);
+      !isEqual(timefilter.getTime(), payload.dateRange) ||
+      !isEqual(payload.query, beforeUpdateQuery);
+
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
@@ -108,16 +114,21 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
       } else {
         queryService.queryString.clearQuery();
       }
-    } else {
+    }
+
+    if ((!isUpdate || props.disableSubscribingToGlobalDataServices) && props.onQuerySubmit) {
+      const afterUpdateQuery = props.disableSubscribingToGlobalDataServices
+        ? queryService.queryString.getQuery()
+        : currentQuery;
+
       // Refresh button triggered for an update
-      if (props.onQuerySubmit)
-        props.onQuerySubmit(
-          {
-            dateRange: timefilter.getTime(),
-            query: currentQuery,
-          },
-          false
-        );
+      props.onQuerySubmit(
+        {
+          dateRange: timefilter.getTime(),
+          query: afterUpdateQuery as QT | Query,
+        },
+        isUpdate
+      );
     }
   };
 };
@@ -206,8 +217,9 @@ export function createSearchBar({
         !useDefaultBehaviors ||
         disableSubscribingToGlobalDataServices ||
         !onQuerySubmitRef.current
-      )
+      ) {
         return;
+      }
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
