@@ -52,7 +52,7 @@ export class DeleteRuleRoute {
   async handle() {
     try {
       await this.rulesClient.deleteRule({ id: this.request.params.id });
-      return this.response.ok({ body: { id: this.request.params.id } });
+      return this.response.noContent();
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
       return this.response.customError({
