@@ -12,9 +12,8 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/product-doc-common",
     "@kbn/inference-common",
-    "@kbn/tooling-log",
     "@kbn/core",
-    "@kbn/scout"
+    "@kbn/logging"
   ]
 }
 
