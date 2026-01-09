@@ -184,18 +184,49 @@ export class VersionSpecificPoliciesTask {
     }
     throwIfAborted(abortController);
 
-    // TODO kuery could be too long if many policies, need to page through
-    const policyIdsKuery = agentPoliciesWithVersionConditions.items
-      .map(
-        (policy) =>
-          `(policy_id:"${policy.id}" OR (policy_id:${policy.id}* AND policy_revision_idx<${policy.revision}))`
-      )
+    const parentPolicyQuery = agentPoliciesWithVersionConditions.items
+      .map((policy) => `(policy_id:"${policy.id}")`)
       .join(' OR ');
 
-    // reassigned agents won't be found on the next run
-    // do we need date filters?
+    await this.deployPoliciesForAgentsKuery(esClient, soClient, abortController, parentPolicyQuery);
+
+    throwIfAborted(abortController);
+
+    const outdatedPolicyQuery = agentPoliciesWithVersionConditions.items
+      .map((policy) => `(policy_id:${policy.id}* AND policy_revision_idx<${policy.revision})`)
+      .join(' OR ');
+
+    await this.deployPoliciesForAgentsKuery(
+      esClient,
+      soClient,
+      abortController,
+      outdatedPolicyQuery
+    );
+
+    throwIfAborted(abortController);
+
+    const upgradedAgentsQuery = agentPoliciesWithVersionConditions.items
+      .map((policy) => `(policy_id:${policy.id}* AND upgraded_at>now-30m)`)
+      .join(' OR ');
+
+    await this.deployPoliciesForAgentsKuery(
+      esClient,
+      soClient,
+      abortController,
+      upgradedAgentsQuery,
+      true
+    );
+  };
+
+  private deployPoliciesForAgentsKuery = async (
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    abortController: AbortController,
+    kuery: string,
+    isUpgrade?: boolean
+  ) => {
     const { aggregations } = await getAgentsByKuery(esClient, soClient, {
-      kuery: `${policyIdsKuery}`, // `enrolled_at>now-1m OR upgraded_at>now-1m`,
+      kuery: `${kuery}`,
       showInactive: false,
       perPage: 0,
       aggregations: {
@@ -220,10 +251,17 @@ export class VersionSpecificPoliciesTask {
         const versions = bucket.version.buckets.map(
           (versionBucket: any) => versionBucket.key as string
         );
-        const minorVersions = uniq(
+        let minorVersions = uniq(
           versions.map((version: string) => version.split('.').slice(0, 2).join('.'))
         );
-        acc.push({ policyId: bucket.key as string, versions: minorVersions });
+        const policyId = bucket.key as string;
+        if (isUpgrade) {
+          // skip versions that already have the version specific policy
+          minorVersions = minorVersions.filter((version) => !policyId.includes(`#${version}`));
+        }
+        if (minorVersions.length > 0) {
+          acc.push({ policyId, versions: minorVersions });
+        }
         return acc;
       },
       []

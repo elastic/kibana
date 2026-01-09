@@ -221,7 +221,8 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
 
   try {
     const { total } = await getAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:"${agentPolicyId}" AND agent.version:${version}.*`,
+      // agents enrolled to parent policy or agents using child policy but upgraded to new version
+      kuery: `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`,
       showInactive: false,
       perPage: 0,
     });
@@ -239,7 +240,9 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
   await AgentService.reassignAgents(
     soClient,
     esClient,
-    { kuery: `policy_id:"${agentPolicyId}" AND agent.version:${version}.*` },
+    {
+      kuery: `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`,
+    },
     versionedAgentPolicyId
   );
 }
