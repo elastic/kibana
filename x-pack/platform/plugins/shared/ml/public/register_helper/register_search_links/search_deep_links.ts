@@ -147,7 +147,7 @@ function createDeepLinks(
               defaultMessage: 'Log rate analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
-            visibleIn: ['sideNav'],
+            visibleIn: [],
           },
           {
             id: 'logPatternAnalysis',
@@ -162,7 +162,7 @@ function createDeepLinks(
               defaultMessage: 'Log pattern analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION}`,
-            visibleIn: ['sideNav'],
+            visibleIn: [],
           },
           {
             id: 'changePointDetections',
@@ -177,7 +177,7 @@ function createDeepLinks(
               defaultMessage: 'Change point detection',
             }),
             path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION}`,
-            visibleIn: ['sideNav'],
+            visibleIn: [],
           },
         ],
       };
@@ -233,7 +233,7 @@ function createDeepLinks(
           defaultMessage: 'Index data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`,
-        visibleIn: ['sideNav'],
+        visibleIn: [],
       };
     },
 
@@ -264,7 +264,7 @@ function createDeepLinks(
           defaultMessage: 'Data drift',
         }),
         path: `/${ML_PAGES.DATA_DRIFT}`,
-        visibleIn: ['sideNav'],
+        visibleIn: [],
       };
     },
   };

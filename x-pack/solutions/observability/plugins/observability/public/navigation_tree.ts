@@ -346,7 +346,7 @@ function createNavTree({
           {
             id: 'category-aiops_labs',
             title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-              defaultMessage: 'AIOps labs',
+              defaultMessage: 'AIOps Labs',
             }),
             breadcrumbStatus: 'hidden',
             children: [

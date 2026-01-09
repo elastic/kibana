@@ -149,7 +149,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                   id: 'data_frame_analytics_job_map',
                   pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
                   name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
-                    defaultMessage: 'Analytics Map',
+                    defaultMessage: 'Analytics map',
                   }),
                   disabled: disableLinks || !isDFAEnabled,
                   testSubj: 'mlMainTab dataFrameAnalyticsMap',
