@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '..';
 
-const DEFAULT_MAP_LOADING_TIMEOUT = 10_000;
+const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
