@@ -58,19 +58,17 @@ const highlightPropertyStyles = css`
   }
 `;
 
-export const getHighlightGradient = ({ euiTheme }: UseEuiTheme) => `
+export const getHighlightStyles = (context: UseEuiTheme) => {
+  const { euiTheme } = context;
+  const rotatingGradient = `
     linear-gradient(var(--highlight-rotate), 
     ${euiTheme.colors.borderBaseSuccess} 0%,
     ${euiTheme.colors.borderBaseAccent} 46%,
     ${euiTheme.colors.borderBaseAccentSecondary} 100%
   )`;
 
-export const brightenInDarkMode = ({ colorMode }: UseEuiTheme, brightness: number) =>
-  colorMode === 'DARK' ? `brightness(${brightness})` : '';
-
-export const getHighlightStyles = (context: UseEuiTheme) => {
-  const { euiTheme } = context;
-  const rotatingGradient = getHighlightGradient(context);
+  const brightenInDarkMode = (brightness: number) =>
+    context.colorMode === 'DARK' ? `brightness(${brightness})` : '';
 
   const highlightGradientBaseStyle: CSSInterpolation = {
     content: `""`,
@@ -81,7 +79,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
     width: 'calc(100% + 10px)',
     height: 'calc(100% + 10px)',
     backgroundImage: rotatingGradient,
-    filter: brightenInDarkMode(context, 1.5),
+    filter: brightenInDarkMode(1.5),
     borderRadius: euiTheme.border.radius.medium,
   };
 
@@ -110,7 +108,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         width: 'calc(100% + 30px)',
         height: 'calc(100% + 30px)',
         backgroundImage: rotatingGradient,
-        filter: `${brightenInDarkMode(context, 1.3)} blur(25px)`,
+        filter: `${brightenInDarkMode(1.3)} blur(25px)`,
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
 
