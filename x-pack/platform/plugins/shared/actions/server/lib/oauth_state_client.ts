@@ -190,21 +190,29 @@ export class OAuthStateClient {
    */
   public async cleanupExpiredStates(): Promise<number> {
     try {
-      const result = await this.unsecuredSavedObjectsClient.find<OAuthState>({
+      const finder = this.unsecuredSavedObjectsClient.createPointInTimeFinder<OAuthState>({
         type: OAUTH_STATE_SAVED_OBJECT_TYPE,
         filter: `${OAUTH_STATE_SAVED_OBJECT_TYPE}.attributes.expiresAt < "${new Date().toISOString()}"`,
         perPage: 100,
       });
 
-      await this.unsecuredSavedObjectsClient.bulkDelete(
-        result.saved_objects.map((obj) => ({
-          type: OAUTH_STATE_SAVED_OBJECT_TYPE,
-          id: obj.id,
-        }))
-      );
+      let totalDeleted = 0;
 
-      this.logger.debug(`Cleaned up ${result.saved_objects.length} expired OAuth states`);
-      return result.saved_objects.length;
+      for await (const response of finder.find()) {
+        await this.unsecuredSavedObjectsClient.bulkDelete(
+          response.saved_objects.map((obj) => ({
+            type: OAUTH_STATE_SAVED_OBJECT_TYPE,
+            id: obj.id,
+          }))
+        );
+
+        totalDeleted += response.saved_objects.length;
+      }
+
+      await finder.close();
+
+      this.logger.debug(`Cleaned up ${totalDeleted} expired OAuth states`);
+      return totalDeleted;
     } catch (err) {
       this.logger.error(`Failed to cleanup expired OAuth states. Error: ${err.message}`);
       return 0;

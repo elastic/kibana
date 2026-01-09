@@ -195,7 +195,19 @@ export const oauthCallbackRoute = (
 
         // Check rate limit
         const currentUser = core.security.authc.getCurrentUser();
-        const username = currentUser?.username || 'anonymous';
+        if (!currentUser) {
+          return res.unauthorized({
+            headers: { 'content-type': 'text/html' },
+            body: generateOAuthCallbackPage({
+              title: 'Authorization Failed',
+              heading: 'Authentication Required',
+              message: 'User should be authenticated to complete OAuth callback.',
+              details: 'Please log in and try again.',
+              isSuccess: false,
+            }),
+          });
+        }
+        const username = currentUser.username;
 
         if (oauthRateLimiter.isRateLimited(username, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${username}`);

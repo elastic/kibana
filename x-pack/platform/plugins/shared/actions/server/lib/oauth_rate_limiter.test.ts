@@ -190,41 +190,4 @@ describe('OAuthRateLimiter', () => {
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(false);
     });
   });
-
-  describe('anonymous users', () => {
-    it('should handle anonymous user requests', () => {
-      const rateLimiter = new OAuthRateLimiter({ config: DEFAULT_CONFIG });
-
-      for (let i = 0; i < 5; i++) {
-        rateLimiter.log('anonymous', 'authorize');
-        jest.advanceTimersByTime(1000);
-      }
-
-      expect(rateLimiter.isRateLimited('anonymous', 'authorize')).toBe(false);
-      expect(rateLimiter.getLogs('anonymous', 'authorize')).toHaveLength(5);
-    });
-
-    it('should rate limit anonymous users independently from authenticated users', () => {
-      const config = {
-        authorize: { limit: 5, lookbackWindow: '1h' },
-        callback: { limit: 50, lookbackWindow: '1h' },
-      };
-      const rateLimiter = new OAuthRateLimiter({ config });
-
-      // Anonymous hits limit
-      for (let i = 0; i < 5; i++) {
-        rateLimiter.log('anonymous', 'authorize');
-        jest.advanceTimersByTime(1000);
-      }
-
-      // Authenticated user under limit
-      for (let i = 0; i < 3; i++) {
-        rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
-      }
-
-      expect(rateLimiter.isRateLimited('anonymous', 'authorize')).toBe(true);
-      expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(false);
-    });
-  });
 });

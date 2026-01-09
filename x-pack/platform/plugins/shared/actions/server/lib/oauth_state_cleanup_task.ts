@@ -19,7 +19,7 @@ export const OAUTH_STATE_CLEANUP_TASK_TYPE = 'actions:oauth_state_cleanup';
 export const OAUTH_STATE_CLEANUP_TASK_ID = `Actions-${OAUTH_STATE_CLEANUP_TASK_TYPE}`;
 export const OAUTH_STATE_CLEANUP_SCHEDULE: IntervalSchedule = { interval: '30m' };
 
-interface TaskState {
+interface TaskState extends Record<string, unknown> {
   runs: number;
   last_cleanup_count: number;
 }
@@ -56,7 +56,6 @@ function registerOAuthStateCleanupTask(
       title: 'OAuth state cleanup task',
       description: 'Periodically removes expired OAuth state objects',
       timeout: '1m',
-      // FIXME: WUT is wrong with the type here?!?!
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
@@ -76,10 +75,6 @@ function registerOAuthStateCleanupTask(
               });
 
               const cleanupCount = await oauthStateClient.cleanupExpiredStates();
-
-              logger.debug(
-                `OAuth state cleanup task completed. Cleaned up ${cleanupCount} expired states.`
-              );
 
               const updatedState: TaskState = {
                 runs: (state.runs || 0) + 1,

@@ -51,11 +51,13 @@ export const oauthAuthorizeRoute = (
         try {
           const core = await context.core;
           const routeLogger = logger.get('oauth_authorize');
-
-          // Check rate limit
           const currentUser = core.security.authc.getCurrentUser();
-          const username = currentUser?.username || 'anonymous';
+          if (!currentUser) {
+            throw new Error('User should be authenticated to initiate OAuth authorization.');
+          }
+          const username = currentUser.username;
 
+          oauthRateLimiter.log(username, 'authorize');
           if (oauthRateLimiter.isRateLimited(username, 'authorize')) {
             routeLogger.warn(
               `OAuth authorize rate limit exceeded for user: ${username}, connector: ${connectorId}`
@@ -68,12 +70,8 @@ export const oauthAuthorizeRoute = (
             });
           }
 
-          // Log the request
-          oauthRateLimiter.log(username, 'authorize');
-
           const actionsClient = (await context.actions).getActionsClient();
 
-          // Get encrypted saved objects client
           if (!getEncryptedSavedObjects) {
             throw new Error('EncryptedSavedObjects plugin not available');
           }
@@ -96,7 +94,6 @@ export const oauthAuthorizeRoute = (
             });
           }
 
-          // Create OAuth authorization service
           const oauthService = new OAuthAuthorizationService(
             actionsClient,
             encryptedSavedObjectsClient,
@@ -107,7 +104,6 @@ export const oauthAuthorizeRoute = (
           // Get OAuth configuration (validates connector and retrieves decrypted config)
           const oauthConfig = await oauthService.getOAuthConfig(connectorId);
 
-          // Get redirect URI
           const redirectUri = oauthService.getRedirectUri(oauthConfig);
 
           // Build return URL for post-OAuth redirect
@@ -121,7 +117,6 @@ export const oauthAuthorizeRoute = (
             }),
             logger: routeLogger,
           });
-
           const { state, codeChallenge } = await oauthStateClient.create({
             connectorId,
             redirectUri,
@@ -130,7 +125,6 @@ export const oauthAuthorizeRoute = (
             kibanaReturnUrl,
           });
 
-          // Build authorization URL
           const authorizationUrl = oauthService.buildAuthorizationUrl({
             baseAuthorizationUrl: oauthConfig.authorizationUrl,
             clientId: oauthConfig.clientId,
