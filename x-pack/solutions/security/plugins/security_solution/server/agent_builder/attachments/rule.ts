@@ -11,7 +11,10 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID } from '../tools';
-export const ruleAttachmentDataSchema = z.object({
+
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
+
+export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string(),
 });
 
