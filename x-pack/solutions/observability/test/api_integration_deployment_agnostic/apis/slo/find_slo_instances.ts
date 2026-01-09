@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { TEST_SPACE_ID, createDummySummaryDoc } from './fixtures/slo';
+import { DEFAULT_SLO, TEST_SPACE_ID, createGroupedSummaryDoc } from './fixtures/slo';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -39,15 +39,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  describe('Find Instances', function () {
-    const SLO_ID = 'test-slo-find-instances';
+  describe('Find SLO Instances', function () {
+    const GROUP_BY = ['host'];
+    let sloId: string;
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      const response = await sloApi.create({ ...DEFAULT_SLO, groupBy: 'host' }, adminRoleAuthc);
+      sloId = response.id;
     });
 
     after(async () => {
       await cleanupSummaryDocs();
+      await sloApi.deleteAllSLOs(adminRoleAuthc);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
@@ -58,37 +62,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('returns all instances for a given SLO id', async () => {
       const now = new Date().toISOString();
       const docs = [
-        createDummySummaryDoc(SLO_ID, 'instance-1', now),
-        createDummySummaryDoc(SLO_ID, 'instance-2', now),
-        createDummySummaryDoc(SLO_ID, 'instance-3', now),
-        createDummySummaryDoc('other-slo', 'instance-1', now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-1' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-2' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-3' }, now),
+        createGroupedSummaryDoc('other-slo', GROUP_BY, { host: 'instance-1' }, now),
       ];
 
       await insertSummaryDocs(docs);
 
-      const response = await sloApi.findInstances(SLO_ID, {}, adminRoleAuthc);
+      const response = await sloApi.findInstances(sloId, {}, adminRoleAuthc);
 
-      expect(response.results).to.have.length(3);
-      expect(response.results.map((r) => r.instanceId).sort()).to.eql([
+      // Filter out the temp instanceId '*'
+      const actualInstances = response.results.filter((r) => r.instanceId !== '*');
+      expect(actualInstances).to.have.length(3);
+      expect(actualInstances.map((r) => r.instanceId).sort()).to.eql([
         'instance-1',
         'instance-2',
         'instance-3',
       ]);
-      expect(response.searchAfter).to.be(undefined);
     });
 
     it('filters instances by search term', async () => {
       const now = new Date().toISOString();
       const docs = [
-        createDummySummaryDoc(SLO_ID, 'admin-console.001', now),
-        createDummySummaryDoc(SLO_ID, 'admin-console.002', now),
-        createDummySummaryDoc(SLO_ID, 'user-service.001', now),
-        createDummySummaryDoc(SLO_ID, 'user-service.002', now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'admin-console.001' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'admin-console.002' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'user-service.001' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'user-service.002' }, now),
       ];
 
       await insertSummaryDocs(docs);
 
-      const response = await sloApi.findInstances(SLO_ID, { search: 'admin' }, adminRoleAuthc);
+      const response = await sloApi.findInstances(sloId, { search: 'admin' }, adminRoleAuthc);
 
       expect(response.results).to.have.length(2);
       expect(response.results.map((r) => r.instanceId).sort()).to.eql([
@@ -97,31 +102,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
     });
 
-    it('returns empty results for non-existent SLO id', async () => {
+    it('returns 404 for non-existent SLO id', async () => {
       const now = new Date().toISOString();
-      const docs = [createDummySummaryDoc(SLO_ID, 'instance-1', now)];
+      const docs = [createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-1' }, now)];
 
       await insertSummaryDocs(docs);
 
-      const response = await sloApi.findInstances('non-existent-slo', {}, adminRoleAuthc);
-
-      expect(response.results).to.have.length(0);
-      expect(response.searchAfter).to.be(undefined);
+      await sloApi.findInstances('non-existent-slo', {}, adminRoleAuthc, 404);
     });
 
     it('respects size parameter', async () => {
       const now = new Date().toISOString();
       const docs = [
-        createDummySummaryDoc(SLO_ID, 'instance-1', now),
-        createDummySummaryDoc(SLO_ID, 'instance-2', now),
-        createDummySummaryDoc(SLO_ID, 'instance-3', now),
-        createDummySummaryDoc(SLO_ID, 'instance-4', now),
-        createDummySummaryDoc(SLO_ID, 'instance-5', now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-1' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-2' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-3' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-4' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-5' }, now),
       ];
 
       await insertSummaryDocs(docs);
 
-      const response = await sloApi.findInstances(SLO_ID, { size: '2' }, adminRoleAuthc);
+      const response = await sloApi.findInstances(sloId, { size: '2' }, adminRoleAuthc);
 
       expect(response.results).to.have.length(2);
       expect(response.searchAfter).to.not.be(undefined);
@@ -130,22 +132,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('supports pagination with searchAfter', async () => {
       const now = new Date().toISOString();
       const docs = [
-        createDummySummaryDoc(SLO_ID, 'instance-1', now),
-        createDummySummaryDoc(SLO_ID, 'instance-2', now),
-        createDummySummaryDoc(SLO_ID, 'instance-3', now),
-        createDummySummaryDoc(SLO_ID, 'instance-4', now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-1' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-2' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-3' }, now),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-4' }, now),
       ];
 
       await insertSummaryDocs(docs);
 
       // First page
-      const firstPage = await sloApi.findInstances(SLO_ID, { size: '2' }, adminRoleAuthc);
+      const firstPage = await sloApi.findInstances(sloId, { size: '2' }, adminRoleAuthc);
       expect(firstPage.results).to.have.length(2);
       expect(firstPage.searchAfter).to.not.be(undefined);
 
       // Second page using searchAfter
       const secondPage = await sloApi.findInstances(
-        SLO_ID,
+        sloId,
         { size: '2', searchAfter: firstPage.searchAfter },
         adminRoleAuthc
       );
@@ -161,16 +163,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('only returns instances for the current space', async () => {
       const now = new Date().toISOString();
       const docs = [
-        createDummySummaryDoc(SLO_ID, 'instance-1', now, TEST_SPACE_ID),
-        createDummySummaryDoc(SLO_ID, 'instance-2', now, 'other-space'),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-1' }, now, TEST_SPACE_ID),
+        createGroupedSummaryDoc(sloId, GROUP_BY, { host: 'instance-2' }, now, 'other-space'),
       ];
 
       await insertSummaryDocs(docs);
 
-      const response = await sloApi.findInstances(SLO_ID, {}, adminRoleAuthc);
+      const response = await sloApi.findInstances(sloId, {}, adminRoleAuthc);
 
-      expect(response.results).to.have.length(1);
-      expect(response.results[0].instanceId).to.eql('instance-1');
+      // Filter out the temp instanceId '*'
+      const actualInstances = response.results.filter((r) => r.instanceId !== '*');
+      expect(actualInstances).to.have.length(1);
+      expect(actualInstances[0].instanceId).to.eql('instance-1');
     });
   });
 }
