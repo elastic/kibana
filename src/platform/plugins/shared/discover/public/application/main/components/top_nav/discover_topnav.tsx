@@ -7,27 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAppStateSelector } from '../../state_management/redux';
-import { useDiscoverTopNav } from './use_discover_topnav';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useESQLVariables } from './use_esql_variables';
-import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
+  useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -35,8 +32,11 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { onSaveDiscoverSession } from './save_discover_session';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
+import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import { onSaveDiscoverSession } from './save_discover_session';
+import { useDiscoverTopNav } from './use_discover_topnav';
+import { useESQLVariables } from './use_esql_variables';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;

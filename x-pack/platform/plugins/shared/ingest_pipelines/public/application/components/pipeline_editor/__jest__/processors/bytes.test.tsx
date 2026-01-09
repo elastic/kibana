@@ -5,96 +5,77 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const BYTES_TYPE = 'bytes';
 
 describe('Processor: Bytes', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
-    const {
-      actions: { addProcessor, addProcessorType },
-    } = testBed;
-    // Open the processor flyout
-    addProcessor();
 
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(BYTES_TYPE);
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: BYTES_TYPE },
+    });
+
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
   });
 
   test('saves with required parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
 
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
     });
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
 
     // Set optional parameteres
-    form.setInputValue('targetField.input', 'target_field');
-
-    form.toggleEuiSwitch('ignoreMissingSwitch.input');
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'target_field' },
+    });
+    fireEvent.click(within(screen.getByTestId('ignoreMissingSwitch')).getByTestId('input'));
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       target_field: 'target_field',
