@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { render } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import type { DashboardApi } from '../dashboard_api/types';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
@@ -46,7 +46,7 @@ describe('Internal dashboard top nav', () => {
 
   it('should not render the managed badge by default', async () => {
     const { api, internalApi } = buildMockDashboardApi();
-    const component = render(
+    const component = renderWithI18n(
       <DashboardContext.Provider value={api}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -63,7 +63,7 @@ describe('Internal dashboard top nav', () => {
       ...api,
       isManaged: true,
     };
-    const component = render(
+    const component = renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -82,7 +82,7 @@ describe('Internal dashboard top nav', () => {
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
 
-      render(
+      renderWithI18n(
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav
@@ -118,7 +118,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -153,7 +153,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -188,7 +188,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -223,7 +223,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav

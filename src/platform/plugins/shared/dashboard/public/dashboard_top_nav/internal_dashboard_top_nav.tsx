@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
-import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiHorizontalRule,
@@ -41,7 +41,6 @@ import {
   getDashboardBreadcrumb,
   getDashboardTitle,
   topNavStrings,
-  unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
@@ -293,27 +292,12 @@ export function InternalDashboardTopNav({
     showResetChange,
   });
 
-  void viewModeTopNavConfig; // TODO
-  void editModeTopNavConfig; // TODO
-
   UseUnmount(() => {
     dashboardApi.clearOverlays();
   });
 
   const badges = useMemo(() => {
     const allBadges: TopNavMenuProps['badges'] = [];
-    if (hasUnsavedChanges && viewMode === 'edit') {
-      allBadges.push({
-        'data-test-subj': 'dashboardUnsavedChangesBadge',
-        badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-        title: '',
-        color: '#F6E58D',
-        toolTipProps: {
-          content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
-          position: 'bottom',
-        } as EuiToolTipProps,
-      });
-    }
 
     const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
@@ -362,7 +346,14 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [isPopoverOpen, dashboardApi, maybeRedirect]);
+
+  useEffect(() => {
+    coreServices.chrome.setBreadcrumbsBadges(badges);
+    return () => {
+      coreServices.chrome.setBreadcrumbsBadges([]);
+    };
+  }, [badges]);
 
   const setFavoriteButtonMountPoint = useCallback(
     (mountPoint: MountPoint<HTMLElement> | undefined) => {
@@ -386,17 +377,13 @@ export function InternalDashboardTopNav({
       </EuiScreenReaderOnly>
       <AppMenu
         setAppMenu={coreServices.chrome.setAppMenu}
-        config={{
-          items: [
-            {
-              label: 'Test',
-              run: () => {},
-              order: 1,
-              id: 'placeholder',
-              iconType: 'gear',
-            },
-          ],
-        }}
+        config={
+          visibilityProps.showTopNavMenu
+            ? viewMode === 'edit'
+              ? editModeTopNavConfig
+              : viewModeTopNavConfig
+            : undefined
+        }
       />
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar

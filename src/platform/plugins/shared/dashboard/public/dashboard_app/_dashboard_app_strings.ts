@@ -223,7 +223,7 @@ export const topNavStrings = {
   },
   resetChanges: {
     label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
-      defaultMessage: 'Reset',
+      defaultMessage: 'Reset changes',
     }),
     description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
       defaultMessage: 'Reset changes to dashboard',
@@ -243,6 +243,15 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.exportConfigDescription', {
       defaultMessage: 'Export dashboard',
+    }),
+    pngLabel: i18n.translate('dashboard.topNave.exportPngButtonAriaLabel', {
+      defaultMessage: 'PNG reports',
+    }),
+    pdfLabel: i18n.translate('dashboard.topNave.exportPdfButtonAriaLabel', {
+      defaultMessage: 'PDF reports',
+    }),
+    scheduleExportLabel: i18n.translate('dashboard.topNave.scheduleExportButtonAriaLabel', {
+      defaultMessage: 'Schedule export',
     }),
   },
   share: {
