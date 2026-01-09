@@ -10,6 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { KUBERNETES_POC_LENS_METRIC_COLOR } from '../../constants';
 
 interface JobsMetricCardProps {
   timeRange: TimeRange;
@@ -42,6 +43,8 @@ export const JobsMetricCard: React.FC<JobsMetricCardProps> = ({ timeRange, heigh
           layerId: 'layer_0',
           layerType: 'data',
           metricAccessor: 'metric_0',
+          color: KUBERNETES_POC_LENS_METRIC_COLOR,
+          applyColorTo: 'value',
         },
         query: {
           esql: JOBS_ESQL,
@@ -52,6 +55,7 @@ export const JobsMetricCard: React.FC<JobsMetricCardProps> = ({ timeRange, heigh
             layers: {
               layer_0: {
                 index: 'esql-query-index',
+                timeField: '@timestamp',
                 query: {
                   esql: JOBS_ESQL,
                 },

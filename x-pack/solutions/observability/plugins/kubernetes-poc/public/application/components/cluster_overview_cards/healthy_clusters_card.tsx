@@ -63,6 +63,7 @@ export const HealthyClustersCard: React.FC<HealthyClustersCardProps> = ({
           showBar: true,
           progressDirection: 'vertical',
           color: '#00BFB3', // Green/teal for healthy
+          applyColorTo: 'value',
         },
         query: {
           esql: HEALTHY_CLUSTERS_ESQL,
@@ -73,6 +74,7 @@ export const HealthyClustersCard: React.FC<HealthyClustersCardProps> = ({
             layers: {
               layer_0: {
                 index: 'esql-query-index',
+                timeField: '@timestamp',
                 query: {
                   esql: HEALTHY_CLUSTERS_ESQL,
                 },

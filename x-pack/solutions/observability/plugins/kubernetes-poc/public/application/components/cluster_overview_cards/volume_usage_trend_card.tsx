@@ -111,6 +111,7 @@ export const VolumeUsageTrendCard: React.FC<VolumeUsageTrendCardProps> = ({
             layers: {
               layer_0: {
                 index: 'esql-query-index',
+                timeField: '@timestamp',
                 query: {
                   esql: VOLUME_USAGE_BY_CLUSTER_ESQL,
                 },

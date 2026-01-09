@@ -10,6 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { KUBERNETES_POC_LENS_METRIC_COLOR } from '../../constants';
 
 interface DaemonsetsMetricCardProps {
   timeRange: TimeRange;
@@ -45,6 +46,8 @@ export const DaemonsetsMetricCard: React.FC<DaemonsetsMetricCardProps> = ({
           layerId: 'layer_0',
           layerType: 'data',
           metricAccessor: 'metric_0',
+          color: KUBERNETES_POC_LENS_METRIC_COLOR,
+          applyColorTo: 'value',
         },
         query: {
           esql: DAEMONSETS_ESQL,
@@ -55,6 +58,7 @@ export const DaemonsetsMetricCard: React.FC<DaemonsetsMetricCardProps> = ({
             layers: {
               layer_0: {
                 index: 'esql-query-index',
+                timeField: '@timestamp',
                 query: {
                   esql: DAEMONSETS_ESQL,
                 },

@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { KUBERNETES_POC_LENS_METRIC_COLOR } from '../../constants';
 
 export type ESQLVisualizationType = 'lnsXY' | 'lnsMetric' | 'lnsPie';
 
@@ -59,6 +60,10 @@ function createESQLLensAttributes(
   title?: string
 ): TypedLensByValueInput['attributes'] {
   const layerId = 'layer_0';
+  const metricDefaults =
+    visualizationType === 'lnsMetric' && !('color' in visualizationState)
+      ? { color: KUBERNETES_POC_LENS_METRIC_COLOR, applyColorTo: 'value' }
+      : {};
 
   return {
     title: title ?? '',
@@ -68,6 +73,7 @@ function createESQLLensAttributes(
     references: [],
     state: {
       visualization: {
+        ...metricDefaults,
         ...visualizationState,
         layerId,
         layerType: 'data',
@@ -81,6 +87,7 @@ function createESQLLensAttributes(
           layers: {
             [layerId]: {
               index: 'esql-query-index',
+              timeField: '@timestamp',
               query: {
                 esql: esqlQuery,
               },

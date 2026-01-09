@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { KUBERNETES_POC_LENS_METRIC_COLOR } from '../../constants';
 
 interface ClusterCountCardProps {
   timeRange: TimeRange;
@@ -51,6 +52,8 @@ export const ClusterCountCard: React.FC<ClusterCountCardProps> = ({ timeRange, h
           maxAccessor: 'max_0',
           showBar: true,
           progressDirection: 'vertical',
+          color: KUBERNETES_POC_LENS_METRIC_COLOR,
+          applyColorTo: 'value',
         },
         query: {
           esql: CLUSTER_COUNT_ESQL,
@@ -61,6 +64,7 @@ export const ClusterCountCard: React.FC<ClusterCountCardProps> = ({ timeRange, h
             layers: {
               layer_0: {
                 index: 'esql-query-index',
+                timeField: '@timestamp',
                 query: {
                   esql: CLUSTER_COUNT_ESQL,
                 },

@@ -10,6 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { KUBERNETES_POC_LENS_METRIC_COLOR } from '../../../constants';
 
 interface MemoryTotalCardProps {
   clusterName: string;
@@ -57,6 +58,8 @@ export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({
           subtitle: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
             defaultMessage: 'Total',
           }),
+          color: KUBERNETES_POC_LENS_METRIC_COLOR,
+          applyColorTo: 'value',
         },
         query: {
           esql: query,
@@ -67,6 +70,7 @@ export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({
             layers: {
               layer_0: {
                 index: 'esql-query-index',
+                timeField: '@timestamp',
                 query: {
                   esql: query,
                 },
