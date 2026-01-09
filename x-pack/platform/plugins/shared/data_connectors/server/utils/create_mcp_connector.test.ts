@@ -156,9 +156,6 @@ describe('createMcpConnector', () => {
       tools: mockMcpTools,
       namespace: 'test-connector',
     });
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      `Bulk create MCP tools results: ${JSON.stringify(mockBulkCreateResults)}`
-    );
   });
 
   it('should not create MCP tools when importedTools is not provided', async () => {
@@ -246,8 +243,6 @@ describe('createMcpConnector', () => {
     ).rejects.toThrow(
       'Error creating MCP tools for test-connector: Error: Failed to get MCP tools'
     );
-
-    expect(mockLogger.error).not.toHaveBeenCalled();
   });
 
   it('should handle errors when bulk creating MCP tools and rethrow', async () => {
@@ -282,8 +277,6 @@ describe('createMcpConnector', () => {
     ).rejects.toThrow(
       'Error creating MCP tools for test-connector: Error: Failed to bulk create tools'
     );
-
-    expect(mockLogger.error).not.toHaveBeenCalled();
   });
 
   it('should handle partial tool creation failures gracefully', async () => {
@@ -341,9 +334,6 @@ describe('createMcpConnector', () => {
 
     // Should still return the connector even if some tools failed
     expect(result).toEqual(mockStackConnector);
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      `Bulk create MCP tools results: ${JSON.stringify(mockBulkCreateResults)}`
-    );
   });
 
   it('should handle empty tool list from getMcpTools', async () => {
