@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useInteractiveModeSelector } from '../state_management/stream_enrichment_state_machine';
 import { StepsListItem } from './steps_list';
 import { isRootStep, isStepUnderEdit } from '../state_management/steps_state_machine';
 import { getRootLevelStepsMap } from '../state_management/stream_enrichment_state_machine/utils';
 import { useStepsProcessingSummary } from '../hooks/use_steps_processing_summary';
-import { CreateStepButton } from '../create_step_button';
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
+import { ProcessingButtonsManual } from '../empty_prompts';
 
 export const RootSteps = ({
   stepRefs,
@@ -70,11 +70,14 @@ export const RootSteps = ({
         />
       ))}
       {!readOnly && (
-        <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
-          <EuiFlexItem grow={false}>
-            <CreateStepButton mode="subdued" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
+            <EuiFlexItem grow={false}>
+              <ProcessingButtonsManual center={true} color="primary" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </EuiPanel>
   );

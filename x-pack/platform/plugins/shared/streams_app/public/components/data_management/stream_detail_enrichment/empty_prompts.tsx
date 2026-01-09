@@ -27,7 +27,15 @@ import {
   useStreamEnrichmentEvents,
 } from './state_management/stream_enrichment_state_machine';
 
-const ProcessingButtonsManual = ({ center = false }: { center?: boolean }) => {
+interface ProcessingButtonsManualProps {
+  center?: boolean;
+  color?: 'text' | 'primary';
+}
+
+export const ProcessingButtonsManual = ({
+  center = false,
+  color = 'text',
+}: ProcessingButtonsManualProps) => {
   const { euiTheme } = useEuiTheme();
   const { addProcessor, addCondition } = useStreamEnrichmentEvents();
 
@@ -35,19 +43,22 @@ const ProcessingButtonsManual = ({ center = false }: { center?: boolean }) => {
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' })
   );
 
+  if (!canAddStep) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup gutterSize="s" justifyContent={center ? 'center' : 'flexStart'}>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
-          color="text"
+          color={color}
           fill={false}
           css={css`
             color: ${euiTheme.colors.textPrimary};
           `}
           data-test-subj="streamsAppStreamDetailEnrichmentCreateConditionButton"
           iconType="logstashIf"
-          disabled={!canAddStep}
           onClick={() => addCondition(undefined, { parentId: null })}
         >
           {createConditionText}
@@ -56,14 +67,13 @@ const ProcessingButtonsManual = ({ center = false }: { center?: boolean }) => {
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
-          color="text"
+          color={color}
           fill={false}
           css={css`
             color: ${euiTheme.colors.textPrimary};
           `}
           data-test-subj="streamsAppStreamDetailEnrichmentCreateProcessorButton"
           iconType="compute"
-          disabled={!canAddStep}
           onClick={() => addProcessor(undefined, { parentId: null })}
         >
           {createProcessorText}
