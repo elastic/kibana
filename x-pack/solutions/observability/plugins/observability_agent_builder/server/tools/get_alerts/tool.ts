@@ -31,10 +31,12 @@ export const defaultFields = [
   'kibana.alert.instance.id',
   'kibana.alert.reason',
   'kibana.alert.rule.category',
+  'kibana.alert.rule.consumer',
   'kibana.alert.rule.name',
+  'kibana.alert.rule.rule_type_id',
   'kibana.alert.rule.tags',
-  'kibana.alert.start',
   'kibana.alert.status',
+  'kibana.alert.evaluation.threshold',
   'kibana.alert.time_range.gte',
   'kibana.alert.time_range.lte',
   'kibana.alert.workflow_status',
@@ -58,7 +60,7 @@ const getAlertsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Filter alerts by field:value pairs. Examples: "service.name: frontend", "host.name: web-*", or "kibana.alert.status: active".'
+      'Filter alerts by field:value pairs. Examples: \'service.name: "frontend"\', \'host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU Alert"\'.'
     ),
   includeRecovered: z
     .boolean()
