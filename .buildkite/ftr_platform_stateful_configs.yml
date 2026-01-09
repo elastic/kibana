@@ -50,7 +50,7 @@ disabled:
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts
 
-defaultQueue: 'n2-4-spot'
+defaultQueue: 'n2d-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
   - src/platform/test/analytics/config.ts
