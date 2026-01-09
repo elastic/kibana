@@ -9,7 +9,6 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
-import type { CSSInterpolation } from '@emotion/serialize';
 import { highlightAnimationDuration } from '../../dashboard_api/track_panel';
 
 const borderSpinKeyframes = keyframes({
@@ -70,19 +69,6 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
   const brightenInDarkMode = (brightness: number) =>
     context.colorMode === 'DARK' ? `brightness(${brightness})` : '';
 
-  const highlightGradientBaseStyle: CSSInterpolation = {
-    content: `""`,
-    position: 'absolute',
-    left: '-5px',
-    top: '-5px',
-    'z-index': -1,
-    width: 'calc(100% + 10px)',
-    height: 'calc(100% + 10px)',
-    backgroundImage: rotatingGradient,
-    filter: brightenInDarkMode(1.5),
-    borderRadius: euiTheme.border.radius.medium,
-  };
-
   return css([
     highlightPropertyStyles,
     {
@@ -94,8 +80,17 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
       },
       '&.dshDashboardGrid__item--highlighted:not(&.dshDashboardGrid__item--focused) .embPanel::before':
         {
-          ...highlightGradientBaseStyle,
+          content: `""`,
           opacity: 0,
+          position: 'absolute',
+          left: '-5px',
+          top: '-5px',
+          'z-index': -1,
+          width: 'calc(100% + 10px)',
+          height: 'calc(100% + 10px)',
+          backgroundImage: rotatingGradient,
+          filter: brightenInDarkMode(1.5),
+          borderRadius: euiTheme.border.radius.medium,
           animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
         },
       '&.dshDashboardGrid__item--highlighted .embPanel::after': {
@@ -112,14 +107,9 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
 
-      // Call out focused panels without animation
+      // Call out focused panels with a simple border
       '&.dshDashboardGrid__item--focused .embPanel': {
-        position: 'relative',
-        overflow: 'visible !important',
-        '&::before': {
-          ...highlightGradientBaseStyle,
-          borderRadius: euiTheme.border.radius.medium,
-        },
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
       },
     },
   ]);
