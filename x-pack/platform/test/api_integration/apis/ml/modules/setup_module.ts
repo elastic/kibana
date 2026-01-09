@@ -956,7 +956,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         // expected default values, from module
-        const expectedMMLs = ['30mb', '10mb', '10mb'];
+        const expectedMMLs = ['10mb', '10mb', '10mb'];
 
         const rspBody = await executeSetupModuleRequest(
           testModule.module,
