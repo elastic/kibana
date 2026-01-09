@@ -31,7 +31,6 @@ export const useResourcesBadge = (
   const { euiTheme } = useEuiTheme();
   const resourcesOpenStatusRef = useRef<boolean>(false);
   const resourcesFromBadgeClassName = 'resourcesFromBadge';
-  const resourcesWhereBadgeClassName = 'resourcesWhereBadge';
 
   const resourcesBadgeStyle = css`
     .${resourcesFromBadgeClassName} {
@@ -53,25 +52,6 @@ export const useResourcesBadge = (
       color: ${euiTheme.colors.plainLight} !important;
       background-color: ${euiTheme.colors.primary};
     }
-    .${resourcesWhereBadgeClassName} {
-      cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
-      padding-inline: 2px;
-      max-inline-size: 100%;
-      font-size: 0.8571rem;
-      line-height: 18px;
-      font-weight: 500;
-      white-space: nowrap;
-      text-decoration: none;
-      border-radius: 3px;
-      text-align: start;
-      border-width: 1px;
-      border-style: solid;
-      color: ${euiTheme.colors.plainLight} !important;
-      background-color: ${euiTheme.colors.accent};
-    }
   `;
 
   const addResourcesDecorator = useCallback(() => {
@@ -84,11 +64,9 @@ export const useResourcesBadge = (
 
     const { root } = Parser.parse(query.esql);
     const fromCommand = root.commands.find((command) => command.name === 'from');
-    const whereCommand = root.commands.find((command) => command.name === 'where');
 
     const fromStringPosition = fromCommand ? findCommandStringPosition(query.esql, 'from') : undefined;
-    const whereStringPosition = whereCommand ? findCommandStringPosition(query.esql, 'where') : undefined;
-    if (!fromStringPosition && !whereStringPosition) {
+    if (!fromStringPosition) {
       return;
     }
 
@@ -107,23 +85,6 @@ export const useResourcesBadge = (
             isWholeLine: false,
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
             inlineClassName: resourcesFromBadgeClassName,
-          },
-        },
-      );
-    }
-    if (whereStringPosition) {
-      collections.push(
-        {
-          range: new monaco.Range(
-            whereStringPosition.startLineNumber,
-            whereStringPosition.min + 1,
-            whereStringPosition.endLineNumber,
-            whereStringPosition.max
-          ),
-          options: {
-            isWholeLine: false,
-            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-            inlineClassName: resourcesWhereBadgeClassName,
           },
         },
       );
@@ -147,10 +108,10 @@ export const useResourcesBadge = (
       const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
       if (!currentWord) return;
       const fromStringPosition = findCommandStringPosition(query.esql, 'from');
-      const whereStringPosition = findCommandStringPosition(query.esql, 'where');
 
       if (
         currentWord.word === 'FROM' &&
+        fromStringPosition &&
         fromStringPosition.startLineNumber === mousePosition.lineNumber &&
         currentWord.startColumn >= fromStringPosition.min &&
         currentWord.endColumn <= fromStringPosition.max
@@ -160,25 +121,6 @@ export const useResourcesBadge = (
             fromStringPosition.startLineNumber,
             fromStringPosition.max + 1
           )
-        editorRef.current?.setPosition(positionAfterCommand);
-        editorRef.current?.revealPosition(positionAfterCommand);
-
-        // Trigger autocomplete suggestions
-        setTimeout(() => {
-          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-        }, 0);
-      }
-      if (
-        currentWord.word === 'WHERE' &&
-        whereStringPosition.startLineNumber === mousePosition.lineNumber &&
-        currentWord.startColumn >= whereStringPosition.min &&
-        currentWord.endColumn <= whereStringPosition.max
-      ) {
-        // Move cursor to position after "WHERE "
-        const positionAfterCommand = new monaco.Position(
-            whereStringPosition.startLineNumber,
-            whereStringPosition.max + 1
-          );
         editorRef.current?.setPosition(positionAfterCommand);
         editorRef.current?.revealPosition(positionAfterCommand);
 
@@ -198,12 +140,12 @@ export const useResourcesBadge = (
       const currentWord = editorModel.current?.getWordAtPosition(currentPosition);
       if (!currentWord) return;
       const fromStringPosition = findCommandStringPosition(query.esql, 'from');
-      const whereStringPosition = findCommandStringPosition(query.esql, 'where');
       // Open the popover on arrow down key press
       if (
         e.keyCode === monaco.KeyCode.DownArrow &&
         !resourcesOpenStatusRef.current &&
         currentWord.word === 'FROM' &&
+        fromStringPosition &&
         fromStringPosition.startLineNumber === currentPosition.lineNumber &&
         currentWord.startColumn >= fromStringPosition.min &&
         currentWord.endColumn <= fromStringPosition.max
@@ -216,28 +158,6 @@ export const useResourcesBadge = (
         );
         editorRef.current?.setPosition(positionAfterFrom);
         editorRef.current?.revealPosition(positionAfterFrom);
-
-        // Trigger autocomplete suggestions
-        setTimeout(() => {
-          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-        }, 0);
-      }
-      if (
-        e.keyCode === monaco.KeyCode.DownArrow &&
-        !resourcesOpenStatusRef.current &&
-        currentWord.word === 'WHERE' &&
-        whereStringPosition.startLineNumber === currentPosition.lineNumber &&
-        currentWord.startColumn >= whereStringPosition.min &&
-        currentWord.endColumn <= whereStringPosition.max
-      ) {
-        e.preventDefault();
-        // Move cursor to position after "WHERE "
-        const positionAfterWhere = new monaco.Position(
-          whereStringPosition.startLineNumber,
-          whereStringPosition.max + 1
-        );
-        editorRef.current?.setPosition(positionAfterWhere);
-        editorRef.current?.revealPosition(positionAfterWhere);
 
         // Trigger autocomplete suggestions
         setTimeout(() => {
