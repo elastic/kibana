@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, memo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -13,189 +13,23 @@ import {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
-  Handle,
-  Position,
   type Node,
   type Edge,
   type EdgeMarker,
   type NodeTypes,
-  type NodeProps,
   type NodeMouseHandler,
-  MarkerType,
 } from '@xyflow/react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type cytoscape from 'cytoscape';
 import dagre from '@dagrejs/dagre';
 import '@xyflow/react/dist/style.css';
-import { getAgentIcon } from '@kbn/custom-icons';
-import { getSpanIcon } from '@kbn/apm-ui-shared';
+import { css } from '@emotion/react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import {
-  getServiceHealthStatusColor,
-  ServiceHealthStatus,
-} from '../../../../../common/service_health_status';
 
-// Node data interface
-interface ServiceMapNodeData extends Record<string, unknown> {
-  id: string;
-  label: string;
-  agentName?: string;
-  spanType?: string;
-  spanSubtype?: string;
-  serviceAnomalyStats?: {
-    healthStatus?: ServiceHealthStatus;
-  };
-  isService: boolean;
-}
-
-// Edge data interface
-interface ServiceMapEdgeData extends Record<string, unknown> {
-  isBidirectional?: boolean;
-}
-
-// Custom Service Node component (circular)
-const ServiceNode = memo(({ data, selected }: NodeProps<Node<ServiceMapNodeData>>) => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === 'DARK';
-
-  const borderColor = useMemo(() => {
-    if (data.serviceAnomalyStats?.healthStatus) {
-      return getServiceHealthStatusColor(euiTheme, data.serviceAnomalyStats.healthStatus);
-    }
-    if (selected) {
-      return euiTheme.colors.primary;
-    }
-    return euiTheme.colors.mediumShade;
-  }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme]);
-
-  const borderWidth = useMemo(() => {
-    const status = data.serviceAnomalyStats?.healthStatus;
-    if (status === ServiceHealthStatus.warning) return 4;
-    if (status === ServiceHealthStatus.critical) return 8;
-    return 4;
-  }, [data.serviceAnomalyStats?.healthStatus]);
-
-  const iconUrl = useMemo(() => {
-    if (data.agentName) {
-      return getAgentIcon(data.agentName, isDarkMode);
-    }
-    return null;
-  }, [data.agentName, isDarkMode]);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
-      <div
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          border: `${borderWidth}px solid ${borderColor}`,
-          background: euiTheme.colors.backgroundBasePlain,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 2px rgba(0,0,0,0.15)',
-          cursor: 'pointer',
-        }}
-      >
-        {iconUrl && (
-          <img
-            src={iconUrl}
-            alt={data.agentName}
-            style={{ width: '60%', height: '60%', objectFit: 'contain' }}
-          />
-        )}
-      </div>
-      <div
-        style={{
-          marginTop: 8,
-          fontSize: euiTheme.size.s,
-          color: selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph,
-          fontFamily: 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-          maxWidth: 200,
-          textAlign: 'center',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          backgroundColor: selected ? `${euiTheme.colors.primary}1A` : 'transparent',
-          padding: `2px ${euiTheme.size.xs}`,
-          borderRadius: 4,
-        }}
-      >
-        {data.label}
-      </div>
-      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
-    </div>
-  );
-});
-
-ServiceNode.displayName = 'ServiceNode';
-
-// Custom Dependency Node (diamond shape)
-const DependencyNode = memo(({ data, selected }: NodeProps<Node<ServiceMapNodeData>>) => {
-  const { euiTheme } = useEuiTheme();
-
-  const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
-
-  const iconUrl = useMemo(() => {
-    if (data.spanType || data.spanSubtype) {
-      return getSpanIcon(data.spanType, data.spanSubtype);
-    }
-    return null;
-  }, [data.spanType, data.spanSubtype]);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
-      <div
-        style={{
-          width: 48,
-          height: 48,
-          transform: 'rotate(45deg)',
-          border: `4px solid ${borderColor}`,
-          background: euiTheme.colors.backgroundBasePlain,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 2px rgba(0,0,0,0.15)',
-          cursor: 'pointer',
-        }}
-      >
-        <div style={{ transform: 'rotate(-45deg)' }}>
-          {iconUrl && (
-            <img
-              src={iconUrl}
-              alt={data.spanSubtype || data.spanType}
-              style={{ width: 20, height: 20, objectFit: 'contain' }}
-            />
-          )}
-        </div>
-      </div>
-      <div
-        style={{
-          marginTop: 16,
-          fontSize: euiTheme.size.s,
-          color: selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph,
-          fontFamily: 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-          maxWidth: 200,
-          textAlign: 'center',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          backgroundColor: selected ? `${euiTheme.colors.primary}1A` : 'transparent',
-          padding: `2px ${euiTheme.size.xs}`,
-          borderRadius: 4,
-        }}
-      >
-        {data.label}
-      </div>
-      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
-    </div>
-  );
-});
-
-DependencyNode.displayName = 'DependencyNode';
+import type { ServiceMapNodeData } from './service_node';
+import { ServiceNode } from './service_node';
+import { DependencyNode } from './dependency_node';
+import { transformElements, type ServiceMapEdgeData } from './transform_data';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -204,111 +38,6 @@ const nodeTypes: NodeTypes = {
 
 // Default edge colors
 const EDGE_COLOR_DEFAULT = '#98A2B3';
-
-// Transform Cytoscape elements to React Flow format
-function transformElements(
-  elements: cytoscape.ElementDefinition[],
-  defaultColor: string
-): {
-  nodes: Node<ServiceMapNodeData>[];
-  edges: Edge<ServiceMapEdgeData>[];
-} {
-  const nodes: Node<ServiceMapNodeData>[] = [];
-  const edges: Edge<ServiceMapEdgeData>[] = [];
-  const bidirectionalPairs = new Set<string>();
-
-  // First pass: identify bidirectional edges
-  const edgeMap = new Map<string, boolean>();
-  elements.forEach((el) => {
-    if ('source' in (el.data || {})) {
-      const edgeData = el.data as { source: string; target: string };
-      const key = `${edgeData.source}->${edgeData.target}`;
-      const reverseKey = `${edgeData.target}->${edgeData.source}`;
-      if (edgeMap.has(reverseKey)) {
-        bidirectionalPairs.add(key);
-        bidirectionalPairs.add(reverseKey);
-      }
-      edgeMap.set(key, true);
-    }
-  });
-
-  elements.forEach((el) => {
-    if ('source' in (el.data || {})) {
-      // It's an edge
-      const edgeData = el.data as {
-        source: string;
-        target: string;
-        id?: string;
-        bidirectional?: boolean;
-        isInverseEdge?: boolean;
-      };
-
-      // Skip inverse edges (they're duplicates for bidirectional display)
-      if (edgeData.isInverseEdge) return;
-
-      const edgeKey = `${edgeData.source}->${edgeData.target}`;
-      const isBidirectional = edgeData.bidirectional || bidirectionalPairs.has(edgeKey);
-
-      const markerEnd: EdgeMarker = {
-        type: MarkerType.ArrowClosed,
-        width: 15,
-        height: 15,
-        color: defaultColor,
-      };
-
-      edges.push({
-        id: edgeData.id || `${edgeData.source}-${edgeData.target}`,
-        source: edgeData.source,
-        target: edgeData.target,
-        type: 'default',
-        style: { stroke: defaultColor, strokeWidth: 1 },
-        markerEnd,
-        markerStart: isBidirectional
-          ? { type: MarkerType.ArrowClosed, width: 15, height: 15, color: defaultColor }
-          : undefined,
-        data: { isBidirectional },
-      });
-    } else {
-      // It's a node
-      const nodeData = el.data as {
-        id: string;
-        'service.name'?: string;
-        'agent.name'?: string;
-        'span.type'?: string;
-        'span.subtype'?: string;
-        'span.destination.service.resource'?: string;
-        label?: string;
-        serviceAnomalyStats?: {
-          healthStatus?: ServiceHealthStatus;
-        };
-      };
-
-      const isService = !!nodeData['service.name'];
-      const label =
-        nodeData['service.name'] ||
-        nodeData.label ||
-        nodeData['span.destination.service.resource'] ||
-        nodeData.id;
-
-      nodes.push({
-        id: nodeData.id,
-        type: isService ? 'service' : 'dependency',
-        position: { x: 0, y: 0 },
-        data: {
-          id: nodeData.id,
-          label,
-          agentName: nodeData['agent.name'],
-          spanType: nodeData['span.type'],
-          spanSubtype: nodeData['span.subtype'],
-          serviceAnomalyStats: nodeData.serviceAnomalyStats,
-          isService,
-        },
-      });
-    }
-  });
-
-  return { nodes, edges };
-}
 
 // Apply Dagre layout (left-to-right like Cytoscape version)
 function applyLayout(
@@ -399,7 +128,7 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
 
-      // Update all edges based on selection (approach from GitHub discussion)
+      // Update all edges based on selection to mark them blue if they are connected to the selected node
       setEdges((currentEdges) =>
         currentEdges.map((edge) => {
           const isConnected =
@@ -478,7 +207,7 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
   );
 
   return (
-    <div style={containerStyle} data-test-subj="reactFlowServiceMapInner">
+    <div css={css(containerStyle)} data-test-subj="reactFlowServiceMapInner">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -499,22 +228,22 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls
           showInteractive={false}
-          style={{
-            backgroundColor: euiTheme.colors.backgroundBasePlain,
-            borderRadius: 4,
-            border: `1px solid ${euiTheme.colors.lightShade}`,
-          }}
+          css={css`{  
+            backgroundColor: ${euiTheme.colors.backgroundBasePlain};
+            border-radius: ${euiTheme.border.radius.medium};
+            border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+          `}
         />
       </ReactFlow>
       {status === FETCH_STATUS.LOADING && (
         <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 10,
-          }}
+          css={css`
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+          `}
         >
           <EuiLoadingSpinner size="xl" />
         </div>
@@ -524,15 +253,13 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
 }
 
 /**
- * React Flow Graph Component with Provider
+ * React Flow Service Map Component
+ * A POC implementation using React Flow to compare with the existing Cytoscape.js implementation
  */
-function ReactFlowGraph(props: ReactFlowGraphProps) {
+export function ReactFlowServiceMap(props: ReactFlowGraphProps) {
   return (
     <ReactFlowProvider>
       <ReactFlowGraphInner {...props} />
     </ReactFlowProvider>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ReactFlowGraph;

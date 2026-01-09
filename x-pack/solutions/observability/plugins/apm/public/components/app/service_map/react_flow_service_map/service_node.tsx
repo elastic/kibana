@@ -1,0 +1,109 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo, memo } from 'react';
+import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getAgentIcon } from '@kbn/custom-icons';
+import { css } from '@emotion/react';
+import {
+  getServiceHealthStatusColor,
+  ServiceHealthStatus,
+} from '../../../../../common/service_health_status';
+import type { AgentName, SpanType } from '../../../../../common/es_fields/apm';
+
+export interface ServiceMapNodeData {
+  id: string;
+  label: string;
+  agentName?: AgentName;
+  spanType?: SpanType;
+  spanSubtype?: SpanSubtype;
+  serviceAnomalyStats?: {
+    healthStatus?: ServiceHealthStatus;
+  };
+  isService: boolean;
+}
+
+// Custom Service Node component (circular)
+export const ServiceNode = memo(({ data, selected }: NodeProps<Node<ServiceMapNodeData>>) => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
+
+  const borderColor = useMemo(() => {
+    if (data.serviceAnomalyStats?.healthStatus) {
+      return getServiceHealthStatusColor(euiTheme, data.serviceAnomalyStats.healthStatus);
+    }
+    if (selected) {
+      return euiTheme.colors.primary;
+    }
+    return euiTheme.colors.mediumShade;
+  }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme]);
+
+  const borderWidth = useMemo(() => {
+    const status = data.serviceAnomalyStats?.healthStatus;
+    if (status === ServiceHealthStatus.warning) return euiTheme.border.width.medium;
+    if (status === ServiceHealthStatus.critical) return euiTheme.border.width.thick;
+    return euiTheme.border.width.medium;
+  }, [
+    data.serviceAnomalyStats?.healthStatus,
+    euiTheme.border.width.medium,
+    euiTheme.border.width.thick,
+  ]);
+
+  const iconUrl = useMemo(() => {
+    if (data.agentName) {
+      return getAgentIcon(data.agentName, isDarkMode);
+    }
+    return null;
+  }, [data.agentName, isDarkMode]);
+
+  return (
+    <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          border: ${borderWidth ?? euiTheme.border.width.medium} solid ${borderColor};
+          background: ${euiTheme.colors.backgroundBasePlain};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+          cursor: pointer;
+        `}
+      >
+        {iconUrl && (
+          <img
+            src={iconUrl}
+            alt={data.agentName}
+            style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+          />
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          margin-top: 8px;
+          font-size: ${euiTheme.size.s};
+          color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+          font-family: ${euiTheme.font.family};
+          max-width: 200px;
+          text-align: center;
+          overflow: hidden;
+        `}
+      >
+        {data.label}
+      </EuiFlexItem>
+      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
+    </EuiFlexGroup>
+  );
+});
+
+ServiceNode.displayName = 'ServiceNode';

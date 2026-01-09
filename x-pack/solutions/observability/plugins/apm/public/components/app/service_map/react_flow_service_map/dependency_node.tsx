@@ -1,0 +1,97 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo, memo } from 'react';
+import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
+import { useEuiTheme, transparentize, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getSpanIcon } from '@kbn/apm-ui-shared';
+import { css } from '@emotion/react';
+import type { SpanType, SpanSubtype } from '../../../../../common/es_fields/apm';
+
+interface DependencyMapNodeData {
+  id: string;
+  label: string;
+  spanType: SpanType;
+  spanSubtype: SpanSubtype;
+}
+
+export const DependencyNode = memo(({ data, selected }: NodeProps<Node<DependencyMapNodeData>>) => {
+  const { euiTheme } = useEuiTheme();
+
+  const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+
+  const iconUrl = useMemo(() => {
+    if (data.spanType || data.spanSubtype) {
+      return getSpanIcon(data.spanType, data.spanSubtype);
+    }
+    return null;
+  }, [data.spanType, data.spanSubtype]);
+
+  return (
+    <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 48px;
+          height: 48px;
+          transform: rotate(45deg);
+          border: ${euiTheme.border.width.medium} solid ${borderColor};
+          background: ${euiTheme.colors.backgroundBasePlain};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+          box-sizing: border-box;
+          cursor: pointer;
+        `}
+      >
+        <div
+          css={css`
+            transform: rotate(-45deg);
+          `}
+        >
+          {iconUrl && (
+            <img
+              src={iconUrl}
+              alt={data.spanSubtype || data.spanType}
+              css={css`
+                width: 20px;
+                height: 20px;
+                object-fit: contain;
+              `}
+            />
+          )}
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          margin-top: 16px;
+          font-size: ${euiTheme.size.s};
+          color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+          font-family: ${euiTheme.font.family};
+          max-width: 200px;
+          text-align: center;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          background-color: ${selected
+            ? transparentize(euiTheme.colors.primary, 0.1)
+            : 'transparent'};
+          padding: ${euiTheme.size.xs} ${euiTheme.size.xs};
+          border-radius: ${euiTheme.border.radius.medium};
+        `}
+      >
+        {data.label}
+      </EuiFlexItem>
+      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
+    </EuiFlexGroup>
+  );
+});
+
+DependencyNode.displayName = 'DependencyNode';

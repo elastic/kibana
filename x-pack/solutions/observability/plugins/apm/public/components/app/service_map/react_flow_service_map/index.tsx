@@ -5,49 +5,6 @@
  * 2.0.
  */
 
-import React, { Suspense, lazy } from 'react';
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import type { ElementDefinition } from 'cytoscape';
-import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-
-interface ReactFlowServiceMapProps {
-  elements: ElementDefinition[];
-  height: number;
-  serviceName?: string;
-  status: FETCH_STATUS;
-}
-
-// Lazy load the React Flow component with a separate webpack chunk
-const ReactFlowGraph = lazy(
-  () =>
-    import(
-      /* webpackChunkName: "react-flow-service-map" */
-      /* webpackMode: "lazy" */
-      './react_flow_graph'
-    )
-);
-
-/**
- * React Flow Service Map Component
- * Uses lazy loading to handle webpack bundling issues with @xyflow/react
- */
-export function ReactFlowServiceMap(props: ReactFlowServiceMapProps) {
-  return (
-    <Suspense
-      fallback={
-        <EuiPanel
-          style={{
-            height: props.height,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <EuiLoadingSpinner size="xl" />
-        </EuiPanel>
-      }
-    >
-      <ReactFlowGraph {...props} />
-    </Suspense>
-  );
-}
+// Re-export the React Flow Service Map component
+// @xyflow/react is available as an npm dependency (same as cytoscape)
+export { ReactFlowServiceMap } from './react_flow_graph';
