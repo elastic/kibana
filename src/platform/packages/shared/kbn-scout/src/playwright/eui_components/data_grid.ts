@@ -151,6 +151,7 @@ export class EuiDataGridWrapper {
   async closeFullScreenMode() {
     await this.ensureGridVisible();
     await this.toolbarFullScreenButton.click();
+    await this.toolbarFullScreenButton.blur();
     await expect(this.dataGridWrapper).not.toContainClass('euiDataGrid--fullScreen');
   }
 
