@@ -185,7 +185,7 @@ describe('pollEsNodesVersion', () => {
     const expectedMessageResults = [
       'Unable to retrieve version information from Elasticsearch nodes. mock request error',
     ];
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     nodeInfosErrorOnce('mock request error'); // first failure
 
