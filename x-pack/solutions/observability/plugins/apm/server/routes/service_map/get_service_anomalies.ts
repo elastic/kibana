@@ -78,16 +78,24 @@ export async function getServiceAnomalies({
             ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
           },
           aggs: {
-            metrics: {
-              top_metrics: {
-                metrics: [
-                  { field: 'actual' },
-                  { field: ML_TRANSACTION_TYPE_FIELD },
-                  { field: 'result_type' },
-                  { field: 'record_score' },
-                ],
-                sort: {
-                  record_score: 'desc' as const,
+            record_results: {
+              filter: {
+                term: {
+                  result_type: 'record',
+                },
+              },
+              aggs: {
+                metrics: {
+                  top_metrics: {
+                    metrics: [
+                      { field: 'actual' },
+                      { field: ML_TRANSACTION_TYPE_FIELD },
+                      { field: 'record_score' },
+                    ],
+                    sort: {
+                      record_score: 'desc' as const,
+                    },
+                  },
                 },
               },
             },
@@ -120,12 +128,9 @@ export async function getServiceAnomalies({
     return {
       mlJobIds: jobIds,
       serviceAnomalies: relevantBuckets.map((bucket) => {
-        const metrics = bucket.metrics.top[0].metrics;
+        const metrics = bucket.record_results.metrics.top[0]?.metrics;
 
-        const anomalyScore =
-          metrics.result_type === 'record' && metrics.record_score
-            ? (metrics.record_score as number)
-            : 0;
+        const anomalyScore = metrics?.record_score ? (metrics.record_score as number) : 0;
 
         const severity = getSeverity(anomalyScore);
         const healthStatus = getServiceHealthStatus({ severity });
@@ -133,8 +138,8 @@ export async function getServiceAnomalies({
         return {
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
-          transactionType: metrics.by_field_value as string,
-          actualValue: metrics.actual as number,
+          transactionType: metrics?.[ML_TRANSACTION_TYPE_FIELD] as string,
+          actualValue: metrics?.actual as number,
           anomalyScore,
           healthStatus,
         };
