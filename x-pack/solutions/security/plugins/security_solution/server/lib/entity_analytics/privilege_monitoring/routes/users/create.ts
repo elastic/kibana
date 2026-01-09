@@ -20,7 +20,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
-
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .post({
@@ -42,27 +41,29 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         },
       },
       withMinimumLicense(
-       async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+        async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-          const secSol = await context.securitySolution;
-          const body = await secSol
-            .getPrivilegeMonitoringDataClient()
-            .createUser(request.body, 'api');
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error creating user: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }, 'platinum')
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
+            const secSol = await context.securitySolution;
+            const body = await secSol
+              .getPrivilegeMonitoringDataClient()
+              .createUser(request.body, 'api');
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error creating user: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };
