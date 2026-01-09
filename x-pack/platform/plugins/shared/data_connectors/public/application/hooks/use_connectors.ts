@@ -26,7 +26,6 @@ const transformDataSourceType = (dataTypeDefinition: DataTypeDefinition): Connec
 /**
  * Hook to fetch and manage connectors from the Data Sources Registry.
  *
- * All connectors are fetched from Data Sources Registry via /api/data_connectors/types
  */
 export const useConnectors = () => {
   const {

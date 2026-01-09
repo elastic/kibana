@@ -7,13 +7,11 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '@kbn/data-sources-registry-plugin';
 
 /**
  * Service for interacting with Data Connector types (from Data Sources Registry).
  *
- * This service accesses the Data Sources Registry via our plugin's server routes,
- * which in turn access the DataCatalog directly via plugin dependencies.
  */
 export class DataConnectorTypesService {
   private readonly http: HttpSetup;

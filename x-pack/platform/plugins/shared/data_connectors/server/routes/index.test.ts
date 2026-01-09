@@ -134,7 +134,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[2][1]; // Index 2: GET /api/data_connectors
+      const routeHandler = mockRouter.get.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest();
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -160,7 +160,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[2][1]; // Index 2: GET /api/data_connectors
+      const routeHandler = mockRouter.get.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest();
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -199,7 +199,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[3][1]; // Index 3: GET /api/data_connectors/:id
+      const routeHandler = mockRouter.get.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'connector-1' },
       });
@@ -224,7 +224,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.get.mock.calls[3][1]; // Index 3: GET /api/data_connectors/:id
+      const routeHandler = mockRouter.get.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'nonexistent' },
       });
