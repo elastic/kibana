@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import { omit } from 'lodash';
 import JSON5 from 'json5';
@@ -46,12 +45,7 @@ describe('v2 migration', () => {
     esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
   });
 
-  afterAll(async () => {
-    if (esServer) {
-      await esServer.stop();
-      await timer(5_000); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
-    }
-  });
+  afterAll(async () => await esServer?.stop());
 
   describe('to the current stack version', () => {
     let upToDateKit: KibanaMigratorTestKit;

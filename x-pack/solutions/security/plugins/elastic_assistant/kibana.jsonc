@@ -38,7 +38,7 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "onechat"
+      "agentBuilder"
     ]
   },
   "build": {

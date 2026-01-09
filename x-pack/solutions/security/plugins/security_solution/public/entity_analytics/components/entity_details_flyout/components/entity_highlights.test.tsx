@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EntityHighlightsAccordion } from './entity_highlights';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
@@ -119,6 +119,7 @@ describe('EntityHighlights', () => {
     fetchEntityHighlights: mockFetchEntityHighlights,
     isChatLoading: false,
     result: null,
+    error: null,
   };
 
   beforeEach(() => {
@@ -219,9 +220,7 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    expect(
-      screen.getByText('Generating AI highlights and recommended actions...')
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Generating AI summary and recommended actions/i)).toBeInTheDocument();
     expect(screen.getByTestId('euiSkeletonLoadingAriaWrapper')).toBeInTheDocument();
   });
 
@@ -267,6 +266,92 @@ describe('EntityHighlights', () => {
 
     // Component should still render without errors
     expect(screen.getByText('Entity summary')).toBeInTheDocument();
+  });
+
+  it('shows dismissible error banner when error is present', () => {
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByText('Error generating summary')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Due to an unexpected issue, LLM could not generate the summary. Please try again.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('entity-highlights-error-banner')).toBeInTheDocument();
+    expect(screen.getByText('Regenerate')).toBeInTheDocument();
+    // Empty state should be hidden while the error banner is visible
+    expect(screen.queryByText('Generate')).not.toBeInTheDocument();
+  });
+
+  it('hides error banner after dismiss', () => {
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    const callout = screen.getByTestId('entity-highlights-error-banner');
+    expect(callout).toBeInTheDocument();
+    fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+
+    expect(screen.queryByTestId('entity-highlights-error-banner')).not.toBeInTheDocument();
+    // Empty state is visible again (generate button exists)
+    expect(screen.getByText('Generate')).toBeInTheDocument();
+  });
+
+  it('shows error banner when a summary already exists', () => {
+    const mockAssistantResult = {
+      response: {
+        highlights: [
+          {
+            title: 'Key Insights',
+            text: 'Some summary text',
+          },
+        ],
+        recommendedActions: null,
+      },
+      replacements: {},
+      summaryAsText: '{"user": "test-user"}',
+      generatedAt: Date.now(),
+    };
+
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      result: mockAssistantResult,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('entity-highlights-error-banner')).toBeInTheDocument();
+    expect(screen.getByText('Key Insights')).toBeInTheDocument();
+  });
+
+  it('calls fetchEntityHighlights when regenerate button is clicked', () => {
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    fireEvent.click(screen.getByText('Regenerate'));
+
+    expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
   it('renders with custom space ID', () => {

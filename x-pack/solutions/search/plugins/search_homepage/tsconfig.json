@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
@@ -46,7 +47,8 @@
     "@kbn/index-management-shared-types",
     "@kbn/data-views-plugin",
     "@kbn/cloud",
-    "@kbn/onechat-plugin",
+    "@kbn/agent-builder-plugin",
+    "@kbn/scout-search",
   ],
   "exclude": [
     "target/**/*",

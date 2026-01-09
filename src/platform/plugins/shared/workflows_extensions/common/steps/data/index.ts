@@ -8,14 +8,26 @@
  */
 
 export {
-  dataDedupeStepCommonDefinition,
   DataDedupeStepTypeId,
+  dataDedupeStepCommonDefinition,
   type DataDedupeStepInputSchema,
   type DataDedupeStepOutputSchema,
 } from './data_dedupe_step';
 export {
-  dataMapStepCommonDefinition,
   DataMapStepTypeId,
+  dataMapStepCommonDefinition,
   type DataMapStepInputSchema,
   type DataMapStepOutputSchema,
 } from './data_map_step';
+export {
+  DataRegexExtractStepTypeId,
+  dataRegexExtractStepCommonDefinition,
+  type DataRegexExtractStepInputSchema,
+  type DataRegexExtractStepOutputSchema,
+} from './data_regex_extract_step';
+export {
+  DataRegexReplaceStepTypeId,
+  dataRegexReplaceStepCommonDefinition,
+  type DataRegexReplaceStepInputSchema,
+  type DataRegexReplaceStepOutputSchema,
+} from './data_regex_replace_step';

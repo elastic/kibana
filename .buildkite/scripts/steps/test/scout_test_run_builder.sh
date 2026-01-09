@@ -17,7 +17,7 @@ buildkite-agent artifact upload "scout_playwright_configs.json"
 
 echo '--- Running Scout API Integration Tests'
 node scripts/scout.js run-tests \
---serverless=security \
+--stateful \
 --config src/platform/packages/shared/kbn-scout/test/scout/api/playwright.config.ts \
 --kibana-install-dir "$KIBANA_BUILD_LOCATION"
 

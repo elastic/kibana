@@ -89,6 +89,7 @@ export interface AppDependencies {
   kibanaVersion: SemVer;
   overlays: OverlayStart;
   canUseSyntheticSource: boolean;
+  canUseEis: boolean;
   privs: {
     monitor: boolean;
     manageEnrich: boolean;

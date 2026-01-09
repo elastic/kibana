@@ -17,7 +17,7 @@ import { get, isArray, isEmpty, keyBy } from 'lodash';
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
-import type { QueryLink } from '../../../common/assets';
+import type { QueryLink } from '../../../common/queries';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string; query?: string },

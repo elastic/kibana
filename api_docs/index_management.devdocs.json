@@ -4055,7 +4055,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"system\" | \"default\" | \"managed\" | \"cloudManaged\""
+          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,

@@ -49,7 +49,7 @@ export async function getDefaultAsyncSubmitParams(
     | 'ignore_unavailable'
     | 'track_total_hits'
     | 'keep_on_completion'
-  >
+  > & { project_routing?: string }
 > {
   return {
     // TODO: adjust for partial results

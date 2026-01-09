@@ -462,7 +462,7 @@
             "label": "checked",
             "description": [],
             "signature": [
-              "\"on\" | \"off\" | undefined"
+              "\"off\" | \"on\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
             "deprecated": false,

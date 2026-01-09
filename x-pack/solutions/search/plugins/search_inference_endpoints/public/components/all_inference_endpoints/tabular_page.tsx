@@ -238,7 +238,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           promoId="inferenceEndpointManagement"
           isSelfManaged={!cloud?.isCloudEnabled}
           direction="row"
-          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
         />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">

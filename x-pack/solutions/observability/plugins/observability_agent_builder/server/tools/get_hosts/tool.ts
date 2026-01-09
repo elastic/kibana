@@ -6,14 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import type { ErrorResult, OtherResult } from '@kbn/onechat-common/tools/tool_result';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { ErrorResult, OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
   StaticToolRegistration,
   ToolHandlerReturn,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -95,14 +95,16 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       },
     },
     handler: async (
-      {
+      toolParams,
+      { request }
+    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
+      const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         limit = DEFAULT_LIMIT,
         kqlFilter,
-      },
-      { request }
-    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
+      } = toolParams;
+
       try {
         const { hosts, total } = await getToolHandler({
           request,

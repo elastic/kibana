@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -81,10 +81,9 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery },
-      context
-    ) => {
+    handler: async (toolParams, context) => {
+      const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
+
       try {
         const esClient = context.esClient.asCurrentUser;
 
