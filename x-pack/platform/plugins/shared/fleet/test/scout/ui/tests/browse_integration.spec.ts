@@ -15,6 +15,11 @@ test.describe('Browse integration', { tag: ['@ess'] }, () => {
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
     });
   });
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings({
+      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
+    });
+  });
 
   test('loads the browse integration page and allow to scroll through it', async ({
     pageObjects,
