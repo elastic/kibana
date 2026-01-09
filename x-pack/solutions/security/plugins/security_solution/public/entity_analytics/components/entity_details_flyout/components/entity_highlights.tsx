@@ -259,3 +259,4 @@ export const EntityHighlightsAccordion: React.FC<{
     </>
   );
 };
+// Add a change for testing
