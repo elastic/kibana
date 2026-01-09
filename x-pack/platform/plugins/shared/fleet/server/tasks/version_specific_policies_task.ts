@@ -193,7 +193,7 @@ export class VersionSpecificPoliciesTask {
     throwIfAborted(abortController);
 
     const outdatedPolicyQuery = agentPoliciesWithVersionConditions.items
-      .map((policy) => `(policy_id:${policy.id}* AND policy_revision_idx<${policy.revision})`)
+      .map((policy) => `(policy_id:${policy.id}#* AND policy_revision_idx<${policy.revision})`)
       .join(' OR ');
 
     await this.deployPoliciesForAgentsKuery(
@@ -206,7 +206,7 @@ export class VersionSpecificPoliciesTask {
     throwIfAborted(abortController);
 
     const upgradedAgentsQuery = agentPoliciesWithVersionConditions.items
-      .map((policy) => `(policy_id:${policy.id}* AND upgraded_at>now-30m)`)
+      .map((policy) => `(policy_id:${policy.id}#* AND upgraded_at>now-30m)`)
       .join(' OR ');
 
     await this.deployPoliciesForAgentsKuery(

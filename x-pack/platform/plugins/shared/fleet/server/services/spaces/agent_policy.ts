@@ -242,6 +242,7 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
     esClient,
     {
       kuery: `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`,
+      showInactive: false,
     },
     versionedAgentPolicyId
   );
