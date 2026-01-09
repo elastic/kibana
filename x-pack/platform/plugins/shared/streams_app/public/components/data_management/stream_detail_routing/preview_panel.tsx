@@ -193,14 +193,22 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     content = (
       <EuiEmptyPrompt
         data-test-subj="streamsAppRoutingPreviewEmptyPrompt"
-        icon={<AssetImage type="noResults" />}
+        icon={<AssetImage size="small" type="noDocuments" />}
         titleSize="xxs"
         title={
           <h2 data-test-subj="streamsAppRoutingPreviewEmptyPromptTitle">
             {i18n.translate('xpack.streams.streamDetail.preview.empty', {
-              defaultMessage: 'No documents to preview',
+              defaultMessage: 'No documents found',
             })}
           </h2>
+        }
+        body={
+          <EuiText size="s" data-test-subj="streamsAppRoutingPreviewEmptyPromptBody">
+            {i18n.translate('xpack.streams.streamDetail.preview.emptyBody', {
+              defaultMessage:
+                "Try a different time range or data sample. Changes can still be applied, but we can't confirm they'll work as expected.",
+            })}
+          </EuiText>
         }
       />
     );

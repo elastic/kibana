@@ -214,28 +214,23 @@ export const NoPreviewDocumentsEmptyPrompt = () => {
 export const NoProcessingDataAvailableEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
-      aria-live="polite"
-      color="warning"
-      iconType="warning"
-      titleSize="s"
+      data-test-subj="streamsAppProcessingPreviewEmptyPrompt"
+      icon={<AssetImage size="small" type="noDocuments" />}
+      titleSize="xxs"
       title={
-        <h2>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
-            { defaultMessage: 'No data available to validate processor changes' }
-          )}
+        <h2 data-test-subj="streamsAppProcessingPreviewEmptyPromptTitle">
+          {i18n.translate('xpack.streams.streamDetail.preview.empty', {
+            defaultMessage: 'No documents found',
+          })}
         </h2>
       }
       body={
-        <p>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
-            {
-              defaultMessage:
-                'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
-            }
-          )}
-        </p>
+        <EuiText size="s" data-test-subj="streamsAppProcessingPreviewEmptyPromptBody">
+          {i18n.translate('xpack.streams.streamDetail.preview.emptyBody', {
+            defaultMessage:
+              "Try a different time range or data sample. Changes can still be applied, but we can't confirm they'll work as expected.",
+          })}
+        </EuiText>
       }
     />
   );
