@@ -7,7 +7,12 @@
 
 import { useState, useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { oauthAuthorize } from '../lib/action_connector_api/oauth_authorize';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../constants';
+
+interface OAuthAuthorizeResponse {
+  authorizationUrl: string;
+  state: string;
+}
 
 export function useOAuthAuthorize() {
   const { http } = useKibana().services;
@@ -17,12 +22,16 @@ export function useOAuthAuthorize() {
     async (connectorId: string) => {
       setIsAuthorizing(true);
       try {
-        const { authorizationUrl } = await oauthAuthorize({
-          http: http!,
-          connectorId,
-        });
+        const { authorizationUrl } = await http!.post<OAuthAuthorizeResponse>(
+          `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
+            connectorId
+          )}/_oauth_authorize`,
+          {
+            body: JSON.stringify({}),
+          }
+        );
 
-        // Open authorization URL in new tab
+        // Open authorization URL in a new tab
         window.open(authorizationUrl, '_blank', 'noopener,noreferrer');
 
         return true;
