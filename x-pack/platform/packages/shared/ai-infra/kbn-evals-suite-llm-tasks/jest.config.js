@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
+  rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks'],
 };
