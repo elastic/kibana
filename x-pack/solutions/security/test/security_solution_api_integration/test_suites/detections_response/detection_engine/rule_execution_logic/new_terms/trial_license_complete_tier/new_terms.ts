@@ -1565,8 +1565,9 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           query: `id: "${id}"`,
+          index: ['new_terms'],
           new_terms_fields: ['host.name'],
-          from: 'now-7d',
+          from: 'now-2d',
           interval: '1h',
         };
 
@@ -1581,7 +1582,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // Should only get alerts from namespace1 and namespace2, not namespace3
-        expect(previewAlerts.length).toEqual(2);
+        expect(previewAlerts.length).toEqual(4);
         // @ts-expect-error namespace does not exist on type
         const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
         expect(namespaces).toContain('namespace1');

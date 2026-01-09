@@ -2786,26 +2786,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should only include documents from specified namespaces when filter is configured', async () => {
-        const id = uuidv4();
         const timestamp = new Date().toISOString();
 
         // Create event documents with different namespaces
         const eventDocNamespace1 = {
-          id,
           '@timestamp': timestamp,
           data_stream: { namespace: 'namespace1' },
           user: { name: 'user1' },
           host: { name: 'server' },
         };
         const eventDocNamespace2 = {
-          id,
           '@timestamp': timestamp,
           data_stream: { namespace: 'namespace2' },
           user: { name: 'user2' },
           host: { name: 'server' },
         };
         const eventDocNamespace3 = {
-          id,
           '@timestamp': timestamp,
           data_stream: { namespace: 'namespace3' },
           user: { name: 'user3' },
@@ -2816,6 +2812,7 @@ export default ({ getService }: FtrProviderContext) => {
         const threatIndicatorDoc = (threatId: string, threatTimestamp: string) => ({
           id: threatId,
           '@timestamp': threatTimestamp,
+          data_stream: { namespace: 'namespace1' },
           agent: { type: 'threat' },
           user: { name: 'user1' },
           host: { name: 'server' },
@@ -2836,9 +2833,9 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: ThreatMatchRuleCreateProps = {
           ...createThreatMatchRule({
             index: ['ecs_compliant'],
-            query: `id: "${id}" and NOT agent.type:threat`,
+            query: `* and NOT agent.type:"threat"`,
             threat_index: ['ecs_compliant'],
-            threat_query: 'agent.type:threat',
+            threat_query: '* and agent.type:"threat"',
             threat_mapping: [
               {
                 entries: [

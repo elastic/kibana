@@ -810,13 +810,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['ecs_compliant']),
-          query: `id:${id}`,
           threshold: {
             field: ['host.id'],
             value: 1,
           },
-          from: 'now-1h',
-          interval: '1h',
         };
 
         const { previewId } = await previewRule({
@@ -832,10 +829,10 @@ export default ({ getService }: FtrProviderContext) => {
         // Should only get alerts from namespace1 and namespace2, not namespace3
         expect(previewAlerts.length).toEqual(2);
         // @ts-expect-error namespace does not exist on type
-        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
-        expect(namespaces).toContain('namespace1');
-        expect(namespaces).toContain('namespace2');
-        expect(namespaces).not.toContain('namespace3');
+        const hostIds = previewAlerts.map((alert) => alert._source['host.id']);
+        expect(hostIds).toContain('host-1');
+        expect(hostIds).toContain('host-2');
+        expect(hostIds).not.toContain('host-3');
       });
     });
   });

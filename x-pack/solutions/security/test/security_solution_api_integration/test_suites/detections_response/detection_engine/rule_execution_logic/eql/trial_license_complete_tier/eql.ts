@@ -1260,12 +1260,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with data stream namespace filter', () => {
-      // const { indexListOfDocuments } = dataGeneratorFactory({
-      //   es,
-      //   index: 'ecs_compliant',
-      //   log,
-      // });
-
       before(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -1333,7 +1327,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: `configuration where id=="${id}"`,
+          query: `any where id == "${id}"`,
           from: 'now-1h',
           interval: '1h',
         };
@@ -1346,7 +1340,6 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           previewId,
           size: 10,
-          sort: ['data_stream.namespace'],
         });
 
         // Should only get alerts from namespace1 and namespace2, not namespace3
