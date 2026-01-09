@@ -358,7 +358,9 @@ export function MonacoEditor({
       <Global
         styles={({ euiTheme: _euiTheme }) => ({
           [`.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
-            zIndex: _euiTheme.levels.menu, // ensure the overflow widgets are above headers and flyouts
+            // ensure the overflow widgets are above headers and flyouts
+            // Fallback if euiTheme is not available
+            zIndex: _euiTheme?.levels?.menu ?? 2000,
           },
         })}
       />
