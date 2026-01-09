@@ -41,6 +41,7 @@ import { CreateRuleMenu } from '../../components/create_rule_menu';
 import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
 import { useGapAutoFillCapabilities } from '../../../rule_gaps/logic/use_gap_auto_fill_capabilities';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -69,6 +70,9 @@ const RulesPageComponent: React.FC = () => {
   const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
     'aiAssistedRuleCreationEnabled'
   );
+  const { isAgentChatExperienceEnabled, hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
+  const isAiRuleCreationAvailable =
+    aiAssistedRuleCreationEnabled && isAgentChatExperienceEnabled && hasAgentBuilderPrivilege;
 
   if (
     redirectToDetections(
@@ -150,7 +154,7 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
-                {aiAssistedRuleCreationEnabled ? (
+                {isAiRuleCreationAvailable ? (
                   <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
                 ) : (
                   <SecuritySolutionLinkButton

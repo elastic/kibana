@@ -41,6 +41,8 @@ import {
   getDetectionEngineUrl,
   getRulesUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+
 import * as i18n from './translations';
 
 const AiAssistedCreateRulePageComponent: React.FC = () => {
@@ -51,6 +53,8 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
     'aiAssistedRuleCreationEnabled'
   );
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addError } = useAppToasts();
@@ -138,6 +142,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     ),
     [styles.linkBack, submittedPromptValue]
   );
+  const isAgentBuilderAvailable = hasAgentBuilderPrivilege && isAgentChatExperienceEnabled;
 
   if (
     redirectToDetections(
@@ -152,7 +157,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!canEditRules || !aiAssistedRuleCreationEnabled) {
+  } else if (!canEditRules || !isAgentBuilderAvailable || !aiAssistedRuleCreationEnabled) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
