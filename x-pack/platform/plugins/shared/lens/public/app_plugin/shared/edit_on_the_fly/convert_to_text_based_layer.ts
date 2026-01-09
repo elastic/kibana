@@ -18,7 +18,10 @@ import type {
 } from '@kbn/lens-common';
 
 import type { OriginalColumn } from '../../../../common/types';
-import { generateEsqlQuery } from '../../../datasources/form_based/generate_esql_query';
+import {
+  generateEsqlQuery,
+  type EsqlQueryResult,
+} from '../../../datasources/form_based/generate_esql_query';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 
@@ -26,6 +29,20 @@ interface EsqlConversionResult {
   esql: string;
   partialRows: boolean;
   esAggsIdMap: Record<string, OriginalColumn[]>;
+}
+
+/**
+ * Extracts a successful EsqlConversionResult from an EsqlQueryResult, or returns undefined if failed.
+ */
+function extractSuccessResult(result: EsqlQueryResult): EsqlConversionResult | undefined {
+  if (result.success) {
+    return {
+      esql: result.esql,
+      partialRows: result.partialRows,
+      esAggsIdMap: result.esAggsIdMap,
+    };
+  }
+  return undefined;
 }
 
 interface LayerConversionData {
@@ -136,7 +153,7 @@ function getLayerConversionData(
 
   let esqlResult: EsqlConversionResult | undefined;
   try {
-    esqlResult = generateEsqlQuery(
+    const queryResult = generateEsqlQuery(
       esAggEntries,
       layer,
       indexPattern,
@@ -144,6 +161,7 @@ function getLayerConversionData(
       framePublicAPI.dateRange,
       startDependencies.data.nowProvider.get()
     );
+    esqlResult = extractSuccessResult(queryResult);
   } catch (e) {
     // Layer remains non-convertible
   }
