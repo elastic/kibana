@@ -12,9 +12,6 @@ globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
   async ({ apiServices, log, logsSynthtraceEsClient, kbnClient, esClient }) => {
-    log.info('Generating Observability data...');
-    await generateRulesData(apiServices);
-
     log.info('Generating sample data into .alerts-observability.test index...');
     await esClient.index({
       index: '.alerts-observability.test',
@@ -39,5 +36,8 @@ globalSetupHook(
       id: 'test-data-view-id_1',
       title: 'logs-*',
     });
+
+    log.info('Generating Observability data...');
+    await generateRulesData(apiServices);
   }
 );
