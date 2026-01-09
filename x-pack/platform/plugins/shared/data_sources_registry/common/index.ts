@@ -6,7 +6,7 @@
  */
 
 // Export constants
-export { PLUGIN_ID, PLUGIN_NAME } from './constants';
+export { PLUGIN_ID, PLUGIN_NAME, API_BASE_PATH } from './constants';
 
 // Export data source types for use by other plugins
 export type {
