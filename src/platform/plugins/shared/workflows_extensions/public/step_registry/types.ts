@@ -51,18 +51,18 @@ export interface PublicStepDefinition<
   actionsMenuGroup?: ActionsMenuGroup;
 
   editorHandlers?: {
-    /**
-     * Dynamic Zod schema for validating step output based on input.
-     * Allows for more flexible output structure based on the specific input provided.
-     * @param input The input data for the step.
-     * @returns A Zod schema defining structure and validation rules for the output of the step.
-     */
-    dynamicOutputSchema?:
-      | ((params: {
-          input: z.infer<InputSchema>;
-          config: z.infer<ConfigSchema>;
-        }) => z.ZodType<z.infer<OutputSchema>>)
-      | undefined;
+    dynamicSchema: {
+      /**
+       * Dynamic Zod schema for validating step output based on input.
+       * Allows for more flexible output structure based on the specific input provided.
+       * @param input The input data for the step.
+       * @returns A Zod schema defining structure and validation rules for the output of the step.
+       */
+      getOutputSchema?: (params: {
+        input: z.infer<InputSchema>;
+        config: z.infer<ConfigSchema>;
+      }) => z.ZodType<z.infer<OutputSchema>>;
+    };
   };
 }
 
