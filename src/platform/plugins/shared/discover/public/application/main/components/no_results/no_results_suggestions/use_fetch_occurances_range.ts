@@ -118,6 +118,12 @@ async function fetchDocumentsTimeRange({
     return { status: TimeRangeExtendingStatus.failed };
   }
 
+  const timeField = dataView.getFieldByName(dataView.timeFieldName);
+
+  if (!timeField) {
+    return { status: TimeRangeExtendingStatus.failed };
+  }
+
   const result = await lastValueFrom(
     data.search.search(
       {
@@ -160,12 +166,26 @@ async function fetchDocumentsTimeRange({
     return { status: TimeRangeExtendingStatus.failed };
   }
 
-  const earliestTimestamp = (
+  const earliestTimestampRaw = (
     result.rawResponse?.aggregations?.earliest_timestamp as AggregationsSingleMetricAggregateBase
   )?.value_as_string;
-  const latestTimestamp = (
+  const latestTimestampRaw = (
     result.rawResponse?.aggregations?.latest_timestamp as AggregationsSingleMetricAggregateBase
   )?.value_as_string;
+
+  const isDateNanos = timeField.esTypes?.includes('date_nanos');
+
+  const earliestTimestamp =
+    isDateNanos && earliestTimestampRaw
+      ? // Round earliestTimestamp to the beginning of the current millisecond
+        new Date(new Date(earliestTimestampRaw).getTime()).toISOString()
+      : earliestTimestampRaw;
+
+  const latestTimestamp =
+    isDateNanos && latestTimestampRaw
+      ? // Round latestTimestamp to the beginning of the next millisecond
+        new Date(new Date(latestTimestampRaw).getTime() + 1).toISOString()
+      : latestTimestampRaw;
 
   return earliestTimestamp && latestTimestamp
     ? {
