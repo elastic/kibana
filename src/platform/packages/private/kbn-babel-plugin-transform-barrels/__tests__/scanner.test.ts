@@ -595,32 +595,53 @@ export { SourceExport } from './source';`
       await Fsp.rm(tempDir, { recursive: true, force: true });
     });
 
-    it('captures local exports defined in the barrel file', async () => {
+    it('filters out local exports to prevent infinite recursion', async () => {
       const barrelIndex = await buildBarrelIndex(tempDir);
       const mainBarrelPath = Path.join(tempDir, 'index.ts');
 
       expect(barrelIndex[mainBarrelPath]).toBeDefined();
       const exports = barrelIndex[mainBarrelPath].exports;
 
-      // LocalConst should be captured with path pointing to the barrel itself
-      expect(exports.LocalConst).toBeDefined();
-      expect(exports.LocalConst.path).toBe(Path.join(tempDir, 'index.ts'));
-      expect(exports.LocalConst.localName).toBe('LocalConst');
+      // Local exports should NOT be in the index because transforming them
+      // would produce the same import path, causing infinite recursion
+      expect(exports.LocalConst).toBeUndefined();
+      expect(exports.LocalFunction).toBeUndefined();
+      expect(exports.LocalClass).toBeUndefined();
 
-      // LocalFunction should be captured
-      expect(exports.LocalFunction).toBeDefined();
-      expect(exports.LocalFunction.path).toBe(Path.join(tempDir, 'index.ts'));
-      expect(exports.LocalFunction.localName).toBe('LocalFunction');
-
-      // LocalClass should be captured
-      expect(exports.LocalClass).toBeDefined();
-      expect(exports.LocalClass.path).toBe(Path.join(tempDir, 'index.ts'));
-      expect(exports.LocalClass.localName).toBe('LocalClass');
-
-      // SourceExport should still trace to source.ts
+      // Re-exported SourceExport should still be in the index
       expect(exports.SourceExport).toBeDefined();
       expect(exports.SourceExport.path).toBe(Path.join(tempDir, 'source.ts'));
       expect(exports.SourceExport.localName).toBe('SourceExport');
+    });
+  });
+
+  describe('barrel with only local exports is excluded from index', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-only-local-test-'));
+
+      // Barrel with ONLY local exports (no re-exports from other files)
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export const LocalOnly = 'local';
+export function LocalFunc() { return 'func'; }`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('does not include barrel in index when all exports are local', async () => {
+      // When a barrel only has local exports, transforming any import from it
+      // would produce the same import path, causing infinite recursion.
+      // Such barrels should not be in the index at all.
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      // Barrel should NOT be in the index since it has no transformable exports
+      expect(barrelIndex[mainBarrelPath]).toBeUndefined();
     });
   });
 
@@ -649,7 +670,7 @@ export const LocalExport = 'local';`
       await Fsp.rm(tempDir, { recursive: true, force: true });
     });
 
-    it('captures both export * contents and local exports', async () => {
+    it('captures export * contents but filters out local exports', async () => {
       const barrelIndex = await buildBarrelIndex(tempDir);
       const mainBarrelPath = Path.join(tempDir, 'index.ts');
 
@@ -663,10 +684,8 @@ export const LocalExport = 'local';`
       expect(exports.SourceB).toBeDefined();
       expect(exports.SourceB.path).toBe(Path.join(tempDir, 'source.ts'));
 
-      // LocalExport should point to the barrel itself
-      expect(exports.LocalExport).toBeDefined();
-      expect(exports.LocalExport.path).toBe(Path.join(tempDir, 'index.ts'));
-      expect(exports.LocalExport.localName).toBe('LocalExport');
+      // LocalExport should NOT be in the index (would cause infinite recursion)
+      expect(exports.LocalExport).toBeUndefined();
     });
   });
 });
