@@ -13,7 +13,10 @@ import type {
   FindSLODefinitionsResponse,
   FindSLOInstancesResponse,
   FindSLOTemplatesResponse,
+  GetHealthScanResultsResponse,
   GetSLOTemplateResponse,
+  ListHealthScanResponse,
+  PostHealthScanResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -338,6 +341,61 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
           attributes: slo,
         })
         .expect(200);
+      return body;
+    },
+
+    async scheduleHealthScan(
+      roleAuthc: RoleCredentials,
+      params?: { force?: boolean }
+    ): Promise<PostHealthScanResponse> {
+      const { body } = await supertestWithoutAuth
+        .post(`/internal/observability/slos/_health/scans`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(params ?? {})
+        .expect(200);
+
+      return body;
+    },
+
+    async getHealthScanResults(
+      scanId: string,
+      roleAuthc: RoleCredentials,
+      params?: { size?: number; searchAfter?: string; problematic?: boolean; allSpaces?: boolean }
+    ): Promise<GetHealthScanResultsResponse> {
+      const queryParams: Record<string, string | number | boolean> = {};
+      if (params?.size !== undefined) queryParams.size = params.size;
+      if (params?.searchAfter) queryParams.searchAfter = params.searchAfter;
+      if (params?.problematic !== undefined) queryParams.problematic = params.problematic;
+      if (params?.allSpaces !== undefined) queryParams.allSpaces = params.allSpaces;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_health/scans/${scanId}`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async listHealthScans(
+      roleAuthc: RoleCredentials,
+      params?: { size?: number; searchAfter?: string }
+    ): Promise<ListHealthScanResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params?.size !== undefined) queryParams.size = params.size;
+      if (params?.searchAfter) queryParams.searchAfter = params.searchAfter;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_health/scans`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
       return body;
     },
   };
