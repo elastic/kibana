@@ -1856,16 +1856,20 @@ class AgentPolicyService {
       }
     );
 
-    // TODO async task to reassign agents
-    await pMap(
-      fleetServerPolicies.filter((fleetServerPolicy) => fleetServerPolicy.policy_id.includes('#')),
-      async (fleetServerPolicy) => {
-        await reassignAgentsToVersionSpecificPolicies(fleetServerPolicy.policy_id);
-      },
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
-      }
-    );
+    // TODO async task to reassign agents similar to scheduleDeployAgentPoliciesTask
+    if (fleetServerPolicies.some((fsp) => fsp.policy_id.includes('#'))) {
+      await pMap(
+        fleetServerPolicies.filter((fleetServerPolicy) =>
+          fleetServerPolicy.policy_id.includes('#')
+        ),
+        async (fleetServerPolicy) => {
+          await reassignAgentsToVersionSpecificPolicies(fleetServerPolicy.policy_id);
+        },
+        {
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+        }
+      );
+    }
   }
 
   public async deleteFleetServerPoliciesForPolicyId(
