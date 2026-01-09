@@ -91,6 +91,31 @@ const operatorConditionAndResults = [
 ];
 
 describe('conditionToPainless', () => {
+  describe('single-element array unwrapping', () => {
+    test('should unwrap single-element arrays before comparison', () => {
+      const condition = { field: 'foo', eq: 'bar' };
+      const result = conditionToPainless(condition);
+
+      // Should contain List instanceof check and size check
+      expect(result).toContain('instanceof List');
+      expect(result).toContain('.size() == 1');
+    });
+
+    test('should handle multiple fields with array unwrapping', () => {
+      const condition = {
+        and: [
+          { field: 'foo', eq: 'bar' },
+          { field: 'baz', eq: 'qux' },
+        ],
+      };
+      const result = conditionToPainless(condition);
+
+      // Should contain List checks for both fields
+      expect(result).toContain('instanceof List');
+      expect(result).toContain('.size() == 1');
+    });
+  });
+
   describe('conditionToStatement', () => {
     describe('operators', () => {
       operatorConditionAndResults.forEach((setup) => {
@@ -300,7 +325,11 @@ describe('conditionToPainless', () => {
     expect(conditionToPainless(condition)).toMatchInlineSnapshot(`
       "
         try {
-        if ($('log', null) !== null) {
+        
+        def val_log = $('log', null); if (val_log instanceof List && val_log.size() == 1) { val_log = val_log[0]; }
+        
+        
+        if (val_log !== null) {
           return true;
         }
         return false;
@@ -326,7 +355,12 @@ describe('conditionToPainless', () => {
     expect(conditionToPainless(condition)).toMatchInlineSnapshot(`
       "
         try {
-        if (($('log.logger.name', null) !== null && (($('log.logger.name', null) instanceof Number && $('log.logger.name', null).toString() == \\"nginx_proxy\\") || $('log.logger.name', null) == \\"nginx_proxy\\")) && (($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \\"error\\") || $('log.level', null) == \\"error\\")) || ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \\"ERROR\\") || $('log.level', null) == \\"ERROR\\")))) {
+        
+        def val_log_logger_name = $('log.logger.name', null); if (val_log_logger_name instanceof List && val_log_logger_name.size() == 1) { val_log_logger_name = val_log_logger_name[0]; }
+        def val_log_level = $('log.level', null); if (val_log_level instanceof List && val_log_level.size() == 1) { val_log_level = val_log_level[0]; }
+        
+        
+        if ((val_log_logger_name !== null && ((val_log_logger_name instanceof Number && val_log_logger_name.toString() == \\"nginx_proxy\\") || val_log_logger_name == \\"nginx_proxy\\")) && ((val_log_level !== null && ((val_log_level instanceof Number && val_log_level.toString() == \\"error\\") || val_log_level == \\"error\\")) || (val_log_level !== null && ((val_log_level instanceof Number && val_log_level.toString() == \\"ERROR\\") || val_log_level == \\"ERROR\\")))) {
           return true;
         }
         return false;
