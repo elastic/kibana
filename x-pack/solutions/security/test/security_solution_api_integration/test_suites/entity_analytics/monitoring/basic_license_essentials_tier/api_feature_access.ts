@@ -25,11 +25,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.message).toEqual(licenseMessage);
     });
 
-    it('should not be able to access schedule now api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.scheduleNow(403);
-      expect(response.body.message).toEqual(licenseMessage);
-    });
-
     it('should not be able to access delete engine api due to license', async () => {
       const response = await privilegedUserMonitoringRoutes.delete(403);
       expect(response.body.message).toEqual(licenseMessage);
@@ -85,24 +80,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not be able to access privileged access detection status api due to license', async () => {
       const response = await privilegedUserMonitoringRoutes.padStatus(403);
-      expect(response.body.message).toEqual(licenseMessage);
-    });
-
-    it('should not be able to access create source api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.createSource(
-        { type: 'index', name: 'test' },
-        403
-      );
-      expect(response.body.message).toEqual(licenseMessage);
-    });
-
-    it('should not be able to access get source api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.getSource('test', 403);
-      expect(response.body.message).toEqual(licenseMessage);
-    });
-
-    it('should not be able to access update source api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.updateSource('test', {}, 403);
       expect(response.body.message).toEqual(licenseMessage);
     });
 

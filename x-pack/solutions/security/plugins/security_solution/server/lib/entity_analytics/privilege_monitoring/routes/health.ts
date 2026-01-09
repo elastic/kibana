@@ -16,13 +16,9 @@ import {
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-<<<<<<< HEAD
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-=======
-import { createEngineStatusService } from '../engine/status_service';
-import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
->>>>>>> 661530a90b7 ([Entity Analytics] Adding license check to privileged user monitoring routes. (#247986))
+
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

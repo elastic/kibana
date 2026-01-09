@@ -21,10 +21,6 @@ export default ({ getService }: FtrProviderContext) => {
       await privilegedUserMonitoringRoutes.disable(404);
     });
 
-    it('should not find schedule now api', async () => {
-      await privilegedUserMonitoringRoutes.scheduleNow(404);
-    });
-
     it('should not find delete engine api', async () => {
       await privilegedUserMonitoringRoutes.delete(404);
     });
@@ -67,18 +63,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not find privileged access detection status api', async () => {
       await privilegedUserMonitoringRoutes.padStatus(404);
-    });
-
-    it('should not find create source api', async () => {
-      await privilegedUserMonitoringRoutes.createSource({ type: 'index', name: 'test' }, 404);
-    });
-
-    it('should not find get source api', async () => {
-      await privilegedUserMonitoringRoutes.getSource('test', 404);
-    });
-
-    it('should not find update source api', async () => {
-      await privilegedUserMonitoringRoutes.updateSource('test', {}, 404);
     });
 
     it('should not find list source api', async () => {
