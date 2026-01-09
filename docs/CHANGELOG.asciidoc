@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.10>>
 * <<release-notes-8.19.9>>
 * <<release-notes-8.19.8>>
 * <<release-notes-8.19.7>>
@@ -116,6 +117,40 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+
+[[release-notes-8.19.10]]
+== {kib} 8.19.10
+
+The 8.19.10 release includes the following fixes.
+
+[float]
+[[enhancement-v8.19.10]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.19.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+[float]
+[[fixes-v8.19.10]]
+=== Fixes
+Alerting and cases:
+* Adds maximum character validation to the email connector params and configuration ({kibana-pull}246453[#246453]).
+* Adds encoding to search terms in the **Cases** page to prevent decoding errors ({kibana-pull}247992[#247992]).
+Dashboards and Visualizations::
+* Fixes compound filters showing unsaved changes on dashboard load ({kibana-pull}247309[#247309]).
+Elastic Observability solution::
+* Fixes trace links calculating date ranges incorrectly ({kibana-pull}247531[#247531]).
+* Adds the refusal field to AI assistant conversations ({kibana-pull}243423[#243423]).
+* Fixes a validation issue that caused an unsupported key error for synthetics project monitors ({kibana-pull}247880[#247880]).
+* Enables linked dashboards to appear for {{es}} query and other stack rules supported in {{observability}} ({kibana-pull}247564[#247564]).
+* Fixes an issue where the **Console** tab on the **Test Run Details** page always displayed the browser console output from Step 1, regardless of which step was currently selected ({kibana-pull}247376[#247376]). 
+* Uses unicode escaping to prevent the agent from interpreting JS template literals as policy variables ({kibana-pull}247284[#247284]). 
+* Enables updating only those Synthetics package policies that use maintenance windows when maintenance windows are updated or deleted ({kibana-pull}246088[#246088]).
+Elastic Security solution::
+For the Elastic Security 8.19.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Kibana platform::
+* Fixes `createAuditEvents` always returning failure as the outcome ({kibana-pull}247152[#247152]).
+Machine Learning::
+* Fixes the display of map view in Data Visualizer for small screen sizes ({kibana-pull}247615[#247615]).
 
 [[release-notes-8.19.9]]
 == {kib} 8.19.9
