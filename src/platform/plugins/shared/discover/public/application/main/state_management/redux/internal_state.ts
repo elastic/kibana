@@ -175,11 +175,6 @@ export const internalStateSlice = createSlice({
       });
     },
 
-    setInitialDocViewerTabId: (state, action: TabAction<Pick<TabState, 'initialDocViewerTabId'>>) =>
-      withTab(state, action.payload, (tab) => {
-        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
-      }),
-
     setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.dataRequestParams = action.payload.dataRequestParams;

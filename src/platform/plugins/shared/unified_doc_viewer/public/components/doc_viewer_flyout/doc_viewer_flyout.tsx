@@ -35,7 +35,7 @@ import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
-export interface UnifiedDocViewerFlyoutProps {
+export interface UnifiedDocViewerFlyoutProps extends Pick<DocViewerProps, 'onUpdateSelectedTabId'> {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
@@ -64,7 +64,6 @@ export interface UnifiedDocViewerFlyoutProps {
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   initialTabId?: string;
-  onTabChange?: (tabId: string) => void;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -101,7 +100,7 @@ export function UnifiedDocViewerFlyout({
   onAddColumn,
   setExpandedDoc,
   initialTabId,
-  onTabChange,
+  onUpdateSelectedTabId,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -215,7 +214,7 @@ export function UnifiedDocViewerFlyout({
         docViewsRegistry={docViewsRegistry}
         decreaseAvailableHeightBy={euiTheme.base}
         initialTabId={initialTabId}
-        onTabChange={onTabChange}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
       />
     ),
     [
@@ -232,7 +231,7 @@ export function UnifiedDocViewerFlyout({
       docViewsRegistry,
       euiTheme.base,
       initialTabId,
-      onTabChange,
+      onUpdateSelectedTabId,
     ]
   );
 

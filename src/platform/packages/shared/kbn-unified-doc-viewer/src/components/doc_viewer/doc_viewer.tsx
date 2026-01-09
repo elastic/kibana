@@ -35,7 +35,7 @@ const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewe
  * a `render` function.
  */
 export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
-  ({ docViews, initialTabId, onTabChange, ...renderProps }, ref) => {
+  ({ docViews, initialTabId, onUpdateSelectedTabId, ...renderProps }, ref) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map(({ id, title, component }: DocView) => ({
@@ -43,7 +43,7 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
         name: title,
         content: (
           <DocViewerTab
-            key={id}
+            key={`${renderProps.hit.id}_${id}`}
             id={id}
             title={title}
             component={component}
@@ -59,14 +59,9 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
     );
     const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined;
 
-    // Sync localStorage fallback to tab-specific state on mount
-    // This ensures the tab's initialDocViewerTabId is set even when falling back to localStorage
     useEffect(() => {
-      if (!initialTabId && storedInitialTabId && onTabChange) {
-        onTabChange(getOriginalTabId(storedInitialTabId));
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+      onUpdateSelectedTabId?.(selectedTabId ? getOriginalTabId(selectedTabId) : undefined);
+    }, [onUpdateSelectedTabId, selectedTabId]);
 
     useImperativeHandle(
       ref,
@@ -83,9 +78,8 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
       (tab: EuiTabbedContentTab) => {
         setSelectedTabId(tab.id);
         setInitialTabId(tab.id); // Persist the selected tab in localStorage
-        onTabChange?.(getOriginalTabId(tab.id)); // Notify parent of tab change
       },
-      [setInitialTabId, onTabChange]
+      [setInitialTabId]
     );
 
     if (!tabs.length) {
