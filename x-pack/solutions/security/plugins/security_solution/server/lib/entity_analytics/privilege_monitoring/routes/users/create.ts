@@ -18,6 +18,8 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
+
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -39,7 +41,8 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
+      withMinimumLicense(
+       async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -60,6 +63,6 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

@@ -20,6 +20,7 @@ import {
   type ListEntitySourcesResponse,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -45,7 +46,8 @@ export const listMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -67,6 +69,8 @@ export const listMonitoringEntitySourceRoute = (
             body: error.message,
           });
         }
-      }
+      },
+        'platinum'
+      )
     );
 };

@@ -14,6 +14,7 @@ import { DeleteEntityEngineRequestQuery } from '../../../../../common/api/entity
 import type { DeleteMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -45,8 +46,8 @@ export const deletePrivilegeMonitoringEngineRoute = (
           },
         },
       },
-
-      async (
+      withMinimumLicense(
+        async (
         context,
         request,
         response
@@ -65,6 +66,6 @@ export const deletePrivilegeMonitoringEngineRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };
