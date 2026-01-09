@@ -15,8 +15,7 @@ const attachmentReadSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to read'),
   version: z
     .number()
-    .int()
-    .positive()
+    .min(1)
     .optional()
     .describe('Specific version to read (defaults to current version)'),
 });
