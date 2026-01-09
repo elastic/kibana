@@ -2375,10 +2375,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0":
-  version "104.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
-  integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
+"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.1":
+  version "104.0.0-amsterdam.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.1.tgz#3a731f92afa67c6e7c88f2059ea8740243ff7fbd"
+  integrity sha512-HPDffYvt8reHwXNzORGix/bBJ1aNSHvYKxBaEni0cz1O4oQupdY6A9U2wu571f7O0F4qZdZ+CyfqEtimcDXkjQ==
   dependencies:
     "@elastic/eui-theme-common" "2.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -2425,10 +2425,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@104.0.0-amsterdam.0":
-  version "104.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
-  integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
+"@elastic/eui@104.0.0-amsterdam.1":
+  version "104.0.0-amsterdam.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.1.tgz#3a731f92afa67c6e7c88f2059ea8740243ff7fbd"
+  integrity sha512-HPDffYvt8reHwXNzORGix/bBJ1aNSHvYKxBaEni0cz1O4oQupdY6A9U2wu571f7O0F4qZdZ+CyfqEtimcDXkjQ==
   dependencies:
     "@elastic/eui-theme-common" "2.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
