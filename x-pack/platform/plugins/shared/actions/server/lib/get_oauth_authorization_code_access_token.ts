@@ -6,10 +6,22 @@
  */
 
 import startCase from 'lodash/startCase';
+import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
+
+// Per-connector locks to prevent concurrent token refreshes for the same connector
+const tokenRefreshLocks = new Map<string, ReturnType<typeof pLimit>>();
+
+function getOrCreateLock(connectorId: string): ReturnType<typeof pLimit> {
+  if (!tokenRefreshLocks.has(connectorId)) {
+    // Using p-limit with concurrency of 1 creates a mutex (only 1 operation at a time)
+    tokenRefreshLocks.set(connectorId, pLimit(1));
+  }
+  return tokenRefreshLocks.get(connectorId)!;
+}
 
 export interface GetOAuthAuthorizationCodeConfig {
   clientId: string;
@@ -57,101 +69,106 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   // Default to true (OAuth 2.0 recommended practice)
   const shouldUseBasicAuth = useBasicAuth ?? true;
 
-  // Get stored token
-  const { connectorToken, hasErrors } = await connectorTokenClient.get({
-    connectorId,
-    tokenType: 'access_token',
-  });
+  // Acquire lock for this connector to prevent concurrent token refreshes
+  const lock = getOrCreateLock(connectorId);
 
-  if (hasErrors) {
-    logger.warn(`Errors fetching connector token for connectorId: ${connectorId}`);
-    return null;
-  }
-
-  // No token found - user must authorize first
-  if (!connectorToken) {
-    logger.warn(
-      `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`
-    );
-    return null;
-  }
-
-  // Check if access token is still valid
-  const now = Date.now();
-  const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
-
-  if (expiresAt > now) {
-    // Token still valid
-    logger.debug(`Using stored access token for connectorId: ${connectorId}`);
-    return connectorToken.token;
-  }
-
-  // Access token expired - attempt refresh
-  if (!connectorToken.refreshToken) {
-    logger.warn(
-      `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
-    );
-    return null;
-  }
-
-  // Check if refresh token is expired
-  if (
-    connectorToken.refreshTokenExpiresAt &&
-    Date.parse(connectorToken.refreshTokenExpiresAt) <= now
-  ) {
-    logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
-    return null;
-  }
-
-  // Refresh the token
-  logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
-  const requestTokenStart = Date.now();
-
-  try {
-    const tokenResult = await requestOAuthRefreshToken(
-      tokenUrl,
-      logger,
-      {
-        refreshToken: connectorToken.refreshToken,
-        clientId,
-        clientSecret,
-        scope,
-        ...additionalFields,
-      },
-      configurationUtilities,
-      shouldUseBasicAuth
-    );
-
-    // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
-    // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
-    const normalizedTokenType = startCase(tokenResult.tokenType);
-    const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
-    const newRefreshToken = tokenResult.refreshToken || connectorToken.refreshToken;
-
-    // Calculate expiration times
-    const accessTokenExpiresAt = tokenResult.expiresIn
-      ? new Date(requestTokenStart + tokenResult.expiresIn * 1000).toISOString()
-      : undefined;
-
-    const refreshTokenExpiresAt = tokenResult.refreshTokenExpiresIn
-      ? new Date(requestTokenStart + tokenResult.refreshTokenExpiresIn * 1000).toISOString()
-      : connectorToken.refreshTokenExpiresAt;
-
-    // Update stored token
-    await connectorTokenClient.updateWithRefreshToken({
-      id: connectorToken.id!,
-      token: newAccessToken,
-      refreshToken: newRefreshToken,
-      expiresAtMillis: accessTokenExpiresAt,
-      refreshTokenExpiresAtMillis: refreshTokenExpiresAt,
+  return await lock(async () => {
+    // Re-fetch token inside lock - another request may have already refreshed it
+    const { connectorToken, hasErrors } = await connectorTokenClient.get({
+      connectorId,
       tokenType: 'access_token',
     });
 
-    return newAccessToken;
-  } catch (err) {
-    logger.error(
-      `Failed to refresh access token for connectorId: ${connectorId}. Error: ${err.message}`
-    );
-    return null;
-  }
+    if (hasErrors) {
+      logger.warn(`Errors fetching connector token for connectorId: ${connectorId}`);
+      return null;
+    }
+
+    // No token found - user must authorize first
+    if (!connectorToken) {
+      logger.warn(
+        `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`
+      );
+      return null;
+    }
+
+    // Check if access token is still valid (may have been refreshed by another request)
+    const now = Date.now();
+    const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
+
+    if (expiresAt > now) {
+      // Token still valid
+      logger.debug(`Using stored access token for connectorId: ${connectorId}`);
+      return connectorToken.token;
+    }
+
+    // Access token expired - attempt refresh
+    if (!connectorToken.refreshToken) {
+      logger.warn(
+        `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
+      );
+      return null;
+    }
+
+    // Check if refresh token is expired
+    if (
+      connectorToken.refreshTokenExpiresAt &&
+      Date.parse(connectorToken.refreshTokenExpiresAt) <= now
+    ) {
+      logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
+      return null;
+    }
+
+    // Refresh the token
+    logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
+    const requestTokenStart = Date.now();
+
+    try {
+      const tokenResult = await requestOAuthRefreshToken(
+        tokenUrl,
+        logger,
+        {
+          refreshToken: connectorToken.refreshToken,
+          clientId,
+          clientSecret,
+          scope,
+          ...additionalFields,
+        },
+        configurationUtilities,
+        shouldUseBasicAuth
+      );
+
+      // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
+      // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
+      const normalizedTokenType = startCase(tokenResult.tokenType);
+      const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
+      const newRefreshToken = tokenResult.refreshToken || connectorToken.refreshToken;
+
+      // Calculate expiration times
+      const accessTokenExpiresAt = tokenResult.expiresIn
+        ? new Date(requestTokenStart + tokenResult.expiresIn * 1000).toISOString()
+        : undefined;
+
+      const refreshTokenExpiresAt = tokenResult.refreshTokenExpiresIn
+        ? new Date(requestTokenStart + tokenResult.refreshTokenExpiresIn * 1000).toISOString()
+        : connectorToken.refreshTokenExpiresAt;
+
+      // Update stored token
+      await connectorTokenClient.updateWithRefreshToken({
+        id: connectorToken.id!,
+        token: newAccessToken,
+        refreshToken: newRefreshToken,
+        expiresAtMillis: accessTokenExpiresAt,
+        refreshTokenExpiresAtMillis: refreshTokenExpiresAt,
+        tokenType: 'access_token',
+      });
+
+      return newAccessToken;
+    } catch (err) {
+      logger.error(
+        `Failed to refresh access token for connectorId: ${connectorId}. Error: ${err.message}`
+      );
+      return null;
+    }
+  });
 };

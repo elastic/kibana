@@ -76,11 +76,11 @@ const rateLimiterSchema = schema.recordOf(
 const oAuthRateLimitSchema = schema.object({
   authorize: schema.object({
     lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
-    limit: schema.number({ defaultValue: 10, min: 1, max: 1000 }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
   }),
   callback: schema.object({
     lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
-    limit: schema.number({ defaultValue: 50, min: 1, max: 1000 }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
   }),
 });
 
