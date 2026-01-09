@@ -192,7 +192,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
 
   /**
    * Enables the Entity Analytics Watchlist feature.
