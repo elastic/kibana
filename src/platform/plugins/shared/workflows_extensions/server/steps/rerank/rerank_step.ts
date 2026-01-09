@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createServerStepDefinition } from '../../step_registry/types';
 import { rerankStepCommonDefinition } from '../../../common/steps/rerank';
-
+import { createServerStepDefinition } from '../../step_registry/types';
 
 interface InferenceEndpoint {
   inference_id: string;
@@ -106,9 +105,7 @@ export const rerankStepDefinition = createServerStepDefinition({
       const dataToRerank = rankWindowSize
         ? context.input.data.slice(0, rankWindowSize)
         : context.input.data;
-      const remainingData = rankWindowSize
-        ? context.input.data.slice(rankWindowSize)
-        : [];
+      const remainingData = rankWindowSize ? context.input.data.slice(rankWindowSize) : [];
 
       // Prepare input for rerank endpoint
       let inputForRerank: any;
@@ -132,7 +129,7 @@ export const rerankStepDefinition = createServerStepDefinition({
         if (!inferenceId) {
           throw new Error(
             'No inference_id provided and no rerank inference endpoints found in Elasticsearch. ' +
-            'Please create a rerank inference endpoint or specify an inference_id explicitly.'
+              'Please create a rerank inference endpoint or specify an inference_id explicitly.'
           );
         }
 

@@ -49,7 +49,6 @@ const RerankOutputSchema = z
   .array(z.any())
   .describe('Array of reranked documents in descending relevance order');
 
-
 export type RerankInput = z.infer<typeof RerankInputSchema>;
 export type RerankOutput = z.infer<typeof RerankOutputSchema>;
 

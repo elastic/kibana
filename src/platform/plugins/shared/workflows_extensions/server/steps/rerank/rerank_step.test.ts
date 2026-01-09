@@ -20,13 +20,15 @@ const mockLogger = {
 
 const createMockEsClient = (mockResponse?: any) => ({
   transport: {
-    request: jest.fn().mockResolvedValue(mockResponse || {
-      rerank: [
-        { index: 1, relevance_score: 0.95, text: 'doc2' },
-        { index: 0, relevance_score: 0.85, text: 'doc1' },
-        { index: 2, relevance_score: 0.75, text: 'doc3' },
-      ],
-    }),
+    request: jest.fn().mockResolvedValue(
+      mockResponse || {
+        rerank: [
+          { index: 1, relevance_score: 0.95, text: 'doc2' },
+          { index: 0, relevance_score: 0.85, text: 'doc1' },
+          { index: 2, relevance_score: 0.75, text: 'doc3' },
+        ],
+      }
+    ),
   },
 });
 
@@ -153,11 +155,7 @@ describe('rerankStepDefinition', () => {
         },
         body: {
           query: 'What is the best laptop?',
-          input: [
-            'Laptop A Good laptop',
-            'Laptop B Great laptop',
-            'Laptop C Average laptop',
-          ],
+          input: ['Laptop A Good laptop', 'Laptop B Great laptop', 'Laptop C Average laptop'],
         },
       });
     });
@@ -174,7 +172,10 @@ describe('rerankStepDefinition', () => {
             { user: { name: 'Bob' }, message: { text: 'Fix bug' } },
             { user: { name: 'Charlie' }, message: { text: 'Update deployment config' } },
           ],
-          fields: [['user', 'name'], ['message', 'text']],
+          fields: [
+            ['user', 'name'],
+            ['message', 'text'],
+          ],
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -190,11 +191,7 @@ describe('rerankStepDefinition', () => {
         },
         body: {
           query: 'Find messages about deployment',
-          input: [
-            'Alice Deploy to prod',
-            'Bob Fix bug',
-            'Charlie Update deployment config',
-          ],
+          input: ['Alice Deploy to prod', 'Bob Fix bug', 'Charlie Update deployment config'],
         },
       });
 
@@ -206,9 +203,9 @@ describe('rerankStepDefinition', () => {
         rerank: [
           { index: 4, relevance_score: 0.99 },
           { index: 2, relevance_score: 0.95 },
-          { index: 0, relevance_score: 0.90 },
+          { index: 0, relevance_score: 0.9 },
           { index: 3, relevance_score: 0.85 },
-          { index: 1, relevance_score: 0.80 },
+          { index: 1, relevance_score: 0.8 },
         ],
       });
       const mockContextManager = createMockContextManager(mockEsClient);
@@ -216,13 +213,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-            { id: 4 },
-            { id: 5 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -232,13 +223,7 @@ describe('rerankStepDefinition', () => {
 
       // All documents reranked
       expect(result.output).toHaveLength(5);
-      expect(result.output).toEqual([
-        { id: 5 },
-        { id: 3 },
-        { id: 1 },
-        { id: 4 },
-        { id: 2 },
-      ]);
+      expect(result.output).toEqual([{ id: 5 }, { id: 3 }, { id: 1 }, { id: 4 }, { id: 2 }]);
 
       // API called with all 5 documents
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
@@ -256,7 +241,7 @@ describe('rerankStepDefinition', () => {
       const mockEsClient = createMockEsClient({
         rerank: [
           { index: 2, relevance_score: 0.95 },
-          { index: 0, relevance_score: 0.90 },
+          { index: 0, relevance_score: 0.9 },
           { index: 1, relevance_score: 0.85 },
         ],
       });
@@ -265,13 +250,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-            { id: 4 },
-            { id: 5 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
           rank_window_size: 3,
         },
         logger: mockLogger as any,
@@ -282,19 +261,12 @@ describe('rerankStepDefinition', () => {
 
       // Returns all 5 documents
       expect(result.output).toHaveLength(5);
-      
+
       // First 3 are reranked
-      expect(result.output.slice(0, 3)).toEqual([
-        { id: 3 },
-        { id: 1 },
-        { id: 2 },
-      ]);
-      
+      expect(result.output.slice(0, 3)).toEqual([{ id: 3 }, { id: 1 }, { id: 2 }]);
+
       // Last 2 are in original order
-      expect(result.output.slice(3)).toEqual([
-        { id: 4 },
-        { id: 5 },
-      ]);
+      expect(result.output.slice(3)).toEqual([{ id: 4 }, { id: 5 }]);
 
       // API called with only 3 documents (cost optimization)
       const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
@@ -313,10 +285,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-          ],
+          data: [{ id: 1 }, { id: 2 }],
           rank_window_size: 10,
         },
         logger: mockLogger as any,
@@ -327,10 +296,7 @@ describe('rerankStepDefinition', () => {
 
       // All documents reranked, no remaining
       expect(result.output).toHaveLength(2);
-      expect(result.output).toEqual([
-        { id: 2 },
-        { id: 1 },
-      ]);
+      expect(result.output).toEqual([{ id: 2 }, { id: 1 }]);
 
       const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
       expect(callInput).toHaveLength(2);
@@ -365,13 +331,13 @@ describe('rerankStepDefinition', () => {
 
       // Returns all 4 documents
       expect(result.output).toHaveLength(4);
-      
+
       // First 2 are reranked
       expect(result.output.slice(0, 2)).toEqual([
         { id: 2, title: 'Doc 2', content: 'Content 2' },
         { id: 1, title: 'Doc 1', content: 'Content 1' },
       ]);
-      
+
       // Last 2 are in original order
       expect(result.output.slice(2)).toEqual([
         { id: 3, title: 'Doc 3', content: 'Content 3' },
@@ -431,11 +397,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }],
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -443,11 +405,7 @@ describe('rerankStepDefinition', () => {
 
       const result = await rerankStepDefinition.handler(context);
 
-      expect(result.output).toEqual([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-      ]);
+      expect(result.output).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
     });
 
     it('should handle errors and return error object', async () => {
@@ -481,11 +439,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { title: 'Doc 1' },
-            { content: 'Doc 2 content' },
-            {},
-          ],
+          data: [{ title: 'Doc 1' }, { content: 'Doc 2 content' }, {}],
           fields: [['title'], ['content'], ['missing']],
         },
         logger: mockLogger as any,
@@ -498,11 +452,7 @@ describe('rerankStepDefinition', () => {
         expect.objectContaining({
           body: {
             query: 'Test query',
-            input: [
-              'Doc 1',
-              'Doc 2 content',
-              '',
-            ],
+            input: ['Doc 1', 'Doc 2 content', ''],
           },
         })
       );
@@ -517,9 +467,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { title: 'Title 1', content: '', metadata: null },
-          ],
+          data: [{ title: 'Title 1', content: '', metadata: null }],
           fields: [['title'], ['content'], ['metadata']],
         },
         logger: mockLogger as any,
@@ -654,27 +602,21 @@ describe('rerankStepDefinition', () => {
 
       // When rank_window_size is 0 (falsy), should rerank all
       expect(result.output).toHaveLength(2);
-      
+
       const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
       expect(callInput).toHaveLength(2);
     });
 
     it('should handle rank_window_size of 1', async () => {
       const mockEsClient = createMockEsClient({
-        rerank: [
-          { index: 0, relevance_score: 0.95 },
-        ],
+        rerank: [{ index: 0, relevance_score: 0.95 }],
       });
       const mockContextManager = createMockContextManager(mockEsClient);
 
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }],
           rank_window_size: 1,
         },
         logger: mockLogger as any,
@@ -684,12 +626,8 @@ describe('rerankStepDefinition', () => {
       const result = await rerankStepDefinition.handler(context);
 
       // Only first doc reranked (stays in place), rest appended
-      expect(result.output).toEqual([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-      ]);
-      
+      expect(result.output).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
+
       const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
       expect(callInput).toHaveLength(1);
     });
@@ -701,12 +639,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           user_question: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-            { id: 4 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
           rank_window_size: 2,
         },
         logger: mockLogger as any,
@@ -716,13 +649,8 @@ describe('rerankStepDefinition', () => {
       const result = await rerankStepDefinition.handler(context);
 
       // Falls back to original order for window, then appends remaining
-      expect(result.output).toEqual([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 },
-      ]);
-      
+      expect(result.output).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+
       // Only first 2 sent to API
       const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
       expect(callInput).toHaveLength(2);

@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { rerankStepCommonDefinition, RerankStepTypeId } from '../../../common/steps/rerank';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
-import { RerankStepTypeId, rerankStepCommonDefinition } from '../../../common/steps/rerank';
-
 
 export const rerankStepDefinition: PublicStepDefinition = {
   ...rerankStepCommonDefinition,
