@@ -6,10 +6,19 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { Logger } from '@kbn/core-di';
+import type { Logger } from '@kbn/logging';
+import { Logger as BaseLogger } from '@kbn/core-di';
 import type { EcsError } from '@elastic/ecs';
 
 interface DebugParams {
+  message: string;
+}
+
+interface InfoParams {
+  message: string;
+}
+
+interface WarnParams {
   message: string;
 }
 
@@ -21,7 +30,7 @@ interface ErrorParams {
 
 @injectable()
 export class LoggerService {
-  constructor(@inject(Logger) private readonly logger: Logger) {}
+  constructor(@inject(BaseLogger) private readonly logger: Logger) {}
 
   public debug({ message }: DebugParams): void {
     this.logger.debug(message);
@@ -32,6 +41,14 @@ export class LoggerService {
     this.logger.error(error.message, {
       error: ecsError,
     });
+  }
+
+  public info({ message }: InfoParams): void {
+    this.logger.info(message);
+  }
+
+  public warn({ message }: WarnParams): void {
+    this.logger.warn(message);
   }
 
   private buildError({ error, code, type }: ErrorParams): EcsError {

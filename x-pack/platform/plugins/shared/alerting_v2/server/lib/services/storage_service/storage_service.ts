@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
-import { ElasticsearchClient } from '@kbn/core-di';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { LoggerService } from './logger_service';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { LoggerService } from '../logger_service';
 
 interface BulkIndexDocsParams {
   index: string;
   docs: Record<string, any>[];
 }
 
-@injectable()
 export class StorageService {
   constructor(
-    @inject(ElasticsearchClient) private readonly esClient: ElasticsearchClient,
-    @inject(LoggerService) private readonly logger: LoggerService
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: LoggerService
   ) {}
 
   public async bulkIndexDocs({ index, docs }: BulkIndexDocsParams): Promise<void> {

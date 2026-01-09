@@ -20,8 +20,8 @@ import { UpdateRuleRoute } from './routes/update_rule_route';
 import { initializeRuleExecutorTaskDefinition } from './lib/rule_executor';
 import { AlertingResourcesService } from './lib/services/alerting_resources_service';
 import { LoggerService } from './lib/services/logger_service';
-import { StorageService } from './lib/services/storage_service';
-import { EsqlService } from './lib/services/esql_service';
+import { QueryServiceFactory } from './lib/services/query_service/query_service_factory';
+import { StorageServiceFactory } from './lib/services/storage_service/storage_service_factory';
 import { registerSavedObjects } from './saved_objects';
 import type { AlertingServerStartDependencies } from './types';
 
@@ -30,19 +30,16 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 };
 
 export const module = new ContainerModule(({ bind }) => {
-  // Register HTTP routes via DI
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
 
-  // Request-scoped rules client
   bind(RulesClient).toSelf().inRequestScope();
 
-  // Singleton services
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(AlertingResourcesService).toSelf().inSingletonScope();
   bind(LoggerService).toSelf().inSingletonScope();
-  bind(StorageService).toSelf().inSingletonScope();
-  bind(EsqlService).toSelf().inSingletonScope();
+  bind(QueryServiceFactory).toSelf().inSingletonScope();
+  bind(StorageServiceFactory).toSelf().inSingletonScope();
 
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);

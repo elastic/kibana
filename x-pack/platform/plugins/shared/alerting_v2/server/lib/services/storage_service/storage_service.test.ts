@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { StorageService } from './storage_service';
-import { LoggerService } from './logger_service';
+import { LoggerService } from '../logger_service';
 
 describe('StorageService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;

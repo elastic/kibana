@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { of, throwError } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
-import { EsqlService } from './esql_service';
-import { LoggerService } from './logger_service';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { QueryService } from './query_service';
+import { LoggerService } from '../logger_service';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
-describe('EsqlService', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+describe('QueryService', () => {
+  let mockSearchClient: jest.Mocked<IScopedSearchClient>;
   let mockLogger: jest.Mocked<Logger>;
   let mockLoggerService: LoggerService;
-  let esqlService: EsqlService;
+  let esqlService: QueryService;
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    // @ts-expect-error - dataPluginMock is not typed correctly
+    mockSearchClient = dataPluginMock
+      .createStartContract()
+      .search.asScoped(httpServerMock.createKibanaRequest({}));
+
     mockLogger = loggerMock.create();
     mockLoggerService = new LoggerService(mockLogger);
-    esqlService = new EsqlService(mockEsClient, mockLoggerService);
+    esqlService = new QueryService(mockSearchClient, mockLoggerService);
   });
 
   afterEach(() => {
@@ -31,8 +38,27 @@ describe('EsqlService', () => {
 
   describe('executeQuery', () => {
     const mockQuery = 'FROM .alerts-* | LIMIT 10';
+    const mockFilter = {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: '2025-01-01T00:00:00.000Z',
+                lte: '2025-01-02T00:00:00.000Z',
+              },
+            },
+          },
+        ],
+      },
+    };
 
-    const mockResponse: EsqlEsqlResult = {
+    const mockParams = [
+      { _tstart: '2025-01-01T00:00:00.000Z' },
+      { _tend: '2025-01-02T00:00:00.000Z' },
+    ];
+
+    const mockResponse: ESQLSearchResponse = {
       columns: [
         { name: '@timestamp', type: 'date' },
         { name: 'rule_id', type: 'keyword' },
@@ -44,15 +70,33 @@ describe('EsqlService', () => {
     };
 
     it('should successfully execute ES|QL query', async () => {
-      mockEsClient.esql.query = jest.fn().mockResolvedValue(mockResponse);
+      mockSearchClient.search.mockReturnValue(
+        of({
+          isRunning: false,
+          rawResponse: mockResponse,
+        })
+      );
 
-      const result = await esqlService.executeQuery({ query: mockQuery });
-
-      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
-      expect(mockEsClient.esql.query).toHaveBeenCalledWith({
+      const result = await esqlService.executeQuery({
         query: mockQuery,
-        drop_null_columns: false,
+        filter: mockFilter,
+        params: mockParams,
       });
+
+      expect(mockSearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockSearchClient.search).toHaveBeenCalledWith(
+        {
+          params: {
+            query: mockQuery,
+            dropNullColumns: false,
+            filter: mockFilter,
+            params: mockParams,
+          },
+        },
+        {
+          strategy: 'esql',
+        }
+      );
 
       expect(result).toEqual(mockResponse);
       expect(mockLogger.error).not.toHaveBeenCalled();
@@ -60,7 +104,7 @@ describe('EsqlService', () => {
 
     it('should throw and log error when query execution fails', async () => {
       const error = new Error('ES|QL syntax error');
-      mockEsClient.esql.query = jest.fn().mockRejectedValue(error);
+      mockSearchClient.search.mockReturnValue(throwError(() => error));
 
       await expect(esqlService.executeQuery({ query: mockQuery })).rejects.toThrow(
         'ES|QL syntax error'
@@ -70,9 +114,9 @@ describe('EsqlService', () => {
     });
   });
 
-  describe('queryResponseToObject', () => {
+  describe('queryResponseToRecords', () => {
     it('should convert ES|QL response to array of objects', () => {
-      const mockResponse: EsqlEsqlResult = {
+      const mockResponse: ESQLSearchResponse = {
         columns: [
           { name: 'rule_id', type: 'keyword' },
           { name: 'alert_series_id', type: 'keyword' },
@@ -84,7 +128,7 @@ describe('EsqlService', () => {
         ],
       };
 
-      const result = esqlService.queryResponseToObject(mockResponse);
+      const result = esqlService.queryResponseToRecords(mockResponse);
 
       expect(result).toHaveLength(2);
       expect(result).toEqual([
@@ -102,7 +146,7 @@ describe('EsqlService', () => {
     });
 
     it('should handle missing column names in response', () => {
-      const mockResponse: EsqlEsqlResult = {
+      const mockResponse: ESQLSearchResponse = {
         columns: [
           { name: 'rule_id', type: 'keyword' },
           { name: 'alert_series_id', type: 'keyword' },
@@ -113,7 +157,7 @@ describe('EsqlService', () => {
         ],
       };
 
-      const result = esqlService.queryResponseToObject(mockResponse);
+      const result = esqlService.queryResponseToRecords(mockResponse);
 
       expect(result).toHaveLength(2);
       expect(result).toEqual([
@@ -129,24 +173,24 @@ describe('EsqlService', () => {
     });
 
     it('should handle empty values response', () => {
-      const mockResponse: EsqlEsqlResult = {
+      const mockResponse: ESQLSearchResponse = {
         columns: [{ name: 'field', type: 'keyword' }],
         values: [],
       };
 
-      const result = esqlService.queryResponseToObject<{ field: string }>(mockResponse);
+      const result = esqlService.queryResponseToRecords<{ field: string }>(mockResponse);
 
       expect(result).toHaveLength(0);
       expect(result).toEqual([]);
     });
 
     it('should handle empty columns response', () => {
-      const mockResponse: EsqlEsqlResult = {
+      const mockResponse: ESQLSearchResponse = {
         columns: [],
         values: [['value']],
       };
 
-      const result = esqlService.queryResponseToObject<{ field: string }>(mockResponse);
+      const result = esqlService.queryResponseToRecords<{ field: string }>(mockResponse);
 
       expect(result).toHaveLength(0);
       expect(result).toEqual([]);
