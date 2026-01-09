@@ -92,11 +92,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityThreatHuntingEnabled: false,
 
   /**
-   * Enabled new index sync update detection logic
-   */
-  privilegedMonitoringNewIndexSyncUpdateDetectionEnabled: true,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -203,7 +198,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
 
   /**
    * Enables the Entity Analytics Watchlist feature.
