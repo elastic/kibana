@@ -60,7 +60,7 @@ const getAlertsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Filter alerts by field:value pairs. Examples: \'service.name: "frontend"\', \'host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU Alert"\'.'
+      'Optional KQL (Kibana Query Language) filter to narrow down alerts. Examples: \'service.name: "frontend"\' (alerts for the frontend service), \'service.name: "checkout" AND host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU"\'.'
     ),
   includeRecovered: z
     .boolean()
