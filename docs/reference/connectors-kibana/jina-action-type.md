@@ -3,7 +3,7 @@ navigation_title: "Jina Reader"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/jina-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.4+
   serverless: preview
 ---
 
