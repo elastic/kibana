@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DynamicActionsState, SerializedEvent } from './types';
 import { dashboardDrilldownPersistableState } from './dashboard_drilldown_persistable_state';
 
 export const dynamicActionsPersistableState = {
-  extract: (state: SerializableRecord) => {
+  extract: (state: DynamicActionsState) => {
     const references: Reference[] = [];
     const newState: DynamicActionsState = {
       events: (state as DynamicActionsState).events.map((eventState: SerializedEvent) => {
@@ -30,13 +29,43 @@ export const dynamicActionsPersistableState = {
     };
     return { state: newState, references };
   },
-  inject: (state: SerializableRecord, references: Reference[]) => {
+  inject: (state: DynamicActionsState, references: Reference[]) => {
     return {
-      events: (state as DynamicActionsState).events.map((eventState: SerializedEvent) => {
+      events: state.events.map((eventState: SerializedEvent) => {
         return eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN'
           ? dashboardDrilldownPersistableState.inject(eventState, references)
           : eventState;
       }),
     } as DynamicActionsState;
+  },
+  telemetry(state: DynamicActionsState, telemetryData: Record<string, number>) {
+    const getMetricKey = (path: string) => `dynamicActions.${path}`;
+
+    const outputTelemetryData = { ...telemetryData };
+    const countMetricKey = getMetricKey('count');
+
+    outputTelemetryData[countMetricKey] =
+      state.events.length + (outputTelemetryData[countMetricKey] || 0);
+
+    for (const event of state.events) {
+      const factoryId = event.action.factoryId;
+      const actionCountMetric = getMetricKey(`actions.${factoryId}.count`);
+
+      outputTelemetryData[actionCountMetric] = 1 + (outputTelemetryData[actionCountMetric] || 0);
+
+      for (const trigger of event.triggers) {
+        const triggerCountMetric = getMetricKey(`triggers.${trigger}.count`);
+        const actionXTriggerCountMetric = getMetricKey(
+          `action_triggers.${factoryId}_${trigger}.count`
+        );
+
+        outputTelemetryData[triggerCountMetric] =
+          1 + (outputTelemetryData[triggerCountMetric] || 0);
+        outputTelemetryData[actionXTriggerCountMetric] =
+          1 + (outputTelemetryData[actionXTriggerCountMetric] || 0);
+      }
+    }
+
+    return outputTelemetryData;
   },
 };

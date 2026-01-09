@@ -8,6 +8,7 @@
  */
 
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { enhancementsPersistableState } from '../../common/bwc/enhancements/enhancements_persistable_state';
 import type { EmbeddableStateWithType } from './types';
 import { telemetryBaseEmbeddableInput } from './migrate_base_input';
 
@@ -25,6 +26,8 @@ export const getTelemetryFunction = (
       outputTelemetryData = factory.telemetry(state, outputTelemetryData);
     }
 
-    return outputTelemetryData;
+    return state.enhancements?.dynamicActions
+      ? enhancementsPersistableState.telemetry(state, telemetryData)
+      : outputTelemetryData;
   };
 };
