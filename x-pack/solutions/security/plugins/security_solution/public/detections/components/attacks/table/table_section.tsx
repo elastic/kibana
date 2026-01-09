@@ -26,6 +26,7 @@ import { inputsSelectors } from '../../../../common/store/inputs';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
+  buildAlertAssigneesFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
@@ -38,6 +39,7 @@ import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_h
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
+import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -57,13 +59,18 @@ export interface TableSectionProps {
    * The page filters retrieved from the FiltersSection component to filter the table
    */
   pageFilters: Filter[] | undefined;
+
+  /**
+   * The list of assignees to add to the others filters
+   */
+  assignees: AssigneesIdsSelection[];
 }
 
 /**
  * Renders the alerts table with grouping functionality in the attacks page.
  */
 export const TableSection = React.memo(
-  ({ dataView, statusFilter, pageFilters }: TableSectionProps) => {
+  ({ dataView, statusFilter, pageFilters, assignees }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -130,8 +137,9 @@ export const TableSection = React.memo(
         ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
+        ...buildAlertAssigneesFilter(assignees),
       ],
-      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, pageFilters]
+      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, pageFilters, assignees]
     );
 
     const isLoading = useMemo(

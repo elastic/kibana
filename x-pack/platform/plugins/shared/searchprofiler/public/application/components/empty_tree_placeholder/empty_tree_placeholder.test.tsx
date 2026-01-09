@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { EmptyTreePlaceHolder } from '.';
 
 describe('EmptyTreePlaceholder', () => {
-  it('renders', async () => {
-    const init = registerTestBed(EmptyTreePlaceHolder);
-    await init();
+  it('renders', () => {
+    render(<EmptyTreePlaceHolder />);
+
+    expect(screen.getByRole('heading', { name: 'No queries to profile' })).toBeInTheDocument();
+    expect(
+      screen.getByText('Enter a query, click Profile, and see the results here.')
+    ).toBeInTheDocument();
   });
 });
