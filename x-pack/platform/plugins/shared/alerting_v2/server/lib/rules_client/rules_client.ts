@@ -66,9 +66,7 @@ export class RulesClient {
     try {
       createRuleDataSchema.validate(params.data);
     } catch (error) {
-      throw Boom.badRequest(
-        `Error validating create ES|QL rule data - ${(error as Error).message}`
-      );
+      throw Boom.badRequest(`Error validating create rule data - ${(error as Error).message}`);
     }
 
     const id = params.options?.id ?? SavedObjectsUtils.generateId();
@@ -101,7 +99,7 @@ export class RulesClient {
       );
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`ES|QL rule with id "${id}" already exists`);
+        throw Boom.conflict(`Rule with id "${id}" already exists`);
       }
       throw e;
     }
@@ -140,9 +138,7 @@ export class RulesClient {
     try {
       updateRuleDataSchema.validate(data);
     } catch (error) {
-      throw Boom.badRequest(
-        `Error validating update ES|QL rule data - ${(error as Error).message}`
-      );
+      throw Boom.badRequest(`Error validating update rule data - ${(error as Error).message}`);
     }
 
     const username = await this.getUserName();
@@ -159,7 +155,7 @@ export class RulesClient {
       existingVersion = doc.version;
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`ES|QL rule with id "${id}" not found`);
+        throw Boom.notFound(`Rule with id "${id}" not found`);
       }
       throw e;
     }
@@ -224,7 +220,7 @@ export class RulesClient {
       return { id, ...attrs };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`ES|QL rule with id "${id}" not found`);
+        throw Boom.notFound(`Rule with id "${id}" not found`);
       }
       throw e;
     }
@@ -238,7 +234,7 @@ export class RulesClient {
       await savedObjectsClient.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`ES|QL rule with id "${id}" not found`);
+        throw Boom.notFound(`Rule with id "${id}" not found`);
       }
       throw e;
     }
