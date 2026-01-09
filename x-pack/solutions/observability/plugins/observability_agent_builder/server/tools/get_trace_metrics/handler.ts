@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import {
   getPreferredBucketSizeAndDataSource,
@@ -26,6 +25,7 @@ import type {
 import type { TraceMetricsItem } from '../../data_registry/data_registry_types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
+import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 
 const MAX_NUMBER_OF_GROUPS = 100;
 
@@ -105,7 +105,10 @@ export async function getToolHandler({
     track_total_hits: false,
     query: {
       bool: {
-        filter: [...rangeQuery(startMs, endMs), ...kqlQuery(kqlFilter)],
+        filter: [
+          ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
+          ...buildKqlFilter(kqlFilter),
+        ],
       },
     },
     aggs: {
