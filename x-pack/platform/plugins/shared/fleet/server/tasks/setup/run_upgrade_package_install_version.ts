@@ -22,7 +22,6 @@ import { reinstallPackageForInstallation } from '../../services/epm/packages';
 interface RunUpgradePackageInstallVersionParams {
   abortController: AbortController;
   logger: Logger;
-  batchSize?: number;
 }
 
 /**
@@ -31,7 +30,6 @@ interface RunUpgradePackageInstallVersionParams {
 export async function runUpgradePackageInstallVersion({
   abortController,
   logger,
-  batchSize,
 }: RunUpgradePackageInstallVersionParams): Promise<void> {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
@@ -40,8 +38,7 @@ export async function runUpgradePackageInstallVersion({
   const maxConcurrency =
     config?.startupOptimization?.maxConcurrentPackageOperations ??
     MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS;
-  const effectiveBatchSize =
-    batchSize ?? config?.startupOptimization?.packagePolicyUpgradeBatchSize ?? 50;
+  const batchSize = config?.startupOptimization?.packagePolicyUpgradeBatchSize ?? 50;
 
   logger.info('Starting deferred package install version upgrade');
 
@@ -60,16 +57,16 @@ export async function runUpgradePackageInstallVersion({
   logger.info(`Found ${res.total} packages requiring install version upgrade`);
 
   const savedObjects = res.saved_objects;
-  for (let i = 0; i < savedObjects.length; i += effectiveBatchSize) {
+  for (let i = 0; i < savedObjects.length; i += batchSize) {
     if (abortController.signal.aborted) {
       logger.warn('Package install version upgrade was aborted');
       return;
     }
 
-    const batch = savedObjects.slice(i, i + effectiveBatchSize);
+    const batch = savedObjects.slice(i, i + batchSize);
     logger.debug(
-      `Processing batch ${Math.floor(i / effectiveBatchSize) + 1} of ${Math.ceil(
-        savedObjects.length / effectiveBatchSize
+      `Processing batch ${Math.floor(i / batchSize) + 1} of ${Math.ceil(
+        savedObjects.length / batchSize
       )}`
     );
 

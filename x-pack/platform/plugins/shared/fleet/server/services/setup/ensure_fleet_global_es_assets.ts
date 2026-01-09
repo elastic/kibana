@@ -57,8 +57,6 @@ export async function ensureFleetGlobalEsAssets(
           .join(', ')}). Scheduling package reinstallation task.`
       );
 
-      // Schedule a background task to reinstall all packages
-      // This defers the heavy reinstallation work to avoid blocking startup
       const taskManager = appContextService.getTaskManagerStart();
       if (taskManager) {
         await scheduleSetupTask(taskManager, { type: 'reinstallPackagesForGlobalAssetUpdate' });
