@@ -14,7 +14,7 @@ import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
 } from '../../../../../common/service_health_status';
-import type { AgentName, SpanType } from '../../../../../common/es_fields/apm';
+import type { AgentName, SpanType, SpanSubtype } from '../../../../../common/es_fields/apm';
 
 export interface ServiceMapNodeData {
   id: string;

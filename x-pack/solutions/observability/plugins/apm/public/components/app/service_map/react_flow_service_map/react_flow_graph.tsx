@@ -21,7 +21,6 @@ import {
 } from '@xyflow/react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type cytoscape from 'cytoscape';
-import dagre from '@dagrejs/dagre';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -30,6 +29,7 @@ import type { ServiceMapNodeData } from './service_node';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { transformElements, type ServiceMapEdgeData } from './transform_data';
+import { applyLayout } from './apply_layout';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -38,52 +38,6 @@ const nodeTypes: NodeTypes = {
 
 // Default edge colors
 const EDGE_COLOR_DEFAULT = '#98A2B3';
-
-// Apply Dagre layout (left-to-right like Cytoscape version)
-function applyLayout(
-  nodes: Node<ServiceMapNodeData>[],
-  edges: Edge<ServiceMapEdgeData>[]
-): { nodes: Node<ServiceMapNodeData>[]; edges: Edge<ServiceMapEdgeData>[] } {
-  if (nodes.length === 0) return { nodes, edges };
-
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({
-    rankdir: 'LR',
-    nodesep: 80,
-    ranksep: 120,
-    marginx: 50,
-    marginy: 50,
-  });
-
-  nodes.forEach((node) => {
-    const width = node.data.isService ? 100 : 80;
-    const height = node.data.isService ? 100 : 80;
-    g.setNode(node.id, { width, height });
-  });
-
-  edges.forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(g);
-
-  const layoutedNodes = nodes.map((node) => {
-    const nodeWithPosition = g.node(node.id);
-    const width = node.data.isService ? 100 : 80;
-    const height = node.data.isService ? 100 : 80;
-
-    return {
-      ...node,
-      position: {
-        x: nodeWithPosition.x - width / 2,
-        y: nodeWithPosition.y - height / 2,
-      },
-    };
-  });
-
-  return { nodes: layoutedNodes, edges };
-}
 
 interface ReactFlowGraphProps {
   elements: cytoscape.ElementDefinition[];
@@ -122,7 +76,7 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
     setEdges(layoutedEdges);
   }, [elements, setNodes, setEdges]);
 
-  // Handle node click - update edges with highlight colors (GitHub discussion approach)
+  // Handle node click - update edges with highlight colors (GitHub discussion approach: https://github.com/xyflow/xyflow/discussions/3176)
   const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
