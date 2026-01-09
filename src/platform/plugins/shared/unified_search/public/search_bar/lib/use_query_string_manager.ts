@@ -51,7 +51,7 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
   const stableQuery = useMemo(() => getStableQuery(query), [query]);
 
   const propsQuery = useMemo(
-    () => getStableQuery(props.query || props.queryStringManager.getQuery()),
+    () => getStableQuery(props.query || props.queryStringManager.getDefaultQuery()),
     [props.query, props.queryStringManager]
   );
 

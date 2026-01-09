@@ -57,9 +57,9 @@ export const useTimefilter = (props: UseTimefilterProps) => {
   }, [props.timefilter, props.disabled]);
 
   const minRefreshInterval = props.timefilter.getMinRefreshInterval();
-  const propsTimeRange: TimeRange = useMemo(() => getTimeRangeWithFallback(props), [props]);
+  const propsTimeRange: TimeRange = useMemo(() => getTimeRangeWithFallback(props, true), [props]);
   const propsRefreshInterval: RefreshInterval = useMemo(
-    () => getRefreshIntervalWithFallback(props),
+    () => getRefreshIntervalWithFallback(props, true),
     [props]
   );
 
@@ -78,16 +78,22 @@ export const useTimefilter = (props: UseTimefilterProps) => {
   };
 };
 
-function getTimeRangeWithFallback(props: UseTimefilterProps) {
+function getTimeRangeWithFallback(props: UseTimefilterProps, useDefault: boolean = false) {
+  const timefilterTime = useDefault
+    ? props.timefilter.getTimeDefaults()
+    : props.timefilter.getTime();
   return {
-    from: props.dateRangeFrom || props.timefilter.getTime().from,
-    to: props.dateRangeTo || props.timefilter.getTime().to,
+    from: props.dateRangeFrom || timefilterTime.from,
+    to: props.dateRangeTo || timefilterTime.to,
   };
 }
 
-function getRefreshIntervalWithFallback(props: UseTimefilterProps) {
+function getRefreshIntervalWithFallback(props: UseTimefilterProps, useDefault: boolean = false) {
+  const timefilterRefreshInterval = useDefault
+    ? props.timefilter.getRefreshIntervalDefaults()
+    : props.timefilter.getRefreshInterval();
   return {
-    value: props.refreshInterval || props.timefilter.getRefreshInterval().value,
-    pause: props.isRefreshPaused || props.timefilter.getRefreshInterval().pause,
+    value: props.refreshInterval || timefilterRefreshInterval.value,
+    pause: props.isRefreshPaused || timefilterRefreshInterval.pause,
   };
 }

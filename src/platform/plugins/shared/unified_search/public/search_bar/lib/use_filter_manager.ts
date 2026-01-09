@@ -43,10 +43,7 @@ export const useFilterManager = (props: UseFilterManagerProps) => {
     };
   }, [props.filterManager, props.disabled]);
 
-  const propsFilters = useMemo(
-    () => props.filters || props.filterManager.getFilters(),
-    [props.filters, props.filterManager]
-  );
+  const propsFilters = useMemo(() => props.filters || [], [props.filters]);
 
   return { filters: props.disabled ? propsFilters : filters };
 };
