@@ -1632,6 +1632,7 @@
     "@kbn/eslint-plugin-telemetry": "link:packages/kbn-eslint-plugin-telemetry",
     "@kbn/evals": "link:x-pack/platform/packages/shared/kbn-evals",
     "@kbn/evals-suite-agent-builder": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder",
+    "@kbn/evals-suite-llm-tasks": "link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks",
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",

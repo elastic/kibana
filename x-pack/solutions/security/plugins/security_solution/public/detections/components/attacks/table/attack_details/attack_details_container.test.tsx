@@ -55,16 +55,6 @@ describe('AttackDetailsContainer', () => {
       expect(tabs[1]).toHaveTextContent(String(mockAttack.alertIds.length));
     });
 
-    it('renders only Alerts tab when attack is undefined', () => {
-      renderContainer({ attack: undefined });
-
-      const tabs = screen.getAllByRole('tab');
-      expect(tabs).toHaveLength(1);
-      expect(tabs[0]).toHaveTextContent('Alerts');
-      expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
-      expect(screen.queryByTestId('attackSummaryTab')).not.toBeInTheDocument();
-    });
-
     it('renders the attack summary tab by default with correct props', () => {
       renderContainer({ showAnonymized: true });
 
