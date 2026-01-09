@@ -924,21 +924,30 @@ function resolveModulePath(modulePath, fromDir) {
     return null;
   }
 
-  const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
-
   const basePath = path.resolve(fromDir, modulePath);
+  const parseableExtensions = ['.ts', '.tsx', '.js', '.jsx'];
 
-  // Try with each extension
-  for (const ext of extensions) {
+  // Check if path already has an extension
+  const existingExt = path.extname(basePath);
+  if (existingExt) {
+    // Path has extension - only resolve if it's parseable and exists
+    if (parseableExtensions.includes(existingExt) && fs.existsSync(basePath)) {
+      return basePath;
+    }
+    // Non-parseable extension (.peggy, .json, etc.) or doesn't exist - skip
+    return null;
+  }
+
+  // No extension - try adding each parseable extension
+  for (const ext of parseableExtensions) {
     const fullPath = basePath + ext;
-    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+    if (fs.existsSync(fullPath)) {
       return fullPath;
     }
   }
 
   // Try as directory with index file
-  for (const ext of extensions) {
-    if (ext === '') continue;
+  for (const ext of parseableExtensions) {
     const indexPath = path.join(basePath, 'index' + ext);
     if (fs.existsSync(indexPath)) {
       return indexPath;
