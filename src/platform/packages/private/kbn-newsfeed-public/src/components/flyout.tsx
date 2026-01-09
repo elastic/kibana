@@ -31,7 +31,8 @@ import {
 import { css, type Theme } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useThrottleFn } from '@kbn/react-hooks';
 import type { FetchResult, NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsListing } from './listing';
@@ -51,6 +52,9 @@ const categoryLabels: Record<NonNullable<NewsfeedItem['category']>, string> = {
   }),
 };
 
+const BREAKPOINT_FOR_SINGLE_COLUMN = 2100;
+const THROTTLE_OPTIONS = { wait: 50 };
+
 interface NewsListingWithNewsProps {
   initialCategory?: NewsfeedItem['category'];
   isServerless: boolean;
@@ -66,6 +70,18 @@ const NewsListingWithNews: React.FC<NewsListingWithNewsProps> = ({
     initialCategory ?? 'search'
   );
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const [asSingleColumn, setAsSingleColumn] = React.useState<boolean>(
+    window.innerWidth < BREAKPOINT_FOR_SINGLE_COLUMN
+  );
+
+  const { run: throttledResize } = useThrottleFn(() => {
+    setAsSingleColumn(window.innerWidth < BREAKPOINT_FOR_SINGLE_COLUMN);
+  }, THROTTLE_OPTIONS);
+
+  useEffect(() => {
+    window.addEventListener('resize', throttledResize);
+    return () => window.removeEventListener('resize', throttledResize);
+  }, [throttledResize]);
 
   // Divide the results: general items have no category, blog items have a category
   const { feedItems: items } = newsFetchResult;
@@ -156,7 +172,7 @@ const NewsListingWithNews: React.FC<NewsListingWithNewsProps> = ({
 
           <EuiPanel hasBorder paddingSize="none" css={styles.panelContainer}>
             <div css={styles.scrollableContent}>
-              <NewsListing feedItems={generalItems} />
+              <NewsListing feedItems={generalItems} asSingleColumn={asSingleColumn} />
             </div>
           </EuiPanel>
         </EuiFlexItem>
@@ -220,7 +236,7 @@ const NewsListingWithNews: React.FC<NewsListingWithNewsProps> = ({
         <EuiPanel hasBorder paddingSize="none" css={styles.panelContainer}>
           {filteredItems.length > 0 && (
             <div css={styles.scrollableContent}>
-              <NewsListing feedItems={filteredItems} />
+              <NewsListing feedItems={filteredItems} asSingleColumn={asSingleColumn} />
             </div>
           )}
         </EuiPanel>

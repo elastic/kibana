@@ -66,9 +66,10 @@ const useNewsfeedContext = () => {
 };
 
 // Wrapper component to bridge context to props and handle category filtering
-const NewsListWithContext: React.FC<{ category?: 'observability' | 'security' | 'search' }> = ({
-  category,
-}) => {
+const NewsListWithContext: React.FC<{
+  category?: 'observability' | 'security' | 'search';
+  asSingleColumn?: boolean;
+}> = ({ category, asSingleColumn }) => {
   const { newsFetchResult } = useNewsfeedContext();
 
   if (!newsFetchResult) {
@@ -89,30 +90,34 @@ const NewsListWithContext: React.FC<{ category?: 'observability' | 'security' | 
     return <NewsEmptyPrompt />;
   }
 
-  return <NewsListing feedItems={filteredItems} />;
+  return <NewsListing feedItems={filteredItems} asSingleColumn={asSingleColumn} />;
 };
 
 type ListStory = StoryObj<{
   category?: 'observability' | 'security' | 'search';
+  asSingleColumn?: boolean;
 }> & {
   parameters: NewsfeedDecoratorParameters;
 };
 
 export const List: ListStory = {
   name: 'News Listing',
-  render: (args) => <NewsListWithContext category={args.category} />,
+  render: (args) => (
+    <NewsListWithContext category={args.category} asSingleColumn={args.asSingleColumn} />
+  ),
   decorators: [FlyoutDecorator],
   parameters: {
     state: 'with-news',
     docs: {
       description: {
         story:
-          'Newsfeed listing component displaying news items. The component filters items by category. Use the category control to see different filtered views: undefined shows general news (no category), or select observability/security/search to see category-specific news.',
+          'Newsfeed listing component displaying news items. The component filters items by category. Use the category control to see different filtered views: undefined shows general news (no category), or select observability/security/search to see category-specific news. The asSingleColumn control allows you to test the layout in single or double column mode.',
       },
     },
   },
   args: {
     category: undefined,
+    asSingleColumn: false,
   },
   argTypes: {
     category: {
@@ -120,6 +125,11 @@ export const List: ListStory = {
       options: [undefined, 'observability', 'security', 'search'],
       description:
         'Filter news by category. undefined = general news (no category), or select a specific category',
+    },
+    asSingleColumn: {
+      control: 'boolean',
+      description:
+        'Display the listing in single column mode (true) or double column mode (false). This simulates the responsive behavior that normally triggers at 2200px window width.',
     },
   },
 };

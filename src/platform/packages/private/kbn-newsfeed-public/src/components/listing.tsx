@@ -21,16 +21,18 @@ import type { NewsfeedItem } from '../types';
 
 interface NewsListingProps {
   feedItems: NewsfeedItem[];
+  asSingleColumn?: boolean;
 }
 
-export const NewsListing: React.FC<NewsListingProps> = ({ feedItems }) => {
+export const NewsListing: React.FC<NewsListingProps> = ({ feedItems, asSingleColumn }) => {
   const { euiTheme } = useEuiTheme();
+
   return feedItems.map((item: NewsfeedItem, index: number) => {
     const isLastItem = index === feedItems.length - 1;
     return (
       <EuiFlexGrid
         key={item.hash}
-        columns={2}
+        columns={asSingleColumn ? 1 : 2}
         gutterSize="s"
         style={{
           borderBottom: isLastItem
