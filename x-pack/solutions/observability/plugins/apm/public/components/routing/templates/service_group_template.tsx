@@ -15,6 +15,8 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -158,11 +160,13 @@ export function ServiceGroupTemplate({
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key: 'service-inventory' | 'service-map' | 'react-flow-service-map';
   breadcrumbLabel?: string;
+  hidden?: boolean;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map', '/react-flow-service-map');
+  const isReactFlowServiceMapEnabled = useApmFeatureFlag(ApmFeatureFlagName.ServiceMapUseReactFlow);
 
   const tabs: ServiceGroupContextTab[] = [
     {
@@ -216,6 +220,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
         </EuiFlexGroup>
       ),
       href: router.link('/react-flow-service-map', { query }),
+      hidden: !isReactFlowServiceMapEnabled,
     },
   ];
 

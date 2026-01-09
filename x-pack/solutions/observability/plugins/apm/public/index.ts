@@ -23,6 +23,7 @@ export interface ConfigSchema {
     infrastructureTabAvailable: boolean;
     infraUiAvailable: boolean;
     migrationToFleetAvailable: boolean;
+    serviceMapUseReactFlow: boolean;
     sourcemapApiAvailable: boolean;
     storageExplorerAvailable: boolean;
     // to be removed in https://github.com/elastic/kibana/issues/221904
