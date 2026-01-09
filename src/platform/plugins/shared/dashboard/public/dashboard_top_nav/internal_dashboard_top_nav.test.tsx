@@ -20,6 +20,7 @@ import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService, navigationService, shareService } from '../services/kibana_services';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
+import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
@@ -44,9 +45,12 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should not render the managed badge by default', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
     const component = render(
-      <DashboardContext.Provider value={buildMockDashboardApi().api}>
-        <InternalDashboardTopNav redirectTo={jest.fn()} />
+      <DashboardContext.Provider value={api}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav redirectTo={jest.fn()} />
+        </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
 
@@ -54,14 +58,16 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should render the managed badge when the dashboard is managed', async () => {
-    const { api } = buildMockDashboardApi();
+    const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi = {
       ...api,
       isManaged: true,
     };
     const component = render(
       <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav redirectTo={jest.fn()} />
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav redirectTo={jest.fn()} />
+        </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
 
@@ -70,7 +76,7 @@ describe('Internal dashboard top nav', () => {
 
   describe('embed mode', () => {
     it('should hide all top nav and unified search elements except filter bar by default', async () => {
-      const { api } = buildMockDashboardApi();
+      const { api, internalApi } = buildMockDashboardApi();
       const dashboardApi: DashboardApi = {
         ...api,
         viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -78,15 +84,17 @@ describe('Internal dashboard top nav', () => {
 
       render(
         <DashboardContext.Provider value={dashboardApi}>
-          <InternalDashboardTopNav
-            redirectTo={jest.fn()}
-            embedSettings={{
-              forceShowDatePicker: false,
-              forceHideFilterBar: false,
-              forceShowQueryInput: false,
-              forceShowTopNavMenu: false,
-            }}
-          />
+          <DashboardInternalContext.Provider value={internalApi}>
+            <InternalDashboardTopNav
+              redirectTo={jest.fn()}
+              embedSettings={{
+                forceShowDatePicker: false,
+                forceHideFilterBar: false,
+                forceShowQueryInput: false,
+                forceShowTopNavMenu: false,
+              }}
+            />
+          </DashboardInternalContext.Provider>
         </DashboardContext.Provider>
       );
 
@@ -104,7 +112,7 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should disable filter bar when forceHideFilterBar is true', async () => {
-    const { api } = buildMockDashboardApi();
+    const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -112,15 +120,17 @@ describe('Internal dashboard top nav', () => {
 
     render(
       <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceHideFilterBar: true,
-            forceShowDatePicker: false,
-            forceShowQueryInput: false,
-            forceShowTopNavMenu: false,
-          }}
-        />
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceHideFilterBar: true,
+              forceShowDatePicker: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
 
@@ -137,7 +147,7 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should enable global time range date picker when forceShowDatePicker is true', async () => {
-    const { api } = buildMockDashboardApi();
+    const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -145,15 +155,17 @@ describe('Internal dashboard top nav', () => {
 
     render(
       <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceShowDatePicker: true,
-            forceHideFilterBar: false,
-            forceShowQueryInput: false,
-            forceShowTopNavMenu: false,
-          }}
-        />
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
 
@@ -170,7 +182,7 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should enable query search bar when forceShowQueryInput is true', async () => {
-    const { api } = buildMockDashboardApi();
+    const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -178,15 +190,17 @@ describe('Internal dashboard top nav', () => {
 
     render(
       <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceShowDatePicker: false,
-            forceHideFilterBar: false,
-            forceShowQueryInput: true,
-            forceShowTopNavMenu: false,
-          }}
-        />
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: false,
+              forceHideFilterBar: false,
+              forceShowQueryInput: true,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
 
@@ -203,7 +217,7 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should enable top nav when forceShowTopNavMenu is true', async () => {
-    const { api } = buildMockDashboardApi();
+    const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -211,15 +225,17 @@ describe('Internal dashboard top nav', () => {
 
     render(
       <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceShowDatePicker: false,
-            forceShowTopNavMenu: true,
-            forceShowQueryInput: false,
-            forceHideFilterBar: false,
-          }}
-        />
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: false,
+              forceShowTopNavMenu: true,
+              forceShowQueryInput: false,
+              forceHideFilterBar: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
 
