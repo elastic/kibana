@@ -10,11 +10,15 @@ import { ROUTES } from '../../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
-type HttpResponse = Record<string, any> | any[];
+type HttpResponse = Record<string, unknown> | unknown[];
 type HttpMethod = 'GET' | 'PUT' | 'POST';
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
+  response?: {
+    data?: unknown;
+  };
+  body?: unknown;
 }
 
 // Register helpers to mock HTTP Requests
@@ -64,10 +68,10 @@ const registerHttpRequestMockHelpers = (
   ) => mockResponse('GET', `${API_ROOT}/watch/${watchId}/history`, response, error);
 
   const setLoadWatchHistoryItemResponse = (
-    watchId: string,
+    historyItemId: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_ROOT}/watch/history/${watchId}`, response, error);
+  ) => mockResponse('GET', `${API_ROOT}/history/${historyItemId}`, response, error);
 
   const setDeleteWatchResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_ROOT}/watches/delete`, response, error);
@@ -89,6 +93,9 @@ const registerHttpRequestMockHelpers = (
 
   const setLoadWatchVisualizeResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_ROOT}/watch/visualize`, response, error);
+
+  const setLoadIndexPatternsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_ROOT}/indices/index_patterns`, response, error);
 
   const setDeactivateWatchResponse = (
     watchId: string,
@@ -127,6 +134,7 @@ const registerHttpRequestMockHelpers = (
     setLoadEsFieldsResponse,
     setLoadSettingsResponse,
     setLoadWatchVisualizeResponse,
+    setLoadIndexPatternsResponse,
     setDeactivateWatchResponse,
     setActivateWatchResponse,
     setAcknowledgeWatchResponse,

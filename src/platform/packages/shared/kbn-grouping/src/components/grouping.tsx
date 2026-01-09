@@ -37,6 +37,7 @@ import type {
   GroupPanelRenderer,
   GetGroupStats,
   GetAdditionalActionButtons,
+  GroupChildComponentRenderer,
 } from './types';
 import type { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
@@ -57,7 +58,7 @@ export interface GroupingProps<T> {
   onChangeGroupsItemsPerPage?: (size: number) => void;
   onChangeGroupsPage?: (index: number) => void;
   onGroupToggle?: OnGroupToggle;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
   takeActionItems?: (
@@ -153,7 +154,7 @@ const GroupingComponent = <T,>({
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
-            <GroupPanel
+            <GroupPanel<T>
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
               onGroupClose={onGroupClose}

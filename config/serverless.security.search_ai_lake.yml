@@ -25,6 +25,10 @@ xpack.features.overrides:
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
   securitySolutionSiemMigrations.hidden: true
+  ### Agent Builder feature is available in this tier; move it from Analytics category to Security.
+  agentBuilder:
+    category: 'security'
+    order: 1101
 
   ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
   siemV5:

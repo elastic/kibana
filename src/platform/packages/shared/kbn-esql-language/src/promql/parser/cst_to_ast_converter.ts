@@ -596,7 +596,8 @@ export class PromQLCstToAstConverter {
       return this.fromStringToken(token.symbol);
     }
 
-    return PromQLBuilder.expression.literal.string(ctx.getText(), '', this.getParserFields(ctx));
+    const text = ctx.getText();
+    return PromQLBuilder.expression.literal.string('', text, this.getParserFields(ctx));
   }
 
   private fromStringToken(token: antlr.Token): ast.PromQLStringLiteral {
@@ -604,8 +605,8 @@ export class PromQLCstToAstConverter {
     const valueUnquoted = this.unquoteString(text);
 
     return PromQLBuilder.expression.literal.string(
-      text,
       valueUnquoted,
+      text,
       this.createParserFieldsFromToken(token)
     );
   }

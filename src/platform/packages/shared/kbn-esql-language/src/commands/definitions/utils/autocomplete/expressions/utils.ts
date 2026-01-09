@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
+import type { ESQLFunction } from '../../../../../types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { FunctionParameterContext } from './types';
 import type { ICommandContext } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type { Signature } from '../../../types';
-import { Walker } from '../../../../../ast';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
@@ -95,7 +94,6 @@ export function buildExpressionFunctionParameterContext(
 
   return {
     paramDefinitions: analyzer.getCompatibleParamDefs(),
-    functionsToIgnore: [fn.name], // Basic recursion prevention
     hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
     functionDefinition: fnDefinition,
     firstArgumentType: analyzer.getFirstArgumentType(),
@@ -103,27 +101,4 @@ export function buildExpressionFunctionParameterContext(
     currentParameterIndex: analyzer.getCurrentParameterIndex(),
     validSignatures: analyzer.getValidSignatures(),
   };
-}
-
-/**
- * Finds the rightmost non-variadic operator in an expression tree.
- * Useful for locating the most specific node near the cursor.
- */
-export function getRightmostNonVariadicOperator(root: ESQLSingleAstItem): ESQLSingleAstItem {
-  if (root?.type !== 'function') {
-    return root;
-  }
-
-  let rightmostFn = root;
-  const walker = new Walker({
-    visitFunction: (fn) => {
-      if (fn.subtype !== 'variadic-call' && fn.location.min > rightmostFn.location.min) {
-        rightmostFn = fn;
-      }
-    },
-  });
-
-  walker.walkFunction(root);
-
-  return rightmostFn;
 }
