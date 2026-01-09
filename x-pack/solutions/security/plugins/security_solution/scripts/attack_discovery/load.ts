@@ -214,11 +214,13 @@ const processFile = async ({
   file,
   indexType,
   log,
+  limit,
 }: {
   esClient: Client;
   file: string;
   indexType: string;
   log: ToolingLog;
+  limit?: number;
 }) => {
   const epNum = path.basename(file).match(/ep(\d+)/)?.[1];
 
@@ -235,7 +237,13 @@ const processFile = async ({
 
   log.info(`Processing and indexing file: ${file} ...`);
 
-  const fileData = (await readAndDecompress({ filePath: file, log }))?.split('\n') ?? [];
+  let fileData = (await readAndDecompress({ filePath: file, log }))?.split('\n') ?? [];
+  
+  // Apply limit if specified
+  if (limit !== undefined && limit > 0) {
+    fileData = fileData.filter((item) => item.length > 0).slice(0, limit);
+    log.info(`Limiting to first ${limit} items from file`);
+  }
 
   try {
     const response = await esClient.bulk<string>({
@@ -250,7 +258,7 @@ const processFile = async ({
       ],
     });
     if (!response.errors) {
-      log.info('Success.');
+      log.info(`Success. Indexed ${fileData.length} items.`);
     } else {
       log.info(`Failed with errors.`);
     }
@@ -264,10 +272,12 @@ const processFilesForEpisode = async ({
   esClient,
   epNum,
   log,
+  limit,
 }: {
   esClient: Client;
   epNum: string;
   log: ToolingLog;
+  limit?: number;
 }) => {
   const dataFiles = fs
     .readdirSync(DIRECTORY_PATH)
@@ -277,7 +287,7 @@ const processFilesForEpisode = async ({
     .filter((file) => file.includes(`ep${epNum}alerts.ndjson.gz`));
 
   for (const file of dataFiles) {
-    await processFile({ esClient, file: path.join(DIRECTORY_PATH, file), indexType: 'data', log });
+    await processFile({ esClient, file: path.join(DIRECTORY_PATH, file), indexType: 'data', log, limit });
   }
 
   for (const file of alertFiles) {
@@ -286,6 +296,7 @@ const processFilesForEpisode = async ({
       file: path.join(DIRECTORY_PATH, file),
       indexType: 'alerts',
       log,
+      limit,
     });
   }
 };
@@ -345,17 +356,29 @@ export const loadAttackDiscoveryData = async ({
   kbnClient,
   esClient,
   log,
+  episodes,
+  limit,
 }: {
   kbnClient: KbnClient;
   esClient: Client;
   log: ToolingLog;
+  episodes?: string[];
+  limit?: number;
 }) => {
   await checkRuleExistsAndStatus({ kbnClient, log });
   await checkDeleteIndices({ esClient, log });
   await createPipeline({ esClient, log });
 
-  for (const epNum of ['1', '2']) {
-    await processFilesForEpisode({ esClient, epNum, log });
+  const episodesToLoad = episodes || ['1', '2'];
+  
+  if (limit !== undefined && limit > 0) {
+    log.info(`Limiting to ${limit} items per file`);
+  }
+  
+  log.info(`Loading episodes: ${episodesToLoad.join(', ')}`);
+
+  for (const epNum of episodesToLoad) {
+    await processFilesForEpisode({ esClient, epNum, log, limit });
   }
 
   return null;

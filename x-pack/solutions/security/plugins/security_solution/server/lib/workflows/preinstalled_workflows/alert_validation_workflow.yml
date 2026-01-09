@@ -8,15 +8,21 @@ tags:
 triggers:
   - type: alert
 consts:
-  workflow_version: "v0.0.1"
-  name: "security.alert.validation"
+  workflow_version: "v0.0.1" #Workflow version
+  auto_close_enabled: true #Automatically close alerts exceeding FP threshold (default: false)
+  auto_close_score_min_threshold: 0.1 #Minimum score for auto-close (0-100)
+  auto_close_score_max_threshold: 0.39 #Maximum score for auto-close (0-100)
+  auto_close_confidence_min_threshold: 0.85 #Minimum confidence for auto-close (0-1)
+  auto_close_confidence_max_threshold: 1.0 #Maximum confidence for auto-close (0-1)
+  closed_tag_suffix: "closed-by-agent" #Suffix for auto-closed false positives tag
 steps:
-- name: set_workflow_variables
+- name: set_workflow_variabless
   type: data.set
   with:
-    normalized_name: "{{ consts.name | downcase | replace: ' ', '_' }}"
+    running_note: false
+    normalized_name: "{{ workflow.name | downcase | replace: ' ', '_' }}"
     normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
-    tag_prefix: "workflow.{{ consts.name | downcase | replace: ' ', '_' }}"
+    tag_prefix: "workflow.{{ workflow.name | downcase | replace: ' ', '_' }}"
 - name: set_workflow_tags
   type: data.set
   with:
@@ -44,6 +50,26 @@ steps:
           with:
             message: "Alert {{ variables.alert_id }} has already been validated. Please remove the \"workflow.security.alert.validation\" tag to re-run."
       else:
+        - name: add_execution_note_to_alert
+          type: kibana.request
+          with:
+            method: PATCH
+            path: /api/note
+            body:
+              note:
+                eventId: '{{ variables.alert_id }}'
+                note: | 
+                  ⏳ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                  ---
+                timelineId: ''
+            headers:
+              kbn-xsrf: string
+              Content-Type: application/json
+        - name: set_note_id
+          type: data.set
+          with:
+            note_id: "{{ steps.add_execution_note_to_alert.output.note.noteId }}"
         - name: onechat_runAgent_step
           type: agentBuilder.runAgent
           agent_id: "elastic-ai-agent"
@@ -257,16 +283,44 @@ steps:
                   "reasoning_records"
                 ]
               }
+        - name: check_if_output_exists
+          type: if
+          condition: "not steps.onechat_runAgent_step.output.verdict:*"
+          steps:
+            - name: add_no_data_note_to_alert
+              type: kibana.request
+              with:
+                method: PATCH
+                path: /api/note
+                body:
+                  noteId: "{{variables.note_id}}"
+                  note:
+                    eventId: '{{ variables.alert_id }}'
+                    timelineId: ''
+                    note: | 
+                      ❌ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
 
-        - name: add_note_to_alert
+                      ---
+                      Error: No verdict returned.
+            - name: fail_workflow
+              type: http
+              with:
+                method: GET
+                url: "---trigger-error---" 
+        - name: add_verdict_note_to_alert
           type: kibana.request
           with:
             method: PATCH
             path: /api/note
             body:
+              noteId: "{{variables.note_id}}"
               note:
                 eventId: '{{ variables.alert_id }}'
-                note: | ## Automated Alert Analysis
+                note: | 
+                  ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                  ---
+                  ## Automated Alert Analysis
                   ### Summary
                   {{ steps.onechat_runAgent_step.output.summary }}
 
@@ -313,7 +367,7 @@ steps:
           condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
           steps:
           # Seperately remove tags to avoid adding tags that are being removed
-          - name: kibana_RemoveAlertTags_step
+          - name: remove_workflow_tags
             type: kibana.SetAlertTags
             with:
               ids: 
@@ -323,7 +377,7 @@ steps:
                 tags_to_add: []
                 
         # Add new tags from this
-        - name: kibana_AddAlertTags_step
+        - name: add_result_tags
           type: kibana.SetAlertTags
           with:
             ids: 
@@ -331,6 +385,25 @@ steps:
             tags: 
               tags_to_remove: []
               tags_to_add: "${{ variables.tags_to_add }}"
-
-
-
+        # Autoclose
+        - name: check_auto_close_conditions
+          type: if
+          condition: "consts.auto_close_enabled: true and steps.onechat_runAgent_step.output.verdict: \"Benign\" and steps.onechat_runAgent_step.output.calculated_score >= {{ consts.auto_close_score_min_threshold }} and steps.onechat_runAgent_step.output.calculated_score <= {{ consts.auto_close_score_max_threshold }} and steps.onechat_runAgent_step.output.confidence_score >= {{ consts.auto_close_confidence_min_threshold }} and steps.onechat_runAgent_step.output.confidence_score <= {{ consts.auto_close_confidence_max_threshold }}"          
+          steps:
+            - name: set_close_tags
+              type: kibana.SetAlertTags
+              with:
+                ids: 
+                - '{{ variables.alert_id }}'
+                tags: 
+                  tags_to_remove: []
+                  tags_to_add:
+                    - "{{variables.tag_prefix}}.{{consts.closed_tag_suffix}}"
+            - name: close_alert_as_false_positive
+              type: kibana.SetAlertsStatus
+              with:
+                status: 'closed'
+                signal_ids:
+                  - '{{ variables.alert_id }}'
+                reason: 'false_positive'
+                        

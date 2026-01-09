@@ -36,14 +36,22 @@ ${HORIZONTAL_LINE}
 `);
       log.info(`Loading data to: ${kbnClient.resolveUrl('')}`);
 
-      await loadAttackDiscoveryData({ kbnClient, esClient, log });
+      // Parse episodes flag (comma-separated list)
+      const episodesFlag = cliContext.flags.episodes as string | undefined;
+      const episodes = episodesFlag ? episodesFlag.split(',').map((ep: string) => ep.trim()) : undefined;
+
+      // Parse limit flag
+      const limitFlag = cliContext.flags.limit as string | undefined;
+      const limit = limitFlag ? parseInt(limitFlag, 10) : undefined;
+
+      await loadAttackDiscoveryData({ kbnClient, esClient, log, episodes, limit });
     },
 
     // Options
     {
       description: `Loads data into a environment for testing/development`,
       flags: {
-        string: ['kibanaUrl', 'elasticsearchUrl', 'username', 'password'],
+        string: ['kibanaUrl', 'elasticsearchUrl', 'username', 'password', 'episodes', 'limit'],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticsearchUrl: 'http://127.0.0.1:9200',
@@ -57,6 +65,10 @@ ${HORIZONTAL_LINE}
         --password                      User name Password (Default: changeme)
         --kibanaUrl                     The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticsearchUrl              The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --episodes                      Comma-separated list of episode numbers to load (e.g., "1" or "1,2")
+                                        (Default: "1,2" - loads episodes 1 and 2)
+        --limit                         Maximum number of alerts/data items to load per file
+                                        (Default: no limit - loads all items)
       `,
       },
     }
