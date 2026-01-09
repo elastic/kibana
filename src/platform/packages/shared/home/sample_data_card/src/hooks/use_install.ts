@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { useServices } from '../services';
+import { pollForInstallation } from './poll_sample_data_status';
 
 /**
  * Parameters for the `useInstall` React hook.
@@ -23,8 +24,11 @@ export type Params = Pick<SampleDataSet, 'id' | 'defaultIndex' | 'name'> & {
 
 /**
  * A React hook that allows a component to install a sample data set, handling success and
- * failure in the Kibana UI.  It also provides a boolean that indicates if the data set is
+ * failure in the Kibana UI. It also provides a boolean that indicates if the data set is
  * in the process of being installed.
+ *
+ * After installation, this hook polls the status endpoint until the data is confirmed
+ * as installed
  */
 export const useInstall = ({
   id,
@@ -32,13 +36,24 @@ export const useInstall = ({
   name,
   onInstall,
 }: Params): [() => void, boolean] => {
-  const { installSampleDataSet, notifyError, notifySuccess } = useServices();
+  const { installSampleDataSet, fetchSampleDataSets, notifyError, notifySuccess } = useServices();
   const [isInstalling, setIsInstalling] = React.useState(false);
 
   const install = useCallback(async () => {
     try {
       setIsInstalling(true);
+
+      // Call the install API (bulk insert without refresh)
       await installSampleDataSet(id, defaultIndex);
+
+      // Poll until ES index is refreshed and status shows installed
+      await pollForInstallation(id, fetchSampleDataSets, {
+        maxAttempts: 20,
+        initialDelayMs: 1000,
+        minTimeout: 1000,
+        factor: 1.5,
+      });
+
       setIsInstalling(false);
 
       notifySuccess({
@@ -48,6 +63,8 @@ export const useInstall = ({
         }),
         ['data-test-subj']: 'sampleDataSetInstallToast',
       });
+
+      // Call onInstall callback when installation is confirmed
       onInstall(id);
     } catch (e) {
       setIsInstalling(false);
@@ -59,7 +76,16 @@ export const useInstall = ({
         text: `${e.message}`,
       });
     }
-  }, [installSampleDataSet, notifyError, notifySuccess, id, defaultIndex, name, onInstall]);
+  }, [
+    installSampleDataSet,
+    fetchSampleDataSets,
+    notifyError,
+    notifySuccess,
+    id,
+    defaultIndex,
+    name,
+    onInstall,
+  ]);
 
   return [install, isInstalling];
 };
