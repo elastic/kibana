@@ -2527,6 +2527,7 @@ module.exports = {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
