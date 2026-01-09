@@ -8,7 +8,6 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { Streams } from '@kbn/streams-schema';
 import { isRootStreamDefinition } from '@kbn/streams-schema';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 
 import { RootStreamEmptyPrompt } from './empty_prompts';
 
@@ -27,8 +26,6 @@ export function StreamDetailEnrichment({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentProps) {
-  const { onPageReady } = usePerformanceContext();
-
   const isRootStream = isRootStreamDefinition(definition.stream);
 
   if (isRootStream) {
