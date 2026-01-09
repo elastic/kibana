@@ -10,7 +10,6 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 
-import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
@@ -43,15 +42,9 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
   // https://github.com/elastic/kibana/issues/247850
   const supportsCellActions = false;
 
-  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
-  //  https://github.com/elastic/kibana/issues/218731
-  //  For the EASE we need to hide cell actions and all preview links that could open non-EASE flyouts
   const disabledActions = useMemo(
-    () =>
-      !supportsCellActions ||
-      showAnonymized ||
-      Boolean(capabilities[SECURITY_FEATURE_ID].configurations),
-    [capabilities, showAnonymized, supportsCellActions]
+    () => !supportsCellActions || showAnonymized,
+    [showAnonymized, supportsCellActions]
   );
 
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => attack, [attack]);
