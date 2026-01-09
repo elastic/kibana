@@ -14,7 +14,8 @@ const START_DATE = 'now-15m';
 const END_DATE = 'now';
 const RULE_NAME = 'Error count threshold';
 
-test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/247467
+test.describe.skip('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
