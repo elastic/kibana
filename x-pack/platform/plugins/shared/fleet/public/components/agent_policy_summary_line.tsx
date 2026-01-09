@@ -37,6 +37,7 @@ export const AgentPolicySummaryLine = memo<{
 
   const revision = agent ? agent.policy_revision : policy.revision;
   const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
+  const versionSpecificPolicy = agent?.policy_id?.split('#')[1];
 
   return (
     <EuiFlexGroup gutterSize="m" css={MIN_WIDTH} alignItems="center">
@@ -131,6 +132,26 @@ export const AgentPolicySummaryLine = memo<{
                     id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
                     defaultMessage="Outdated policy"
                   />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {versionSpecificPolicy && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyWarning"
+                defaultMessage="Version specific policy"
+              />
+            }
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiText color="subdued" size="xs">
+                  v{versionSpecificPolicy}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
