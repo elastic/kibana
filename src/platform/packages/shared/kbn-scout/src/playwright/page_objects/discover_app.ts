@@ -36,7 +36,7 @@ export class DiscoverApp {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
-    await this.waitUntilFieldlistHasCountOfFields();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
@@ -58,7 +58,7 @@ export class DiscoverApp {
     await this.page.waitForLoadingIndicatorHidden();
   }
 
-  async waitUntilFieldlistHasCountOfFields() {
+  async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
       state: 'hidden',
     });
