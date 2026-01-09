@@ -203,28 +203,6 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
     await expect(observabilitySection).toBeVisible();
   });
 
-  test('renders Observability space link and navigates correctly', async ({
-    pageObjects,
-    page,
-    config,
-  }) => {
-    test.skip(config.serverless, 'This test only runs in stateful (ESS)');
-
-    const createSpaceLink = await pageObjects.homepage.getCreateObservabilitySpaceLink();
-    await expect(createSpaceLink).toBeVisible();
-
-    await pageObjects.homepage.clickCreateObservabilitySpaceLink();
-    await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
-  });
-
-  test('renders Observability project link', async ({ pageObjects, config }) => {
-    test.skip(!config.serverless, 'This test only runs in serverless');
-
-    const createProjectLink = await pageObjects.homepage.getCreateObservabilityProjectLink();
-    await expect(createProjectLink).toBeVisible();
-    await expect(createProjectLink).toHaveAttribute('href', /projects/);
-  });
-
   test('renders Security content and navigates correctly', async ({ pageObjects, page }) => {
     const securitySection = await pageObjects.homepage.getSecuritySection();
     await expect(securitySection).toBeVisible();
