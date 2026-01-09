@@ -337,7 +337,7 @@ For the Elastic Observability 9.1.10 release information, refer to [Elastic Obse
 For the Elastic Security 9.1.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Fixes createAuditEvents always returning failure as the outcome [#247152]({{kib-pull}}247152).
+* Fixes `createAuditEvents` always returning failure as the outcome [#247152]({{kib-pull}}247152).
 
 **Kibana security**:
 * Adds case sensitivity to the index privileges fields on the **Edit roles** page [#246069]({{kib-pull}}246069).
