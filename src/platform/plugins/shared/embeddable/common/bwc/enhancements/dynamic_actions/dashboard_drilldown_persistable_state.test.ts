@@ -33,7 +33,7 @@ test('should extract and injected dashboard reference', () => {
     Array [
       Object {
         "id": "dashboardId_1",
-        "name": "drilldown:test_id:event_id:dashboardId",
+        "name": "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:event_id:dashboardId",
         "type": "dashboard",
       },
     ]

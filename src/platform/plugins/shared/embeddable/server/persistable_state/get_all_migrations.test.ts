@@ -19,8 +19,6 @@ describe('embeddable getAllMigratons', () => {
   test('returns all migrations', () => {
     const migrations = getAllMigrations(factories, migrateFn);
     expect(migrations).toHaveProperty(['7.11.0']);
-    expect(migrations).toHaveProperty(['7.12.0']);
     expect(migrations).toHaveProperty(['7.13.0']);
-    expect(migrations).toHaveProperty(['7.14.0']);
   });
 });

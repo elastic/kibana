@@ -13,8 +13,8 @@ import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plu
 
 describe('getTransformIn', () => {
   const transformEnhancementsInMock = jest.fn().mockReturnValue({
-    enhancementsState: { dynamiceActions: 'transformedInValue' },
-    enhancementsReferences: [
+    state: { dynamiceActions: 'transformedInValue' },
+    references: [
       {
         id: '5678',
         name: 'someRef',
