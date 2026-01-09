@@ -8,13 +8,17 @@
  */
 
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import { euiOverflowScroll, euiShadow } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { EmotionFn } from '../types';
 
-const root: EmotionFn = (useEuiTheme) =>
-  css`
+const root = (useEuiTheme: UseEuiTheme, chromeStyle: ChromeStyle = 'classic') => {
+  const isProjectStyle = chromeStyle === 'project';
+
+  return css`
     grid-area: application;
 
     height: calc(100% - ${layoutVar('application.marginBottom')});
@@ -28,10 +32,20 @@ const root: EmotionFn = (useEuiTheme) =>
     display: flex;
     flex-direction: column;
 
-    background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
-    border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
-    border: ${getHighContrastBorder(useEuiTheme)};
-    ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+    // Only apply distinguished background styling for "project" chrome style
+    ${isProjectStyle &&
+    css`
+      background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
+      border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
+      border: ${getHighContrastBorder(useEuiTheme)};
+      ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+    `}
+    ${!isProjectStyle &&
+    css`
+      background-color: transparent;
+      border-radius: 0;
+      border: none;
+    `}
 
     &:focus-visible {
       border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};
@@ -50,6 +64,7 @@ const root: EmotionFn = (useEuiTheme) =>
       }
     }
   `;
+};
 
 const content: EmotionFn = () => css`
   display: flex;
