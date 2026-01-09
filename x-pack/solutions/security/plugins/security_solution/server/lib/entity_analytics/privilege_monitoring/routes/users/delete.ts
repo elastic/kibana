@@ -21,6 +21,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -42,7 +43,8 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -64,6 +66,8 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: error.message,
           });
         }
-      }
+      },
+        'platinum'
+      )
     );
 };

@@ -20,6 +20,7 @@ import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setti
 import { createEngineStatusService } from '../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const scheduleNowMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -41,8 +42,8 @@ export const scheduleNowMonitoringEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {},
       },
-
-      async (
+      withMinimumLicense(
+        async (
         context,
         request,
         response
@@ -80,6 +81,8 @@ export const scheduleNowMonitoringEngineRoute = (
             body: error.message,
           });
         }
-      }
+      },
+        'platinum'
+      )
     );
 };

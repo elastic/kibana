@@ -21,6 +21,7 @@ import { createInitialisationService } from '../engine/initialisation_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const initPrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -42,7 +43,7 @@ export const initPrivilegeMonitoringEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {},
       },
-
+      withMinimumLicense(
       async (
         context,
         request,
@@ -81,6 +82,8 @@ export const initPrivilegeMonitoringEngineRoute = (
             body: error.message,
           });
         }
-      }
+      },
+        'platinum'
+      )
     );
 };

@@ -18,6 +18,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../engine/status_service';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -44,7 +45,7 @@ export const disablePrivilegeMonitoringEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {},
       },
-
+      withMinimumLicense(
       async (
         context,
         request,
@@ -73,5 +74,5 @@ export const disablePrivilegeMonitoringEngineRoute = (
           });
         }
       }
-    );
+    ));
 };

@@ -26,6 +26,7 @@ import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const createMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -50,6 +51,7 @@ export const createMonitoringEntitySourceRoute = (
           },
         },
       },
+      withMinimumLicense(
       async (context, request, response): Promise<IKibanaResponse<CreateEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
@@ -90,6 +92,6 @@ export const createMonitoringEntitySourceRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

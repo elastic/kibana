@@ -22,6 +22,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -43,6 +44,7 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
           },
         },
       },
+      withMinimumLicense(
       async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
@@ -55,16 +57,18 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
           const crudService = createPrivilegedUsersCrudService(dataClient);
 
-          const body = await crudService.list(request.query.kql);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error listing users: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            const body = await crudService.list(request.query.kql);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error listing users: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

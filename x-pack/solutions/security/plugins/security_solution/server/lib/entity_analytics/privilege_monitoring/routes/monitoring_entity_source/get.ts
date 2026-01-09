@@ -22,6 +22,7 @@ import {
   GetEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const getMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -47,8 +48,9 @@ export const getMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
         try {
           await assertAdvancedSettingsEnabled(
@@ -67,6 +69,6 @@ export const getMonitoringEntitySourceRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

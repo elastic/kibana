@@ -22,6 +22,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -44,7 +45,7 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -67,6 +68,6 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

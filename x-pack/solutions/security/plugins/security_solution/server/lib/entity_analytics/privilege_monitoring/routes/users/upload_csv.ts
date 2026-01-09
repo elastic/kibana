@@ -26,6 +26,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCsvService } from '../../users/csv_upload';
 import { checkAndInitPrivilegeMonitoringResources } from '../../check_and_init_privmon_resources';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -60,7 +61,8 @@ export const uploadUsersCSVRoute = (
           },
         },
       },
-      async (
+      withMinimumLicense(
+        async (
         context,
         request,
         response
@@ -96,6 +98,8 @@ export const uploadUsersCSVRoute = (
             body: error.message,
           });
         }
-      }
+      },
+        'platinum'
+      )
     );
 };
