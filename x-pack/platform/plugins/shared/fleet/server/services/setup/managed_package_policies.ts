@@ -31,7 +31,6 @@ export interface UpgradeManagedPackagePoliciesResult {
 }
 
 const TASK_TYPE = 'fleet:setup:upgrade_managed_package_policies';
-const DEFAULT_BATCH_SIZE = 50;
 
 export function registerUpgradeManagedPackagePoliciesTask(
   taskManagerSetup: TaskManagerSetupContract
@@ -145,64 +144,28 @@ export const upgradeManagedPackagePolicies = async (
     return [];
   }
 
-  const config = appContextService.getConfig();
-  const batchSize =
-    config?.startupOptimization?.packagePolicyUpgradeBatchSize ?? DEFAULT_BATCH_SIZE;
-  let batch: PackagePolicy[] = [];
-  let totalProcessed = 0;
-  let batchNumber = 0;
-
   const packagePoliciesFinder = await getPackagePoliciesNotMatchingVersion(
     soClient,
     installedPackage.name,
     installedPackage.version
   );
 
+  let upgradedCount = 0;
   for await (const packagePolicies of packagePoliciesFinder) {
     for (const packagePolicy of packagePolicies) {
       if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-        batch.push(packagePolicy);
-
-        if (batch.length >= batchSize) {
-          batchNumber++;
-          logger.debug(
-            `Processing package policy upgrade batch ${batchNumber} (${batch.length} policies)`
-          );
-
-          await processBatch(batch, results, soClient, esClient, installedPackage);
-          totalProcessed += batch.length;
-
-          batch = [];
-        }
+        await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
+        upgradedCount++;
       }
     }
   }
 
-  // Process remaining policies in the last batch
-  if (batch.length > 0) {
-    batchNumber++;
-    logger.debug(
-      `Processing final package policy upgrade batch ${batchNumber} (${batch.length} policies)`
-    );
-    await processBatch(batch, results, soClient, esClient, installedPackage);
-    totalProcessed += batch.length;
+  if (upgradedCount > 0) {
+    logger.info(`Completed upgrading ${upgradedCount} package policies for ${pkgName}`);
   }
 
-  logger.info(`Completed upgrading ${totalProcessed} package policies for ${pkgName}`);
   return results;
 };
-
-async function processBatch(
-  batch: PackagePolicy[],
-  results: UpgradeManagedPackagePoliciesResult[],
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  installedPackage: Installation
-) {
-  for (const packagePolicy of batch) {
-    await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
-  }
-}
 
 async function getPackagePoliciesNotMatchingVersion(
   soClient: SavedObjectsClientContract,

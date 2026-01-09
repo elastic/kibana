@@ -71,7 +71,6 @@ export interface FleetConfigType {
   startupOptimization?: {
     deferPackageUpgrade?: boolean;
     maxConcurrentPackageOperations?: number;
-    skipGlobalAssetPackageReinstall?: boolean;
     packagePolicyUpgradeBatchSize?: number;
   };
   developer?: {

@@ -250,8 +250,6 @@ export const config: PluginConfigDescriptor = {
           deferPackageUpgrade: schema.boolean({ defaultValue: false }),
           /** Maximum packages to process concurrently during startup */
           maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
-          /** Skip package reinstalls when global Fleet assets change */
-          skipGlobalAssetPackageReinstall: schema.boolean({ defaultValue: false }),
           /** Batch size for package policy upgrades */
           packagePolicyUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
         })
