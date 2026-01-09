@@ -78,7 +78,7 @@ steps:
 export function generateGithubSearchPullRequestsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.search_pull_requests'
-description: 'Search for pull requests in a GitHub repository'
+description: 'Search for pull requests by their metadata (titles, descriptions, comments, labels, authors). Use this when you need to find PRs related to a topic, feature, or keyword. Returns pull request objects with PR numbers, titles, and metadata. The query parameter searches across PR titles, descriptions, and comments.'
 enabled: true
 triggers:
   - type: 'manual'
@@ -264,7 +264,7 @@ steps:
 export function generateGithubSearchRepoContentsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.search_repo_contents'
-description: 'Search for code and files in a GitHub repository'
+description: 'Search for code and file content within repository source files. Use this when you need to find specific code patterns, functions, classes, or text within actual source code files. Returns file matches with file paths and URLs. The query parameter searches within the actual code content of files. If you get a request about searching pull requests, use the search_pull_requests workflow instead.'
 enabled: true
 triggers:
   - type: 'manual'
