@@ -64,9 +64,11 @@ export const useResourcesBadge = (
 
     const { root } = Parser.parse(query.esql);
     const fromCommand = root.commands.find((command) => command.name === 'from');
+    const tsCommand = root.commands.find((command) => command.name === 'ts');
 
     const fromStringPosition = fromCommand ? findCommandStringPosition(query.esql, 'from') : undefined;
-    if (!fromStringPosition) {
+    const tsStringPosition = tsCommand ? findCommandStringPosition(query.esql, 'ts') : undefined;
+    if (!fromStringPosition && !tsStringPosition) {
       return;
     }
 
@@ -80,6 +82,23 @@ export const useResourcesBadge = (
             fromStringPosition.min + 1,
             fromStringPosition.endLineNumber,
             fromStringPosition.max
+          ),
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: resourcesFromBadgeClassName,
+          },
+        },
+      );
+    }
+    if (tsStringPosition) {
+      collections.push(
+        {
+          range: new monaco.Range(
+            tsStringPosition.startLineNumber,
+            tsStringPosition.min + 1,
+            tsStringPosition.endLineNumber,
+            tsStringPosition.max
           ),
           options: {
             isWholeLine: false,
@@ -108,10 +127,12 @@ export const useResourcesBadge = (
       const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
       if (!currentWord) return;
       const fromStringPosition = findCommandStringPosition(query.esql, 'from');
+      const tsStringPosition = findCommandStringPosition(query.esql, 'ts');
 
       if (
         currentWord.word === 'FROM' &&
         fromStringPosition &&
+        fromStringPosition.startLineNumber !== -1 &&
         fromStringPosition.startLineNumber === mousePosition.lineNumber &&
         currentWord.startColumn >= fromStringPosition.min &&
         currentWord.endColumn <= fromStringPosition.max
@@ -120,6 +141,27 @@ export const useResourcesBadge = (
         const positionAfterCommand = new monaco.Position(
             fromStringPosition.startLineNumber,
             fromStringPosition.max + 1
+          )
+        editorRef.current?.setPosition(positionAfterCommand);
+        editorRef.current?.revealPosition(positionAfterCommand);
+
+        // Trigger autocomplete suggestions
+        setTimeout(() => {
+          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        }, 0);
+      }
+      if (
+        currentWord.word === 'TS' &&
+        tsStringPosition &&
+        tsStringPosition.startLineNumber !== -1 &&
+        tsStringPosition.startLineNumber === mousePosition.lineNumber &&
+        currentWord.startColumn >= tsStringPosition.min &&
+        currentWord.endColumn <= tsStringPosition.max
+      ) {
+        // Move cursor to position after "TS "
+        const positionAfterCommand = new monaco.Position(
+            tsStringPosition.startLineNumber,
+            tsStringPosition.max + 1
           )
         editorRef.current?.setPosition(positionAfterCommand);
         editorRef.current?.revealPosition(positionAfterCommand);
@@ -140,12 +182,14 @@ export const useResourcesBadge = (
       const currentWord = editorModel.current?.getWordAtPosition(currentPosition);
       if (!currentWord) return;
       const fromStringPosition = findCommandStringPosition(query.esql, 'from');
+      const tsStringPosition = findCommandStringPosition(query.esql, 'ts');
       // Open the popover on arrow down key press
       if (
         e.keyCode === monaco.KeyCode.DownArrow &&
         !resourcesOpenStatusRef.current &&
         currentWord.word === 'FROM' &&
         fromStringPosition &&
+        fromStringPosition.startLineNumber !== -1 &&
         fromStringPosition.startLineNumber === currentPosition.lineNumber &&
         currentWord.startColumn >= fromStringPosition.min &&
         currentWord.endColumn <= fromStringPosition.max
@@ -158,6 +202,30 @@ export const useResourcesBadge = (
         );
         editorRef.current?.setPosition(positionAfterFrom);
         editorRef.current?.revealPosition(positionAfterFrom);
+
+        // Trigger autocomplete suggestions
+        setTimeout(() => {
+          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        }, 0);
+      }
+      if (
+        e.keyCode === monaco.KeyCode.DownArrow &&
+        !resourcesOpenStatusRef.current &&
+        currentWord.word === 'TS' &&
+        tsStringPosition &&
+        tsStringPosition.startLineNumber !== -1 &&
+        tsStringPosition.startLineNumber === currentPosition.lineNumber &&
+        currentWord.startColumn >= tsStringPosition.min &&
+        currentWord.endColumn <= tsStringPosition.max
+      ) {
+        e.preventDefault();
+        // Move cursor to position after "TS "
+        const positionAfterTs = new monaco.Position(
+          tsStringPosition.startLineNumber,
+          tsStringPosition.max + 1
+        );
+        editorRef.current?.setPosition(positionAfterTs);
+        editorRef.current?.revealPosition(positionAfterTs);
 
         // Trigger autocomplete suggestions
         setTimeout(() => {
