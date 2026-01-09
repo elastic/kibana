@@ -733,7 +733,7 @@ describe('AgentlessPoliciesService', () => {
       expect(createSpy).toHaveBeenCalledTimes(1);
 
       // Verify rollback: cloud connector should be deleted
-      expect(deleteSpy).toHaveBeenCalledWith(soClient, 'aws-cloud-connector-123', true);
+      expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'aws-cloud-connector-123', true);
 
       // Verify rollback: agent policy should be deleted
       expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(

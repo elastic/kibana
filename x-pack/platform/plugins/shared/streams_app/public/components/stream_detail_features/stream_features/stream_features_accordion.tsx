@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { StreamExistingFeaturesTable } from './stream_existing_features_table';
@@ -28,7 +28,7 @@ export const StreamFeaturesAccordion = ({
   aiFeatures,
 }: {
   definition: Streams.all.Definition;
-  features: Feature[];
+  features: System[];
   loading: boolean;
   refresh: () => void;
   aiFeatures: AIFeatures | null;
