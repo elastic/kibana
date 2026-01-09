@@ -348,63 +348,6 @@ steps:
 `;
 }
 
-export function generateGithubForkRepoWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.github.fork_repo'
-description: 'Fork a GitHub repository'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: owner
-    type: string
-  - name: repo
-    type: string
-  - name: organization
-    type: string
-    required: false
-steps:
-  - name: fork-repo
-    type: github.forkRepo
-    connector-id: ${stackConnectorId}
-    with:
-      owner: "\${{inputs.owner}}"
-      repo: "\${{inputs.repo}}"
-      organization: "\${{inputs.organization}}"
-`;
-}
-
-export function generateGithubCreateRepositoryWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.github.create_repository'
-description: 'Create a new GitHub repository'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: name
-    type: string
-  - name: description
-    type: string
-    required: false
-  - name: private
-    type: boolean
-    required: false
-  - name: autoInit
-    type: boolean
-    required: false
-steps:
-  - name: create-repository
-    type: github.createRepository
-    connector-id: ${stackConnectorId}
-    with:
-      name: "\${{inputs.name}}"
-      description: "\${{inputs.description}}"
-      private: "\${{inputs.private}}"
-      autoInit: "\${{inputs.autoInit}}"
-`;
-}
-
 export function generateGithubGetPullRequestDiffWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.get_pull_request_diff'

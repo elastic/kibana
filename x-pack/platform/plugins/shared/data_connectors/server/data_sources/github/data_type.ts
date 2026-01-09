@@ -21,8 +21,6 @@ import {
   generateGithubGetIssueCommentsWorkflow,
   generateGithubGetPullRequestCommentsWorkflow,
   generateGithubGetPullRequestFilesWorkflow,
-  generateGithubForkRepoWorkflow,
-  generateGithubCreateRepositoryWorkflow,
   generateGithubGetPullRequestDiffWorkflow,
   generateGithubGetPullRequestReviewsWorkflow,
   generateGithubGetPullRequestStatusWorkflow,
@@ -89,14 +87,6 @@ export const githubDataSource: DataTypeDefinition = {
       },
       {
         content: generateGithubGetPullRequestFilesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubForkRepoWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubCreateRepositoryWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {

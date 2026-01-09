@@ -351,67 +351,6 @@ export const GithubConnector: ConnectorSpec = {
         });
       },
     },
-    forkRepo: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        organization: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          organization?: string;
-        };
-
-        const requestBody = typedInput.organization
-          ? { organization: typedInput.organization }
-          : {};
-
-        const response = await ctx.client.post(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/forks`,
-          requestBody,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    createRepository: {
-      isTool: false,
-      input: z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        private: z.coerce.boolean().optional(),
-        autoInit: z.coerce.boolean().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          name: string;
-          description?: string;
-          private?: boolean;
-          autoInit?: boolean;
-        };
-
-        const requestBody = {
-          name: typedInput.name,
-          ...(typedInput.description !== undefined && { description: typedInput.description }),
-          ...(typedInput.private !== undefined && { private: typedInput.private }),
-          ...(typedInput.autoInit !== undefined && { auto_init: typedInput.autoInit }),
-        };
-
-        const response = await ctx.client.post('https://api.github.com/user/repos', requestBody, {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        });
-        return response.data;
-      },
-    },
     getFileContents: {
       isTool: false,
       input: z.object({
