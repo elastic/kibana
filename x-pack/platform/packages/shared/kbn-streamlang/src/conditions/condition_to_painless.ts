@@ -19,12 +19,48 @@ import { painlessFieldAccessor } from '../../types/utils';
 import { encodeValue } from '../../types/utils';
 import { evaluateDateMath } from './painless_date_math_helpers';
 
-// Utility: get the field name from a filter condition
-function safePainlessField(conditionOrField: FilterCondition | string) {
-  if (typeof conditionOrField === 'string') {
-    return painlessFieldAccessor(conditionOrField);
+// Type for mapping field names to variable names
+type FieldVarMap = Map<string, string>;
+
+// Extract all unique field names from a condition recursively
+function extractFieldNames(condition: Condition, fields: Set<string> = new Set()): Set<string> {
+  if ('field' in condition && typeof condition.field === 'string') {
+    fields.add(condition.field);
   }
-  return painlessFieldAccessor(conditionOrField.field);
+  if ('and' in condition && Array.isArray(condition.and)) {
+    condition.and.forEach((c) => extractFieldNames(c, fields));
+  }
+  if ('or' in condition && Array.isArray(condition.or)) {
+    condition.or.forEach((c) => extractFieldNames(c, fields));
+  }
+  if ('not' in condition && condition.not) {
+    extractFieldNames(condition.not, fields);
+  }
+  return fields;
+}
+
+// Convert a field name to a valid Painless variable name
+function fieldToVarName(field: string): string {
+  // Replace special characters with underscores and prefix with 'val_'
+  return 'val_' + field.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+// Generate variable declaration with single-element List unwrapping
+function generateFieldDeclaration(field: string, varName: string): string {
+  return `def ${varName} = $('${field}', null); if (${varName} instanceof List && ${varName}.size() == 1) { ${varName} = ${varName}[0]; }`;
+}
+
+// Utility: get the field accessor - uses varMap if provided, otherwise inline accessor
+function safePainlessField(conditionOrField: FilterCondition | string, varMap?: FieldVarMap) {
+  const fieldName =
+    typeof conditionOrField === 'string' ? conditionOrField : conditionOrField.field;
+
+  // If we have a varMap and it contains this field, use the variable name
+  if (varMap && varMap.has(fieldName)) {
+    return varMap.get(fieldName)!;
+  }
+
+  return painlessFieldAccessor(fieldName);
 }
 
 function generateRangeComparisonClauses(
@@ -64,8 +100,11 @@ function generateRangeComparisonClauses(
 }
 
 // Convert a shorthand binary filter condition to painless
-function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
-  const safeFieldAccessor = safePainlessField(condition);
+function shorthandBinaryToPainless(
+  condition: ShorthandBinaryFilterCondition,
+  varMap?: FieldVarMap
+) {
+  const safeFieldAccessor = safePainlessField(condition, varMap);
   // Find which operator is present
   const op = BINARY_OPERATORS.find((k) => condition[k] !== undefined);
 
@@ -161,12 +200,12 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
 }
 
 // Convert a shorthand unary filter condition to painless
-function shorthandUnaryToPainless(condition: ShorthandUnaryFilterCondition) {
+function shorthandUnaryToPainless(condition: ShorthandUnaryFilterCondition, varMap?: FieldVarMap) {
   if ('exists' in condition) {
     if (typeof condition.exists === 'boolean') {
       return condition.exists
-        ? `${safePainlessField(condition)} !== null`
-        : `${safePainlessField(condition)} == null`;
+        ? `${safePainlessField(condition, varMap)} !== null`
+        : `${safePainlessField(condition, varMap)} == null`;
     } else {
       throw new Error('Invalid value for exists operator, expected boolean');
     }
@@ -176,27 +215,36 @@ function shorthandUnaryToPainless(condition: ShorthandUnaryFilterCondition) {
 }
 
 // Main recursive conversion to painless
-export function conditionToStatement(condition: Condition, nested = false): string {
+export function conditionToStatement(
+  condition: Condition,
+  nested = false,
+  varMap?: FieldVarMap
+): string {
   if ('field' in condition && typeof condition.field === 'string') {
     // Shorthand unary
     if ('exists' in condition) {
-      return shorthandUnaryToPainless(condition as ShorthandUnaryFilterCondition);
+      return shorthandUnaryToPainless(condition as ShorthandUnaryFilterCondition, varMap);
     }
     // Shorthand binary
-    return `(${safePainlessField(condition)} !== null && ${shorthandBinaryToPainless(
-      condition as ShorthandBinaryFilterCondition
+    return `(${safePainlessField(condition, varMap)} !== null && ${shorthandBinaryToPainless(
+      condition as ShorthandBinaryFilterCondition,
+      varMap
     )})`;
   }
   if ('and' in condition && Array.isArray(condition.and)) {
-    const and = condition.and.map((filter) => conditionToStatement(filter, true)).join(' && ');
+    const and = condition.and
+      .map((filter) => conditionToStatement(filter, true, varMap))
+      .join(' && ');
     return nested ? `(${and})` : and;
   }
   if ('or' in condition && Array.isArray(condition.or)) {
-    const or = condition.or.map((filter) => conditionToStatement(filter, true)).join(' || ');
+    const or = condition.or
+      .map((filter) => conditionToStatement(filter, true, varMap))
+      .join(' || ');
     return nested ? `(${or})` : or;
   }
   if ('not' in condition && condition.not) {
-    return `!(${conditionToStatement(condition.not, true)})`;
+    return `!(${conditionToStatement(condition.not, true, varMap)})`;
   }
   // Always/never conditions (if you have them)
   if ('always' in condition) {
@@ -217,9 +265,27 @@ export function conditionToPainless(condition: Condition): string {
     return `return true`;
   }
 
+  // Extract all field names and create variable mappings
+  const fields = extractFieldNames(condition);
+  const varMap: FieldVarMap = new Map();
+  const declarations: string[] = [];
+
+  for (const field of fields) {
+    const varName = fieldToVarName(field);
+    varMap.set(field, varName);
+    declarations.push(generateFieldDeclaration(field, varName));
+  }
+
+  // declarationsBlock will look like this:
+  // def val_field1 = $('field1', null); if (val_field1 instanceof List && val_field1.size() == 1) { val_field1 = val_field1[0]; }
+  const declarationsBlock = declarations.length > 0 ? declarations.join('\n  ') + '\n  ' : '';
+
   return `
   try {
-  if (${conditionToStatement(condition)}) {
+  
+  ${declarationsBlock}
+  
+  if (${conditionToStatement(condition, false, varMap)}) {
     return true;
   }
   return false;
