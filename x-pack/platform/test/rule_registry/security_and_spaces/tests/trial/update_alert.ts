@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${obsMinReadAlertsAllSpacesAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
-        const res = await supertestWithoutAuth
+        await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
           .set('kbn-xsrf', 'true')
