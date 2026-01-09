@@ -9,7 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { stripUnmappedKeys, throwOnUnmappedKeys } from './scope_tooling';
-import type { DashboardState } from './types';
 
 const mockGetTransforms = jest.fn();
 
@@ -259,24 +258,6 @@ describe('stripUnmappedKeys', () => {
       }
     `);
   });
-
-  it('should drop pinned_panels', () => {
-    const dashboardState = {
-      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
-      title: 'my dashboard',
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped key 'pinned_panels' from dashboard",
-        ],
-      }
-    `);
-  });
 });
 
 describe('throwOnUnmappedKeys', () => {
@@ -359,14 +340,6 @@ describe('throwOnUnmappedKeys', () => {
     const dashboardState = {
       title: 'my dashboard',
       references: [],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains pinned_panels', () => {
-    const dashboardState = {
-      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
-      title: 'my dashboard',
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });

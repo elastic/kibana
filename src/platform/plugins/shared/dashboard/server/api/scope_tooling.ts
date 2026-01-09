@@ -13,11 +13,8 @@ import type { DashboardPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { pinned_panels: controlGroupInput, references, panels, ...rest } = dashboardState;
-  if (controlGroupInput) {
-    // TODO: Don't drop `controlGroupInput`
-    warnings.push(`Dropped unmapped key 'controlGroupInput' from dashboard`);
-  }
+  const { references, panels, ...rest } = dashboardState;
+
   if (references) {
     warnings.push(`Dropped unmapped key 'references' from dashboard`);
   }

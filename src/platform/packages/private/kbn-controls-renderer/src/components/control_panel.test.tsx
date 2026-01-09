@@ -44,7 +44,7 @@ const parentApi = {
   getSerializedStateForChild: jest.fn().mockReturnValue({ type: 'optionsListControl' }),
   viewMode$: new BehaviorSubject('view'),
   layout$: new BehaviorSubject({
-    controls: {
+    pinnedPanels: {
       control1: {
         type: 'optionsListControl',
       },
@@ -102,7 +102,7 @@ describe('render', () => {
 
     test('should use small class + no flex grow', async () => {
       parentApi.layout$.next({
-        controls: {
+        pinnedPanels: {
           control1: {
             type: 'optionsListControl',
             width: 'small',

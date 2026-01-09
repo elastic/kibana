@@ -34,7 +34,7 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
       },
-      controls: {
+      pinnedPanels: {
         control1: {
           grow: true,
           width: 'small',
@@ -130,26 +130,24 @@ describe('serializeLayout', () => {
       ]
     `);
     expect(pinned_panels).toMatchInlineSnapshot(`
-      Object {
-        "controls": Array [
-          Object {
-            "config": Object {
-              "anotherValue": "test",
-            },
-            "type": "someOtherControl",
-            "uid": "control2",
+      Array [
+        Object {
+          "config": Object {
+            "anotherValue": "test",
           },
-          Object {
-            "config": Object {
-              "selection": "some value",
-            },
-            "grow": true,
-            "type": "someControl",
-            "uid": "control1",
-            "width": "small",
+          "type": "someOtherControl",
+          "uid": "control2",
+        },
+        Object {
+          "config": Object {
+            "selection": "some value",
           },
-        ],
-      }
+          "grow": true,
+          "type": "someControl",
+          "uid": "control1",
+          "width": "small",
+        },
+      ]
     `);
     expect(references).toMatchInlineSnapshot(`
       Array [
