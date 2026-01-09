@@ -43,23 +43,15 @@ const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsContainer = EmptyResultsContainer as unknown as jest.Mock;
 
-const defaultProps: Parameters<typeof TableSection>[0] = {
-  assignees: [],
-  pageFilters: [],
-  statusFilter: [],
-  dataView,
-};
-
 describe('<TableSection />', () => {
   const openSchedulesFlyout = jest.fn();
-  const clearPageFilters = jest.fn();
 
-  const defaultProps = {
-    statusFilter: [],
+  const defaultProps: Parameters<typeof TableSection>[0] = {
+    assignees: [],
     pageFilters: [],
+    statusFilter: [],
     dataView,
     openSchedulesFlyout,
-    clearPageFilters,
   };
 
   beforeEach(() => {
@@ -153,10 +145,7 @@ describe('<TableSection />', () => {
     });
 
     expect(mockEmptyResultsContainer).toHaveBeenCalledWith(
-      expect.objectContaining({
-        openSchedulesFlyout,
-        hasFilters: false,
-      }),
+      expect.objectContaining({ openSchedulesFlyout }),
       expect.anything()
     );
   });
@@ -589,23 +578,6 @@ describe('<TableSection />', () => {
       });
 
       expect(getAttackMock).toHaveBeenCalledWith('some-key', groupingBucket);
-    });
-
-    it('should pass clearFilters to EmptyResultsContainer', async () => {
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(mockEmptyResultsContainer).toHaveBeenCalledWith(
-          expect.objectContaining({
-            clearFilters: expect.any(Function),
-          }),
-          expect.anything()
-        );
-      });
     });
   });
 });

@@ -14,65 +14,30 @@ export const LEARN_MORE = i18n.translate(
   }
 );
 
-export const NO_SCHEDULES_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.noSchedulesTitle',
+export const NO_RESULTS_MATCH_YOUR_SEARCH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.emptyResults.noResultsMatchYourSearchTitle',
   {
-    defaultMessage: 'Automate attack discoveries for your alerts',
+    defaultMessage: 'No results match your search criteria',
   }
 );
 
-export const NO_SCHEDULES_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.noSchedulesBody',
+export const HERE_ARE_SOME_THINGS_TO_TRY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.emptyResults.hereAreSomeThingsToTryTitle',
   {
-    defaultMessage: 'Schedule recurring scans to find attacks without manual effort.',
+    defaultMessage: 'Here are some things to try:',
   }
 );
 
-export const NO_SCHEDULES_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.noSchedulesAction',
+export const EXPAND_THE_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.emptyResults.expandTheTimeRangeLabel',
   {
-    defaultMessage: 'Schedule',
+    defaultMessage: 'Expand the time range',
   }
 );
 
-export const RESET_FILTERS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.resetFiltersTitle',
+export const CHECK_FILTERS_CONTROLS_SEARCH_BAR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.emptyResults.checkFiltersControlsSearchBarLabel',
   {
-    defaultMessage: 'No attacks match your search criteria',
-  }
-);
-
-export const RESET_FILTERS_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.resetFiltersBody',
-  {
-    defaultMessage: 'Adjust your filters, change the time range, or',
-  }
-);
-
-export const RESET_FILTERS_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.resetFiltersAction',
-  {
-    defaultMessage: 'Clear all filters',
-  }
-);
-
-export const WITH_SCHEDULES_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.withSchedulesTitle',
-  {
-    defaultMessage: 'No attacks detected for selected time',
-  }
-);
-
-export const WITH_SCHEDULES_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.withSchedulesBody',
-  {
-    defaultMessage: 'Scheduled runs happen automatically.',
-  }
-);
-
-export const WITH_SCHEDULES_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.emptyResults.withSchedulesAction',
-  {
-    defaultMessage: 'View schedules',
+    defaultMessage: 'Check filters, controls, and search bar',
   }
 );

@@ -22,7 +22,6 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
-import type { CanClearSelections } from '@kbn/controls-plugin/public/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -103,14 +102,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const [pageFilters, setPageFilters] = useState<Filter[]>();
   const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
 
-  const clearPageFilters = useCallback(() => {
-    if (pageFilterHandler) {
-      Object.values(pageFilterHandler.children$.getValue()).forEach((controlApi) => {
-        (controlApi as CanClearSelections)?.clearSelections?.();
-      });
-    }
-  }, [pageFilterHandler]);
-
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const isTableLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
@@ -171,7 +162,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           statusFilter={statusFilter}
           pageFilters={pageFilters}
           assignees={assignees}
-          clearPageFilters={clearPageFilters}
           openSchedulesFlyout={openSchedulesFlyout}
         />
 
