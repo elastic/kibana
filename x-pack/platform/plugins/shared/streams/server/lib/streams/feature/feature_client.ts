@@ -21,6 +21,7 @@ import {
   FEATURE_NAME,
   FEATURE_VALUE,
   FEATURE_TAGS,
+  FEATURE_META,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -103,6 +104,15 @@ export class FeatureClient {
       total: featuresResponse.hits.total.value,
     };
   }
+
+  async deleteFeatures(name: string) {
+    const features = await this.getFeatures(name);
+    return await this.clients.storageClient.bulk({
+      operations: features.hits.map((feature) => ({
+        delete: { _id: feature.id },
+      })),
+    });
+  }
 }
 
 function toStorage(name: string, feature: Feature): StoredFeature {
@@ -118,6 +128,7 @@ function toStorage(name: string, feature: Feature): StoredFeature {
     [FEATURE_LAST_SEEN]: feature.last_seen,
     [FEATURE_TAGS]: feature.tags,
     [STREAM_NAME]: name,
+    [FEATURE_META]: feature.meta,
   };
 }
 
@@ -133,6 +144,7 @@ function fromStorage(feature: StoredFeature): Feature {
     status: feature[FEATURE_STATUS],
     last_seen: feature[FEATURE_LAST_SEEN],
     tags: feature[FEATURE_TAGS],
+    meta: feature[FEATURE_META],
   };
 }
 

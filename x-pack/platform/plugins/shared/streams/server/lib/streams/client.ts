@@ -38,6 +38,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -74,6 +75,7 @@ export class StreamsClient {
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       systemClient: SystemClient;
+      featureClient: FeatureClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;

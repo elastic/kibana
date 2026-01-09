@@ -12,11 +12,9 @@ import type { Observable } from 'rxjs';
 import { from, map, catchError } from 'rxjs';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { createServerRoute } from '../../../create_server_route';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import type { IdentifiedFeaturesEvent } from './types';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
@@ -46,31 +44,21 @@ export const upsertFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const {
-      path: { name },
-      body,
-    } = params;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
-    }
-
-    await featureClient.bulk(name, [
+    const stream = await streamsClient.getStream(params.path.name);
+    await featureClient.bulk(stream.name, [
       {
         index: {
           feature: {
-            ...body,
+            ...params.body,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            id: getFeatureId(name, body),
+            id: getFeatureId(stream.name, params.body),
           },
         },
       },
@@ -107,23 +95,18 @@ export const listFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
-
-    const { hits: features } = await featureClient.getFeatures(name, {
+    const stream = await streamsClient.getStream(params.path.name);
+    const { hits: features } = await featureClient.getFeatures(stream.name, {
       type: params.query?.type ? [params.query.type] : [],
       status: params.query?.status ? [params.query.status] : [],
     });
+
     return {
       features,
     };
@@ -174,18 +157,8 @@ export const identifyFeaturesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const {
-      path: { name },
-      query: { from: start, to: end },
-    } = params;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
-    }
-
     const [stream, { featurePromptOverride }] = await Promise.all([
-      streamsClient.getStream(name),
+      streamsClient.getStream(params.path.name),
       new PromptsConfigService({ soClient, logger }).getPrompt(),
     ]);
 
@@ -200,8 +173,8 @@ export const identifyFeaturesRoute = createServerRoute({
 
     return from(
       identifyFeatures({
-        start: start.getTime(),
-        end: end.getTime(),
+        start: params.query.from.getTime(),
+        end: params.query.to.getTime(),
         esClient,
         inferenceClient: boundInferenceClient,
         logger: logger.get('feature_identification'),
@@ -214,11 +187,11 @@ export const identifyFeaturesRoute = createServerRoute({
           ...feature,
           status: 'active' as const,
           last_seen: now,
-          id: getFeatureId(name, feature),
+          id: getFeatureId(stream.name, feature),
         }));
 
         await featureClient.bulk(
-          name,
+          stream.name,
           features.map((feature) => ({ index: { feature } }))
         );
 

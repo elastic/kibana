@@ -20,6 +20,7 @@ import {
   FEATURE_NAME,
   FEATURE_TYPE,
   FEATURE_TAGS,
+  FEATURE_META,
 } from './fields';
 
 export interface StoredFeature {
