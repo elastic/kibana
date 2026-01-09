@@ -257,10 +257,7 @@ async function generateAlertSummary({
     1–2 sentences: What is likely happening and why it matters. If recovered, reduce urgency. If no strong signals, say "Inconclusive" and briefly note why.
 
     **Assessment**
-    Most plausible explanation in prose, or "Inconclusive" if signals do not support a clear cause. Mention which signals support the assessment and their relevance (Direct/Indirect).
-
-    **Related Signals**
-    Brief prose combining the top 3–5 signals. For each, mention the source (change points, exit span errors, errors, log categories, anomalies) and timeframe. Prioritize signals that directly explain the alert.
+    Most plausible explanation in prose, citing the signals that support it (e.g., "downstream metrics show...", "logs indicate..."). Say "Inconclusive" if signals do not support a clear cause.
 
     **Next Steps**
     2–3 numbered actions an SRE can take now.
@@ -268,16 +265,15 @@ async function generateAlertSummary({
     Guardrails:
     - Do not repeat the alert reason verbatim.
     - Only give a non-inconclusive Assessment when supported by on-topic signals; otherwise say "Inconclusive" and don't speculate.
-    - If only one signal supports the assessment, note that corroboration is limited.
-    - Keep it concise (~150–200 words total).
+    - Keep it concise (~100–150 words total).
 
     Signal priority (use what exists, skip what doesn't):
-    1) Change points: sudden shifts in throughput/latency/failure rate
-    2) Exit span errors: failed outgoing calls to downstream services
-    3) Errors: exception patterns with downstream context
-    4) Log categories: error messages and exception patterns
+    1) Downstream dependencies: dependency metrics that may indicate issues
+    2) Change points: sudden shifts in throughput/latency/failure rate
+    3) Log categories: error messages and exception patterns. 
+    4) Errors: exception patterns with downstream context
     5) Anomalies: ML-detected unusual patterns
-    6) Service summary: only if it materially changes interpretation
+    6) Service summary: instance counts, versions, and metadata
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;
