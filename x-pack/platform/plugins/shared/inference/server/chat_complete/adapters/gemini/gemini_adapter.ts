@@ -79,23 +79,23 @@ function toolChoiceToConfig(toolChoice: ToolOptions['toolChoice']): GeminiToolCo
 function toolsToGemini(tools: ToolOptions['tools']): Gemini.Tool[] {
   return tools
     ? [
-      {
-        functionDeclarations: Object.entries(tools ?? {}).map(
-          ([toolName, { description, schema }]) => {
-            return {
-              name: toolName,
-              description,
-              parameters: schema
-                ? toolSchemaToGemini({ schema })
-                : {
-                  type: Gemini.SchemaType.OBJECT,
-                  properties: {},
-                },
-            };
-          }
-        ),
-      },
-    ]
+        {
+          functionDeclarations: Object.entries(tools ?? {}).map(
+            ([toolName, { description, schema }]) => {
+              return {
+                name: toolName,
+                description,
+                parameters: schema
+                  ? toolSchemaToGemini({ schema })
+                  : {
+                      type: Gemini.SchemaType.OBJECT,
+                      properties: {},
+                    },
+              };
+            }
+          ),
+        },
+      ]
     : [];
 }
 
@@ -119,13 +119,13 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           required: def.required as string[],
           properties: def.properties
             ? Object.entries(def.properties).reduce<
-              Record<string, Gemini.FunctionDeclarationSchema>
-            >((properties, [key, prop]) => {
-              properties[key] = convertSchemaType({
-                def: prop,
-              }) as Gemini.FunctionDeclarationSchema;
-              return properties;
-            }, {})
+                Record<string, Gemini.FunctionDeclarationSchema>
+              >((properties, [key, prop]) => {
+                properties[key] = convertSchemaType({
+                  def: prop,
+                }) as Gemini.FunctionDeclarationSchema;
+                return properties;
+              }, {})
             : undefined,
         };
       case 'string':

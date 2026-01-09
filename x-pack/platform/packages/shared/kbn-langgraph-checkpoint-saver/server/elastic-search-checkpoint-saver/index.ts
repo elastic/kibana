@@ -232,12 +232,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-            configurable: {
-              thread_id: threadId,
-              checkpoint_ns: checkpointNs,
-              checkpoint_id: doc.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: threadId,
+                checkpoint_ns: checkpointNs,
+                checkpoint_id: doc.parent_checkpoint_id,
+              },
+            }
           : undefined,
     };
   }
@@ -309,12 +309,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-            configurable: {
-              thread_id: source.thread_id,
-              checkpoint_ns: source.checkpoint_ns,
-              checkpoint_id: source.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: source.thread_id,
+                checkpoint_ns: source.checkpoint_ns,
+                checkpoint_id: source.parent_checkpoint_id,
+              },
+            }
           : undefined,
       };
     }

@@ -332,11 +332,11 @@ export async function updateDefendInsights({
       ...(!eventsContextCount || !insights
         ? {}
         : {
-          generationIntervals: addGenerationInterval(currentInsight.generationIntervals, {
-            durationMs,
-            date: new Date().toISOString(),
+            generationIntervals: addGenerationInterval(currentInsight.generationIntervals, {
+              durationMs,
+              date: new Date().toISOString(),
+            }),
           }),
-        }),
       id: defendInsightId,
       replacements: latestReplacements,
       backingIndex: currentInsight.backingIndex,
