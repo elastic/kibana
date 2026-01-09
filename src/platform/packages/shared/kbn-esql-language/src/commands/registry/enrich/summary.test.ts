@@ -17,14 +17,20 @@ describe('ENRICH > summary', () => {
 
   it('doesnt add new columns when WITH option is specified without assignments', () => {
     const result = summary(synth.cmd`ENRICH policy ON matchfield WITH enrichField`, '');
-    expect(result).toEqual({ newColumns: new Set([]) });
+    expect(result).toEqual({ newColumns: new Set([]), renamedColumnsPairs: new Set([]) });
   });
 
-  it('adds the given names as columns, when WITH with assignment is specified', () => {
+  it('adds the given names as columns and renamed pairs when WITH with assignment is specified', () => {
     const result = summary(
       synth.cmd`ENRICH policy ON matchfield WITH foo = enrichField1, bar = enrichField2`,
       ''
     );
-    expect(result).toEqual({ newColumns: new Set(['foo', 'bar']) });
+    expect(result).toEqual({
+      newColumns: new Set(['foo', 'bar']),
+      renamedColumnsPairs: new Set([
+        ['foo', 'enrichField1'],
+        ['bar', 'enrichField2'],
+      ]),
+    });
   });
 });

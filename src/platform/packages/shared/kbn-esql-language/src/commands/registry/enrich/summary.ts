@@ -20,6 +20,7 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
     return { newColumns: new Set([]) };
   }
   const newColumns: string[] = [];
+  const renamedColumnsPairs: Array<[string, string]> = [];
 
   const processArgument = async (arg: unknown) => {
     if (!isAssignment(arg)) return;
@@ -29,6 +30,7 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
         const rightColumn = arg.args[1][0];
         if (rightColumn && leftColumn && rightColumn.name !== leftColumn.name) {
           newColumns.push(leftColumn.name);
+          renamedColumnsPairs.push([leftColumn.name, rightColumn.name]);
         }
       }
     }
@@ -36,5 +38,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
 
   withOption?.args.forEach(processArgument);
 
-  return { newColumns: new Set(newColumns) };
+  return {
+    newColumns: new Set(newColumns),
+    renamedColumnsPairs: new Set(renamedColumnsPairs),
+  };
 };

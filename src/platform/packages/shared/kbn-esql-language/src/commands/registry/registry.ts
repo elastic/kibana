@@ -75,7 +75,7 @@ export interface ICommandMethods<TContext = any> {
    * Returns useful information about the command.
    * @param command The parsed Abstract Syntax Tree.
    * @param query The ESQL query string.
-   * @returns An array of newly generated column names.
+   * @returns A summary object containing details about the command.
    */
   summary?: (command: ESQLCommand, query: string) => ESQLCommandSummary;
 }
