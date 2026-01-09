@@ -195,6 +195,19 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
     await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
   });
 
+  test('renders Security content and navigates correctly', async ({ pageObjects, page }) => {
+    const securitySection = await pageObjects.homepage.getSecuritySection();
+    await expect(securitySection).toBeVisible();
+
+    const setupElasticDefendLink = await pageObjects.homepage.getSetupElasticDefendLink();
+    await expect(setupElasticDefendLink).toBeVisible();
+
+    await pageObjects.homepage.clickSetupElasticDefendLink();
+
+    await expect(page).toHaveURL(/elastic-defend/);
+  });
+
+  // === Dive deeper with Elasticsearch ===
   test('renders Search labs content', async ({ pageObjects, page }) => {
     const searchLabsSection = await pageObjects.homepage.getSearchLabsSection();
     await expect(searchLabsSection).toBeVisible();

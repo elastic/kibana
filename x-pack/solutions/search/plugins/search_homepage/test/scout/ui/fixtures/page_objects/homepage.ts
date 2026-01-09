@@ -197,6 +197,20 @@ export class Homepage {
     await this.page.testSubj.locator('createObservabilitySpaceLink').click();
   }
 
+  // V1 Homepage - Alternate Solutions (Security section)
+  async getSecuritySection() {
+    return this.page.testSubj.locator('securitySection');
+  }
+
+  async getSetupElasticDefendLink() {
+    return this.page.testSubj.locator('setupElasticDefendLink');
+  }
+
+  async clickSetupElasticDefendLink() {
+    await this.page.testSubj.locator('setupElasticDefendLink').scrollIntoViewIfNeeded();
+    await this.page.testSubj.locator('setupElasticDefendLink').click();
+  }
+
   // V1 Homepage - Dive deeper with Elasticsearch
   async getSearchLabsSection() {
     return this.page.testSubj.locator('searchLabsSection');
