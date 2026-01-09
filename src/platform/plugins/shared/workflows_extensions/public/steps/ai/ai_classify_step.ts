@@ -27,7 +27,11 @@ export const AiClassifyStepDefinition: PublicStepDefinition<
   AiClassifyStepConfigSchema
 > = {
   ...AiClassifyStepCommonDefinition,
-  dynamicOutputSchema: (input) => buildStructuredOutputSchema(input),
+  editorHandlers: {
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
+    },
+  },
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/list_add').then(({ icon }) => ({
       default: icon,
