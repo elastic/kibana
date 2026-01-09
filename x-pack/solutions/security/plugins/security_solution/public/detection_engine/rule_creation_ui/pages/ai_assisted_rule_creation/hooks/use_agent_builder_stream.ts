@@ -46,7 +46,15 @@ export const useAgentBuilderStream = () => {
           input: `Create detection rule based on the following query: ${message}`,
           connector_id: connectorId,
           capabilities: getKibanaDefaultAgentCapabilities(),
-          attachments: [{ type: SecurityAgentBuilderAttachments.rule, data: { text: '' } }], // initial empty rule attachment
+          attachments: [
+            {
+              type: SecurityAgentBuilderAttachments.rule,
+              data: {
+                text: '',
+                attachmentLabel: 'AI Assisted Rule Creation',
+              },
+            },
+          ],
           browser_api_tools: [],
         };
 
