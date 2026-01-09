@@ -78,19 +78,16 @@ const ActionsCell: React.FC<{
 
   const items = [
     <EuiContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" color="danger" />}
-      css={css({
-        color: euiTheme.colors.danger,
-      })}
+      key="edit"
+      icon="pencil"
       onClick={() => {
         setIsPopoverOpen(false);
-        onDelete?.(source);
+        onEdit?.(source);
       }}
-      data-test-subj={`deleteActiveSource-${source.id}`}
+      data-test-subj={`editActiveSource-${source.id}`}
     >
-      {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
-        defaultMessage: 'Delete',
+      {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
+        defaultMessage: 'Edit',
       })}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
@@ -107,16 +104,19 @@ const ActionsCell: React.FC<{
       })}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      key="edit"
-      icon="pencil"
+      key="delete"
+      icon={<EuiIcon type="trash" color="danger" />}
+      css={css({
+        color: euiTheme.colors.danger,
+      })}
       onClick={() => {
         setIsPopoverOpen(false);
-        onEdit?.(source);
+        onDelete?.(source);
       }}
-      data-test-subj={`editActiveSource-${source.id}`}
+      data-test-subj={`deleteActiveSource-${source.id}`}
     >
-      {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
-        defaultMessage: 'Edit',
+      {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
+        defaultMessage: 'Delete',
       })}
     </EuiContextMenuItem>,
   ];
