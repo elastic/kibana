@@ -29,8 +29,6 @@ describe('APM metrics static dashboard helpers', () => {
         dataView,
       });
 
-      // expect(panels).toEqual('[]');
-
       const esqlQuery = (panels as Array<{ panelConfig?: { query?: { esql?: string } } }>)
         .map((p) => p.panelConfig?.query?.esql)
         .find(Boolean);
@@ -47,8 +45,6 @@ describe('APM metrics static dashboard helpers', () => {
         { dataView, agentName: 'opentelemetry/java/opentelemetry-java-instrumentation' },
         apmIndices
       );
-
-      // expect(panels).toEqual('[]');
 
       const esqlQuery = (panels as Array<{ panelConfig?: { query?: { esql?: string } } }>)
         .map((p) => p.panelConfig?.query?.esql)
