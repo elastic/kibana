@@ -437,6 +437,27 @@ export class RulesPage {
   }
 
   /**
+   * Waits for the form to be ready after data view changes
+   * This waits for form elements to be initialized with default values
+   */
+  async waitForFormReady() {
+    // Wait for the custom equation editor to be visible (indicates criteria initialized)
+    const customEquationButton = this.page.testSubj.locator('customEquation');
+    try {
+      await expect(customEquationButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    } catch {
+      // If custom equation button doesn't appear, try the add condition button instead
+      const addConditionButton = this.page.testSubj.locator(
+        'thresholdRuleExpressionsAddConditionButton'
+      );
+      await expect(addConditionButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    }
+
+    // Ensure save button is enabled (indicates validation passed)
+    await expect(this.ruleSaveButton).toBeEnabled({ timeout: 3000 });
+  }
+
+  /**
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {

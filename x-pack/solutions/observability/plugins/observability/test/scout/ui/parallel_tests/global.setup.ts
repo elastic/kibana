@@ -26,17 +26,19 @@ globalSetupHook(
       refresh: true,
     });
 
-    log.info('Creating dummy data view for ad-hoc data view tests...');
-    await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
-      id: 'test-data-view-id_1',
-      title: 'logs-*',
-    });
-
+    // Generate logs data first
+    log.info('Generating logs data...');
     await generateLogsData({
       from: Date.now() - 15 * 60 * 1000, // 15 minutes ago
       to: Date.now(),
       client: logsSynthtraceEsClient,
+    });
+
+    log.info('Creating data view for logs-* after data is indexed...');
+    await createDataView(kbnClient, {
+      name: 'test-data-view-name_1',
+      id: 'test-data-view-id_1',
+      title: 'logs-*',
     });
   }
 );
