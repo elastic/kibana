@@ -33,11 +33,9 @@ const getTraceChangePointsSchema = z.object({
     .string()
     .describe(
       `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
-Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance.
-common fields to group by include: 
+Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance. Common fields to group by include: 
 - Service level: 'service.name', 'service.environment', 'service.version'
 - Transaction level: 'transaction.name', 'transaction.type'
-- Dependency level: 'span.destination.service.resource', 'span.type' (external, db, cache)
 - Infrastructure level: 'host.name', 'container.id', 'kubernetes.pod.name' 
 `
     )
