@@ -19,8 +19,6 @@ interface OAuthStateAttributes {
   codeVerifier: string;
   connectorId: string;
   redirectUri: string;
-  authorizationUrl: string;
-  scope?: string;
   kibanaReturnUrl: string;
   createdAt: string;
   expiresAt: string;
@@ -96,6 +94,12 @@ export class OAuthStateClient {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + STATE_EXPIRATION_MS);
 
+    this.logger.debug(
+      `Creating OAuth state for connectorId "${connectorId}" with authorizationUrl: ${authorizationUrl}${
+        scope ? `, scope: ${scope}` : ''
+      }`
+    );
+
     try {
       const result = await this.unsecuredSavedObjectsClient.create(
         OAUTH_STATE_SAVED_OBJECT_TYPE,
@@ -105,8 +109,6 @@ export class OAuthStateClient {
             codeVerifier,
             connectorId,
             redirectUri,
-            authorizationUrl,
-            scope,
             kibanaReturnUrl,
             createdAt: now.toISOString(),
             expiresAt: expiresAt.toISOString(),
