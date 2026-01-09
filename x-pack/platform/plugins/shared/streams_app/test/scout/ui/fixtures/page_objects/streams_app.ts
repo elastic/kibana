@@ -619,6 +619,11 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
+  async waitForModifiedFieldsDetection() {
+    const badge = this.page.getByTestId('streamsAppModifiedFieldsBadge');
+    await expect(badge).toBeVisible({ timeout: 30_000 });
+  }
+
   async saveStepsListChanges() {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
   }
@@ -683,7 +688,9 @@ export class StreamsApp {
   }
 
   async confirmChangesInReviewModal() {
-    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+    await submitButton.click();
   }
 
   /**
