@@ -9,6 +9,7 @@
 
 import type { ScoutPage } from '..';
 
+// Increased timeout because spinner may take over 10s to appear
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
