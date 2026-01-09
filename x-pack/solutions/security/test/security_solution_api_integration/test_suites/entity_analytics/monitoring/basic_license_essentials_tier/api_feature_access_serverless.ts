@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not find update user api', async () => {
-      await privilegedUserMonitoringRoutes.updateUser({}, 404);
+      await privilegedUserMonitoringRoutes.updateUser('test', {}, 404);
     });
 
     it('should not find upload user CSV api', async () => {
@@ -67,10 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not find list source api', async () => {
       await privilegedUserMonitoringRoutes.listSource(404);
-    });
-
-    it('should not find delete source api', async () => {
-      await privilegedUserMonitoringRoutes.deleteSource('test', 404);
     });
   });
 };

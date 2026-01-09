@@ -7,8 +7,8 @@
 
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { LicenseType } from '@kbn/licensing-types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 
 const LICENSE_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.api.licenseError',

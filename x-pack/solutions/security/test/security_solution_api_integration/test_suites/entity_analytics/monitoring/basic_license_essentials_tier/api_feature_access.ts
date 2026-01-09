@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not be able to access update user api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.updateUser({}, 403);
+      const response = await privilegedUserMonitoringRoutes.updateUser('test', {}, 403);
       expect(response.body.message).toEqual(licenseMessage);
     });
 
@@ -85,11 +85,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not be able to access list source api due to license', async () => {
       const response = await privilegedUserMonitoringRoutes.listSource(403);
-      expect(response.body.message).toEqual(licenseMessage);
-    });
-
-    it('should not be able to access delete source api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.deleteSource('test', 403);
       expect(response.body.message).toEqual(licenseMessage);
     });
   });

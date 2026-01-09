@@ -7,22 +7,12 @@
 import type SuperTest from 'supertest';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import {
   API_VERSIONS,
-  MONITORING_ENGINE_DELETE_URL,
-  MONITORING_ENGINE_DISABLE_URL,
-  MONITORING_ENGINE_INIT_URL,
-  MONITORING_USERS_CSV_UPLOAD_URL,
-  MONITORING_USERS_LIST_URL,
-  MONITORING_USERS_URL,
-  PAD_INSTALL_URL,
-  PAD_STATUS_URL,
-  PRIVMON_HEALTH_URL,
-  PRIVMON_INDICES_URL,
-  PRIVMON_PRIVILEGE_CHECK_API,
+  PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
 } from '@kbn/security-solution-plugin/common/constants';
 import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
+import { PAD_INSTALL_URL, PAD_STATUS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 
 const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   if (response.status !== statusCode) {
@@ -39,7 +29,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
   return {
     init: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .post(routeWithNamespace(MONITORING_ENGINE_INIT_URL, namespace))
+        .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/init', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -49,7 +39,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     disable: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .post(routeWithNamespace(MONITORING_ENGINE_DISABLE_URL, namespace))
+        .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/disable', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -59,7 +49,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     delete: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .delete(routeWithNamespace(MONITORING_ENGINE_DELETE_URL, namespace))
+        .delete(routeWithNamespace('/api/entity_analytics/monitoring/engine/delete', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -69,7 +59,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     healthCheck: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .get(routeWithNamespace(PRIVMON_HEALTH_URL, namespace))
+        .get(routeWithNamespace('/api/entity_analytics/monitoring/privileges/health', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -79,7 +69,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     privilegeCheck: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .get(routeWithNamespace(PRIVMON_PRIVILEGE_CHECK_API, namespace))
+        .get(routeWithNamespace(PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -89,7 +79,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     createIndices: async (requestBody: Record<string, unknown>, expectStatusCode: number = 200) => {
       const response = await supertest
-        .put(routeWithNamespace(PRIVMON_INDICES_URL, namespace))
+        .put(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -99,7 +89,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     searchIndices: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .get(routeWithNamespace(PRIVMON_INDICES_URL, namespace))
+        .get(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -109,7 +99,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     createUser: async (requestBody: Record<string, unknown>, expectStatusCode: number = 200) => {
       const response = await supertest
-        .post(routeWithNamespace(MONITORING_USERS_URL, namespace))
+        .post(routeWithNamespace('/api/entity_analytics/monitoring/users', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -119,7 +109,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     listUsers: async (expectStatusCode: number = 200) => {
       const response = await supertest
-        .get(routeWithNamespace(MONITORING_USERS_LIST_URL, namespace))
+        .get(routeWithNamespace('/api/entity_analytics/monitoring/users/list', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -127,9 +117,9 @@ export const privilegeMonitoringRouteHelpersFactory = (
       assertStatusCode(expectStatusCode, response);
       return response;
     },
-    updateUser: async (requestBody: Record<string, unknown>, expectStatusCode: number = 200) => {
+    updateUser: async (id: string,requestBody: Record<string, unknown>, expectStatusCode: number = 200) => {
       const response = await supertest
-        .put(routeWithNamespace(MONITORING_USERS_LIST_URL, namespace))
+        .put(routeWithNamespace(`/api/entity_analytics/monitoring/users/${id}`, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -140,7 +130,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     uploadUsersCSV: async (fileContent: string | Buffer, expectStatusCode: number = 200) => {
       const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
       const response = await supertest
-        .post(routeWithNamespace(MONITORING_USERS_CSV_UPLOAD_URL, namespace))
+        .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -150,7 +140,7 @@ export const privilegeMonitoringRouteHelpersFactory = (
     },
     deleteUser: async (id: string, expectStatusCode: number = 200) => {
       const response = await supertest
-        .delete(routeWithNamespace(`${MONITORING_USERS_URL}/${id}`, namespace))
+        .delete(routeWithNamespace(`/api/entity_analytics/monitoring/users/${id}`, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -181,16 +171,6 @@ export const privilegeMonitoringRouteHelpersFactory = (
     listSource: async (expectStatusCode: number = 200) => {
       const response = await supertest
         .get(routeWithNamespace('/api/entity_analytics/monitoring/entity_source/list', namespace))
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', API_VERSIONS.public.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send();
-      assertStatusCode(expectStatusCode, response);
-      return response;
-    },
-    deleteSource: async (id: string, expectStatusCode: number = 200) => {
-      const response = await supertest
-        .delete(routeWithNamespace(`${MONITORING_ENTITY_SOURCE_URL}/${id}`, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', API_VERSIONS.public.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
