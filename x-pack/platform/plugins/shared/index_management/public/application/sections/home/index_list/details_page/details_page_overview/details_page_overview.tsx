@@ -84,10 +84,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   // If the user doesn't have update mappings privileges we let the api handle the error
 
   const { data } = useUserPrivileges(indexDetails.name);
-  const hasUpdateMappingsPrivileges = useMemo(
-    () => data?.privileges?.canManageIndex === true,
-    [data]
-  );
+  const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,

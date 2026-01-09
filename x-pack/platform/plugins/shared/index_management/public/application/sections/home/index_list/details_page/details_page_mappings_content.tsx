@@ -83,10 +83,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     history,
   } = useAppContext();
   const { data: userPrivilege } = useUserPrivileges(index.name);
-  const hasUpdateMappingsPrivilege = useMemo(
-    () => userPrivilege?.privileges?.canManageIndex === true,
-    [userPrivilege]
-  );
+  const hasUpdateMappingsPrivilege = userPrivilege?.privileges?.canManageIndex === true;
+
   const pendingFieldsRef = useRef<HTMLDivElement>(null);
   const state = useMappingsState();
   const dispatch = useDispatch();
