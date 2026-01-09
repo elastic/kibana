@@ -7,15 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';

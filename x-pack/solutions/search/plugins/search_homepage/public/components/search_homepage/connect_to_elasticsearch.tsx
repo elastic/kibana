@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiText,
   useEuiTheme,
-  EuiShowFor
+  EuiShowFor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,52 +36,51 @@ export const ConnectToElasticsearch = () => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
       <EuiShowFor sizes={['l', 'xl']}>
-      <EuiFlexItem grow={false} css={css ({flexBasis: "100%" })}>
-        <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate('xpack.searchHomepage.connectToElasticsearch.p.endpointLabel', {
-              defaultMessage: 'Elasticsearch:',
-            })}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            <FormInfoField
-              value={elasticsearchUrl}
-              copyValue={elasticsearchUrl}
-              dataTestSubj="endpointValueField"
-              copyValueDataTestSubj="copyEndpointButton"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+        <EuiFlexItem grow={false} css={css({ flexBasis: '100%' })}>
+          <EuiText color="subdued" size="s">
+            <p>
+              {i18n.translate('xpack.searchHomepage.connectToElasticsearch.p.endpointLabel', {
+                defaultMessage: 'Elasticsearch:',
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <FormInfoField
+                value={elasticsearchUrl}
+                copyValue={elasticsearchUrl}
+                dataTestSubj="endpointValueField"
+                copyValueDataTestSubj="copyEndpointButton"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiShowFor>
-       <EuiShowFor sizes={['xl']}>
-      <EuiFlexItem
-        css={css({
-          borderLeft: euiTheme.colors.borderBaseSubdued,
-        })}
-      >
-        <EuiButton
-          data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
-          color="text"
-          iconType="plusInCircle"
-          size="s"
-          onClick={() =>
-            openWiredConnectionDetails({
-              props: { options: { defaultTabId: 'apiKeys' } },
-            })
-          }
-          disabled={!hasAPIKeyManagePermissions}
+      <EuiShowFor sizes={['xl']}>
+        <EuiFlexItem
+          css={css({
+            borderLeft: euiTheme.colors.borderBaseSubdued,
+          })}
         >
-          <FormattedMessage
-            id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
-            defaultMessage="API keys"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+          <EuiButton
+            data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
+            color="text"
+            iconType="plusInCircle"
+            size="s"
+            onClick={() =>
+              openWiredConnectionDetails({
+                props: { options: { defaultTabId: 'apiKeys' } },
+              })
+            }
+          >
+            <FormattedMessage
+              id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
+              defaultMessage="API keys"
+            />
+          </EuiButton>
+        </EuiFlexItem>
       </EuiShowFor>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon

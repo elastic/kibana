@@ -12,7 +12,6 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextTruncate,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -74,7 +73,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
         maxWidth: maxWidth ? `${maxWidth}px` : undefined,
         minWidth: minWidth ? `${minWidth}px` : undefined,
         backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-        borderRadius: `${euiTheme.border.radius.medium}`
+        borderRadius: `${euiTheme.border.radius.medium}`,
       })}
     >
       {label && (
@@ -84,7 +83,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           </EuiTitle>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false} >
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup
           css={css({
             color: euiTheme.colors.textParagraph,
@@ -94,7 +93,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           gutterSize="xs"
           responsive={false}
         >
-          <EuiFlexItem css={{ minWidth: 0, maxWidth: "300px" }} grow={false}>
+          <EuiFlexItem css={{ minWidth: 0, maxWidth: '300px' }} grow={false}>
             <code
               data-test-subj={dataTestSubj}
               style={{
