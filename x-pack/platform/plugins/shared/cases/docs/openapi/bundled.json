@@ -1813,7 +1813,7 @@
       },
       "ids": {
         "name": "ids",
-        "description": "The cases that you want to removed. All non-ASCII characters must be URL encoded.\n",
+        "description": "The cases that you want to removed. All non-ASCII characters must be URL encoded. For example, `[\"d4e7abb0-b462-11ec-9a8d-698504725a43\"]`.\n",
         "in": "query",
         "required": true,
         "schema": {
@@ -1822,11 +1822,12 @@
             "type": "string",
             "minItems": 1,
             "maxItems": 100
-          }
-        },
-        "example": [
-          "d4e7abb0-b462-11ec-9a8d-698504725a43"
-        ]
+          },
+          "example": [
+            "d4e7abb0-b462-11ec-9a8d-698504725a43",
+            "b77fd541-4184-44a6-9e25-81e7322a1dd6"
+          ]
+        }
       },
       "assignees_filter": {
         "in": "query",
