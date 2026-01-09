@@ -25,6 +25,7 @@ import {
   ADD_RULES,
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
+  AI_RULE_CREATE,
   EXCEPTIONS,
   RULES,
   SIEM_RULES,
@@ -76,7 +77,7 @@ export const links: LinkItem = {
         },
         {
           id: SecurityPageName.aiAssistedRuleCreate,
-          title: CREATE_NEW_RULE,
+          title: AI_RULE_CREATE,
           path: AI_ASSISTED_RULE_CREATE_PATH,
           skipUrlState: true,
           hideTimeline: false,
