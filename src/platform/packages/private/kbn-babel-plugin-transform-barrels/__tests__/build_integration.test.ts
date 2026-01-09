@@ -26,21 +26,21 @@ const CONFIG_PKG_MANIFEST = Path.join(
   REPO_ROOT,
   'src/platform/packages/shared/kbn-config/kibana.jsonc'
 );
-const SECURITYSOLUTION_ECS_PKG_MANIFEST = Path.join(
+const UNIFIED_DATA_TABLE_PKG_MANIFEST = Path.join(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-securitysolution-ecs/kibana.jsonc'
+  'src/platform/packages/shared/kbn-unified-data-table/kibana.jsonc'
 );
 
 const CORE_SERVER_PKG = Package.fromManifest(REPO_ROOT, CORE_SERVER_PKG_MANIFEST);
 const CONFIG_PKG = Package.fromManifest(REPO_ROOT, CONFIG_PKG_MANIFEST);
-const SECURITYSOLUTION_ECS_PKG = Package.fromManifest(REPO_ROOT, SECURITYSOLUTION_ECS_PKG_MANIFEST);
+const UNIFIED_DATA_TABLE_PKG = Package.fromManifest(REPO_ROOT, UNIFIED_DATA_TABLE_PKG_MANIFEST);
 
 const BUILD_DIR = Path.join(REPO_ROOT, 'build', 'kibana');
 const CORE_SERVER_OUTPUT = Path.join(BUILD_DIR, CORE_SERVER_PKG.normalizedRepoRelativeDir, 'src');
 const CONFIG_OUTPUT = Path.join(BUILD_DIR, CONFIG_PKG.normalizedRepoRelativeDir, 'src');
-const SECURITYSOLUTION_ECS_OUTPUT = Path.join(
+const UNIFIED_DATA_TABLE_OUTPUT = Path.join(
   BUILD_DIR,
-  SECURITYSOLUTION_ECS_PKG.normalizedRepoRelativeDir,
+  UNIFIED_DATA_TABLE_PKG.normalizedRepoRelativeDir,
   'src'
 );
 
@@ -76,7 +76,7 @@ describe('barrel transform build integration', () => {
     mockConfig.getDistPackagesFromRepo = () => [
       CORE_SERVER_PKG,
       CONFIG_PKG,
-      SECURITYSOLUTION_ECS_PKG,
+      UNIFIED_DATA_TABLE_PKG,
     ];
 
     const build = new Build(mockConfig);
@@ -131,21 +131,19 @@ describe('barrel transform build integration', () => {
       /require\(['"]@kbn\/config-schema\/src\/errors\/validation_error['"]\)/
     );
 
-    // export * from with local exports
-    // Original: export * from './ecs_fields';
-    // 1. src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts (barrel)
-    // 2. src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts (source)
-    const securitysolutionEcsFileContent = await Fsp.readFile(
-      Path.join(SECURITYSOLUTION_ECS_OUTPUT, 'index.js'),
+    // Nested export * chain with local exports
+    // Original: import { calcFieldCounts } from '@kbn/discover-utils';
+    // 1. src/platform/packages/shared/kbn-discover-utils/index.ts (barrel)
+    // 2. src/platform/packages/shared/kbn-discover-utils/src/index.ts: export * from './utils'
+    // 3. src/platform/packages/shared/kbn-discover-utils/src/utils/index.ts: export * from './calc_field_counts'
+    // 4. src/platform/packages/shared/kbn-discover-utils/src/utils/calc_field_counts.ts (source)
+    const dataTableCopyRowsFileContent = await Fsp.readFile(
+      Path.join(UNIFIED_DATA_TABLE_OUTPUT, 'components', 'data_table_copy_rows_as_text.js'),
       FILE_ENCODING
     );
-    // The barrel should re-export from ecs_fields directly
-    expect(securitysolutionEcsFileContent).toMatch(/require\(['"]\.\/ecs_fields['"]\)/);
-
-    // import then export pattern
-    // Original: import { EventCategory, EventCode } from './event'; export { EventCategory, EventCode };
-    // 1. src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts (barrel)
-    // 2. src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts (source)
-    expect(securitysolutionEcsFileContent).toMatch(/require\(['"]\.\/event['"]\)/);
+    expect(dataTableCopyRowsFileContent).not.toMatch(/require\(['"]@kbn\/discover-utils['"]\)/);
+    expect(dataTableCopyRowsFileContent).toMatch(
+      /require\(['"]@kbn\/discover-utils\/src\/utils\/calc_field_counts['"]\)/
+    );
   });
 });
