@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiSpacer, EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 
 import { AlertsTab } from './alerts_tab';
+import { SummaryTab } from './summary_tab';
 import * as i18n from './translations';
 
 export const ATTACK_SUMMARY_TAB = 'attackSummaryTab';
@@ -23,11 +24,15 @@ interface TabInfo {
   content: JSX.Element;
   id: string;
   name: string;
+  /**
+   * Places content after the tab content/children.
+   */
+  append?: React.ReactNode;
 }
 
 interface AttackDetailsContainerProps {
-  /** The attack discovery alert document. If undefined, only the Alerts tab will be shown. */
-  attack?: AttackDiscoveryAlert;
+  /** The attack discovery alert document. */
+  attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
   /** Filters applied from grouping */
@@ -45,41 +50,41 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({ attack, groupingFilters, defaultFilters, isTableLoading }) => {
-    const tabs = useMemo<TabInfo[]>(() => {
-      const tabsList: TabInfo[] = [];
-
-      if (attack) {
-        tabsList.push({
+  ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
+    const tabs = useMemo<TabInfo[]>(
+      () => [
+        {
           id: ATTACK_SUMMARY_TAB,
           name: i18n.ATTACK_SUMMARY,
           content: (
             <>
               <EuiSpacer size="s" />
-              {/* TODO: Placeholder for `AttackSummaryTab` */}
-              <div data-test-subj="attackSummaryTabPlaceholder" />
+              <SummaryTab attack={attack} showAnonymized={showAnonymized} />
             </>
           ),
-        });
-      }
-
-      tabsList.push({
-        id: ALERTS_TAB,
-        name: i18n.ALERTS,
-        content: (
-          <>
-            <EuiSpacer size="s" />
-            <AlertsTab
-              groupingFilters={groupingFilters}
-              defaultFilters={defaultFilters}
-              isTableLoading={isTableLoading}
-            />
-          </>
-        ),
-      });
-
-      return tabsList;
-    }, [attack, groupingFilters, defaultFilters, isTableLoading]);
+        },
+        {
+          id: ALERTS_TAB,
+          name: i18n.ALERTS,
+          content: (
+            <>
+              <EuiSpacer size="s" />
+              <AlertsTab
+                groupingFilters={groupingFilters}
+                defaultFilters={defaultFilters}
+                isTableLoading={isTableLoading}
+              />
+            </>
+          ),
+          append: attack ? (
+            <EuiNotificationBadge size="m" color="subdued">
+              {attack.alertIds.length}
+            </EuiNotificationBadge>
+          ) : undefined,
+        },
+      ],
+      [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]
+    );
 
     const firstTabId = useMemo(() => (attack ? ATTACK_SUMMARY_TAB : ALERTS_TAB), [attack]);
 
@@ -105,6 +110,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               key={index}
               isSelected={tab.id === selectedTabId}
               onClick={() => onSelectedTabChanged(tab.id)}
+              append={tab.append}
             >
               {tab.name}
             </EuiTab>
