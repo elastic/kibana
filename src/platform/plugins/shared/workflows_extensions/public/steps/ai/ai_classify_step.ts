@@ -33,7 +33,7 @@ export const AiClassifyStepDefinition: PublicStepDefinition<
     },
   },
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/list_add').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
     }))
   ),
