@@ -88,7 +88,7 @@ const metricStateBackgroundChartSchemaESQL = {
 
 const metricStatePrimaryMetricOptionsSchema = schema.object({
   // this is used to differentiate primary and secondary metrics
-  // unfortunately givent he lack of tuple schema support we need to have some way
+  // unfortunately given the lack of tuple schema support we need to have some way
   // to avoid default injection in the wrong type
   type: schema.literal('primary'),
   /**
@@ -165,7 +165,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
 
 const metricStateSecondaryMetricOptionsSchema = schema.object({
   // this is used to differentiate primary and secondary metrics
-  // unfortunately givent he lack of tuple schema support we need to have some way
+  // unfortunately given the lack of tuple schema support we need to have some way
   // to avoid default injection in the wrong type
   type: schema.literal('secondary'),
   /**
