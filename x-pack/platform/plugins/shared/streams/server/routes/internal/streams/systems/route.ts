@@ -343,8 +343,8 @@ export const identifySystemsRoute = createServerRoute({
       try {
         await taskClient.schedule<SystemIdentificationTaskParams>({
           task: {
-            type: 'streams_system_identification',
-            id: `streams_system_identification_${name}`,
+            type: 'streams_feature_identification',
+            id: `streams_feature_identification_${name}`,
             space: '*',
             stream: name,
           },
@@ -367,7 +367,7 @@ export const identifySystemsRoute = createServerRoute({
         throw error;
       }
     } else if (params.query.cancel) {
-      await taskClient.cancel(`streams_system_identification_${name}`);
+      await taskClient.cancel(`streams_feature_identification_${name}`);
 
       return {
         status: 'being_canceled',
@@ -377,7 +377,7 @@ export const identifySystemsRoute = createServerRoute({
         const task = await taskClient.acknowledge<
           SystemIdentificationTaskParams,
           IdentifySystemsResult
-        >(`streams_system_identification_${name}`);
+        >(`streams_feature_identification_${name}`);
 
         return {
           status: 'acknowledged',
@@ -393,7 +393,7 @@ export const identifySystemsRoute = createServerRoute({
     }
 
     const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
-      `streams_system_identification_${name}`
+      `streams_feature_identification_${name}`
     );
 
     if (task.status === 'in_progress') {
