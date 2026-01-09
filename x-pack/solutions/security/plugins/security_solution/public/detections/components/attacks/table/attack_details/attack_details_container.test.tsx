@@ -23,7 +23,6 @@ import {
   ATTACKS_PAGE,
   SELECTED_TAB_SETTING_NAME,
 } from '../../constants';
-import { AlertsTab } from './alerts_tab';
 import { SummaryTab } from './summary_tab';
 
 // Mock heavy child components to speed up tests
