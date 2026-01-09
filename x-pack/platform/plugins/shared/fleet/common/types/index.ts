@@ -71,7 +71,7 @@ export interface FleetConfigType {
   startupOptimization?: {
     deferPackageUpgrade?: boolean;
     maxConcurrentPackageOperations?: number;
-    packagePolicyUpgradeBatchSize?: number;
+    packageUpgradeBatchSize?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;

@@ -38,7 +38,7 @@ export async function runUpgradePackageInstallVersion({
   const maxConcurrency =
     config?.startupOptimization?.maxConcurrentPackageOperations ??
     MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS;
-  const batchSize = config?.startupOptimization?.packagePolicyUpgradeBatchSize ?? 50;
+  const batchSize = config?.startupOptimization?.packageUpgradeBatchSize ?? 50;
 
   logger.info('Starting deferred package install version upgrade');
 
