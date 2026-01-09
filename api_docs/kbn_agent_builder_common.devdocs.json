@@ -2881,7 +2881,13 @@
               "\nConversation-level versioned attachments.\nThese attachments are shared across all rounds and can be referenced via attachment_refs."
             ],
             "signature": [
-              "VersionedAttachment",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.VersionedAttachment",
+                "text": "VersionedAttachment"
+              },
               "<string, unknown>[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
@@ -4330,6 +4336,80 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ToolUiEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolUiEventData",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolUiEventData",
+            "text": "ToolUiEventData"
+          },
+          "<TEvent, TData>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ToolUiEventData.tool_id",
+            "type": "string",
+            "tags": [],
+            "label": "tool_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ToolUiEventData.tool_call_id",
+            "type": "string",
+            "tags": [],
+            "label": "tool_call_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ToolUiEventData.custom_event",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "custom_event",
+            "description": [],
+            "signature": [
+              "TEvent"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ToolUiEventData.data",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "TData"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.UserIdAndName",
         "type": "Interface",
         "tags": [],
@@ -4358,6 +4438,155 @@
             "label": "username",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/users.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.VersionedAttachment",
+        "type": "Interface",
+        "tags": [],
+        "label": "VersionedAttachment",
+        "description": [
+          "\nRepresents a conversation-level versioned attachment.\nContains all versions of the attachment and metadata."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.VersionedAttachment",
+            "text": "VersionedAttachment"
+          },
+          "<Type, DataType>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique identifier for the attachment"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.type",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Type of the attachment"
+            ],
+            "signature": [
+              "Type"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.versions",
+            "type": "Array",
+            "tags": [],
+            "label": "versions",
+            "description": [
+              "Array of all versions (ordered by version number)"
+            ],
+            "signature": [
+              "AttachmentVersion",
+              "<DataType>[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.current_version",
+            "type": "number",
+            "tags": [],
+            "label": "current_version",
+            "description": [
+              "Current active version number"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Human-readable description of the attachment"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.active",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "active",
+            "description": [
+              "Status of the attachment"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.hidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidden",
+            "description": [
+              "Whether the attachment should be hidden from the user"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.client_id",
+            "type": "string",
+            "tags": [],
+            "label": "client_id",
+            "description": [
+              "The client-provided ID if this attachment was created with one (e.g., via flyout configuration)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4987,6 +5216,14 @@
             "pluginId": "@kbn/agent-builder-common",
             "scope": "common",
             "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolUiEvent",
+            "text": "ToolUiEvent"
+          },
+          "<string, object> | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
             "section": "def-common.ToolResultEvent",
             "text": "ToolResultEvent"
           },
@@ -5269,7 +5506,13 @@
             "text": "UserIdAndName"
           },
           "; created_at: string; updated_at: string; attachments?: ",
-          "VersionedAttachment",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.VersionedAttachment",
+            "text": "VersionedAttachment"
+          },
           "<string, unknown>[] | undefined; agent_id: string; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
@@ -6120,6 +6363,44 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ToolUiEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolUiEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderEvent",
+            "text": "AgentBuilderEvent"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
+          },
+          ".toolUi, ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolUiEventData",
+            "text": "ToolUiEventData"
+          },
+          "<TEvent, TData>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -6726,7 +7007,7 @@
           "\nIds of built-in agentBuilder tools"
         ],
         "signature": [
-          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; readonly getWorkflowExecutionStatus: string; readonly productDocumentation: string; readonly cases: string; readonly integrationKnowledge: string; }"
+          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; readonly getWorkflowExecutionStatus: string; readonly productDocumentation: string; readonly cases: string; readonly integrationKnowledge: string; readonly attachmentRead: string; readonly attachmentUpdate: string; readonly attachmentAdd: string; readonly attachmentList: string; readonly attachmentDiff: string; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
         "deprecated": false,

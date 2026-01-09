@@ -16,8 +16,11 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
+import { useKibana } from '../../common/lib/kibana';
 
 const NoMatchesComponent: React.FC = () => {
+  const { docLinks } = useKibana().services;
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -39,10 +42,7 @@ const NoMatchesComponent: React.FC = () => {
           <EuiText size="s" color="subdued">
             {i18n.MODIFY_SEARCH}
             <br />
-            <EuiLink
-              href="https://www.elastic.co/guide/en/security/current/case-permissions.html"
-              target="_blank"
-            >
+            <EuiLink href={docLinks.links.cases.casesPermissions} target="_blank">
               {i18n.LEARN_PRIVILEGES_GRANT_ACCESS}
             </EuiLink>
           </EuiText>

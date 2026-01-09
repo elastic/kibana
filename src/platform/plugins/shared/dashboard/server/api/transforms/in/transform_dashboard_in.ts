@@ -91,7 +91,6 @@ export const transformDashboardIn = (
       attributes,
       references: [
         ...tagReferences,
-        ...controlGroupReferences,
         ...panelReferences,
         ...controlGroupReferences,
         ...searchSourceReferences,
