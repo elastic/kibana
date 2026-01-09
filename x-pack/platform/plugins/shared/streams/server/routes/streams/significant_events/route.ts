@@ -6,27 +6,36 @@
  */
 import {
   systemSchema,
-  type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
+  type SignificantEventsQueriesGenerationTaskResult,
+  type SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map, catchError } from 'rxjs';
-import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
-import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
+import { BooleanFromString } from '@kbn/zod-helpers';
+import { conflict } from '@hapi/boom';
+import {
+  SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
+  type SignificantEventsQueriesGenerationTaskParams,
+} from '../../../lib/tasks/task_definitions/significant_events_queries_generation';
 import { resolveConnectorId } from '../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import { AcknowledgingIncompleteError } from '../../../lib/tasks/acknowledging_incomplete_error';
+import { CancellationInProgressError } from '../../../lib/tasks/cancellation_in_progress_error';
+import { isStale } from '../../../lib/tasks/is_stale';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
+
+function getSignificantEventsQueriesGenerationTaskId(streamName: string) {
+  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
+}
 
 const previewSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
@@ -174,9 +183,12 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Number of sample documents to use for generation from the current data of stream'
         ),
+      schedule: BooleanFromString.optional(),
+      cancel: BooleanFromString.optional(),
+      acknowledge: BooleanFromString.optional(),
     }),
     body: z.object({
-      system: systemSchema.optional(),
+      systems: z.array(systemSchema).optional(),
     }),
   }),
   options: {
@@ -199,65 +211,108 @@ const generateSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<SignificantEventsGenerateResponse> => {
-    const {
-      streamsClient,
-      scopedClusterClient,
-      licensing,
-      inferenceClient,
-      uiSettingsClient,
-      soClient,
-    } = await getScopedClients({ request });
+  }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const connectorId = await resolveConnectorId({
-      connectorId: params.query.connectorId,
-      uiSettingsClient,
-      logger,
-    });
+    const { name } = params.path;
 
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
+    if (params.query.schedule) {
+      try {
+        const connectorId = await resolveConnectorId({
+          connectorId: params.query.connectorId,
+          uiSettingsClient,
+          logger,
+        });
+        await taskClient.schedule<SignificantEventsQueriesGenerationTaskParams>({
+          task: {
+            type: SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
+            id: getSignificantEventsQueriesGenerationTaskId(name),
+            space: '*',
+            stream: name,
+          },
+          params: {
+            connectorId,
+            start: params.query.from.getTime(),
+            end: params.query.to.getTime(),
+            systems: params.body?.systems,
+            sampleDocsSize: params.query.sampleDocsSize,
+          },
+          request,
+        });
 
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const definition = await streamsClient.getStream(params.path.name);
-
-    const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
-
-    return fromRxjs(
-      generateSignificantEventDefinitions(
-        {
-          definition,
-          system: params.body?.system,
-          connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
-          sampleDocsSize: params.query.sampleDocsSize,
-          systemPromptOverride: significantEventsPromptOverride,
-        },
-        {
-          inferenceClient,
-          esClient: scopedClusterClient.asCurrentUser,
-          logger: logger.get('significant_events'),
-          signal: getRequestAbortSignal(request),
+        return {
+          status: 'in_progress',
+        };
+      } catch (error) {
+        if (error instanceof CancellationInProgressError) {
+          throw conflict(error.message);
         }
-      )
-    ).pipe(
-      map(({ queries, tokensUsed }) => ({
-        type: 'generated_queries' as const,
-        queries,
-        tokensUsed,
-      })),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
-    );
+
+        throw error;
+      }
+    } else if (params.query.cancel) {
+      await taskClient.cancel(getSignificantEventsQueriesGenerationTaskId(name));
+
+      return {
+        status: 'being_canceled',
+      };
+    } else if (params.query.acknowledge) {
+      try {
+        const task = await taskClient.acknowledge<
+          SignificantEventsQueriesGenerationTaskParams,
+          SignificantEventsQueriesGenerationResult
+        >(getSignificantEventsQueriesGenerationTaskId(name));
+
+        return {
+          status: 'acknowledged',
+          ...task.task.payload,
+        };
+      } catch (error) {
+        if (error instanceof AcknowledgingIncompleteError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    }
+
+    // Check if there's an existing task
+    const task = await taskClient.get<
+      SignificantEventsQueriesGenerationTaskParams,
+      SignificantEventsQueriesGenerationResult
+    >(getSignificantEventsQueriesGenerationTaskId(name));
+
+    if (task.status === 'in_progress') {
+      if (isStale(task.created_at)) {
+        return {
+          status: 'stale',
+        };
+      }
+
+      return {
+        status: 'in_progress',
+      };
+    } else if (task.status === 'failed') {
+      return {
+        status: 'failed',
+        error: task.task.error,
+      };
+    } else if (task.status === 'completed' || task.status === 'acknowledged') {
+      return {
+        status: task.status,
+        ...task.task.payload,
+      };
+    }
+
+    // Return status for remaining states: not_started, canceled, being_canceled
+    return {
+      status: task.status,
+    };
   },
 });
 

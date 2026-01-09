@@ -71,10 +71,29 @@ type SignificantEventsGenerateResponse = Observable<
   >
 >;
 
+interface SignificantEventsQueriesGenerationResult {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: ChatCompletionTokenCount;
+}
+
+type SignificantEventsQueriesGenerationTaskResult =
+  | {
+      status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
+    }
+  | {
+      status: 'failed';
+      error: string;
+    }
+  | ({
+      status: 'completed' | 'acknowledged';
+    } & SignificantEventsQueriesGenerationResult);
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 };
