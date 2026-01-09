@@ -79,7 +79,7 @@ export const wizardSteps = {
       const indexPatternsComboBox = new EuiComboBoxTestHarness('indexPatternsField');
 
       // Clear existing selections first
-      indexPatternsComboBox.clear();
+      await indexPatternsComboBox.clear();
 
       // Add each pattern
       for (const pattern of indexPatterns) {

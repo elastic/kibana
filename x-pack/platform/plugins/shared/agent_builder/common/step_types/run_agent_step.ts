@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 /**
  * Step type ID for the agentBuilder run agent step.
  */
-export const RunAgentStepTypeId = 'agentBuilder.runAgent';
+export const RunAgentStepTypeId = 'ai.agent';
 
 /**
  * Input schema for the run agent step.
