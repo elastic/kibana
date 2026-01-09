@@ -86,7 +86,15 @@ export interface TableActionGroup<T> {
 
 export type TableActions<T> = Array<TableActionGroup<T>>;
 
-function ActionsCell<T extends object>({ item, actions }: { item: T; actions: TableActions<T> }) {
+function ActionsCell<T extends object>({
+  item,
+  actions,
+  disabled = false,
+}: {
+  item: T;
+  actions: TableActions<T>;
+  disabled?: boolean;
+}) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [activePanelId, setActivePanelId] = useState(0);
   const { euiTheme } = useEuiTheme();
@@ -190,6 +198,7 @@ function ActionsCell<T extends object>({ item, actions }: { item: T; actions: Ta
           iconType="boxesVertical"
           onClick={togglePopover}
           color="text"
+          isDisabled={disabled}
         />
       }
       isOpen={isPopoverOpen}
@@ -252,6 +261,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
 
   // actions column
   actions?: TableActions<T>;
+  isActionsDisabled?: (item: T) => boolean;
 
   'data-test-subj'?: string;
 }) {
@@ -299,6 +309,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
       onChangeSearchQuery: () => {},
     },
     actions,
+    isActionsDisabled,
   } = props;
 
   const columnsWithActions = useMemo(() => {
@@ -312,11 +323,17 @@ function UnoptimizedManagedTable<T extends object>(props: {
       }),
       width: '80px',
       align: 'center',
-      render: (item: T) => <ActionsCell item={item} actions={actions} />,
+      render: (item: T) => (
+        <ActionsCell
+          item={item}
+          actions={actions}
+          disabled={isActionsDisabled ? isActionsDisabled(item) : false}
+        />
+      ),
     };
 
     return [...columns, actionsColumn];
-  }, [columns, actions]);
+  }, [columns, actions, isActionsDisabled]);
 
   const {
     urlParams: {

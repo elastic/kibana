@@ -48,6 +48,7 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
+import { OTHER_SERVICE_NAME } from '../../../shared/links/apm/max_groups_message';
 import { ListMetric } from '../../../shared/list_metric';
 import type {
   ITableColumn,
@@ -666,6 +667,7 @@ export function ApmServicesTable({
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
           actions={serviceActions}
+          isActionsDisabled={(item) => item.serviceName === OTHER_SERVICE_NAME}
         />
       </EuiFlexItem>
       <AlertingFlyout
