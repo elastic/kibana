@@ -17,6 +17,11 @@
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
+export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;
+export const MonitoringEntitySourceType = z.enum(['index', 'entity_analytics_integration']);
+export type MonitoringEntitySourceTypeEnum = typeof MonitoringEntitySourceType.enum;
+export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
+
 export type Matcher = z.infer<typeof Matcher>;
 export const Matcher = z.object({
   fields: z.array(z.string()),
@@ -25,6 +30,11 @@ export const Matcher = z.object({
  
       */
   values: z.union([z.array(z.string()), z.array(z.boolean())]),
+});
+
+export type Filter = z.infer<typeof Filter>;
+export const Filter = z.object({
+  kuery: z.union([z.string(), z.object({})]).optional(),
 });
 
 export type Integrations = z.infer<typeof Integrations>;
@@ -50,61 +60,38 @@ export const Integrations = z.object({
     .optional(),
 });
 
-export type CreateMonitoringEntitySource = z.infer<typeof CreateMonitoringEntitySource>;
-export const CreateMonitoringEntitySource = z.object({
-  type: z.string(),
-  name: z.string(),
-  managed: z.boolean().optional(),
+export type UpdateableMonitoringEntitySourceProperties = z.infer<
+  typeof UpdateableMonitoringEntitySourceProperties
+>;
+export const UpdateableMonitoringEntitySourceProperties = z.object({
+  name: z.string().optional(),
   indexPattern: z.string().optional(),
-  enabled: z.boolean().optional(),
-  error: z.string().optional(),
   integrationName: z.string().optional(),
+  enabled: z.boolean().optional(),
   matchers: z.array(Matcher).optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
+  filter: Filter.optional(),
   integrations: Integrations.optional(),
 });
 
-export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
-export const UpdatedMonitoringEntitySource = z.object({
-  type: z.string().optional(),
-  name: z.string().optional(),
-  managed: z.boolean().optional(),
-  indexPattern: z.string().optional(),
-  enabled: z.boolean().optional(),
-  error: z.string().optional(),
-  integrationName: z.string().optional(),
-  matchers: z.array(Matcher).optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
-  integrations: Integrations.optional(),
-});
+export type UpdateEntitySourceNoadditionalProps = z.infer<
+  typeof UpdateEntitySourceNoadditionalProps
+>;
+export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySourceProperties.merge(
+  z.object({}).strict()
+);
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
-export const MonitoringEntitySourceProperties = z.object({
-  name: z.string().optional(),
-  type: z.string().optional(),
-  managed: z.boolean().optional(),
-  indexPattern: z.string().optional(),
-  integrationName: z.string().optional(),
-  enabled: z.boolean().optional(),
-  matchers: z.array(Matcher).optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
-  integrations: Integrations.optional(),
-});
+export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
+  z.object({
+    type: MonitoringEntitySourceType.optional(),
+    managed: z.boolean().optional(),
+  })
+);
 
-export type MonitoringEntitySourceNoId = z.infer<typeof MonitoringEntitySourceNoId>;
-export const MonitoringEntitySourceNoId = MonitoringEntitySourceProperties.merge(z.object({}));
+export type MonitoringEntitySourceAttributes = z.infer<typeof MonitoringEntitySourceAttributes>;
+export const MonitoringEntitySourceAttributes = MonitoringEntitySourceProperties.merge(
+  z.object({})
+);
 
 export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
 export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
@@ -114,7 +101,16 @@ export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
 );
 
 export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
-export const CreateEntitySourceRequestBody = CreateMonitoringEntitySource;
+export const CreateEntitySourceRequestBody = z
+  .object({
+    type: MonitoringEntitySourceType,
+    name: z.string(),
+    indexPattern: z.string().optional(),
+    enabled: z.boolean().optional(),
+    matchers: z.array(Matcher).optional(),
+    filter: Filter.optional(),
+  })
+  .strict();
 export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
 
 export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
@@ -139,11 +135,20 @@ export const ListEntitySourcesRequestQuery = z.object({
   type: z.string().optional(),
   managed: BooleanFromString.optional(),
   name: z.string().optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  per_page: z.coerce.number().int().min(1).max(10000).optional(),
+  sort_field: z.string().optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
 });
 export type ListEntitySourcesRequestQueryInput = z.input<typeof ListEntitySourcesRequestQuery>;
 
 export type ListEntitySourcesResponse = z.infer<typeof ListEntitySourcesResponse>;
-export const ListEntitySourcesResponse = z.array(MonitoringEntitySource);
+export const ListEntitySourcesResponse = z.object({
+  sources: z.array(MonitoringEntitySource),
+  page: z.number().int().min(1),
+  per_page: z.number().int().min(1).max(10000),
+  total: z.number().int().min(0),
+});
 
 export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;
 export const UpdateEntitySourceRequestParams = z.object({
@@ -152,7 +157,7 @@ export const UpdateEntitySourceRequestParams = z.object({
 export type UpdateEntitySourceRequestParamsInput = z.input<typeof UpdateEntitySourceRequestParams>;
 
 export type UpdateEntitySourceRequestBody = z.infer<typeof UpdateEntitySourceRequestBody>;
-export const UpdateEntitySourceRequestBody = MonitoringEntitySourceNoId;
+export const UpdateEntitySourceRequestBody = UpdateEntitySourceNoadditionalProps;
 export type UpdateEntitySourceRequestBodyInput = z.input<typeof UpdateEntitySourceRequestBody>;
 
 export type UpdateEntitySourceResponse = z.infer<typeof UpdateEntitySourceResponse>;
