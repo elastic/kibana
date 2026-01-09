@@ -55,7 +55,7 @@ export function SignificantEventsGenerationPanel({
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
-        <EuiPanel hasBorder css={{ 'text-align': 'left' }}>
+        <EuiPanel hasBorder>
           {features.length === 0 ? (
             <IdentifyFeatures
               definition={definition}
