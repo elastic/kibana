@@ -30,12 +30,14 @@ export const AiPromptStepDefinition: PublicStepDefinition<
 > = {
   ...AiPromptStepCommonDefinition,
   editorHandlers: {
-    dynamicOutputSchema: ({ input }) => {
-      if (input.outputSchema) {
-        return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
-      }
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (input.outputSchema) {
+          return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
+        }
 
-      return OutputSchema;
+        return OutputSchema;
+      },
     },
   },
   icon: React.lazy(() =>
