@@ -247,10 +247,9 @@ async function generateAlertSummary({
     Signal priority (use what exists, skip what doesn't):
     1) Downstream dependencies: dependency metrics that may indicate issues
     2) Change points: sudden shifts in throughput/latency/failure rate
-    3) Log categories: error messages and exception patterns. 
+    3) Log categories: error messages and exception patterns
     4) Errors: exception patterns with downstream context
-    5) Anomalies: ML-detected unusual patterns
-    6) Service summary: instance counts, versions, and metadata
+    5) Service summary: instance counts, versions, anomalies, and metadata
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;
