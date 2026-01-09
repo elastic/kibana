@@ -240,6 +240,24 @@ const dashboardGridStyles = {
         {
           visibility: 'hidden !important' as 'hidden',
         },
+
+      // Call out focused panels
+      '.dshDashboardGrid__item--focused .embPanel': {
+        position: 'relative',
+        overflow: 'visible !important',
+        '&::before': {
+          content: `""`,
+          opacity: 1,
+          position: 'absolute',
+          left: '-5px',
+          top: '-5px',
+          'z-index': -1,
+          width: 'calc(100% + 10px)',
+          height: 'calc(100% + 10px)',
+          backgroundColor: euiTheme.colors.borderBaseAccent,
+          borderRadius: euiTheme.border.radius.medium,
+        },
+      },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
         '.dshDashboardGrid__item--expanded': {
