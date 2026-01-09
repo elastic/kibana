@@ -19,28 +19,29 @@ export const createMcpConnector = async (
   connector: DataTypeDefinition,
   name: string,
   token: string,
-  kibanaLogger: Logger
+  logger: Logger
 ) => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
-  const secrets: Record<string, string> = {};
+  const secrets: Record<string, string | Record<string, string>> = {
+    secretHeaders: {
+      Authorization: `${token}`,
+    },
+  };
   const connectorConfig = connector.stackConnector.config as any;
 
+  logger.info(`Creating MCP stack connector for '${name}'`);
   const stackConnector = await actionsClient.create({
     action: {
       name: `mcp stack connector for data connector '${name}'`,
       actionTypeId: '.mcp',
       config: {
-        // TODO: Make the token an encrypted secret but currently there's a bug with testing MCP connector with encrypted secrets
         ...connectorConfig,
-        headers: {
-          Authorization: `${token}`,
-        },
       },
       secrets,
     },
   });
 
-  if (connector.importedTools) {
+  if (connector.importedTools && connector.importedTools.length > 0) {
     try {
       const mcpTools = await getMcpTools({
         actions,
@@ -48,19 +49,16 @@ export const createMcpConnector = async (
         connectorId: stackConnector.id,
         toolNames: connector.importedTools,
       });
-      const results = await bulkCreateMcpTools({
+      await bulkCreateMcpTools({
         registry,
         actions,
         request,
         connectorId: stackConnector.id,
         tools: mcpTools,
         namespace: name,
-        kibanaLogger,
       });
-      kibanaLogger.info(`Bulk create MCP tools results: ${JSON.stringify(results)}`);
     } catch (error) {
-      kibanaLogger.error(`Error creating MCP tools: ${error}`);
-      throw error;
+      throw new Error(`Error creating MCP tools for ${name}: ${error}`);
     }
   }
   return stackConnector;

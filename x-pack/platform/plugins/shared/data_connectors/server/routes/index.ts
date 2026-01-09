@@ -153,7 +153,6 @@ export function registerRoutes(dependencies: RouteDependencies) {
         // Validate data connector type exists
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
-
         if (!dataConnectorTypeDef) {
           return response.customError({
             statusCode: 400,
@@ -215,8 +214,6 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
         logger.debug(`Found ${connectors.length} data connector(s) to delete`);
 
-        const [, { actions, agentBuilder }] = await getStartServices();
-
         if (connectors.length === 0) {
           return response.ok({
             body: {
@@ -227,6 +224,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
             },
           });
         }
+        // Delete all related resources and saved objects for each connector
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 

@@ -104,7 +104,6 @@ export async function createConnectorAndRelatedResources(
   const connectorType = dataConnectorTypeDef.stackConnector.type;
 
   let stackConnector: ActionResult;
-  let secrets: Record<string, string> = {};
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
 
@@ -124,7 +123,7 @@ export async function createConnectorAndRelatedResources(
     );
     logger.info(`Imported tools for MCP connector: ${JSON.stringify(toolIds)}`);
   } else {
-    secrets = buildSecretsFromConnectorSpec(connectorType, token);
+    const secrets = buildSecretsFromConnectorSpec(connectorType, token);
     logger.info(`Creating Kibana stack connector for data connector '${name}'`);
     const actionsClient = await actions.getActionsClientWithRequest(request);
     stackConnector = await actionsClient.create({

@@ -7,7 +7,6 @@
 
 import { ToolType, validateToolId } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolRegistry } from '../tool_registry';
 import { validateConnector } from '../tool_types/mcp/validate_configuration';
@@ -28,8 +27,6 @@ export interface BulkCreateMcpToolsParams {
   namespace?: string;
   skipExisting?: boolean;
   tags?: string[];
-  // delete this
-  kibanaLogger: Logger;
 }
 
 /**
@@ -47,7 +44,6 @@ export async function bulkCreateMcpTools({
   tools,
   namespace,
   skipExisting,
-  kibanaLogger,
   tags = [],
 }: BulkCreateMcpToolsParams): Promise<BulkCreateMcpToolsResponse> {
   // Validate namespace if provided (must be valid tool ID segment)

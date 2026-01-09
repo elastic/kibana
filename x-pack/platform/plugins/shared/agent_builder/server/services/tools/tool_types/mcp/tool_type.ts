@@ -90,7 +90,7 @@ export async function getMcpTools({
       .filter((t) => toolNames.includes(t.name))
       .map((tool) => ({ name: tool.name, description: tool.description }));
   } catch (error) {
-    // Connector not found or other error - return empty array
+    // Connector not found or other error
     return [];
   }
 }
