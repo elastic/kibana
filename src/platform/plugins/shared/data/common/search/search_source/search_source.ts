@@ -688,6 +688,8 @@ export class SearchSource {
         } else {
           return addToBody('aggs', val);
         }
+      case 'timezone':
+        return addToRoot(key, val);
       default:
         return addToBody(key, val);
     }
