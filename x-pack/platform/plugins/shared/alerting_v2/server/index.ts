@@ -9,9 +9,9 @@ import { ContainerModule } from 'inversify';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
-import { bindOnSetup } from './di/bind_on_setup';
-import { bindRoutes } from './di/bind_routes';
-import { bindServices } from './di/bind_services';
+import { bindOnSetup } from './setup/bind_on_setup';
+import { bindRoutes } from './setup/bind_routes';
+import { bindServices } from './setup/bind_services';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
