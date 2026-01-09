@@ -348,8 +348,6 @@ For the Elastic Security 9.1.10 release information, refer to [Elastic Security 
 **Platform**:
 * Unifies the flow for clients partially and fully authorized to saved objects, and applies the intersection of allowed and authorized lists [#244967]({{kib-pull}}244967).
 
- [#244967]({{kib-pull}}244967).
-
 **Search**:
 * Fixes an issue where users running {{es}} with basic licenses would encounter errors when updating index mappings. Now, the Machine Learning saved object check will only run if saving semantic text mapping [#248462]({{kib-pull}}248462).
 
