@@ -57,7 +57,6 @@ export interface GetBuildAgentParams {
   events?: ToolEventEmitter;
 }
 
-
 export const getBuildAgent = async ({
   esClient,
   connectorId,
@@ -70,15 +69,18 @@ export const getBuildAgent = async ({
   events,
 }: GetBuildAgentParams) => {
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
-    .addNode(ESQL_QUERY_CREATION, await getEsqlQueryGraphWithTool({
-      model,
-      esClient,
-      connectorId,
-      inference,
-      logger,
-      request,
-      events,
-    }))
+    .addNode(
+      ESQL_QUERY_CREATION,
+      await getEsqlQueryGraphWithTool({
+        model,
+        esClient,
+        connectorId,
+        inference,
+        logger,
+        request,
+        events,
+      })
+    )
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
