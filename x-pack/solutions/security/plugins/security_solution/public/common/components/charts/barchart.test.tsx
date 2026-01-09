@@ -10,8 +10,6 @@ import { BarSeries, Axis, ScaleType } from '@elastic/charts';
 import type { RenderResult } from '@testing-library/react';
 import { screen, render } from '@testing-library/react';
 import React from 'react';
-
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
 import '../../mock/react_beautiful_dnd';
 
@@ -377,14 +375,10 @@ describe('BarChart with stackByField', () => {
     expect(screen.getByTestId('draggable-legend')).toBeInTheDocument();
   });
 
-  test.each(data)('it renders the expected draggable legend text for datum $key', ({ key }) => {
-    const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
-      stackByField
-    )}-${escapeDataProviderId(key)}`;
-
-    expect(
-      wrapper.container.querySelector(`div[data-provider-id="${dataProviderId}"]`)
-    ).toHaveTextContent(key);
+  data.forEach((datum, idx) => {
+    test(`it renders the expected draggable legend text for datum ${datum.key}`, () => {
+      expect(wrapper.getByTestId(`legend-item-${idx}`)).toHaveTextContent(datum.key);
+    });
   });
 });
 

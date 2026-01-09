@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
+import { USER_PREVIEW_BANNER, UserEntityOverview } from './user_entity_overview';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
+  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
-  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
-  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
+  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../../shared/mocks/mock_context';

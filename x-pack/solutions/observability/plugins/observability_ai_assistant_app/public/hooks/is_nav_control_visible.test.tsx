@@ -10,9 +10,15 @@ import { useIsNavControlVisible } from './is_nav_control_visible';
 import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { of } from 'rxjs';
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 describe('isNavControlVisible', () => {
+  const settings = { client: uiSettingsServiceMock.createStartContract() };
+
+  beforeEach(() => {
+    settings.client.get$.mockReturnValue(of(AIChatExperience.Classic));
+  });
   describe('with solution:es', () => {
     it('always returns true for ES solution spaces', () => {
       const coreStart = {
@@ -22,11 +28,13 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Never),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'es' }),
@@ -47,11 +55,13 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Never),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'oblt' }),
@@ -72,11 +82,13 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Never),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -99,11 +111,13 @@ describe('isNavControlVisible', () => {
             new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Never),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -123,11 +137,13 @@ describe('isNavControlVisible', () => {
             new Map([['security', { id: 'security', category: { id: 'securitySolution' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Observability),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -147,11 +163,13 @@ describe('isNavControlVisible', () => {
             new Map([['search', { id: 'search', category: { id: 'enterpriseSearch' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -171,11 +189,13 @@ describe('isNavControlVisible', () => {
             new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -195,11 +215,13 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -219,11 +241,13 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Observability),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
@@ -243,14 +267,44 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of(AIChatExperience.Classic),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'classic' }),
+        },
+      } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+      const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+      expect(result.current.isVisible).toBe(false);
+    });
+
+    it('returns false when chatExperience is Agent regardless of other settings', () => {
+      settings.client.get$.mockReturnValue(of(AIChatExperience.Agent));
+
+      const coreStart = {
+        application: {
+          currentAppId$: of('observability'),
+          applications$: of(
+            new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
+          ),
+        },
+        settings,
+      } as unknown as CoreStart;
+
+      const pluginsStart = {
+        aiAssistantManagementSelection: {
+          aiAssistantType$: of(AIAssistantType.Observability),
+          chatExperience$: of(AIChatExperience.Agent),
+        },
+        spaces: {
+          getActiveSpace$: () => of({ solution: 'oblt' }),
         },
       } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
 

@@ -136,9 +136,9 @@ export const Chat = () => {
             css={{
               paddingTop: euiTheme.size.l,
               paddingBottom: euiTheme.size.l,
-              // don't allow the chat to shrink below 66.6% of the screen
+              // don't allow the chat to shrink below 700px
               flexBasis: 0,
-              minWidth: '66.6%',
+              minWidth: 700,
             }}
           >
             <EuiFlexGroup direction="column" className="eui-fullHeight">

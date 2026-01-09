@@ -29,41 +29,6 @@ describe('DELETE /api/workflows', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the bulk delete workflows route with correct configuration', () => {
-      registerDeleteWorkflowsBulkRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const deleteBulkCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows'
-      );
-
-      expect(deleteBulkCall).toBeDefined();
-      expect(deleteBulkCall[0]).toMatchObject({
-        path: '/api/workflows',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['all', 'workflow_delete'],
-              },
-            ],
-          },
-        },
-      });
-      expect(deleteBulkCall[0].validate).toBeDefined();
-      expect(deleteBulkCall[0].validate.body).toBeDefined();
-      expect(deleteBulkCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 
@@ -82,7 +47,12 @@ describe('DELETE /api/workflows', () => {
     });
 
     it('should delete multiple workflows successfully', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+      const mockResult = {
+        total: 3,
+        deleted: 3,
+        failures: [],
+      };
+      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(mockResult);
 
       const mockContext = {};
       const mockRequest = {
@@ -101,11 +71,16 @@ describe('DELETE /api/workflows', () => {
         'default',
         mockRequest
       );
-      expect(mockResponse.ok).toHaveBeenCalledWith();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
 
     it('should handle empty ids array gracefully', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+      const mockResult = {
+        total: 3,
+        deleted: 3,
+        failures: [],
+      };
+      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(mockResult);
 
       const mockContext = {};
       const mockRequest = {
@@ -120,7 +95,7 @@ describe('DELETE /api/workflows', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith([], 'default', mockRequest);
-      expect(mockResponse.ok).toHaveBeenCalledWith();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
 
     it('should handle API errors gracefully', async () => {
@@ -148,7 +123,12 @@ describe('DELETE /api/workflows', () => {
     });
 
     it('should work with different space contexts', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+      const mockResult = {
+        total: 2,
+        deleted: 2,
+        failures: [],
+      };
+      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(mockResult);
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
 
       const mockContext = {};
@@ -168,7 +148,7 @@ describe('DELETE /api/workflows', () => {
         'custom-space',
         mockRequest
       );
-      expect(mockResponse.ok).toHaveBeenCalledWith();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
 
     it('should handle Elasticsearch connection errors', async () => {

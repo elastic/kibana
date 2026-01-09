@@ -23,7 +23,9 @@ export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup
             rawState: savedObject.attributes,
           },
         },
-        true // shows a toast and scrolls to panel
+        {
+          displaySuccessMessage: true, // shows a toast and scrolls to panel
+        }
       );
     },
     savedObjectType: MY_SAVED_OBJECT_TYPE,

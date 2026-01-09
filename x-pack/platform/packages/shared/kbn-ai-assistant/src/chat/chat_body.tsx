@@ -412,13 +412,12 @@ export function ChatBody({
   };
 
   const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+  const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
     !!elasticManagedLlm &&
     connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed &&
-    tourCalloutDismissed;
+    !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
@@ -656,6 +655,7 @@ export function ChatBody({
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
@@ -686,6 +686,7 @@ export function ChatBody({
       >
         {conversation.error ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',

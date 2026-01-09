@@ -226,6 +226,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <EuiSpacer />
       {meta.totalItemCount > 9999 && (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={
             <FormattedMessage

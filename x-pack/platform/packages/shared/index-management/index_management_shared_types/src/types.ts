@@ -46,6 +46,9 @@ export type IndexManagementLocatorParams = SerializableRecord &
         indexTemplate: string;
       }
     | {
+        page: 'create_template';
+      }
+    | {
         page: 'component_template';
         componentTemplate: string;
       }
@@ -82,6 +85,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface IndexManagementPluginStart {
+  apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;

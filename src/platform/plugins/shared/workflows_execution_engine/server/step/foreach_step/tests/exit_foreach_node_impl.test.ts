@@ -10,7 +10,7 @@
 import type { ExitForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 
 describe('ExitForeachNodeImpl', () => {
@@ -52,8 +52,8 @@ describe('ExitForeachNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
     });
 
-    it('should throw an error', async () => {
-      await expect(underTest.run()).rejects.toThrow(
+    it('should throw an error', () => {
+      expect(() => underTest.run()).toThrow(
         new Error(`Foreach state for step ${node.stepId} not found`)
       );
     });

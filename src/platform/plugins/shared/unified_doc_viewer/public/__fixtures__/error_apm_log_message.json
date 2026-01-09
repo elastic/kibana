@@ -1,0 +1,479 @@
+{
+  "_index": "metrics-gcp-us-central1:.ds-logs-apm.error-default-2025.10.22-001643",
+  "_id": "HqvHFpoBBhAm7vUvms0W",
+  "_version": 1,
+  "_source": {
+    "kubernetes": {
+      "node": {
+        "name": "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+      },
+      "pod": {
+        "uid": "3af8f096-f969-4d30-a33e-78080ee558e4",
+        "name": "apm-ingest-service-us-central1-c-99d96d56d-5x266"
+      },
+      "namespace": "apm-ingest-service"
+    },
+    "agent": {
+      "name": "go",
+      "version": "2.7.1"
+    },
+    "process": {
+      "args": [
+        "/ko-app/apm-ingest-service"
+      ],
+      "pid": 1,
+      "title": "apm-ingest-serv"
+    },
+    "error": {
+      "exception": [
+        {
+          "module": "go.elastic.co/ecszap/internal",
+          "handled": true,
+          "message": "unable to dial: dial tcp: lookup mis-warpstream-agent-headless-unified.mis-warpstream-agent.svc.cluster.local: operation was canceled",
+          "type": "ecsError"
+        }
+      ],
+      "culprit": "newHealthHandler.func1",
+      "log": {
+        "stacktrace": [
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "core.go",
+            "line": {
+              "number": 142
+            },
+            "function": "(*contextCore).Write",
+            "module": "go.elastic.co/apm/module/apmzap/v2"
+          },
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "core.go",
+            "line": {
+              "number": 97
+            },
+            "function": "(*Core).Write",
+            "module": "go.elastic.co/apm/module/apmzap/v2"
+          },
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "entry.go",
+            "line": {
+              "number": 253
+            },
+            "function": "(*CheckedEntry).Write",
+            "module": "go.uber.org/zap/zapcore"
+          },
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "logger.go",
+            "line": {
+              "number": 263
+            },
+            "function": "(*Logger).Error",
+            "module": "go.uber.org/zap"
+          },
+          {
+            "exclude_from_grouping": false,
+            "filename": "health.go",
+            "line": {
+              "number": 45
+            },
+            "function": "newHealthHandler.func1",
+            "module": "github.com/elastic/apm-ingest-service/internal/server"
+          },
+          {
+            "exclude_from_grouping": false,
+            "filename": "echo.go",
+            "line": {
+              "number": 581
+            },
+            "function": "(*Echo).add.func1",
+            "module": "github.com/labstack/echo/v4"
+          },
+          {
+            "exclude_from_grouping": false,
+            "filename": "echo.go",
+            "line": {
+              "number": 668
+            },
+            "function": "(*Echo).ServeHTTP",
+            "module": "github.com/labstack/echo/v4"
+          },
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "server.go",
+            "line": {
+              "number": 3340
+            },
+            "function": "serverHandler.ServeHTTP",
+            "module": "net/http"
+          },
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "server.go",
+            "line": {
+              "number": 2109
+            },
+            "function": "(*conn).serve",
+            "module": "net/http"
+          },
+          {
+            "exclude_from_grouping": false,
+            "library_frame": true,
+            "filename": "asm_arm64.s",
+            "line": {
+              "number": 1268
+            },
+            "function": "goexit",
+            "module": "runtime"
+          }
+        ],
+        "level": "error",
+        "message": "health check failed"
+      },
+      "id": "00e6d60dc1e51ac718364579f856da2e",
+      "grouping_key": "6169416abf1430c3bc7f515b77a60d31"
+    },
+    "message": "health check failed",
+    "labels": {
+      "orchestrator_target": "production",
+      "orchestrator_deploymentslice": "production-ds-3",
+      "cloud_region": "us-central1",
+      "orchestrator_channel": "default",
+      "cloud_provider": "gcp",
+      "orchestrator_cluster_name": "prd-gcpusc1-cp-app-5",
+      "orchestrator_environment": "production"
+    },
+    "cloud": {
+      "availability_zone": "us-central1-c",
+      "instance": {
+        "name": "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p",
+        "id": "4232753933272295722"
+      },
+      "provider": "gcp",
+      "project": {
+        "id": "esp-prod-usc1-cp-app-5"
+      },
+      "region": "us-central1"
+    },
+    "observer": {
+      "hostname": "elastic-agent-apm-server-6fbbdf48b-5zmtx",
+      "type": "apm-server",
+      "version": "8.19.4"
+    },
+    "@timestamp": "2025-10-24T15:12:45.063Z",
+    "data_stream": {
+      "namespace": "default",
+      "type": "logs",
+      "dataset": "apm.error"
+    },
+    "service": {
+      "node": {
+        "name": "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+      },
+      "environment": "production",
+      "name": "apm-ingest-service",
+      "runtime": {
+        "name": "gc",
+        "version": "go1.25.1"
+      },
+      "language": {
+        "name": "go",
+        "version": "go1.25.1"
+      },
+      "version": "git-a8f1614cb4a5"
+    },
+    "host": {
+      "hostname": "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p",
+      "os": {
+        "platform": "linux"
+      },
+      "ip": [
+        "100.64.175.107"
+      ],
+      "name": "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p",
+      "architecture": "arm64"
+    },
+    "event": {
+      "dataset": "apm.error"
+    },
+    "timestamp": {
+      "us": 1761318765063726
+    }
+  },
+  "fields": {
+    "error.log.stacktrace.exclude_from_grouping": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "host.name.text": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "host.hostname": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "process.pid": [
+      1
+    ],
+    "service.language.name": [
+      "go"
+    ],
+    "cloud.availability_zone": [
+      "us-central1-c"
+    ],
+    "process.title.text": [
+      "apm-ingest-serv"
+    ],
+    "error.log.stacktrace.module": [
+      "go.elastic.co/apm/module/apmzap/v2",
+      "go.elastic.co/apm/module/apmzap/v2",
+      "go.uber.org/zap/zapcore",
+      "go.uber.org/zap",
+      "github.com/elastic/apm-ingest-service/internal/server",
+      "github.com/labstack/echo/v4",
+      "github.com/labstack/echo/v4",
+      "net/http",
+      "net/http",
+      "runtime"
+    ],
+    "agent.name.text": [
+      "go"
+    ],
+    "kubernetes.namespace": [
+      "apm-ingest-service"
+    ],
+    "processor.event": [
+      "error"
+    ],
+    "error.log.stacktrace.library_frame": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "agent.name": [
+      "go"
+    ],
+    "labels.cloud_provider": [
+      "gcp"
+    ],
+    "host.name": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "labels.orchestrator_environment": [
+      "production"
+    ],
+    "cloud.region": [
+      "us-central1"
+    ],
+    "cloud.instance.name.text": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "service.language.name.text": [
+      "go"
+    ],
+    "service.runtime.name.text": [
+      "gc"
+    ],
+    "error.exception.module": [
+      "go.elastic.co/ecszap/internal"
+    ],
+    "service.runtime.version": [
+      "go1.25.1"
+    ],
+    "data_stream.type": [
+      "logs"
+    ],
+    "error.log.message": [
+      "health check failed"
+    ],
+    "host.architecture": [
+      "arm64"
+    ],
+    "labels.orchestrator_channel": [
+      "default"
+    ],
+    "cloud.provider": [
+      "gcp"
+    ],
+    "timestamp.us": [
+      1761318765063726
+    ],
+    "kubernetes.node.name.text": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "observer.type": [
+      "apm-server"
+    ],
+    "observer.version": [
+      "8.19.4"
+    ],
+    "service.name.text": [
+      "apm-ingest-service"
+    ],
+    "agent.version": [
+      "2.7.1"
+    ],
+    "process.title": [
+      "apm-ingest-serv"
+    ],
+    "labels.cloud_region": [
+      "us-central1"
+    ],
+    "error.grouping_key": [
+      "6169416abf1430c3bc7f515b77a60d31"
+    ],
+    "kubernetes.node.name": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "error.log.stacktrace.line.number": [
+      142,
+      97,
+      253,
+      263,
+      45,
+      581,
+      668,
+      3340,
+      2109,
+      1268
+    ],
+    "error.culprit": [
+      "newHealthHandler.func1"
+    ],
+    "kubernetes.pod.name.text": [
+      "apm-ingest-service-us-central1-c-99d96d56d-5x266"
+    ],
+    "labels.orchestrator_deploymentslice": [
+      "production-ds-3"
+    ],
+    "error.exception.type": [
+      "ecsError"
+    ],
+    "service.node.name": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "kubernetes.pod.uid": [
+      "3af8f096-f969-4d30-a33e-78080ee558e4"
+    ],
+    "service.node.name.text": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "cloud.instance.id": [
+      "4232753933272295722"
+    ],
+    "host.ip": [
+      "100.64.175.107"
+    ],
+    "labels.orchestrator_target": [
+      "production"
+    ],
+    "error.log.stacktrace.function": [
+      "(*contextCore).Write",
+      "(*Core).Write",
+      "(*CheckedEntry).Write",
+      "(*Logger).Error",
+      "newHealthHandler.func1",
+      "(*Echo).add.func1",
+      "(*Echo).ServeHTTP",
+      "serverHandler.ServeHTTP",
+      "(*conn).serve",
+      "goexit"
+    ],
+    "kubernetes.pod.name": [
+      "apm-ingest-service-us-central1-c-99d96d56d-5x266"
+    ],
+    "service.environment": [
+      "production"
+    ],
+    "service.name": [
+      "apm-ingest-service"
+    ],
+    "data_stream.namespace": [
+      "default"
+    ],
+    "service.runtime.name": [
+      "gc"
+    ],
+    "process.args": [
+      "/ko-app/apm-ingest-service"
+    ],
+    "error.exception.handled": [
+      true
+    ],
+    "labels.orchestrator_cluster_name": [
+      "prd-gcpusc1-cp-app-5"
+    ],
+    "message": [
+      "health check failed"
+    ],
+    "observer.hostname": [
+      "elastic-agent-apm-server-6fbbdf48b-5zmtx"
+    ],
+    "@timestamp": [
+      "2025-10-24T15:12:45.063Z"
+    ],
+    "service.version": [
+      "git-a8f1614cb4a5"
+    ],
+    "error.log.level": [
+      "error"
+    ],
+    "host.os.platform": [
+      "linux"
+    ],
+    "data_stream.dataset": [
+      "apm.error"
+    ],
+    "error.id": [
+      "00e6d60dc1e51ac718364579f856da2e"
+    ],
+    "service.language.version": [
+      "go1.25.1"
+    ],
+    "error.grouping_name": [
+      "health check failed"
+    ],
+    "error.log.stacktrace.filename": [
+      "core.go",
+      "core.go",
+      "entry.go",
+      "logger.go",
+      "health.go",
+      "echo.go",
+      "echo.go",
+      "server.go",
+      "server.go",
+      "asm_arm64.s"
+    ],
+    "event.dataset": [
+      "apm.error"
+    ],
+    "cloud.instance.name": [
+      "gke-prd-gcpusc1-cp-app-5-mgencx243ea7-61a98118-n29p"
+    ],
+    "cloud.project.id": [
+      "esp-prod-usc1-cp-app-5"
+    ],
+    "error.exception.message": [
+      "unable to dial: dial tcp: lookup mis-warpstream-agent-headless-unified.mis-warpstream-agent.svc.cluster.local: operation was canceled"
+    ]
+  }
+}

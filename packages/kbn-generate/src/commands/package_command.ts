@@ -37,12 +37,12 @@ export const PackageCommand: GenerateCommand = {
   description: 'Generate a basic package',
   usage: 'node scripts/generate package [pkgId]',
   flags: {
-    boolean: ['web', 'force', 'dev'],
-    string: ['dir', 'owner', 'group', 'visibility', 'license'],
+    boolean: ['force', 'dev'],
+    string: ['dir', 'owner', 'group', 'visibility', 'license', 'type'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
-      --web          Build webpack-compatible version of sources for this package. If your package is intended to be
-                      used in the browser and Node.js then you need to opt-into these sources being created.
+      --type         Package type: "server", "common", or "browser". Determines kibana.jsonc type field.
+                      If not specified, you will be asked interactively.
       --dir          Specify where this package will be written.
                       defaults to [./packages/{kebab-case-version-of-name}]
       --force        If the --dir already exists, delete it before generation
@@ -73,14 +73,27 @@ export const PackageCommand: GenerateCommand = {
       throw createFlagError(`package id must start with @kbn/ and have no spaces`);
     }
 
-    const web = !!flags.web;
     const dev = !!flags.dev;
+
+    type PackageType = 'server' | 'common' | 'browser';
+    const packageType =
+      (flags.type as PackageType | undefined) ||
+      (
+        await inquirer.prompt<{ type: PackageType }>({
+          type: 'list',
+          default: 'common',
+          choices: [
+            { name: 'Browser (shared-browser)', value: 'browser' },
+            { name: 'Common (shared-common)', value: 'common' },
+            { name: 'Server (shared-server)', value: 'server' },
+          ],
+          name: 'type',
+          message: 'What type of package is this?',
+        })
+      ).type;
+
     let group = flags.group as KibanaGroup | undefined;
     let visibility = flags.visibility as 'private' | 'shared' | undefined;
-
-    if (group !== 'platform') {
-      visibility = 'private';
-    }
 
     const license = flags.license as 'oss' | 'x-pack' | undefined;
     let calculatedPackageDir: string;
@@ -139,6 +152,10 @@ export const PackageCommand: GenerateCommand = {
             message: `What group is this package part of?`,
           })
         ).group;
+
+      if (group !== 'platform') {
+        visibility = 'private';
+      }
 
       let xpack: boolean;
 
@@ -235,10 +252,11 @@ export const PackageCommand: GenerateCommand = {
       await render.toFile(src, dest, {
         pkg: {
           id: pkgId,
-          web,
+          packageType,
           dev,
           owner,
           group,
+          web: packageType === 'browser',
           visibility,
           directoryName: Path.basename(normalizedRepoRelativeDir),
           normalizedRepoRelativeDir,

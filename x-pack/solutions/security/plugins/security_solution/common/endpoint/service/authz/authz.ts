@@ -108,6 +108,9 @@ export const calculateEndpointAuthz = (
   const canReadWorkflowInsights = hasAuth('readWorkflowInsights');
   const canWriteWorkflowInsights = hasAuth('writeWorkflowInsights');
 
+  const canReadScriptsLibrary = hasAuth('readScriptsManagement');
+  const canWriteScriptsLibrary = hasAuth('writeScriptsManagement');
+
   // These are currently tied to the superuser role
   const canReadAdminData = hasSuperuserRole;
   const canWriteAdminData = hasSuperuserRole;
@@ -153,6 +156,12 @@ export const calculateEndpointAuthz = (
     canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     canWriteScanOperations: canWriteScanOperations && isEnterpriseLicense,
+
+    // ---------------------------------------------------------
+    // Scripts Library Management
+    // ---------------------------------------------------------
+    canReadScriptsLibrary: canReadScriptsLibrary && isEnterpriseLicense,
+    canWriteScriptsLibrary: canWriteScriptsLibrary && isEnterpriseLicense,
 
     // ---------------------------------------------------------
     // artifacts
@@ -251,6 +260,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteWorkflowInsights: false,
     canReadAdminData: false,
     canWriteAdminData: false,
+    canReadScriptsLibrary: false,
+    canWriteScriptsLibrary: false,
   };
 };
 

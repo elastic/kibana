@@ -1,0 +1,67 @@
+{
+  "id": "dataConnectors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "dataConnectors",
+        "id": "def-common.DATA_CONNECTORS_FULL_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_CONNECTORS_FULL_TITLE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_connectors/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataConnectors",
+        "id": "def-common.DATA_CONNECTORS_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_CONNECTORS_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/app/data_connectors\""
+        ],
+        "path": "x-pack/platform/plugins/shared/data_connectors/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataConnectors",
+        "id": "def-common.DATA_CONNECTORS_SHORT_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_CONNECTORS_SHORT_TITLE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_connectors/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

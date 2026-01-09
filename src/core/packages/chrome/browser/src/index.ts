@@ -12,7 +12,7 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeStart } from './contracts';
+export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
   ChromeHelpExtension,
@@ -35,7 +35,6 @@ export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
-  PanelSelectedNode,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -46,16 +45,8 @@ export type {
   SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
   NodeDefinition,
-  NodeDefinitionWithChildren,
   RenderAs as NodeRenderAs,
-  EuiThemeSize,
   NavigationTreeDefinition,
-  GroupDefinition,
-  ItemDefinition,
-  PresetDefinition,
-  RecentlyAccessedDefinition,
-  NavigationGroupPreset,
-  RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,

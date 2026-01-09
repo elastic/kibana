@@ -20,7 +20,7 @@ import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../state_management/redux';
 import type { DiscoverCustomization } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
@@ -47,9 +47,13 @@ async function mountComponent(
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+      },
+    })
+  );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
       dataRequestParams: {
@@ -128,17 +132,24 @@ describe('Discover documents layout', () => {
       grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
     } as DiscoverAppState;
     const container = getDiscoverStateMock({});
-    container.appState.update(state);
+    container.internalState.dispatch(
+      container.injectCurrentTab(internalStateActions.updateAppState)({ appState: state })
+    );
 
     onResize(
       {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      container
+      container.getCurrentTab().appState.grid,
+      (grid) => {
+        container.internalState.dispatch(
+          container.injectCurrentTab(internalStateActions.updateAppState)({ appState: { grid } })
+        );
+      }
     );
 
-    expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
+    expect(container.getCurrentTab().appState.grid?.columns?.someField.width).toEqual(206);
   });
 
   test('should render customisations', async () => {

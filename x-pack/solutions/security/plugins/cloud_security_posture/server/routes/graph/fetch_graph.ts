@@ -16,6 +16,11 @@ import {
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  GRAPH_ACTOR_ENTITY_FIELDS,
+  GRAPH_TARGET_ENTITY_FIELDS,
+} from '@kbn/cloud-security-posture-common/constants';
+import { generateFieldHintCases, concatPropIfExists } from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
@@ -116,8 +121,9 @@ const buildDslFilter = (
         ? []
         : [
             {
-              exists: {
-                field: 'target.entity.id',
+              bool: {
+                should: GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({ exists: { field } })),
+                minimum_should_match: 1,
               },
             },
           ]),
@@ -172,60 +178,134 @@ const buildEsqlQuery = ({
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
+  const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
+
+  // Generate target entity ID collection logic
+  // All fields use the same pattern: only append if not null
+  // This ensures we filter out null values and only collect actual target entity IDs
+  const targetEntityIdEvals = [
+    // Initialize targetEntityId as null
+    '| EVAL targetEntityId = TO_STRING(null)',
+    // For each target field, append if not null
+    ...GRAPH_TARGET_ENTITY_FIELDS.map((field) => {
+      return `| EVAL targetEntityId = CASE(
+    ${field} IS NULL,
+    targetEntityId,
+    CASE(
+      targetEntityId IS NULL,
+      ${field},
+      MV_DEDUPE(MV_APPEND(targetEntityId, ${field}))
+    )
+  )`;
+    }),
+  ].join('\n');
+
+  // Generate actor and target field hint CASE statements
+  const actorFieldHintCases = generateFieldHintCases(GRAPH_ACTOR_ENTITY_FIELDS, 'actorEntityId');
+  const targetFieldHintCases = generateFieldHintCases(GRAPH_TARGET_ENTITY_FIELDS, 'targetEntityId');
+
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+| EVAL actorEntityId = COALESCE(
+    ${actorFieldsCoalesce}
+  )
+| WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
+| EVAL actorEntityId = COALESCE(
+    ${actorFieldsCoalesce}
+  )
+${targetEntityIdEvals}
+| MV_EXPAND actorEntityId
+| MV_EXPAND targetEntityId
+| EVAL actorEntityFieldHint = CASE(
+${actorFieldHintCases},
+    ""
+  )
+| EVAL targetEntityFieldHint = CASE(
+${targetFieldHintCases},
+    ""
+)
 ${
   isEnrichPolicyExists
     ? `
-| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+
+| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
 
 // Construct actor and target entities data
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
-      CASE (
+// Build entity field conditionally - only include fields that have values
+| EVAL actorEntityField = CASE(
+    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      ${concatPropIfExists('name', 'actorEntityName', false)},
+      ${concatPropIfExists('type', 'actorEntityType')},
+      ${concatPropIfExists('sub_type', 'actorEntitySubType')},
+      CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
         ""
       ),
-    "}",
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
-      CASE (
+      ",\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}")
+  )
+| EVAL targetEntityField = CASE(
+    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      ${concatPropIfExists('name', 'targetEntityName', false)},
+      ${concatPropIfExists('type', 'targetEntityType')},
+      ${concatPropIfExists('sub_type', 'targetEntitySubType')},
+      CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
         ""
       ),
-    "}",
-  "}")
+      ",\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}")
+  )
 `
     : `
-// Fallback to null string with non-enriched actor
+| EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",
+    "\\"availableInEntityStore\\":false",
+    ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+  "}")
+| EVAL targetEntityField = CONCAT(",\\"entity\\":", "{",
+    "\\"availableInEntityStore\\":false",
+    ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+  "}")
+// Fallback to null string with non-enriched entity metadata
+| EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
-| EVAL actorDocData = TO_STRING(null)
-
-// Fallback to null string with non-enriched target
+| EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
-| EVAL targetDocData = TO_STRING(null)
 `
 }
+// Create actor and target data with entity data
+
+| EVAL actorDocData = CONCAT("{",
+    "\\"id\\":\\"", actorEntityId, "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
+    actorEntityField,
+  "}")
+| EVAL targetDocData = CONCAT("{",
+    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
+    targetEntityField,
+  "}")
+
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
@@ -259,64 +339,45 @@ ${
         : ''
     }
   "}")
-
-// Construct actor and target entity groups
-| EVAL actorEntityGroup = CASE(
-    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
-    CONCAT(actorEntityType, ":", actorEntitySubType),
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    actor.entity.id
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
-    CONCAT(targetEntityType, ":", targetEntitySubType),
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    target.entity.id
-  )
-
-| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actor.entity.id)
-| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, target.entity.id)
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    ""
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    ""
-  )
 | STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
   // actor attributes
-  actorEntityGroup = VALUES(actorEntityGroup),
-  actorIds = VALUES(actor.entity.id),
-  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
-  actorEntityType = VALUES(actorEntityType),
-  actorLabel = VALUES(actorLabel),
-  actorsDocData = VALUES(actorDocData),
+  actorNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    MV_COUNT(VALUES(actorEntityId)) == 1, TO_STRING(VALUES(actorEntityId)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(actorEntityId)), ","))
+  ),
+  actorIdsCount = COUNT_DISTINCT(actorEntityId),
+  actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
+  actorsDocData = VALUES(actorDocData),
   // target attributes
-  targetEntityGroup = VALUES(targetEntityGroup),
-  targetIds = VALUES(target.entity.id),
-  targetIdsCount = COUNT_DISTINCT(target.entity.id),
-  targetEntityType = VALUES(targetEntityType),
-  targetLabel = VALUES(targetLabel),
+  targetNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    COUNT_DISTINCT(targetEntityId) == 0, null,
+    CASE(
+      MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
+      MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))
+    )
+  ),
+  targetIdsCount = COUNT_DISTINCT(targetEntityId),
+  targetEntityName = VALUES(targetEntityName),
+  targetHostIp = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
-      actorEntityGroup,
-      targetEntityGroup,
+      actorEntityType,
+      actorEntitySubType,
+      targetEntityType,
+      targetEntitySubType,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
+| SORT action DESC, isOrigin`;
 
   return query;
 };

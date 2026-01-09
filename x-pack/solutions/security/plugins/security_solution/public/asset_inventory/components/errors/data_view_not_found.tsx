@@ -58,6 +58,7 @@ export const DataViewNotFound = ({
             footer={
               error ? (
                 <EuiCallOut
+                  announceOnMount
                   onDismiss={reset}
                   title={
                     <FormattedMessage

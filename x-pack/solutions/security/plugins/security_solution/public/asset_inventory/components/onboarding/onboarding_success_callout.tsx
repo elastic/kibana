@@ -21,6 +21,7 @@ export const OnboardingSuccessCallout = () => {
   return isOnboardingSuccessCalloutVisible ? (
     <>
       <EuiCallOut
+        announceOnMount
         onDismiss={hideOnboardingSuccessCallout}
         title={
           <FormattedMessage

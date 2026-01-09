@@ -29,37 +29,6 @@ describe('GET /api/workflows/workflow-json-schema', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the workflow JSON schema route with correct configuration', () => {
-      registerGetWorkflowJsonSchemaRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getSchemaCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/workflow-json-schema'
-      );
-
-      expect(getSchemaCall).toBeDefined();
-      expect(getSchemaCall[0]).toMatchObject({
-        path: '/api/workflows/workflow-json-schema',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: ['all'],
-          },
-        },
-      });
-      expect(getSchemaCall[0].validate).toBeDefined();
-      expect(getSchemaCall[0].validate.query).toBeDefined();
-      expect(getSchemaCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

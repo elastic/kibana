@@ -72,6 +72,7 @@ const colorByValueBase = schema.object({
       }),
     ]),
     {
+      maxSize: 100,
       validate(steps) {
         if (
           steps.some((step) => step.type === 'from') &&
@@ -156,9 +157,10 @@ const categoricalColorMappingSchema = schema.object({
   }),
   mapping: schema.arrayOf(
     schema.object({
-      values: schema.arrayOf(serializedValueSchema),
+      values: schema.arrayOf(serializedValueSchema, { maxSize: 1000 }),
       color: colorDefSchema,
-    })
+    }),
+    { maxSize: 1000 }
   ),
   unassignedColor: schema.maybe(colorCodeSchema),
 });
@@ -171,15 +173,16 @@ const gradientColorMappingSchema = schema.object({
   mapping: schema.maybe(
     schema.arrayOf(
       schema.object({
-        values: schema.arrayOf(serializedValueSchema),
-      })
+        values: schema.arrayOf(serializedValueSchema, { maxSize: 100 }),
+      }),
+      { maxSize: 100 }
     )
   ),
-  gradient: schema.maybe(schema.arrayOf(colorDefSchema)),
+  gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
   unassignedColor: schema.maybe(colorCodeSchema),
 });
 
-const colorMappingSchema = schema.oneOf([
+export const colorMappingSchema = schema.oneOf([
   /**
    * Categorical color mapping: assigns colors from a palette to specific values.
    */

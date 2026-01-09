@@ -160,7 +160,7 @@ export function DataViewEditor({
       </EuiFlexItem>
       <EuiFlexItem css={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
         {errorMessage === mustMatchError ? (
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount color="warning">
             <FormattedMessage
               id="xpack.ml.dataDrift.indexPatternsEditor.notMatchDetail"
               defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.

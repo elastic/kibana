@@ -6,6 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/transport/lib/types';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { responseActionsClientMock } from '../mocks';
@@ -30,7 +31,7 @@ const createConstructorOptionsMock = (): ResponseActionsClientOptions => {
           const searchResponse = metadataGenerator.toEsSearchResponse([
             metadataGenerator.toEsSearchHit(
               metadataGenerator.generate({
-                agent: { id: '1-2-3' },
+                agent: { id: '1-2-3', version: kibanaPackageJson.version },
                 elastic: { agent: { id: '1-2-3' } },
               })
             ),

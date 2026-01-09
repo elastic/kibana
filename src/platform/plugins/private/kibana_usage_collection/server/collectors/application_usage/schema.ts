@@ -135,6 +135,7 @@ export const applicationUsageSchema = {
   agent_builder: commonSchema,
   apm: commonSchema,
   canvas: commonSchema,
+  cloud_connect: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
   searchInferenceEndpoints: commonSchema,
@@ -146,6 +147,7 @@ export const applicationUsageSchema = {
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchRedirect: commonSchema,
+  searchGettingStarted: commonSchema,
   searchHomepage: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
@@ -174,6 +176,8 @@ export const applicationUsageSchema = {
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
+  security_reset_session: commonSchema,
+  security_unauthenticated: commonSchema,
   securitySolutionUI: commonSchema,
   /**
    * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement

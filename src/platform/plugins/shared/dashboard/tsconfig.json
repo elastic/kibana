@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -11,7 +11,6 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/share-plugin",
-    "@kbn/controls-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/url-forwarding-plugin",
     "@kbn/usage-collection-plugin",
@@ -36,7 +35,6 @@
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/test-jest-helpers",
     "@kbn/core-application-browser",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-button-exit-full-screen",
@@ -48,7 +46,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/object-versioning",
     "@kbn/core-saved-objects-api-server",
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-table-list-view-table",
@@ -90,9 +87,16 @@
     "@kbn/data-service-server",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
+    "@kbn/controls-renderer",
     "@kbn/presentation-util",
-    "@kbn/background-search",
-    "@kbn/react-query"
+    "@kbn/security-plugin-types-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/content-management-access-control-public",
+    "@kbn/content-management-access-control-server",
+    "@kbn/react-query",
+    "@kbn/core-http-server",
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

@@ -48,6 +48,26 @@ const listItems = [
       defaultMessage: 'Comment/uncomment line',
     }),
   },
+  {
+    title: (
+      <>
+        <kbd>{COMMAND_KEY}</kbd> <kbd>K</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
+      defaultMessage: 'Open quick search',
+    }),
+  },
+  {
+    title: (
+      <>
+        <kbd>{COMMAND_KEY}</kbd> <kbd>I</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
+      defaultMessage: 'Prettify query',
+    }),
+  },
 ];
 
 export function KeyboardShortcuts() {

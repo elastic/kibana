@@ -9,13 +9,14 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
 const ChartSize = 250;
+const visualizationId = 'aiValueAlertProcessingDonut';
 interface Props {
   attackAlertIds: string[];
   from: string;
@@ -69,11 +70,11 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         }
         height={ChartSize}
         width={'100%'}
-        id={`open`}
+        id={visualizationId}
         isDonut={true}
         donutTitleLabel={'Total alerts processed'}
         donutTextWrapperClassName={'donutText'}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.alerts}
         timerange={{ from, to }}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,

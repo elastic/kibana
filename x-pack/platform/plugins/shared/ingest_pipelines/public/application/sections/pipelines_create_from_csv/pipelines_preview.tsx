@@ -63,7 +63,12 @@ export const PipelinesPreview: FC<Props> = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         {!hasError && (
-          <EuiCallOut title="Processor definitions generated" color="success" iconType="check">
+          <EuiCallOut
+            announceOnMount
+            title="Processor definitions generated"
+            color="success"
+            iconType="check"
+          >
             <EuiText>
               <p>
                 <FormattedMessage

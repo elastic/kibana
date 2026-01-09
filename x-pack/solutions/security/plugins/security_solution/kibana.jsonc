@@ -19,6 +19,7 @@
       "alerting",
       "cases",
       "cloud",
+      "cloudDefend",
       "cloudSecurityPosture",
       "contentManagement",
       "dashboard",
@@ -32,6 +33,7 @@
       "fieldFormats",
       "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -61,6 +63,7 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -76,7 +79,9 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "agentBuilder",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -87,7 +92,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"

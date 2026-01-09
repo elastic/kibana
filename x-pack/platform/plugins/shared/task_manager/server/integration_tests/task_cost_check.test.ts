@@ -14,6 +14,7 @@ import { TaskCost } from '../task';
 import { setupTestServers } from './lib';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { sortBy } from 'lodash';
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 jest.mock('../task_type_dictionary', () => {
   const actual = jest.requireActual('../task_type_dictionary');
@@ -24,6 +25,10 @@ jest.mock('../task_type_dictionary', () => {
     }),
   };
 });
+
+const taskTypeIdsFromSpecs = new Set(
+  Object.values(connectorsSpecs).map(({ metadata }) => `actions:${metadata.id}`)
+);
 
 // Notify response-ops if a task sets a cost to something other than `Normal`
 describe('Task cost checks', () => {
@@ -51,7 +56,11 @@ describe('Task cost checks', () => {
   });
 
   it('detects tasks with cost definitions', async () => {
-    const taskTypes = taskTypeDictionary.getAllDefinitions();
+    const taskTypes = taskTypeDictionary
+      .getAllDefinitions()
+      // Skip review of task types from connector specs
+      .filter((taskType: TaskDefinition) => !taskTypeIdsFromSpecs.has(taskType.type));
+
     const taskTypesWithCost = sortBy(
       taskTypes
         .map((taskType: TaskDefinition) =>

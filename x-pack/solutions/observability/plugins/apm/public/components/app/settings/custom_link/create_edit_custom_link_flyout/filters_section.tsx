@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,48 +15,60 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
-import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
+import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 
 export function FiltersSection({
   filters,
-  onChangeFilters,
+  setFilters,
 }: {
   filters: Filter[];
-  onChangeFilters: (filters: Filter[]) => void;
+  setFilters: (filters: Filter[]) => void;
 }) {
   const onChangeFilter = useCallback(
-    (key: Filter['key'], value: Filter['value'], idx: number) => {
-      const newFilters = [...filters];
-      newFilters[idx] = { key, value };
-      onChangeFilters(newFilters);
+    (key: Filter['key'], value: Filter['value'], id: string) => {
+      const newFilters = filters.map((item) => (item.id === id ? { id, key, value } : item));
+
+      setFilters(newFilters);
     },
-    [filters, onChangeFilters]
+    [filters, setFilters]
   );
 
   const start = useMemo(() => moment().subtract(24, 'h').toISOString(), []);
   const end = useMemo(() => moment().toISOString(), []);
 
-  const onRemoveFilter = (idx: number) => {
+  const onRemoveFilter = (id: string) => {
     // remove without mutating original array
-    const newFilters = [...filters];
-    newFilters.splice(idx, 1);
+    const newFilters = filters.filter((item) => item.id !== id);
 
     // if there is only one item left it should not be removed
     // but reset to empty
     if (isEmpty(newFilters)) {
-      onChangeFilters([{ key: '', value: '' }]);
+      setFilters([{ key: '', value: '', id }]);
     } else {
-      onChangeFilters(newFilters);
+      setFilters(newFilters);
     }
   };
 
   const handleAddFilter = () => {
-    onChangeFilters([...filters, { key: '', value: '' }]);
+    setFilters([...filters, { id: uuidv4(), key: '', value: '' }]);
   };
 
+  useEffect(() => {
+    if (filters?.length && isEmpty(filters[0].key) && !filters[0]?.id) {
+      const initialFiltersWithId = filters.map((item) => {
+        return { ...item, id: uuidv4() };
+      });
+
+      setFilters(initialFiltersWithId);
+    }
+
+    return () => {};
+  }, [filters, setFilters]);
   return (
     <>
       <EuiTitle size="xs">
@@ -77,9 +88,12 @@ export function FiltersSection({
 
       <EuiSpacer size="s" />
 
-      {filters.map((filter, idx) => {
+      {filters.map((filter) => {
         const { key, value } = filter;
-        const filterId = `filter-${idx}`;
+        if (!filter.id) {
+          filter.id = uuidv4();
+        }
+        const filterId = filter.id;
         const selectOptions = getSelectOptions(filters, key);
         return (
           <React.Fragment key={filterId}>
@@ -102,7 +116,7 @@ export function FiltersSection({
                   })}
                   onChange={(e) =>
                     // set value to empty string to reset value when new field is selected
-                    onChangeFilter(e.target.value as FilterKey, '', idx)
+                    onChangeFilter(e.target.value as FilterKey, '', filterId)
                   }
                   isInvalid={!isEmpty(value) && (isEmpty(key) || key === DEFAULT_OPTION.value)}
                 />
@@ -116,11 +130,14 @@ export function FiltersSection({
                     'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                     { defaultMessage: 'Value' }
                   )}
-                  onChange={(selectedValue) => onChangeFilter(key, selectedValue as string, idx)}
+                  onChange={(selectedValue) =>
+                    onChangeFilter(key, selectedValue as string, filterId)
+                  }
                   defaultValue={value}
                   isInvalid={!isEmpty(key) && isEmpty(value)}
                   start={start}
                   end={end}
+                  shouldReset={isEmpty(key) || key === DEFAULT_OPTION.value}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -133,7 +150,7 @@ export function FiltersSection({
                   )}
                   data-test-subj="apmCustomLinkFiltersSectionButton"
                   iconType="trash"
-                  onClick={() => onRemoveFilter(idx)}
+                  onClick={() => onRemoveFilter(filterId)}
                   disabled={!value && !key && filters.length === 1}
                 />
               </EuiFlexItem>
@@ -148,13 +165,23 @@ export function FiltersSection({
       <AddFilterButton
         onClick={handleAddFilter}
         // Disable button when user has already added all items available
-        isDisabled={filters.length === FILTER_SELECT_OPTIONS.length - 1}
+        // or item is not properly setup (does not have key or value)
+        isDisabled={
+          filters.length === FILTER_SELECT_OPTIONS.length - 1 ||
+          filters.some((filter) => isEmpty(filter.key) || isEmpty(filter.value))
+        }
       />
     </>
   );
 }
 
-function AddFilterButton({ onClick, isDisabled }: { onClick: () => void; isDisabled: boolean }) {
+export function AddFilterButton({
+  onClick,
+  isDisabled,
+}: {
+  onClick: () => void;
+  isDisabled: boolean;
+}) {
   return (
     <EuiButtonEmpty
       aria-label={i18n.translate(

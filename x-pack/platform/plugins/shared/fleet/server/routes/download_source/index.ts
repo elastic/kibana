@@ -60,9 +60,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: getDownloadSourcesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(DownloadSourceResponseSchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -99,9 +101,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneDownloadSourcesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetDownloadSourceResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -131,9 +135,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PutDownloadSourcesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetDownloadSourceResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -162,9 +168,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostDownloadSourcesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetDownloadSourceResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -194,9 +202,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeleteDownloadSourcesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteDownloadSourcesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

@@ -34,9 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/internal/ml/saved_objects/update_jobs_spaces`)
+      .post(`/api/ml/saved_objects/update_jobs_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'))
+      .set(getCommonRequestHeader('2023-10-31'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

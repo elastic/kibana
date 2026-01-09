@@ -27,7 +27,9 @@
           "Readable",
           ")[], options: ",
           "TransformOptions",
-          " | undefined) => ",
+          "<",
+          "Transform",
+          "> | undefined) => ",
           "PassThrough"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
@@ -62,7 +64,9 @@
             ],
             "signature": [
               "TransformOptions",
-              " | undefined"
+              "<",
+              "Transform",
+              "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
@@ -471,6 +475,41 @@
               "object"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
+        "id": "def-server.toValidIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "toValidIndexName",
+        "description": [
+          "Converts a given string into a valid Elasticsearch index name."
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-utils/src/index/to_valid_index_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utils",
+            "id": "def-server.toValidIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-utils/src/index/to_valid_index_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

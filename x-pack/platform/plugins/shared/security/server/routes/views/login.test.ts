@@ -303,6 +303,68 @@ describe('Login view routes', () => {
       }
     });
 
+    it('returns `origin` configuration for providers.', async () => {
+      license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
+
+      const request = httpServerMock.createKibanaRequest();
+      const contextMock = coreMock.createRequestHandlerContext();
+
+      const cases: Array<[LoginSelectorProvider[], ConfigType['authc']]> = [
+        [[], getAuthcConfig({ providers: { basic: { basic1: { order: 0, enabled: false } } } })],
+        [
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              origin: 'http://example.com',
+              usesLoginForm: true,
+              showInSelector: true,
+              icon: 'logoElasticsearch',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({
+            providers: { basic: { basic1: { order: 0, origin: 'http://example.com' } } },
+          }),
+        ],
+        [
+          [
+            {
+              name: 'token1',
+              type: 'token',
+              origin: ['http://example.com', 'http://example-2.com'],
+              usesLoginForm: true,
+              showInSelector: true,
+              icon: 'logoElasticsearch',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({
+            providers: {
+              token: {
+                token1: { order: 0, origin: ['http://example.com', 'http://example-2.com'] },
+              },
+            },
+          }),
+        ],
+      ];
+
+      for (const [providers, authcConfig] of cases) {
+        config.authc = authcConfig;
+
+        const expectedPayload = expect.objectContaining({
+          selector: { enabled: false, providers },
+        });
+        await expect(
+          routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
+        ).resolves.toEqual({
+          options: { body: expectedPayload },
+          payload: expectedPayload,
+          status: 200,
+        });
+      }
+    });
+
     it('correctly returns `selector` information.', async () => {
       license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
 

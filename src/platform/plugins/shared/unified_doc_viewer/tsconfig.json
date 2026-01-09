@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -55,7 +55,9 @@
     "@kbn/css-utils",
     "@kbn/storybook",
     "@kbn/esql-composer",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/core-chrome-layout-constants"
   ],
   "exclude": ["target/**/*"]
 }

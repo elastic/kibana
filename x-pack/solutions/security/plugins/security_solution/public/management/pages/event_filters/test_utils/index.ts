@@ -133,6 +133,7 @@ export const esResponseData = () => ({
                 Ext: {
                   variant: 'Windows Pro',
                 },
+                type: 'linux',
                 name: 'Linux',
                 family: 'Debian OS',
                 version: '10.0',

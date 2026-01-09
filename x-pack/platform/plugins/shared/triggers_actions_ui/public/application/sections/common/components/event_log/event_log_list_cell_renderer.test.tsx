@@ -71,7 +71,7 @@ describe('EventLogListCellRenderer', () => {
   });
 
   afterAll(() => {
-    window.location = originalLocation;
+    window.location = originalLocation as string & Location;
   });
 
   beforeEach(() => {

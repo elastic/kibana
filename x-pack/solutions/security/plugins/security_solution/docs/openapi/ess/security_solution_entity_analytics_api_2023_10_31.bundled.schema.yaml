@@ -746,6 +746,60 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/engines:
+    delete:
+      operationId: DeleteEntityEngines
+      parameters:
+        - description: >-
+            The entity type of the engine ('user', 'host', 'service',
+            'generic').
+          examples:
+            hostAndService:
+              value: host,service
+          in: query
+          name: entityTypes
+          required: false
+          schema:
+            description: >-
+              Array of engine types to delete. Empty by default, which results
+              in all the engines being deleted.
+            items:
+              $ref: '#/components/schemas/EntityType'
+            type: array
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteEntityEnginesExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted:
+                      - host
+                    still_running:
+                      - generic
+                      - user
+                      - service
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+                  still_running:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+          description: Successful response
+      summary: Delete Entity Engines
+      tags:
+        - Security Entity Analytics API
     get:
       operationId: ListEntityEngines
       responses:
@@ -770,12 +824,22 @@ paths:
       operationId: DeleteEntityEngine
       parameters:
         - description: The entity type of the engine (either 'user' or 'host').
+          examples:
+            host:
+              value: host
           in: path
           name: entityType
           required: true
           schema:
             $ref: '#/components/schemas/EntityType'
         - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+        - deprecated: true
+          description: Control flag to also delete the entity data.
           in: query
           name: data
           required: false
@@ -785,6 +849,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEntityEngineExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
@@ -984,6 +1053,55 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/{entityType}:
+    delete:
+      description: >
+        Delete a single entity in Entity Store.
+
+        The entity will be immediately deleted from the latest index.  It will
+        remain available in historical snapshots if it has been snapshotted. 
+        The delete operation does not prevent the entity from being recreated if
+        it is observed again in the future. 
+      operationId: DeleteSingleEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: >-
+                    Identifier of the entity to be deleted, commonly entity.id
+                    value.
+                  type: string
+              required:
+                - id
+        description: Schema for the deleting entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response. Entity deleted.
+        '404':
+          description: Entity Not Found. No entity with this ID and Type exists.
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Delete an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
     put:
       description: >
         Update or create an entity in Entity Store.
@@ -1040,56 +1158,6 @@ paths:
             Operation on an uninitialized Engine or in a cluster without CRUD
             API Enabled
       summary: Upsert an entity in Entity Store
-      tags:
-        - Security Entity Analytics API
-  /api/entity_store/entities/{entityType}/{entityId}:
-    delete:
-      description: >
-        Delete a single entity in Entity Store.
-
-        The entity will be immediately deleted from the latest index.  It will
-        remain available in historical snapshots if it has been snapshotted. 
-        The delete operation does not prevent the entity from being recreated if
-        it is observed again in the future. 
-      operationId: DeleteSingleEntity
-      parameters:
-        - in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/EntityType'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  description: >-
-                    Identifier of the entity to be deleted, commonly entity.id
-                    value.
-                  type: string
-              required:
-                - id
-        description: Schema for the deleting entity
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  deleted:
-                    type: boolean
-          description: Successful response. Entity deleted.
-        '404':
-          description: Entity Not Found. No entity with this ID and Type exists.
-        '503':
-          description: >-
-            Operation on an uninitialized Engine or in a cluster without CRUD
-            API Enabled
-      summary: Delete an entity in Entity Store
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/bulk:
@@ -1294,6 +1362,25 @@ paths:
                 exclude_alert_tags:
                   items:
                     type: string
+                  type: array
+                filters:
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        items:
+                          enum:
+                            - host
+                            - user
+                            - service
+                          type: string
+                        type: array
+                      filter:
+                        description: KQL filter string
+                        type: string
+                    required:
+                      - entity_types
+                      - filter
                   type: array
                 range:
                   type: object
@@ -1951,6 +2038,28 @@ components:
           items:
             $ref: '#/components/schemas/RiskScoreInput'
           type: array
+        modifiers:
+          description: A list of modifiers that were applied to the risk score calculation.
+          items:
+            type: object
+            properties:
+              contribution:
+                format: double
+                type: number
+              metadata:
+                additionalProperties: true
+                type: object
+              modifier_value:
+                format: double
+                type: number
+              subtype:
+                type: string
+              type:
+                type: string
+            required:
+              - type
+              - contribution
+          type: array
         notes:
           items:
             type: string
@@ -2092,6 +2201,9 @@ components:
             event:
               type: object
               properties:
+                '@timestamp':
+                  format: date-time
+                  type: string
                 ingested:
                   format: date-time
                   type: string
@@ -2432,6 +2544,31 @@ components:
     UserName:
       type: object
       properties:
+        entity_analytics_monitoring:
+          description: Entity analytics monitoring configuration for the user
+          type: object
+          properties:
+            labels:
+              description: Array of labels associated with the user
+              items:
+                type: object
+                properties:
+                  field:
+                    description: The field name for the label
+                    type: string
+                  source:
+                    description: >-
+                      The source where this label was created (api, csv, or
+                      index_sync)
+                    enum:
+                      - api
+                      - csv
+                      - index_sync
+                    type: string
+                  value:
+                    description: The value of the label
+                    type: string
+              type: array
         user:
           type: object
           properties:

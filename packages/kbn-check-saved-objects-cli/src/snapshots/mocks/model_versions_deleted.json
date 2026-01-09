@@ -7,7 +7,7 @@
     "pullRequestUrl": "https://github.com/elastic/kibana/pulls/233325"
   },
   "typeDefinitions": {
-        "task": {
+    "task": {
       "name": "task",
       "migrationVersions": [
         "7.4.0",

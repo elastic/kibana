@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -8,6 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -41,7 +43,12 @@
     "@kbn/deeplinks-search",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/index-management-shared-types",
+    "@kbn/data-views-plugin",
+    "@kbn/cloud",
+    "@kbn/agent-builder-plugin",
+    "@kbn/scout-search",
   ],
   "exclude": [
     "target/**/*",

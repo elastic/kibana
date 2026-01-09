@@ -15,9 +15,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useAiValueRoleCheck } from '../hooks/use_ai_value_role_check';
+import { useHasSecurityCapability } from '../../helper_hooks';
 import { TestProviders } from '../../common/mock/test_providers';
 import * as i18n from './translations';
+import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 // Mock all dependencies before imports to avoid issues
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
@@ -40,9 +41,18 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(),
 }));
 
-jest.mock('../hooks/use_ai_value_role_check', () => ({
-  useAiValueRoleCheck: jest.fn(),
+jest.mock('../../helper_hooks', () => ({
+  useHasSecurityCapability: jest.fn(),
 }));
+
+jest.mock('../providers/ai_value/export_provider', () => {
+  return {
+    AIValueExportProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="AIValueExportProvider">{children}</div>
+    ),
+    useAIValueExportContext: jest.fn(),
+  };
+});
 
 // Mock docLinks for NoPrivileges component
 jest.mock('@kbn/doc-links', () => ({
@@ -123,9 +133,11 @@ const mockUseAlertsPrivileges = useAlertsPrivileges as jest.MockedFunction<
   typeof useAlertsPrivileges
 >;
 const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
-const mockUseAiValueRoleCheck = useAiValueRoleCheck as jest.MockedFunction<
-  typeof useAiValueRoleCheck
+const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunction<
+  typeof useHasSecurityCapability
 >;
+
+const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
 
 describe('AIValue', () => {
   beforeEach(() => {
@@ -147,10 +159,10 @@ describe('AIValue', () => {
       sourcererDataView: {} as Record<string, unknown>,
     });
     mockUseAlertsPrivileges.mockReturnValue({
-      hasKibanaREAD: true,
       hasIndexRead: true,
       hasIndexUpdateDelete: false,
-      hasKibanaCRUD: false,
+      hasAlertsRead: false,
+      hasAlertsAll: false,
       loading: false,
       isAuthenticated: true,
       hasEncryptionKey: true,
@@ -162,18 +174,12 @@ describe('AIValue', () => {
       status: 'ready',
       dataView: {} as never,
     });
-    mockUseAiValueRoleCheck.mockReturnValue({
-      hasRequiredRole: true,
-      isLoading: false,
-    });
+    mockUseHasSecurityCapability.mockReturnValue(true);
   });
 
-  describe('Loading States', () => {
-    it('shows page loader when role check is loading', () => {
-      mockUseAiValueRoleCheck.mockReturnValue({
-        hasRequiredRole: false,
-        isLoading: true,
-      });
+  describe('Access states', () => {
+    it('shows no privileges when user lacks soc management capability', () => {
+      mockUseHasSecurityCapability.mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -181,7 +187,7 @@ describe('AIValue', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
     });
 
     it('shows page loader when new data view picker is enabled and status is pristine', () => {
@@ -221,57 +227,8 @@ describe('AIValue', () => {
   });
 
   describe('Access Control', () => {
-    it('shows no privileges when user lacks required role', () => {
-      mockUseAiValueRoleCheck.mockReturnValue({
-        hasRequiredRole: false,
-        isLoading: false,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
-
-    it('shows no privileges when user lacks alert read privileges', () => {
-      mockUseAlertsPrivileges.mockReturnValue({
-        hasKibanaREAD: false,
-        hasIndexRead: true,
-        hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        loading: false,
-        isAuthenticated: true,
-        hasEncryptionKey: true,
-        hasIndexManage: false,
-        hasIndexWrite: false,
-        hasIndexMaintenance: false,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
-
-    it('shows no privileges when user lacks index read privileges', () => {
-      mockUseAlertsPrivileges.mockReturnValue({
-        hasKibanaREAD: true,
-        hasIndexRead: false,
-        hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        loading: false,
-        isAuthenticated: true,
-        hasEncryptionKey: true,
-        hasIndexManage: false,
-        hasIndexWrite: false,
-        hasIndexMaintenance: false,
-      });
+    it('shows no privileges when user lacks soc management capability', () => {
+      mockUseHasSecurityCapability.mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -314,6 +271,16 @@ describe('AIValue', () => {
       const datePicker = screen.getByTestId('superDatePickerToggleQuickMenuButton');
       expect(datePicker).toBeInTheDocument();
     });
+
+    it('should be wrapped in a AIValueExportProvider', () => {
+      render(
+        <TestProviders>
+          <AIValue />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('AIValueExportProvider')).toBeInTheDocument();
+    });
   });
 
   describe('Hook Integration', () => {
@@ -327,8 +294,9 @@ describe('AIValue', () => {
       expect(mockUseSyncTimerangeUrlParam).toHaveBeenCalled();
       expect(mockUseDeepEqualSelector).toHaveBeenCalledWith(expect.any(Function));
       expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
-      expect(mockUseAiValueRoleCheck).toHaveBeenCalled();
+      expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('socManagement');
       expect(mockUseAlertsPrivileges).toHaveBeenCalled();
+      expect(mockUseAIValueExportContext).toHaveBeenCalled();
     });
   });
 
@@ -367,6 +335,30 @@ describe('AIValue', () => {
       );
 
       expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
+    });
+  });
+
+  describe('export mode', () => {
+    beforeEach(() => {
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: {
+          timeRange: {
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-31T23:59:59.999Z',
+          },
+        },
+        isExportMode: true,
+      });
+    });
+
+    it('should not render the header of the page', () => {
+      render(
+        <TestProviders>
+          <AIValue />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
     });
   });
 });

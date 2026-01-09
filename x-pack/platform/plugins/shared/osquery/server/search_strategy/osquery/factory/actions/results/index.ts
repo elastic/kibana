@@ -22,7 +22,17 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
 
-    return buildActionResultsQuery(options);
+    // Ensure pagination defaults if not provided (match UI default pageSize: 20)
+    const optionsWithDefaults = {
+      ...options,
+      pagination: options.pagination || {
+        activePage: 0,
+        cursorStart: 0,
+        querySize: 20,
+      },
+    };
+
+    return buildActionResultsQuery(optionsWithDefaults);
   },
   // @ts-expect-error update types
   parse: async (

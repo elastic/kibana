@@ -168,8 +168,7 @@ export class ESQLService extends FtrService {
       await this.typeEsqlEditorQuery(query);
       // Wait until suggestions are loaded
       await this.common.sleep(1000);
-      // Create control is the first suggestion
-      await this.browser.pressKeys(this.browser.keys.ENTER);
+      await this.selectEsqlSuggestionByLabel('Create control');
 
       return await this.testSubjects.exists('create_esql_control_flyout');
     });
@@ -183,6 +182,21 @@ export class ESQLService extends FtrService {
     await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
     await this.testSubjects.click('saveEsqlControlsFlyoutButton');
     await this.waitESQLEditorLoaded();
+  }
+
+  public async focusEditor(editorSubjId = 'ESQLEditor') {
+    await this.retry.try(async () => {
+      const editor = await this.testSubjects.find(editorSubjId);
+      await editor.click();
+    });
+  }
+
+  public async isQuickSearchVisorVisible() {
+    const visorContainer = await this.testSubjects.find('ESQLEditor-quick-search-visor');
+    const visorWrapper = await visorContainer.findByCssSelector(':scope > div');
+    const opacity = await visorWrapper.getComputedStyle('opacity');
+
+    return opacity === '1';
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
@@ -237,6 +251,26 @@ export class ESQLService extends FtrService {
 
       await optionToSelect.click();
       return true;
+    });
+  }
+
+  public async toggleQuickSearchVisor(open: boolean) {
+    await this.testSubjects.click('ESQLEditor-toggle-quick-search-visor');
+    await this.retry.try(async () => {
+      expect(await this.isQuickSearchVisorVisible()).to.be(open);
+    });
+  }
+
+  public async toggleDatasourceDropdown(open: boolean) {
+    if (open) {
+      await this.testSubjects.click('visorSourcesDropdownButton');
+    } else {
+      await this.browser.pressKeys(Key.ESCAPE);
+    }
+
+    await this.retry.try(async () => {
+      const exists = await this.testSubjects.exists('esqlEditor-visor-datasourcesList-switcher');
+      expect(exists).to.be(open);
     });
   }
 }

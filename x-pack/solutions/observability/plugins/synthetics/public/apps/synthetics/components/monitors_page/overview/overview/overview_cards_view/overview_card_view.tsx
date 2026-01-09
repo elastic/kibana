@@ -18,12 +18,16 @@ import { OverviewLoader } from '../overview_loader';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
 import { selectOverviewState, selectOverviewTrends } from '../../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
-const MIN_BATCH_SIZE = 20;
-const LIST_THRESHOLD = 12;
 const MIN_CARD_WIDTH = 400;
+
+// Minimum number of rows to fetch in a batch
+const MIN_BATCH_SIZE = 20;
+// When there are less than this number of rows remaining to be scrolled, fetch more
+const LIST_THRESHOLD = 12;
 
 interface ListItem {
   configId: string;
@@ -32,13 +36,9 @@ interface ListItem {
 
 export const OverviewCardView = ({
   monitorsSortedByStatus,
-  maxItem,
-  setMaxItem,
   setFlyoutConfigCallback,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
-  maxItem: number;
-  setMaxItem: (maxItem: number) => void;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
   const {
@@ -48,6 +48,16 @@ export const OverviewCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const { view } = useSelector(selectOverviewState);
   const [rowCount, setRowCount] = useState(5);
+  const [sliceToFetch, setSliceToFetch] = useState<{
+    startIndex: number;
+    endIndex: number;
+  } | null>(null);
+
+  useInfiniteOverviewTrendsRequests({
+    monitorsSortedByStatus,
+    sliceToFetch,
+    numOfColumns: rowCount,
+  });
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -80,7 +90,9 @@ export const OverviewCardView = ({
                     listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
                   }
                   itemCount={listItems.length}
-                  loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
+                  loadMoreItems={(start, stop: number) =>
+                    setSliceToFetch({ startIndex: start, endIndex: stop })
+                  }
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >

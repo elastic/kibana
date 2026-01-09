@@ -16,7 +16,7 @@ xpack.securitySolutionServerless.inaccessibleApps:
   - lens
 
 ## Disable plugin features
-xpack.alerting.maintenanceWindow.enabled: false
+xpack.maintenanceWindows.enabled: false
 xpack.alerting.rulesSettings.enabled: false
 xpack.trigger_actions_ui.rules.enabled: false
 
@@ -24,72 +24,87 @@ xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
-  siem.description: null
-  siemV2.description: null
-  siemV3.description: null
-  siemV4.description: null
   securitySolutionSiemMigrations.hidden: true
+  ### Agent Builder feature is available in this tier; move it from Analytics category to Security.
+  agentBuilder:
+    category: 'security'
+    order: 1101
 
   ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+  siemV5:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose 4 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: 'discover_v2'
+          privileges: ['all']
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: 'fleet'
+          privileges: ['all']
+      read.composedOf:
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siemV4:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV4 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations
-        - feature: "fleet"
-          privileges: [ "all" ]
+        - feature: 'fleet'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "fleet"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siemV3:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV3 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations
-        - feature: "fleet"
-          privileges: [ "all" ]
+        - feature: 'fleet'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "fleet"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siemV2:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations
-        - feature: "fleet"
-          privileges: [ "all" ]
+        - feature: 'fleet'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "fleet"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siem:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
+        - feature: 'savedQueryManagement'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'savedQueryManagement'
+          privileges: ['read']
 
 # Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
@@ -98,10 +113,10 @@ xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations
 xpack.fleet.prereleaseEnabledByDefault: true
 xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
-# Elastic Managed LLM
+# Elastic Managed LLMs
 xpack.actions.preconfigured:
-  Elastic-Managed-LLM:
-    name: Elastic Managed LLM
+  Anthropic-Claude-Sonnet-3-7:
+    name: Anthropic Claude Sonnet 3.7
     actionTypeId: .inference
     exposeConfig: true
     config:
@@ -110,3 +125,23 @@ xpack.actions.preconfigured:
       inferenceId: ".rainbow-sprinkles-elastic"
       providerConfig:
         model_id: "rainbow-sprinkles"
+  Anthropic-Claude-Sonnet-4-5:
+    name: Anthropic Claude Sonnet 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".gp-llm-v2-chat_completion"
+      providerConfig:
+        model_id: "gp-llm-v2"
+  OpenAI-GPT-OSS-120B:
+    name: OpenAI GPT-OSS 120B
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-oss-120b-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-oss-120b"

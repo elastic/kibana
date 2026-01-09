@@ -24,7 +24,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
-  from?: 'fleet-policy-list' | undefined;
+  from?: 'fleet-policy-list' | 'installed-integrations' | undefined;
 }> = ({
   agentPolicies,
   packagePolicy,
@@ -145,6 +145,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         agentPolicies={agentPolicies}
         key="packagePolicyDelete"
         packagePolicyPackage={packagePolicy.package}
+        isAgentlessPolicy={packagePolicy.supports_agentless}
       >
         {(deletePackagePoliciesPrompt) => {
           return (

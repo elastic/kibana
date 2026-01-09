@@ -45,7 +45,7 @@ export const getKibanaDependenciesMock = (
   const integrations =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
-  return deepmerge(
+  const result: NoDataPageKibanaDependencies = deepmerge(
     {
       coreStart: {
         application: {
@@ -62,4 +62,6 @@ export const getKibanaDependenciesMock = (
       isMergeableObject: isPlainObject,
     }
   );
+
+  return result;
 };

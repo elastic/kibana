@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -28,6 +28,10 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/spaces-plugin",
     "@kbn/projects-solutions-groups",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/search-api-panels",
+    "@kbn/kibana-react-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/deeplinks-management"
   ]
 }

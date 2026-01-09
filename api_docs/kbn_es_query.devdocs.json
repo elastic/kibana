@@ -140,9 +140,9 @@
           },
           ", \"id\">, disabled: boolean | undefined, negate: boolean | undefined, alias: string | null | undefined, store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -283,9 +283,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               }
@@ -313,9 +313,9 @@
           "QueryDslQueryContainer",
           ", disabled: boolean, negate: boolean, alias: string | null, store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -416,9 +416,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               }
@@ -790,9 +790,9 @@
           },
           ", alias: string | null, store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -955,9 +955,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -4161,6 +4161,59 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.sanitizeProjectRoutingForES",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeProjectRoutingForES",
+        "description": [
+          "\nSanitizes project routing value for Elasticsearch API calls.\n"
+        ],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          ") => \"_alias:_origin\" | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/project_routing/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.sanitizeProjectRoutingForES.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The project routing value from application state"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/project_routing/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The sanitized value for Elasticsearch, or undefined to search all projects"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.termQuery",
         "type": "Function",
         "tags": [],
@@ -4216,6 +4269,56 @@
               "TermQueryOpts"
             ],
             "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/term_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.termsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "termsQuery",
+        "description": [],
+        "signature": [
+          "(field: T, values: (string | number | boolean)[]) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/terms_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.termsQuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/terms_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.termsQuery.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              "(string | number | boolean)[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/terms_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4335,9 +4438,9 @@
           "FilterMetaParams",
           " | undefined; value?: string | undefined; }; $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -4396,9 +4499,9 @@
           "FilterMetaParams",
           " | undefined; value?: string | undefined; }; $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -4455,9 +4558,9 @@
           },
           ") => { $state: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -5355,6 +5458,20 @@
             "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.ExecutionContextSearch.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5404,6 +5521,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "negate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/compare_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.FilterCompareOptions.group",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "group",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -5936,7 +6067,7 @@
         "description": [
           "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
-        "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
+        "path": "src/platform/packages/shared/kbn-es-query-constants/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5968,9 +6099,9 @@
         "signature": [
           "{ $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -6164,9 +6295,9 @@
         "signature": [
           "{ $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -6297,6 +6428,23 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/phrases_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.ProjectRouting",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectRouting",
+        "description": [
+          "\nProject routing configuration for cross-project search (CPS).\n\nUsed in serverless environments to control whether searches are scoped to a single project or span multiple projects.\n\nExamples:\n- undefined - Search across all projects (default)\n- '_alias:*' - Search across all projects\n- '_alias:_origin' - Search only in the current project\n"
+        ],
+        "signature": [
+          "string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/project_routing/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6536,6 +6684,20 @@
             "type": "boolean",
             "tags": [],
             "label": "negate",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/compare_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.COMPARE_ALL_OPTIONS.group",
+            "type": "boolean",
+            "tags": [],
+            "label": "group",
             "description": [],
             "signature": [
               "true"

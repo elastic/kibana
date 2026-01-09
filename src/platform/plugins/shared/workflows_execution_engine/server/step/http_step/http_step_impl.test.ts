@@ -11,16 +11,17 @@ import axios from 'axios';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import { HttpStepImpl } from './http_step_impl';
 import { UrlValidator } from '../../lib/url_validator';
+import { ExecutionError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock the isAxiosError static method
-(axios as any).isAxiosError = jest.fn();
+jest.spyOn(axios, 'isAxiosError');
 
 describe('HttpStepImpl', () => {
   let httpStep: HttpStepImpl;
@@ -63,6 +64,7 @@ describe('HttpStepImpl', () => {
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       abortController: stepContextAbortController,
+      flushEventLogs: jest.fn().mockResolvedValue(undefined),
     } as any;
 
     mockWorkflowRuntime = {
@@ -110,7 +112,10 @@ describe('HttpStepImpl', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => (mockedAxios as unknown as jest.Mock).mockReset());
+  afterEach(() => {
+    (mockedAxios as unknown as jest.Mock).mockReset();
+    (axios.isAxiosError as unknown as jest.Mock).mockReset();
+  });
 
   describe('getInput', () => {
     it('should render http step context', () => {
@@ -125,6 +130,7 @@ describe('HttpStepImpl', () => {
         body: {
           id: '{{userId}}',
         },
+        fetcher: undefined,
       });
     });
 
@@ -279,6 +285,43 @@ describe('HttpStepImpl', () => {
         })
       );
     });
+
+    it('should support body for all HTTP methods', async () => {
+      const testBody = { data: 'test' };
+      const methods: Array<'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'> = [
+        'GET',
+        'POST',
+        'PUT',
+        'DELETE',
+        'PATCH',
+      ];
+
+      for (const method of methods) {
+        (mockedAxios as any).mockResolvedValueOnce({
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          data: {},
+        });
+
+        const input = {
+          url: 'https://api.example.com/data',
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: testBody,
+        };
+
+        await (httpStep as any)._run(input);
+
+        expect(mockedAxios).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: 'https://api.example.com/data',
+            method,
+            data: testBody,
+          })
+        );
+      }
+    });
   });
 
   describe('run', () => {
@@ -336,7 +379,12 @@ describe('HttpStepImpl', () => {
       const result = await (httpStep as any)._run(input);
 
       expect((mockedAxios as any).isAxiosError).toHaveBeenCalledWith(axiosError);
-      expect(result.error).toBe('HTTP request was cancelled');
+      expect(result.error).toEqual(
+        new ExecutionError({
+          type: 'HttpRequestCancelledError',
+          message: 'HTTP request was cancelled',
+        })
+      );
     });
 
     it('should fail the step and continue workflow when template rendering fails', async () => {
@@ -364,7 +412,12 @@ describe('HttpStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
 
       // Should fail the step with a clear error message
-      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith('Template rendering failed');
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        new ExecutionError({
+          message: 'Template rendering failed',
+          type: 'Error',
+        })
+      );
 
       // Should navigate to next node (workflow continues)
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
@@ -441,7 +494,11 @@ describe('HttpStepImpl', () => {
       // Should start the step, fail the step, and navigate to next node
       expect(mockStepExecutionRuntime.startStep).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
-        'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
+        new ExecutionError({
+          message:
+            'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
+          type: 'Error',
+        })
       );
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
@@ -470,6 +527,128 @@ describe('HttpStepImpl', () => {
         expect.objectContaining({
           url: 'https://any-host.com/test',
           method: 'GET',
+        })
+      );
+    });
+  });
+
+  describe('Fetcher configuration', () => {
+    beforeEach(() => {
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+      });
+    });
+
+    it('should apply skip_ssl_verification option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+        fetcher: {
+          skip_ssl_verification: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          httpsAgent: expect.objectContaining({
+            options: expect.objectContaining({
+              rejectUnauthorized: false,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should apply keep_alive option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          keep_alive: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          httpsAgent: expect.objectContaining({
+            options: expect.objectContaining({
+              keepAlive: true,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should apply max_redirects option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          max_redirects: 5,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxRedirects: 5,
+        })
+      );
+    });
+
+    it('should disable redirects when follow_redirects is false', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          follow_redirects: false,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxRedirects: 0,
+        })
+      );
+    });
+
+    it('should work without fetcher options', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          httpsAgent: expect.anything(),
         })
       );
     });

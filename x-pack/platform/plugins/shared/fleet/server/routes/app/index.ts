@@ -9,7 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
 import { ALL_SPACES_ID, API_VERSIONS } from '../../../common/constants';
@@ -19,7 +19,6 @@ import { GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '../../types';
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
-import { type FleetConfigType } from '../../config';
 import { genericErrorResponse } from '../schema/errors';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
@@ -169,13 +168,9 @@ export const GenerateServiceTokenResponseSchema = schema.object({
 
 export const registerRoutes = (
   router: FleetAuthzRouter,
-  config: FleetConfigType,
+  experimentalFeatures: ExperimentalFeatures,
   isServerless?: boolean
 ) => {
-  const experimentalFeatures = parseExperimentalConfigValue(
-    config.enableExperimental || [],
-    config.experimentalFeatures || {}
-  );
   router.versioned
     .get({
       path: '/internal/fleet/telemetry/usage',
@@ -241,9 +236,11 @@ export const registerRoutes = (
           request: CheckPermissionsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => CheckPermissionsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -291,9 +288,11 @@ export const registerRoutes = (
             request: GenerateServiceTokenRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => GenerateServiceTokenResponseSchema,
               },
               400: {
+                description: 'A bad request.',
                 body: genericErrorResponse,
               },
             },

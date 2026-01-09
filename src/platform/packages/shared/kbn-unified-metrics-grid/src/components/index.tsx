@@ -8,45 +8,33 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import { MetricsExperienceClientProvider } from '../context/metrics_experience_client_provider';
 import { withRestorableState } from '../restorable_state';
 import { MetricsExperienceStateProvider } from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
+import { MetricsExperienceFieldsCapsProvider } from '../context/metrics_experience_fields_provider';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
-
-const InternalUnifiedMetricsExperienceGrid = (
-  props: ChartSectionProps & { client?: MetricsExperienceClient }
-) => {
-  if (!props.client) {
-    return null;
-  }
-
+const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
-    <MetricsExperienceClientProvider value={{ client: props.client }}>
-      <MetricsExperienceStateProvider>
-        <QueryClientProvider client={queryClient}>
-          <MetricsExperienceGrid {...props} />
-        </QueryClientProvider>
-      </MetricsExperienceStateProvider>
-    </MetricsExperienceClientProvider>
+    <PerformanceContextProvider>
+      <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams}>
+        <MetricsExperienceGrid {...props} />
+      </MetricsExperienceFieldsCapsProvider>
+    </PerformanceContextProvider>
+  );
+};
+
+const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
+  return (
+    <MetricsExperienceStateProvider>
+      <InternalUnifiedMetricsExperienceGrid {...props} />
+    </MetricsExperienceStateProvider>
   );
 };
 
 const UnifiedMetricsExperienceGridWithRestorableState = withRestorableState(
-  InternalUnifiedMetricsExperienceGrid
+  InternalUnifiedMetricsExperienceGridWithState
 );
 
 // eslint-disable-next-line import/no-default-export

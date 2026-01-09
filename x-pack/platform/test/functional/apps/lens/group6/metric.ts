@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
-      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await testSubjects.click('lnsMetric_background_chart_line');
       await lens.closeDimensionEditor();
 
       await inspector.open('lnsApp_inspectButton');
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_panel');
+      await testSubjects.click('lnsMetric_background_chart_none');
       await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('mtrVis');
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await testSubjects.click('lnsMetric_background_chart_line');
 
       await lens.waitForVisualization('mtrVis');
 
@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_panel');
+      await testSubjects.click('lnsMetric_background_chart_none');
 
       await lens.waitForVisualization('mtrVis');
 

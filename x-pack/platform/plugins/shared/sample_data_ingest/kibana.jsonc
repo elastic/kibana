@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "sampleDataIngest"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["taskManager"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []

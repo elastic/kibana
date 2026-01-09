@@ -35,11 +35,21 @@ export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError
  * Factory service for accessing saved object clients
  */
 export class SavedObjectsClientFactory {
+  private static includedHiddenTypes = new Set<string>([REFERENCE_DATA_SAVED_OBJECT_TYPE]);
+
   constructor(
     private readonly savedObjectsServiceStart: SavedObjectsServiceStart,
     /** Can either be the  `HttpServiceSetup` or  `HttpServiceStart` or just an interface that hs a `basePath` implementation from core */
     private readonly httpServiceSetup: { basePath: IBasePath }
   ) {}
+
+  /**
+   * Add a hidden Saved Object type to the list of types that should be given access by the SO clients created by the SavedObjectsClientFactory.
+   * @param soType
+   */
+  public static addSavedObjectHiddenType(soType: string): void {
+    this.includedHiddenTypes.add(soType);
+  }
 
   protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
     const fakeRequest = kibanaRequestFactory({
@@ -55,6 +65,12 @@ export class SavedObjectsClientFactory {
     }
 
     return fakeRequest;
+  }
+
+  protected getHiddenTypes(): string[] {
+    return Array.from(
+      (this.constructor as typeof SavedObjectsClientFactory).includedHiddenTypes.values()
+    );
   }
 
   protected toReadonly(soClient: SavedObjectsClientContract): SavedObjectsClientContract {
@@ -86,7 +102,7 @@ export class SavedObjectsClientFactory {
       this.createFakeHttpRequest(spaceId),
       {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE],
+        includedHiddenTypes: this.getHiddenTypes(),
       }
     );
 
@@ -106,7 +122,7 @@ export class SavedObjectsClientFactory {
   createInternalUnscopedSoClient(readonly: boolean = true): SavedObjectsClientContract {
     const soClient = this.savedObjectsServiceStart.getScopedClient(this.createFakeHttpRequest(), {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-      includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: this.getHiddenTypes(),
     });
 
     if (readonly) {

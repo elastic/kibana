@@ -236,6 +236,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
       {Boolean(errored) && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
               defaultMessage: 'No report generated',
             })}
@@ -251,6 +252,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
         <>
           {Boolean(errored) && <EuiSpacer size="s" />}
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.reporting.listing.infoPanel.callout.warningsTitle', {
               defaultMessage: 'Report contains warnings',
             })}

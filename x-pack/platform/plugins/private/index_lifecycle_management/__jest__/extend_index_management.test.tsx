@@ -7,10 +7,14 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
+import { useEuiTheme } from '@elastic/eui';
+
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import type { Index } from '@kbn/index-management-plugin/common';
 
 import { init } from '../integration_tests/helpers/http_requests';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -21,9 +25,6 @@ import {
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
-import type { Index } from '@kbn/index-management-plugin/common';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { useEuiTheme } from '@elastic/eui';
 
 const { httpSetup } = init();
 
@@ -322,7 +323,7 @@ describe('extend index management', () => {
       expect(extension).toBeNull();
     });
 
-    test('should return extension when one index is passed and it does not have lifecycle policy', () => {
+    test('should return extension when one index is passed and it does not have lifecycle policy', async () => {
       const extension = addLifecyclePolicyActionExtension({
         indices: [indexWithoutLifecyclePolicy],
         reloadIndices,
@@ -330,8 +331,12 @@ describe('extend index management', () => {
       });
       expect(extension?.renderConfirmModal).toBeDefined();
       const component = extension!.renderConfirmModal(jest.fn());
-      const rendered = mountWithIntl(component);
-      expect(rendered.exists('.euiModal--confirmation'));
+      renderWithI18n(component);
+
+      // Wait for the async componentDidMount to complete
+      await waitFor(() => {
+        expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -416,41 +421,45 @@ describe('extend index management', () => {
           index: indexWithLifecyclePolicy,
         });
       expect(shouldRenderTab).toBeTruthy();
-      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecyclePolicy} />);
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+      const { container } = renderWithI18n(
+        <IlmContentComponent index={indexWithLifecyclePolicy} />
+      );
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyStepPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyErrorPanel)).not.toBeInTheDocument();
     });
 
     test('should render an error panel when index has lifecycle error', () => {
-      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleError} />);
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeTruthy();
+      const { container } = renderWithI18n(<IlmContentComponent index={indexWithLifecycleError} />);
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyStepPanel)).not.toBeInTheDocument();
+      expect(screen.getByTestId(policyErrorPanel)).toBeInTheDocument();
     });
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
-      const rendered = mountWithIntl(
+      const { container } = renderWithI18n(
         <IlmContentComponent index={indexWithLifecyclePhaseDefinition} />
       );
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.getByTestId(phaseDefinitionPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(policyStepPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyErrorPanel)).not.toBeInTheDocument();
     });
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
-      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleWaitingStep} />);
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+      const { container } = renderWithI18n(
+        <IlmContentComponent index={indexWithLifecycleWaitingStep} />
+      );
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
+      expect(screen.getByTestId(policyStepPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(policyErrorPanel)).not.toBeInTheDocument();
     });
   });
 

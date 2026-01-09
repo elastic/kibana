@@ -7,8 +7,13 @@
 
 import { EuiFormRow, EuiText, EuiSpacer, EuiComboBox, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Feature } from '@kbn/streams-schema';
+import { type Feature } from '@kbn/streams-schema';
 import React from 'react';
+
+export const ALL_DATA_OPTION = {
+  label: 'All data',
+  value: { name: 'All data', type: 'all_data' as const },
+};
 
 export interface FeatureSelectorProps {
   features: Feature[];
@@ -17,11 +22,13 @@ export interface FeatureSelectorProps {
 }
 
 export function FeaturesSelector({
+  isDisabled,
   features,
   selectedFeatures,
   onFeaturesChange,
-}: FeatureSelectorProps) {
+}: FeatureSelectorProps & { isDisabled: boolean }) {
   const { euiTheme } = useEuiTheme();
+  const options = features.map((feature) => ({ label: feature.name, value: feature }));
 
   return (
     <EuiFormRow
@@ -43,13 +50,14 @@ export function FeaturesSelector({
               defaultMessage: 'Select features',
             }
           )}
-          options={features.map((feature) => ({ label: feature.name, value: feature }))}
+          options={options}
+          isDisabled={features.length === 0 || isDisabled}
           selectedOptions={selectedFeatures.map((feature) => ({
             label: feature.name,
             value: feature,
           }))}
           onChange={(selected) => {
-            onFeaturesChange(selected.map((option) => option.value) as Feature[]);
+            onFeaturesChange(selected.map((option) => option.value as Feature));
           }}
         />
       </>

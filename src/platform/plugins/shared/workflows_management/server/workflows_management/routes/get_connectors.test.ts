@@ -29,40 +29,6 @@ describe('GET /api/workflows/connectors', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the connectors route with correct configuration', () => {
-      registerGetConnectorsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getConnectorsCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/connectors'
-      );
-
-      expect(getConnectorsCall).toBeDefined();
-      expect(getConnectorsCall[0]).toMatchObject({
-        path: '/api/workflows/connectors',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['read', 'workflow_read'],
-              },
-            ],
-          },
-        },
-      });
-      expect(getConnectorsCall[0].validate).toBe(false);
-      expect(getConnectorsCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

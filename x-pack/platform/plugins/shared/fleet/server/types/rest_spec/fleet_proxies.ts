@@ -14,6 +14,13 @@ function validateUrl(value: string) {
     return 'Invalid URL';
   }
 }
+export const ProxyHeadersSchema = schema.oneOf([
+  schema.literal(null),
+  schema.recordOf(
+    schema.string(),
+    schema.oneOf([schema.string(), schema.boolean(), schema.number()])
+  ),
+]);
 
 export const FleetProxySchema = schema.object({
   id: schema.string(),
@@ -21,15 +28,7 @@ export const FleetProxySchema = schema.object({
     validate: validateUrl,
   }),
   name: schema.string(),
-  proxy_headers: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.recordOf(
-        schema.string(),
-        schema.oneOf([schema.string(), schema.boolean(), schema.number()])
-      ),
-    ])
-  ),
+  proxy_headers: schema.maybe(ProxyHeadersSchema),
   certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -51,12 +50,7 @@ export const PutFleetProxyRequestSchema = {
   body: schema.object({
     name: schema.maybe(schema.string()),
     url: schema.maybe(schema.string({ validate: validateUrl })),
-    proxy_headers: schema.nullable(
-      schema.recordOf(
-        schema.string(),
-        schema.oneOf([schema.string(), schema.boolean(), schema.number()])
-      )
-    ),
+    proxy_headers: schema.maybe(ProxyHeadersSchema),
     certificate_authorities: schema.nullable(schema.string()),
     certificate: schema.nullable(schema.string()),
     certificate_key: schema.nullable(schema.string()),

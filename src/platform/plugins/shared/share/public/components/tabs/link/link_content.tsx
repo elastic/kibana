@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   copyToClipboard,
   EuiButton,
@@ -23,7 +22,6 @@ import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { TimeTypeSection } from './time_type_section';
 import { useShareContext, type IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
-import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
 import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type LinkProps = Pick<
@@ -65,16 +63,7 @@ export const LinkContent = ({
   const timeRange = shareableUrlLocatorParams?.params?.timeRange;
 
   const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
-  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
-  const isValidCalloutOverride = React.isValidElement(draftModeCallOut);
-  const draftModeCalloutContent = isValidCalloutOverride
-    ? // Retro-compatible case
-      { node: draftModeCallOut }
-    : typeof draftModeCallOut === 'object'
-    ? // Custom content callout
-      (draftModeCallOut as DraftModeCalloutProps)
-    : // Default content callout
-      {};
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -136,20 +125,23 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
-  const changeTimeType = (e: EuiSwitchEvent) => {
-    setIsAbsoluteTime(e.target.checked);
-    if (urlToCopy?.current && e.target.checked !== isAbsoluteTime) {
-      urlToCopy.current = undefined;
-    }
-  };
+  const handleTimeTypeChange = useCallback(
+    (isAbsolute: boolean) => {
+      if (urlToCopy?.current && isAbsolute !== isAbsoluteTime) {
+        urlToCopy.current = undefined;
+      }
+      setIsAbsoluteTime(isAbsolute);
+    },
+    [isAbsoluteTime]
+  );
 
   return (
     <>
       <EuiForm>
         <TimeTypeSection
           timeRange={timeRange}
-          isAbsoluteTime={isAbsoluteTime}
-          changeTimeType={changeTimeType}
+          onTimeTypeChange={handleTimeTypeChange}
+          isAbsoluteTimeByDefault={isAbsoluteTime}
         />
         {isDirty && draftModeCallOut && (
           <>
@@ -177,6 +169,7 @@ export const LinkContent = ({
             }
           >
             <EuiButton
+              iconType="copy"
               fill
               data-test-subj="copyShareUrlButton"
               data-share-url={urlToCopy.current}

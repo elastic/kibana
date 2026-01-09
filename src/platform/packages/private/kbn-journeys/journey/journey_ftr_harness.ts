@@ -8,8 +8,7 @@
  */
 
 import Url from 'url';
-import { inspect, format } from 'util';
-import { setTimeout as setTimer } from 'timers/promises';
+import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
 import type { ApmBase } from '@elastic/apm-rum';
@@ -71,8 +70,6 @@ export class JourneyFtrHarness {
   private page: Page | undefined;
   private client: CDPSession | undefined;
   private context: BrowserContext | undefined;
-  private currentSpanStack: Array<apmNode.Span | null> = [];
-  private currentTransaction: apmNode.Transaction | undefined | null = undefined;
 
   private pageTeardown$ = new Rx.Subject<Page>();
   private telemetryTrackerSubs = new Map<Page, Rx.Subscription>();
@@ -118,44 +115,7 @@ export class JourneyFtrHarness {
     // Update labels before start for consistency b/w APM services
     await this.updateTelemetryAndAPMLabels(journeyLabels);
 
-    this.apm = apmNode.start({
-      serviceName: 'functional test runner',
-      environment: process.env.CI ? 'ci' : 'development',
-      active: kbnTestServerEnv.ELASTIC_APM_ACTIVE !== 'false',
-      serverUrl: kbnTestServerEnv.ELASTIC_APM_SERVER_URL,
-      secretToken: kbnTestServerEnv.ELASTIC_APM_SECRET_TOKEN,
-      globalLabels: kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS,
-      transactionSampleRate: kbnTestServerEnv.ELASTIC_APM_TRANSACTION_SAMPLE_RATE,
-      logger: {
-        warn: (...args: any[]) => {
-          this.log.warning('APM WARN', ...args);
-        },
-        info: (...args: any[]) => {
-          this.log.info('APM INFO', ...args);
-        },
-        fatal: (...args: any[]) => {
-          this.log.error(format('APM FATAL', ...args));
-        },
-        error: (...args: any[]) => {
-          this.log.error(format('APM ERROR', ...args));
-        },
-        debug: (...args: any[]) => {
-          this.log.debug('APM DEBUG', ...args);
-        },
-        trace: (...args: any[]) => {
-          this.log.verbose('APM TRACE', ...args);
-        },
-      },
-    });
-
-    if (this.currentTransaction) {
-      throw new Error(`Transaction exist, end prev transaction ${this.currentTransaction?.name}`);
-    }
-
-    this.currentTransaction = this.apm?.startTransaction(
-      `Journey: ${this.journeyConfig.getName()}`,
-      'performance'
-    );
+    this.apm = apmNode;
   }
 
   private async setupBrowserAndPage() {
@@ -312,40 +272,9 @@ export class JourneyFtrHarness {
     }
   }
 
-  private async teardownApm() {
-    if (!this.apm) {
-      return;
-    }
-
-    if (this.currentTransaction) {
-      this.currentTransaction.end('Success');
-      this.currentTransaction = undefined;
-    }
-
-    const apmStarted = this.apm.isStarted();
-    // @ts-expect-error
-    const apmActive = apmStarted && this.apm._conf.active;
-
-    if (!apmActive) {
-      this.log.warning('APM is not active');
-      return;
-    }
-
-    this.log.info('Flushing APM');
-    await new Promise<void>((resolve) => this.apm?.flush(() => resolve()));
-    // wait for the HTTP request that apm.flush() starts, which we
-    // can't track but hope it is started within 3 seconds, node will stay
-    // alive for active requests
-    // https://github.com/elastic/apm-agent-nodejs/issues/2088
-    await setTimer(3000);
-  }
-
   private async onTeardown() {
     await this.tearDownBrowserAndPage();
-    // It is important that we complete the APM transaction after we close the browser and before we start
-    // unloading the test data so that the scalability data extractor can focus on just the APM data produced
-    // by Kibana running under test.
-    await this.teardownApm();
+
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         /**
@@ -395,11 +324,6 @@ export class JourneyFtrHarness {
   }
 
   private async onStepError(step: AnyStep, err: Error) {
-    if (this.currentTransaction) {
-      this.currentTransaction.end(`Failure ${err.message}`);
-      this.currentTransaction = undefined;
-    }
-
     if (this.page) {
       const { screenshot, fs } = await this.takeScreenshots(this.page);
       if (screenshot && fs) {
@@ -408,20 +332,27 @@ export class JourneyFtrHarness {
     }
   }
 
-  private async withSpan<T>(name: string, type: string | undefined, block: () => Promise<T>) {
-    if (!this.currentTransaction) {
-      return await block();
-    }
+  private async withSpan<T>(
+    name: string,
+    type: string | undefined,
+    block: (ids: { traceId?: string; parentId?: string }) => Promise<T>
+  ) {
+    const traceId = apmNode.currentTraceIds['trace.id'];
+    const parentId =
+      apmNode.currentTraceIds['span.id'] ?? apmNode.currentTraceIds['transaction.id'];
 
-    const span = this.currentTransaction.startSpan(name, type ?? null);
+    const span = parentId
+      ? apmNode.currentTransaction?.startSpan(name, type ?? null, {
+          childOf: parentId,
+        })
+      : undefined;
 
     if (!span) {
-      return await block();
+      return await block({ traceId, parentId });
     }
 
     try {
-      this.currentSpanStack.unshift(span);
-      const result = await block();
+      const result = await block({ traceId, parentId });
       span.setOutcome('success');
       span.end();
       return result;
@@ -429,20 +360,7 @@ export class JourneyFtrHarness {
       span.setOutcome('failure');
       span.end();
       throw error;
-    } finally {
-      if (span !== this.currentSpanStack.shift()) {
-        // eslint-disable-next-line no-unsafe-finally
-        throw new Error('span stack mismatch');
-      }
     }
-  }
-
-  private getCurrentSpanOrTransaction() {
-    return this.currentSpanStack.length ? this.currentSpanStack[0] : this.currentTransaction;
-  }
-
-  private getCurrentTraceparent() {
-    return this.getCurrentSpanOrTransaction()?.traceparent;
   }
 
   private async getBrowserInstance() {
@@ -515,7 +433,7 @@ export class JourneyFtrHarness {
   private async interceptBrowserRequests(page: Page) {
     await page.route('**', async (route, request) => {
       const headers = await request.allHeaders();
-      const traceparent = this.getCurrentTraceparent();
+      const traceparent = apmNode.currentTraceparent;
       if (traceparent && request.isNavigationRequest()) {
         await route.continue({ headers: { traceparent, ...headers } });
       } else {
@@ -571,29 +489,30 @@ export class JourneyFtrHarness {
 
       for (const step of steps) {
         it(step.name, async () => {
-          await this.withSpan(`step: ${step.name}`, 'step', async () => {
-            await this.page?.evaluate(
-              ([traceId, parentId]) => {
-                const win = window as WindowWithApmContext;
-                win.journeyTraceId = traceId;
-                win.journeyParentId = parentId;
-              },
-              [
-                this.apm?.currentTraceIds['trace.id'],
-                this.apm?.currentTraceIds['span.id'] || this.apm?.currentTraceIds['transaction.id'],
-              ]
-            );
+          const ids = {
+            traceId: this.apm?.currentTraceIds['trace.id'],
+            parentId:
+              this.apm?.currentTraceIds['span.id'] ?? this.apm?.currentTraceIds['transaction.id'],
+          };
 
-            try {
-              await step.fn(this.getCtx());
-              await this.onStepSuccess(step);
-            } catch (e) {
-              const error = new Error(`Step [${step.name}] failed: ${e.message}`);
-              error.stack = e.stack;
-              await this.onStepError(step, error);
-              throw error; // Rethrow error if step fails otherwise it is silently passing
-            }
-          });
+          await this.page?.evaluate(
+            ([traceId, parentId]) => {
+              const win = window as WindowWithApmContext;
+              win.journeyTraceId = traceId;
+              win.journeyParentId = parentId;
+            },
+            [ids.traceId, ids.parentId]
+          );
+
+          try {
+            await step.fn(this.getCtx());
+            await this.onStepSuccess(step);
+          } catch (e) {
+            const error = new Error(`Step [${step.name}] failed: ${e.message}`);
+            error.stack = e.stack;
+            await this.onStepError(step, error);
+            throw error; // Rethrow error if step fails otherwise it is silently passing
+          }
         });
       }
     });

@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { useNavigateToHostDetails } from './use_navigate_to_host_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   CspInsightLeftPanelSubTab,
@@ -18,7 +17,6 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 import { HostPanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -53,88 +51,51 @@ const mockOpenLeftPanel = jest.fn();
 const mockOpenFlyout = jest.fn();
 
 describe('useNavigateToHostDetails', () => {
-  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-        openLeftPanel: mockOpenLeftPanel,
-        openFlyout: mockOpenFlyout,
-      });
-    });
-
-    it('returns callback that opens details panel when not in preview mode', () => {
-      const { result } = renderHook(() => useNavigateToHostDetails(mockProps));
-
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-        id: HostDetailsPanelKey,
-        params: {
-          name: mockProps.hostName,
-          scopeId: mockProps.scopeId,
-          isRiskScoreExist: mockProps.isRiskScoreExist,
-          path: { tab, subTab },
-          hasMisconfigurationFindings: mockProps.hasMisconfigurationFindings,
-          hasVulnerabilitiesFindings: mockProps.hasVulnerabilitiesFindings,
-          hasNonClosedAlerts: mockProps.hasNonClosedAlerts,
-        },
-      });
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
-    });
-
-    it('returns callback that opens flyout when in preview mode', () => {
-      const { result } = renderHook(() =>
-        useNavigateToHostDetails({ ...mockProps, isPreviewMode: true })
-      );
-
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: HostPanelKey,
-          params: {
-            contextID: mockProps.contextID,
-            scopeId: mockProps.scopeId,
-            hostName: mockProps.hostName,
-          },
-        },
-        left: {
-          id: HostDetailsPanelKey,
-          params: {
-            name: mockProps.hostName,
-            scopeId: mockProps.scopeId,
-            isRiskScoreExist: mockProps.isRiskScoreExist,
-            path: { tab, subTab },
-            hasMisconfigurationFindings: mockProps.hasMisconfigurationFindings,
-            hasVulnerabilitiesFindings: mockProps.hasVulnerabilitiesFindings,
-            hasNonClosedAlerts: mockProps.hasNonClosedAlerts,
-          },
-        },
-      });
-      expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+      openLeftPanel: mockOpenLeftPanel,
+      openFlyout: mockOpenFlyout,
     });
   });
 
-  describe('when newExpandableFlyoutNavigationDisabled is true', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-        openLeftPanel: mockOpenLeftPanel,
-        openFlyout: mockOpenFlyout,
-      });
+  it('returns callback that opens details panel when not in preview mode', () => {
+    const { result } = renderHook(() => useNavigateToHostDetails(mockProps));
+
+    result.current({ tab, subTab });
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: HostDetailsPanelKey,
+      params: {
+        name: mockProps.hostName,
+        scopeId: mockProps.scopeId,
+        isRiskScoreExist: mockProps.isRiskScoreExist,
+        path: { tab, subTab },
+        hasMisconfigurationFindings: mockProps.hasMisconfigurationFindings,
+        hasVulnerabilitiesFindings: mockProps.hasVulnerabilitiesFindings,
+        hasNonClosedAlerts: mockProps.hasNonClosedAlerts,
+      },
     });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+  });
 
-    it('returns callback that opens details panel when not in preview mode', () => {
-      const { result } = renderHook(() => useNavigateToHostDetails(mockProps));
+  it('returns callback that opens flyout when in preview mode', () => {
+    const { result } = renderHook(() =>
+      useNavigateToHostDetails({ ...mockProps, isPreviewMode: true })
+    );
 
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
+    result.current({ tab, subTab });
 
-      expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: HostPanelKey,
+        params: {
+          contextID: mockProps.contextID,
+          scopeId: mockProps.scopeId,
+          hostName: mockProps.hostName,
+        },
+      },
+      left: {
         id: HostDetailsPanelKey,
         params: {
           name: mockProps.hostName,
@@ -145,20 +106,8 @@ describe('useNavigateToHostDetails', () => {
           hasVulnerabilitiesFindings: mockProps.hasVulnerabilitiesFindings,
           hasNonClosedAlerts: mockProps.hasNonClosedAlerts,
         },
-      });
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      },
     });
-
-    it('returns empty callback and isLinkEnabled is false when in preview mode', () => {
-      const { result } = renderHook(() =>
-        useNavigateToHostDetails({ ...mockProps, isPreviewMode: true })
-      );
-
-      expect(result.current.isLinkEnabled).toBe(false);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenLeftPanel).not.toHaveBeenCalled();
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
-    });
+    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 });

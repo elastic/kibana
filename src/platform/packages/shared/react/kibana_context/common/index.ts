@@ -19,5 +19,5 @@ import type { KibanaTheme } from './types';
  */
 export const defaultTheme: KibanaTheme = {
   darkMode: false,
-  name: 'amsterdam',
+  name: 'borealis',
 };

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -13,6 +13,7 @@
     "@kbn/data-view-utils",
     "@kbn/fields-metadata-plugin",
     "@kbn/shared-ux-markdown",
+    "@kbn/core",
   ],
   "exclude": ["target/**/*"]
 }

@@ -202,6 +202,114 @@
       },
       {
         "parentPluginId": "discoverShared",
+        "id": "def-public.ObservabilityLogsAIInsightFeature",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityLogsAIInsightFeature",
+        "description": [],
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.ObservabilityLogsAIInsightFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"observability-logs-ai-insight\""
+            ],
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.ObservabilityLogsAIInsightFeature.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              {
+                "pluginId": "discoverShared",
+                "scope": "public",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-public.ObservabilityLogsAiInsightFeatureRenderDeps",
+                "text": "ObservabilityLogsAiInsightFeatureRenderDeps"
+              },
+              ") => JSX.Element"
+            ],
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discoverShared",
+                "id": "def-public.ObservabilityLogsAIInsightFeature.render.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discoverShared",
+                    "scope": "public",
+                    "docId": "kibDiscoverSharedPluginApi",
+                    "section": "def-public.ObservabilityLogsAiInsightFeatureRenderDeps",
+                    "text": "ObservabilityLogsAiInsightFeatureRenderDeps"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverShared",
+        "id": "def-public.ObservabilityLogsAiInsightFeatureRenderDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityLogsAiInsightFeatureRenderDeps",
+        "description": [],
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.ObservabilityLogsAiInsightFeatureRenderDeps.doc",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverShared",
         "id": "def-public.ObservabilityStreamsFeature",
         "type": "Interface",
         "tags": [],
@@ -352,6 +460,26 @@
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.ObservabilityStreamsFeatureRenderDeps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -481,13 +609,21 @@
             "text": "ObservabilityLogsAIAssistantFeature"
           },
           " | ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityLogsAIInsightFeature",
+            "text": "ObservabilityLogsAIInsightFeature"
+          },
+          " | ",
           "ObservabilityCreateSLOFeature",
           " | ",
           "ObservabilityLogEventsFeature",
           " | ",
-          "ObservabilityTracesSpanLinksFeature",
+          "ObservabilityTracesFeature",
           " | ",
-          "ObservabilityTracesFetchErrorsFeature",
+          "ObservabilityLogsFetchDocumentByIdFeature",
           " | ",
           "SecuritySolutionFeature"
         ],

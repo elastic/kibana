@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import user from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -56,11 +57,39 @@ describe('UserForm', () => {
   };
 
   it('prevents editing username when disabled', async () => {
-    // See https://github.com/elastic/kibana/issues/204268
-
-    renderUserForm({ disabled: true });
+    const { unmount } = renderUserForm({ disabled: true });
     const usernameInput = screen.getByTestId<HTMLInputElement>('userFormUserNameInput');
-    fireEvent.change(usernameInput, { target: { value: 'foo' } });
+    await user.type(usernameInput, 'foo');
     expect(usernameInput.value).toBe('jdoe');
+    unmount();
+  });
+
+  it('does not render submit button if user is form is disabled', () => {
+    const { unmount } = renderUserForm({ disabled: true });
+    expect(() => {
+      screen.getByTestId('editUserFormSubmitButton');
+    }).toThrowError();
+    unmount();
+  });
+
+  it('renders disabled submit button if no changes have been made', () => {
+    const { unmount } = renderUserForm();
+    const submitButton = screen.getByTestId('editUserFormSubmitButton');
+    expect(submitButton).toBeDisabled();
+    unmount();
+  });
+
+  it('enables the submit button if changes have been made', async () => {
+    const { unmount } = renderUserForm();
+    const submitButton = screen.getByTestId('editUserFormSubmitButton');
+    expect(submitButton).toBeDisabled();
+    const usernameInput = screen.getByTestId<HTMLInputElement>('userFormUserNameInput');
+
+    await user.type(usernameInput, 'foo');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('editUserFormSubmitButton')).toBeEnabled();
+    });
+    unmount();
   });
 });

@@ -86,6 +86,7 @@ export interface ActionResultsStrategyResponse
 
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
+  agentIds?: string[];
   startDate?: string;
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];

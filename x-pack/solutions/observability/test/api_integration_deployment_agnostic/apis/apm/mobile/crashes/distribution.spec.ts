@@ -11,7 +11,7 @@ import type {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';

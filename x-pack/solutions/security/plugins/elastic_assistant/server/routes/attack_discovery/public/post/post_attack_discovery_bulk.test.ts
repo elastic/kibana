@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
 import * as helpers from '../../../helpers';
-import * as publicHelpers from '../../helpers/throw_if_public_api_disabled';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
 import type { AttackDiscoveryDataClient } from '../../../../lib/attack_discovery/persistence';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
@@ -33,10 +32,6 @@ jest.mock('../../../helpers', () => {
     performChecks: jest.fn(),
   };
 });
-
-jest.mock('../../helpers/throw_if_public_api_disabled', () => ({
-  throwIfPublicApiDisabled: jest.fn(),
-}));
 
 const { context: mockContext } = requestContextMock.createTools();
 
@@ -93,9 +88,6 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
     jest
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
-
-    // make the public API appear enabled for tests
-    (publicHelpers.throwIfPublicApiDisabled as jest.Mock).mockResolvedValue(undefined);
 
     addVersionMock = jest.fn();
     (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });

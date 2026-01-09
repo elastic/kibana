@@ -6,11 +6,11 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { FileUploadStartDependencies } from './plugin';
+import type { FileUploadPluginStartDependencies } from './plugin';
 
 let coreStart: CoreStart;
-let pluginsStart: FileUploadStartDependencies;
-export function setStartServices(core: CoreStart, plugins: FileUploadStartDependencies) {
+let pluginsStart: FileUploadPluginStartDependencies;
+export function setStartServices(core: CoreStart, plugins: FileUploadPluginStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
 }

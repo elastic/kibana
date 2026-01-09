@@ -8,31 +8,38 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
-import { Subject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
+import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
+import type { UnifiedMetricsGridProps } from '../types';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
 
 describe('MetricsGrid', () => {
-  const requestParams: MetricsGridProps['requestParams'] = {
+  let discoverFetch$: UnifiedHistogramFetch$;
+
+  const actions: UnifiedMetricsGridProps['actions'] = {
+    openInNewTab: jest.fn(),
+    updateESQLQuery: jest.fn(),
+  };
+
+  const fetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
     filters: [],
-    getTimeRange: () => ({ from: 'now-1h', to: 'now' }),
     query: {
       esql: 'FROM metrics-*',
     },
     esqlVariables: [],
     relativeTimeRange: { from: 'now-1h', to: 'now' },
-    updateTimeRange: () => {},
-  };
+  });
 
   const services = {
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
@@ -53,19 +60,31 @@ describe('MetricsGrid', () => {
     },
   ];
 
+  const defaultProps: MetricsGridProps = {
+    columns: 2,
+    dimensions: [],
+    discoverFetch$: undefined as unknown as UnifiedHistogramFetch$,
+    fields,
+    fetchParams,
+    services,
+    actions,
+  };
+
+  const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
+    return render(<MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    discoverFetch$ = getFetch$Mock(fetchParams);
+  });
+
+  afterEach(() => {
+    discoverFetch$.complete();
+  });
+
   it('renders MetricChart for each metric field when pivotOn is metric', () => {
-    const { getAllByTestId } = render(
-      <MetricsGrid
-        columns={3}
-        dimensions={[]}
-        pivotOn="metric"
-        discoverFetch$={new Subject()}
-        fields={fields}
-        requestParams={requestParams}
-        services={services}
-        filters={[]}
-      />
-    );
+    const { getAllByTestId } = renderMetricsGrid({ columns: 3 });
 
     const charts = getAllByTestId('chart');
     expect(charts).toHaveLength(fields.length);
@@ -74,29 +93,21 @@ describe('MetricsGrid', () => {
   it('passes the correct size prop', () => {
     const { rerender } = render(
       <MetricsGrid
+        {...defaultProps}
         columns={3}
-        dimensions={['host.name']}
-        pivotOn="metric"
-        discoverFetch$={new Subject()}
-        fields={fields}
-        requestParams={requestParams}
-        services={services}
-        filters={[]}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
+        discoverFetch$={discoverFetch$}
       />
     );
 
-    expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 'm' }), expect.anything());
+    expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
 
     rerender(
       <MetricsGrid
+        {...defaultProps}
         columns={4}
-        dimensions={['host.name']}
-        pivotOn="metric"
-        discoverFetch$={new Subject()}
-        fields={fields}
-        requestParams={requestParams}
-        services={services}
-        filters={[]}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
+        discoverFetch$={discoverFetch$}
       />
     );
 
@@ -105,22 +116,15 @@ describe('MetricsGrid', () => {
 
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('renders with proper ARIA grid attributes', () => {
-      render(
-        <MetricsGrid
-          columns={2}
-          dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
-          fields={fields}
-          requestParams={requestParams}
-          services={services}
-          filters={[]}
-        />
-      );
+      renderMetricsGrid();
 
       const gridElement = screen.getByRole('grid');
       expect(gridElement).toBeInTheDocument();
@@ -134,18 +138,7 @@ describe('MetricsGrid', () => {
     });
 
     it('renders grid cells with proper ARIA attributes', () => {
-      render(
-        <MetricsGrid
-          columns={2}
-          dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
-          fields={fields}
-          requestParams={requestParams}
-          services={services}
-          filters={[]}
-        />
-      );
+      renderMetricsGrid();
 
       const gridCells = screen.getAllByRole('gridcell');
       expect(gridCells).toHaveLength(2);
@@ -162,20 +155,9 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle arrow key navigation correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
-      render(
-        <MetricsGrid
-          columns={2}
-          dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
-          fields={fields}
-          requestParams={requestParams}
-          services={services}
-          filters={[]}
-        />
-      );
+      renderMetricsGrid();
 
       const gridElement = screen.getByRole('grid');
       const gridCells = screen.getAllByRole('gridcell');
@@ -195,20 +177,9 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle clicking on cells to focus them', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
-      render(
-        <MetricsGrid
-          columns={2}
-          dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
-          fields={fields}
-          requestParams={requestParams}
-          services={services}
-          filters={[]}
-        />
-      );
+      renderMetricsGrid();
 
       const gridCells = screen.getAllByRole('gridcell');
 
@@ -220,8 +191,8 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle vertical arrow navigation in multi-row grid', async () => {
-      const user = userEvent.setup();
-      const multipleFields = [
+      const user = userEvent.setup({ delay: null });
+      const multipleFields: MetricsGridProps['fields'] = [
         ...fields,
         {
           name: 'system.disk.utilization',
@@ -237,18 +208,7 @@ describe('MetricsGrid', () => {
         },
       ];
 
-      render(
-        <MetricsGrid
-          columns={2}
-          dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
-          fields={multipleFields}
-          requestParams={requestParams}
-          services={services}
-          filters={[]}
-        />
-      );
+      renderMetricsGrid({ fields: multipleFields });
 
       const gridElement = screen.getByRole('grid');
       const gridCells = screen.getAllByRole('gridcell');
@@ -270,7 +230,6 @@ describe('MetricsGrid', () => {
 
   describe('MetricsGrid focus management', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
       // Mock setTimeout to run synchronously in tests
       jest.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
         callback();
@@ -284,18 +243,7 @@ describe('MetricsGrid', () => {
 
     describe('Chart ref management', () => {
       it('should generate unique chart IDs for each metric', () => {
-        render(
-          <MetricsGrid
-            columns={2}
-            dimensions={[]}
-            pivotOn="metric"
-            discoverFetch$={new Subject()}
-            fields={fields}
-            requestParams={requestParams}
-            services={services}
-            filters={[]}
-          />
-        );
+        renderMetricsGrid();
 
         const chartDiv1 = document.getElementById('system.cpu.utilization-0');
         const chartDiv2 = document.getElementById('system.memory.utilization-1');
@@ -305,18 +253,7 @@ describe('MetricsGrid', () => {
       });
 
       it('should store chart refs with proper data attributes', () => {
-        render(
-          <MetricsGrid
-            columns={2}
-            dimensions={[]}
-            pivotOn="metric"
-            discoverFetch$={new Subject()}
-            fields={fields}
-            requestParams={requestParams}
-            services={services}
-            filters={[]}
-          />
-        );
+        renderMetricsGrid();
 
         const gridCells = screen.getAllByRole('gridcell');
 
@@ -327,21 +264,18 @@ describe('MetricsGrid', () => {
     });
 
     describe('Focus state management', () => {
-      it('should update focus state when cell receives focus', async () => {
-        const user = userEvent.setup();
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
 
-        render(
-          <MetricsGrid
-            columns={2}
-            dimensions={[]}
-            pivotOn="metric"
-            discoverFetch$={new Subject()}
-            fields={fields}
-            requestParams={requestParams}
-            services={services}
-            filters={[]}
-          />
-        );
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should update focus state when cell receives focus', async () => {
+        const user = userEvent.setup({ delay: null });
+
+        renderMetricsGrid();
 
         const gridCells = screen.getAllByRole('gridcell');
 
@@ -354,24 +288,13 @@ describe('MetricsGrid', () => {
       });
 
       it('should handle programmatic focus correctly', () => {
-        render(
-          <MetricsGrid
-            columns={2}
-            dimensions={[]}
-            pivotOn="metric"
-            discoverFetch$={new Subject()}
-            fields={fields}
-            requestParams={requestParams}
-            services={services}
-            filters={[]}
-          />
-        );
+        renderMetricsGrid();
 
         const gridCells = screen.getAllByRole('gridcell');
 
         // Simulate programmatic focus (like from flyout closing)
-        gridCells[1].focus();
-        fireEvent.focus(gridCells[1]);
+        act(() => gridCells[1].focus());
+        act(() => fireEvent.focus(gridCells[1]));
 
         // Verify focus state and DOM focus
         expect(document.activeElement).toBe(gridCells[1]);

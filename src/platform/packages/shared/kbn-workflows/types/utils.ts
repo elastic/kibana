@@ -10,10 +10,11 @@
 import type {
   ConnectorContractUnion,
   DynamicConnectorContract,
-  EnhancedInternalConnectorContract,
-  EsWorkflow,
+  EsWorkflowCreate,
+  HttpMethod,
+  InternalConnectorContract,
 } from './v1';
-import { ExecutionStatus } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
   BuiltInStepType,
   ElasticsearchStep,
@@ -32,10 +33,7 @@ import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
-): Omit<
-  EsWorkflow,
-  'spaceId' | 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'
-> {
+): EsWorkflowCreate {
   // TODO: handle merge, if, foreach, etc.
 
   return {
@@ -44,7 +42,6 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     tags: workflowDefinition.tags ?? [],
     enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
-    deleted_at: null,
     valid: true,
   };
 }
@@ -62,6 +59,20 @@ export function isDangerousStatus(status: ExecutionStatus) {
   return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }
 
+export function isTerminalStatus(status: ExecutionStatus) {
+  return TerminalExecutionStatuses.includes(status);
+}
+
+export function isCancelableStatus(status: ExecutionStatus) {
+  const CancelableStatus: readonly ExecutionStatus[] = [
+    ExecutionStatus.RUNNING,
+    ExecutionStatus.WAITING,
+    ExecutionStatus.WAITING_FOR_INPUT,
+    ExecutionStatus.PENDING,
+  ];
+  return CancelableStatus.includes(status);
+}
+
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
 export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
@@ -77,10 +88,13 @@ export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
 export const isTriggerType = (type: string): type is TriggerType =>
   TriggerTypes.includes(type as TriggerType);
 
+export const isInternalConnector = (
+  connector: ConnectorContractUnion
+): connector is InternalConnectorContract => 'methods' in connector;
+
 export const isDynamicConnector = (
   connector: ConnectorContractUnion
 ): connector is DynamicConnectorContract => 'actionTypeId' in connector;
 
-export const isEnhancedInternalConnector = (
-  connector: ConnectorContractUnion
-): connector is EnhancedInternalConnectorContract => 'examples' in connector;
+export const isHttpMethod = (method: string): method is HttpMethod =>
+  KNOWN_HTTP_METHODS.includes(method as HttpMethod);

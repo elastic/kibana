@@ -13,6 +13,41 @@
     "functions": [
       {
         "parentPluginId": "visTypeTimeseries",
+        "id": "def-server.createRequestHash",
+        "type": "Function",
+        "tags": [],
+        "label": "createRequestHash",
+        "description": [
+          "\nGenerate the hash for this request so that, in the future, this hash can be used to look up\nexisting search IDs for this request. Ignores the `preference` parameter since it generally won't\nmatch from one request to another identical request."
+        ],
+        "signature": [
+          "(keys: Record<any, any>) => string"
+        ],
+        "path": "src/platform/plugins/shared/vis_types/timeseries/server/create_request_hash.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeTimeseries",
+            "id": "def-server.createRequestHash.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "keys",
+            "description": [],
+            "signature": [
+              "Record<any, any>"
+            ],
+            "path": "src/platform/plugins/shared/vis_types/timeseries/server/create_request_hash.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visTypeTimeseries",
         "id": "def-server.isVisSeriesData",
         "type": "Function",
         "tags": [],

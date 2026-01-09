@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Needed for Scout tests dependent on .peggy grammar files (`@kbn/tinymath`)
+import './peggy_setup';
+
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
@@ -38,7 +41,7 @@ export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
 
 // Other worker types
-export type { SamlAuth, SynthtraceFixture } from './fixtures/scope/worker';
+export type { SamlAuth, SynthtraceFixture, RequestAuthFixture } from './fixtures/scope/worker';
 
 // Tagging utility
 export { tags } from './tags';
@@ -49,3 +52,6 @@ export { apiTest } from './test/api';
 
 // Test helpers for EUI components
 export * from './eui_components';
+
+// Test helpers for Kibana components
+export * from './ui_components';

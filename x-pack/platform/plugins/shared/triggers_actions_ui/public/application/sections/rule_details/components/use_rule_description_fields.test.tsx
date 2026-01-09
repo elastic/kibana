@@ -8,15 +8,35 @@
 import React from 'react';
 import { AsyncField, createPrebuildFields } from './use_rule_description_fields';
 import { screen, render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { HttpSetup } from '@kbn/core/public';
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { existsFilter } from '@kbn/es-query/src/filters/stubs';
+
+jest.mock('../../../../common/lib/kibana/kibana_react');
+
+const dataViewGetMock = jest.fn();
+
+jest.mocked(useKibana).mockReturnValue({
+  services: {
+    ...createStartServicesMock(),
+    dataViews: {
+      get: dataViewGetMock,
+    },
+  },
+} as unknown as ReturnType<typeof useKibana>);
 
 describe('use_rule_description_fields', () => {
   let queryClient: QueryClient;
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">{children}</IntlProvider>
+      </QueryClientProvider>
+    );
   };
 
   beforeEach(() => {
@@ -64,51 +84,75 @@ describe('use_rule_description_fields', () => {
   describe('prebuild fields: data view index pattern', () => {
     it('should fetch the index pattern by id', async () => {
       const DATA_VIEW_ID = 'my-data-view-id';
-      const DATA_VIEW_INDEX_PATTERN = '.test_index_pattern*';
-      const httpMock = {
-        post: jest.fn().mockResolvedValueOnce({
-          result: { result: { item: { attributes: { title: DATA_VIEW_INDEX_PATTERN } } } },
-        }),
-      };
+      const DATA_VIEW_TITLE = 'Test Data View';
+
+      dataViewGetMock.mockResolvedValueOnce(
+        createStubDataView({
+          spec: {
+            id: DATA_VIEW_ID,
+            title: DATA_VIEW_TITLE,
+          },
+        })
+      );
 
       const prebuildFields = createPrebuildFields({
         border: '1px solid red',
-        http: httpMock as unknown as HttpSetup,
       });
 
-      const node =
-        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](DATA_VIEW_ID);
+      const node = prebuildFields.dataViewIndexPattern(DATA_VIEW_ID);
 
       render(node.description, { wrapper });
 
-      expect(httpMock.post).toHaveBeenCalledWith('/api/content_management/rpc/get', {
-        body: expect.stringContaining(`\"id\":\"${DATA_VIEW_ID}\"`),
-      });
-
+      expect(dataViewGetMock).toHaveBeenCalledWith(DATA_VIEW_ID);
       expect(await screen.findByTestId('rule-description-index-patterns')).toBeInTheDocument();
-      expect(screen.getByText(DATA_VIEW_INDEX_PATTERN)).toBeInTheDocument();
+      expect(screen.getByText(DATA_VIEW_TITLE)).toBeInTheDocument();
     });
 
     it('should show error "-" when something goes wrong', async () => {
       jest.spyOn(console, 'error').mockImplementation(jest.fn());
       const DATA_VIEW_ID = 'my-data-view-id-error-test';
-      const httpMock = {
-        post: jest.fn().mockRejectedValueOnce(new Error('unexpected error')),
-      };
+
+      dataViewGetMock.mockRejectedValue(new Error('Test error fetching data view'));
 
       const prebuildFields = createPrebuildFields({
         border: '1px solid red',
-        http: httpMock as unknown as HttpSetup,
       });
 
-      const node =
-        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](DATA_VIEW_ID);
+      const node = prebuildFields.dataViewIndexPattern(DATA_VIEW_ID);
 
       render(node.description, { wrapper });
 
       expect(
         await screen.findByTestId('rule-description-field-error-boundary')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('prebuild fields: query filters', () => {
+    it('should fetch the index pattern by id', async () => {
+      const DATA_VIEW_ID = 'my-data-view-id';
+
+      dataViewGetMock.mockResolvedValueOnce(
+        createStubDataView({
+          spec: {
+            id: DATA_VIEW_ID,
+          },
+        })
+      );
+
+      const prebuildFields = createPrebuildFields({
+        border: '1px solid red',
+      });
+
+      const node = prebuildFields.queryFilters({
+        filters: [existsFilter],
+        dataViewId: DATA_VIEW_ID,
+      });
+
+      render(node.description, { wrapper });
+
+      expect(dataViewGetMock).toHaveBeenCalledWith(DATA_VIEW_ID);
+      expect(await screen.findByTestId('description-detail-query-filter')).toBeInTheDocument();
     });
   });
 });

@@ -70,6 +70,9 @@
           },
           "group": {
             "type": "keyword"
+          },
+          "params": {
+            "type": "flattened"
           }
         },
         "type": "nested"
@@ -316,6 +319,17 @@
     }
   },
   "api_key_pending_invalidation": {
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      }
+    }
+  },
+  "api_key_to_invalidate": {
+    "dynamic": false,
     "properties": {
       "apiKeyId": {
         "type": "keyword"
@@ -639,13 +653,13 @@
       },
       "observables": {
         "properties": {
+          "description": {
+            "type": "keyword"
+          },
           "typeKey": {
             "type": "keyword"
           },
           "value": {
-            "type": "keyword"
-          },
-          "description": {
             "type": "keyword"
           }
         },
@@ -688,6 +702,9 @@
         "type": "integer"
       },
       "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -881,6 +898,23 @@
     "dynamic": false,
     "properties": {}
   },
+  "cloud-connect-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      },
+      "clusterId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
@@ -1070,6 +1104,65 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_connector": {
+    "dynamic": false,
+    "properties": {
+      "kscIds": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "toolIds": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "workflowIds": {
+        "type": "keyword"
+      }
+    }
+  },
+  "data_stream-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_id": {
+        "type": "keyword"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "job_info": {
+        "properties": {
+          "job_id": {
+            "type": "keyword"
+          },
+          "job_type": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "result": {
+        "properties": {}
       }
     }
   },
@@ -1829,6 +1922,9 @@
   "fleet-cloud-connector": {
     "dynamic": false,
     "properties": {
+      "accountType": {
+        "type": "keyword"
+      },
       "cloudProvider": {
         "type": "keyword"
       },
@@ -2043,6 +2139,26 @@
       },
       "token_plain": {
         "type": "keyword"
+      }
+    }
+  },
+  "gap_auto_fill_scheduler": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "ruleTypeConsumerPairs": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -2599,6 +2715,13 @@
         "index": false,
         "type": "boolean"
       },
+      "ilm_migration_status": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "integration_knowledge_enabled": {
+        "type": "boolean"
+      },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
       },
@@ -2608,12 +2731,35 @@
       "secret_storage_requirements_met": {
         "type": "boolean"
       },
+      "ssl_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "use_space_awareness_migration_started_at": {
         "index": false,
         "type": "date"
       },
       "use_space_awareness_migration_status": {
         "index": false,
+        "type": "keyword"
+      }
+    }
+  },
+  "integration-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_count": {
+        "type": "integer"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "status": {
         "type": "keyword"
       }
     }
@@ -3115,6 +3261,9 @@
       },
       "product_version": {
         "type": "keyword"
+      },
+      "resource_type": {
+        "type": "keyword"
       }
     }
   },
@@ -3153,6 +3302,17 @@
       "filter": {
         "dynamic": false,
         "properties": {}
+      },
+      "filters": {
+        "properties": {
+          "entity_types": {
+            "type": "keyword"
+          },
+          "filter": {
+            "type": "text"
+          }
+        },
+        "type": "nested"
       },
       "identifierType": {
         "type": "keyword"
@@ -3198,6 +3358,9 @@
     "properties": {
       "createdBy": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -3739,6 +3902,23 @@
     "dynamic": false,
     "properties": {}
   },
+  "slo_template": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
   "space": {
     "dynamic": false,
     "properties": {
@@ -3760,6 +3940,10 @@
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "stream-prompts": {
     "dynamic": false,
     "properties": {}
   },

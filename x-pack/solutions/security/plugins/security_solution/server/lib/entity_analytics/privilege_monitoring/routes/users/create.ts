@@ -8,18 +8,13 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import {
   CreatePrivMonUserRequestBody,
   type CreatePrivMonUserResponse,
 } from '../../../../../../common/api/entity_analytics';
-import {
-  API_VERSIONS,
-  APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-  MONITORING_USERS_URL,
-} from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID, MONITORING_USERS_URL } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
@@ -46,16 +41,17 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
           const secSol = await context.securitySolution;
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const { elasticsearch } = await context.core;
+          const crudService = createPrivilegedUsersCrudService({
+            esClient: elasticsearch.client.asCurrentUser,
+            index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
+            logger: secSol.getLogger(),
+          });
+
           const config = secSol.getConfig();
           const maxUsersAllowed =
             config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-          const crudService = createPrivilegedUsersCrudService(dataClient);
 
           const body = await crudService.create(request.body, 'api', maxUsersAllowed);
           return response.ok({ body });

@@ -13,11 +13,6 @@ import { getAttackDiscoveryGenerationRoute } from './get_attack_discovery_genera
 import * as helpers from '../../../helpers';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/generation.gen';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
-
-jest.mock('../../helpers/throw_if_public_api_disabled', () => ({
-  throwIfPublicApiDisabled: jest.fn().mockResolvedValue(undefined),
-}));
 
 const mockGeneration: AttackDiscoveryGeneration = {
   alerts_context_count: 10,
@@ -449,52 +444,6 @@ describe('getAttackDiscoveryGenerationRoute', () => {
           'content-type': 'application/json',
         },
         statusCode: 403,
-      });
-    });
-  });
-
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      beforeEach(() => {
-        (throwIfPublicApiDisabled as jest.Mock).mockRejectedValueOnce(
-          Object.assign(new Error('Attack discovery public API is disabled'), {
-            statusCode: 403,
-          })
-        );
-      });
-
-      it('returns a 403 custom response when the public API is disabled', async () => {
-        await getHandler(mockContext, mockRequest, mockResponse);
-
-        expect(mockResponse.custom).toHaveBeenCalledWith({
-          body: Buffer.from(
-            JSON.stringify({
-              message: 'Attack discovery public API is disabled',
-              status_code: 403,
-            })
-          ),
-          headers: {
-            'content-type': 'application/json',
-          },
-          statusCode: 403,
-        });
-      });
-    });
-
-    describe('when the public API is enabled', () => {
-      beforeEach(() => {
-        (throwIfPublicApiDisabled as jest.Mock).mockResolvedValueOnce(undefined);
-      });
-
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        await getHandler(mockContext, mockRequest, mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: {
-            generation: mockGeneration,
-            data: mockAlertData,
-          },
-        });
       });
     });
   });

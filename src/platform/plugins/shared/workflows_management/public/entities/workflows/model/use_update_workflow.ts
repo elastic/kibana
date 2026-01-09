@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useAsyncThunk } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
-import { updateWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/update_workflow_thunk';
+import { useAsyncThunk } from '../../../hooks/use_async_thunk';
+import { updateWorkflowThunk } from '../store/workflow_detail/thunks/update_workflow_thunk';
 
 export const useUpdateWorkflow = () => useAsyncThunk(updateWorkflowThunk);

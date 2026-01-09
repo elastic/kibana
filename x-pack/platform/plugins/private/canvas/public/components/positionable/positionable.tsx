@@ -43,7 +43,9 @@ export const Positionable: FC<Props> = ({ children, transformMatrix, width, heig
 };
 
 Positionable.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   children: PropTypes.element.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,

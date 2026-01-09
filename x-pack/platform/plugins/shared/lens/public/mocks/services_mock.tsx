@@ -64,17 +64,6 @@ export function makeAttributeService(doc: LensDocument): jest.Mocked<LensAttribu
     loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
     saveToLibrary: jest.fn().mockResolvedValue(doc.savedObjectId),
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
-    injectReferences: jest.fn((_runtimeState, references) => ({
-      ..._runtimeState,
-      attributes: {
-        ..._runtimeState.attributes,
-        references: references?.length ? references : _runtimeState.attributes.references,
-      },
-    })),
-    extractReferences: jest.fn((_runtimeState) => ({
-      rawState: _runtimeState,
-      references: _runtimeState.attributes.references || [],
-    })),
   };
 
   return attributeServiceMock;

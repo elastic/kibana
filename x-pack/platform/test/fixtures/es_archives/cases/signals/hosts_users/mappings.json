@@ -3,10 +3,12 @@
   "value": {
     "aliases": {
       ".alerts-security.alerts-default": {
-        "is_write_index": false
+        "is_write_index": false,
+        "is_hidden": true
       },
       "siem-signals-default": {
-        "is_write_index": true
+        "is_write_index": true,
+        "is_hidden": true
       }
     },
     "index": "siem-signals-default-000001",

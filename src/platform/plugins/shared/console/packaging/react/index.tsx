@@ -243,8 +243,6 @@ export const OneConsole = ({
             objectStorageClient,
             http,
             autocompleteInfo,
-            // Mock required services that aren't available in packaging
-            dataViews: {} as any,
             data: {} as any,
             licensing: {} as any,
             application: {} as any,

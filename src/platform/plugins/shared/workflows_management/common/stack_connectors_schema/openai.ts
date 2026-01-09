@@ -12,19 +12,16 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // OpenAI connector parameter schema
 export const OpenAIParamsSchema = z.object({
-  subAction: z.enum(['run', 'test', 'dashboard']),
-  subActionParams: z.object({
-    body: z.string(),
-    model: z.string().optional(),
-    n: z.number().optional(),
-    stop: z.array(z.string()).optional(),
-    temperature: z.number().optional(),
-    max_tokens: z.number().optional(),
-  }),
+  body: z.string(),
+  model: z.string().optional(),
+  n: z.number().optional(),
+  stop: z.array(z.string()).optional(),
+  temperature: z.number().optional(),
+  max_tokens: z.number().optional(),
 });
 
 // OpenAI connector response schema

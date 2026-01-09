@@ -10,6 +10,11 @@
 export { ViewSavedSearchAction } from '../embeddable/actions/view_saved_search_action';
 export { getSearchEmbeddableFactory } from '../embeddable/get_search_embeddable_factory';
 export { getLegacyLogStreamEmbeddableFactory } from '../embeddable/get_legacy_log_stream_embeddable_factory';
-export { searchEmbeddableTransforms } from '../../common/embeddable';
+export { getSearchEmbeddableTransforms } from '../../common/embeddable';
 export { addControlsFromSavedSession } from '../embeddable/utils/add_controls_from_saved_session';
-export { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
+export {
+  SAVED_OBJECT_REF_NAME,
+  apiPublishesEditablePauseFetch,
+  apiHasUniqueId,
+} from '@kbn/presentation-publishing';
+export { apiPublishesESQLVariables } from '@kbn/esql-types';

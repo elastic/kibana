@@ -9,6 +9,7 @@
 
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 import type { ActivePanelEvent, GridPanelData } from './grid_panel';
 import type {
   ActiveSectionEvent,
@@ -63,6 +64,7 @@ export interface GridLayoutStateManager {
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+  scrollContainer$: BehaviorSubject<ScrollContainer>;
 
   activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
   activeSectionEvent$: BehaviorSubject<ActiveSectionEvent | undefined>;

@@ -11,12 +11,12 @@ import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/con
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
-import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   assetCriticalityRouteHelpersFactory,
   buildDocument,
@@ -34,7 +34,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const previewRiskScores = async ({
@@ -68,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  const doTests = () => {
+  describe('@ess @serverless Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -118,6 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
             category_1_score: 8.100601759,
             id_field: 'host.name',
             id_value: 'host-1',
+            modifiers: [],
           });
 
           expect(rawScore.category_1_score! + rawScore.category_2_score!).to.be.within(
@@ -137,7 +137,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
@@ -146,6 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 8.100601759,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
             {
               calculated_level: 'Unknown',
@@ -155,6 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 8.100601759,
               id_field: 'host.name',
               id_value: 'host-2',
+              modifiers: [],
             },
           ]);
         });
@@ -179,6 +185,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 10.9645969767,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -201,6 +208,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 18.2283347711,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -226,6 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 18.2283347711,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
             {
               calculated_level: 'Unknown',
@@ -235,6 +244,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 8.100601759,
               id_field: 'host.name',
               id_value: 'host-2',
+              modifiers: [],
             },
           ]);
         });
@@ -257,6 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 19.5457321682,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -282,6 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 16.1634263078,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -311,6 +323,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 16.1634263078,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -336,6 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 93.0749150865,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -367,6 +381,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 98.3314921662,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -463,6 +478,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 86.8348557878,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -492,6 +508,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 93.0749150865,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
         });
@@ -519,6 +536,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 93.0749150865,
               id_field: 'user.name',
               id_value: 'user-1',
+              modifiers: [],
             },
           ]);
         });
@@ -548,6 +566,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 89.9143565467,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [],
             },
           ]);
 
@@ -560,6 +579,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 89.9143565467,
               id_field: 'user.name',
               id_value: 'user-1',
+              modifiers: [],
             },
           ]);
         });
@@ -592,7 +612,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               criticality_level: 'extreme_impact',
               criticality_modifier: 2.0,
@@ -603,6 +627,16 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 8.100601759,
               id_field: 'host.name',
               id_value: 'host-1',
+              modifiers: [
+                {
+                  contribution: 6.8865521091,
+                  metadata: {
+                    criticality_level: 'extreme_impact',
+                  },
+                  modifier_value: 2,
+                  type: 'asset_criticality',
+                },
+              ],
             },
             {
               calculated_level: 'Unknown',
@@ -612,6 +646,7 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_score: 8.100601759,
               id_field: 'host.name',
               id_value: 'host-2',
+              modifiers: [],
             },
           ]);
         });
@@ -628,28 +663,6 @@ export default ({ getService }: FtrProviderContext): void => {
         service: [],
         user: [],
       });
-    });
-  };
-
-  describe('@ess @serverless Risk Scoring Preview API', () => {
-    describe('ESQL based risk scoring', () => {
-      doTests();
-    });
-
-    describe('scripted metric based risk scoring', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-
-      doTests();
     });
   });
 };

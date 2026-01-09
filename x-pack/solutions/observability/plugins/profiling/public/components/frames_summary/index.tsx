@@ -136,12 +136,12 @@ export function FramesSummary({
   const Summary = (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" data-test-subj="framesSummary_items">
         {data
           .filter((item) => !item.hidden)
           .map((item) => {
             return (
-              <EuiFlexItem key={item.id}>
+              <EuiFlexItem key={item.id} data-test-subj={`framesSummary_item_${item.id}`}>
                 <SummaryItem
                   {...item}
                   isLoading={isLoading}
@@ -156,27 +156,37 @@ export function FramesSummary({
   );
 
   return compressed ? (
-    <>{Summary}</>
+    <div data-test-subj="framesSummary_compressed">{Summary}</div>
   ) : (
     <EuiAccordion
       initialIsOpen
       id="TopNFunctionsSummary"
+      data-test-subj="framesSummary"
       buttonContent={
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
+            <EuiText
+              color={data[0].baseColor}
+              style={{ fontWeight: 'bold' }}
+              textAlign="left"
+              data-test-subj="framesSummary_performanceTitle"
+            >
               {data[0].title}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
+            <EuiTextColor
+              style={{ fontWeight: 'bold' }}
+              color={data[0].baseColor}
+              data-test-subj="framesSummary_performanceValue"
+            >
               {data[0].baseValue}
             </EuiTextColor>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
     >
-      {Summary}
+      <div data-test-subj="framesSummary_details">{Summary}</div>
     </EuiAccordion>
   );
 }

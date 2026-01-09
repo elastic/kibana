@@ -7,7 +7,7 @@
 
 import type { Case, Attachments, Attachment } from '../../../common/types/domain';
 import type {
-  AlertResponse,
+  DocumentResponse,
   AttachmentsFindResponse,
   BulkGetAttachmentsResponse,
 } from '../../../common/types/api';
@@ -22,7 +22,7 @@ import type {
   DeleteAllArgs,
   DeleteArgs,
   FindCommentsArgs,
-  GetAllAlertsAttachToCase,
+  GetAllDocumentsAttachedToCase,
   GetAllArgs,
   GetArgs,
   UpdateArgs,
@@ -32,7 +32,7 @@ import type {
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
-import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { find, get, getAll, getAllDocumentsAttachedToCase } from './get';
 import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
@@ -62,9 +62,9 @@ export interface AttachmentsSubClient {
    */
   find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponse>;
   /**
-   * Retrieves all alerts attach to a case given a single case ID
+   * Retrieves all documents attached to a case given a single case ID
    */
-  getAllAlertsAttachToCase(params: GetAllAlertsAttachToCase): Promise<AlertResponse>;
+  getAllDocumentsAttachedToCase(params: GetAllDocumentsAttachedToCase): Promise<DocumentResponse>;
   /**
    * Gets all attachments for a single case.
    */
@@ -104,7 +104,8 @@ export const createAttachmentsSubClient = (
     bulkDeleteFileAttachments: (params) =>
       bulkDeleteFileAttachments(params, clientArgs, casesClient),
     find: (params) => find(params, clientArgs),
-    getAllAlertsAttachToCase: (params) => getAllAlertsAttachToCase(params, clientArgs, casesClient),
+    getAllDocumentsAttachedToCase: (params) =>
+      getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params) => getAll(params, clientArgs),
     get: (params) => get(params, clientArgs),
     update: (params) => update(params, clientArgs),

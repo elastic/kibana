@@ -212,6 +212,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
       {policy.isManagedPolicy ? (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="info"

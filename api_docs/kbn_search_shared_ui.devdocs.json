@@ -212,6 +212,21 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.GETTING_STARTED_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "GETTING_STARTED_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"gettingStartedVisited\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.GLOBAL_EMPTY_STATE_SKIP_KEY",
         "type": "string",
         "tags": [],

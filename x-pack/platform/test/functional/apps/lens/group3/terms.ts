@@ -326,6 +326,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.switchToVisualization('lnsDatatable');
 
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
 
         await lens.configureDimension({
           dimension: 'lnsDatatable_rows > lns-empty-dimension',

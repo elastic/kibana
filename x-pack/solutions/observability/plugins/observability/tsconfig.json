@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -126,7 +126,7 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
@@ -137,7 +137,15 @@
     "@kbn/discover-utils",
     "@kbn/deeplinks-management",
     "@kbn/observability-nav-icons",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/content-management-utils",
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/agent-builder-plugin",
+    "@kbn/synthtrace",
+    "@kbn/fleet-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
+    "@kbn/observability-agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

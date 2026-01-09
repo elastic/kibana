@@ -6,11 +6,10 @@
  */
 
 import React, { lazy } from 'react';
-import { ConnectorForm, formDeserializer, formSerializer } from './connector_form';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { waitFor, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
+import { ConnectorForm } from './connector_form';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
 
@@ -31,6 +30,10 @@ describe('ConnectorForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
+    appMockRenderer.coreStart.application.capabilities = {
+      ...appMockRenderer.coreStart.application.capabilities,
+      actions: { save: true, show: true },
+    };
   });
 
   it('calls on change with correct init state', async () => {
@@ -38,7 +41,7 @@ describe('ConnectorForm', () => {
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <ConnectorForm
         actionTypeModel={actionTypeModel}
         isEdit={false}
@@ -48,7 +51,9 @@ describe('ConnectorForm', () => {
       />
     );
 
-    expect(result.getByTestId('nameInput')).toBeInTheDocument();
+    // Wait for the form to render to avoid suspended resources warnings from rtl
+    expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+
     expect(onChange).toHaveBeenCalledWith({
       isSubmitted: false,
       isSubmitting: false,
@@ -60,16 +65,11 @@ describe('ConnectorForm', () => {
   });
 
   it('calls onFormModifiedChange when form is modified', async () => {
-    appMockRenderer.coreStart.application.capabilities = {
-      ...appMockRenderer.coreStart.application.capabilities,
-      actions: { save: true, show: true },
-    };
-
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <ConnectorForm
         actionTypeModel={actionTypeModel}
         isEdit={false}
@@ -79,14 +79,12 @@ describe('ConnectorForm', () => {
       />
     );
 
-    expect(result.getByTestId('nameInput')).toBeInTheDocument();
-    await act(async () => {
-      await userEvent.type(result.getByRole('textbox'), 'My connector', { delay: 100 });
-    });
+    const nameInput = screen.getByTestId('nameInput');
+    expect(nameInput).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(onFormModifiedChange).toHaveBeenCalledWith(true);
-    });
+    await userEvent.type(nameInput, 'My connector', { delay: 100 });
+
+    expect(onFormModifiedChange).toHaveBeenCalledWith(true);
   });
 
   it('calls onChange when the form is invalid', async () => {
@@ -148,100 +146,37 @@ describe('ConnectorForm', () => {
     });
   });
 
-  describe('serializers', () => {
-    it('formSerializer works as expected for .gen-ai', () => {
-      const formData = {
-        actionTypeId: '.gen-ai',
-        isDeprecated: false,
-        config: {
-          headers: [
-            { key: 'foo', value: 'bar' },
-            { key: 'an', value: 'tonio' },
-          ],
-        },
-        secrets: {
-          secretHeaders: [
-            {
-              key: 'foo',
-              value: 'bar',
-            },
-          ],
-        },
-        isMissingSecrets: false,
-      };
-
-      expect(formSerializer(formData)).toEqual({
-        actionTypeId: '.gen-ai',
-        config: {
-          headers: {
-            foo: 'bar',
-            an: 'tonio',
-          },
-        },
-        isDeprecated: false,
-        isMissingSecrets: false,
-        secrets: {
-          secretHeaders: undefined,
-        },
-      });
+  it('passes the serializers from the connector type model to the underlying form', async () => {
+    const formSerializer = jest.fn((data) => data);
+    const formDeserializer = jest.fn((data) => data);
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      actionConnectorFields: lazy(() => import('./connector_mock')),
+      connectorForm: {
+        serializer: formSerializer,
+        deserializer: formDeserializer,
+      },
     });
 
-    it('formDeserializer works as expected for .gen-ai', () => {
-      const formData = {
-        actionTypeId: '.gen-ai',
-        isDeprecated: false,
-        config: {
-          headers: {
-            foo: 'bar',
-            an: 'tonio',
-          },
-        },
-        secrets: {
-          secretHeaders: {
-            not: 'relevant',
-          },
-        },
-        isMissingSecrets: false,
-      };
+    appMockRenderer.render(
+      <ConnectorForm
+        actionTypeModel={actionTypeModel}
+        isEdit={true}
+        connector={connector}
+        onChange={onChange}
+        onFormModifiedChange={onFormModifiedChange}
+      />
+    );
 
-      expect(formDeserializer(formData)).toEqual({
-        actionTypeId: '.gen-ai',
-        config: {
-          headers: [
-            {
-              key: 'foo',
-              type: 'config',
-              value: 'bar',
-            },
-            {
-              key: 'an',
-              type: 'config',
-              value: 'tonio',
-            },
-          ],
-        },
-        __internal__: {
-          headers: [
-            {
-              key: 'foo',
-              type: 'config',
-              value: 'bar',
-            },
-            {
-              key: 'an',
-              type: 'config',
-              value: 'tonio',
-            },
-          ],
-        },
-        isDeprecated: false,
-        isMissingSecrets: false,
-        secrets: {
-          secretHeaders: {
-            not: 'relevant',
-          },
-        },
-      });
+    expect(formDeserializer).toHaveBeenCalled();
+
+    // Without the name the form is invalid and doesn't submit
+    await userEvent.type(screen.getByTestId('nameInput'), 'Name');
+
+    await act(async () => {
+      const submit = onChange.mock.calls[0][0].submit;
+      await submit();
     });
+
+    expect(formSerializer).toHaveBeenCalled();
   });
 });

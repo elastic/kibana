@@ -30,6 +30,8 @@ interface ResolveIndexResponseItem {
   mode?: 'lookup' | 'time_series' | string;
   indices?: string[];
   aliases?: string[];
+  attributes?: string[];
+  backing_indices?: string[];
 }
 
 export interface ResolveIndexResponse {

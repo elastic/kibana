@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
@@ -29,7 +29,7 @@ export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
 export const singleMetricViewerEmbeddableCustomInputSchema = schema.object({
   ...baseUserInputProps.getPropSchemas(),
   id: schema.maybe(schema.string()),
-  filters: schema.maybe(schema.arrayOf(filterSchema)),
+  filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
   query: schema.maybe(querySchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
   timeRange: schema.maybe(timeRangeSchema),

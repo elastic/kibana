@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { RootSchema, SchemaArray } from '@elastic/ebt';
+import type { RootSchema, SchemaObject } from '@elastic/ebt';
+import type { FeatureType } from '@kbn/streams-schema';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
-  StreamsAIGrokSuggestionLatencyProps,
-  StreamsAssetClickEventProps,
-  StreamsAssetCountProps,
+  StreamsAIDissectSuggestionAcceptedProps,
+  StreamsAttachmentClickEventProps,
+  StreamsAttachmentCountProps,
+  StreamsAttachmentLinkChangedProps,
+  StreamsAttachmentFlyoutOpenedProps,
+  StreamsAttachmentFlyoutActionProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
@@ -18,101 +23,135 @@ import type {
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
+  StreamsFeatureIdentificationSavedProps,
+  StreamsFeatureIdentificationDeletedProps,
+  StreamsDescriptionGeneratedProps,
+  StreamsTabVisitedProps,
 } from './types';
 
-const streamsAssetCountSchema: RootSchema<StreamsAssetCountProps> = {
+const attachmentTypeCountFields: Record<
+  AttachmentType,
+  { type: 'long'; _meta: { description: string } }
+> = {
+  dashboard: {
+    type: 'long',
+    _meta: {
+      description: 'The count of dashboard attachments',
+    },
+  },
+  slo: {
+    type: 'long',
+    _meta: {
+      description: 'The count of SLO attachments',
+    },
+  },
+  rule: {
+    type: 'long',
+    _meta: {
+      description: 'The count of rule attachments',
+    },
+  },
+};
+
+const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
   name: {
     type: 'keyword',
     _meta: {
       description: 'The name of the Stream',
     },
   },
-  dashboards: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-    },
-  },
-  slos: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-      optional: true,
-    },
-  },
-  rules: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-      optional: true,
-    },
-  },
+  ...attachmentTypeCountFields,
 };
 
-const streamsAssetClickEventSchema: RootSchema<StreamsAssetClickEventProps> = {
+const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventProps> = {
   name: {
     type: 'keyword',
     _meta: {
       description: 'The name of the Stream',
     },
   },
-  asset_type: {
+  attachment_type: {
     type: 'keyword',
     _meta: {
-      description: 'The type of asset: dashboard, slo, rule',
+      description: 'The type of attachment: dashboard, slo, rule',
     },
   },
-  asset_id: {
+  attachment_id: {
     type: 'keyword',
     _meta: {
-      description: 'The id of the asset',
+      description: 'The id of the attachment',
     },
   },
 };
 
-const matchRate: SchemaArray<number, number> = {
-  type: 'array',
-  items: {
-    type: 'float',
-    _meta: {
-      description: 'The rate',
-    },
-  },
+const attachmentCountByTypeSchema: SchemaObject<Record<AttachmentType, number>> = {
   _meta: {
-    description: 'The success rate of each match',
+    description: 'The count of attachments grouped by type',
   },
+  properties: attachmentTypeCountFields,
 };
 
-const streamsAIGrokSuggestionLatencySchema: RootSchema<StreamsAIGrokSuggestionLatencyProps> = {
-  name: {
+const streamsAttachmentLinkChangedSchema: RootSchema<StreamsAttachmentLinkChangedProps> = {
+  stream_name: {
     type: 'keyword',
     _meta: {
       description: 'The name of the Stream',
     },
   },
-  field: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the field used.',
-    },
-  },
-  connector_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The ID of the LLM connector',
-    },
-  },
-  suggestion_count: {
+  attachment_count: {
     type: 'long',
     _meta: {
-      description: 'The number of suggestions in the response',
+      description: 'The number of attachments linked or unlinked',
     },
   },
-  match_rate: matchRate,
-  duration_ms: {
-    type: 'long',
+  count_by_type: attachmentCountByTypeSchema,
+};
+
+const streamsAttachmentFlyoutOpenedSchema: RootSchema<StreamsAttachmentFlyoutOpenedProps> = {
+  stream_name: {
+    type: 'keyword',
     _meta: {
-      description: 'The duration of the request',
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of attachment: dashboard, slo, rule',
+    },
+  },
+  attachment_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the attachment',
+    },
+  },
+};
+
+const streamsAttachmentFlyoutActionSchema: RootSchema<StreamsAttachmentFlyoutActionProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of attachment: dashboard, slo, rule',
+    },
+  },
+  attachment_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the attachment',
+    },
+  },
+  action: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The action taken from the flyout: navigate_to_attachment, unlink, navigate_to_attached_stream',
     },
   },
 };
@@ -150,6 +189,40 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
   },
 };
 
+const streamsAIDissectSuggestionAcceptedSchema: RootSchema<StreamsAIDissectSuggestionAcceptedProps> =
+  {
+    name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    field: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the field used.',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector',
+      },
+    },
+    match_rate: {
+      type: 'float',
+      _meta: {
+        description: 'The success rate of suggestion',
+      },
+    },
+    detected_fields: {
+      type: 'long',
+      _meta: {
+        description: 'The number of detected fields',
+      },
+    },
+  };
+
 const wiredStreamsStatusChangedSchema: RootSchema<WiredStreamsStatusChangedProps> = {
   is_enabled: {
     type: 'boolean',
@@ -170,6 +243,12 @@ const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
     type: 'keyword',
     _meta: {
       description: 'The type of the stream: wired or classic',
+    },
+  },
+  configuration_mode: {
+    type: 'keyword',
+    _meta: {
+      description: 'The mode used to configure the processors: interactive or yaml',
     },
   },
 };
@@ -214,6 +293,21 @@ const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   },
 };
 
+const countByTypes: SchemaObject<{ [key in FeatureType]: number }> = {
+  _meta: {
+    description: 'The count of identified features or significant events by type',
+  },
+  properties: {
+    system: {
+      type: 'long',
+      _meta: {
+        description:
+          'The count of system features or significant events generated by system features',
+      },
+    },
+  },
+};
+
 const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
   {
     duration_ms: {
@@ -223,10 +317,47 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
           'The time (in milliseconds) it took to generate significant events suggestions',
       },
     },
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of significant event queries generated',
+      },
+    },
+    count_by_feature_type: countByTypes,
+    features_selected: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features selected for generation',
+      },
+    },
+    features_total: {
+      type: 'long',
+      _meta: {
+        description: 'The number of total features available for generation',
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
         description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
       },
     },
   };
@@ -238,19 +369,175 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
       description: 'The number of significant events created',
     },
   },
+  count_by_feature_type: countByTypes,
   stream_type: {
     type: 'keyword',
     _meta: {
       description: 'The type of the stream: wired or classic',
     },
   },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+};
+
+const streamsFeatureIdentificationSavedSchema: RootSchema<StreamsFeatureIdentificationSavedProps> =
+  {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features saved',
+      },
+    },
+    count_by_type: countByTypes,
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdentificationDeletedProps> =
+  {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features deleted',
+      },
+    },
+    count_by_type: countByTypes,
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+};
+
+const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the stream being visited',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired, classic or unknown',
+    },
+  },
+  tab_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the tab being visited',
+    },
+  },
+  privileges: {
+    properties: {
+      manage: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can manage/change the stream',
+        },
+      },
+      monitor: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can monitor the stream',
+        },
+      },
+      view_index_metadata: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can view stream metadata',
+        },
+      },
+      lifecycle: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can change retention settings',
+        },
+      },
+      simulate: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can simulate processing changes',
+        },
+      },
+      text_structure: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can use text structure API',
+        },
+      },
+      read_failure_store: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can read failure store',
+        },
+      },
+      manage_failure_store: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can manage failure store',
+        },
+      },
+    },
+  },
 };
 
 export {
-  streamsAssetCountSchema,
-  streamsAssetClickEventSchema,
-  streamsAIGrokSuggestionLatencySchema,
+  streamsAttachmentCountSchema,
+  streamsAttachmentClickEventSchema,
+  streamsAttachmentLinkChangedSchema,
+  streamsAttachmentFlyoutOpenedSchema,
+  streamsAttachmentFlyoutActionSchema,
   streamsAIGrokSuggestionAcceptedSchema,
+  streamsAIDissectSuggestionAcceptedSchema,
   streamsRetentionChangedSchema,
   streamsProcessingSavedSchema,
   streamsChildStreamCreatedSchema,
@@ -258,4 +545,8 @@ export {
   streamsSignificantEventsSuggestionsGeneratedSchema,
   streamsSignificantEventsCreatedSchema,
   wiredStreamsStatusChangedSchema,
+  streamsFeatureIdentificationSavedSchema,
+  streamsFeatureIdentificationDeletedSchema,
+  streamsDescriptionGeneratedSchema,
+  streamsTabVisitedSchema,
 };

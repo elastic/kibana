@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState, useCallback, useMemo } from 'react';
 import type { ReactNode, FC } from 'react';
-import React, { useState, useCallback } from 'react';
 
-import { SecondaryMenu } from '../secondary_menu';
-import { NestedMenuContext } from './use_nested_menu';
-import { Panel } from './menu_panel';
 import { Header } from './header';
 import { Item } from './menu_item';
+import { NestedMenuContext } from './use_nested_menu';
+import { Panel } from './menu_panel';
 import { PrimaryMenuItem } from './primary_menu_item';
+import { SecondaryMenu } from '../secondary_menu';
+import { MAIN_PANEL_ID } from '../../constants';
 
 interface NestedSecondaryMenuProps {
   children: ReactNode;
@@ -23,16 +24,16 @@ interface NestedSecondaryMenuProps {
 }
 
 interface NestedSecondaryMenuComponent extends FC<NestedSecondaryMenuProps> {
-  Panel: typeof Panel;
   Header: typeof Header;
   Item: typeof Item;
+  Panel: typeof Panel;
   PrimaryMenuItem: typeof PrimaryMenuItem;
   Section: typeof SecondaryMenu.Section;
 }
 
 export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
   children,
-  initialPanel = 'main',
+  initialPanel = MAIN_PANEL_ID,
 }) => {
   const [currentPanel, setCurrentPanel] = useState(initialPanel);
   const [panelStack, setPanelStack] = useState<Array<{ id: string; returnFocusId?: string }>>([]);
@@ -62,20 +63,23 @@ export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
     });
   }, []);
 
-  const contextValue = {
-    canGoBack: panelStack.length > 0,
-    currentPanel,
-    goBack,
-    goToPanel,
-    panelStackDepth: panelStack.length,
-    returnFocusId,
-  };
+  const contextValue = useMemo(
+    () => ({
+      canGoBack: panelStack.length > 0,
+      currentPanel,
+      goBack,
+      goToPanel,
+      panelStackDepth: panelStack.length,
+      returnFocusId,
+    }),
+    [currentPanel, goBack, goToPanel, panelStack.length, returnFocusId]
+  );
 
   return <NestedMenuContext.Provider value={contextValue}>{children}</NestedMenuContext.Provider>;
 };
 
-NestedSecondaryMenu.Panel = Panel;
 NestedSecondaryMenu.Header = Header;
 NestedSecondaryMenu.Item = Item;
+NestedSecondaryMenu.Panel = Panel;
 NestedSecondaryMenu.PrimaryMenuItem = PrimaryMenuItem;
 NestedSecondaryMenu.Section = SecondaryMenu.Section;

@@ -7,28 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
-import { css } from '@emotion/react';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import { useDiscoverTopNav } from './use_discover_topnav';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useESQLVariables } from './use_esql_variables';
-import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
+  useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -36,8 +32,11 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { onSaveDiscoverSession } from './save_discover_session';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
+import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import { onSaveDiscoverSession } from './save_discover_session';
+import { useDiscoverTopNav } from './use_discover_topnav';
+import { useESQLVariables } from './use_esql_variables';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -99,6 +98,18 @@ export const DiscoverTopNav = ({
     onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
   });
 
+  const onOpenQueryInNewTab = useCallback(
+    async (tabName: string, esqlQuery: string) => {
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel: tabName,
+          appState: { query: { esql: esqlQuery } },
+        })
+      );
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
@@ -142,19 +153,22 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appState } = stateContainer;
-    if (newSavedQueryId) {
-      appState.update({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const newState = {
-        ...appState.getState(),
-      };
-      delete newState.savedQuery;
-      appState.set(newState);
-    }
-  };
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const setAppState = useCurrentTabAction(internalStateActions.setAppState);
+
+  const updateSavedQueryId = useCallback(
+    (newSavedQueryId: string | undefined) => {
+      if (newSavedQueryId) {
+        dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
+      } else {
+        // remove savedQueryId from state
+        const newState = { ...stateContainer.getCurrentTab().appState };
+        delete newState.savedQuery;
+        dispatch(setAppState({ appState: newState }));
+      }
+    },
+    [dispatch, setAppState, stateContainer, updateAppState]
+  );
 
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {
@@ -249,7 +263,7 @@ export const DiscoverTopNav = ({
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
-    <span css={floatingActionStyles}>
+    <span>
       <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
@@ -316,6 +330,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
@@ -323,13 +338,3 @@ export const DiscoverTopNav = ({
     </span>
   );
 };
-
-// ToDo: Remove when the new layout lands https://github.com/elastic/kibana/issues/234854
-const floatingActionStyles = css({
-  '.controlFrameFloatingActions': {
-    top: '100%',
-    transform: 'translate(0, -20%)',
-    left: '-8px',
-    right: 'auto',
-  },
-});

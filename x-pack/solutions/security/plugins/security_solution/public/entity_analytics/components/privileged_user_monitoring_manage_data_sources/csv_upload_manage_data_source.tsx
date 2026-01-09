@@ -57,6 +57,7 @@ export const CsvUploadManageDataSource = ({
           </p>
           {isError && (
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.file.retrievalError"

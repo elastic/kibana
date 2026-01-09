@@ -8,7 +8,7 @@
  */
 
 import { isArray } from 'lodash';
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
 
 // From Monaco position to linear offset

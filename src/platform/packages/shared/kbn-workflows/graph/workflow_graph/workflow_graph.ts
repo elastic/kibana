@@ -10,7 +10,7 @@
 import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
-import type { WorkflowYaml } from '../..';
+import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
 
@@ -37,8 +37,11 @@ export class WorkflowGraph {
     this.graph = graph;
   }
 
-  public static fromWorkflowDefinition(workflowDefinition: Record<string, unknown>): WorkflowGraph {
-    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition as WorkflowYaml)); // TODO: use the correct type in the parameter
+  public static fromWorkflowDefinition(
+    workflowDefinition: WorkflowYaml,
+    defaultSettings?: WorkflowSettings
+  ): WorkflowGraph {
+    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition, defaultSettings));
   }
 
   public get topologicalOrder(): string[] {
@@ -50,6 +53,32 @@ export class WorkflowGraph {
 
   public getNode(nodeId: string): GraphNodeUnion {
     return this.graph.node(nodeId);
+  }
+
+  /**
+   * Retrieves a step node by its step ID, accounting for control flow node prefixes.
+   * This method tries to find the node with the given step ID, checking for common
+   * control flow node prefixes (enterForeach_, enterCondition_, enterIf_, etc.)
+   *
+   * @param stepId - The step ID to search for
+   * @returns The graph node if found, undefined otherwise
+   */
+  public getStepNode(stepId: string): GraphNodeUnion | undefined {
+    const nodePrefixes = [
+      '', // Try the exact step ID first
+      'enterForeach_',
+      'enterCondition_',
+    ];
+
+    for (const prefix of nodePrefixes) {
+      const nodeId = `${prefix}${stepId}`;
+      const node = this.graph.node(nodeId);
+      if (node) {
+        return node;
+      }
+    }
+
+    return undefined;
   }
 
   public getNodeStack(nodeId: string): string[] {

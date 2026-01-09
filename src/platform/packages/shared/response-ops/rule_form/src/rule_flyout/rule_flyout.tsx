@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { useRuleFlyoutUIContext } from '../../lib';
 import type { RuleFormData, RuleTypeMetaData } from '../types';
 import { RuleFormStepId } from '../constants';
@@ -24,6 +25,7 @@ interface RuleFlyoutProps {
   onSave: (formData: RuleFormData) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 // This component is only responsible for the CONTENT of the EuiFlyout. See `flyout/rule_form_flyout.tsx` for the
@@ -40,6 +42,7 @@ export const RuleFlyout = ({
   onCancel: onClose = () => {},
   onChangeMetaData = () => {},
   initialEditStep,
+  focusTrapProps,
 }: RuleFlyoutProps) => {
   const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(initialEditStep);
   const [isConfirmCloseModalVisible, setIsConfirmCloseModalVisible] = useState(false);
@@ -108,7 +111,11 @@ export const RuleFlyout = ({
         />
       )}
       {isConfirmCloseModalVisible && (
-        <ConfirmRuleClose onCancel={onCancelClose} onConfirm={onClose} />
+        <ConfirmRuleClose
+          onCancel={onCancelClose}
+          onConfirm={onClose}
+          focusTrapProps={focusTrapProps}
+        />
       )}
     </>
   );

@@ -27,10 +27,11 @@ import type {
   LensDocument,
   LensInspector,
 } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 
 export interface RedirectToOriginProps {
-  state?: LensSerializedState;
+  state?: LensSerializedAPIConfig;
   isCopied?: boolean;
 }
 

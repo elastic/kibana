@@ -76,6 +76,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   if (!from || !to) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.apm.alertDetails.error.toastTitle"

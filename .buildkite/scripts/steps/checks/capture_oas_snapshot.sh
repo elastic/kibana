@@ -31,12 +31,13 @@ fi
 
 run_check() {
   eval "$cmd"
-  node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 }
 
 retry 5 15 run_check
-
-check_for_changed_files "$cmd" true
-
+# Bundle hand written specs
 .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
 .buildkite/scripts/steps/openapi_bundling/final_merge.sh
+
+node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
+
+check_for_changed_files "capture_oas_snapshot.sh" true

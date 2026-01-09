@@ -141,6 +141,7 @@ export const SourceStatusWrapper: FC<PropsWithChildren<unknown>> = ({ children }
         </div>
       ) : hasFailedLoading ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
             defaultMessage: 'Sorry, there was a problem loading field information',
           })}
@@ -336,7 +337,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       {shouldShowGroupByOptimizationWarning && (
         <>
           <EuiSpacer size="l" />
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount color="warning">
             {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
               defaultMessage:
                 'When setting a "group by" we highly recommend using the "{comparator}" comparator for your threshold. This can lead to significant performance improvements.',

@@ -155,7 +155,6 @@ describe(`assertTelemetryPayload`, () => {
         {
           root: {
             properties: {
-              // @ts-expect-error: TS doesn't allow pass_through with properties, but it may occur during the tests in runtime, so we want to validate this test case.
               im_only_passing_through_data: { type: 'pass_through', properties: {} },
             },
           },

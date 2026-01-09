@@ -68,4 +68,43 @@ describe('utils', () => {
       });
     });
   });
+
+  describe('format preservation', () => {
+    it('should preserve trailing zeros in numeric values', () => {
+      const input = '[{"value": 1249604.0}]';
+      const parsed = parseJson(input);
+      const output = stringifyJson(parsed);
+
+      expect(output).toContain('1249604.0');
+      expect(output).not.toContain('"value": 1249604,');
+      expect(output).not.toContain('"value": 1249604\n');
+    });
+
+    it('should not add trailing zeros to integers', () => {
+      const input = '[{"count": 12345}]';
+      const parsed = parseJson(input);
+      const output = stringifyJson(parsed);
+
+      expect(output).toContain('12345');
+      expect(output).not.toContain('12345.0');
+    });
+
+    it('should preserve trailing zeros in nested structures', () => {
+      const input = '[{"outer": {"inner": {"value": 999.0}}}]';
+      const parsed = parseJson(input);
+      const output = stringifyJson(parsed);
+
+      expect(output).toContain('999.0');
+    });
+
+    it('should preserve trailing zeros in arrays of numbers', () => {
+      const input = '[{"values": [1.0, 2.0, 3.0]}]';
+      const parsed = parseJson(input);
+      const output = stringifyJson(parsed);
+
+      expect(output).toContain('1.0');
+      expect(output).toContain('2.0');
+      expect(output).toContain('3.0');
+    });
+  });
 });

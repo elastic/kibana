@@ -12,7 +12,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { useDocumentDetailsContext } from '../context';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 export interface UseNavigateToLeftPanelParams {
   /**
    * The tab to navigate to
@@ -24,33 +24,16 @@ export interface UseNavigateToLeftPanelParams {
   subTab?: string;
 }
 
-export interface UseNavigateToLeftPanelResult {
-  /**
-   * Callback to open analyzer in visualize tab
-   */
-  navigateToLeftPanel: () => void;
-  /**
-   * Whether the button should be disabled
-   */
-  isEnabled: boolean;
-}
-
 /**
- * Hook that returns the a callback to navigate to the analyzer in the flyout
+ * Hook that returns a callback to navigate to the analyzer in the flyout
  */
 export const useNavigateToLeftPanel = ({
   tab,
   subTab,
-}: UseNavigateToLeftPanelParams): UseNavigateToLeftPanelResult => {
+}: UseNavigateToLeftPanelParams): (() => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
-
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
-
-  const isEnabled = isNewNavigationEnabled || (!isNewNavigationEnabled && !isPreviewMode);
 
   const right: FlyoutPanelProps = useMemo(
     () => ({
@@ -80,7 +63,7 @@ export const useNavigateToLeftPanel = ({
     [eventId, indexName, scopeId, tab, subTab]
   );
 
-  const navigateToLeftPanel = useCallback(() => {
+  return useCallback(() => {
     if (!isPreviewMode) {
       openLeftPanel(left);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
@@ -88,7 +71,7 @@ export const useNavigateToLeftPanel = ({
         panel: 'left',
         tabId: tab,
       });
-    } else if (isNewNavigationEnabled && isPreviewMode) {
+    } else {
       openFlyout({
         right,
         left,
@@ -98,17 +81,5 @@ export const useNavigateToLeftPanel = ({
         panel: 'left',
       });
     }
-  }, [
-    openFlyout,
-    openLeftPanel,
-    right,
-    left,
-    scopeId,
-    telemetry,
-    isPreviewMode,
-    tab,
-    isNewNavigationEnabled,
-  ]);
-
-  return useMemo(() => ({ navigateToLeftPanel, isEnabled }), [navigateToLeftPanel, isEnabled]);
+  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isPreviewMode, tab]);
 };

@@ -32,6 +32,7 @@ export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) 
       {failedJobMessage !== undefined && (
         <>
           <EuiCallOut
+            announceOnMount
             data-test-subj="analyticsWizardProgressCallout"
             title={i18n.translate(
               'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutTitle',

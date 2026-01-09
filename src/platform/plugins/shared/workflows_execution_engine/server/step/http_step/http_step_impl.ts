@@ -10,16 +10,29 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import https from 'https';
+import type { FetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
+import type { z } from '@kbn/zod/v4';
 import type { UrlValidator } from '../../lib/url_validator';
+import { ExecutionError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
 import { BaseAtomicNodeImplementation } from '../node_implementation';
 
 type HttpHeaders = Record<string, string | number | boolean>;
+
+/**
+ * Fetcher configuration options for customizing HTTP requests
+ * Derived from the Zod schema to ensure type safety and avoid duplication
+ */
+type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
+  // Allow additional options to be passed through
+  [key: string]: any;
+};
 
 // Extend BaseStep for HTTP-specific properties
 export interface HttpStep extends BaseStep {
@@ -28,6 +41,7 @@ export interface HttpStep extends BaseStep {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: HttpHeaders;
     body?: any;
+    fetcher?: FetcherOptions;
   };
 }
 
@@ -54,13 +68,14 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   public getInput() {
-    const { url, method = 'GET', headers = {}, body } = this.step.with;
+    const { url, method = 'GET', headers = {}, body, fetcher } = this.step.with;
 
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
       url,
       method,
       headers,
       body,
+      fetcher,
     });
   }
 
@@ -73,7 +88,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
-    const { url, method, headers, body } = input;
+    const { url, method, headers, body, fetcher: fetcherOptions } = input;
 
     // Validate that the URL is allowed based on the allowedHosts configuration
     try {
@@ -102,10 +117,32 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       method,
       headers,
       signal: this.stepExecutionRuntime.abortController.signal,
+      ...(body && { data: body }),
     };
 
-    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
-      config.data = body;
+    // Apply fetcher options if provided
+    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+      const { skip_ssl_verification, follow_redirects, max_redirects, keep_alive } = fetcherOptions;
+
+      // Configure HTTPS agent for SSL and keep-alive options
+      const httpsAgentOptions: https.AgentOptions = {};
+
+      if (skip_ssl_verification) {
+        httpsAgentOptions.rejectUnauthorized = false;
+      }
+
+      if (keep_alive !== undefined) {
+        httpsAgentOptions.keepAlive = keep_alive;
+      }
+
+      config.httpsAgent = new https.Agent(httpsAgentOptions);
+
+      // Configure redirect behavior
+      if (follow_redirects === false) {
+        config.maxRedirects = 0;
+      } else if (max_redirects !== undefined) {
+        config.maxRedirects = max_redirects;
+      }
     }
 
     const response: AxiosResponse = await axios(config);
@@ -128,43 +165,71 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     };
   }
 
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
-    let errorMessage: string;
-    let isAborted = false;
+  protected handleFailure(input: any, error: any): RunStepResult {
+    let executionError: ExecutionError;
 
     if (axios.isAxiosError(error)) {
-      if (error.code === 'ERR_CANCELED') {
-        errorMessage = 'HTTP request was cancelled';
-        isAborted = true;
-      } else if (error.response) {
-        errorMessage = `${error.response.status} ${error.response.statusText}`;
-      } else {
-        errorMessage = `${error.message ? error.message : error.name}`;
-      }
+      executionError = this.mapAxiosError(error);
     } else if (error instanceof Error) {
-      errorMessage = error.message;
-      // Check if this is an AbortError
-      if (error.name === 'AbortError') {
-        isAborted = true;
-      }
+      executionError = new ExecutionError({
+        type: error.name,
+        message: error.message,
+      });
     } else {
-      errorMessage = String(error);
+      executionError = new ExecutionError({
+        type: 'UnknownError',
+        message: String(error),
+      });
     }
 
-    this.workflowLogger.logError(
-      `HTTP request failed: ${errorMessage}`,
-      error instanceof Error ? error : new Error(errorMessage),
-      {
-        workflow: { step_id: this.step.name },
-        event: { action: 'http_request', outcome: 'failure' },
-        tags: isAborted ? ['http', 'cancelled'] : ['http', 'error'],
-      }
-    );
+    this.workflowLogger.logError(`HTTP request failed: ${executionError.message}`, executionError, {
+      workflow: { step_id: this.step.name },
+      event: { action: 'http_request', outcome: 'failure' },
+      tags: ['http', 'error', executionError.type],
+    });
 
     return {
       input,
       output: undefined,
-      error: errorMessage,
+      error: executionError,
     };
+  }
+
+  private mapAxiosError(error: AxiosError): ExecutionError {
+    if (error.code === 'ECONNREFUSED') {
+      const url = new URL(this.step.with.url);
+      return new ExecutionError({
+        type: 'ConnectionRefused',
+        message: `Connection refused to ${url.origin}`,
+      });
+    }
+
+    if (error.code === 'ERR_CANCELED') {
+      return new ExecutionError({
+        type: 'HttpRequestCancelledError',
+        message: 'HTTP request was cancelled',
+      });
+    }
+
+    if (error.response) {
+      return new ExecutionError({
+        type: 'HttpRequestError',
+        message: error.message,
+        details: {
+          headers: error.response.headers,
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+        },
+      });
+    }
+
+    return new ExecutionError({
+      type: error.code || 'UnknownHttpRequestError',
+      message: error.message,
+      details: error.config && {
+        config: error.config,
+      },
+    });
   }
 }

@@ -531,4 +531,116 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
       expect(esqlResult.documentsWithoutKeywordsOrdered[0].message).toBe('no match here at all');
     }
   );
+
+  apiTest(
+    'should inline pattern definitions',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{FAVORITE_CAT:pet}'],
+            pattern_definitions: {
+              FAVORITE_CAT: 'burmese',
+            },
+          } as GrokProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: 'I love burmese cats!' }];
+
+      await testBed.ingest('ingest-grok-pattern-definitions', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-pattern-definitions');
+
+      await testBed.ingest('esql-grok-pattern-definitions', docs);
+      const esqlResult = await esql.queryOnIndex('esql-grok-pattern-definitions', query);
+
+      expect(ingestResult[0].pet).toBe('burmese');
+      expect(esqlResult.documentsWithoutKeywords[0].pet).toBe('burmese');
+    }
+  );
+
+  apiTest(
+    'should inline nested pattern definitions',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{FAVORITE_PET:pet}'],
+            pattern_definitions: {
+              FAVORITE_PET: '%{FAVORITE_CAT}',
+              FAVORITE_CAT: 'burmese',
+            },
+          } as GrokProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: 'I love burmese cats!' }];
+
+      await testBed.ingest('ingest-grok-pattern-definitions-nested', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered(
+        'ingest-grok-pattern-definitions-nested'
+      );
+
+      await testBed.ingest('esql-grok-pattern-definitions-nested', docs);
+      const esqlResult = await esql.queryOnIndex('esql-grok-pattern-definitions-nested', query);
+
+      expect(ingestResult[0].pet).toBe('burmese');
+      expect(esqlResult.documentsWithoutKeywords[0].pet).toBe('burmese');
+    }
+  );
+
+  apiTest(
+    'should inline pattern definitions with regex',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{IP:client.ip} \\[%{MY_TIMESTAMP:@timestamp}\\]'],
+            pattern_definitions: {
+              MY_TIMESTAMP: '%{MONTH} %{MONTHDAY}, %{YEAR}',
+            },
+          } as GrokProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: '127.0.0.1 [Jan 11, 2011]' }];
+
+      await testBed.ingest('ingest-grok-pattern-definitions-regex', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered(
+        'ingest-grok-pattern-definitions-regex'
+      );
+
+      await testBed.ingest('esql-grok-pattern-definitions-regex', docs);
+      const esqlResult = await esql.queryOnIndex('esql-grok-pattern-definitions-regex', query);
+
+      const expectedExtractDoc = {
+        '@timestamp': 'Jan 11, 2011',
+        'client.ip': '127.0.0.1',
+        message: '127.0.0.1 [Jan 11, 2011]',
+      };
+
+      expect(ingestResult[0]).toStrictEqual(expect.objectContaining(expectedExtractDoc));
+      expect(esqlResult.documentsWithoutKeywords[0]).toStrictEqual(
+        expect.objectContaining(expectedExtractDoc)
+      );
+    }
+  );
 });

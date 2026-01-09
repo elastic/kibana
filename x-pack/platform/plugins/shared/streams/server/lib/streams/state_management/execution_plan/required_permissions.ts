@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { ActionsByType } from './types';
 
@@ -75,6 +74,7 @@ export function getRequiredPermissionsForActions({
     delete_queries,
     unlink_assets,
     unlink_features,
+    update_failure_store,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);

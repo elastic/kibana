@@ -35,6 +35,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -50,7 +52,7 @@ export function StreamsSettingsFlyout({
   const {
     dependencies: {
       start: {
-        streams: { wiredStatus$, enableWiredMode, disableWiredMode },
+        streams: { getWiredStatus, enableWiredMode, disableWiredMode },
       },
     },
     core,
@@ -59,6 +61,7 @@ export function StreamsSettingsFlyout({
 
   const {
     ui: { manage: canManageWiredKibana },
+    features: { significantEvents },
   } = useStreamsPrivileges();
 
   const [canManageWiredElasticsearch, setCanManageWiredElasticsearch] =
@@ -71,13 +74,24 @@ export function StreamsSettingsFlyout({
   const [isDisabling, setIsDisabling] = React.useState(false);
 
   React.useEffect(() => {
-    const sub = wiredStatus$.subscribe((status) => {
-      setWiredChecked(status.enabled === true);
-      setCanManageWiredElasticsearch(Boolean(status.can_manage));
-      setLoading(false);
-    });
-    return () => sub.unsubscribe();
-  }, [wiredStatus$]);
+    const fetchWiredStatus = async () => {
+      try {
+        const status = await getWiredStatus();
+        setWiredChecked(status.enabled === true);
+        setCanManageWiredElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching wired streams status',
+          }),
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWiredStatus();
+  }, [getWiredStatus, core.notifications.toasts]);
 
   const handleSwitchChange = async () => {
     if (wiredChecked) {
@@ -87,6 +101,7 @@ export function StreamsSettingsFlyout({
         setLoading(true);
         await enableWiredMode(signal);
         telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: true });
+        setWiredChecked(true);
         refreshStreams();
       } catch (error) {
         core.notifications.toasts.addError(error, {
@@ -108,6 +123,7 @@ export function StreamsSettingsFlyout({
     try {
       await disableWiredMode(signal);
       telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: false });
+      setWiredChecked(false);
       refreshStreams();
       setShowDisableModal(false);
       setDisableConfirmChecked(false);
@@ -125,6 +141,38 @@ export function StreamsSettingsFlyout({
       setLoading(false);
     }
   };
+
+  const [{ loading: isChangingSignificantEvents }, toggleSignificantEvents] = useAsyncFn(
+    async (event) => {
+      const isEnabled = event.target.checked;
+      try {
+        await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
+
+        core.notifications.toasts.addInfo(
+          isEnabled
+            ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
+                defaultMessage: 'Significant events enabled',
+              })
+            : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
+                defaultMessage: 'Significant events disabled',
+              })
+        );
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
+            {
+              defaultMessage: 'Error updating Significant events setting',
+            }
+          ),
+          toastMessage:
+            error?.body?.message || (error instanceof Error ? error.message : String(error)),
+          toastLifeTimeMs: 5000,
+        });
+      }
+    },
+    [core]
+  );
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -144,6 +192,10 @@ export function StreamsSettingsFlyout({
     {
       id: `${shipperButtonGroupPrefix}__fleet`,
       label: 'Fleet',
+    },
+    {
+      id: `${shipperButtonGroupPrefix}__curl`,
+      label: 'curl/HTTP',
     },
   ];
   const [selectedShipperId, setSelectedShipperId] = React.useState(
@@ -188,6 +240,11 @@ output.elasticsearch:
     action => "create"
   }
 }`,
+    [`${shipperButtonGroupPrefix}__curl`]: `POST /logs/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`,
   };
 
   return (
@@ -262,6 +319,63 @@ output.elasticsearch:
               )}
             </EuiFormRow>
           </EuiDescribedFormGroup>
+
+          {significantEvents?.available && (
+            <EuiDescribedFormGroup
+              fullWidth
+              descriptionFlexItemProps={{ grow: 2 }}
+              title={
+                <h3>
+                  <EuiFlexGroup gutterSize="s">
+                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
+                      defaultMessage: 'Significant events',
+                    })}
+                    <EuiBetaBadge
+                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                        defaultMessage: 'Technical Preview',
+                      })}
+                      tooltipContent={i18n.translate(
+                        'xpack.streams.streamsListView.betaBadgeDescription',
+                        {
+                          defaultMessage:
+                            'This functionality is experimental and not supported. It may change or be removed at any time.',
+                        }
+                      )}
+                      alignment="middle"
+                      size="s"
+                    />
+                  </EuiFlexGroup>
+                </h3>
+              }
+              description={
+                <p>
+                  {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
+                    defaultMessage:
+                      "A Significant event is a single, 'interesting' log event identified by an automated rule as being important for understanding a system's behavior.",
+                  })}
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.streams.streamsListView.enableSignificantEventsSwitchLabel',
+                    {
+                      defaultMessage: 'Enable Significant events',
+                    }
+                  )}
+                  checked={Boolean(significantEvents?.enabled)}
+                  onChange={toggleSignificantEvents}
+                  data-test-subj="streamsSignificantEventsSwitch"
+                  disabled={
+                    core.uiSettings.isOverridden(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS) ||
+                    isChangingSignificantEvents
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          )}
+
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiText size="xs">
               <h3>
@@ -352,14 +466,41 @@ output.elasticsearch:
                 </ul>
               </EuiText>
             ) : (
-              <EuiCodeBlock
-                language="yaml"
-                isCopyable
-                paddingSize="m"
-                data-test-subj="streamsShipperConfigExample"
-              >
-                {shipperConfigExamples[selectedShipperId]}
-              </EuiCodeBlock>
+              <>
+                {selectedShipperId.endsWith('__curl') && (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.streams.streamsListView.shipperConfigCurlDescription"
+                        defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
+                        values={{
+                          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+                          logsEndpoint: <code>/logs/</code>,
+                          bulkApiLink: (
+                            <EuiLink
+                              href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              external
+                              // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+                            >
+                              Bulk API
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                )}
+                <EuiCodeBlock
+                  language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
+                  isCopyable
+                  paddingSize="m"
+                  data-test-subj="streamsShipperConfigExample"
+                >
+                  {shipperConfigExamples[selectedShipperId]}
+                </EuiCodeBlock>
+              </>
             )}
           </EuiFlexGroup>
         </EuiFlyoutBody>
@@ -371,6 +512,7 @@ output.elasticsearch:
             setDisableConfirmChecked(false);
           }}
           aria-labelledby="streamsWiredDisableModalTitle"
+          data-test-subj="streamsWiredDisableModal"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="streamsWiredDisableModalTitle">
@@ -392,6 +534,7 @@ output.elasticsearch:
               label={i18n.translate('xpack.streams.streamsSettingsFlyout.disableModalCheckbox', {
                 defaultMessage: 'I understand this will delete all data and configuration.',
               })}
+              data-test-subj="streamsWiredDisableConfirmCheckbox"
             />
           </EuiModalBody>
           <EuiModalFooter>
@@ -401,6 +544,7 @@ output.elasticsearch:
                 setDisableConfirmChecked(false);
               }}
               disabled={isDisabling}
+              data-test-subj="streamsWiredDisableCancelButton"
             >
               {i18n.translate('xpack.streams.streamsSettingsFlyout.disableModalCancel', {
                 defaultMessage: 'Cancel',

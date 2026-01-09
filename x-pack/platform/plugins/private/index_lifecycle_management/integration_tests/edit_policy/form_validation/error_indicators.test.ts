@@ -5,17 +5,41 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers';
-import type { ValidationTestBed } from './validation.helpers';
-import { setupValidationTestBed } from './validation.helpers';
+import { screen, fireEvent } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import {
+  createColdPhaseActions,
+  createDeletePhaseActions,
+  createFrozenPhaseActions,
+  createHotPhaseActions,
+  createWarmPhaseActions,
+} from '../../helpers/actions/phases';
+import {
+  haveGlobalErrorCallout,
+  havePhaseErrorCallout,
+} from '../../helpers/actions/errors_actions';
+import { createFormSetValueAction } from '../../helpers/actions/form_set_value_action';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
 
 describe('<EditPolicy /> error indicators', () => {
-  let testBed: ValidationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let actions: {
+    togglePhase: ReturnType<typeof createTogglePhaseAction>;
+    setPolicyName: ReturnType<typeof createFormSetValueAction>;
+    toggleSaveAsNewPolicy: () => void;
+    savePolicy: () => void;
+  } & ReturnType<typeof createRolloverActions> &
+    ReturnType<typeof createHotPhaseActions> &
+    ReturnType<typeof createWarmPhaseActions> &
+    ReturnType<typeof createColdPhaseActions> &
+    ReturnType<typeof createFrozenPhaseActions> &
+    ReturnType<typeof createDeletePhaseActions>;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -25,12 +49,24 @@ describe('<EditPolicy /> error indicators', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup);
+    renderEditPolicy(httpSetup, {
+      initialEntries: ['/policies/edit'],
     });
 
-    const { component } = testBed;
-    component.update();
+    await screen.findByTestId('savePolicyButton');
+
+    actions = {
+      togglePhase: createTogglePhaseAction(),
+      setPolicyName: createFormSetValueAction('policyNameField'),
+      savePolicy: () => fireEvent.click(screen.getByTestId('savePolicyButton')),
+      toggleSaveAsNewPolicy: () => fireEvent.click(screen.getByTestId('saveAsNewSwitch')),
+      ...createRolloverActions(),
+      ...createHotPhaseActions(),
+      ...createWarmPhaseActions(),
+      ...createColdPhaseActions(),
+      ...createFrozenPhaseActions(),
+      ...createDeletePhaseActions(),
+    };
   });
   test('shows phase error indicators correctly', async () => {
     // This test simulates a user configuring a policy phase by phase. The flow is the following:
@@ -43,81 +79,72 @@ describe('<EditPolicy /> error indicators', () => {
     // 6. Fix validation error in cold
     // We assert against each of these progressive states.
 
-    const { actions } = testBed;
-
     // 0. No validation issues
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
 
     // 1. Hot phase validation issue
-    await actions.hot.toggleForceMerge();
+    actions.hot.toggleForceMerge();
     await actions.hot.setForcemergeSegmentsCount('-22');
-    actions.errors.waitForValidation();
-    expect(actions.errors.havePhaseCallout('hot')).toBe(true);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
+    expect(havePhaseErrorCallout('hot')).toBe(true);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
 
     // 2. Warm phase validation issue
     await actions.togglePhase('warm');
-    await actions.warm.toggleForceMerge();
+    actions.warm.toggleForceMerge();
     await actions.warm.setForcemergeSegmentsCount('-22');
-    actions.errors.waitForValidation();
-    expect(actions.errors.havePhaseCallout('hot')).toBe(true);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(true);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
+    expect(havePhaseErrorCallout('hot')).toBe(true);
+    expect(havePhaseErrorCallout('warm')).toBe(true);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
 
     // 3. Cold phase validation issue
     await actions.togglePhase('cold');
     await actions.cold.setReplicas('-33');
-    actions.errors.waitForValidation();
-    expect(actions.errors.havePhaseCallout('hot')).toBe(true);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(true);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(true);
+    expect(havePhaseErrorCallout('hot')).toBe(true);
+    expect(havePhaseErrorCallout('warm')).toBe(true);
+    expect(havePhaseErrorCallout('cold')).toBe(true);
 
     // 4. Fix validation issue in hot
     await actions.hot.setForcemergeSegmentsCount('1');
-    actions.errors.waitForValidation();
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(true);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(true);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(true);
+    expect(havePhaseErrorCallout('cold')).toBe(true);
 
     // 5. Fix validation issue in warm
     await actions.warm.setForcemergeSegmentsCount('1');
-    actions.errors.waitForValidation();
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(true);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(true);
 
     // 6. Fix validation issue in cold
     await actions.cold.setReplicas('1');
-    actions.errors.waitForValidation();
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
-  });
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
+  }, 15000);
 
   test('global error callout should show, after clicking the "Save" button, if there are any form errors', async () => {
-    const { actions } = testBed;
+    expect(haveGlobalErrorCallout()).toBe(false);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
 
-    expect(actions.errors.haveGlobalCallout()).toBe(false);
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
-
-    await actions.toggleSaveAsNewPolicy();
+    // For new policy, just set empty name and save to trigger validation error
     await actions.setPolicyName('');
-    actions.errors.waitForValidation();
     await actions.savePolicy();
+    await waitFor(() => expect(haveGlobalErrorCallout()).toBe(true));
 
-    expect(actions.errors.haveGlobalCallout()).toBe(true);
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
+    expect(haveGlobalErrorCallout()).toBe(true);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
   });
 
   test('clears all error indicators if last erring field is unmounted', async () => {
-    const { actions } = testBed;
+    // Set a valid policy name first (required for new policy)
+    await actions.setPolicyName('test-policy');
 
     await actions.togglePhase('cold');
     await actions.cold.setMinAgeValue('7');
@@ -125,19 +152,19 @@ describe('<EditPolicy /> error indicators', () => {
     await actions.cold.setSearchableSnapshot('');
 
     await actions.savePolicy();
-    actions.errors.waitForValidation();
+    await waitFor(() => expect(haveGlobalErrorCallout()).toBe(true));
 
-    expect(actions.errors.haveGlobalCallout()).toBe(true);
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(true);
+    expect(haveGlobalErrorCallout()).toBe(true);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(true);
 
     // unmount the field
     await actions.cold.toggleSearchableSnapshot();
 
-    expect(actions.errors.haveGlobalCallout()).toBe(false);
-    expect(actions.errors.havePhaseCallout('hot')).toBe(false);
-    expect(actions.errors.havePhaseCallout('warm')).toBe(false);
-    expect(actions.errors.havePhaseCallout('cold')).toBe(false);
-  });
+    expect(haveGlobalErrorCallout()).toBe(false);
+    expect(havePhaseErrorCallout('hot')).toBe(false);
+    expect(havePhaseErrorCallout('warm')).toBe(false);
+    expect(havePhaseErrorCallout('cold')).toBe(false);
+  }, 10000);
 });

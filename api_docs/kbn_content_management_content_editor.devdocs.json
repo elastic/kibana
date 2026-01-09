@@ -166,9 +166,9 @@
         "label": "OpenContentEditorParams",
         "description": [],
         "signature": [
-          "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
+          "{ item: ",
           "Item",
-          "; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
+          "; onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
           "CustomValidators",
           " | undefined; appendRows?: React.ReactNode; }"
         ],

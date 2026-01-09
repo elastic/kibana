@@ -11,8 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TINES_CONNECTOR_ID, TINES_TITLE, SUB_ACTION } from '../../../common/tines/constants';
-import type { TinesConfig, TinesSecrets } from '../../../common/tines/types';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/tines/constants';
+import type { TinesConfig, TinesSecrets } from '@kbn/connector-schemas/tines';
 import type { TinesExecuteActionParams } from './types';
 
 interface ValidationErrors {
@@ -29,8 +29,8 @@ export function getConnectorType(): ConnectorTypeModel<
   TinesExecuteActionParams
 > {
   return {
-    id: TINES_CONNECTOR_ID,
-    actionTypeTitle: TINES_TITLE,
+    id: CONNECTOR_ID,
+    actionTypeTitle: CONNECTOR_NAME,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.security.tines.config.selectMessageText', {
       defaultMessage: 'Send events to a Story.',

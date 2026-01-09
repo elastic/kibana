@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
-  ConfigMappingSchema,
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  SwimlaneSecretsConfigurationSchema,
-  SwimlaneServiceConfigurationSchema,
-} from './schema';
-
-export type SwimlanePublicConfigurationType = z.infer<typeof SwimlaneServiceConfigurationSchema>;
-export type SwimlaneSecretConfigurationType = z.infer<typeof SwimlaneSecretsConfigurationSchema>;
-
-export type MappingConfigType = z.infer<typeof ConfigMappingSchema>;
-export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
-
+  CreateRecordParams,
+  PushToServiceApiParams,
+  SwimlanePublicConfigurationType,
+  SwimlaneSecretConfigurationType,
+  UpdateRecordParams,
+} from '@kbn/connector-schemas/swimlane';
 export interface ExternalServiceCredentials {
   config: SwimlanePublicConfigurationType;
   secrets: SwimlaneSecretConfigurationType;
@@ -35,14 +26,6 @@ export interface ExternalServiceValidation {
   secrets: (secrets: any, validatorServices: ValidatorServices) => void;
 }
 
-export interface CreateRecordParams {
-  incident: Incident;
-}
-export interface UpdateRecordParams extends CreateRecordParams {
-  incidentId: string;
-}
-
-export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
   logger: Logger;
@@ -78,8 +61,6 @@ export interface ExternalService {
   createRecord: (params: CreateRecordParams) => Promise<ExternalServiceIncidentResponse>;
   updateRecord: (params: UpdateRecordParams) => Promise<ExternalServiceIncidentResponse>;
 }
-
-export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;

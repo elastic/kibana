@@ -17,6 +17,7 @@ import {
 
 import { closeDetailPanel } from '../../../store/actions';
 
+/** @type {import('react-redux').MapStateToProps<any, any, any>} */
 const mapStateToProps = (state) => {
   return {
     isOpen: isDetailPanelOpen(state),
@@ -26,6 +27,7 @@ const mapStateToProps = (state) => {
   };
 };
 
+/** @type {import('react-redux').MapDispatchToProps<any, any>} */
 const mapDispatchToProps = (dispatch) => {
   return {
     closeDetailPanel: () => {
@@ -34,4 +36,7 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
+/**
+ * @type {import('react-redux').ConnectedComponent<typeof DetailPanelView, {}>}
+ */
 export const DetailPanel = connect(mapStateToProps, mapDispatchToProps)(DetailPanelView);

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   getComplexRule,
   getComplexRuleOutput,
@@ -16,7 +17,6 @@ import {
   updateUsername,
   removeServerGeneratedProperties,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

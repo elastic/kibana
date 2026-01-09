@@ -124,16 +124,13 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddableRenderer
           type={type}
           maybeId={id}
-          getParentApi={() => ({
-            ...dashboardApi,
-            reload$: dashboardInternalApi.panelsReload$,
-          })}
+          getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
+          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, useMargins, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;

@@ -142,6 +142,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         {hasFleetServer && isSingleAgent ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
                 defaultMessage: 'This agent is running Fleet Server',
               })}

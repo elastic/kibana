@@ -434,7 +434,7 @@
         "signature": [
           "Pick<",
           "LogsOverviewContentProps",
-          ", \"timeRange\" | \"height\"> & { dependencies: ",
+          ", \"height\" | \"timeRange\"> & { dependencies: ",
           {
             "pluginId": "@kbn/logs-overview",
             "scope": "public",
@@ -443,6 +443,8 @@
             "text": "LogsOverviewDependencies"
           },
           "; documentFilters?: ",
+          "QueryDslQueryContainer",
+          "[] | undefined; nonHighlightingFilters?: ",
           "QueryDslQueryContainer",
           "[] | undefined; featureFlags?: ",
           {

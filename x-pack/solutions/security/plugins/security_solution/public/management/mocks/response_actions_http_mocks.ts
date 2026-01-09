@@ -6,6 +6,7 @@
  */
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { MemoryDumpActionRequestBody } from '../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_AGENT_FILE_INFO_ROUTE,
@@ -19,6 +20,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  MEMORY_DUMP_ROUTE,
   RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
@@ -50,6 +52,8 @@ import type {
   ResponseActionRunScriptParameters,
   ResponseActionScriptsApiResponse,
   ResponseActionCancelOutputContent,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -89,6 +93,10 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   cancel: () => ActionDetailsApiResponse<
     ResponseActionCancelOutputContent,
     ResponseActionCancelParameters
+  >;
+  memoryDump: () => ActionDetailsApiResponse<
+    ResponseActionMemoryDumpOutputContent,
+    ResponseActionMemoryDumpParameters
   >;
 }>;
 
@@ -339,6 +347,38 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       });
 
       return { data: response };
+    },
+  },
+  {
+    id: 'memoryDump',
+    path: MEMORY_DUMP_ROUTE,
+    method: 'post',
+    handler: (
+      req
+    ): ActionDetailsApiResponse<
+      ResponseActionMemoryDumpOutputContent,
+      ResponseActionMemoryDumpParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const reqBody = JSON.parse(
+        (req.body as string) ?? '{}'
+      ) as unknown as MemoryDumpActionRequestBody;
+      const actionDetails: Partial<
+        ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+      > = {
+        command: 'memory-dump',
+        agentType: reqBody.agent_type ?? 'endpoint',
+        comment: reqBody.comment ?? '',
+        parameters: reqBody.parameters ?? { type: 'kernel' },
+        agents: reqBody.endpoint_ids ?? ['123'],
+      };
+
+      return {
+        data: generator.generateActionDetails<
+          ResponseActionMemoryDumpOutputContent,
+          ResponseActionMemoryDumpParameters
+        >(actionDetails),
+      };
     },
   },
 ]);

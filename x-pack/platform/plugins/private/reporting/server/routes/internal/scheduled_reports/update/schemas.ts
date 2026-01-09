@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { scheduleRruleSchemaV3 } from '@kbn/task-manager-plugin/server';
+import { rawNotificationSchema } from '../../../../saved_objects/scheduled_report/schemas/latest';
 
 export const updateScheduledReportParamsSchema = schema.object({
   id: schema.string(),
@@ -15,4 +16,5 @@ export const updateScheduledReportParamsSchema = schema.object({
 export const updateScheduledReportBodySchema = schema.object({
   title: schema.maybe(schema.string()),
   schedule: schema.maybe(scheduleRruleSchemaV3),
+  notification: schema.maybe(rawNotificationSchema),
 });

@@ -154,6 +154,23 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+
+  /**
+   * The max file size allowed for files uploaded to the Endpoint (Elastic Defend) Scripts library
+   */
+  maxEndpointScriptFileSize: schema.number({
+    defaultValue: 26214400, // 25MB,
+    max: Number.MAX_SAFE_INTEGER,
+  }),
+
+  /**
+   * Disables the auto-install/enable of the Elastic Defend SIEM rule.
+   * Whenever a Policy is created via Fleet's API, we check if the corresponding Elastic Defend SIEM
+   * rule is installed/enabled in the active space, and if not, we auto-install it. Set this configuration
+   * setting to `false` to disable that behavior
+   */
+  disableEndpointRuleAutoInstall: schema.boolean({ defaultValue: false }),
+
   /**
    * Defines the settings for a specific offering of the Security Solution app.
    * They override the default values.

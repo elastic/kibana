@@ -268,6 +268,7 @@ export const WatchVisualization = () => {
           </Chart>
         ) : (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.watcher.thresholdPreviewChart.noDataTitle"

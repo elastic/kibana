@@ -11,10 +11,13 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  CONNECTOR_ID as SLACK_CONNECTOR_ID,
+  CONNECTOR_NAME as SLACK_CONNECTOR_NAME,
+} from '@kbn/connector-schemas/slack/constants';
+import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
+import type { PostMessageParams } from '@kbn/connector-schemas/slack_api';
 import type { SlackActionParams, SlackSecrets } from '../types';
-import type { PostMessageParams } from '../../../common/slack_api/types';
-import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 
 export const subtype = [
   {
@@ -40,9 +43,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
       defaultMessage: 'Send messages to Slack channels.',
     }),
-    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.slack.connectorTypeTitle', {
-      defaultMessage: 'Slack',
-    }),
+    actionTypeTitle: SLACK_CONNECTOR_NAME,
     validateParams: async (
       actionParams: SlackActionParams
     ): Promise<GenericValidationResult<SlackActionParams>> => {

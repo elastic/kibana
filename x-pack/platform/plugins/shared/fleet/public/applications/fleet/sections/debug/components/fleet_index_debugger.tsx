@@ -102,7 +102,7 @@ export const FleetIndexDebugger = () => {
       {indexResult?.error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Error" color="danger">
+          <EuiCallOut announceOnMount title="Error" color="danger">
             {(indexResult?.error as any)?.error?.reason ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.fleetIndexDebugger.fetchError"

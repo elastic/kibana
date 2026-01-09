@@ -272,7 +272,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
+            {
+              abortSignal,
+              strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+              sessionId: getSearchSessionId(),
+              projectRouting: input?.projectRouting,
+            }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
@@ -359,7 +364,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             : body.values;
 
           const allColumns =
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;

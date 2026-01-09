@@ -1,0 +1,59 @@
+{
+  "id": "developerToolbar",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "developerToolbar",
+      "id": "def-public.DeveloperToolbarSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "DeveloperToolbarSetup",
+      "description": [],
+      "signature": [
+        "DeveloperToolbarItemRegistry"
+      ],
+      "path": "src/platform/plugins/shared/developer_toolbar/public/plugin.tsx",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "developerToolbar",
+        "id": "def-server.ConfigSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; }"
+        ],
+        "path": "src/platform/plugins/shared/developer_toolbar/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -273,15 +273,15 @@ describe('Observability AI Assistant client', () => {
           });
         });
 
-      stream = observableIntoStream(
-        client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
     });
 
     describe('when streaming the response from the LLM', () => {
@@ -557,16 +557,16 @@ describe('Observability AI Assistant client', () => {
         return {} as any;
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          conversationId: 'my-conversation-id',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        conversationId: 'my-conversation-id',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -649,16 +649,16 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -739,16 +739,16 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1178,15 +1178,15 @@ describe('Observability AI Assistant client', () => {
         };
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          persist: false,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        persist: false,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1304,16 +1304,16 @@ describe('Observability AI Assistant client', () => {
         };
       });
 
-      stream = observableIntoStream(
-        client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1392,15 +1392,15 @@ describe('Observability AI Assistant client', () => {
         };
       });
 
-      const stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          persist: false,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        persist: false,
+      });
+
+      const stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1480,16 +1480,16 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1553,7 +1553,7 @@ describe('Observability AI Assistant client', () => {
         title: 'My predefined title',
         persist: false,
       })
-      .subscribe(() => {}); // To trigger call to chat
+      .response$.subscribe(() => {}); // To trigger call to chat
     await nextTick();
 
     expect(chatSpy.mock.calls[0][1].systemMessage).toEqual(EXPECTED_STORED_SYSTEM_MESSAGE);
@@ -1571,7 +1571,7 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      const complete$ = await client.complete({
+      const { response$ } = client.complete({
         connectorId: 'foo',
         messages: [user('Can you call the my_action function?')],
         functionClient: new ChatFunctionClient([
@@ -1601,7 +1601,7 @@ describe('Observability AI Assistant client', () => {
       const messages: Message[] = [];
 
       completePromise = new Promise<Message[]>((resolve, reject) => {
-        complete$.subscribe({
+        response$.subscribe({
           next: (event) => {
             if (event.type === StreamingChatResponseEventType.MessageAdd) {
               messages.push(event.message);
@@ -1748,8 +1748,8 @@ describe('Observability AI Assistant client', () => {
       // client = createClient(namespace);
       client = createClient();
       (client as any).dependencies.namespace = namespace;
-      (
-        await client.complete({
+      client
+        .complete({
           functionClient: functionClientMock,
           connectorId: 'foo',
           messages: [],
@@ -1758,7 +1758,7 @@ describe('Observability AI Assistant client', () => {
           kibanaPublicUrl: 'http://localhost:5601',
           title: 'Generated title',
         })
-      ).subscribe({});
+        .response$.subscribe({});
 
       await nextTick();
     };

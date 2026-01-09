@@ -31,7 +31,7 @@ const tab1 = getTabStateMock({
     timeRange: { from: 'now-7d', to: 'now' },
     refreshInterval: { pause: true, value: 500 },
   },
-  initialAppState: { columns: ['column1'] },
+  appState: { columns: ['column1'] },
 });
 const tab2 = getTabStateMock({
   id: '2',
@@ -44,7 +44,7 @@ const tab2 = getTabStateMock({
     timeRange: { from: 'now-15m', to: 'now' },
     refreshInterval: { pause: false, value: 1000 },
   },
-  initialAppState: { columns: ['column2'] },
+  appState: { columns: ['column2'] },
 });
 
 describe('tab mapping utils', () => {
@@ -56,6 +56,29 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "appState": Object {
+            "breakdownField": undefined,
+            "columns": Array [
+              "column2",
+            ],
+            "dataSource": Object {
+              "dataViewId": "test-data-view-2",
+              "type": "dataView",
+            },
+            "density": undefined,
+            "filters": undefined,
+            "grid": Object {},
+            "headerRowHeight": undefined,
+            "hideAggregatedPreview": undefined,
+            "hideChart": false,
+            "interval": undefined,
+            "query": undefined,
+            "rowHeight": undefined,
+            "rowsPerPage": undefined,
+            "sampleSize": undefined,
+            "sort": Array [],
+            "viewMode": undefined,
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -77,28 +100,6 @@ describe('tab mapping utils', () => {
             },
           },
           "id": "2",
-          "initialAppState": Object {
-            "breakdownField": undefined,
-            "columns": Array [
-              "column2",
-            ],
-            "dataSource": Object {
-              "dataViewId": "test-data-view-2",
-              "type": "dataView",
-            },
-            "density": undefined,
-            "filters": undefined,
-            "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
-            "hideChart": false,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
-            "sort": Array [],
-            "viewMode": undefined,
-          },
           "initialInternalState": Object {
             "controlGroupJson": undefined,
             "serializedSearchSource": Object {
@@ -108,9 +109,17 @@ describe('tab mapping utils', () => {
               "bar": "foo",
             },
           },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
+          },
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -127,6 +136,29 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "appState": Object {
+            "breakdownField": undefined,
+            "columns": Array [
+              "column2",
+            ],
+            "dataSource": Object {
+              "dataViewId": "test-data-view-2",
+              "type": "dataView",
+            },
+            "density": undefined,
+            "filters": undefined,
+            "grid": Object {},
+            "headerRowHeight": undefined,
+            "hideAggregatedPreview": undefined,
+            "hideChart": false,
+            "interval": undefined,
+            "query": undefined,
+            "rowHeight": undefined,
+            "rowsPerPage": undefined,
+            "sampleSize": undefined,
+            "sort": Array [],
+            "viewMode": undefined,
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -148,28 +180,6 @@ describe('tab mapping utils', () => {
             },
           },
           "id": "2",
-          "initialAppState": Object {
-            "breakdownField": undefined,
-            "columns": Array [
-              "column2",
-            ],
-            "dataSource": Object {
-              "dataViewId": "test-data-view-2",
-              "type": "dataView",
-            },
-            "density": undefined,
-            "filters": undefined,
-            "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
-            "hideChart": false,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
-            "sort": Array [],
-            "viewMode": undefined,
-          },
           "initialInternalState": Object {
             "controlGroupJson": undefined,
             "serializedSearchSource": Object {
@@ -179,9 +189,17 @@ describe('tab mapping utils', () => {
               "bar": "foo",
             },
           },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
+          },
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -210,6 +228,7 @@ describe('tab mapping utils', () => {
       expect(savedSearch).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -280,6 +299,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -313,6 +333,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -361,6 +382,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "default_column",
           ],

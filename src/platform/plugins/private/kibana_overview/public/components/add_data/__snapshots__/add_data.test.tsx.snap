@@ -53,65 +53,41 @@ exports[`AddData render 1`] = `
     <EuiFlexItem
       key="home_tutorial_directory"
     >
-      <RedirectAppLinks
-        coreStart={
-          Object {
-            "application": undefined,
-          }
-        }
-      >
-        <Synopsis
-          description="Ingest data from popular apps and services."
-          iconType="indexOpen"
-          id="home_tutorial_directory"
-          onClick={[Function]}
-          title="Ingest data"
-          url="/app/home#/tutorial_directory"
-          wrapInPanel={true}
-        />
-      </RedirectAppLinks>
+      <Synopsis
+        description="Ingest data from popular apps and services."
+        iconType="indexOpen"
+        id="home_tutorial_directory"
+        onClick={[Function]}
+        title="Ingest data"
+        url="/app/home#/tutorial_directory"
+        wrapInPanel={true}
+      />
     </EuiFlexItem>
     <EuiFlexItem
       key="ingestManager"
     >
-      <RedirectAppLinks
-        coreStart={
-          Object {
-            "application": undefined,
-          }
-        }
-      >
-        <Synopsis
-          description="Add and manage your fleet of Elastic Agents and integrations."
-          iconType="indexManagementApp"
-          id="ingestManager"
-          onClick={[Function]}
-          title="Add Elastic Agent"
-          url="/app/ingestManager"
-          wrapInPanel={true}
-        />
-      </RedirectAppLinks>
+      <Synopsis
+        description="Add and manage your fleet of Elastic Agents and integrations."
+        iconType="indexManagementApp"
+        id="ingestManager"
+        onClick={[Function]}
+        title="Add Elastic Agent"
+        url="/app/ingestManager"
+        wrapInPanel={true}
+      />
     </EuiFlexItem>
     <EuiFlexItem
       key="ml_file_data_visualizer"
     >
-      <RedirectAppLinks
-        coreStart={
-          Object {
-            "application": undefined,
-          }
-        }
-      >
-        <Synopsis
-          description="Import your own CSV, NDJSON, or log file"
-          iconType="document"
-          id="ml_file_data_visualizer"
-          onClick={[Function]}
-          title="Upload a file"
-          url="/app/ml#/filedatavisualizer"
-          wrapInPanel={true}
-        />
-      </RedirectAppLinks>
+      <Synopsis
+        description="Import your own CSV, NDJSON, or log file"
+        iconType="document"
+        id="ml_file_data_visualizer"
+        onClick={[Function]}
+        title="Upload a file"
+        url="/app/ml#/filedatavisualizer"
+        wrapInPanel={true}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 </section>

@@ -10,7 +10,8 @@ import {
   STATUS_API_PATH,
   INSTALL_API_PATH,
   type StatusResponse,
-  type InstallResponse,
+  type InstalledResponse,
+  type InstallingResponse,
 } from '../../../common';
 
 export class InstallationService {
@@ -24,7 +25,7 @@ export class InstallationService {
     return await this.http.get<StatusResponse>(STATUS_API_PATH);
   }
 
-  async install(): Promise<InstallResponse> {
-    return await this.http.post<InstallResponse>(INSTALL_API_PATH);
+  async install(): Promise<InstallingResponse | InstalledResponse> {
+    return await this.http.post<InstallingResponse | InstalledResponse>(INSTALL_API_PATH);
   }
 }

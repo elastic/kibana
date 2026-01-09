@@ -49,7 +49,8 @@ export function EmbeddableFieldStatsUserInput({
       const dv = await getOrCreateDataViewByIndexPattern(
         pluginStart.data.dataViews,
         esqlQuery,
-        undefined
+        undefined,
+        coreStart.http
       );
       if (dv?.id && nextUpdate.dataViewId !== dv.id) {
         nextUpdate.dataViewId = dv.id;

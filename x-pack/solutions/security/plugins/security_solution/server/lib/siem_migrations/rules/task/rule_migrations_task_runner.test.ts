@@ -25,7 +25,7 @@ jest.mock('./retrievers', () => ({
   })),
 }));
 
-const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));
+const mockCreateModel = jest.fn(() => ({ model: 'test-model', bindTools: jest.fn() }));
 const mockGetModelName = jest.fn(() => 'test-model');
 jest.mock('../../common/task/util/actions_client_chat', () => ({
   ...jest.requireActual('../../common/task/util/actions_client_chat'),

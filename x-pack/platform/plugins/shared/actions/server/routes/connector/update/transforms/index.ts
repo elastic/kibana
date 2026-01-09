@@ -8,4 +8,3 @@
 export { transformUpdateConnectorResponse } from './transform_update_connector_response/latest';
 
 export { transformUpdateConnectorResponse as transformUpdateConnectorResponseV1 } from './transform_update_connector_response/v1';
-export { transformUpdateConnectorResponse as transformUpdateConnectorResponseV2 } from './transform_update_connector_response/v2';

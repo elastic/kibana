@@ -22,10 +22,10 @@ import type {
   SparseEmbeddingParams,
   TextEmbeddingParams,
   UnifiedChatCompleteParams,
-} from '../../../common/inference/types';
+} from '@kbn/connector-schemas/inference';
+import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
-import { SUB_ACTION } from '../../../common/inference/constants';
 import type { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
@@ -82,7 +82,12 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 
   if (!isEndpointExists) {
     return (
-      <EuiCallOut title="Missing configuration" color="warning" iconType="warning">
+      <EuiCallOut
+        announceOnMount={false}
+        title="Missing configuration"
+        color="warning"
+        iconType="warning"
+      >
         <FormattedMessage
           id="xpack.stackConnectors.components.inference.loadingErrorText"
           defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}

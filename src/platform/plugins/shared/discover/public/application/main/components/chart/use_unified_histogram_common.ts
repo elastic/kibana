@@ -12,7 +12,6 @@ import React, { useCallback, useEffect } from 'react';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export const useUnifiedHistogramCommon = ({
   currentTabId,
@@ -46,7 +45,6 @@ export const useUnifiedHistogramCommon = ({
     });
   }, [currentTabId, layoutProps, localStorageKeyPrefix, stateContainer.runtimeStateManager]);
 
-  const isEsqlMode = useIsEsqlMode();
   const renderCustomChartToggleActions = useCallback(
     () =>
       React.isValidElement(panelsToggle)
@@ -56,7 +54,6 @@ export const useUnifiedHistogramCommon = ({
   );
 
   return {
-    isEsqlMode,
     renderCustomChartToggleActions,
   };
 };

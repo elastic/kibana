@@ -14,6 +14,7 @@ import {
   sloDefinitionSchema,
   summarySchema,
 } from '../schema';
+import type { SLODefinitionResponse } from './routes/find_definition';
 
 const sloWithDataResponseSchema = t.intersection([
   sloDefinitionSchema,
@@ -24,7 +25,6 @@ const sloWithDataResponseSchema = t.intersection([
   }),
 ]);
 
-type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { sloWithDataResponseSchema };

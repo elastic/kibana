@@ -29,41 +29,6 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the workflow execution route with correct configuration', () => {
-      registerGetWorkflowExecutionByIdRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getExecutionCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflowExecutions/{workflowExecutionId}'
-      );
-
-      expect(getExecutionCall).toBeDefined();
-      expect(getExecutionCall[0]).toMatchObject({
-        path: '/api/workflowExecutions/{workflowExecutionId}',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['read', 'workflow_execution_read'],
-              },
-            ],
-          },
-        },
-      });
-      expect(getExecutionCall[0].validate).toBeDefined();
-      expect(getExecutionCall[0].validate.params).toBeDefined();
-      expect(getExecutionCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

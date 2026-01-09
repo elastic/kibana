@@ -11,6 +11,7 @@ import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 import type {
   RuleAction,
   ActionTypeRegistryContract,
+  ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as I18n from './translations';
 
@@ -39,11 +40,13 @@ export const validateMustache = (params: RuleAction['params']) => {
 
 export const validateActionParams = async (
   actionItem: RuleAction,
-  actionTypeRegistry: ActionTypeRegistryContract
+  actionTypeRegistry: ActionTypeRegistryContract,
+  connector?: ActionConnector
 ): Promise<string[]> => {
+  const connectorConfig = connector && 'config' in connector ? connector.config : undefined;
   const actionErrors = await actionTypeRegistry
     .get(actionItem.actionTypeId)
-    ?.validateParams(actionItem.params);
+    ?.validateParams(actionItem.params, connectorConfig);
 
   if (actionErrors) {
     const actionErrorsValues = Object.values(actionErrors.errors);

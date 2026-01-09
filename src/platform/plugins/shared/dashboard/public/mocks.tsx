@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { BehaviorSubject } from 'rxjs';
 import type { DashboardStart } from './plugin';
 import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
+import type { DashboardReadResponseBody } from '../server';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -67,18 +66,6 @@ export function setupIntersectionObserverMock({
   });
 }
 
-export const mockControlGroupApi = {
-  untilInitialized: async () => {},
-  untilFiltersPublished: async () => {},
-  filters$: new BehaviorSubject(undefined),
-  query$: new BehaviorSubject(undefined),
-  timeslice$: new BehaviorSubject(undefined),
-  esqlVariables$: new BehaviorSubject(undefined),
-  dataViews$: new BehaviorSubject(undefined),
-  hasUnsavedChanges$: new BehaviorSubject(false),
-  children$: new BehaviorSubject([]),
-} as unknown as ControlGroupApi;
-
 export function buildMockDashboardApi({
   overrides,
   savedObjectId,
@@ -89,19 +76,18 @@ export function buildMockDashboardApi({
   const initialState = getSampleDashboardState(overrides);
   const results = getDashboardApi({
     initialState,
+    incomingEmbeddables: undefined,
     savedObjectId,
-    savedObjectResult: {
-      dashboardFound: true,
-      newDashboardCreated: savedObjectId === undefined,
-      dashboardId: savedObjectId,
-      managed: false,
-      dashboardInput: {
-        ...initialState,
-      },
-      references: [],
-    },
+    readResult: savedObjectId
+      ? ({
+          id: savedObjectId,
+          data: initialState,
+          meta: {
+            managed: false,
+          },
+        } as unknown as DashboardReadResponseBody)
+      : undefined,
   });
-  results.internalApi.setControlGroupApi(mockControlGroupApi);
   return results;
 }
 
@@ -109,11 +95,11 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
   return {
     // options
     options: {
-      useMargins: true,
-      syncColors: false,
-      syncCursor: true,
-      syncTooltips: false,
-      hidePanelTitles: false,
+      use_margins: true,
+      sync_colors: false,
+      sync_cursor: true,
+      sync_tooltips: false,
+      hide_panel_titles: false,
     },
 
     tags: [],
@@ -123,11 +109,10 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       language: 'kuery',
       query: 'hi',
     },
-    timeRange: {
+    time_range: {
       to: 'now',
       from: 'now-15m',
     },
-    timeRestore: false,
     panels: [],
     ...overrides,
   };
@@ -189,9 +174,9 @@ export function getMockPanelsWithSections() {
 }
 
 export function getMockLayout() {
-  return deserializeLayout(getMockPanels(), () => []).layout;
+  return deserializeLayout(getMockPanels(), { controls: [] }, () => []).layout;
 }
 
 export function getMockLayoutWithSections() {
-  return deserializeLayout(getMockPanelsWithSections(), () => []).layout;
+  return deserializeLayout(getMockPanelsWithSections(), { controls: [] }, () => []).layout;
 }

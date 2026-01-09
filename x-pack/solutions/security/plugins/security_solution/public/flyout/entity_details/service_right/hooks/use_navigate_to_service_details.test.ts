@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { useNavigateToServiceDetails } from './use_navigate_to_service_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   CspInsightLeftPanelSubTab,
@@ -15,10 +14,8 @@ import {
 } from '../../shared/components/left_panel/left_panel_header';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { ServicePanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -39,11 +36,6 @@ const mockProps = {
   serviceName: 'testService',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
-  hasMisconfigurationFindings: false,
-  hasNonClosedAlerts: false,
-  contextID: 'testContextID',
-  isPreviewMode: false,
-  email: ['test@test.com'],
 };
 
 const tab = EntityDetailsLeftPanelTab.RISK_INPUTS;
@@ -53,111 +45,29 @@ const mockOpenLeftPanel = jest.fn();
 const mockOpenFlyout = jest.fn();
 
 describe('useNavigateToServiceDetails', () => {
-  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-        openLeftPanel: mockOpenLeftPanel,
-        openFlyout: mockOpenFlyout,
-      });
-    });
-
-    it('returns callback that opens details panel when not in preview mode', () => {
-      const { result } = renderHook(() => useNavigateToServiceDetails(mockProps));
-
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-        id: ServiceDetailsPanelKey,
-        params: {
-          service: {
-            name: mockProps.serviceName,
-          },
-          scopeId: mockProps.scopeId,
-          isRiskScoreExist: mockProps.isRiskScoreExist,
-          path: { tab, subTab },
-        },
-      });
-    });
-
-    it('returns callback that opens flyout when in preview mode', () => {
-      const { result } = renderHook(() =>
-        useNavigateToServiceDetails({ ...mockProps, isPreviewMode: true })
-      );
-
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: ServicePanelKey,
-          params: {
-            contextID: mockProps.contextID,
-            scopeId: mockProps.scopeId,
-            serviceName: mockProps.serviceName,
-          },
-        },
-        left: {
-          id: ServiceDetailsPanelKey,
-          params: {
-            service: {
-              name: mockProps.serviceName,
-            },
-            scopeId: mockProps.scopeId,
-            isRiskScoreExist: mockProps.isRiskScoreExist,
-            path: { tab, subTab },
-          },
-        },
-      });
-      expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+      openLeftPanel: mockOpenLeftPanel,
+      openFlyout: mockOpenFlyout,
     });
   });
 
-  describe('when newExpandableFlyoutNavigationDisabled is true', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-        openLeftPanel: mockOpenLeftPanel,
-        openFlyout: mockOpenFlyout,
-      });
-    });
+  it('returns callback that opens details panel', () => {
+    const { result } = renderHook(() => useNavigateToServiceDetails(mockProps));
 
-    it('returns callback that opens details panel when not in preview mode', () => {
-      const { result } = renderHook(() => useNavigateToServiceDetails(mockProps));
+    result.current({ tab, subTab });
 
-      expect(result.current.isLinkEnabled).toBe(true);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-        id: ServiceDetailsPanelKey,
-        params: {
-          service: {
-            name: mockProps.serviceName,
-          },
-          scopeId: mockProps.scopeId,
-          isRiskScoreExist: mockProps.isRiskScoreExist,
-          path: { tab, subTab },
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: ServiceDetailsPanelKey,
+      params: {
+        service: {
+          name: mockProps.serviceName,
         },
-      });
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
-    });
-
-    it('returns empty callback and isLinkEnabled is false when in preview mode', () => {
-      const { result } = renderHook(() =>
-        useNavigateToServiceDetails({ ...mockProps, isPreviewMode: true })
-      );
-
-      expect(result.current.isLinkEnabled).toBe(false);
-      result.current.openDetailsPanel({ tab, subTab });
-
-      expect(mockOpenLeftPanel).not.toHaveBeenCalled();
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+        scopeId: mockProps.scopeId,
+        isRiskScoreExist: mockProps.isRiskScoreExist,
+        path: { tab, subTab },
+      },
     });
   });
 });

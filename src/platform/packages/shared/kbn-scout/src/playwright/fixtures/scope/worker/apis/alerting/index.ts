@@ -324,7 +324,9 @@ export const getAlertingApiHelper = (
           async () => {
             await kbnClient.request({
               method: 'POST',
-              path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`,
+              path: `${buildSpacePath(
+                spaceId
+              )}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute?validate_alerts_existence=false`,
               retries: 3,
             });
           }
@@ -411,7 +413,7 @@ export const getAlertingApiHelper = (
         });
       },
 
-      getExecutionLog: async (ruleId: string, spaceId?: string) => {
+      getExecutionLog: async (ruleId: string, spaceId?: string, dateStart = new Date()) => {
         return await measurePerformanceAsync(
           log,
           `alertingApi.rules.getExecutionLog [${ruleId}]`,
@@ -420,6 +422,7 @@ export const getAlertingApiHelper = (
               method: 'GET',
               path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_execution_log`,
               retries: 3,
+              query: { date_start: dateStart.toISOString() },
             });
             return response.data;
           }
@@ -648,7 +651,12 @@ export const getAlertingApiHelper = (
         );
       },
 
-      waitForNextExecution: async (ruleId: string, spaceId?: string, timeoutMs: number = 30000) => {
+      waitForNextExecution: async (
+        ruleId: string,
+        spaceId?: string,
+        timeoutMs: number = 30000,
+        dateStart: Date = new Date()
+      ) => {
         return await measurePerformanceAsync(
           log,
           `alertingApi.waiting.waitForNextExecution [${ruleId}]`,
@@ -658,6 +666,7 @@ export const getAlertingApiHelper = (
               method: 'GET',
               path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_execution_log`,
               retries: 3,
+              query: { date_start: dateStart.toISOString() },
             });
             const initialLogData = initialLog.data as any;
             const initialCount = initialLogData.total;
@@ -669,7 +678,8 @@ export const getAlertingApiHelper = (
                   path: `${buildSpacePath(
                     spaceId
                   )}/internal/alerting/rule/${ruleId}/_execution_log`,
-                  retries: 1, // Lower retries for frequent polling operations
+                  retries: 1, // Lower retries for frequent polling operations,
+                  query: { date_start: dateStart.toISOString() },
                 });
                 const logData = executionLog.data as any;
                 return logData.total;

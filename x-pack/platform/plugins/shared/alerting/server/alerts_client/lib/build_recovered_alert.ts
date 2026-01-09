@@ -14,6 +14,8 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_MUTED,
   ALERT_STATUS,
   EVENT_ACTION,
   TAGS,
@@ -29,15 +31,17 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
 import type { Alert as LegacyAlert } from '../../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule } from '../types';
+import type { AlertRule, AlertRuleData } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import { filterAlertState } from './filter_alert_state';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -49,6 +53,7 @@ interface BuildRecoveredAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  ruleData?: AlertRuleData;
   runTimestamp?: string;
   recoveryActionGroup: string;
   payload?: DeepPartial<AlertData>;
@@ -72,6 +77,7 @@ export const buildRecoveredAlert = <
   alert,
   legacyAlert,
   rule,
+  ruleData,
   timestamp,
   payload,
   runTimestamp,
@@ -89,6 +95,12 @@ export const buildRecoveredAlert = <
 
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
+  const alertState = legacyAlert.getState();
+  const filteredAlertState = filterAlertState(alertState);
+  const hasAlertState = Object.keys(filteredAlertState).length > 0;
+
+  // Preserve ALERT_MUTED from existing alert
+  const alertMuted = get(alert, ALERT_MUTED);
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -107,23 +119,25 @@ export const buildRecoveredAlert = <
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set latest maintenance window Names
+    [ALERT_MAINTENANCE_WINDOW_NAMES]: legacyAlert.getMaintenanceWindowNames(),
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
+    // Preserve muted state from existing alert
+    ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration
-    ...(legacyAlert.getState().duration
-      ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
-      : {}),
+    ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
     // Set end time
-    ...(legacyAlert.getState().end && legacyAlert.getState().start
+    ...(alertState.end && alertState.start
       ? {
-          [ALERT_START]: legacyAlert.getState().start,
-          [ALERT_END]: legacyAlert.getState().end,
+          [ALERT_START]: alertState.start,
+          [ALERT_END]: alertState.end,
           [ALERT_TIME_RANGE]: {
-            gte: legacyAlert.getState().start,
-            lte: legacyAlert.getState().end,
+            gte: alertState.start,
+            lte: alertState.end,
           },
         }
       : {}),
@@ -138,6 +152,7 @@ export const buildRecoveredAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
+    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

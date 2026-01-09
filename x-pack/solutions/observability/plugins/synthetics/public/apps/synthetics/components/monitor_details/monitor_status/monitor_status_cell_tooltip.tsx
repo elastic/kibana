@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiProgress, useEuiTheme, VISUALIZATION_COLORS } from '@elastic/eui';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
 
 import type { TooltipValue } from '@elastic/charts';
 import { TooltipTable, TooltipHeader, TooltipContainer } from '@elastic/charts';
@@ -24,12 +24,8 @@ export const MonitorStatusCellTooltip = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
-
-  const SUCCESS_COLOR = isAmsterdam ? VISUALIZATION_COLORS[0] : euiTheme.colors.success;
-  const DANGER_COLOR = isAmsterdam
-    ? VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1]
-    : euiTheme.colors.danger;
+  const SUCCESS_COLOR = euiTheme.colors.success;
+  const DANGER_COLOR = euiTheme.colors.danger;
   if (!timeBin) {
     return <>{''}</>;
   }

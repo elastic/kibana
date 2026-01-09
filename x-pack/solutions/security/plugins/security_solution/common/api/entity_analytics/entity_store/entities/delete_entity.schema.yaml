@@ -3,7 +3,7 @@ info:
   version: '2023-10-31'
   title: Entity Store - Delete Single Entity
 paths:
-  /api/entity_store/entities/{entityType}/{entityId}:
+  /api/entity_store/entities/{entityType}:
     delete:
       x-labels: [ess, serverless]
       x-codegen-enabled: true

@@ -22,10 +22,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import type { SearchIn, SearchResult } from '@kbn/content-management-plugin/common';
 
-import { contentManagementService } from '../../services/kibana_services';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { uiActionsService } from '../../services/kibana_services';
 
 export interface DashboardPickerProps {
   onChange: (dashboard: { name: string; id: string } | null) => void;
@@ -38,7 +37,29 @@ interface DashboardOption {
   value: string;
 }
 
-type DashboardHit = SavedObjectCommon<{ title: string }>;
+interface Dashboard {
+  id: string;
+  isManaged: boolean;
+  title: string;
+}
+
+// TODO replace action call with dashboardStartService.findDashboardServer().search
+// when circular dependency issue is resolved
+async function searchDashboards(search?: string): Promise<Dashboard[]> {
+  const searchAction = await uiActionsService.getAction('searchDashboardAction');
+  return new Promise(function (resolve) {
+    searchAction.execute({
+      onResults(dashboards: Dashboard[]) {
+        resolve(dashboards);
+      },
+      search: {
+        search,
+        per_page: 30,
+      },
+      trigger: { id: 'searchDashbaords' },
+    } as ActionExecutionContext);
+  });
+}
 
 export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPickerProps) {
   const { euiTheme } = useEuiTheme();
@@ -46,7 +67,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
   const [isLoading, setIsLoading] = useState(true);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const [dashboardHits, setDashboardHits] = useState<DashboardHit[]>([]);
+  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [dashboardOptions, setDashboardOptions] = useState<DashboardOption[]>([]);
 
   const [query, setQuery] = useState('');
@@ -70,27 +91,18 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
    */
   useEffect(() => {
     let canceled = false;
+    setIsLoading(true);
 
-    (async () => {
-      setIsLoading(true);
-
-      const response = await contentManagementService.client.search<
-        SearchIn<'dashboard'>,
-        SearchResult<DashboardHit>
-      >({
-        contentTypeId: 'dashboard',
-        query: {
-          text: debouncedQuery ? `${debouncedQuery}*` : undefined,
-          limit: 30,
-        },
+    searchDashboards(debouncedQuery)
+      .then((nextDashboards) => {
+        if (canceled) return;
+        setDashboards(nextDashboards);
+        setIsLoading(false);
+      })
+      .catch((e) => {
+        if (canceled) return;
+        setIsLoading(false);
       });
-      if (canceled) return;
-      if (response && response.hits) {
-        setDashboardHits(response.hits);
-      }
-
-      setIsLoading(false);
-    })();
 
     return () => {
       canceled = true;
@@ -102,16 +114,16 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
    */
   useEffect(() => {
     setDashboardOptions(
-      dashboardHits
-        .filter((d) => !d.managed && !(idsToOmit ?? []).includes(d.id))
+      dashboards
+        .filter((d) => !d.isManaged && !(idsToOmit ?? []).includes(d.id))
         .map((d) => ({
           value: d.id,
-          label: d.attributes.title,
+          label: d.title,
           checked: d.id === selectedDashboard?.value ? 'on' : undefined,
-          'data-test-subj': `dashboard-picker-option-${d.attributes.title.replaceAll(' ', '-')}`,
+          'data-test-subj': `dashboard-picker-option-${d.title.replaceAll(' ', '-')}`,
         }))
     );
-  }, [dashboardHits, idsToOmit, selectedDashboard]);
+  }, [dashboards, idsToOmit, selectedDashboard]);
 
   return (
     <EuiInputPopover

@@ -35,6 +35,7 @@ import type { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
 export type OnLlmResponse = (args: {
   content: string;
+  refusal?: string;
   interruptValue?: InterruptValue;
   traceData?: Message['traceData'];
   isError?: boolean;

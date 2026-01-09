@@ -108,7 +108,7 @@ const EditPackPageComponent = () => {
       isReadOnly ? (
         <>
           <EuiSpacer />
-          <EuiCallOut>
+          <EuiCallOut announceOnMount>
             <FormattedMessage
               id="xpack.osquery.editPack.prebuiltPackModeDescription"
               defaultMessage="This is a prebuilt Elastic pack. You can modify the scheduled agent policies, but you cannot edit queries in the pack."
@@ -133,7 +133,7 @@ const EditPackPageComponent = () => {
       {!data ? (
         <EuiSkeletonText lines={10} />
       ) : (
-        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} />
+        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} packId={packId} />
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal

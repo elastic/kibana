@@ -166,6 +166,7 @@ export function ApmIndices() {
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiCallOut
+                announceOnMount
                 color="primary"
                 iconType="spacesApp"
                 title={

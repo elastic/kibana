@@ -32,13 +32,13 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs';
+import { debounceTime, EMPTY } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
@@ -53,17 +53,12 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 56px; /* 56 = 40 + 8 + 8 */
+      min-width: ${size.xxl};
       cursor: pointer;
     `,
     logo: css`
       min-width: 0; /* overrides min-width: 40px */
       padding: 0;
-    `,
-    spinner: css`
-      position: relative;
-      left: 4px;
-      top: 2px;
     `,
   },
   leftHeaderSection: css`
@@ -72,9 +67,6 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
     flex-shrink: 1;
   `,
   breadcrumbsSectionItem: css`
-    min-width: 0; // needed to enable breadcrumbs truncation
-  `,
-  redirectAppLinksContainer: css`
     min-width: 0; // needed to enable breadcrumbs truncation
   `,
   leftNavcontrols: css`
@@ -116,6 +108,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   actionMenu$?: Observable<MountPoint | undefined> | null;
+  appMenu$?: Observable<AppMenuConfig | undefined> | null;
   docLinks: DocLinksStart;
   children: React.ReactNode;
   customBranding$: Observable<CustomBranding>;
@@ -206,7 +199,7 @@ const Logo = ({
       {loadingCount === 0 ? (
         renderLogo()
       ) : (
-        <a onClick={navigateHome} href={fullHref} css={logoCss.spinner}>
+        <a onClick={navigateHome} href={fullHref}>
           <EuiLoadingSpinner
             size="l"
             aria-hidden={false}
@@ -235,8 +228,11 @@ export const ProjectHeader = ({
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
-  const topBarStyles = css`
+  const topBarStyles = () => css`
     box-shadow: none !important;
+    background-color: ${euiTheme.colors.backgroundTransparent};
+    border-bottom-color: ${euiTheme.colors.backgroundTransparent};
+    padding-inline: 4px 8px;
   `;
 
   return (
@@ -276,16 +272,11 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <RedirectAppLinks
-                  coreStart={{ application }}
-                  css={headerCss.redirectAppLinksContainer}
+                <BreadcrumbsWithExtensionsWrapper
+                  breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
                 >
-                  <BreadcrumbsWithExtensionsWrapper
-                    breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-                  >
-                    <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
-                  </BreadcrumbsWithExtensionsWrapper>
-                </RedirectAppLinks>
+                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
@@ -320,8 +311,12 @@ export const ProjectHeader = ({
         </div>
       </header>
 
-      {observables.actionMenu$ && (
-        <AppMenuBar appMenuActions$={observables.actionMenu$} isFixed={true} />
+      {(observables.actionMenu$ || observables.appMenu$) && (
+        <AppMenuBar
+          appMenuActions$={observables.actionMenu$}
+          appMenu$={observables.appMenu$ ?? EMPTY}
+          isFixed={true}
+        />
       )}
     </>
   );

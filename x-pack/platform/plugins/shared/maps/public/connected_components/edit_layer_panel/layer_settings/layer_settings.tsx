@@ -244,6 +244,7 @@ export function LayerSettings(props: Props) {
     return isLayerGroup(props.layer) ? (
       <>
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
             defaultMessage: 'Drag layers in and out of the group',
           })}

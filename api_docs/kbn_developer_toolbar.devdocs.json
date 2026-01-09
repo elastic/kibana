@@ -1,0 +1,245 @@
+{
+  "id": "@kbn/developer-toolbar",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/developer-toolbar",
+        "id": "def-public.DeveloperToolbar",
+        "type": "Function",
+        "tags": [],
+        "label": "DeveloperToolbar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/developer-toolbar",
+            "scope": "public",
+            "docId": "kibKbnDeveloperToolbarPluginApi",
+            "section": "def-public.DeveloperToolbarProps",
+            "text": "DeveloperToolbarProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/developer-toolbar",
+                "scope": "public",
+                "docId": "kibKbnDeveloperToolbarPluginApi",
+                "section": "def-public.DeveloperToolbarProps",
+                "text": "DeveloperToolbarProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/developer-toolbar",
+        "id": "def-public.DeveloperToolbarItem",
+        "type": "Function",
+        "tags": [],
+        "label": "DeveloperToolbarItem",
+        "description": [
+          "\nComponent that registers an item to be displayed in the developer toolbar.\nThis component can be rendered anywhere in the app tree.\nThe children will be portaled to the developer toolbar automatically."
+        ],
+        "signature": [
+          "({ id, children, priority, }: ",
+          {
+            "pluginId": "@kbn/developer-toolbar",
+            "scope": "public",
+            "docId": "kibKbnDeveloperToolbarPluginApi",
+            "section": "def-public.DeveloperToolbarItemProps",
+            "text": "DeveloperToolbarItemProps"
+          },
+          ") => null"
+        ],
+        "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbarItem.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  children,\n  priority,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/developer-toolbar",
+                "scope": "public",
+                "docId": "kibKbnDeveloperToolbarPluginApi",
+                "section": "def-public.DeveloperToolbarItemProps",
+                "text": "DeveloperToolbarItemProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/developer-toolbar",
+        "id": "def-public.DeveloperToolbarItemProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeveloperToolbarItemProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbarItemProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique identifier for this item.\nUsed as user-facing identifier in settings and data-test-subj attributes."
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbarItemProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nThe React component(s) to render in the toolbar"
+            ],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbarItemProps.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nPriority for ordering items. Higher numbers appear first. Defaults to 0."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/developer-toolbar",
+        "id": "def-public.DeveloperToolbarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeveloperToolbarProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbarProps.envInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "envInfo",
+            "description": [],
+            "signature": [
+              "EnvironmentInfo",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/developer-toolbar",
+            "id": "def-public.DeveloperToolbarProps.onHeightChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onHeightChange",
+            "description": [],
+            "signature": [
+              "((height: number) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/developer-toolbar",
+                "id": "def-public.DeveloperToolbarProps.onHeightChange.$1",
+                "type": "number",
+                "tags": [],
+                "label": "height",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

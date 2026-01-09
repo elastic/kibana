@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import fastIsEqual from 'fast-deep-equal';
 
 export interface FetchContext {
@@ -18,6 +19,8 @@ export interface FetchContext {
   searchSessionId: string | undefined;
   timeRange: TimeRange | undefined;
   timeslice: [number, number] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
+  projectRouting: ProjectRouting | undefined;
 }
 
 export interface ReloadTimeFetchContext extends Omit<FetchContext, 'isReload'> {
@@ -25,19 +28,29 @@ export interface ReloadTimeFetchContext extends Omit<FetchContext, 'isReload'> {
 }
 
 export function isReloadTimeFetchContextEqual(
-  currentContext: ReloadTimeFetchContext,
-  lastContext: ReloadTimeFetchContext
+  previousContext: ReloadTimeFetchContext,
+  currentContext: ReloadTimeFetchContext
 ): boolean {
-  if (currentContext.searchSessionId !== lastContext.searchSessionId) return false;
-
   return (
-    isReloadTimestampEqualForFetch(currentContext.reloadTimestamp, lastContext.reloadTimestamp) &&
-    areFiltersEqualForFetch(currentContext.filters, lastContext.filters) &&
-    isQueryEqualForFetch(currentContext.query, lastContext.query) &&
-    isTimeRangeEqualForFetch(currentContext.timeRange, lastContext.timeRange) &&
-    isTimeSliceEqualForFetch(currentContext.timeslice, lastContext.timeslice)
+    isReloadTimestampEqualForFetch(
+      previousContext.reloadTimestamp,
+      currentContext.reloadTimestamp
+    ) &&
+    areFiltersEqualForFetch(previousContext.filters, currentContext.filters) &&
+    isQueryEqualForFetch(previousContext.query, currentContext.query) &&
+    isTimeRangeEqualForFetch(previousContext.timeRange, currentContext.timeRange) &&
+    isProjectRoutingEqualForFetch(previousContext.projectRouting, currentContext.projectRouting) &&
+    isTimeSliceEqualForFetch(previousContext.timeslice, currentContext.timeslice) &&
+    areVariablesEqualForFetch(previousContext.esqlVariables, currentContext.esqlVariables)
   );
 }
+
+const isProjectRoutingEqualForFetch = (
+  currentProjectRouting: ProjectRouting,
+  lastProjectRouting: ProjectRouting
+) => {
+  return currentProjectRouting === lastProjectRouting;
+};
 
 export const areFiltersEqualForFetch = (currentFilters?: Filter[], lastFilters?: Filter[]) => {
   return onlyDisabledFiltersChanged(currentFilters, lastFilters, {
@@ -48,11 +61,11 @@ export const areFiltersEqualForFetch = (currentFilters?: Filter[], lastFilters?:
 };
 
 export const isReloadTimestampEqualForFetch = (
-  currentReloadTimestamp?: number,
-  lastReloadTimestamp?: number
+  previousReloadTimestamp?: number,
+  currentReloadTimestamp?: number
 ) => {
   if (!currentReloadTimestamp) return true; // if current reload timestamp is not set, this is not a force refresh.
-  return currentReloadTimestamp === lastReloadTimestamp;
+  return currentReloadTimestamp === previousReloadTimestamp;
 };
 
 export const isQueryEqualForFetch = (
@@ -69,3 +82,8 @@ export const isTimeSliceEqualForFetch = (
   currentTimeslice: [number, number] | undefined,
   lastTimeslice: [number, number] | undefined
 ) => fastIsEqual(currentTimeslice, lastTimeslice);
+
+const areVariablesEqualForFetch = (
+  currentVariables: ESQLControlVariable[] | undefined,
+  lastVariables: ESQLControlVariable[] | undefined
+) => fastIsEqual(currentVariables, lastVariables);

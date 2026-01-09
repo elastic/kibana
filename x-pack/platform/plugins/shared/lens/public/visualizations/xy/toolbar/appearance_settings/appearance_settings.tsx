@@ -1,0 +1,152 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
+import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
+import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
+import { MissingValuesOptions } from './missing_values_option';
+import { LineCurveOption } from './line_curve_option';
+import { FillOpacityOption } from './fill_opacity_option';
+import { PointVisibilityOption } from './point_visibility_option';
+import type { XYState } from '../../types';
+import {
+  flipSeriesType,
+  getBarSeriesLayers,
+  hasAreaSeries,
+  hasNonBarSeries,
+  isBarLayer,
+  isHorizontalChart,
+} from '../../state_helpers';
+import { getDataLayers } from '../../visualization_helpers';
+
+export function getValueLabelDisableReason({
+  isAreaPercentage,
+  isHistogramSeries,
+}: {
+  isAreaPercentage: boolean;
+  isHistogramSeries: boolean;
+}): string {
+  if (isHistogramSeries) {
+    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on histograms.',
+    });
+  }
+  if (isAreaPercentage) {
+    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on percentage area charts.',
+    });
+  }
+  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
+  });
+}
+
+export const XyAppearanceSettings: React.FC<{
+  state: XYState;
+  setState: (newState: XYState) => void;
+}> = ({ state, setState }) => {
+  const dataLayers = getDataLayers(state.layers);
+  const isAreaPercentage = dataLayers.some(
+    ({ seriesType }) => seriesType === 'area_percentage_stacked'
+  );
+
+  const isHasNonBarSeries = hasNonBarSeries(dataLayers);
+
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
+
+  const isHorizontal = isHorizontalChart(state.layers);
+
+  const barSeriesLayers = getBarSeriesLayers(dataLayers);
+
+  const hasAnyBarSetting = !!barSeriesLayers.length;
+  const hasAreaSettings = hasAreaSeries(dataLayers);
+  const shouldDisplayDividerHr = !!(hasAnyBarSetting && isHasNonBarSeries);
+
+  return (
+    <>
+      {hasAnyBarSetting ? (
+        <BarOrientationSettings
+          isDisabled={isHasNonBarSeries}
+          barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
+          onBarOrientationChange={() => {
+            const newSeriesType = flipSeriesType(dataLayers[0].seriesType);
+            setState({
+              ...state,
+              layers: state.layers.map((layer) =>
+                isBarLayer(layer)
+                  ? {
+                      ...layer,
+                      seriesType: newSeriesType,
+                    }
+                  : layer
+              ),
+            });
+          }}
+        />
+      ) : null}
+
+      {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
+
+      {hasAreaSettings ? (
+        <>
+          <FillOpacityOption
+            isFillOpacityEnabled={true}
+            value={state?.fillOpacity ?? 0.3}
+            onChange={(newValue) => {
+              setState({
+                ...state,
+                fillOpacity: newValue,
+              });
+            }}
+          />
+
+          <ToolbarDivider />
+        </>
+      ) : null}
+
+      <PointVisibilityOption
+        enabled={isHasNonBarSeries}
+        selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
+        onChange={(newValue) => {
+          setState({
+            ...state,
+            pointVisibility: newValue,
+          });
+        }}
+      />
+
+      <LineCurveOption
+        enabled={isCurveTypeEnabled}
+        value={state?.curveType}
+        onChange={(curveType) => {
+          setState({
+            ...state,
+            curveType,
+          });
+        }}
+      />
+      <MissingValuesOptions
+        isFittingEnabled={isFittingEnabled}
+        fittingFunction={state?.fittingFunction}
+        emphasizeFitting={state?.emphasizeFitting}
+        endValue={state?.endValue}
+        onFittingFnChange={(newVal) => {
+          setState({ ...state, fittingFunction: newVal });
+        }}
+        onEmphasizeFittingChange={(newVal) => {
+          setState({ ...state, emphasizeFitting: newVal });
+        }}
+        onEndValueChange={(newVal) => {
+          setState({ ...state, endValue: newVal });
+        }}
+      />
+    </>
+  );
+};

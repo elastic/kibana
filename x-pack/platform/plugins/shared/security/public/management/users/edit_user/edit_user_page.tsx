@@ -14,6 +14,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiPageHeader,
   EuiPanel,
@@ -79,6 +80,17 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
   const isReservedUser = isUserReserved(user);
   const isDeprecatedUser = isUserDeprecated(user);
 
+  const getReturnToUserListButton = () => {
+    return (
+      <EuiButton iconType="arrowLeft" onClick={backToUsers} data-test-subj="editUserBackButton">
+        <FormattedMessage
+          id="xpack.security.management.users.userForm.backToUsersButton"
+          defaultMessage="Back to users"
+        />
+      </EuiButton>
+    );
+  };
+
   // We render email below the title already and don't need to duplicate it in the title itself.
   const title = getUserDisplayName({ full_name: user.full_name, username: user.username });
   return (
@@ -103,6 +115,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       {isDeprecatedUser ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.deprecatedUserWarning"
@@ -119,6 +132,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       ) : isReservedUser ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.reservedUserWarning"
@@ -132,6 +146,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       ) : user.enabled === false ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.disabledUserWarning"
@@ -190,7 +205,6 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
             />
           ) : undefined}
 
-          <EuiSpacer />
           <EuiHorizontalRule />
 
           <EuiPanel color="subdued" hasShadow={false} grow={false}>
@@ -333,8 +347,14 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               </EuiPanel>
             </>
           )}
+
+          <EuiHorizontalRule />
         </>
       )}
+
+      <EuiFlexItem>
+        <EuiFormRow fullWidth={false}>{getReturnToUserListButton()}</EuiFormRow>
+      </EuiFlexItem>
     </>
   );
 };

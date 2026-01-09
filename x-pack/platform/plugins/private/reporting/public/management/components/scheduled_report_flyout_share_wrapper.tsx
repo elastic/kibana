@@ -17,9 +17,9 @@ import { isEmpty } from 'lodash';
 import { supportedReportTypes } from '../report_params';
 import { queryClient } from '../../query_client';
 import type { ReportingPublicPluginStartDependencies } from '../../plugin';
-import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 import type { ReportTypeId } from '../../types';
 import * as i18n from '../translations';
+import { CreateScheduledReportForm } from './create_scheduled_report_form';
 
 export interface ScheduledReportMenuItem {
   apiClient: ReportingAPIClient;
@@ -68,6 +68,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
     return (
       <EuiFlyoutBody>
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.SCHEDULED_REPORT_NO_REPORT_TYPES_TITLE}
           color="warning"
           iconType="warning"
@@ -81,7 +82,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
   return (
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <ScheduledReportFlyoutContent
+        <CreateScheduledReportForm
           apiClient={apiClient}
           objectType={objectType}
           sharingData={sharingData}

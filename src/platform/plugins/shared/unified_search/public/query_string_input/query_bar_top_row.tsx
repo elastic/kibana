@@ -12,9 +12,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY } from 'rxjs';
+import { EMPTY, delay, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
-import { throttle } from 'lodash';
+import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
@@ -37,24 +37,24 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  EuiIconTip,
   useEuiTheme,
+  type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
-import { EuiIconBackgroundTask } from '@kbn/background-search';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
-
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import { ProjectPicker } from '../project_picker';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
@@ -103,8 +103,6 @@ export const strings = {
       defaultMessage: 'Send to background',
     }),
 };
-
-const SHOW_PROJECT_PICKER_KEY = 'unifiedSearch.showProjectPicker';
 
 const getWrapperWithTooltip = (
   children: JSX.Element,
@@ -233,8 +231,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      */
     controlsWrapper: React.ReactNode;
   };
+  /**
+   * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
+   */
+  onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
-  showProjectPicker?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -283,6 +284,8 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const { euiTheme } = useEuiTheme();
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -292,14 +295,20 @@ export const QueryBarTopRow = React.memo(
       if (submitButtonStyle !== 'auto') return;
 
       const handleResize = throttle(() => {
-        setIsXXLarge(window.innerWidth >= 1440);
+        setIsXXLarge(window.innerWidth >= euiTheme.breakpoint.m);
       }, 50);
 
       window.addEventListener('resize', handleResize);
       handleResize();
 
       return () => window.removeEventListener('resize', handleResize);
-    }, [submitButtonStyle]);
+    }, [euiTheme.breakpoint.m, submitButtonStyle]);
+
+    useEffect(() => {
+      if (!props.isLoading) {
+        setIsCancelling(false);
+      }
+    }, [props.isLoading]);
 
     const {
       showQueryInput = true,
@@ -328,7 +337,15 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
-    const backgroundSearchState = useObservable(data.search.session.state$);
+    const backgroundSearchState = useObservable(
+      data.search.session.state$.pipe(
+        mergeMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick
+          if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
+          return of(state);
+        })
+      )
+    );
     const canSendToBackground =
       backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
 
@@ -436,6 +453,7 @@ export const QueryBarTopRow = React.memo(
         event.preventDefault();
 
         if (propsOnCancel) {
+          setIsCancelling(true);
           propsOnCancel();
         }
       },
@@ -539,9 +557,14 @@ export const QueryBarTopRow = React.memo(
       ]
     );
 
+    const onDraftChangeDebounced = useMemo(
+      () => (onDraftChange ? debounce(onDraftChange, 300) : undefined),
+      [onDraftChange]
+    );
+
     useEffect(() => {
-      onDraftChange?.(draft);
-    }, [onDraftChange, draft]);
+      onDraftChangeDebounced?.(draft);
+    }, [onDraftChangeDebounced, draft]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
@@ -595,6 +618,20 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
+      const timeZoneName = uiSettings.get('dateFormat:tz');
+      const timeZoneSettingTip = i18n.translate(
+        'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
+        {
+          defaultMessage: 'Time zone is set in space settings by administrators',
+        }
+      );
+      const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
+        <>
+          {nameDisplay}
+          <EuiIconTip content={timeZoneSettingTip} color="subdued" />
+        </>
+      );
+
       const datePicker = (
         <SuperDatePicker
           isDisabled={isDisabled}
@@ -616,12 +653,17 @@ export const QueryBarTopRow = React.memo(
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed
+          showTimeWindowButtons
+          timeZoneDisplayProps={{
+            timeZone: timeZoneName,
+            customRender: timeZoneCustomRender,
+          }}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return (
-        <EuiFlexItem className={wrapperClasses} css={inputStringStyles.datePickerWrapper}>
+        <EuiFlexItem className={wrapperClasses} css={styles.datePickerWrapper}>
           {component}
         </EuiFlexItem>
       );
@@ -637,13 +679,14 @@ export const QueryBarTopRow = React.memo(
             color="text"
             data-test-subj="queryCancelButton"
             iconType="cross"
+            isMainButtonLoading={isCancelling}
+            isDisabled={isCancelling}
             isSecondaryButtonDisabled={!canSendToBackground}
             isSecondaryButtonLoading={isSendingToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            // TODO: Replace when the backgroundTask icon is available in EUI
-            secondaryButtonIcon={EuiIconBackgroundTask}
+            secondaryButtonIcon="backgroundTask"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             size="s"
           >
@@ -662,6 +705,8 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
+            isLoading={isCancelling}
+            isDisabled={isCancelling}
           >
             {buttonLabelCancel}
           </EuiButtonIcon>
@@ -676,6 +721,8 @@ export const QueryBarTopRow = React.memo(
           size="s"
           data-test-subj="queryCancelButton"
           color="text"
+          isLoading={isCancelling}
+          isDisabled={isCancelling}
         >
           {buttonLabelCancel}
         </EuiButton>
@@ -707,8 +754,7 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          // TODO: Replace when the backgroundTask icon is available in EUI
-          secondaryButtonIcon={EuiIconBackgroundTask}
+          secondaryButtonIcon="backgroundTask"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           size="s"
         >
@@ -766,7 +812,18 @@ export const QueryBarTopRow = React.memo(
     function renderDataViewsPicker() {
       if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
         return (
-          <EuiFlexItem css={{ maxWidth: '100%' }} grow={isMobile}>
+          <EuiFlexItem
+            css={{
+              minWidth: 120,
+              maxWidth: isMobile ? '100%' : 'max-content',
+              ...(!isMobile && {
+                flexBasis: '120px',
+                flexGrow: 1,
+                flexShrink: 1,
+              }),
+            }}
+            grow={isMobile}
+          >
             <DataViewPicker
               {...props.dataViewPickerComponentProps}
               trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
@@ -775,18 +832,6 @@ export const QueryBarTopRow = React.memo(
           </EuiFlexItem>
         );
       }
-    }
-
-    function renderProjectPicker() {
-      // temporarily adding a local storage key to toggle the project picker visibility
-      if (props.showProjectPicker && localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
-        return (
-          <EuiFlexItem grow={isMobile}>
-            <ProjectPicker />
-          </EuiFlexItem>
-        );
-      }
-      return null;
     }
 
     function renderAddButton() {
@@ -922,12 +967,13 @@ export const QueryBarTopRow = React.memo(
                 : undefined
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
           />
         )
       );
     }
-    const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
+    const styles = useMemoCss(inputStringStyles);
 
     return (
       <>
@@ -952,7 +998,6 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {props.showProjectPicker && renderProjectPicker()}
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover

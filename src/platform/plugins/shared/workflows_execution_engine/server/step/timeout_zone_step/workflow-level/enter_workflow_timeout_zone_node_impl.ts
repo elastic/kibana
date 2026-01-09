@@ -18,27 +18,25 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private stepExecutionRuntime: StepExecutionRuntime
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
   public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public async monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
+  public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): void {
     const timeoutMs = parseDuration(this.node.timeout);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const stepExecution = this.stepExecutionRuntime.stepExecution!;
-    const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
+    const whenStepStartedTime = new Date(
+      this.wfExecutionRuntimeManager.getWorkflowExecution().startedAt
+    ).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
     if (currentStepDuration > timeoutMs) {
       const timeoutError = new Error('Failed due to workflow timeout');
       monitoredStepExecutionRuntime.abortController.abort();
-      await monitoredStepExecutionRuntime.failStep(timeoutError);
+      monitoredStepExecutionRuntime.failStep(timeoutError);
 
       let stack = monitoredStepExecutionRuntime.scopeStack;
 
@@ -53,7 +51,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
           });
 
         if (scopeStepExecutionRuntime.stepExecution) {
-          await scopeStepExecutionRuntime.failStep(timeoutError);
+          scopeStepExecutionRuntime.failStep(timeoutError);
         }
       }
 
@@ -61,7 +59,5 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
       this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }
-
-    return Promise.resolve();
   }
 }

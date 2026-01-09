@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "stripInternal": true,
@@ -42,5 +42,6 @@
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/babel-preset",
     "@kbn/dot-text",
+    "@kbn/apm-utils",
   ]
 }

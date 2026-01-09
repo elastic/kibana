@@ -5,11 +5,11 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { timerange } from '@kbn/apm-synthtrace-client';
-import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
+import { timerange } from '@kbn/synthtrace-client';
+import { service } from '@kbn/synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -81,22 +81,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let errorsSamplesResponse: ErrorGroupSamples;
       const { bananaTransaction } = config;
 
-      describe('error group id', () => {
-        before(async () => {
-          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
-          const response = await callErrorGroupSamplesApi({
-            groupId: '0000000000000000000000000Error 1',
+      [{ withoutErrorId: true }, { withoutErrorId: false }].forEach(({ withoutErrorId }) => {
+        describe(`error sample (${withoutErrorId ? 'without error id' : 'with error id'})`, () => {
+          before(async () => {
+            await generateData({ serviceName, start, end, apmSynthtraceEsClient, withoutErrorId });
+            const response = await callErrorGroupSamplesApi({
+              groupId: '0000000000000000000000000Error 1',
+            });
+            errorsSamplesResponse = response.body;
           });
-          errorsSamplesResponse = response.body;
-        });
 
-        after(() => apmSynthtraceEsClient.clean());
+          after(() => apmSynthtraceEsClient.clean());
 
-        it('displays correct number of occurrences', () => {
-          const numberOfBuckets = 15;
-          expect(errorsSamplesResponse.occurrencesCount).to.equal(
-            bananaTransaction.failureRate * numberOfBuckets
-          );
+          it('displays correct number of occurrences', () => {
+            const numberOfBuckets = 15;
+            expect(errorsSamplesResponse.occurrencesCount).to.equal(
+              bananaTransaction.failureRate * numberOfBuckets
+            );
+          });
         });
       });
     });

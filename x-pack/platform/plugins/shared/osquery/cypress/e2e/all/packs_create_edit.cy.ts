@@ -7,6 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
@@ -22,7 +23,6 @@ import {
   FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
   customActionRunSavedQuerySelector,
 } from '../../screens/packs';
-import { API_VERSIONS } from '../../../common/constants';
 import { navigateTo } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
 import { changePackActiveStatus, preparePack } from '../../tasks/packs';

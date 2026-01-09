@@ -9,11 +9,6 @@
 
 import type { EuiEmptyPromptProps } from '@elastic/eui';
 
-import type {
-  RedirectAppLinksServices,
-  RedirectAppLinksKibanaDependencies,
-} from '@kbn/shared-ux-link-redirect-app-types';
-
 /**
  * A list of services that are consumed by this component.
  */
@@ -25,7 +20,7 @@ export interface Services {
 /**
  * Services that are consumed by this component and any dependencies.
  */
-export type NoDataCardServices = Services & RedirectAppLinksServices;
+export type NoDataCardServices = Services;
 
 /**
  * An interface containing a collection of Kibana plugins and services required to
@@ -50,7 +45,7 @@ interface KibanaDependencies {
  * An interface containing a collection of Kibana plugins and services required to
  * render this component as well as any dependencies.
  */
-export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinksKibanaDependencies;
+export type NoDataCardKibanaDependencies = KibanaDependencies;
 
 /**
  * Props for the `NoDataCard` pure component.

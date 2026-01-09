@@ -134,6 +134,7 @@ export const CreatePolicyWizard = () => {
       {createError && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
               defaultMessage: 'Unable to create your policy',
             })}

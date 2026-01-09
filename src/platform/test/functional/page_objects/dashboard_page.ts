@@ -255,6 +255,9 @@ export class DashboardPageObject extends FtrService {
   public async duplicateDashboard(dashboardNameOverride?: string) {
     this.log.debug('Clicking duplicate');
 
+    if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+      await this.openSaveSplitMenu();
+    }
     await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
 
     if (dashboardNameOverride) {
@@ -358,6 +361,9 @@ export class DashboardPageObject extends FtrService {
 
   public async clickDiscardChanges(accept = true) {
     await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists('dashboardDiscardChangesMenuItem'))) {
+        await this.openSaveSplitMenu();
+      }
       await this.expectDiscardChangesButtonEnabled();
       this.log.debug('clickDiscardChanges');
       await this.testSubjects.click('dashboardDiscardChangesMenuItem');
@@ -605,6 +611,9 @@ export class DashboardPageObject extends FtrService {
     });
 
     if (!isSaveModalOpen) {
+      if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+        await this.openSaveSplitMenu();
+      }
       await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
 
@@ -639,6 +648,17 @@ export class DashboardPageObject extends FtrService {
       await this.comboBox.setElement(tagsComboBox, tagName);
     }
     await this.testSubjects.click('savedObjectTitle');
+  }
+
+  public async openSaveSplitMenu() {
+    await this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
+  }
+
+  public async clickInteractiveSave() {
+    if (await !this.testSubjects.exists('dashboardInteractiveSaveMenuItem')) {
+      await this.openSaveSplitMenu();
+    }
+    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
   }
 
   /**
@@ -690,6 +710,13 @@ export class DashboardPageObject extends FtrService {
       '[data-test-subj="embeddablePanelTitle"]'
     );
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
+  }
+
+  public async getPanelIdByTitle(title: string) {
+    const panelHoverActionsWrapper = await this.testSubjects.find(
+      `embeddablePanelHoverActions-${title}`
+    );
+    return await panelHoverActionsWrapper.getAttribute('data-test-embeddable-id');
   }
 
   /**
@@ -814,7 +841,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async verifyNoRenderErrors() {
-    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
     }

@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -20,7 +22,14 @@ import type {
 } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { PanelSelectedNode, SolutionId } from './project_navigation';
+import type { SolutionId } from './project_navigation';
+
+/**
+ * ChromeSetup exposes APIs available during the setup phase.
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ChromeSetup {}
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -81,6 +90,11 @@ export interface ChromeStart {
   setBadge(badge?: ChromeBadge): void;
 
   /**
+   * Set global footer; Meant to be used by developer toolbar
+   */
+  setGlobalFooter(node: ReactNode): void;
+
+  /**
    * Get an observable of the current list of breadcrumbs
    */
   getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
@@ -89,6 +103,36 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
+
+  /**
+   * Get an observable of the current app menu configuration
+   */
+  getAppMenu$(): Observable<AppMenuConfig | undefined>;
+
+  /**
+   * Set the app menu configuration for the current application.
+   *
+   * @example
+   *```tsx
+   * import React, { useEffect } from 'react';
+   * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+   * import { useKibana } from '@kbn/kibana-react-plugin/public';
+   *
+   * interface Props {
+   *  config: AppMenuConfig;
+   *}
+   *
+   * const Example = ({ config }: Props) => {
+   *  const { chrome } = useKibana().services;
+   *
+   *  useEffect(() => {
+   *    chrome.setAppMenu(config);
+   *  }, [chrome.setAppMenu, config]);
+   *
+   *  return <div>Hello world!</div>;
+   * };
+   */
+  setAppMenu(config?: AppMenuConfig): void;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs
@@ -184,20 +228,6 @@ export interface ChromeStart {
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
-
-    /**
-     * Get an observable of the selected nav node that opens the side nav panel.
-     */
-    getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
-
-    /**
-     * Set the selected nav node that opens the side nav panel.
-     *
-     * @param node The selected nav node that opens the side nav panel. If a string is provided,
-     * it will be used as the **id** of the selected nav node. If `null` is provided, the side nav panel
-     * will be closed.
-     */
-    setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
 
     /**
      * Get an observable of the visibility state of the feedback button in the side nav.

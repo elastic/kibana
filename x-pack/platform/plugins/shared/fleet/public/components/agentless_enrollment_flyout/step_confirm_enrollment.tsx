@@ -41,6 +41,7 @@ export const AgentlessStepConfirmEnrollment = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="success"
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText',
@@ -68,6 +69,7 @@ export const AgentlessStepConfirmEnrollment = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="danger"
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.failureText',

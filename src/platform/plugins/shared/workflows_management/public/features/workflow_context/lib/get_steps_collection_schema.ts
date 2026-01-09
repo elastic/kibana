@@ -10,7 +10,7 @@
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from '../../../../common/schema';
 
@@ -20,10 +20,7 @@ export function getStepsCollectionSchema(
   stepName: string
 ) {
   const stepId = getStepId(stepName);
-  const stepNode =
-    workflowExecutionGraph.getNode(stepId) ||
-    workflowExecutionGraph.getNode(`enterForeach_${stepId}`) ||
-    workflowExecutionGraph.getNode(`enterCondition_${stepId}`);
+  const stepNode = workflowExecutionGraph.getStepNode(stepId);
 
   if (!stepNode) {
     throw new Error(`Step with id ${stepId} not found in the workflow graph.`);

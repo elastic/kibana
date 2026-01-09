@@ -22,7 +22,7 @@ export const ElasticsearchConnectionDetails = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
+            <EuiTitle size="s">
               <h3>
                 {i18n.translate(
                   'xpack.search.gettingStarted.elasticsearchConnectionDetails.endpointLabel',

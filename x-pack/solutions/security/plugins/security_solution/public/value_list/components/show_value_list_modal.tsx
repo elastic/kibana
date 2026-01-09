@@ -6,9 +6,8 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useListsPrivileges } from '../../detections/containers/detection_engine/lists/use_lists_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ValueListModal } from './value_list_modal';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
@@ -23,9 +22,6 @@ export const ShowValueListModal = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const { canWriteIndex, canReadIndex, loading } = useListsPrivileges();
-  const isValueItemsListModalEnabled = useIsExperimentalFeatureEnabled(
-    'valueListItemsModalEnabled'
-  );
 
   const onCloseModal = useCallback(() => setShowModal(false), []);
   const onShowModal = useCallback(() => {
@@ -35,7 +31,7 @@ export const ShowValueListModal = ({
 
   if (loading) return null;
 
-  if (!canReadIndex || !isValueItemsListModalEnabled) {
+  if (!canReadIndex) {
     return shouldShowContentIfModalNotAvailable ? <>{children}</> : null;
   }
 

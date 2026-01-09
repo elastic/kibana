@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/unified-doc-viewer-examples",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/kibana-data-discovery",
   "description": "Examples showing usage of the unified doc viewer.",
   "group": "platform",
   "visibility": "private",
@@ -9,10 +9,6 @@
     "id": "unifiedDocViewerExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "developerExamples",
-      "unifiedDocViewer"
-    ]
+    "requiredPlugins": ["data", "developerExamples", "unifiedDocViewer"]
   }
 }

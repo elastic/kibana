@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionTypeConfig, ActionTypeSecrets, ValidatorServices } from '../types';
-import type { SubActionConnectorType, ValidateFn, Validators } from './types';
+import type { ExecutorParams, SubActionConnectorType, ValidateFn, Validators } from './types';
 import { ValidatorType } from './types';
-
+import type { ValidatorType as ValidationSchema } from '../types';
 export const buildValidators = <
   Config extends ActionTypeConfig,
   Secrets extends ActionTypeSecrets
@@ -20,7 +20,11 @@ export const buildValidators = <
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
   connector: SubActionConnectorType<Config, Secrets>;
-}) => {
+}): {
+  config: ValidationSchema<Config>;
+  secrets: ValidationSchema<Secrets>;
+  params: ValidationSchema<ExecutorParams>;
+} => {
   const { config, secrets } = buildCustomValidators(connector.validators);
 
   return {

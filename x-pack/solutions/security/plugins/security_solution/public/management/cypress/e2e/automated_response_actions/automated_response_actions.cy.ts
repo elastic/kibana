@@ -83,7 +83,7 @@ describe(
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
+      changeAlertsFilter(`process.name: "sshd" and agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
       cy.getByTestSubj('expand-event').first().click();

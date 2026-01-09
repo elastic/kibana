@@ -434,6 +434,7 @@ describe('PendingActionsSelector', () => {
           'upload',
           'scan',
           'runscript',
+          'memory-dump',
         ],
       },
       {

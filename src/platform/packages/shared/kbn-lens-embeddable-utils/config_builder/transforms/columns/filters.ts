@@ -24,10 +24,13 @@ export function fromFiltersLensApiToLensState(
     operationType: 'filters',
     ...shared,
     params: {
-      filters: (filters ?? []).map((filter) => ({
-        input: filter.filter,
-        label: filter.label ?? 'Filter',
-      })),
+      filters: (filters ?? [])
+        // do not propagate advanced filters within dimensions
+        .filter((filter) => filter.filter.language != null)
+        .map((filter) => ({
+          input: filter.filter,
+          label: filter.label ?? 'Filter',
+        })),
     },
   };
 }

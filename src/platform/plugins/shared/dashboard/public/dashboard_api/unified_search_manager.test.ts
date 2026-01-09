@@ -11,7 +11,6 @@ import { BehaviorSubject, Subject, take } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 describe('initializeUnifiedSearchManager', () => {
   describe('startComparing$', () => {
@@ -19,7 +18,6 @@ describe('initializeUnifiedSearchManager', () => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const unifiedSearchManager = initializeUnifiedSearchManager(
         lastSavedState$.value,
-        new BehaviorSubject<ControlGroupApi | undefined>(undefined),
         new BehaviorSubject<boolean>(false),
         new Subject<void>(),
         () => lastSavedState$.value,
@@ -38,7 +36,6 @@ describe('initializeUnifiedSearchManager', () => {
         const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
-          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
           new BehaviorSubject<boolean>(false),
           new Subject<void>(),
           () => lastSavedState$.value,
@@ -58,13 +55,9 @@ describe('initializeUnifiedSearchManager', () => {
       });
 
       test('Should return timeRanage change when timeRestore is true', (done) => {
-        const lastSavedState$ = new BehaviorSubject<DashboardState>({
-          ...getSampleDashboardState(),
-          timeRestore: true,
-        });
+        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
-          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
           new BehaviorSubject<boolean>(true),
           new Subject<void>(),
           () => lastSavedState$.value,
@@ -75,7 +68,7 @@ describe('initializeUnifiedSearchManager', () => {
         unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
           expect(changes).toMatchInlineSnapshot(`
             Object {
-              "timeRange": Object {
+              "time_range": Object {
                 "from": "now-30m",
                 "to": "now",
               },
@@ -95,7 +88,6 @@ describe('initializeUnifiedSearchManager', () => {
         const timeRestore$ = new BehaviorSubject<boolean>(false);
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
-          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
           timeRestore$,
           new Subject<void>(),
           () => lastSavedState$.value,
@@ -113,7 +105,7 @@ describe('initializeUnifiedSearchManager', () => {
             if (emitCount === 1) {
               expect(changes).toMatchInlineSnapshot(`
               Object {
-                "timeRange": Object {
+                "time_range": Object {
                   "from": "now-30m",
                   "to": "now",
                 },

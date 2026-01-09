@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -8,12 +8,14 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
+    "test/scout_cspm_agentless/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/scout-security",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/fleet-plugin",
@@ -72,7 +74,7 @@
     "@kbn/shared-ux-page-no-data",
     "@kbn/shared-ux-card-no-data",
     "@kbn/react-kibana-context-theme",
-    "@kbn/react-query",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

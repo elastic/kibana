@@ -8,17 +8,17 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable, PublishesESQLVariables } from '@kbn/esql-types';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
-  CanAddNewSection,
   CanExpandPanels,
+  CanPinPanels,
   HasLastSavedChildState,
+  HasSections,
   HasSerializedChildState,
   PassThroughContext,
   PresentationContainer,
@@ -34,10 +34,11 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesPauseFetch,
+  PublishesEditablePauseFetch,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
+  PublishesProjectRouting,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -47,15 +48,13 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardLocatorParams } from '../../common';
-import type { DashboardState, GridData } from '../../server/content_management';
-import type {
-  LoadDashboardReturn,
-  SaveDashboardReturn,
-} from '../services/dashboard_content_management_service/types';
+import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
+import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 
@@ -87,7 +86,9 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (
+    result: DashboardReadResponseBody
+  ) => 'valid' | 'invalid' | 'redirected';
 
   fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
@@ -96,7 +97,8 @@ export interface DashboardCreationOptions {
 }
 
 export type DashboardApi = CanExpandPanels &
-  CanAddNewSection &
+  CanPinPanels &
+  HasSections &
   HasAppContext &
   HasExecutionContext &
   HasLastSavedChildState &
@@ -115,13 +117,13 @@ export type DashboardApi = CanExpandPanels &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &
+  PublishesProjectRouting &
   PublishesViewMode &
   PublishesWritableViewMode &
-  PublishesPauseFetch &
+  PublishesEditablePauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
-    controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     setFocusedPanelId: (id: string | undefined) => void;
@@ -154,26 +156,43 @@ export type DashboardApi = CanExpandPanels &
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setQuery: (query?: Query | undefined) => void;
+    setProjectRouting: (projectRouting?: ProjectRouting) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+
+    publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
+    unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
+    publishFilters: () => void;
+
+    publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+    unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+    publishTimeslice: () => void;
+
+    layout$: BehaviorSubject<DashboardLayout>;
+
+    registerChildApi: (api: DefaultEmbeddableApi) => void;
+
+    accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
+    changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+    createdBy?: string;
+    user?: DashboardUser;
+    isAccessControlEnabled?: boolean;
   };
 
 export interface DashboardInternalApi {
-  controlGroupReload$: Subject<void>;
-  panelsReload$: Subject<void>;
-  layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  registerChildApi: (api: DefaultEmbeddableApi) => void;
-  setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  serializeControls: () => {
-    controlGroupInput: ControlsGroupState | undefined;
-    controlGroupReferences: Reference[];
-  };
+  publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  publishVariables: () => void;
+}
+
+export interface DashboardUser {
+  uid: string;
+  hasGlobalAccessControlPrivilege: boolean;
 }

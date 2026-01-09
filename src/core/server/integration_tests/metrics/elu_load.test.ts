@@ -10,6 +10,7 @@
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import type { Server } from '@hapi/hapi';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
@@ -34,7 +35,10 @@ describe('GET /api/_elu_load', () => {
       logger: loggingSystemMock.create(),
       configService: configServiceMock.create({ atPath: { interval: moment.duration('1s') } }),
     });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

@@ -119,7 +119,7 @@ const useStyles = () => {
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, dataViews, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const { core, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
   const styles = useStyles();
 
   useEffect(() => {
@@ -170,7 +170,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             http,
             autocompleteInfo,
             application: startServices.application,
-            dataViews,
             data,
             licensing,
           },

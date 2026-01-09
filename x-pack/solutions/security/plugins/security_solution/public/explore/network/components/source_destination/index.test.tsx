@@ -45,16 +45,24 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
-import { CellActionsWrapper } from '../../../../common/components/drag_and_drop/cell_actions_wrapper';
+import { SecurityCellActions } from '../../../../common/components/cell_actions';
 
-jest.mock('../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+jest.mock('../../../../common/components/cell_actions', () => {
   return {
-    CellActionsWrapper: jest.fn(),
+    SecurityCellActions: jest.fn(),
+    CellActionsMode: {
+      HOVER_DOWN: 'hover-down',
+      HOVER_RIGHT: 'hover-right',
+      INLINE: 'inline',
+    },
+    SecurityCellActionsTrigger: {
+      DEFAULT: 'default',
+    },
   };
 });
 
-const MockedCellActionsWrapper = jest.fn(({ children }) => {
-  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+const MockedSecurityCellActions = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
 jest.mock('../../../../common/lib/kibana');
@@ -131,7 +139,7 @@ jest.mock('react-router-dom', () => {
 
 describe('SourceDestination', () => {
   beforeEach(() => {
-    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
   });
 
   test('renders correctly against snapshot', () => {
@@ -337,9 +345,11 @@ describe('SourceDestination', () => {
   test('should passing correct scopeId to cell actions', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+    expect(MockedSecurityCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
-        scopeId: 'some_scope',
+        metadata: expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
       }),
       {}
     );

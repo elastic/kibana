@@ -835,6 +835,38 @@
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.requestHash",
+            "type": "string",
+            "tags": [],
+            "label": "requestHash",
+            "description": [
+              "\nA hash of the request params. This is attached automatically by the search interceptor. It is used to link this request with a search session."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [
+              "\nProject routing configuration for cross-project search (CPS)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -983,7 +1015,15 @@
         "signature": [
           "{ executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
+          " | undefined; projectRouting?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          "; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "deprecated": false,
@@ -1014,7 +1054,7 @@
         "label": "SanitizedConnectionRequestParams",
         "description": [],
         "signature": [
-          "{ path: string; querystring?: string | undefined; method: string; }"
+          "{ method: string; path: string; querystring?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "deprecated": false,

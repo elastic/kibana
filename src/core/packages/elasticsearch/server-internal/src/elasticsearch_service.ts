@@ -64,6 +64,8 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  // @ts-expect-error - CPS is not yet implemented
+  private cpsEnabled = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -139,6 +141,10 @@ export class ElasticsearchService
         getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
       publicBaseUrl: config.publicBaseUrl,
+      setCpsFeatureFlag: (enabled) => {
+        this.cpsEnabled = enabled;
+        this.log.info(`CPS feature flag set to ${enabled}`);
+      },
     };
   }
 
@@ -162,8 +168,11 @@ export class ElasticsearchService
         `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`,
         {
           event: {
-            type: 'kibana_started.elasticsearch.waitTime',
+            // ECS Event reference: https://www.elastic.co/docs/reference/ecs/ecs-event
+            action: 'kibana_started.elasticsearch.waitTime',
+            category: 'database',
             duration: elasticsearchWaitTime,
+            type: 'connection',
           },
         }
       );

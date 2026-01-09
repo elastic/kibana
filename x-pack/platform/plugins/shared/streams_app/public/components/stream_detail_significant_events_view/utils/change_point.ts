@@ -7,6 +7,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { StreamQueryKql } from '@kbn/streams-schema';
 import type { $Values } from 'utility-types';
 import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 import { pValueToLabel } from './p_value_to_label';
@@ -18,6 +19,7 @@ type EuiThemeColor = $Values<{
 }>;
 
 export interface FormattedChangePoint {
+  query: StreamQueryKql;
   time: number;
   impact: 'high' | 'medium' | 'low';
   p_value: number;
@@ -56,9 +58,7 @@ function getImpactProperties(impact: FormattedChangePoint['impact']): {
   };
 }
 
-export function formatChangePoint(
-  item: Omit<SignificantEventItem, 'query' | 'title'>
-): FormattedChangePoint | undefined {
+export function formatChangePoint(item: SignificantEventItem): FormattedChangePoint | undefined {
   const type = Object.keys(item.change_points.type)[0] as keyof typeof item.change_points.type;
 
   const isChange = type && type !== 'stationary' && type !== 'non_stationary';
@@ -82,6 +82,7 @@ export function formatChangePoint(
     ? {
         ...change,
         ...getImpactProperties(change.impact),
+        query: item.query,
       }
     : undefined;
 }

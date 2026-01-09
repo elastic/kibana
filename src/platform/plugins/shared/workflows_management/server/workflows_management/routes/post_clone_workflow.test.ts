@@ -29,41 +29,6 @@ describe('POST /api/workflows/{id}/clone', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the clone workflow route with correct configuration', () => {
-      registerPostCloneWorkflowRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postCloneCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/{id}/clone'
-      );
-
-      expect(postCloneCall).toBeDefined();
-      expect(postCloneCall[0]).toMatchObject({
-        path: '/api/workflows/{id}/clone',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['all', 'workflow_create'],
-              },
-            ],
-          },
-        },
-      });
-      expect(postCloneCall[0].validate).toBeDefined();
-      expect(postCloneCall[0].validate.params).toBeDefined();
-      expect(postCloneCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

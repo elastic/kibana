@@ -117,8 +117,10 @@ export const useFetchSessionViewProcessEvents = (
         }
       },
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      refetchOnMount: 'always',
       refetchOnReconnect: false,
+      cacheTime: 0,
+      staleTime: 0,
     }
   );
 

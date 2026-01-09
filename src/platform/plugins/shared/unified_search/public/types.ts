@@ -21,6 +21,7 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
@@ -48,6 +49,7 @@ export interface UnifiedSearchStartDependencies {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   screenshotMode?: ScreenshotModePluginStart;
+  cps: CPSPluginStart;
 }
 
 type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
@@ -113,4 +115,5 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  cps: CPSPluginStart;
 }

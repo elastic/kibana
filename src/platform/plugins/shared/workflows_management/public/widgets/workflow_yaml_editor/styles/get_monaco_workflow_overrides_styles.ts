@@ -26,6 +26,10 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       max-height: 400px;
       font-size: 13px;
       z-index: 999;
+      border-radius: 6px !important;
+      ${euiShadow(euiThemeContext, 'm')}
+      border-width: 0 !important;
+      overflow: hidden !important;
     }
 
     .monaco-editor
@@ -127,6 +131,10 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       width: calc(${euiTheme.size.s} * 0.75) !important;
       border-radius: ${euiTheme.border.radius.medium} !important;
       margin-right: 2px;
+    }
+
+    .monaco-editor .suggest-widget .monaco-list .monaco-list-row .suggest-icon {
+      color: ${euiTheme.colors.textParagraph} !important;
     }
   `;
 };

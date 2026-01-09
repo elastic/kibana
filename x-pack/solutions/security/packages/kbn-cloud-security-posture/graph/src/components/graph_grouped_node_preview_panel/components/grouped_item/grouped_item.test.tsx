@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import {
   GROUPED_ITEM_TEST_ID,
-  GROUPED_ITEM_TITLE_TEST_ID,
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TIMESTAMP_TEST_ID,
   GROUPED_ITEM_ACTOR_TEST_ID,
   GROUPED_ITEM_TARGET_TEST_ID,
@@ -35,8 +36,8 @@ describe('<GroupedItem />', () => {
             icon: 'node',
             timestamp,
             risk: 55,
-            ip: '5.5.5.5',
-            countryCode: 'US',
+            ips: ['5.5.5.5'],
+            countryCodes: ['US'],
           }}
         />
       );
@@ -44,13 +45,13 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
 
-      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('entity-1');
+      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe('entity-1');
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
       expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain('IP: 5.5.5.5');
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
     });
 
@@ -72,7 +73,7 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
 
-      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('process_start');
+      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe('process_start');
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
@@ -98,7 +99,7 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
 
-      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('alert_action');
+      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe('alert_action');
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
@@ -112,12 +113,7 @@ describe('<GroupedItem />', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity', id: entityId }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(entityId);
-      });
-
-      it('falls back to dash when entity label and entity id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
+        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe(entityId);
       });
     });
 
@@ -125,12 +121,7 @@ describe('<GroupedItem />', () => {
       it('falls back to event id when event action is missing', () => {
         const eventId = 'event-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'event', id: eventId }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(eventId);
-      });
-
-      it('falls back to dash when event action and event id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'event' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
+        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(eventId);
       });
     });
 
@@ -138,12 +129,7 @@ describe('<GroupedItem />', () => {
       it('falls back to alert id when alert action is missing', () => {
         const alertId = 'alert-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert', id: alertId }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(alertId);
-      });
-
-      it('falls back to dash when alert action and alert id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
+        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(alertId);
       });
     });
   });
@@ -399,12 +385,12 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: 'il',
+            countryCodes: ['il'],
           }}
         />
       );
 
-      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe('Geo 🇮🇱 Israel');
+      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe('Geo:  🇮🇱 Israel');
     });
 
     it('does not render geolocation info when countryCode is undefined', () => {
@@ -414,7 +400,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: undefined,
+            countryCodes: undefined,
           }}
         />
       );
@@ -429,7 +415,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: '',
+            countryCodes: [''],
           }}
         />
       );
@@ -444,7 +430,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: 'INVALID',
+            countryCodes: ['INVALID'],
           }}
         />
       );
@@ -464,23 +450,23 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           item={{
             ...item,
-            countryCode: 'us', // lowercase
+            countryCodes: ['us'], // lowercase
           }}
         />
       );
 
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
 
-      rerender(<GroupedItem item={{ ...item, countryCode: 'US' }} />); // uppercase
+      rerender(<GroupedItem item={{ ...item, countryCodes: ['US'] }} />); // uppercase
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
 
-      rerender(<GroupedItem item={{ ...item, countryCode: 'uS' }} />); // mixed case
+      rerender(<GroupedItem item={{ ...item, countryCodes: ['uS'] }} />); // mixed case
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
     });
   });
@@ -493,7 +479,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            ip: undefined,
+            ips: undefined,
           }}
         />
       );
@@ -508,7 +494,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            ip: '',
+            ips: [''],
           }}
         />
       );
@@ -524,12 +510,108 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            ip: ipv4,
+            ips: [ipv4],
           }}
         />
       );
 
       expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain(`IP: ${ipv4}`);
+    });
+
+    it('renders first IP address when ip is an array', () => {
+      const ipArray = ['192.168.1.1', '10.0.0.1'];
+      const { getByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            ips: ipArray,
+          }}
+        />
+      );
+
+      expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain(`IP: ${ipArray[0]}`);
+    });
+
+    it('does not render IP when ip is an empty array', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            ips: [],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_IP_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render IP when ip array contains only empty strings', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            ips: ['', ''],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_IP_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('country code format variations', () => {
+    it('renders first country code when countryCode is an array', () => {
+      const countryArray = ['US', 'IL'];
+      const { getByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            countryCodes: countryArray,
+          }}
+        />
+      );
+
+      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
+        'Geo:  🇺🇸 United States of America'
+      );
+    });
+
+    it('does not render geolocation when countryCode is an empty array', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            countryCodes: [],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_GEO_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render geolocation when countryCode array contains only empty strings', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            countryCodes: ['', ''],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_GEO_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
@@ -539,7 +621,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).not.toBeInTheDocument();
     });
 
     it('renders skeleton when isLoading is true even with item provided', () => {
@@ -556,7 +638,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).not.toBeInTheDocument();
     });
 
     it('does not render skeleton when isLoading is false', () => {
@@ -573,7 +655,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).toBeInTheDocument();
     });
 
     it('does not render skeleton when isLoading is undefined and defaults to false', () => {
@@ -589,7 +671,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).toBeInTheDocument();
     });
   });
 

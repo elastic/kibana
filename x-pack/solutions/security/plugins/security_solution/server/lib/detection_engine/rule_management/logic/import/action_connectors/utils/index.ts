@@ -33,6 +33,12 @@ export const mapSOErrorToBulkError = (error: SavedObjectsImportFailure): BulkErr
         statusCode: 400,
         message: 'Missing SO references',
       });
+    case 'unexpected_access_control_metadata':
+      return createBulkErrorObject({
+        id: error.id,
+        statusCode: 400,
+        message: 'Unexpected access control metadata for object type',
+      });
     case 'unknown':
       return createBulkErrorObject({
         id: error.id,

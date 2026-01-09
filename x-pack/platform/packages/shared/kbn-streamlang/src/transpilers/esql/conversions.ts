@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import type { ESQLAstCommand } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
@@ -16,8 +16,16 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  MathProcessor,
   RenameProcessor,
   SetProcessor,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
+  DropDocumentProcessor,
+  ReplaceProcessor,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -27,6 +35,12 @@ import { convertDateProcessorToESQL } from './processors/date';
 import { convertDissectProcessorToESQL } from './processors/dissect';
 import { convertGrokProcessorToESQL } from './processors/grok';
 import { convertConvertProcessorToESQL } from './processors/convert';
+import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_prefix';
+import { convertRemoveProcessorToESQL } from './processors/remove';
+import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
+import { convertReplaceProcessorToESQL } from './processors/replace';
+import { convertMathProcessorToESQL } from './processors/math';
+import { createTransformStringESQL } from './transform_string';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -50,6 +64,33 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'grok':
       return convertGrokProcessorToESQL(processor as GrokProcessor);
+
+    case 'math':
+      return convertMathProcessorToESQL(processor as MathProcessor);
+
+    case 'remove_by_prefix':
+      return convertRemoveByPrefixProcessorToESQL(processor as RemoveByPrefixProcessor);
+
+    case 'remove':
+      return convertRemoveProcessorToESQL(processor as RemoveProcessor);
+
+    case 'drop_document':
+      return convertDropDocumentProcessorToESQL(processor as DropDocumentProcessor);
+
+    case 'replace':
+      return convertReplaceProcessorToESQL(processor as ReplaceProcessor);
+
+    case 'uppercase':
+      const convertUppercaseProcessorToESQL = createTransformStringESQL('TO_UPPER');
+      return convertUppercaseProcessorToESQL(processor as UppercaseProcessor);
+
+    case 'lowercase':
+      const convertLowercaseProcessorToESQL = createTransformStringESQL('TO_LOWER');
+      return convertLowercaseProcessorToESQL(processor as LowercaseProcessor);
+
+    case 'trim':
+      const convertTrimProcessorToESQL = createTransformStringESQL('TRIM');
+      return convertTrimProcessorToESQL(processor as TrimProcessor);
 
     case 'manual_ingest_pipeline':
       return [

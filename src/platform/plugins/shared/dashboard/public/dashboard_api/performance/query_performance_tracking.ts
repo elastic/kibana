@@ -22,6 +22,7 @@ import {
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
@@ -160,4 +161,5 @@ function reportPerformanceMetrics({
 
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);
   clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.PANEL);
+  performance.clearMarks(DASHBOARD_DURATION_START_MARK);
 }

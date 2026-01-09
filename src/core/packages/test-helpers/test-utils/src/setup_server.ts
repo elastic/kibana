@@ -18,6 +18,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 const defaultCoreId = Symbol('core');
 
@@ -45,7 +46,10 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   const coreContext = createCoreContext({ coreId });
   const contextService = new ContextService(coreContext);
   const server = new HttpService(coreContext);
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
   const httpSetup = await server.setup({
     context: contextService.setup({ pluginDependencies: new Map() }),
     executionContext: executionContextServiceMock.createInternalSetupContract(),

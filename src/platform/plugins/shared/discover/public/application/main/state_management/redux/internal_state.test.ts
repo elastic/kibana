@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { ExistenceFetchStatus } from '@kbn/unified-field-list';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
   createInternalStateStore,
@@ -82,7 +84,7 @@ describe('InternalStateStore', () => {
     expect(tabsState.unsafeCurrentId).not.toBe(initialTabId);
     expect(tabsState.unsafeCurrentId).toBe(tabsState.allIds[1]);
     expect(tabsState.byId[tabsState.unsafeCurrentId].label).toBe(params.tabLabel);
-    expect(tabsState.byId[tabsState.unsafeCurrentId].initialAppState).toEqual(params.appState);
+    expect(tabsState.byId[tabsState.unsafeCurrentId].appState).toEqual(params.appState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].initialInternalState).toEqual({
       searchSessionId: params.searchSessionId,
@@ -99,5 +101,102 @@ describe('InternalStateStore', () => {
       internalStateActions.setControlGroupState({ tabId, controlGroupState: mockControlState })
     );
     expect(selectTab(store.getState(), tabId).controlGroupState).toEqual(mockControlState);
+  });
+
+  it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {
+    const { store } = await createTestStore();
+    const initialTabId = store.getState().tabs.unsafeCurrentId;
+    expect(store.getState().tabs.allIds).toHaveLength(1);
+    expect(store.getState().tabs.unsafeCurrentId).toBe(initialTabId);
+    const items = Array.from({ length: 3 }).map((_, index) => ({
+      id: `tab${index}`,
+      label: `Tab ${index}`,
+    }));
+    const testInfo = {
+      fetchStatus: ExistenceFetchStatus.succeeded,
+      existingFieldsByFieldNameMap: { bytes: true },
+      numberOfFetches: 1,
+      newFields: undefined,
+    };
+    await store.dispatch(
+      internalStateActions.updateTabs({
+        items,
+        selectedItem: items[0],
+      })
+    );
+    expect(store.getState().tabs.unsafeCurrentId).toBe(items[0].id);
+    items.forEach((item, index) => {
+      store.dispatch(
+        internalStateActions.setFieldListUiState({
+          tabId: item.id,
+          fieldListUiState: { nameFilter: `field${index}` },
+        })
+      );
+      store.dispatch(
+        internalStateActions.setFieldListExistingFieldsInfoUiState({
+          tabId: item.id,
+          fieldListExistingFieldsInfo: {
+            dataViewId: 'logstash-*',
+            dataViewHash: 'logstash-*:logstash-*:time:false:28',
+            info: testInfo,
+          },
+        })
+      );
+    });
+
+    store.dispatch(
+      internalStateActions.setFieldListExistingFieldsInfoUiState({
+        tabId: items[1].id,
+        fieldListExistingFieldsInfo: {
+          dataViewId: 'another-data-view',
+          dataViewHash: 'another-data-view:another-data-view:time:false:28',
+          info: testInfo,
+        },
+      })
+    );
+
+    store.dispatch(
+      internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({
+        dataViewId: 'logstash-*',
+      })
+    );
+
+    const tabsState = store.getState().tabs;
+    expect(tabsState.allIds).toHaveLength(3);
+    expect(tabsState.byId[items[0].id].uiState).toMatchInlineSnapshot(`
+      Object {
+        "fieldList": Object {
+          "nameFilter": "field0",
+        },
+        "fieldListExistingFieldsInfo": undefined,
+      }
+    `);
+    expect(tabsState.byId[items[1].id].uiState).toMatchInlineSnapshot(`
+      Object {
+        "fieldList": Object {
+          "nameFilter": "field1",
+        },
+        "fieldListExistingFieldsInfo": Object {
+          "dataViewHash": "another-data-view:another-data-view:time:false:28",
+          "dataViewId": "another-data-view",
+          "info": Object {
+            "existingFieldsByFieldNameMap": Object {
+              "bytes": true,
+            },
+            "fetchStatus": "succeeded",
+            "newFields": undefined,
+            "numberOfFetches": 1,
+          },
+        },
+      }
+    `);
+    expect(tabsState.byId[items[2].id].uiState).toMatchInlineSnapshot(`
+      Object {
+        "fieldList": Object {
+          "nameFilter": "field2",
+        },
+        "fieldListExistingFieldsInfo": undefined,
+      }
+    `);
   });
 });

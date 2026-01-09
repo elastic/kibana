@@ -67,7 +67,6 @@ import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
-import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
 import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
@@ -113,8 +112,12 @@ export class ObservabilityAIAssistantClient {
   ) {}
 
   private getConversationWithMetaFields = async (
-    conversationId: string
+    conversationId: string | undefined
   ): Promise<SearchHit<Conversation> | undefined> => {
+    if (!conversationId) {
+      return undefined;
+    }
+
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: resourceNames.writeIndexAlias.conversations,
       query: {
@@ -213,10 +216,19 @@ export class ObservabilityAIAssistantClient {
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?: boolean;
-  }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
+  }): {
+    response$: Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>;
+    getConversation: () => Promise<ConversationCreateRequest>;
+  } => {
     return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-      const conversationId = persist ? predefinedConversationId || v4() : '';
+      const conversationId = persist ? predefinedConversationId || v4() : undefined;
+      let resolveConversationRequest: (value: ConversationCreateRequest | undefined) => void;
+      const conversationRequestPromise = new Promise<ConversationCreateRequest | undefined>(
+        (resolve) => {
+          resolveConversationRequest = resolve;
+        }
+      );
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         const { namespace } = this.dependencies;
@@ -375,7 +387,22 @@ export class ObservabilityAIAssistantClient {
                     // on the function response to have a valid conversation
                     const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                    if (!persist || isFunctionRequest) {
+                    const conversationCreateRequest: ConversationCreateRequest = {
+                      '@timestamp': new Date().toISOString(),
+                      conversation: {
+                        title,
+                        id: conversationId,
+                      },
+                      public: !!isPublic,
+                      labels: {},
+                      numeric_labels: {},
+                      systemMessage,
+                      messages: deanonymizedMessages,
+                      archived: false,
+                    };
+
+                    if (!persist || !conversationId || isFunctionRequest) {
+                      resolveConversationRequest(conversationCreateRequest);
                       return of();
                     }
 
@@ -403,6 +430,7 @@ export class ObservabilityAIAssistantClient {
                         )
                       ).pipe(
                         map((conversationUpdated): ConversationUpdateEvent => {
+                          resolveConversationRequest(conversationUpdated);
                           return {
                             conversation: conversationUpdated.conversation,
                             type: StreamingChatResponseEventType.ConversationUpdate,
@@ -411,22 +439,9 @@ export class ObservabilityAIAssistantClient {
                       );
                     }
 
-                    return from(
-                      this.create({
-                        '@timestamp': new Date().toISOString(),
-                        conversation: {
-                          title,
-                          id: conversationId,
-                        },
-                        public: !!isPublic,
-                        labels: {},
-                        numeric_labels: {},
-                        systemMessage,
-                        messages: deanonymizedMessages,
-                        archived: false,
-                      })
-                    ).pipe(
+                    return from(this.create(conversationCreateRequest)).pipe(
                       map((conversationCreated): ConversationCreateEvent => {
+                        resolveConversationRequest(conversationCreated);
                         return {
                           conversation: conversationCreated.conversation,
                           type: StreamingChatResponseEventType.ConversationCreate,
@@ -441,7 +456,7 @@ export class ObservabilityAIAssistantClient {
         })
       );
 
-      return output$.pipe(
+      const response$ = output$.pipe(
         catchError((error) => {
           this.dependencies.logger.error(error);
           return throwError(() => error);
@@ -467,6 +482,24 @@ export class ObservabilityAIAssistantClient {
         }),
         shareReplay()
       );
+
+      return {
+        response$,
+        getConversation: async () => {
+          const subscription = response$.subscribe();
+
+          try {
+            const response = await conversationRequestPromise;
+            if (!response) {
+              throw new Error('Failed to generate conversation response');
+            }
+
+            return response;
+          } finally {
+            subscription.unsubscribe();
+          }
+        },
+      };
     });
   };
 
@@ -544,7 +577,6 @@ export class ObservabilityAIAssistantClient {
         })
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(

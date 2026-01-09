@@ -21,8 +21,16 @@ export function extractDashboardState(
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 
-    const controlGroupState = extractControlGroupState(stateAsObject);
+    const { controlGroupState, autoApplyFilters } = extractControlGroupState(stateAsObject);
+
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
+    if (
+      dashboardState.options?.auto_apply_filters === undefined &&
+      typeof autoApplyFilters === 'boolean'
+    ) {
+      // >9.4 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+      dashboardState.options = { ...dashboardState.options, auto_apply_filters: autoApplyFilters };
+    }
 
     if (typeof stateAsObject.description === 'string') {
       dashboardState.description = stateAsObject.description;
@@ -30,10 +38,6 @@ export function extractDashboardState(
 
     if (Array.isArray(stateAsObject.tags)) {
       dashboardState.tags = stateAsObject.tags;
-    }
-
-    if (typeof stateAsObject.timeRestore === 'boolean') {
-      dashboardState.timeRestore = stateAsObject.timeRestore;
     }
 
     if (typeof stateAsObject.title === 'string') {

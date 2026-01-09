@@ -168,6 +168,7 @@ export const basicCaseFields: CaseAttributes = {
   category: null,
   customFields: [],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 };
 

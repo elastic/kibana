@@ -40,6 +40,7 @@ exports[`FeatureProperties should render 1`] = `
 
 exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   color="danger"
   iconType="warning"
   size="s"

@@ -7,7 +7,6 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 
 export const getDestinationIpColor = (euiTheme: EuiThemeComputed) =>
-  euiTheme.flags.hasVisColorAdjustment ? '#9170b8' : euiTheme.colors.vis.euiColorVis2;
+  euiTheme.colors.vis.euiColorVis2;
 
-export const getSourceIpColor = (euiTheme: EuiThemeComputed) =>
-  euiTheme.flags.hasVisColorAdjustment ? '#d36186' : euiTheme.colors.vis.euiColorVis4;
+export const getSourceIpColor = (euiTheme: EuiThemeComputed) => euiTheme.colors.vis.euiColorVis4;
