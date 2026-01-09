@@ -78,7 +78,7 @@ export const useFetchSignificantEvents = (
           },
           signal: signal ?? null,
         })
-      : streamsRepositoryClient.fetch('GET /api/streams/significant_events 2023-10-31', {
+      : streamsRepositoryClient.fetch('GET /api/streams/_significant_events 2023-10-31', {
           params: {
             query: {
               from: isoFrom,

@@ -99,7 +99,7 @@ const previewSignificantEventsRoute = createServerRoute({
 });
 
 const readAllSignificantEventsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/significant_events 2023-10-31',
+  endpoint: 'GET /api/streams/_significant_events 2023-10-31',
   params: z.object({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
   }),
