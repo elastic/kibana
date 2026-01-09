@@ -16,8 +16,8 @@ import merge from 'lodash/merge';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import type { Package } from '@kbn/repo-packages';
-import type { PackageManifestBaseFields } from '@kbn/repo-packages/modern/types';
 import { getPackages } from '@kbn/repo-packages';
+import type { PackageManifestBaseFields } from '@kbn/repo-packages/modern/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
@@ -180,14 +180,17 @@ function applyTsConfigSettings(
   projectConfig: MoonProjectConfig,
   { tsConfigPath, allPackageIds, includeDependencies }: ApplyTsConfigParams
 ) {
-  if (!fs.existsSync(tsConfigPath)) {
-    projectConfig.language = 'javascript';
-    logger.warning(`Skipping ${projectConfig.id} - no tsconfig.json found.`);
+  if (!hasSourceRoot(projectConfig)) {
+    logger.warning('Skipping tsconfig settings - no sourceRoot found in project metadata');
     return;
   }
 
-  if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping tsconfig settings - no sourceRoot found in project metadata');
+  if (!fs.existsSync(tsConfigPath)) {
+    projectConfig.language = 'javascript';
+    logger.warning(`Skipping ${projectConfig.id} - no tsconfig.json found.`);
+    projectConfig.fileGroups = {
+      [MOON_CONST.FILE_GROUP_SRC]: ['**/*.{js,jsx,mjs,cjs}'],
+    };
     return;
   }
 

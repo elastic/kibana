@@ -6,4 +6,10 @@ fileGroups:
     - "/tsconfig.base.json"
     - "/tsconfig.browser.json"
 
-tasks: {}
+tasks:
+  regenerate-moon-config:
+    script: |
+      node scripts/regenerate_moon_projects.js --update --filter $MOON_PROJECT_ID
+    options:
+      runFromWorkspaceRoot: true
+      cache: false
