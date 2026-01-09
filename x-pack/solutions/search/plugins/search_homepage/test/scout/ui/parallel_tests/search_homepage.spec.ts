@@ -198,35 +198,32 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
   });
 
   // === Alternate Solutions ===
-  // Stateful (ESS): "Create an Observability space" - navigates internally
-  test(
-    'renders Observability section with space link',
-    { tag: ['@ess'] },
-    async ({ pageObjects, page }) => {
-      const observabilitySection = await pageObjects.homepage.getObservabilitySection();
-      await expect(observabilitySection).toBeVisible();
+  test('renders Observability section', async ({ pageObjects }) => {
+    const observabilitySection = await pageObjects.homepage.getObservabilitySection();
+    await expect(observabilitySection).toBeVisible();
+  });
 
-      const createSpaceLink = await pageObjects.homepage.getCreateObservabilitySpaceLink();
-      await expect(createSpaceLink).toBeVisible();
+  test('renders Observability space link and navigates correctly', async ({
+    pageObjects,
+    page,
+    config,
+  }) => {
+    test.skip(config.serverless, 'This test only runs in stateful (ESS)');
 
-      await pageObjects.homepage.clickCreateObservabilitySpaceLink();
-      await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
-    }
-  );
+    const createSpaceLink = await pageObjects.homepage.getCreateObservabilitySpaceLink();
+    await expect(createSpaceLink).toBeVisible();
 
-  // Serverless: "Create an Observability project" - external link to cloud
-  test(
-    'renders Observability section with project link',
-    { tag: ['@svlSearch'] },
-    async ({ pageObjects }) => {
-      const observabilitySection = await pageObjects.homepage.getObservabilitySection();
-      await expect(observabilitySection).toBeVisible();
+    await pageObjects.homepage.clickCreateObservabilitySpaceLink();
+    await expect(page).toHaveURL(/management\/kibana\/spaces\/create/);
+  });
 
-      const createProjectLink = await pageObjects.homepage.getCreateObservabilityProjectLink();
-      await expect(createProjectLink).toBeVisible();
-      await expect(createProjectLink).toHaveAttribute('href', /projects/);
-    }
-  );
+  test('renders Observability project link', async ({ pageObjects, config }) => {
+    test.skip(!config.serverless, 'This test only runs in serverless');
+
+    const createProjectLink = await pageObjects.homepage.getCreateObservabilityProjectLink();
+    await expect(createProjectLink).toBeVisible();
+    await expect(createProjectLink).toHaveAttribute('href', /projects/);
+  });
 
   test('renders Security content and navigates correctly', async ({ pageObjects, page }) => {
     const securitySection = await pageObjects.homepage.getSecuritySection();
