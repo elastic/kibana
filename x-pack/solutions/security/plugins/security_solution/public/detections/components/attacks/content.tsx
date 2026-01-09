@@ -170,6 +170,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           dataView={dataView}
           statusFilter={statusFilter}
           pageFilters={pageFilters}
+          assignees={assignees}
           clearPageFilters={clearPageFilters}
           openSchedulesFlyout={openSchedulesFlyout}
         />

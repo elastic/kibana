@@ -43,6 +43,13 @@ const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsContainer = EmptyResultsContainer as unknown as jest.Mock;
 
+const defaultProps: Parameters<typeof TableSection>[0] = {
+  assignees: [],
+  pageFilters: [],
+  statusFilter: [],
+  dataView,
+};
+
 describe('<TableSection />', () => {
   const openSchedulesFlyout = jest.fn();
   const clearPageFilters = jest.fn();
