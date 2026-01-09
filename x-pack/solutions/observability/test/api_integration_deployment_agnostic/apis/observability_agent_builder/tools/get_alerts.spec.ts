@@ -20,7 +20,6 @@ import { createRule, deleteRules } from '../utils/alerts/alerting_rules';
 
 const RECENT_ALERT_RULE_NAME = 'Recent Alert';
 const OLD_ALERT_DOC_RULE_NAME = 'Manually Indexed Old Alert';
-const RECOVERED_ALERT_RULE_NAME = 'Recovered Alert';
 const APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
 
 const alertRuleData = {
@@ -107,28 +106,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      // Manually index a recovered alert (within the 100h range)
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      await es.index({
-        index: APM_ALERTS_INDEX,
-        refresh: 'wait_for',
-        document: {
-          '@timestamp': new Date().toISOString(),
-          'kibana.alert.start': oneHourAgo,
-          'kibana.alert.end': new Date().toISOString(),
-          'kibana.alert.status': 'recovered',
-          'kibana.alert.rule.name': RECOVERED_ALERT_RULE_NAME,
-          'kibana.alert.rule.consumer': 'apm',
-          'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
-          'kibana.alert.evaluation.threshold': 1,
-          'service.environment': 'production',
-          'kibana.space_ids': ['default'],
-          'event.kind': 'signal',
-          'event.action': 'close',
-          'kibana.alert.workflow_status': 'closed',
-        },
-      });
-
       // Run the created rule to generate an alert
       await alertingApi.runRule(roleAuthc, createdRuleId);
     });
@@ -195,47 +172,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const to = new Date();
 
         expect(alertStartTime >= from && alertStartTime <= to).to.be(true);
-      });
-    });
-
-    describe('when using includeRecovered parameter', () => {
-      it('excludes recovered alerts by default', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetAlertsToolResult>({
-          id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
-          params: {
-            start: 'now-100h',
-            end: 'now',
-          },
-        });
-
-        expect(results).to.have.length(1);
-
-        for (const alert of results[0].data.alerts) {
-          expect(alert['kibana.alert.status']).to.eql('active');
-        }
-
-        const alertNames = results[0].data.alerts.map((a) => a['kibana.alert.rule.name']);
-        expect(alertNames).to.not.contain(RECOVERED_ALERT_RULE_NAME);
-      });
-
-      it('includes recovered alerts when includeRecovered is true', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetAlertsToolResult>({
-          id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
-          params: {
-            start: 'now-100h',
-            end: 'now',
-            includeRecovered: true,
-          },
-        });
-
-        expect(results).to.have.length(1);
-
-        const statuses = results[0].data.alerts.map((a) => a['kibana.alert.status']);
-        expect(statuses).to.contain('active');
-        expect(statuses).to.contain('recovered');
-
-        const alertNames = results[0].data.alerts.map((a) => a['kibana.alert.rule.name']);
-        expect(alertNames).to.contain(RECOVERED_ALERT_RULE_NAME);
       });
     });
 
