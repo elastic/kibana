@@ -13,8 +13,8 @@ import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
-import { getPreferredDocumentSource } from '../get_trace_metrics';
 import { getOutcomeAggregation } from '../../../lib/helpers/transaction_error_rate';
+import { getPreferredDocumentSource } from '../../utils/get_preferred_document_source';
 
 interface ChangePointDetails {
   change_point?: number;
