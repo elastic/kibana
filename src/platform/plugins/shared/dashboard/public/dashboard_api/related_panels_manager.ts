@@ -76,7 +76,7 @@ export const initializeRelatedPanelsManager = (
 
         if (apiAppliesFilters(child)) {
           nextSectionEntry.appliesFilters.add(child.uuid);
-          if (apiHasUseGlobalFiltersSetting(child) && child.useGlobalFilters$.value === true)
+          if (apiHasUseGlobalFiltersSetting(child) && child.useGlobalFilters$.value)
             uuidsUsingGlobalFilters.add(child.uuid);
         } else {
           nextSectionEntry.doesNotApplyFilters.add(child.uuid);
