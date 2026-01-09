@@ -179,11 +179,14 @@ describe('WHERE Autocomplete', () => {
       );
     });
 
-    test('after logical operator inside function', async () => {
-      await whereExpectSuggestions(`from a | where CASE(doubleField > 1 AND `, [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
-      ]);
+    test('after chained logical operator inside function', async () => {
+      await whereExpectSuggestions(
+        `from a | where CASE(doubleField < 1 AND doubleField > 2 OR doubleField == 3 AND `,
+        [
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+        ]
+      );
     });
 
     test('after a logical operator numeric', async () => {

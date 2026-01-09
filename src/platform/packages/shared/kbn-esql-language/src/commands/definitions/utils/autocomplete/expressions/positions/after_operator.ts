@@ -35,8 +35,8 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
   }
 
   const rightmostOperator = getRightmostOperatorInFunctionTree(expressionRoot as ESQLFunction);
-  // Dispatch with rightmostOperator to handle special operators (IN, LIKE, IS NULL)
-  // even when nested inside binary expressions like AND/OR
+  // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
+  // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
   const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
 
   const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
