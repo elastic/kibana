@@ -58,6 +58,7 @@ export function wrapAsMonacoMessages(
       endColumn: endPosition.column + 1,
       endLineNumber: endPosition.lineNumber,
       severity: convertSeverityToMonacoKind(e.type),
+      underlinedWarning: e.underlinedWarning,
       _source: 'client' as const,
     };
   });

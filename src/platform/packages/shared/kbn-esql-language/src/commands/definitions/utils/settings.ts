@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../types';
-import { isBinaryExpression, isIdentifier, withAutoSuggest } from '../../../..';
+import { isBinaryExpression, isIdentifier, isStringLiteral, withAutoSuggest } from '../../../..';
 import { UnmappedFieldsTreatment, type ISuggestionItem } from '../../registry/types';
 import { SuggestionCategory } from '../../../shared/sorting/types';
 import { settings } from '../generated/settings';
@@ -45,7 +45,7 @@ export function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
   const rigthSide = isBinaryExpression(settingArg) ? settingArg.args[1] : undefined;
 
   const settingName = isIdentifier(leftSide) ? leftSide.text : undefined;
-  const settingValue = isIdentifier(rigthSide) ? rigthSide.text : undefined;
+  const settingValue = isStringLiteral(rigthSide) ? rigthSide.valueUnquoted : undefined;
 
   return {
     settingName,
@@ -61,11 +61,12 @@ export function getUnmappedFieldsTreatment(
   headers: ESQLAstHeaderCommand[]
 ): UnmappedFieldsTreatment {
   let unmappedFieldsTreatment: UnmappedFieldsTreatment = UnmappedFieldsTreatment.FAIL;
+
   headers.forEach((comand) => {
-    if (comand.name.toLowerCase() === 'set') {
+    if (comand.name.toUpperCase() === 'SET') {
       const { settingName, settingValue } = getSettingData(comand as ESQLAstSetHeaderCommand);
-      if (settingName === 'unmapped_fields') {
-        switch (settingValue) {
+      if (settingName?.toUpperCase() === 'UNMAPPED_FIELDS') {
+        switch (settingValue?.toUpperCase()) {
           case 'NULLIFY':
             unmappedFieldsTreatment = UnmappedFieldsTreatment.NULLIFY;
             break;

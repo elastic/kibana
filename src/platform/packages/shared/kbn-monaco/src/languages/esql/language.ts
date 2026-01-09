@@ -36,7 +36,10 @@ const removeKeywordSuffix = (name: string) => {
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
-export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
+export type MonacoMessage = monaco.editor.IMarkerData & {
+  code: string;
+  underlinedWarning?: boolean;
+};
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{

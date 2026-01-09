@@ -760,14 +760,14 @@ const ESQLEditorInternal = function ESQLEditor({
         allWarnings = [...parserWarnings, ...externalErrorsParsedWarnings];
       }
 
+      const unerlinedWarnings = allWarnings.filter((warning) => warning.underlinedWarning);
+      const underlinedMessages = [...allErrors, ...unerlinedWarnings];
       const markers = [];
 
-      if (allErrors.length) {
-        if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(allErrors));
-        } else {
-          markers.push(...allErrors);
-        }
+      if (dataErrorsControl?.enabled === false) {
+        markers.push(...filterDataErrors(underlinedMessages));
+      } else {
+        markers.push(...underlinedMessages);
       }
 
       if (active) {

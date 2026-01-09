@@ -31,10 +31,10 @@ export class ColumnValidator {
     const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
 
     if (!this.exists) {
-      if (unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
+      if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
         return [errors.unknownColumn(this.column)];
       } else {
-        return [errors.unknownColumnWarning(this.column)];
+        return [errors.unmappedFieldWarning(this.column)];
       }
     }
 

@@ -212,6 +212,7 @@ function validateCommand(
     policies: references.policies,
     sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
+    unmappedFieldsTreatment: references.unmappedFieldsTreatment,
   };
 
   if (commandDefinition.methods.validate) {
