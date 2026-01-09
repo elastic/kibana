@@ -42,10 +42,12 @@ export const createRelevanceSearchTool = ({
   model,
   esClient,
   events,
+  logger,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
+  logger: Logger;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -60,6 +62,7 @@ export const createRelevanceSearchTool = ({
             size,
             model,
             esClient,
+            logger,
           });
           const results = rawResults.map(convertMatchResult);
 

@@ -17,6 +17,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  EventsServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -83,6 +84,10 @@ export interface AgentBuilderPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * Events service contract, can be used to listen to chat events.
+   */
+  events: EventsServiceStartContract;
   /**
    * Opens a conversation flyout.
    *
