@@ -234,7 +234,6 @@ export const PaginatedContent = memo(
             }
           }
 
-          // Include dataUpdatedAt in key to force remount when data is refreshed,
           const itemKey = dataUpdatedAt ? `${key}-${dataUpdatedAt}` : key;
 
           return <Item {...itemComponentProps(item)} key={itemKey} Decorator={CardDecorator} />;
