@@ -21,7 +21,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/utility-types'
 tags:
-  - shared-common
+  - shared-server
   - package
   - prod
   - group-platform

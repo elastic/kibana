@@ -129,6 +129,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/zod'
   - '@kbn/cps'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod
