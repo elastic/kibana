@@ -28,7 +28,9 @@ export const createSearchPanelAction = {
       {
         panelType: SEARCH_EMBEDDABLE_TYPE,
       },
-      true
+      {
+        displaySuccessMessage: true,
+      }
     );
   },
 };

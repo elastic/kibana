@@ -13,6 +13,7 @@
     "@kbn/core-execution-context-common",
     "@kbn/content-management-utils",
     "@kbn/utility-types",
-    "@kbn/presentation-publishing-schemas"
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/esql-types"
   ]
 }
