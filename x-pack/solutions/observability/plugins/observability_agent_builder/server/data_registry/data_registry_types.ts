@@ -159,12 +159,20 @@ interface ChangePointResult {
   bucket?: Bucket;
 }
 
-interface BucketChangePoints extends Bucket {
-  changes: ChangePointResult;
+export interface BucketChangePoints extends Bucket {
+  changes_latency: ChangePointResult;
+  changes_throughput: ChangePointResult;
+  changes_failure_rate: ChangePointResult;
   time_series: {
     buckets: Array<
       Bucket & {
         avg_latency: {
+          value: number | null;
+        };
+        throughput: {
+          value: number | null;
+        };
+        failure_rate: {
           value: number | null;
         };
       }
