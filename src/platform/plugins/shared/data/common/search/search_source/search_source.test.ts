@@ -875,7 +875,7 @@ describe('SearchSource', () => {
           language: 'kuery',
           query: 'event.start < "2025-12-16T10:50:00.000"',
         });
-        searchSource.setOverwriteTimezone('America/Los_Angeles');
+        searchSource.setField('timezone', 'America/Los_Angeles');
 
         const request = searchSource.getSearchRequestBody();
         expect(request.query).toEqual({

@@ -41,7 +41,6 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   getActiveIndexFilter: jest.fn(),
   parseActiveIndexPatternFromQueryString: jest.fn(),
   loadDataViewFields: jest.fn(),
-  setOverwriteTimezone: jest.fn(),
 };
 
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
