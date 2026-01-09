@@ -103,6 +103,8 @@ export function StreamDetailEnrichmentContentImpl() {
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
   const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
 
+  // console.log('state', getStreamEnrichmentState);
+
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
     // Create lookup maps for efficient comparison
@@ -162,7 +164,7 @@ export function StreamDetailEnrichmentContentImpl() {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_processing] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'schemaEditorFields',

@@ -55,12 +55,14 @@ export function UnmanagedElasticsearchAssets({
     [definition.stream.name, streamsRepositoryClient]
   );
 
+  console.log('DFJKHSKFJHDS');
+
   useEffect(() => {
     if (unmanagedAssetsDetailsFetch.value && !unmanagedAssetsDetailsFetch.loading) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_advanced] streamType: ${streamType}`,
         },
       });
     }
