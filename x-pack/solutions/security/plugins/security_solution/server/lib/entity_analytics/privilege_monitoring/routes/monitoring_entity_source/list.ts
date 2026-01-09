@@ -48,28 +48,28 @@ export const listMonitoringEntitySourceRoute = (
       },
       withMinimumLicense(
         async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
 
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.list(request.query);
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.list(request.query);
 
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error listing monitoring entity sources: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      },
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error listing monitoring entity sources: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
         'platinum'
       )
     );

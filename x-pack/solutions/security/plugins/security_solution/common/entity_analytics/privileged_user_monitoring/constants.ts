@@ -19,6 +19,6 @@ export const PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE =
 
 const PAD_URL = `/api/entity_analytics/privileged_user_monitoring/pad` as const;
 
-  // Privileged Access Detection (PAD) URLs
+// Privileged Access Detection (PAD) URLs
 export const PAD_INSTALL_URL = `${PAD_URL}/install` as const;
 export const PAD_STATUS_URL = `${PAD_URL}/status` as const;

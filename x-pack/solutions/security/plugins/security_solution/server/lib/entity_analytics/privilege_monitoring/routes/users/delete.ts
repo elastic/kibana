@@ -20,7 +20,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
-
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .delete({
@@ -45,22 +44,24 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
           const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-          const secSol = await context.securitySolution;
-          await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
-          return response.ok({ body: { aknowledged: true } });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error deleting user: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }, 'platinum')
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
+            const secSol = await context.securitySolution;
+            await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
+            return response.ok({ body: { aknowledged: true } });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error deleting user: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

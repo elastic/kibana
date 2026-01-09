@@ -24,7 +24,6 @@ import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
-
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
@@ -60,42 +59,44 @@ export const uploadUsersCSVRoute = (
       },
       withMinimumLicense(
         async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<PrivmonBulkUploadUsersCSVResponse>> => {
-        const { errorRetries, maxBulkRequestBodySizeBytes } =
-          config.entityAnalytics.monitoring.privileges.users.csvUpload;
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<PrivmonBulkUploadUsersCSVResponse>> => {
+          const { errorRetries, maxBulkRequestBodySizeBytes } =
+            config.entityAnalytics.monitoring.privileges.users.csvUpload;
 
-        const siemResponse = buildSiemResponse(response);
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
 
-          await checkAndInitPrivilegedMonitoringResources(context, logger);
+            await checkAndInitPrivilegedMonitoringResources(context, logger);
 
-          const secSol = await context.securitySolution;
-          const fileStream = request.body.file as HapiReadableStream;
+            const secSol = await context.securitySolution;
+            const fileStream = request.body.file as HapiReadableStream;
 
-          const body = await secSol.getPrivilegeMonitoringDataClient().uploadUsersCSV(fileStream, {
-            retries: errorRetries,
-            flushBytes: maxBulkRequestBodySizeBytes,
-          });
+            const body = await secSol
+              .getPrivilegeMonitoringDataClient()
+              .uploadUsersCSV(fileStream, {
+                retries: errorRetries,
+                flushBytes: maxBulkRequestBodySizeBytes,
+              });
 
-          return response.ok({ body });
-        } catch (e) {
-          // TODO TEST THIS ERROR SCENARIO
-          const error = transformError(e);
-          logger.error(`Error uploading users via CSV: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      },
+            return response.ok({ body });
+          } catch (e) {
+            // TODO TEST THIS ERROR SCENARIO
+            const error = transformError(e);
+            logger.error(`Error uploading users via CSV: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
         'platinum'
       )
     );
