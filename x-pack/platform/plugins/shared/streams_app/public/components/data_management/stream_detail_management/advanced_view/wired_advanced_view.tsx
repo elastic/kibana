@@ -63,6 +63,7 @@ export function WiredAdvancedView({
           />
           <EuiSpacer />
           <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
+          <EuiSpacer />
         </>
       )}
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
