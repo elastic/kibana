@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { v4 as uuidV4 } from 'uuid';
 import { render } from 'react-dom';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -37,7 +38,6 @@ interface SystemFlyoutStartDeps {
 export class SystemFlyoutService {
   private targetDomElement: Element | null = null;
   private activeFlyouts = new Map<string, SystemFlyoutRef>();
-  private idCounter = 0;
 
   public start({
     analytics,
@@ -53,7 +53,7 @@ export class SystemFlyoutService {
         content: React.ReactElement,
         { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
-        const flyoutId = `system-flyout-${++this.idCounter}`;
+        const flyoutId = `system-flyout-${uuidV4()}`;
 
         // Create a container for this flyout within the main React tree
         const flyoutContainer = document.createElement('div');

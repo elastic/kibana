@@ -40,7 +40,8 @@ export type OverlayFlyoutOpenOptions = Omit<
    */
   onClose?: (flyout: OverlayRef) => void;
   /**
-   * Use overlays.openSystemFlyout to create session-based flyouts.
+   * If the `session` field is provided in options, it must be set to 'never'. If you need a session-based flyout,
+   * use overlays.openSystemFlyout instead.
    */
   session?: 'never';
   /**
