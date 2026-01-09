@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
-import { Route, Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
 
 jest.mock('@elastic/eui', () => {
   // We only override EuiPopover to avoid MutationObserver-based act warnings in JSDOM.
@@ -29,10 +24,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-import { mockHttpRequest, wrapComponent } from './helpers';
-import { registerRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
-import { createRollupJobsStore } from '../../crud_app/store';
-import { JobCreate } from '../../crud_app/sections';
+import { mockHttpRequest, renderJobCreate } from './helpers';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
 describe('Create Rollup Job, step 5: Metrics', () => {
@@ -42,22 +35,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   const dateTypeMetrics = ['max', 'min', 'value_count'];
 
   let startMock;
-  let history;
-
-  const renderJobCreate = () => {
-    const store = createRollupJobsStore();
-    history = createMemoryHistory({ initialEntries: ['/create'] });
-    registerRouter({ history });
-    const WrappedJobCreate = wrapComponent(JobCreate);
-
-    renderWithI18n(
-      <Provider store={store}>
-        <Router history={history}>
-          <Route path="/create" component={WrappedJobCreate} />
-        </Router>
-      </Provider>
-    );
-  };
 
   const setInputValue = (testId, value) => {
     const input = screen.getByTestId(testId);

@@ -5,38 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment-timezone';
 import { fireEvent, screen } from '@testing-library/react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
-import { Route, Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
 
-import { mockHttpRequest, wrapComponent } from './helpers';
-import { registerRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
-import { createRollupJobsStore } from '../../crud_app/store';
-import { JobCreate } from '../../crud_app/sections';
+import { mockHttpRequest, renderJobCreate } from './helpers';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { docLinksServiceMock, coreMock } from '@kbn/core/public/mocks';
 
 describe('Create Rollup Job, step 2: Date histogram', () => {
   let startMock;
-  let history;
-
-  const renderJobCreate = () => {
-    const store = createRollupJobsStore();
-    history = createMemoryHistory({ initialEntries: ['/create'] });
-    registerRouter({ history });
-    const WrappedJobCreate = wrapComponent(JobCreate);
-
-    renderWithI18n(
-      <Provider store={store}>
-        <Router history={history}>
-          <Route path="/create" component={WrappedJobCreate} />
-        </Router>
-      </Provider>
-    );
-  };
 
   const setInputValue = (testId, value) => {
     const input = screen.getByTestId(testId);

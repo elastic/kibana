@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { first } from 'lodash';
-import { Provider } from 'react-redux';
-import { Route, Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
 
-import { mockHttpRequest, wrapComponent } from './helpers';
-import { registerRouter, setHttp } from '../../crud_app/services';
-import { createRollupJobsStore } from '../../crud_app/store';
-import { JobCreate } from '../../crud_app/sections';
+import { mockHttpRequest, renderJobCreate } from './helpers';
+import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -31,22 +24,6 @@ jest.mock('../../kibana_services', () => {
 
 describe('Create Rollup Job, step 6: Review', () => {
   let startMock;
-  let history;
-
-  const renderJobCreate = () => {
-    const store = createRollupJobsStore();
-    history = createMemoryHistory({ initialEntries: ['/create'] });
-    registerRouter({ history });
-    const WrappedJobCreate = wrapComponent(JobCreate);
-
-    renderWithI18n(
-      <Provider store={store}>
-        <Router history={history}>
-          <Route path="/create" component={WrappedJobCreate} />
-        </Router>
-      </Provider>
-    );
-  };
 
   const setInputValue = (testId, value) => {
     const input = screen.getByTestId(testId);

@@ -10,3 +10,5 @@ export { mockHttpRequest } from './setup_environment';
 export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export { wrapComponent } from './setup_context';
+
+export { renderJobCreate } from './render_job_create';

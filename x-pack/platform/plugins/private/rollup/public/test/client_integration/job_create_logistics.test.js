@@ -5,38 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
-import { Route, Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
 
-import { mockHttpRequest, wrapComponent } from './helpers';
+import { mockHttpRequest, renderJobCreate } from './helpers';
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { registerRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
-import { createRollupJobsStore } from '../../crud_app/store';
-import { JobCreate } from '../../crud_app/sections';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 
 describe('Create Rollup Job, step 1: Logistics', () => {
   let startMock;
-  let history;
-
-  const renderJobCreate = () => {
-    const store = createRollupJobsStore();
-    history = createMemoryHistory({ initialEntries: ['/create'] });
-    registerRouter({ history });
-    const WrappedJobCreate = wrapComponent(JobCreate);
-
-    renderWithI18n(
-      <Provider store={store}>
-        <Router history={history}>
-          <Route path="/create" component={WrappedJobCreate} />
-        </Router>
-      </Provider>
-    );
-  };
 
   const setInputValue = (testId, value) => {
     const input = screen.getByTestId(testId);
