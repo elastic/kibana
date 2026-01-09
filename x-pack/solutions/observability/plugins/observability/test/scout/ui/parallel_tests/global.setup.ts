@@ -26,7 +26,6 @@ globalSetupHook(
       refresh: true,
     });
 
-    // Generate logs data first
     log.info('Generating logs data...');
     await generateLogsData({
       from: Date.now() - 15 * 60 * 1000, // 15 minutes ago

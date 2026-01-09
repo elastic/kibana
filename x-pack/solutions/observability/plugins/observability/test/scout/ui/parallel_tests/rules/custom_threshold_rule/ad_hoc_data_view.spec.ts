@@ -8,7 +8,6 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/247693
 test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlOblt'] }, () => {
   const AD_HOC_DATA_VIEW_PATTERN = '.alerts-*';
 
