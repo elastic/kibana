@@ -18,8 +18,15 @@ import userEvent from '@testing-library/user-event';
 let tz: string;
 let session: UISession;
 
-const MOCK_NOW_TIME = new Date();
-MOCK_NOW_TIME.setTime(1607026176061);
+const MOCK_NOW_TIME = new Date(1607026176061);
+
+const TEST_CASES = [
+  { status: SearchSessionStatus.IN_PROGRESS, expectedText: 'In progress' },
+  { status: SearchSessionStatus.EXPIRED, expectedText: 'Expired' },
+  { status: SearchSessionStatus.CANCELLED, expectedText: 'Cancelled' },
+  { status: SearchSessionStatus.COMPLETE, expectedText: 'Complete' },
+  { status: SearchSessionStatus.ERROR, expectedText: 'Error' },
+];
 
 describe('Background Search Session management status labels', () => {
   beforeEach(() => {
@@ -42,40 +49,17 @@ describe('Background Search Session management status labels', () => {
   });
 
   describe('getStatusText', () => {
-    test('in progress', () => {
-      expect(getStatusText(SearchSessionStatus.IN_PROGRESS)).toBe('In progress');
-    });
-
-    test('expired', () => {
-      expect(getStatusText(SearchSessionStatus.EXPIRED)).toBe('Expired');
-    });
-
-    test('cancelled', () => {
-      expect(getStatusText(SearchSessionStatus.CANCELLED)).toBe('Cancelled');
-    });
-
-    test('complete', () => {
-      expect(getStatusText(SearchSessionStatus.COMPLETE)).toBe('Complete');
-    });
-
-    test('error', () => {
-      expect(getStatusText(SearchSessionStatus.ERROR)).toBe('Error');
-    });
+    test.each(TEST_CASES)(
+      'when the status is $status it should return $expectedText',
+      ({ status, expectedText }) => {
+        expect(getStatusText(status)).toBe(expectedText);
+      }
+    );
   });
 
   describe('StatusIndicator', () => {
-    test('render in progress', () => {
-      render(
-        <LocaleWrapper>
-          <StatusIndicator session={session} timezone={tz} />
-        </LocaleWrapper>
-      );
-
-      expect(screen.getByText('In progress')).toBeVisible();
-    });
-
-    test('complete', () => {
-      session.status = SearchSessionStatus.COMPLETE;
+    test.each(TEST_CASES)('renders $status', ({ status, expectedText }) => {
+      session.status = status;
 
       render(
         <LocaleWrapper>
@@ -83,89 +67,83 @@ describe('Background Search Session management status labels', () => {
         </LocaleWrapper>
       );
 
-      expect(screen.getByText('Complete')).toBeVisible();
+      expect(screen.getByText(expectedText)).toBeVisible();
     });
 
-    test('complete - expires soon', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      session.status = SearchSessionStatus.COMPLETE;
-
-      render(
-        <LocaleWrapper>
-          <StatusIndicator session={session} timezone={tz} />
-        </LocaleWrapper>
-      );
-
-      await user.hover(screen.getByText('Complete'));
-      act(() => {
-        jest.advanceTimersByTime(300);
+    describe('when the user hovers the indicator', () => {
+      beforeAll(() => {
+        jest.useFakeTimers();
       });
 
-      expect(await screen.findByText(/Expires on/i)).toBeVisible();
-      jest.useRealTimers();
-    });
-
-    test('expired', () => {
-      session.status = SearchSessionStatus.EXPIRED;
-
-      render(
-        <LocaleWrapper>
-          <StatusIndicator now={MOCK_NOW_TIME.toISOString()} session={session} timezone={tz} />
-        </LocaleWrapper>
-      );
-
-      expect(screen.getByText('Expired')).toBeVisible();
-    });
-
-    test('error', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      session.status = SearchSessionStatus.ERROR;
-
-      render(
-        <LocaleWrapper>
-          <StatusIndicator
-            now={MOCK_NOW_TIME.toISOString()}
-            session={{ ...session, errors: ['an error'] }}
-            timezone={tz}
-          />
-        </LocaleWrapper>
-      );
-
-      await user.hover(screen.getByText('Error'));
-      act(() => {
-        jest.advanceTimersByTime(300);
+      afterAll(() => {
+        jest.useRealTimers();
       });
 
-      expect(
-        await screen.findByText(
-          /One or more searches failed to complete. Use the "Inspect" action to see the underlying errors./i
-        )
-      ).toBeVisible();
-      jest.useRealTimers();
-    });
+      const setupUser = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-    test('error handling', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      session.status = SearchSessionStatus.COMPLETE;
-      (session as any).created = null;
-      (session as any).expires = null;
+      test('complete - expires soon', async () => {
+        const user = setupUser();
+        session.status = SearchSessionStatus.COMPLETE;
 
-      render(
-        <LocaleWrapper>
-          <StatusIndicator now={MOCK_NOW_TIME.toISOString()} session={session} timezone={tz} />
-        </LocaleWrapper>
-      );
+        render(
+          <LocaleWrapper>
+            <StatusIndicator session={session} timezone={tz} />
+          </LocaleWrapper>
+        );
 
-      await user.hover(screen.getByText('Complete'));
-      act(() => {
-        jest.advanceTimersByTime(300);
+        await user.hover(screen.getByText('Complete'));
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
+
+        expect(await screen.findByText(/Expires on/i)).toBeVisible();
       });
 
-      expect(await screen.findByText(/Expires on unknown/i)).toBeVisible();
-      jest.useRealTimers();
+      test('error', async () => {
+        const user = setupUser();
+        session.status = SearchSessionStatus.ERROR;
+
+        render(
+          <LocaleWrapper>
+            <StatusIndicator
+              now={MOCK_NOW_TIME.toISOString()}
+              session={{ ...session, errors: ['an error'] }}
+              timezone={tz}
+            />
+          </LocaleWrapper>
+        );
+
+        await user.hover(screen.getByText('Error'));
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
+
+        expect(
+          await screen.findByText(
+            /One or more searches failed to complete. Use the "Inspect" action to see the underlying errors./i
+          )
+        ).toBeVisible();
+      });
+
+      test('error handling', async () => {
+        const user = setupUser();
+        session.status = SearchSessionStatus.COMPLETE;
+        (session as any).created = null;
+        (session as any).expires = null;
+
+        render(
+          <LocaleWrapper>
+            <StatusIndicator now={MOCK_NOW_TIME.toISOString()} session={session} timezone={tz} />
+          </LocaleWrapper>
+        );
+
+        await user.hover(screen.getByText('Complete'));
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
+
+        expect(await screen.findByText(/Expires on unknown/i)).toBeVisible();
+      });
     });
   });
 });

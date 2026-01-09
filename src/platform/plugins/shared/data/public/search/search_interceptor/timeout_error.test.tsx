@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { render, screen } from '@testing-library/react';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import userEvent from '@testing-library/user-event';
 
-const applicationMock = {
-  navigateToApp: jest.fn(),
-} as unknown as ApplicationStart;
+const applicationMock = applicationServiceMock.createStartContract();
 
 describe('SearchTimeoutError', () => {
   beforeEach(() => {
