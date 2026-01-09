@@ -95,7 +95,7 @@ const DefaultConnectorBadge = () => {
 };
 
 const manageConnectorsAriaLabel = i18n.translate(
-  'xpack.agentBuilder.conversationInput.connectorSelector.manageConnectors.ariaLabel',
+  'xpack.onechat.conversationInput.connectorSelector.manageConnectors.ariaLabel',
   {
     defaultMessage: 'Manage connectors',
   }
@@ -117,7 +117,7 @@ const ConnectorListFooter: React.FC = () => {
             disabled={!showManagement}
           >
             <FormattedMessage
-              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+              id="xpack.onechat.conversationInput.agentSelector.manageAgents"
               defaultMessage="Manage"
             />
           </EuiButtonEmpty>
