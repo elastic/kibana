@@ -89,7 +89,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
+              render: () => (
                 <CustomDocView
                   formattedRecord={context.formatRecord(params.record.flattened)}
                   openInNewTab={openInNewTab}
