@@ -57,7 +57,7 @@ export const DataLifecycleSummary = ({ phases, loading = false }: DataLifecycleS
         </EuiText>
       </EuiPanel>
 
-      <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
+      <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
         {showSkeleton ? (
           <EuiSkeletonRectangle
             width="100%"
