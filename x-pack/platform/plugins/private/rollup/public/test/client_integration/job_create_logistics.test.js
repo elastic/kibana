@@ -77,11 +77,8 @@ describe('Create Rollup Job, step 1: Logistics', () => {
         setInputValue('rollupIndexName', 'rollup-index');
       });
 
-      beforeEach(() => {
-        expect(screen.getByTestId('rollupJobNextButton')).not.toBeDisabled();
-      });
-
       it('should not allow spaces', async () => {
+        expect(screen.getByTestId('rollupJobNextButton')).not.toBeDisabled();
         setInputValue('rollupIndexPattern', 'with space');
         // Wait for async index pattern validation to finish (errors are hidden while validating).
         await screen.findByTestId('fieldIndexPatternSuccessMessage');
@@ -93,6 +90,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow an unknown index pattern', async () => {
+        expect(screen.getByTestId('rollupJobNextButton')).not.toBeDisabled();
         mockHttpRequest(startMock.http, { indxPatternVldtResp: { doesMatchIndices: false } });
         setInputValue('rollupIndexPattern', 'unknown');
         await waitFor(() => {
@@ -106,6 +104,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow an index pattern without time fields', async () => {
+        expect(screen.getByTestId('rollupJobNextButton')).not.toBeDisabled();
         mockHttpRequest(startMock.http, { indxPatternVldtResp: { dateFields: [] } });
         setInputValue('rollupIndexPattern', 'abc');
         await waitFor(() => {
@@ -121,6 +120,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow an index pattern that matches a rollup index', async () => {
+        expect(screen.getByTestId('rollupJobNextButton')).not.toBeDisabled();
         mockHttpRequest(startMock.http, {
           indxPatternVldtResp: { doesMatchRollupIndices: true },
         });
@@ -138,6 +138,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not be the same as the rollup index name', async () => {
+        expect(screen.getByTestId('rollupJobNextButton')).not.toBeDisabled();
         setInputValue('rollupJobName', 'test-job');
         setInputValue('rollupIndexPattern', 'abc');
         setInputValue('rollupIndexName', 'abc');
