@@ -29,7 +29,6 @@ import {
   useLensSelector,
   selectFramePublicAPI,
   useLensDispatch,
-  selectCanEditTextBasedQuery,
   selectHideTextBasedEditor,
 } from '../../../state_management';
 import {
@@ -92,7 +91,6 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
-  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const hideTextBasedEditor = useLensSelector(selectHideTextBasedEditor);
 
   const activeVisualization =

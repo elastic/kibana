@@ -11,6 +11,7 @@ import type {
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
+  TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPrivateState,
   TypedLensSerializedState,
@@ -175,6 +176,11 @@ function getLayerConversionData(
   };
 }
 
+interface BuildTextBasedStateReturnType {
+  newDatasourceState: TextBasedPrivateState;
+  columnIdMapping: Record<string, string>;
+}
+
 /**
  * Builds the text-based datasource state and column ID mapping
  */
@@ -184,12 +190,10 @@ function buildTextBasedState(
   framePublicAPI: FramePublicAPI,
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies
-):
-  | { newDatasourceState: TextBasedPrivateState; columnIdMapping: Record<string, string> }
-  | undefined {
+): BuildTextBasedStateReturnType | undefined {
   if (layersToConvert.length === 0) return undefined;
 
-  const newLayers: Record<string, TextBasedPrivateState['layers'][string]> = {};
+  const newLayers: Record<string, TextBasedLayer> = {};
   const columnIdMapping: Record<string, string> = {};
 
   for (const layerId of layersToConvert) {
