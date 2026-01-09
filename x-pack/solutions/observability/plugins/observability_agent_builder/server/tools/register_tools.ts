@@ -49,11 +49,6 @@ import {
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   createGetMetricChangePointsTool,
 } from './get_metric_change_points/tool';
-import {
-  OBSERVABILITY_GET_EXIT_SPAN_ERRORS_TOOL_ID,
-  createGetExitSpanErrorsTool,
-} from './get_exit_span_errors/tool';
-
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
@@ -74,7 +69,6 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
-  OBSERVABILITY_GET_EXIT_SPAN_ERRORS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -105,7 +99,6 @@ export async function registerTools({
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
-    createGetExitSpanErrorsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

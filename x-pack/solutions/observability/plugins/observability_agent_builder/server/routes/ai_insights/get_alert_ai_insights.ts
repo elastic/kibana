@@ -17,7 +17,6 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getToolHandler as getExitSpanErrors } from '../../tools/get_exit_span_errors/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 
 /**
@@ -186,28 +185,6 @@ async function fetchAlertContext({
         return null;
       }
     }),
-    // exit span errors
-    (async (): Promise<FetchResult | null> => {
-      try {
-        const start = getStart(START_TIME_OFFSETS.errors);
-        const result = await getExitSpanErrors({
-          core,
-          plugins,
-          logger,
-          esClient,
-          serviceName,
-          serviceEnvironment,
-          start,
-          end: alertStart,
-        });
-        return result.exitSpanErrors.length > 0
-          ? { key: 'exitSpanErrors', start, data: result }
-          : null;
-      } catch (err) {
-        logger.debug(`AI insight: exitSpanErrors failed: ${err}`);
-        return null;
-      }
-    })(),
     // log categories
     (async (): Promise<FetchResult | null> => {
       try {
