@@ -11,6 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import useObservable from 'react-use/lib/useObservable';
 import {
   getCreateRuleRoute,
   getEditRuleRoute,
@@ -35,10 +36,12 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp },
+    application: { navigateToApp, currentAppId$ },
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const currentAppId = useObservable(currentAppId$, undefined);
+  const isInRulesApp = currentAppId === 'rules';
 
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
 
@@ -88,6 +91,7 @@ const RulesPage = () => {
     (ruleId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
+
       const returnApp = 'rules';
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleId)}`,
@@ -97,23 +101,34 @@ const RulesPage = () => {
         },
       });
     },
-    [navigateToApp]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [history, navigateToApp, isInRulesApp, currentAppId]
   );
 
   const navigateToCreateRuleForm = useCallback(
     (ruleTypeId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
-      const returnApp = 'rules';
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-        state: {
-          returnApp,
-          returnPath,
-        },
-      });
+
+      if (isInRulesApp) {
+        history.push({
+          pathname: getCreateRuleRoute(ruleTypeId),
+          state: {
+            returnApp: 'rules',
+            returnPath,
+          },
+        });
+      } else {
+        navigateToApp(currentAppId || 'management', {
+          path: getCreateRuleRoute(ruleTypeId),
+          state: {
+            returnApp: currentAppId || 'management',
+            returnPath,
+          },
+        });
+      }
     },
-    [navigateToApp]
+    [history, navigateToApp, isInRulesApp, currentAppId]
   );
 
   const renderRulesList = useCallback(() => {
