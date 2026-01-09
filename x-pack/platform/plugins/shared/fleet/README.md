@@ -218,7 +218,7 @@ FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solution
 ```
 #### UI Tests
 
-We use to write our UI tests, with cypress a new tool as been introduced `kbn-scout` based on playwright that should be priviligied for new tests.
+We used to write our UI tests with cypress. A new tool `kbn-scout` has been introduced based on playwright that should be used for new tests.
 
 ##### Scout tests
 
