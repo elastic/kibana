@@ -59,6 +59,7 @@ jobs:
         sha: ${{ env.CHECKOUT_SHA }}
         output: sarif-results
     - name: Dismiss alerts
+      continue-on-error: true
       uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
