@@ -9,6 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { BaseFeature, Feature, FeatureStatus } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
+import { isNotFoundError } from '@kbn/es-errors';
 import {
   STREAM_NAME,
   FEATURE_UUID,
@@ -26,7 +27,6 @@ import {
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
-import { isNotFoundError } from '@kbn/es-errors';
 
 interface FeatureBulkIndexOperation {
   index: { feature: Feature };
