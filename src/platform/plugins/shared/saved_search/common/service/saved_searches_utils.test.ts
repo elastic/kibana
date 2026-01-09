@@ -107,7 +107,6 @@ describe('saved_searches_utils', () => {
             "id": "data_source1",
             "inheritOptions": Object {},
             "overwriteDataViewType": undefined,
-            "overwriteTimezone": undefined,
             "parent": undefined,
             "requestStartHandlers": Array [],
             "shouldOverwriteDataViewType": false,
