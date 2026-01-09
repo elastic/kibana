@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ConfirmationPrompt,
-  ConfirmationPromptResponse,
-} from '@kbn/agent-builder-common/agents/prompts';
+import { StatusError } from './status_error';
 
-export type ConfirmationPromptWithResponse = ConfirmationPrompt & {
-  response: ConfirmationPromptResponse;
-};
+export class SystemNotFoundError extends StatusError {
+  constructor(message: string) {
+    super(message, 404);
+    this.name = 'SystemNotFoundError';
+  }
+}

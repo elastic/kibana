@@ -6,28 +6,22 @@
  */
 
 import { z } from '@kbn/zod';
-import {
-  streamObjectNameSchema,
-  featureSchema,
-  type Feature,
-  featureTypeSchema,
-} from '@kbn/streams-schema';
+import { streamObjectNameSchema, systemSchema, type System } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { catchError, from, map } from 'rxjs';
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { conflict } from '@hapi/boom';
-import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
+import { generateStreamDescription, type IdentifySystemsResult, sumTokens } from '@kbn/streams-ai';
 import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
-import type { FeatureIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/feature_identification';
+import type { SystemIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/system_identification';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
@@ -41,12 +35,12 @@ import { createConnectorSSEError } from '../../../utils/create_connector_sse_err
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-export const getFeatureRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features/{featureType}/{featureName}',
+export const getSystemRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/systems/{systemName}',
   options: {
     access: 'internal',
-    summary: 'Get a feature for a stream',
-    description: 'Fetches the specified feature',
+    summary: 'Get a system for a stream',
+    description: 'Fetches the specified system',
   },
   security: {
     authz: {
@@ -56,38 +50,35 @@ export const getFeatureRoute = createServerRoute({
   params: z.object({
     path: z.object({
       name: z.string(),
-      featureType: featureTypeSchema,
-      featureName: streamObjectNameSchema,
+      systemName: streamObjectNameSchema,
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ feature: Feature }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ system: System }> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name, featureType, featureName } = params.path;
-
+    const { name, systemName } = params.path;
     const { read } = await checkAccess({ name, scopedClusterClient });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
 
-    const feature = await featureClient.getFeature(name, { type: featureType, name: featureName });
-
-    return { feature };
+    const system = await systemClient.getSystem(name, systemName);
+    return { system };
   },
 });
 
-export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{featureType}/{featureName}',
+export const deleteSystemRoute = createServerRoute({
+  endpoint: 'DELETE /internal/streams/{name}/systems/{systemName}',
   options: {
     access: 'internal',
-    summary: 'Delete a feature for a stream',
-    description: 'Deletes the specified feature',
+    summary: 'Delete a system for a stream',
+    description: 'Deletes the specified system',
   },
   security: {
     authz: {
@@ -97,8 +88,7 @@ export const deleteFeatureRoute = createServerRoute({
   params: z.object({
     path: z.object({
       name: z.string(),
-      featureType: z.string(),
-      featureName: streamObjectNameSchema,
+      systemName: streamObjectNameSchema,
     }),
   }),
   handler: async ({
@@ -108,34 +98,31 @@ export const deleteFeatureRoute = createServerRoute({
     server,
     logger,
   }): Promise<StorageClientDeleteResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name, featureName, featureType } = params.path;
-
+    const { name, systemName } = params.path;
     const { read } = await checkAccess({ name, scopedClusterClient });
 
     if (!read) {
-      throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot delete system for stream ${name}, insufficient privileges`);
     }
 
-    logger
-      .get('feature_identification')
-      .debug(`Deleting feature ${featureType}/${featureName} for stream ${name}`);
-    return await featureClient.deleteFeature(name, { type: featureType, name: featureName });
+    logger.get('system_identification').debug(`Deleting system ${systemName} for stream ${name}`);
+    return await systemClient.deleteSystem(name, systemName);
   },
 });
 
-export const upsertFeatureRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
+export const upsertSystemRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/{name}/systems/{systemName}',
   options: {
     access: 'internal',
-    summary: 'Upserts a feature for a stream',
-    description: 'Upserts the specified feature',
+    summary: 'Upserts a system for a stream',
+    description: 'Upserts the specified system',
   },
   security: {
     authz: {
@@ -143,8 +130,8 @@ export const upsertFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), featureType: featureTypeSchema, featureName: z.string() }),
-    body: featureSchema,
+    path: z.object({ name: z.string(), systemName: streamObjectNameSchema }),
+    body: systemSchema,
   }),
   handler: async ({
     params,
@@ -152,7 +139,7 @@ export const upsertFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<StorageClientIndexResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -160,30 +147,29 @@ export const upsertFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
-      path: { name, featureType, featureName },
+      path: { name, systemName },
       body,
     } = params;
 
-    if (body.type !== featureType || body.name !== featureName) {
-      throw new StatusError(`Feature type and name must match the path parameters`, 400);
+    if (body.name !== systemName) {
+      throw new StatusError(`Cannot update system name`, 400);
     }
 
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot update system for stream ${name}, insufficient privileges`);
     }
 
-    return await featureClient.updateFeature(name, body);
+    return await systemClient.updateSystem(name, body);
   },
 });
 
-export const listFeaturesRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features',
+export const listSystemsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/systems',
   options: {
     access: 'internal',
-    summary: 'Lists all features for a stream',
-    description: 'Fetches all features for the specified stream',
+    summary: 'Lists all systems for a stream',
+    description: 'Fetches all systems for the specified stream',
   },
   security: {
     authz: {
@@ -198,8 +184,8 @@ export const listFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<{ features: Feature[] }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
+  }): Promise<{ systems: System[] }> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -207,27 +193,22 @@ export const listFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
 
-    const { hits: features } = await featureClient.getFeatures(name);
-
-    return {
-      features,
-    };
+    const { systems } = await systemClient.getSystems(name);
+    return { systems };
   },
 });
 
-export const bulkFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_bulk',
+export const bulkSystemsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/systems/_bulk',
   options: {
     access: 'internal',
-    summary: 'Bulk changes to features',
-    description: 'Add or delete features in bulk for a given stream',
+    summary: 'Bulk changes to systems',
+    description: 'Add or delete systems in bulk for a given stream',
   },
   security: {
     authz: {
@@ -241,13 +222,12 @@ export const bulkFeaturesRoute = createServerRoute({
         z.union([
           z.object({
             index: z.object({
-              feature: featureSchema,
+              system: systemSchema,
             }),
           }),
           z.object({
             delete: z.object({
-              feature: z.object({
-                type: featureTypeSchema,
+              system: z.object({
                 name: streamObjectNameSchema,
               }),
             }),
@@ -263,7 +243,7 @@ export const bulkFeaturesRoute = createServerRoute({
     server,
     logger,
   }): Promise<StorageClientBulkResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -278,19 +258,19 @@ export const bulkFeaturesRoute = createServerRoute({
     const { read } = await checkAccess({ name, scopedClusterClient });
 
     if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
     }
 
     logger
-      .get('feature_identification')
+      .get('system_identification')
       .debug(
-        `Performing bulk feature operation with ${operations.length} operations for stream ${name}`
+        `Performing bulk system operation with ${operations.length} operations for stream ${name}`
       );
-    return await featureClient.bulk(name, operations);
+    return await systemClient.bulk(name, operations);
   },
 });
 
-export type FeatureIdentificationTaskResult =
+export type SystemIdentificationTaskResult =
   | {
       status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
     }
@@ -300,17 +280,17 @@ export type FeatureIdentificationTaskResult =
     }
   | ({
       status: 'completed';
-    } & IdentifyFeaturesResult)
+    } & IdentifySystemsResult)
   | ({
       status: 'acknowledged';
-    } & IdentifyFeaturesResult);
+    } & IdentifySystemsResult);
 
-export const identifyFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify',
+export const identifySystemsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/systems/_identify',
   options: {
     access: 'internal',
-    summary: 'Identify features in a stream',
-    description: 'Identify features in a stream with an LLM',
+    summary: 'Identify systems in a stream',
+    description: 'Identify systems in a stream with an LLM',
   },
   security: {
     authz: {
@@ -320,12 +300,7 @@ export const identifyFeaturesRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
+      connectorId: z.string().optional(),
       from: dateFromString,
       to: dateFromString,
       schedule: BooleanFromString.optional(),
@@ -339,7 +314,7 @@ export const identifyFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<FeatureIdentificationTaskResult> => {
+  }): Promise<SystemIdentificationTaskResult> => {
     const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
       {
         request,
@@ -350,24 +325,23 @@ export const identifyFeaturesRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId: connectorIdParam, from: start, to: end },
+      query: { from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
     }
 
     const connectorId = await resolveConnectorId({
-      connectorId: connectorIdParam,
+      connectorId: params.query.connectorId,
       uiSettingsClient,
       logger,
     });
 
     if (params.query.schedule) {
       try {
-        await taskClient.schedule<FeatureIdentificationTaskParams>({
+        await taskClient.schedule<SystemIdentificationTaskParams>({
           task: {
             type: 'streams_feature_identification',
             id: `streams_feature_identification_${name}`,
@@ -401,8 +375,8 @@ export const identifyFeaturesRoute = createServerRoute({
     } else if (params.query.acknowledge) {
       try {
         const task = await taskClient.acknowledge<
-          FeatureIdentificationTaskParams,
-          IdentifyFeaturesResult
+          SystemIdentificationTaskParams,
+          IdentifySystemsResult
         >(`streams_feature_identification_${name}`);
 
         return {
@@ -418,7 +392,7 @@ export const identifyFeaturesRoute = createServerRoute({
       }
     }
 
-    const task = await taskClient.get<FeatureIdentificationTaskParams, IdentifyFeaturesResult>(
+    const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
       `streams_feature_identification_${name}`
     );
 
@@ -560,12 +534,12 @@ export const describeStreamRoute = createServerRoute({
   },
 });
 
-export const featureRoutes = {
-  ...getFeatureRoute,
-  ...deleteFeatureRoute,
-  ...upsertFeatureRoute,
-  ...listFeaturesRoute,
-  ...bulkFeaturesRoute,
-  ...identifyFeaturesRoute,
+export const systemRoutes = {
+  ...getSystemRoute,
+  ...deleteSystemRoute,
+  ...upsertSystemRoute,
+  ...listSystemsRoute,
+  ...bulkSystemsRoute,
+  ...identifySystemsRoute,
   ...describeStreamRoute,
 };

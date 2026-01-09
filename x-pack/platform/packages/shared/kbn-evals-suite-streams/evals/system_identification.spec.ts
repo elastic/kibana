@@ -7,7 +7,7 @@
 import Path from 'path';
 import { node } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { identifySystemFeatures } from '@kbn/streams-ai';
+import { identifySystems } from '@kbn/streams-ai';
 import kbnDatemath from '@kbn/datemath';
 import type { ScoutTestConfig } from '@kbn/scout';
 import { omit, uniq } from 'lodash';
@@ -16,12 +16,12 @@ import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { WiredIngest } from '@kbn/streams-schema';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
-import type { FeatureIdentificationEvaluationDataset } from './feature_identification_datasets';
-import { FEATURE_IDENTIFICATION_DATASETS } from './feature_identification_datasets';
+import type { SystemIdentificationEvaluationDataset } from './system_identification_datasets';
+import { SYSTEM_IDENTIFICATION_DATASETS } from './system_identification_datasets';
 
 evaluate.describe.configure({ timeout: 600_000 });
 
-evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
+evaluate.describe('Streams systems identification', { tag: '@svlOblt' }, () => {
   const from = kbnDatemath.parse('now-15m')!;
   const to = kbnDatemath.parse('now')!;
 
@@ -86,8 +86,8 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
     );
   }
 
-  async function runFeatureIdentificationExperiment(
-    dataset: FeatureIdentificationEvaluationDataset,
+  async function runSystemIdentificationExperiment(
+    dataset: SystemIdentificationEvaluationDataset,
     {
       phoenixClient,
       apiServices,
@@ -242,34 +242,28 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
             });
           }
 
-          const { features } = await identifySystemFeatures({
+          const { systems } = await identifySystems({
             start: from.valueOf(),
             end: to.valueOf(),
             esClient,
             inferenceClient,
             logger,
             stream,
-            dropUnmapped: true,
             signal: new AbortController().signal,
-            analysis: await describeDataset({
-              esClient,
-              start: from.valueOf(),
-              end: to.valueOf(),
-              index: stream.name,
-            }),
+            dropUnmapped: true,
           });
 
-          const featuresWithAnalysis = await Promise.all(
-            features.map(async (feature) => {
+          const systemsWithAnalysis = await Promise.all(
+            systems.map(async (system) => {
               return {
-                feature,
+                system,
                 analysis: formatDocumentAnalysis(
                   await describeDataset({
                     esClient,
                     start: from.valueOf(),
                     end: to.valueOf(),
                     index: stream.name,
-                    filter: conditionToQueryDsl(feature.filter),
+                    filter: conditionToQueryDsl(system.filter),
                   }),
                   {
                     dropEmpty: true,
@@ -288,13 +282,13 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           });
 
           return {
-            features: features.map(({ name, filter }) => ({
+            systems: systems.map(({ name, filter }) => ({
               name,
               filter,
             })),
-            analysis: featuresWithAnalysis.map(({ feature, analysis }) => {
+            analysis: systemsWithAnalysis.map(({ system, analysis }) => {
               return {
-                name: feature.name,
+                name: system.name,
                 analysis,
               };
             }),
@@ -309,7 +303,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
             const result = await evaluators.criteria(expected.criteria).evaluate({
               input: input.stream,
               expected,
-              output: output.features,
+              output: output.systems,
               metadata,
             });
 
@@ -321,7 +315,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
   }
 
   // Serverless datasets (one describe per dataset with isolated lifecycle)
-  FEATURE_IDENTIFICATION_DATASETS.serverless.forEach((dataset) => {
+  SYSTEM_IDENTIFICATION_DATASETS.serverless.forEach((dataset) => {
     evaluate.describe(dataset.name, () => {
       evaluate.beforeEach(async ({ apiServices }) => {
         await apiServices.streams.enable();
@@ -336,7 +330,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
       });
 
       evaluate(
-        'feature identification',
+        'system identification',
         async ({
           evaluators,
           esClient,
@@ -346,7 +340,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           apiServices,
           config,
         }) => {
-          await runFeatureIdentificationExperiment(dataset, {
+          await runSystemIdentificationExperiment(dataset, {
             apiServices,
             esClient,
             evaluators,
@@ -361,7 +355,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
   });
 
   // Loghub datasets
-  FEATURE_IDENTIFICATION_DATASETS.loghub.forEach((dataset) => {
+  SYSTEM_IDENTIFICATION_DATASETS.loghub.forEach((dataset) => {
     evaluate.describe(dataset.name, () => {
       evaluate.beforeEach(async ({ apiServices }) => {
         await apiServices.streams.enable();
@@ -400,7 +394,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           apiServices,
           config,
         }) => {
-          await runFeatureIdentificationExperiment(
+          await runSystemIdentificationExperiment(
             {
               ...dataset,
               examples: dataset.examples.map((example) => {
@@ -432,7 +426,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
   });
 
   // Mixed datasets
-  FEATURE_IDENTIFICATION_DATASETS.mixed.forEach((dataset) => {
+  SYSTEM_IDENTIFICATION_DATASETS.mixed.forEach((dataset) => {
     evaluate.describe(dataset.name, () => {
       evaluate.beforeEach(async ({ apiServices }) => {
         await apiServices.streams.enable();
@@ -447,7 +441,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
       });
 
       evaluate(
-        'feature identification',
+        'system identification',
         async ({
           evaluators,
           esClient,
@@ -457,7 +451,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           apiServices,
           config,
         }) => {
-          await runFeatureIdentificationExperiment(dataset, {
+          await runSystemIdentificationExperiment(dataset, {
             apiServices,
             esClient,
             evaluators,

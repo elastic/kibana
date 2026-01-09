@@ -20,6 +20,8 @@ export interface EndpointScript {
   fileSize: number;
   /** SHA-256 hash of the file */
   fileHash: string;
+  /** Id of the internally stored file for this script */
+  fileId: string;
   /** If `true`, then the script, when invoked, requires input arguments to be provided */
   requiresInput: boolean;
   /**
