@@ -7,7 +7,6 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 import { merge } from 'lodash';
-import systemPromptDefault from '../significant_events/system_prompt.text';
 import systemPromptTemplate from './system_prompt.text';
 import userPromptTemplate from './user_prompt.text';
 
@@ -64,8 +63,8 @@ export function createIdentifySystemsPrompt({
   systemPromptOverride,
 }: {
   systemPromptOverride?: string;
-} = {}) {
-  const systemPrompt = systemPromptOverride ?? systemPromptDefault;
+}) {
+  const systemPrompt = systemPromptOverride ?? systemPromptTemplate;
 
   return createPrompt({
     name: 'identify_systems',
@@ -104,4 +103,4 @@ export function createIdentifySystemsPrompt({
     .get();
 }
 
-export { systemPromptTemplate as featuresSystemPromptTemplate };
+export { systemPromptTemplate as systemsSystemPromptTemplate };
