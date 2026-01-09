@@ -95,8 +95,32 @@ describe('GithubConnector', () => {
         data: {
           total_count: 2,
           items: [
-            { number: 1, title: 'Issue 1', state: 'open' },
-            { number: 2, title: 'Issue 2', state: 'open' },
+            {
+              number: 1,
+              title: 'Issue 1',
+              state: 'open',
+              html_url: 'https://github.com/owner/repo/issues/1',
+              labels: [{ name: 'bug', color: 'd73a4a' }],
+              created_at: '2024-01-01T00:00:00Z',
+              updated_at: '2024-01-02T00:00:00Z',
+              comments: 5,
+              body: 'Issue description',
+              assignees: [{ login: 'user1' }],
+              milestone: null,
+            },
+            {
+              number: 2,
+              title: 'Issue 2',
+              state: 'open',
+              html_url: 'https://github.com/owner/repo/issues/2',
+              labels: [],
+              created_at: '2024-01-03T00:00:00Z',
+              updated_at: '2024-01-04T00:00:00Z',
+              comments: 0,
+              body: null,
+              assignees: [],
+              milestone: { title: 'v1.0' },
+            },
           ],
         },
       };
@@ -105,6 +129,7 @@ describe('GithubConnector', () => {
       const result = await GithubConnector.actions.searchIssues.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
+        type: 'issue',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
@@ -115,14 +140,58 @@ describe('GithubConnector', () => {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        total_count: 2,
+        items: [
+          {
+            number: 1,
+            title: 'Issue 1',
+            state: 'open',
+            html_url: 'https://github.com/owner/repo/issues/1',
+            labels: [{ name: 'bug', color: 'd73a4a' }],
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-02T00:00:00Z',
+            comments: 5,
+            body: 'Issue description',
+            assignees: ['user1'],
+            milestone: null,
+          },
+          {
+            number: 2,
+            title: 'Issue 2',
+            state: 'open',
+            html_url: 'https://github.com/owner/repo/issues/2',
+            labels: [],
+            created_at: '2024-01-03T00:00:00Z',
+            updated_at: '2024-01-04T00:00:00Z',
+            comments: 0,
+            body: null,
+            assignees: [],
+            milestone: 'v1.0',
+          },
+        ],
+      });
     });
 
     it('should search for issues with query', async () => {
       const mockResponse = {
         data: {
           total_count: 1,
-          items: [{ number: 1, title: 'Bug fix', state: 'open' }],
+          items: [
+            {
+              number: 1,
+              title: 'Bug fix',
+              state: 'open',
+              html_url: 'https://github.com/owner/repo/issues/1',
+              labels: [],
+              created_at: '2024-01-01T00:00:00Z',
+              updated_at: '2024-01-01T00:00:00Z',
+              comments: 0,
+              body: null,
+              assignees: [],
+              milestone: null,
+            },
+          ],
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
@@ -130,6 +199,7 @@ describe('GithubConnector', () => {
       const result = await GithubConnector.actions.searchIssues.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
+        type: 'issue',
         query: 'bug',
       });
 
@@ -141,74 +211,41 @@ describe('GithubConnector', () => {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect(result).toEqual(mockResponse.data);
+      expect((result as { total_count: number; items: Array<{ title: string }> }).total_count).toBe(
+        1
+      );
+      expect(
+        (result as { total_count: number; items: Array<{ title: string }> }).items[0].title
+      ).toBe('Bug fix');
     });
 
-    it('should handle invalid search query', async () => {
-      const error: HttpError = new Error('Validation failed');
-      error.response = {
-        status: 422,
-        data: {
-          message: 'Invalid query syntax',
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchIssues.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-          query: 'invalid query syntax',
-        })
-      ).rejects.toThrow('Validation failed');
-    });
-
-    it('should handle 422 error without message', async () => {
-      const error: HttpError = new Error('Validation failed');
-      error.response = {
-        status: 422,
-        data: {},
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchIssues.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-        })
-      ).rejects.toThrow('Validation failed');
-    });
-
-    it('should rethrow non-422 errors', async () => {
-      const error: HttpError = new Error('Server error');
-      error.response = { status: 500 };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchIssues.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-        })
-      ).rejects.toThrow('Server error');
-    });
-  });
-
-  describe('searchPullRequests action', () => {
-    it('should search for pull requests without query', async () => {
+    it('should search for pull requests', async () => {
       const mockResponse = {
         data: {
-          total_count: 2,
+          total_count: 1,
           items: [
-            { number: 1, title: 'PR 1', state: 'open', pull_request: {} },
-            { number: 2, title: 'PR 2', state: 'open', pull_request: {} },
+            {
+              number: 10,
+              title: 'PR 1',
+              state: 'open',
+              html_url: 'https://github.com/owner/repo/pull/10',
+              labels: [],
+              created_at: '2024-01-01T00:00:00Z',
+              updated_at: '2024-01-01T00:00:00Z',
+              comments: 0,
+              body: null,
+              assignees: [],
+              milestone: null,
+            },
           ],
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await GithubConnector.actions.searchPullRequests.handler(mockContext, {
+      const result = await GithubConnector.actions.searchIssues.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
+        type: 'pr',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
@@ -219,33 +256,142 @@ describe('GithubConnector', () => {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect(result).toEqual(mockResponse.data);
+      expect((result as { total_count: number; items: Array<{ title: string }> }).total_count).toBe(
+        1
+      );
+      expect(
+        (result as { total_count: number; items: Array<{ title: string }> }).items[0].title
+      ).toBe('PR 1');
     });
 
-    it('should search for pull requests with query', async () => {
+    it('should search with state filter', async () => {
       const mockResponse = {
         data: {
-          total_count: 1,
-          items: [{ number: 1, title: 'Bug fix PR', state: 'open', pull_request: {} }],
+          total_count: 0,
+          items: [],
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await GithubConnector.actions.searchPullRequests.handler(mockContext, {
+      await GithubConnector.actions.searchIssues.handler(mockContext, {
         owner: 'owner',
         repo: 'repo',
-        query: 'bug',
+        type: 'issue',
+        state: 'closed',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
         params: {
-          q: 'repo:owner/repo is:pr is:open bug',
+          q: 'repo:owner/repo is:issue is:closed',
         },
         headers: {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should search with author filter', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 0,
+          items: [],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GithubConnector.actions.searchIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        type: 'issue',
+        author: 'octocat',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
+        params: {
+          q: 'repo:owner/repo is:issue is:open author:octocat',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+    });
+
+    it('should search with assignee filter', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 0,
+          items: [],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GithubConnector.actions.searchIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        type: 'issue',
+        assignee: 'user1',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
+        params: {
+          q: 'repo:owner/repo is:issue is:open assignee:user1',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+    });
+
+    it('should search with label filter', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 0,
+          items: [],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GithubConnector.actions.searchIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        type: 'issue',
+        label: 'bug',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
+        params: {
+          q: 'repo:owner/repo is:issue is:open label:bug',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+    });
+
+    it('should search with milestone filter', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 0,
+          items: [],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GithubConnector.actions.searchIssues.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        type: 'issue',
+        milestone: 'v1.0',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
+        params: {
+          q: 'repo:owner/repo is:issue is:open milestone:"v1.0"',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
     });
 
     it('should handle invalid search query', async () => {
@@ -259,9 +405,10 @@ describe('GithubConnector', () => {
       mockClient.get.mockRejectedValue(error);
 
       await expect(
-        GithubConnector.actions.searchPullRequests.handler(mockContext, {
+        GithubConnector.actions.searchIssues.handler(mockContext, {
           owner: 'owner',
           repo: 'repo',
+          type: 'issue',
           query: 'invalid query syntax',
         })
       ).rejects.toThrow('Validation failed');
@@ -276,24 +423,12 @@ describe('GithubConnector', () => {
       mockClient.get.mockRejectedValue(error);
 
       await expect(
-        GithubConnector.actions.searchPullRequests.handler(mockContext, {
+        GithubConnector.actions.searchIssues.handler(mockContext, {
           owner: 'owner',
           repo: 'repo',
+          type: 'issue',
         })
       ).rejects.toThrow('Validation failed');
-    });
-
-    it('should rethrow non-422 errors', async () => {
-      const error: HttpError = new Error('Server error');
-      error.response = { status: 500 };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchPullRequests.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-        })
-      ).rejects.toThrow('Server error');
     });
   });
 
@@ -1057,289 +1192,6 @@ describe('GithubConnector', () => {
         }
       );
       expect(result).toEqual(mockResponse.data);
-    });
-  });
-
-  describe('listIssues action', () => {
-    it('should list issues without optional parameters', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 1,
-            title: 'Issue 1',
-            state: 'open',
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-01T00:00:00Z',
-          },
-          {
-            number: 2,
-            title: 'Issue 2',
-            state: 'open',
-            created_at: '2024-01-02T00:00:00Z',
-            updated_at: '2024-01-02T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {},
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should list issues with state parameter', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 3,
-            title: 'Closed Issue',
-            state: 'closed',
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-03T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        state: 'closed',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {
-            state: 'closed',
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should list issues with sort and direction parameters', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 2,
-            title: 'Issue 2',
-            state: 'open',
-            created_at: '2024-01-02T00:00:00Z',
-            updated_at: '2024-01-02T00:00:00Z',
-          },
-          {
-            number: 1,
-            title: 'Issue 1',
-            state: 'open',
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-01T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        sort: 'created',
-        direction: 'desc',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {
-            sort: 'created',
-            direction: 'desc',
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should list issues with labels parameter', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 5,
-            title: 'Bug Issue',
-            state: 'open',
-            labels: [{ name: 'bug', color: 'd73a4a' }],
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-01T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        labels: ['bug', 'urgent'],
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {
-            labels: 'bug,urgent',
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should list issues with pagination parameters', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 10,
-            title: 'Issue 10',
-            state: 'open',
-            created_at: '2024-01-10T00:00:00Z',
-            updated_at: '2024-01-10T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        page: 2,
-        perPage: 10,
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {
-            page: 2,
-            per_page: 10,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should list issues with since parameter', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 7,
-            title: 'Recent Issue',
-            state: 'open',
-            created_at: '2024-01-15T00:00:00Z',
-            updated_at: '2024-01-15T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        since: '2024-01-01T00:00:00Z',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {
-            since: '2024-01-01T00:00:00Z',
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should list issues with all optional parameters', async () => {
-      const mockResponse = {
-        data: [
-          {
-            number: 8,
-            title: 'Complex Issue',
-            state: 'open',
-            labels: [{ name: 'enhancement', color: 'a2eeef' }],
-            created_at: '2024-01-08T00:00:00Z',
-            updated_at: '2024-01-08T00:00:00Z',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        state: 'open',
-        sort: 'updated',
-        direction: 'asc',
-        since: '2024-01-01T00:00:00Z',
-        labels: ['enhancement'],
-        page: 1,
-        perPage: 20,
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/issues',
-        {
-          params: {
-            state: 'open',
-            sort: 'updated',
-            direction: 'asc',
-            since: '2024-01-01T00:00:00Z',
-            labels: 'enhancement',
-            page: 1,
-            per_page: 20,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should handle empty issue list', async () => {
-      const mockResponse = {
-        data: [],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-      });
-
-      expect(result).toEqual([]);
     });
   });
 

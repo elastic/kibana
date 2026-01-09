@@ -9,11 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import {
-  generateGithubSearchIssuesWorkflow,
+  generateGithubSearchIssuesOrPullRequestsWorkflow,
   generateGithubGetDocsWorkflow,
   generateGithubListRepositoriesWorkflow,
-  generateGithubSearchPullRequestsWorkflow,
-  generateGithubListIssuesWorkflow,
   generateGithubGetIssueWorkflow,
   generateGithubGetPullRequestWorkflow,
   generateGithubGetFileContentsWorkflow,
@@ -51,18 +49,10 @@ export const githubDataSource: DataTypeDefinition = {
 
   generateWorkflows(stackConnectorId: string) {
     return [
-      { content: generateGithubSearchIssuesWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateGithubSearchIssuesOrPullRequestsWorkflow(stackConnectorId), shouldGenerateABTool: true },
       { content: generateGithubGetDocsWorkflow(stackConnectorId), shouldGenerateABTool: true },
       {
         content: generateGithubListRepositoriesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubListIssuesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {

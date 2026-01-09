@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export function generateGithubSearchIssuesWorkflow(stackConnectorId: string): string {
+export function generateGithubSearchIssuesOrPullRequestsWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'sources.github.search_issues'
-description: 'Search for issues in a GitHub repository'
+name: 'sources.github.search_issues_or_pull_requests'
+description: 'Search for issues or pull requests in a GitHub repository'
 enabled: true
 triggers:
   - type: 'manual'
@@ -16,7 +16,24 @@ inputs:
     type: string
   - name: repo
     type: string
+  - name: type
+    type: string
   - name: query
+    type: string
+    required: false
+  - name: state
+    type: string
+    required: false
+  - name: author
+    type: string
+    required: false
+  - name: assignee
+    type: string
+    required: false
+  - name: label
+    type: string
+    required: false
+  - name: milestone
     type: string
     required: false
 steps:
@@ -26,7 +43,13 @@ steps:
     with:
       owner: "\${{inputs.owner}}"
       repo: "\${{inputs.repo}}"
+      type: "\${{inputs.type}}"
       query: "\${{inputs.query}}"
+      state: "\${{inputs.state}}"
+      author: "\${{inputs.author}}"
+      assignee: "\${{inputs.assignee}}"
+      label: "\${{inputs.label}}"
+      milestone: "\${{inputs.milestone}}"
 `;
 }
 
@@ -75,81 +98,6 @@ steps:
 `;
 }
 
-export function generateGithubSearchPullRequestsWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.github.search_pull_requests'
-description: 'Search for pull requests by their metadata (titles, descriptions, comments, labels, authors). Use this when you need to find PRs related to a topic, feature, or keyword. Returns pull request objects with PR numbers, titles, and metadata. The query parameter searches across PR titles, descriptions, and comments.'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: owner
-    type: string
-  - name: repo
-    type: string
-  - name: query
-    type: string
-    required: false
-steps:
-  - name: search-pull-requests
-    type: github.searchPullRequests
-    connector-id: ${stackConnectorId}
-    with:
-      owner: "\${{inputs.owner}}"
-      repo: "\${{inputs.repo}}"
-      query: "\${{inputs.query}}"
-`;
-}
-
-export function generateGithubListIssuesWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.github.list_issues'
-description: 'List issues in a GitHub repository'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: owner
-    type: string
-  - name: repo
-    type: string
-  - name: state
-    type: string
-    required: false
-  - name: sort
-    type: string
-    required: false
-  - name: direction
-    type: string
-    required: false
-  - name: since
-    type: string
-    required: false
-  - name: labels
-    type: array
-    required: false
-  - name: page
-    type: number
-    required: false
-  - name: perPage
-    type: number
-    required: false
-steps:
-  - name: list-issues
-    type: github.listIssues
-    connector-id: ${stackConnectorId}
-    with:
-      owner: "\${{inputs.owner}}"
-      repo: "\${{inputs.repo}}"
-      state: "\${{inputs.state}}"
-      sort: "\${{inputs.sort}}"
-      direction: "\${{inputs.direction}}"
-      since: "\${{inputs.since}}"
-      labels: "\${{inputs.labels}}"
-      page: "\${{inputs.page}}"
-      perPage: "\${{inputs.perPage}}"
-`;
-}
 
 export function generateGithubGetIssueWorkflow(stackConnectorId: string): string {
   return `version: '1'

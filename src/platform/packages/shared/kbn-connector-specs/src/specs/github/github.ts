@@ -48,57 +48,102 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string(),
         repo: z.string(),
+        type: z.enum(['issue', 'pr']),
         query: z.string().optional(),
+        state: z.enum(['open', 'closed']).optional(),
+        author: z.string().optional(),
+        assignee: z.string().optional(),
+        label: z.string().optional(),
+        milestone: z.string().optional(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
           repo: string;
+          type: 'issue' | 'pr';
           query?: string;
+          state?: 'open' | 'closed';
+          author?: string;
+          assignee?: string;
+          label?: string;
+          milestone?: string;
         };
-        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo} is:issue is:open`;
-        if (typedInput.query) {
-          searchQuery += ` ${typedInput.query}`;
-        }
+        const queryParts = [
+          `repo:${typedInput.owner}/${typedInput.repo}`,
+          `is:${typedInput.type}`,
+          `is:${typedInput.state || 'open'}`,
+        ];
+
+        // Add structured filters
+        if (typedInput.author) queryParts.push(`author:${typedInput.author}`);
+        if (typedInput.assignee) queryParts.push(`assignee:${typedInput.assignee}`);
+        if (typedInput.label) queryParts.push(`label:${typedInput.label}`);
+        if (typedInput.milestone) queryParts.push(`milestone:"${typedInput.milestone}"`);
+        if (typedInput.query) queryParts.push(typedInput.query);
+
+        const params: { q: string; sort?: string; order?: string } = {
+          q: queryParts.join(' '),
+        };
 
         const response = await ctx.client.get('https://api.github.com/search/issues', {
-          params: {
-            q: searchQuery,
-          },
+          params,
           headers: {
             Accept: 'application/vnd.github.v3+json',
           },
         });
-        return response.data;
-      },
-    },
-    searchPullRequests: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        query: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          query?: string;
-        };
-        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo} is:pr is:open`;
-        if (typedInput.query) {
-          searchQuery += ` ${typedInput.query}`;
-        }
 
-        const response = await ctx.client.get('https://api.github.com/search/issues', {
-          params: {
-            q: searchQuery,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
+        // Transform response to only include essential fields for determining if worth investigating
+        const transformedItems = response.data.items.map(
+          (item: {
+            number: number;
+            title: string;
+            state: string;
+            html_url: string;
+            labels: Array<{ name: string; color?: string }>;
+            created_at: string;
+            updated_at: string;
+            comments: number;
+            body: string | null;
+            assignees: Array<{ login: string }>;
+            milestone: { title: string } | null;
+          }) => ({
+            number: item.number,
+            title: item.title,
+            state: item.state,
+            html_url: item.html_url,
+            labels: item.labels.map((label) => ({ name: label.name, color: label.color })),
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            comments: item.comments,
+            body: item.body,
+            assignees: item.assignees.map((assignee) => assignee.login),
+            milestone: item.milestone?.title ?? null,
+          })
+        );
+
+        const searchIssuesResponseSchema = z.object({
+          total_count: z.number(),
+          items: z.array(
+            z.object({
+              number: z.number(),
+              title: z.string(),
+              state: z.string(),
+              html_url: z.string(),
+              labels: z.array(z.object({ name: z.string(), color: z.string().optional() })),
+              created_at: z.string(),
+              updated_at: z.string(),
+              comments: z.number(),
+              body: z.string().nullable(),
+              assignees: z.array(z.string()),
+              milestone: z.string().nullable(),
+            })
+          ),
         });
-        return response.data;
+
+        return searchIssuesResponseSchema.parse({
+          total_count: response.data.total_count,
+          items: transformedItems,
+        });
       },
     },
     searchRepoContents: {
@@ -387,52 +432,6 @@ export const GithubConnector: ConnectorSpec = {
         // Return raw response data to support both file and directory responses
         // Files: object with name, path, content (base64), html_url, etc.
         // Directories: array of objects with type, name, path, size, url, etc.
-        return response.data;
-      },
-    },
-    listIssues: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        state: z.enum(['open', 'closed', 'all']).optional(),
-        sort: z.enum(['created', 'updated', 'comments']).optional(),
-        direction: z.enum(['asc', 'desc']).optional(),
-        since: z.string().optional(),
-        labels: z.array(z.string()).optional(),
-        page: z.coerce.number().min(1).optional(),
-        perPage: z.coerce.number().min(1).max(100).optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          state?: 'open' | 'closed' | 'all';
-          sort?: 'created' | 'updated' | 'comments';
-          direction?: 'asc' | 'desc';
-          since?: string;
-          labels?: string[];
-          page?: number;
-          perPage?: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues`,
-          {
-            params: {
-              ...(typedInput.state && { state: typedInput.state }),
-              ...(typedInput.sort && { sort: typedInput.sort }),
-              ...(typedInput.direction && { direction: typedInput.direction }),
-              ...(typedInput.since && { since: typedInput.since }),
-              ...(typedInput.labels && typedInput.labels.length > 0 && { labels: typedInput.labels.join(',') }),
-              ...(typedInput.page && { page: typedInput.page }),
-              ...(typedInput.perPage && { per_page: typedInput.perPage }),
-            },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
         return response.data;
       },
     },
