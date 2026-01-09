@@ -62,7 +62,7 @@ export function useAdHocApmDataView() {
       setDataView(result.dataView);
       setApmIndices(result.apmIndices);
     });
-  }, [services.notifications.toasts, services.dataViews]);
+  }, [notifications.toasts, services.dataViews]);
 
   return { dataView, apmIndices };
 }
