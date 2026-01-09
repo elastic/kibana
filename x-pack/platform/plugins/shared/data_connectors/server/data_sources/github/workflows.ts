@@ -98,7 +98,6 @@ steps:
 `;
 }
 
-
 export function generateGithubGetIssueWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.get_issue'
