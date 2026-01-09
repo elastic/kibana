@@ -14,6 +14,7 @@ import type {
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { descriptionPrompt } from '@kbn/streams-ai/src/description/prompt';
+import { systemsPrompt } from '@kbn/streams-ai/src/systems/prompt';
 import { streamsPromptsSOType } from './prompts_config';
 import type { PromptsConfigAttributes } from './prompts_config';
 
@@ -23,6 +24,7 @@ const defaultsPrompts = {
   featurePromptOverride: featuresPrompt,
   significantEventsPromptOverride: significantEventsPrompt,
   descriptionPromptOverride: descriptionPrompt,
+  systemsPromptOverride: systemsPrompt,
 };
 
 const SINGLETON_PROMPTS_ID = 'streams-prompts-config-id';
@@ -77,6 +79,8 @@ export class PromptsConfigService {
           defaultsPrompts.significantEventsPromptOverride,
         descriptionPromptOverride:
           data.attributes.descriptionPromptOverride || defaultsPrompts.descriptionPromptOverride,
+        systemsPromptOverride:
+          data.attributes.systemsPromptOverride || defaultsPrompts.systemsPromptOverride,
       };
     } catch (err: any) {
       // saved objects client throws with statusCode 404 for not found

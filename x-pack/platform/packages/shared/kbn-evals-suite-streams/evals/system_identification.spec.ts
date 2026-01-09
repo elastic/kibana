@@ -15,6 +15,7 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { WiredIngest } from '@kbn/streams-schema';
 import { descriptionPrompt } from '@kbn/streams-ai/src/description/prompt';
+import { systemsPrompt } from '@kbn/streams-ai/src/systems/prompt';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type { SystemIdentificationEvaluationDataset } from './system_identification_datasets';
@@ -252,6 +253,7 @@ evaluate.describe('Streams systems identification', { tag: '@svlOblt' }, () => {
             stream,
             signal: new AbortController().signal,
             descriptionPrompt,
+            systemsPrompt,
             dropUnmapped: true,
           });
 

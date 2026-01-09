@@ -10,6 +10,8 @@ import { merge } from 'lodash';
 import systemsSystemPrompt from './system_prompt.text';
 import systemsUserPrompt from './user_prompt.text';
 
+export { systemsSystemPrompt as systemsPrompt };
+
 const systemsSchemaBase = {
   type: 'object',
   properties: {
@@ -59,7 +61,7 @@ export interface FinalizeSystemsResponse {
   }>;
 }
 
-export function createIdentifySystemsPrompt() {
+export function createIdentifySystemsPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({
     name: 'identify_systems',
     input: z.object({
@@ -75,7 +77,7 @@ export function createIdentifySystemsPrompt() {
     .version({
       system: {
         mustache: {
-          template: systemsSystemPrompt,
+          template: systemPrompt,
         },
       },
       template: {
