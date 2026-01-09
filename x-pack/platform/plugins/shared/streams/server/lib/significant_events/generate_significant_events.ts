@@ -31,8 +31,7 @@ export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
 ): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt } =
-    params;
+  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt } = params;
   const { inferenceClient, esClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({

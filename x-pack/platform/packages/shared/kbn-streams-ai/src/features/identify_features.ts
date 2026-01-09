@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';

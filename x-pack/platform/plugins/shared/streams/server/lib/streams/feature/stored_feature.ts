@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import type { FeatureStatus } from '@kbn/streams-schema/src/feature';
+import { featureStatusSchema } from '@kbn/streams-schema/src/feature';
 import {
   STREAM_NAME,
   FEATURE_UUID,
@@ -19,7 +21,6 @@ import {
   FEATURE_TYPE,
   FEATURE_TAGS,
 } from './fields';
-import { featureStatusSchema, FeatureStatus } from '@kbn/streams-schema/src/feature';
 
 export interface StoredFeature {
   [FEATURE_TYPE]: string;
