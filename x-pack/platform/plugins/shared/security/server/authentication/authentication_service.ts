@@ -17,6 +17,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { i18n as i18nLib } from '@kbn/i18n';
 import type {
   AuditServiceSetup,
   AuthenticationServiceStart,
@@ -29,13 +30,13 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
-import { renderUnauthenticatedPage } from './unauthenticated_page';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
@@ -216,23 +217,27 @@ export class AuthenticationService {
         return toolkit.next();
       }
 
+      const unauthenticatedTitle = i18nLib.translate(
+        'xpack.security.authentication.unauthenticatedTitle',
+        {
+          defaultMessage: 'Unauthenticated',
+        }
+      );
+
       // Now we are only dealing with authentication flow errors or 401 errors in non-authentication routes.
       // Additionally, if logout fails for any reason, we also want to show an error page.
       // At this point we redirect users to the login page if it's available, or render a dedicated unauthenticated error page.
       if (!isLoginPageAvailable || isLogoutRoute) {
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: true,
-        });
+        const location = http.basePath.prepend(
+          `/security/unauthenticated?next=${encodeURIComponent(originalURL)}`
+        );
+        const body = createRedirectHtmlPage(unauthenticatedTitle, location);
         return toolkit.render({
-          body: renderUnauthenticatedPage({
-            staticAssets: http.staticAssets,
-            basePath: http.basePath,
-            originalURL,
-            customBranding: customBrandingValue,
-          }),
+          body,
           headers: {
             'Content-Security-Policy': http.csp.header,
             'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
+            Refresh: `0;url=${location}`,
           },
         });
       }
@@ -242,18 +247,18 @@ export class AuthenticationService {
         this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
       }
 
+      const location = http.basePath.prepend(
+        `${
+          needsToLogout ? '/logout' : '/login'
+        }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(originalURL)}`
+      );
+      const body = createRedirectHtmlPage(unauthenticatedTitle, location);
       return toolkit.render({
-        body: '<div/>',
+        body,
         headers: {
+          Refresh: `0;url=${location}`,
           'Content-Security-Policy': http.csp.header,
           'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-          Refresh: `0;url=${http.basePath.prepend(
-            `${
-              needsToLogout ? '/logout' : '/login'
-            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              originalURL
-            )}`
-          )}`,
         },
       });
     });

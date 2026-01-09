@@ -23,6 +23,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { ConversationStateManager, PromptManager } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
@@ -36,6 +37,7 @@ export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type AttachmentsServiceMock = jest.Mocked<AttachmentsService>;
+export type AttachmentStateManagerMock = jest.Mocked<AttachmentStateManager>;
 export type PromptManagerMock = jest.Mocked<PromptManager>;
 export type StateManagerMock = jest.Mocked<ConversationStateManager>;
 
@@ -74,6 +76,9 @@ export const createAttachmentsService = (): AttachmentsServiceMock => {
 export const createPromptManagerMock = (): PromptManagerMock => {
   return {
     set: jest.fn(),
+    get: jest.fn(),
+    dump: jest.fn(),
+    getConfirmationStatus: jest.fn(),
     clear: jest.fn(),
     forTool: jest.fn(),
   };
@@ -85,12 +90,34 @@ export const createStateManagerMock = (): StateManagerMock => {
   };
 };
 
+export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock => {
+  return {
+    get: jest.fn(),
+    getLatest: jest.fn(),
+    getVersion: jest.fn(),
+    getActive: jest.fn(),
+    getAll: jest.fn(),
+    getDiff: jest.fn(),
+    add: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    restore: jest.fn(),
+    permanentDelete: jest.fn(),
+    rename: jest.fn(),
+    resolveRefs: jest.fn(),
+    getTotalTokenEstimate: jest.fn(),
+    hasChanges: jest.fn(),
+    markClean: jest.fn(),
+  };
+};
+
 export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   security: ReturnType<typeof securityServiceMock.createStart>;
   modelProvider: ModelProviderMock;
   toolsService: ToolsServiceStartMock;
   agentsService: AgentsServiceStartMock;
+  promptManager: PromptManagerMock;
   logger: MockedLogger;
   request: KibanaRequest;
 }
@@ -120,6 +147,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
     resultStore: createToolResultStoreMock(),
+    attachmentStateManager: createAttachmentStateManagerMock(),
     events: {
       emit: jest.fn(),
     },
@@ -149,6 +177,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
+    attachmentStateManager: createAttachmentStateManagerMock(),
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),

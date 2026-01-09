@@ -45,6 +45,19 @@ import {
   createGetChangeEventsTool,
   OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID,
 } from './get_change_events/tool';
+import {
+  createGetTraceMetricsTool,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+} from './get_trace_metrics/tool';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  createGetLogChangePointsTool,
+} from './get_log_change_points/tool';
+import {
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  createGetMetricChangePointsTool,
+} from './get_metric_change_points/tool';
+
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
@@ -64,6 +77,9 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -88,11 +104,14 @@ export async function registerTools({
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
-    createGetServicesTool({ core, dataRegistry, logger }),
+    createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetChangeEventsTool({ core, plugins, logger }),
+    createGetTraceMetricsTool({ core, dataRegistry, logger }),
+    createGetLogChangePointsTool({ core, plugins, logger }),
+    createGetMetricChangePointsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

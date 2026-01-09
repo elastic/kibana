@@ -12,7 +12,7 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeStart } from './contracts';
+export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
   ChromeHelpExtension,
@@ -31,7 +31,7 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
