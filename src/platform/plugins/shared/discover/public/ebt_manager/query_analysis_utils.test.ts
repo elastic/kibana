@@ -32,7 +32,7 @@ describe('mergeMultiMatchAnalyses', () => {
     expect(result.rawTypes).toEqual(analysis.rawTypes);
   });
 
-  it('should correctly merge counts and raw types from multiple analyses', () => {
+  it('should correctly merge counts and types from multiple analyses', () => {
     const analysis1: MultiMatchAnalysis = {
       typeCounts: new Map([
         ['match_phrase', 2],

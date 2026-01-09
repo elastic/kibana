@@ -9,6 +9,7 @@
 
 import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
 import { z } from '@kbn/zod/v4';
+import { analyzeEsqlMatchRequest } from './esql_query_analysis_utils';
 
 /**
  * Analysis result for multi_match query types found in ES query DSL.
@@ -54,7 +55,7 @@ export interface MultiMatchAnalysis {
  *   }
  * };
  *
- * const result = analyzeMultiMatchTypes(query);
+ * const result = analyzeMultiMatchTypesQuery(query);
  * // result.typeCounts: Map([['match_phrase', 2], ['best_fields', 1]])
  * ```
  *
@@ -147,7 +148,7 @@ export function analyzeMultiMatchTypesQuery(query: object | undefined): MultiMat
  * @param request - The inspected request object containing the JSON body to be analyzed.
  * @returns The result of analyzing the query for multi-match types, or the result of analyzing `undefined` if the request body is invalid.
  */
-export function analyzeMultiMatchTypesRequest(request: InspectedRequest) {
+export function analyzeMultiMatchTypesRequest(request: InspectedRequest): MultiMatchAnalysis {
   const maybeRequestBody = RequestWithQuery.safeParse(request.json);
 
   return analyzeMultiMatchTypesQuery(
@@ -180,6 +181,56 @@ export function mergeMultiMatchAnalyses(analyses: MultiMatchAnalysis[]): MultiMa
       rawTypes: [],
     } as MultiMatchAnalysis
   );
+}
+
+/**
+ * Merges multiple query analysis results (from analyzeRequest) into a single result.
+ * @param analyses - Array of analysis results to merge
+ * @returns A single merged result with combined counts and types
+ * @internal
+ */
+export function mergeAnalysisResults(
+  analyses: Array<{ phraseQueryCount: number; matchTypes: string[] }>
+): { phraseQueryCount: number; matchTypes: string[] } {
+  return analyses.reduce(
+    (merged, analysis) => {
+      merged.phraseQueryCount += analysis.phraseQueryCount;
+      merged.matchTypes.push(...analysis.matchTypes);
+      return merged;
+    },
+    { phraseQueryCount: 0, matchTypes: [] }
+  );
+}
+
+/**
+ * Analyzes an inspected request to extract query information.
+ * Supports both Query DSL and ES|QL requests with auto-detection.
+ *
+ * @param request - The inspected request object to analyze
+ * @returns Object containing phrase count and match types for telemetry
+ *
+ * @internal
+ */
+export function analyzeRequest(request: InspectedRequest): {
+  phraseQueryCount: number;
+  matchTypes: string[];
+} {
+  // Try ES|QL first (request body has a string 'query' field)
+  const esqlResult = analyzeEsqlMatchRequest(request);
+  if (esqlResult.matchTypes.length > 0) {
+    // It's an ES|QL request
+    return {
+      phraseQueryCount: esqlResult.phraseQueryCount,
+      matchTypes: esqlResult.matchTypes,
+    };
+  }
+
+  // Otherwise, it's a Query DSL request (request body has an object 'query' field)
+  const queryDslResult = analyzeMultiMatchTypesRequest(request);
+  return {
+    phraseQueryCount: queryDslResult.typeCounts.get('match_phrase') ?? 0,
+    matchTypes: queryDslResult.rawTypes,
+  };
 }
 
 const RequestWithQuery = z.object({

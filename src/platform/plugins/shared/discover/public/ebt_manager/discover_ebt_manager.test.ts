@@ -1013,7 +1013,7 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      const analyzeSpy = jest.spyOn(queryAnalysisUtils, 'analyzeMultiMatchTypesRequest');
+      const analyzeSpy = jest.spyOn(queryAnalysisUtils, 'analyzeRequest');
 
       const request: InspectedRequest = {
         id: '0',

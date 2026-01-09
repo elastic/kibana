@@ -31,11 +31,7 @@ import {
   TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
-import {
-  analyzeMultiMatchTypesRequest,
-  mergeMultiMatchAnalyses,
-  type MultiMatchAnalysis,
-} from './query_analysis_utils';
+import { analyzeRequest, mergeAnalysisResults } from './query_analysis_utils';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
   ReportEvent,
@@ -92,12 +88,11 @@ export class ScopedDiscoverEBTManager {
   };
   private queryAnalysisCache = new LRUCache<
     string, // cache analysis per request id
-    MultiMatchAnalysis,
+    { phraseQueryCount: number; matchTypes: string[] },
     { request: InspectedRequest } // pass full request via context
   >({
     max: 10,
-    memoMethod: (requestId, _previousValue, { context: { request } }) =>
-      analyzeMultiMatchTypesRequest(request),
+    memoMethod: (_requestId, _previousValue, { context: { request } }) => analyzeRequest(request),
   });
 
   constructor(
@@ -380,21 +375,32 @@ export class ScopedDiscoverEBTManager {
         reported = true;
         const duration = window.performance.now() - startTime;
 
+        // Analyze all requests - auto-detects Query DSL vs ES|QL
         const queryAnalyses = requests.map((request) =>
           this.queryAnalysisCache.memo(request.id, { context: { request } })
         );
-        const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
+
+        const mergedAnalysis = mergeAnalysisResults(queryAnalyses);
+
+        const meta: Record<string, string[]> = {};
+
+        // Preserve existing meta from otherEventData
+        if (otherEventData?.meta) {
+          Object.assign(meta, otherEventData.meta);
+        }
+
+        // Add match types to meta (unified for both Query DSL and ES|QL)
+        if (mergedAnalysis.matchTypes.length > 0) {
+          meta.multi_match_types = mergedAnalysis.matchTypes;
+        }
 
         this.reportPerformanceEvent({
           key1: 'query_range_secs',
           value1: queryRangeSeconds,
           key2: 'phrase_query_count',
-          value2: mergedAnalysis.typeCounts.get('match_phrase') ?? 0,
+          value2: mergedAnalysis.phraseQueryCount,
           ...otherEventData,
-          meta: {
-            multi_match_types: mergedAnalysis.rawTypes,
-            ...otherEventData?.meta,
-          },
+          meta,
           eventName,
           duration,
         });
