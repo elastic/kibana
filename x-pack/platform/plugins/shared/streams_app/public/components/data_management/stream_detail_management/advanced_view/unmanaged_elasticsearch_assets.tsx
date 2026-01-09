@@ -55,8 +55,6 @@ export function UnmanagedElasticsearchAssets({
     [definition.stream.name, streamsRepositoryClient]
   );
 
-  console.log('DFJKHSKFJHDS');
-
   useEffect(() => {
     if (unmanagedAssetsDetailsFetch.value && !unmanagedAssetsDetailsFetch.loading) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
