@@ -50,14 +50,14 @@ export const ConfigSchema = z.object({
   /**
    * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
    */
-  agent_id: z
+  'agent-id': z
     .string()
     .optional()
     .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
   /**
    * The ID of the GenAI connector to use. Defaults to the default GenAI connector.
    */
-  connector_id: z
+  'connector-id': z
     .string()
     .optional()
     .describe('The ID of the connector to use. Defaults to the default GenAI connector.'),
