@@ -83,15 +83,15 @@ export async function getMcpTools({
   request: KibanaRequest;
   connectorId: string;
   toolNames: string[];
-}): Promise<Array<{ name: string; description?: string }>> {
+}): Promise<Array<{ name: string; description?: string }> | undefined> {
   try {
     const { tools } = await listMcpTools({ actions, request, connectorId });
     return tools
       .filter((t) => toolNames.includes(t.name))
       .map((tool) => ({ name: tool.name, description: tool.description }));
   } catch (error) {
-    // Connector not found or other error
-    return [];
+    // Connector not found or other error - return undefined
+    return undefined;
   }
 }
 

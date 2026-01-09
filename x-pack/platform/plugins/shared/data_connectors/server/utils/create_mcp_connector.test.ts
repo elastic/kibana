@@ -79,7 +79,7 @@ describe('createMcpConnector', () => {
         },
         secrets: {
           secretHeaders: {
-            Authorization: 'test-token-123',
+            Authorization: 'Bearer test-token-123',
           },
         },
       },
@@ -362,13 +362,6 @@ describe('createMcpConnector', () => {
     );
 
     expect(result).toEqual(mockStackConnector);
-    expect(bulkCreateMcpToolsModule.bulkCreateMcpTools).toHaveBeenCalledWith({
-      registry: mockRegistry,
-      actions: mockActions,
-      request: mockRequest,
-      connectorId: 'mcp-connector-9',
-      tools: [],
-      namespace: 'test-connector',
-    });
+    expect(bulkCreateMcpToolsModule.bulkCreateMcpTools).not.toHaveBeenCalled();
   });
 });

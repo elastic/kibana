@@ -24,7 +24,7 @@ export const createMcpConnector = async (
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const secrets: Record<string, string | Record<string, string>> = {
     secretHeaders: {
-      Authorization: `${token}`,
+      Authorization: `Bearer ${token}`,
     },
   };
   const connectorConfig = connector.stackConnector.config as any;
@@ -49,14 +49,16 @@ export const createMcpConnector = async (
         connectorId: stackConnector.id,
         toolNames: connector.importedTools,
       });
-      await bulkCreateMcpTools({
-        registry,
-        actions,
-        request,
-        connectorId: stackConnector.id,
-        tools: mcpTools,
-        namespace: name,
-      });
+      if (mcpTools && mcpTools.length > 0) {
+        await bulkCreateMcpTools({
+          registry,
+          actions,
+          request,
+          connectorId: stackConnector.id,
+          tools: mcpTools,
+          namespace: name,
+        });
+      }
     } catch (error) {
       throw new Error(`Error creating MCP tools for ${name}: ${error}`);
     }
