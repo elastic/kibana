@@ -154,6 +154,18 @@ export class Homepage {
     await this.page.locator('button[data-test-subj="uploadFileButton"]').click();
   }
 
+  async getCreateIndexCard() {
+    return this.page.testSubj.locator('gettingStartedCreateIndexButton');
+  }
+
+  async getCreateIndexButton() {
+    return this.page.testSubj.locator('createIndexButton');
+  }
+
+  async clickCreateIndexButton() {
+    await this.page.testSubj.locator('createIndexButton').click();
+  }
+
   async getSampleDataSection() {
     return this.page.testSubj.locator('sampleDataSection');
   }

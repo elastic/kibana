@@ -142,6 +142,21 @@ test.describe('Search Homepage (V1)', { tag: ['@ess', '@svlSearch'] }, () => {
     await esClient.indices.delete({ index: SAMPLE_DATA_INDEX }).catch(() => {});
   });
 
+  test('renders the "Create an index" card and navigates correctly', async ({
+    pageObjects,
+    page,
+  }) => {
+    const createIndexCard = await pageObjects.homepage.getCreateIndexCard();
+    await expect(createIndexCard).toBeVisible();
+
+    const createIndexButton = await pageObjects.homepage.getCreateIndexButton();
+    await expect(createIndexButton).toBeVisible();
+
+    await pageObjects.homepage.clickCreateIndexButton();
+
+    await expect(page).toHaveURL(/indices\/create/);
+  });
+
   // === Get started with API (Console Tutorials) ===
   test('clicking on search basics tutorial opens console', async ({ pageObjects }) => {
     const tutorial = await pageObjects.homepage.getConsoleTutorial('search_basics');
