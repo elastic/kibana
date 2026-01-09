@@ -68,6 +68,12 @@ const getAlertsSchema = z.object({
     .describe(
       'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned.'
     ),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional list of fields to include in the alert documents. If not specified, a default set of common alert fields is returned. Use this to request specific fields like "error.message", "url.full", or any custom alert fields.'
+    ),
 });
 
 export function createGetAlertsTool({
@@ -105,6 +111,7 @@ Supports filtering by status (active/recovered) and KQL queries.`,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
         includeRecovered,
+        fields,
       } = toolParams;
 
       try {
@@ -115,6 +122,7 @@ Supports filtering by status (active/recovered) and KQL queries.`,
           end,
           kqlFilter,
           includeRecovered,
+          fields,
         });
 
         return {

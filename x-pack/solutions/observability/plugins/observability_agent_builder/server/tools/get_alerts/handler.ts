@@ -28,6 +28,7 @@ export async function getToolHandler({
   end,
   kqlFilter,
   includeRecovered,
+  fields,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -38,6 +39,7 @@ export async function getToolHandler({
   end: string;
   kqlFilter?: string;
   includeRecovered?: boolean;
+  fields?: string[];
 }) {
   const [, pluginStart] = await core.getStartServices();
   const { ruleRegistry } = pluginStart;
@@ -75,7 +77,8 @@ export async function getToolHandler({
   });
 
   const total = getTotalHits(response);
-  const alerts = response.hits.hits.map((hit) => pick(hit._source ?? {}, defaultFields));
+  const fieldsToReturn = fields ?? defaultFields;
+  const alerts = response.hits.hits.map((hit) => pick(hit._source ?? {}, fieldsToReturn));
 
   return { alerts, total };
 }
