@@ -557,6 +557,22 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Waits for a specific number of browser tabs to exist.
+   * Useful when an action opens a new tab and you need to wait for it before switching.
+   *
+   * @param {number} expectedTabCount - The number of tabs to wait for
+   * @param {number} timeout - Maximum time to wait in milliseconds (default: 10000)
+   * @return {Promise<void>}
+   */
+  public async waitForTabCount(expectedTabCount: number, timeout: number = 10000) {
+    const retry = this.ctx.getService('retry');
+    await retry.waitForWithTimeout(`${expectedTabCount} tabs to exist`, timeout, async () => {
+      const tabs = await this.driver.getAllWindowHandles();
+      return tabs.length >= expectedTabCount;
+    });
+  }
+
+  /**
    * Opens a blank new tab.
    * @return {Promise<string>}
    */

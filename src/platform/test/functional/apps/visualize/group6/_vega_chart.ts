@@ -369,6 +369,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const spec = getLinkTestSpec(await getKibanaBaseUrl(), usermeta);
         await fillSpecAndGo(spec);
 
+        // Wait for the new tab to open before checking and switching
+        await browser.waitForTabCount(2);
         const windowHandlers = await browser.getAllWindowHandles();
         expect(windowHandlers.length).to.equal(2);
 

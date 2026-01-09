@@ -664,6 +664,8 @@ export class SettingsPageObject extends FtrService {
   async selectRollupIndexPatternType() {
     await this.testSubjects.click('typeField');
     await this.testSubjects.click('rollupType');
+    // Wait for the form to update after changing the type
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async getIndexPatternIdFromUrl() {

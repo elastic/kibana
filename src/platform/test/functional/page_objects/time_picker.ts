@@ -149,8 +149,14 @@ export class TimePickerPageObject extends FtrService {
    * @param {Boolean} force time picker force update, default is false
    */
   public async setAbsoluteRange(fromTime: string, toTime: string, force = false) {
+    const start = Date.now();
+    const stepStart = () => Date.now();
+    const slowLog = (label: string, t: number) =>
+      this.common.logSlowTiming(`timePicker.setAbsoluteRange ${label}`, t);
     if (!force) {
+      const t0 = stepStart();
       const currentUrl = decodeURI(await this.browser.getCurrentUrl());
+      slowLog('getCurrentUrl', t0);
       const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
       const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
       const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
@@ -158,13 +164,17 @@ export class TimePickerPageObject extends FtrService {
         this.log.debug(
           `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
         );
+        this.common.logSlowTiming('timePicker.setAbsoluteRange skipped (already in URL)', start);
         return;
       }
     }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
+    const t1 = stepStart();
     await this.showStartEndTimes();
+    slowLog('showStartEndTimes', t1);
 
     // set to time
+    const t2 = stepStart();
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
       await this.testSubjects.click('superDatePickerAbsoluteTab');
@@ -177,8 +187,10 @@ export class TimePickerPageObject extends FtrService {
       this.log.debug(`Validating 'endDate' - expected: '${toTime}, actual: ${actualToTime}'`);
       return toTime === actualToTime;
     });
+    slowLog('setEndDate', t2);
 
     // set from time
+    const t3 = stepStart();
     await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.testSubjects.click('superDatePickerAbsoluteTab');
@@ -191,11 +203,14 @@ export class TimePickerPageObject extends FtrService {
       this.log.debug(`Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`);
       return fromTime === actualFromTime;
     });
+    slowLog('setStartDate', t3);
 
+    const t4 = stepStart();
     await this.retry.waitFor('Timepicker popover to close', async () => {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
       return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
     });
+    slowLog('waitForPopoverClose', t4);
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
       'superDatePickerApplyTimeButton',
@@ -204,14 +219,21 @@ export class TimePickerPageObject extends FtrService {
     if (superDatePickerApplyButtonExists) {
       // Timepicker is in top nav
       // Click super date picker apply button to apply time range
+      const t5 = stepStart();
       await this.testSubjects.click('superDatePickerApplyTimeButton');
+      slowLog('applyTimeRange applyButton', t5);
     } else {
       // Timepicker is embedded in query bar
       // click query bar submit button to apply time range
+      const t6 = stepStart();
       await this.testSubjects.click('querySubmitButton');
+      slowLog('applyTimeRange querySubmit', t6);
     }
 
+    const t7 = stepStart();
     await this.header.awaitGlobalLoadingIndicatorHidden();
+    slowLog('awaitGlobalLoadingIndicatorHidden', t7);
+    this.common.logSlowTiming('timePicker.setAbsoluteRange', start);
   }
 
   public async isOff() {
