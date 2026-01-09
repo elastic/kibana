@@ -17,6 +17,11 @@ export const DASHBOARD_AGENT_FEATURE_FLAG_DEFAULT = false;
 export const DASHBOARD_NAMESPACE = 'platform.dashboard';
 
 /**
+ * Dashboard agent ID
+ */
+export const DASHBOARD_AGENT_ID = `${DASHBOARD_NAMESPACE}.dashboard_agent`;
+
+/**
  * Helper function to create tool IDs in the dashboard namespace
  */
 const dashboardTool = (toolName: string) => {
@@ -30,4 +35,19 @@ const dashboardTool = (toolName: string) => {
 export const dashboardTools = {
   createDashboard: dashboardTool('create_dashboard'),
   updateDashboard: dashboardTool('update_dashboard'),
+} as const;
+
+/**
+ * Helper function to create attachment type IDs in the dashboard namespace
+ */
+const dashboardAttachment = (attachmentName: string) => {
+  return `${DASHBOARD_NAMESPACE}.${attachmentName}`;
+};
+
+/**
+ * Ids of built-in dashboard attachment types.
+ * These attachment types are registered by the dashboard_agent plugin.
+ */
+export const dashboardAttachments = {
+  dashboard: dashboardAttachment('dashboard'),
 } as const;
