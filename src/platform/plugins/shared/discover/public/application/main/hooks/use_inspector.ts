@@ -31,6 +31,7 @@ export function useInspector({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const dispatch = useInternalStateDispatch();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
@@ -40,7 +41,7 @@ export function useInspector({
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+    dispatch(internalStateActions.setExpandedDoc({ tabId: currentTabId, expandedDoc: undefined }));
 
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
@@ -54,7 +55,9 @@ export function useInspector({
         contexts: getContextsAdapter({
           onOpenDocDetails: (record) => {
             session?.close();
-            dispatch(internalStateActions.setExpandedDoc({ expandedDoc: record }));
+            dispatch(
+              internalStateActions.setExpandedDoc({ tabId: currentTabId, expandedDoc: record })
+            );
           },
         }),
       },
@@ -63,6 +66,7 @@ export function useInspector({
 
     setInspectorSession(session);
   }, [
+    currentTabId,
     dispatch,
     getContextsAdapter,
     inspector,
