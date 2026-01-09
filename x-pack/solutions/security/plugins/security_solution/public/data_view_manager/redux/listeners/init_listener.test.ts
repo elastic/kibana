@@ -70,22 +70,20 @@ describe('createInitListener', () => {
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener(
-      {
-        dataViews: mockDataViewsService,
-        logger: mockLogger,
-        http,
-        application,
-        uiSettings,
-        spaces,
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-          remove: jest.fn(),
-          clear: jest.fn(),
-        } as unknown as Storage,
-      },
-    );
+    listener = createInitListener({
+      dataViews: mockDataViewsService,
+      logger: mockLogger,
+      http,
+      application,
+      uiSettings,
+      spaces,
+      storage: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      } as unknown as Storage,
+    });
   });
 
   it('should load the data views and dispatch further actions', async () => {

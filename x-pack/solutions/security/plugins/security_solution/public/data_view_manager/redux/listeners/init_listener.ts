@@ -35,17 +35,15 @@ import { createExploreDataView } from '../../utils/create_explore_data_view';
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
-export const createInitListener = (
-  dependencies: {
-    http: CoreStart['http'];
-    application: CoreStart['application'];
-    uiSettings: CoreStart['uiSettings'];
-    dataViews: DataViewsServicePublic;
-    spaces: SpacesPluginStart;
-    storage: Storage;
-    logger: Logger;
-  }
-) => {
+export const createInitListener = (dependencies: {
+  http: CoreStart['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
+  dataViews: DataViewsServicePublic;
+  spaces: SpacesPluginStart;
+  storage: Storage;
+  logger: Logger;
+}) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (
@@ -132,7 +130,7 @@ export const createInitListener = (
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
             if (scope === DataViewManagerScopeName.explore) {
-            logger.debug(`Preloading data view for scope: ${scope}`);
+              logger.debug(`Preloading data view for scope: ${scope}`);
               return listenerApi.dispatch(
                 selectDataViewAsync({
                   id: exploreDataView.id,

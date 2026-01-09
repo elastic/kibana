@@ -88,17 +88,15 @@ export const useInitDataViewManager = () => {
     }
 
     // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener(
-      {
-        dataViews: services.dataViews,
-        http: services.http,
-        uiSettings: services.uiSettings,
-        application: services.application,
-        spaces: services.spaces,
-        storage: services.storage,
-        logger: createInitListenerLogger,
-      }
-    );
+    const dataViewsLoadingListener = createInitListener({
+      dataViews: services.dataViews,
+      http: services.http,
+      uiSettings: services.uiSettings,
+      application: services.application,
+      spaces: services.spaces,
+      storage: services.storage,
+      logger: createInitListenerLogger,
+    });
 
     logger.debug('Registering data view manager listeners');
 
