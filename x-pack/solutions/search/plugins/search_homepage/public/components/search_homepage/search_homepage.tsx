@@ -77,7 +77,7 @@ export const SearchHomepagePage = () => {
               data-test-subj="searchHomepageHeaderLeftsideGroup"
             >
               <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
+                <EuiTitle size="s">
                   <h3>
                     {user?.full_name
                       ? i18n.translate('xpack.searchHomepage.welcome.title', {
@@ -95,7 +95,7 @@ export const SearchHomepagePage = () => {
                   <LicenseBadge />
                 </EuiFlexItem>
               )}
-              {isAdmin && (
+              {/* {isAdmin && (
                 <EuiFlexItem grow={false}>
                   <EuiLink
                     data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
@@ -112,7 +112,7 @@ export const SearchHomepagePage = () => {
                     )}
                   </EuiLink>
                 </EuiFlexItem>
-              )}
+              )} */}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

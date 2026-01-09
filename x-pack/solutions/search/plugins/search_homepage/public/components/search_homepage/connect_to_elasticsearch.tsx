@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiText,
   useEuiTheme,
+  EuiShowFor
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,12 +34,13 @@ export const ConnectToElasticsearch = () => {
   }, [status]);
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="m">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+      <EuiShowFor sizes={['l', 'xl']}>
+      <EuiFlexItem grow={false} css={css ({flexBasis: "100%" })}>
         <EuiText color="subdued" size="s">
           <p>
             {i18n.translate('xpack.searchHomepage.connectToElasticsearch.p.endpointLabel', {
-              defaultMessage: 'Endpoint:',
+              defaultMessage: 'Elasticsearch:',
             })}
           </p>
         </EuiText>
@@ -55,6 +57,8 @@ export const ConnectToElasticsearch = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      </EuiShowFor>
+       <EuiShowFor sizes={['xl']}>
       <EuiFlexItem
         css={css({
           borderLeft: euiTheme.colors.borderBaseSubdued,
@@ -78,6 +82,7 @@ export const ConnectToElasticsearch = () => {
           />
         </EuiButton>
       </EuiFlexItem>
+      </EuiShowFor>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           display="base"
