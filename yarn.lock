@@ -6652,6 +6652,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-llm-tasks@link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
   version "0.0.0"
   uid ""
