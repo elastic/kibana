@@ -33,6 +33,7 @@ import {
   testIndexName,
   testIndexSettings,
   testIndexStats,
+  testUserStartPrivilegesResponse,
 } from './mocks';
 
 jest.mock('@kbn/code-editor', () => {
@@ -97,6 +98,10 @@ describe('<IndexDetailsPage />', () => {
       });
     });
     testBed.component.update();
+    httpRequestsMockHelpers.setUserStartPrivilegesResponse(
+      testIndexName,
+      testUserStartPrivilegesResponse
+    );
   });
 
   describe('error section', () => {
@@ -605,7 +610,7 @@ describe('<IndexDetailsPage />', () => {
       );
     });
     it('loads mappings from the API', async () => {
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
+      expect(httpSetup.get).toHaveBeenCalledWith(
         `${API_BASE_PATH}/mapping/${testIndexName}`,
         requestOptions
       );
