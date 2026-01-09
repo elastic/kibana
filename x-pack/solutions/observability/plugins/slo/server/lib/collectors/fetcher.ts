@@ -16,6 +16,7 @@ export const fetcher = async (context: CollectorFetchContext) => {
   const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({
     type: SO_SLO_TYPE,
     perPage: 100,
+    namespaces: ['*'],
   });
 
   const totalInstances = await context.esClient.count({
