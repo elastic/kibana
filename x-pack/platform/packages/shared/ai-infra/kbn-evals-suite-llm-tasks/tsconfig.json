@@ -1,0 +1,19 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/product-doc-common",
+    "@kbn/inference-common",
+    "@kbn/core",
+    "@kbn/logging"
+  ]
+}
+

@@ -12,10 +12,15 @@ import { AttackDetailsContainer, TABS_TEST_ID } from './attack_details_container
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import { AlertsTab } from './alerts_tab';
+import { SummaryTab } from './summary_tab';
 
 // Mock heavy child components to speed up tests
 jest.mock('./alerts_tab', () => ({
   AlertsTab: jest.fn(() => <div data-test-subj="alertsTab">{'AlertsTab'}</div>),
+}));
+
+jest.mock('./summary_tab', () => ({
+  SummaryTab: jest.fn(() => <div data-test-subj="attackSummaryTab">{'SummaryTab'}</div>),
 }));
 
 describe('AttackDetailsContainer', () => {
@@ -40,30 +45,28 @@ describe('AttackDetailsContainer', () => {
   });
 
   describe('tab rendering', () => {
-    it('renders tabs with correct names when attack is provided', () => {
+    it('renders tabs with correct names and badge when attack is provided', () => {
       renderContainer();
 
       const tabs = screen.getAllByRole('tab');
       expect(tabs).toHaveLength(2);
       expect(tabs[0]).toHaveTextContent('Attack summary');
       expect(tabs[1]).toHaveTextContent('Alerts');
+      expect(tabs[1]).toHaveTextContent(String(mockAttack.alertIds.length));
     });
 
-    it('renders only Alerts tab when attack is undefined', () => {
-      renderContainer({ attack: undefined });
-
-      const tabs = screen.getAllByRole('tab');
-      expect(tabs).toHaveLength(1);
-      expect(tabs[0]).toHaveTextContent('Alerts');
-      expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
-      expect(screen.queryByTestId('attackSummaryTabPlaceholder')).not.toBeInTheDocument();
-    });
-
-    it('renders the attack summary tab by default', () => {
-      renderContainer();
+    it('renders the attack summary tab by default with correct props', () => {
+      renderContainer({ showAnonymized: true });
 
       expect(screen.getByTestId(TABS_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByTestId('attackSummaryTabPlaceholder')).toBeInTheDocument();
+      expect(screen.getByTestId('attackSummaryTab')).toBeInTheDocument();
+      expect(SummaryTab).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attack: mockAttack,
+          showAnonymized: true,
+        }),
+        {}
+      );
     });
   });
 
@@ -92,7 +95,7 @@ describe('AttackDetailsContainer', () => {
       expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
 
       fireEvent.click(screen.getByText('Attack summary'));
-      expect(screen.getByTestId('attackSummaryTabPlaceholder')).toBeInTheDocument();
+      expect(screen.getByTestId('attackSummaryTab')).toBeInTheDocument();
     });
   });
 
@@ -114,7 +117,7 @@ describe('AttackDetailsContainer', () => {
         </TestProviders>
       );
       // Should be back to summary tab
-      expect(screen.getByTestId('attackSummaryTabPlaceholder')).toBeInTheDocument();
+      expect(screen.getByTestId('attackSummaryTab')).toBeInTheDocument();
     });
   });
 });
