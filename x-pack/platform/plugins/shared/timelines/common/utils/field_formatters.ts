@@ -61,7 +61,7 @@ export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: 
   // Check if this is the threat.enrichments field itself or a subfield of it
   return (
     dotField === ENRICHMENT_DESTINATION_PATH ||
-    dotField.startsWith(ENRICHMENT_DESTINATION_PATH + '.')
+    dotField.startsWith(`${ENRICHMENT_DESTINATION_PATH}.`)
   );
 };
 
