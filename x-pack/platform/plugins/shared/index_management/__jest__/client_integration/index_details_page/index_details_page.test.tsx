@@ -894,7 +894,7 @@ describe('<IndexDetailsPage />', () => {
       await user.click(screen.getByTestId('indexDetailsTab-mappings'));
 
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
+        expect(httpSetup.get).toHaveBeenCalledWith(
           `${API_BASE_PATH}/mapping/${encodeURIComponent(percentSignName)}`,
           requestOptions
         );

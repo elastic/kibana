@@ -34,6 +34,7 @@ import {
   createNonDataStreamIndex,
   getTableCellsValues,
 } from '../helpers/actions/data_stream_actions';
+import { closeViewFilterPopoverIfOpen } from '../helpers/actions/popover_cleanup';
 
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
@@ -85,12 +86,7 @@ describe('Data Streams tab', () => {
       filterList?.getAttribute('data-popover-open') === 'true' &&
       screen.queryByTestId('viewButton')
     ) {
-      fireEvent.click(screen.getByTestId('viewButton'));
-      await waitFor(() => {
-        expect(screen.queryByTestId('filterList')?.getAttribute('data-popover-open')).not.toBe(
-          'true'
-        );
-      });
+      await closeViewFilterPopoverIfOpen();
     }
   });
 

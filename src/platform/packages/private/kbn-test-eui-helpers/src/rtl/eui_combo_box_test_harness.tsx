@@ -273,6 +273,10 @@ export class EuiComboBoxTestHarness {
    * - Does not open/wait for an options list or attempt option matching.
    *
    * Notes:
+   * - This does not verify that the value was accepted/created. Createable comboboxes vary:
+   *   some render pills, some write selection into the input (asPlainText), and some clear the
+   *   input after creation. Prefer asserting via a downstream UI boundary (e.g. Next enabled,
+   *   validation cleared) or via `getSelected()` when pills exist.
    * - Some combos still render a popover as you type; call `close()` when you need deterministic
    *   portal cleanup before the next interaction.
    */

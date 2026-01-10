@@ -9,6 +9,7 @@ import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 import type { DataStream } from '../../../../common';
+import { closeViewFilterPopoverIfOpen } from './popover_cleanup';
 
 /**
  * Helper to extract table cell values from a table element.
@@ -68,17 +69,8 @@ export const createDataStreamTabActions = () => {
     const filterItems = await screen.findAllByTestId('filterItem');
     await user.click(filterItems[index]);
 
-    // The filter popover can stay open after selection; close it to avoid leaking EuiPopover
-    // across tests (which can schedule late async updates and add timing variance).
-    const filterList = screen.queryByTestId('filterList');
-    if (filterList?.getAttribute('data-popover-open') === 'true') {
-      await user.click(viewButton);
-      await waitFor(() => {
-        expect(screen.queryByTestId('filterList')?.getAttribute('data-popover-open')).not.toBe(
-          'true'
-        );
-      });
-    }
+    // Ensure the popover is closed before the next interaction.
+    await closeViewFilterPopoverIfOpen();
   };
 
   const clickNameAt = async (index: number) => {

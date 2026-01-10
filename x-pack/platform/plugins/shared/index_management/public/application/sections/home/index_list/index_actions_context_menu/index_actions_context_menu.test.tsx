@@ -174,23 +174,27 @@ const openContextMenu = async () => {
   await user.click(btns[btns.length - 1]);
 };
 
+const closeActionsMenuIfOpen = async () => {
+  // Some tests open the popover just to assert menu items exist. Close it so it doesn't
+  // leak popover state across tests (late async updates can cause act() warnings).
+  if (!document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')) return;
+
+  const btns = screen.getAllByTestId('indexActionsContextMenuButton');
+  await user.click(btns[btns.length - 1]);
+  await waitFor(() => {
+    expect(
+      document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')
+    ).toBeNull();
+  });
+};
+
 describe('IndexActionsContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(async () => {
-    // Some tests open the popover just to assert menu items exist. Close it so it doesn't
-    // leak popover state across tests (late async updates can cause act() warnings).
-    if (document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')) {
-      const btns = screen.getAllByTestId('indexActionsContextMenuButton');
-      await user.click(btns[btns.length - 1]);
-      await waitFor(() => {
-        expect(
-          document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')
-        ).toBeNull();
-      });
-    }
+    await closeActionsMenuIfOpen();
   });
 
   describe('WHEN rendering the component', () => {

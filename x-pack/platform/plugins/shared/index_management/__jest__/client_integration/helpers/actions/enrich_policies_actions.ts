@@ -119,7 +119,7 @@ export const createCreateEnrichPolicyActions = () => {
     }
   };
 
-  const clickBackButton = async () => {
+  const clickBackButton = async ({ waitForTestId }: { waitForTestId?: string } = {}) => {
     // Best-effort cleanup: if we're on the field selection step, make sure combo boxes
     // are fully closed before navigating away. Leaving an EuiPopover open here can
     // schedule late async updates and trigger act() warnings.
@@ -135,6 +135,12 @@ export const createCreateEnrichPolicyActions = () => {
       }
     }
     await user.click(screen.getByTestId('backButton'));
+
+    // Optional step boundary wait (mirrors clickNextButton's API) to keep navigation-driven
+    // updates within RTL's act() and reduce flake on slow CI.
+    if (waitForTestId) {
+      await screen.findByTestId(waitForTestId);
+    }
   };
 
   const clickRequestTab = async () => {

@@ -11,6 +11,7 @@ import {
   EuiPopoverPanelTestHarness,
   EuiTableTestHarness,
 } from '@kbn/test-eui-helpers';
+import { closeViewFilterPopoverIfOpen } from '../helpers/actions/popover_cleanup';
 
 // Convert non breaking spaces (&nbsp;) to ordinary space
 export const removeWhiteSpaceOnArrayValues = (array: string[]) =>
@@ -82,15 +83,7 @@ export const createIndexTemplatesTabActions = () => {
 
     // The filter popover can remain open after selection; close it to avoid leaking
     // popover state across tests (late async updates can cause act() warnings).
-    const filterList = screen.queryByTestId('filterList');
-    if (filterList?.getAttribute('data-popover-open') === 'true') {
-      fireEvent.click(viewButton);
-      await waitFor(() => {
-        expect(screen.queryByTestId('filterList')?.getAttribute('data-popover-open')).not.toBe(
-          'true'
-        );
-      });
-    }
+    await closeViewFilterPopoverIfOpen();
   };
 
   const clickTemplateAt = async (index: number, isLegacy = false) => {
