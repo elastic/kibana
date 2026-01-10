@@ -8,10 +8,12 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/evals",
-    "@kbn/agent-builder-common",
-    "@kbn/tooling-log",
-    "@kbn/core",
-    "@kbn/scout",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/product-doc-common",
     "@kbn/inference-common",
+    "@kbn/core",
+    "@kbn/logging"
   ]
 }
+
