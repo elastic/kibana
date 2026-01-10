@@ -65,6 +65,7 @@ processingCommand
     | joinCommand
     | changePointCommand
     | completionCommand
+    | workflowCommand
     | sampleCommand
     | forkCommand
     | rerankCommand
@@ -335,6 +336,18 @@ rerankCommand
 
 completionCommand
     : COMPLETION (targetField=qualifiedName ASSIGN)? prompt=primaryExpression commandNamedParameters
+    ;
+
+workflowCommand
+    : WORKFLOW workflowId=string WITH LP workflowInputs RP (AS targetField=qualifiedName)?
+    ;
+
+workflowInputs
+    : workflowInput (COMMA workflowInput)*
+    ;
+
+workflowInput
+    : name=identifier ASSIGN value=primaryExpression
     ;
 
 inlineStatsCommand

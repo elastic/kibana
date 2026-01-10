@@ -81,6 +81,9 @@ import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RerankCommandContext } from "./esql_parser.js";
 import { CompletionCommandContext } from "./esql_parser.js";
+import { WorkflowCommandContext } from "./esql_parser.js";
+import { WorkflowInputsContext } from "./esql_parser.js";
+import { WorkflowInputContext } from "./esql_parser.js";
 import { InlineStatsCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
 import { FuseConfigurationContext } from "./esql_parser.js";
@@ -874,6 +877,36 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitCompletionCommand?: (ctx: CompletionCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.workflowCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterWorkflowCommand?: (ctx: WorkflowCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.workflowCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitWorkflowCommand?: (ctx: WorkflowCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.workflowInputs`.
+	 * @param ctx the parse tree
+	 */
+	enterWorkflowInputs?: (ctx: WorkflowInputsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.workflowInputs`.
+	 * @param ctx the parse tree
+	 */
+	exitWorkflowInputs?: (ctx: WorkflowInputsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.workflowInput`.
+	 * @param ctx the parse tree
+	 */
+	enterWorkflowInput?: (ctx: WorkflowInputContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.workflowInput`.
+	 * @param ctx the parse tree
+	 */
+	exitWorkflowInput?: (ctx: WorkflowInputContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.inlineStatsCommand`.
 	 * @param ctx the parse tree

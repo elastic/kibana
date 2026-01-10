@@ -21,10 +21,12 @@ import { registerGetWorkflowExecutionByIdRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_logs';
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
+import { registerGetWorkflowsListRoute } from './get_workflows_list';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
+import { registerPostExecuteSyncRoute } from './post_execute_sync';
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
 import { registerPostTestStepRoute } from './post_test_step';
@@ -62,4 +64,8 @@ export function defineRoutes(
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerGetWorkflowJsonSchemaRoute(deps);
+
+  // ES|QL WORKFLOW command support (POC)
+  registerPostExecuteSyncRoute(deps);
+  registerGetWorkflowsListRoute(deps);
 }

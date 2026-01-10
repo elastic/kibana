@@ -447,6 +447,12 @@ export class CstToAstConverter {
       return this.fromCompletionCommand(completionCommandCtx);
     }
 
+    const workflowCommandCtx = ctx.workflowCommand();
+
+    if (workflowCommandCtx) {
+      return this.fromWorkflowCommand(workflowCommandCtx);
+    }
+
     const sampleCommandCtx = ctx.sampleCommand();
 
     if (sampleCommandCtx) {
@@ -1388,6 +1394,55 @@ export class CstToAstConverter {
     }
 
     command.inferenceId = inferenceId;
+    return command;
+  }
+
+  // ------------------------------------------------------------------- WORKFLOW
+
+  private fromWorkflowCommand(ctx: cst.WorkflowCommandContext): ast.ESQLAstWorkflowCommand {
+    const command = this.createCommand<'workflow', ast.ESQLAstWorkflowCommand>('workflow', ctx);
+
+    // Parse workflow ID (required string)
+    const workflowIdCtx = ctx._workflowId;
+    if (workflowIdCtx) {
+      const workflowId = this.toStringLiteral(workflowIdCtx);
+      command.workflowId = workflowId;
+      command.args.push(workflowId);
+    } else {
+      // Create an incomplete workflowId if missing
+      command.workflowId = Builder.expression.literal.string('', { name: 'workflowId' }, { incomplete: true });
+    }
+
+    // Parse inputs from workflowInputs
+    const inputsCtx = ctx.workflowInputs();
+    const inputs: Array<{ name: string; value: ast.ESQLAstExpression }> = [];
+
+    if (inputsCtx) {
+      const inputContexts = inputsCtx.workflowInput_list();
+      for (const inputCtx of inputContexts) {
+        const nameCtx = inputCtx._name;
+        const valueCtx = inputCtx._value;
+
+        if (nameCtx && valueCtx) {
+          const name = nameCtx.getText();
+          // Note: valueCtx is now a primaryExpression (not booleanExpression)
+          const value = this.fromPrimaryExpressionStrict(valueCtx);
+          inputs.push({ name, value });
+          // Note: We do NOT add inputs to args because they use a unique structure
+          // (name = value) that the generic validator incorrectly treats as function expressions.
+          // The inputs are stored in the dedicated 'inputs' property instead.
+        }
+      }
+    }
+    command.inputs = inputs;
+
+    // Parse optional target field (AS targetField)
+    const targetFieldCtx = ctx._targetField;
+    if (targetFieldCtx) {
+      const targetField = this.toColumn(targetFieldCtx);
+      command.targetField = targetField;
+    }
+
     return command;
   }
 

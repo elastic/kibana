@@ -204,6 +204,79 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
+  /**
+   * Execute a workflow synchronously and return its output.
+   * This is a POC method for ES|QL WORKFLOW command integration.
+   * Unlike runWorkflow, this method waits for the workflow to complete
+   * and returns the output directly.
+   */
+  public async runWorkflowSync(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, any>,
+    request: KibanaRequest
+  ): Promise<unknown> {
+    const { event, ...manualInputs } = inputs;
+    const context = {
+      event,
+      spaceId,
+      inputs: manualInputs,
+      // Mark as sync execution to use direct execution path
+      source: 'esql-sync',
+    };
+
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+
+    // Execute workflow and get execution ID
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
+      workflow,
+      context,
+      request
+    );
+
+    // Poll for completion and extract output
+    const maxWaitMs = 30000; // 30 seconds max
+    const pollIntervalMs = 100;
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < maxWaitMs) {
+      const execution = await this.workflowsService.getWorkflowExecution(
+        executeResponse.workflowExecutionId,
+        spaceId
+      );
+
+      if (!execution) {
+        throw new Error(`Workflow execution ${executeResponse.workflowExecutionId} not found`);
+      }
+
+      // Check if execution is complete
+      if (['completed', 'failed', 'cancelled'].includes(execution.status)) {
+        if (execution.status === 'failed') {
+          throw new Error(`Workflow execution failed: ${execution.error?.message || 'Unknown error'}`);
+        }
+        if (execution.status === 'cancelled') {
+          throw new Error('Workflow execution was cancelled');
+        }
+
+        // Extract output from step executions
+        // The output is typically the result of the last step at the top level
+        if (execution.stepExecutions && execution.stepExecutions.length > 0) {
+          // Import and use getWorkflowOutput logic inline for POC
+          // In production, this would be imported from the shared package
+          const lastStep = execution.stepExecutions[execution.stepExecutions.length - 1];
+          return lastStep.output ?? null;
+        }
+
+        return null;
+      }
+
+      // Wait before polling again
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+    }
+
+    throw new Error(`Workflow execution timed out after ${maxWaitMs}ms`);
+  }
+
   public async scheduleWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
