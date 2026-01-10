@@ -14,11 +14,8 @@ import {
   indexAll,
 } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetIndexInfoToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/tool';
-import type {
-  IndexInfoResult,
-  IndexFieldsResult,
-} from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/handler';
+import type { IndexOverviewResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/get_index_overview_handler';
+import type { IndexFieldsResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/get_index_fields_handler';
 import type { MultiFieldValuesResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/get_field_values_handler';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
@@ -76,14 +73,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       if (apmSynthtraceEsClient) await apmSynthtraceEsClient.clean();
     });
 
-    describe('get_index_info() - curated fields', () => {
+    describe('operation: "get-overview"', () => {
       it('returns curated fields and data sources', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: {},
+          params: { operation: 'get-overview' },
         });
 
-        const data = results[0].data as IndexInfoResult;
+        const data = results[0].data as unknown as IndexOverviewResult;
 
         expect(data).to.have.property('curatedFields');
         expect(data).to.have.property('schemas');
@@ -99,53 +96,92 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('discovers host.name from curated list', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: {},
+          params: { operation: 'get-overview' },
         });
 
-        const data = results[0].data as IndexInfoResult;
+        const data = results[0].data as unknown as IndexOverviewResult;
         const hostField = data.curatedFields.find((f) => f.name === 'host.name');
 
         expect(hostField).to.be.ok();
-        expect(hostField!.isOtel).to.be(false);
+        expect(hostField!.schema).to.be('ecs');
       });
     });
 
-    describe('get_index_info({ index }) - all fields', () => {
+    describe('operation: "list-fields"', () => {
       it('returns fields grouped by type', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'metrics-*' },
+          params: { operation: 'list-fields', index: 'metrics-*' },
         });
 
-        const data = results[0].data as IndexFieldsResult;
+        const data = results[0].data as unknown as IndexFieldsResult;
 
         expect(data).to.have.property('fieldsByType');
-        expect(data).to.have.property('totalFields');
-        expect(data.totalFields).to.be.greaterThan(0);
         expect(data.fieldsByType.keyword).to.contain('host.name');
       });
 
       it('returns empty for non-existent index', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'non-existent-index-12345' },
+          params: { operation: 'list-fields', index: 'non-existent-index-12345' },
         });
 
-        const data = results[0].data as IndexFieldsResult;
-        expect(data.totalFields).to.be(0);
+        const data = results[0].data as unknown as IndexFieldsResult;
+        expect(Object.keys(data.fieldsByType)).to.have.length(0);
+      });
+
+      it('returns error when index is missing', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: { operation: 'list-fields' },
+        });
+
+        expect(results[0].type).to.be('error');
+        expect((results[0].data as { message: string }).message).to.contain(
+          '"index" is required for operation "list-fields"'
+        );
+      });
+
+      it('supports kqlFilter parameter', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: {
+            operation: 'list-fields',
+            index: 'metrics-*',
+            kqlFilter: 'host.name: field-discovery-host-01',
+          },
+        });
+
+        const data = results[0].data as unknown as IndexFieldsResult;
+        expect(Object.keys(data.fieldsByType).length).to.be.greaterThan(0);
+      });
+
+      it('supports start and end time range parameters', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: {
+            operation: 'list-fields',
+            index: 'metrics-*',
+            start: 'now-10m',
+            end: 'now',
+          },
+        });
+
+        const data = results[0].data as unknown as IndexFieldsResult;
+        expect(Object.keys(data.fieldsByType).length).to.be.greaterThan(0);
       });
     });
 
-    describe('get_index_info({ index, field }) - field values', () => {
+    describe('operation: "get-field-values"', () => {
       it('returns keyword values for host.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'metrics-*', field: 'host.name' },
+          params: { operation: 'get-field-values', index: 'metrics-*', fields: 'host.name' },
         });
 
-        const data = results[0].data as MultiFieldValuesResult;
+        const data = results[0].data as unknown as MultiFieldValuesResult;
         const hostResult = data.fields['host.name'];
 
         expect(hostResult.type).to.be('keyword');
@@ -156,12 +192,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns numeric min/max for numeric field', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'metrics-*', field: 'system.cpu.total.norm.pct' },
+          params: {
+            operation: 'get-field-values',
+            index: 'metrics-*',
+            fields: 'system.cpu.total.norm.pct',
+          },
         });
 
-        const data = results[0].data as MultiFieldValuesResult;
+        const data = results[0].data as unknown as MultiFieldValuesResult;
         const result = data.fields['system.cpu.total.norm.pct'];
 
         expect(result.type).to.be('numeric');
@@ -172,12 +212,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns date min/max for date field', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'metrics-*', field: '@timestamp' },
+          params: { operation: 'get-field-values', index: 'metrics-*', fields: '@timestamp' },
         });
 
-        const data = results[0].data as MultiFieldValuesResult;
+        const data = results[0].data as unknown as MultiFieldValuesResult;
         const result = data.fields['@timestamp'];
 
         expect(result.type).to.be('date');
@@ -194,25 +234,57 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns error for non-existent field', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'metrics-*', field: 'non.existent.field' },
+          params: {
+            operation: 'get-field-values',
+            index: 'metrics-*',
+            fields: 'non.existent.field',
+          },
         });
 
-        const data = results[0].data as MultiFieldValuesResult;
+        const data = results[0].data as unknown as MultiFieldValuesResult;
         expect(data.fields['non.existent.field'].type).to.be('error');
       });
 
       it('supports batch discovery for multiple fields', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetIndexInfoToolResult>({
+        const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { index: 'metrics-*', field: ['host.name', 'cloud.provider'] },
+          params: {
+            operation: 'get-field-values',
+            index: 'metrics-*',
+            fields: ['host.name', 'cloud.provider'],
+          },
         });
 
-        const data = results[0].data as MultiFieldValuesResult;
+        const data = results[0].data as unknown as MultiFieldValuesResult;
 
         expect(data.fields['host.name'].type).to.be('keyword');
         expect(data.fields['cloud.provider'].type).to.be('keyword');
+      });
+
+      it('returns error when index is missing', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: { operation: 'get-field-values', fields: 'host.name' },
+        });
+
+        expect(results[0].type).to.be('error');
+        expect((results[0].data as { message: string }).message).to.contain(
+          '"index" and "fields" are required'
+        );
+      });
+
+      it('returns error when fields is missing', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: { operation: 'get-field-values', index: 'metrics-*' },
+        });
+
+        expect(results[0].type).to.be('error');
+        expect((results[0].data as { message: string }).message).to.contain(
+          '"index" and "fields" are required'
+        );
       });
     });
   });

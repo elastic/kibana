@@ -6,8 +6,8 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { mapValues } from 'lodash';
-import { getTypedSearch, type TypedSearch } from '../../utils/get_typed_search';
+import { keyBy, mapValues } from 'lodash';
+import { getTypedSearch } from '../../utils/get_typed_search';
 import { getFieldType } from './utils';
 
 const MAX_KEYWORD_VALUES = 50;
@@ -34,86 +34,103 @@ type FieldValuesResult =
 
 export interface MultiFieldValuesResult {
   fields: Record<string, FieldValuesResult>;
-  [key: string]: unknown;
 }
 
-/** Gets distinct values for keyword fields via termsEnum */
-async function getKeywordFieldValues({
-  esClient,
-  index,
-  field,
-}: {
-  esClient: IScopedClusterClient;
-  index: string;
-  field: string;
-}): Promise<FieldValuesResult> {
-  const enumResponse = await esClient.asCurrentUser.termsEnum({
-    index,
-    field,
-    size: MAX_KEYWORD_VALUES + 1,
-  });
-  const terms = enumResponse.terms;
-  return {
-    type: 'keyword',
-    field,
-    values: terms.slice(0, MAX_KEYWORD_VALUES),
-    hasMoreValues: terms.length > MAX_KEYWORD_VALUES,
-  };
+/** Gets distinct values for a single keyword field via termsEnum (no batch API available) */
+async function getKeywordFieldValues(
+  esClient: IScopedClusterClient,
+  index: string,
+  field: string
+): Promise<FieldValuesResult> {
+  try {
+    const { terms } = await esClient.asCurrentUser.termsEnum({
+      index,
+      field,
+      size: MAX_KEYWORD_VALUES + 1,
+    });
+
+    return {
+      type: 'keyword',
+      field,
+      values: terms.slice(0, MAX_KEYWORD_VALUES),
+      hasMoreValues: terms.length > MAX_KEYWORD_VALUES,
+    };
+  } catch (error) {
+    return { type: 'error', field, message: error.message };
+  }
 }
 
-/** Gets min/max for numeric fields via stats aggregation */
-async function getNumericFieldValues({
-  search,
-  index,
-  field,
-}: {
-  search: TypedSearch;
-  index: string;
-  field: string;
-}): Promise<FieldValuesResult> {
-  const statsResponse = await search({
+/** Gets min/max for multiple numeric fields in a single request */
+async function getNumericFieldValuesBatch(
+  esClient: IScopedClusterClient,
+  index: string,
+  fields: string[]
+): Promise<Record<string, FieldValuesResult>> {
+  if (fields.length === 0) return {};
+
+  const search = getTypedSearch(esClient.asCurrentUser);
+  const response = await search({
     index,
     size: 0,
     track_total_hits: false,
-    aggs: { stats: { stats: { field } } },
+    aggs: Object.fromEntries(fields.map((field) => [field, { stats: { field } }])),
   });
-  const stats = statsResponse.aggregations?.stats;
-  if (stats?.min != null && stats?.max != null) {
-    return { type: 'numeric', field, min: stats.min, max: stats.max };
-  }
-  return { type: 'error', field, message: 'No numeric values found' };
+
+  return keyBy(
+    fields.map((field): FieldValuesResult => {
+      const stats = response.aggregations?.[field];
+      if (stats?.min != null && stats?.max != null) {
+        return { type: 'numeric', field, min: stats.min, max: stats.max };
+      }
+      return { type: 'error', field, message: 'No numeric values found' };
+    }),
+    'field'
+  );
 }
 
-/** Gets min/max for date fields via min/max aggregations */
-async function getDateFieldValues({
-  search,
-  index,
-  field,
-}: {
-  search: TypedSearch;
-  index: string;
-  field: string;
-}): Promise<FieldValuesResult> {
-  const dateResponse = await search({
+/** Gets min/max for multiple date fields in a single request */
+async function getDateFieldValuesBatch(
+  esClient: IScopedClusterClient,
+  index: string,
+  fields: string[]
+): Promise<Record<string, FieldValuesResult>> {
+  if (fields.length === 0) return {};
+
+  const aggs = Object.fromEntries(
+    fields.flatMap((field) => [
+      [`${field}_min`, { min: { field } }],
+      [`${field}_max`, { max: { field } }],
+    ])
+  ) as Record<string, { min: { field: string } } | { max: { field: string } }>;
+
+  const search = getTypedSearch(esClient.asCurrentUser);
+  const response = await search({
     index,
     size: 0,
     track_total_hits: false,
-    aggs: {
-      min_date: { min: { field } },
-      max_date: { max: { field } },
-    },
+    aggs,
   });
-  const minAgg = dateResponse.aggregations?.min_date;
-  const maxAgg = dateResponse.aggregations?.max_date;
-  if (minAgg?.value_as_string && maxAgg?.value_as_string) {
-    return { type: 'date', field, min: minAgg.value_as_string, max: maxAgg.value_as_string };
-  }
-  return { type: 'error', field, message: 'No date values found' };
+
+  return keyBy(
+    fields.map((field): FieldValuesResult => {
+      const minAgg = response.aggregations?.[`${field}_min`];
+      const maxAgg = response.aggregations?.[`${field}_max`];
+      if (minAgg?.value_as_string && maxAgg?.value_as_string) {
+        return { type: 'date', field, min: minAgg.value_as_string, max: maxAgg.value_as_string };
+      }
+      return { type: 'error', field, message: 'No date values found' };
+    }),
+    'field'
+  );
 }
 
 /**
- * Field value discovery - returns distinct values for keyword fields.
- * Calls fieldCaps once for all fields, then termsEnum in parallel for keywords.
+ * Field value discovery - returns values/ranges for multiple fields.
+ * Batches requests by field type to minimize ES calls:
+ * - 1 fieldCaps call for type detection
+ * - 1 search call for all numeric fields (batched stats aggs)
+ * - 1 search call for all date fields (batched min/max aggs)
+ * - N parallel termsEnum calls for keyword fields (no batch API)
  */
 export async function getFieldValuesHandler({
   esClient,
@@ -133,37 +150,40 @@ export async function getFieldValuesHandler({
   });
   const fieldTypes = mapValues(capsResponse.fields, getFieldType);
 
-  // Create search client once for all aggregation queries
-  const search = getTypedSearch(esClient.asCurrentUser);
+  // Group fields by type
+  const keywordFields: string[] = [];
+  const numericFields: string[] = [];
+  const dateFields: string[] = [];
+  const skippedFields: Record<string, FieldValuesResult> = {};
 
-  // Process each field based on its type
-  const results = await Promise.all(
-    fields.map(async (field): Promise<[string, FieldValuesResult]> => {
-      const fieldType = fieldTypes[field];
+  for (const field of fields) {
+    const fieldType = fieldTypes[field];
+    if (!fieldType) {
+      skippedFields[field] = { type: 'error', field, message: `Field "${field}" not found` };
+    } else if (KEYWORD_TYPES.includes(fieldType)) {
+      keywordFields.push(field);
+    } else if (NUMERIC_TYPES.includes(fieldType)) {
+      numericFields.push(field);
+    } else if (DATE_TYPES.includes(fieldType)) {
+      dateFields.push(field);
+    } else {
+      skippedFields[field] = { type: 'unsupported', field, fieldType };
+    }
+  }
 
-      if (!fieldType) {
-        return [field, { type: 'error', field, message: `Field "${field}" not found` }];
-      }
+  // Batch requests by type (runs in parallel)
+  const [keywordResults, numericResults, dateResults] = await Promise.all([
+    Promise.all(keywordFields.map((field) => getKeywordFieldValues(esClient, index, field))),
+    getNumericFieldValuesBatch(esClient, index, numericFields),
+    getDateFieldValuesBatch(esClient, index, dateFields),
+  ]);
 
-      try {
-        if (KEYWORD_TYPES.includes(fieldType)) {
-          return [field, await getKeywordFieldValues({ esClient, index, field })];
-        }
-
-        if (NUMERIC_TYPES.includes(fieldType)) {
-          return [field, await getNumericFieldValues({ search, index, field })];
-        }
-
-        if (DATE_TYPES.includes(fieldType)) {
-          return [field, await getDateFieldValues({ search, index, field })];
-        }
-
-        return [field, { type: 'unsupported', field, fieldType }];
-      } catch (error) {
-        return [field, { type: 'error', field, message: error.message }];
-      }
-    })
-  );
-
-  return { fields: Object.fromEntries(results) };
+  return {
+    fields: {
+      ...skippedFields,
+      ...keyBy(keywordResults, 'field'),
+      ...numericResults,
+      ...dateResults,
+    },
+  };
 }

@@ -30,7 +30,7 @@ const MAX_CHUNKS = 5;
 const MAX_FIELDS_PER_CHUNK = 250;
 const MAX_RELEVANT_FIELDS = 100;
 
-export interface FieldWithType {
+interface FieldWithType {
   name: string;
   type: string;
 }
@@ -90,7 +90,7 @@ function getFieldObjects(
  */
 export async function selectRelevantFields({
   userIntentDescription,
-  candidateFields: candidateFields,
+  candidateFields,
   inferenceClient,
   logger,
 }: {
