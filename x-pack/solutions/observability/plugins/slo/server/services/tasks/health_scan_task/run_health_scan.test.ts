@@ -166,9 +166,12 @@ describe('runHealthScan', () => {
               '@timestamp': TEST_DATE.toISOString(),
               scanId: TEST_SCAN_ID,
               spaceId: 'custom-space',
-              sloId: 'slo-1',
-              revision: 1,
-              isProblematic: true,
+              slo: {
+                id: 'slo-1',
+                revision: 1,
+                name: 'SLO slo-1',
+                enabled: true,
+              },
               health: healthResult.health,
             },
           ],
@@ -259,8 +262,14 @@ describe('runHealthScan', () => {
         1,
         expect.objectContaining({
           operations: expect.arrayContaining([
-            expect.objectContaining({ spaceId: 'space-a', sloId: 'slo-1' }),
-            expect.objectContaining({ spaceId: 'space-b', sloId: 'slo-2' }),
+            expect.objectContaining({
+              spaceId: 'space-a',
+              slo: expect.objectContaining({ id: 'slo-1' }),
+            }),
+            expect.objectContaining({
+              spaceId: 'space-b',
+              slo: expect.objectContaining({ id: 'slo-2' }),
+            }),
           ]),
         }),
         expect.any(Object)
@@ -270,7 +279,10 @@ describe('runHealthScan', () => {
         2,
         expect.objectContaining({
           operations: expect.arrayContaining([
-            expect.objectContaining({ spaceId: 'space-a', sloId: 'slo-3' }),
+            expect.objectContaining({
+              spaceId: 'space-a',
+              slo: expect.objectContaining({ id: 'slo-3' }),
+            }),
           ]),
         }),
         expect.any(Object)
@@ -339,7 +351,12 @@ describe('runHealthScan', () => {
 
       expect(scopedClusterClient.asInternalUser.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          operations: expect.arrayContaining([expect.objectContaining({ spaceId: 'default' })]),
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              spaceId: 'default',
+              slo: expect.objectContaining({ id: 'slo-1' }),
+            }),
+          ]),
         }),
         expect.any(Object)
       );
