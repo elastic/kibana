@@ -19,32 +19,48 @@
  *   - `kubernetes.namespace = ingest`, `kubernetes.pod.name = ingest-{0..3}`
  *   - `cloud.region = eu-central-1`, `cloud.availability_zone = euc1b`
  *   - `labels.pipeline_state = healthy`
- *   - Invoke via:
- *     ```
- *     POST kbn:///api/agent_builder/tools/_execute
- *     {
- *       "tool_id": "observability.run_log_rate_analysis",
- *       "tool_params": {
- *         "index": "logs-*",
- *         "baseline": { "start": "now-3h", "end": "now-1h" },
- *         "deviation": { "start": "now-1h", "end": "now" }
- *       }
- *     }
- *     ```
+ *
+ * Invoke via:
+ * ```
+ * POST kbn:///api/agent_builder/tools/_execute
+ * {
+ *   "tool_id": "observability.run_log_rate_analysis",
+ *   "tool_params": {
+ *     "index": "logs-*",
+ *     "baseline": { "start": "now-3h", "end": "now-1h" },
+ *     "deviation": { "start": "now-1h", "end": "now" }
+ *   }
+ * }
+ * ```
  *
  * The resulting dataset is purpose-built for log rate analysis to find the disappearing ingest
  * cohort when comparing a baseline window (before the drop) with the deviation window (after).
  */
 
-import type { LogDocument } from '@kbn/synthtrace-client';
-import { generateShortId, log } from '@kbn/synthtrace-client';
-import type { Scenario } from '../../../../cli/scenario';
-import { getSynthtraceEnvironment } from '../../../../lib/utils/get_synthtrace_environment';
-import { withClient } from '../../../../lib/utils/with_client';
-import { parseLogsScenarioOpts } from '../../../helpers/logs_scenario_opts_parser';
+import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
+import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
+import { createCliScenario } from '../../../../lib/utils/create_scenario';
+import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
+import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
 
-const ENVIRONMENT = getSynthtraceEnvironment(__filename);
+const ENVIRONMENT = 'production';
 const PIPELINE_DROP_WINDOW_MS = 60 * 60 * 1000; // drop happens 60 minutes from end
+
+/**
+ * Baseline time window for log rate analysis (before the dip)
+ */
+export const LOG_RATE_ANALYSIS_DIP_BASELINE_WINDOW = {
+  start: 'now-3h',
+  end: 'now-1h',
+} as const;
+
+/**
+ * Deviation time window for log rate analysis (during the dip)
+ */
+export const LOG_RATE_ANALYSIS_DIP_DEVIATION_WINDOW = {
+  start: 'now-1h',
+  end: 'now',
+} as const;
 
 interface Tenant {
   id: string;
@@ -132,39 +148,6 @@ const BASE_SERVICES: BaseServiceConfig[] = [
     statusCodes: [200, 201, 400],
   },
 ];
-
-const scenario: Scenario<LogDocument> = async (runOptions) => {
-  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
-
-  return {
-    generate: ({ range, clients: { logsEsClient } }) => {
-      const { logger } = runOptions;
-      const pipelineDropStart = range.to.getTime() - PIPELINE_DROP_WINDOW_MS;
-      const timestamps = range.interval('30s');
-
-      const logs = timestamps.rate(1).generator((timestamp, index) => {
-        return [
-          ...generateCoreAppLogs({
-            timestamp,
-            index,
-            isLogsDb,
-          }),
-          ...generateAuditPipelineLogs({
-            timestamp,
-            index,
-            isLogsDb,
-            isHealthy: timestamp < pipelineDropStart,
-          }),
-        ];
-      });
-
-      return withClient(
-        logsEsClient,
-        logger.perf('generating_log_rate_analysis_incident_logs', () => logs)
-      );
-    },
-  };
-};
 
 function generateCoreAppLogs({
   timestamp,
@@ -279,4 +262,48 @@ function generateAuditPipelineLogs({
     );
 }
 
-export default scenario;
+/**
+ * Generates log data with a DIP pattern for log rate analysis.
+ * The ingest.audit logs drop out in the last hour, creating a clear dip.
+ * Can be used both by CLI (via default export) and by API tests (via direct import).
+ */
+export function generateLogRateAnalysisDipData({
+  logsEsClient,
+  range,
+  isLogsDb = false,
+}: {
+  logsEsClient: LogsSynthtraceEsClient;
+  range?: Timerange;
+  isLogsDb?: boolean;
+}): ScenarioReturnType<LogDocument> {
+  const effectiveRange =
+    range ??
+    timerange(LOG_RATE_ANALYSIS_DIP_BASELINE_WINDOW.start, LOG_RATE_ANALYSIS_DIP_DEVIATION_WINDOW.end);
+
+  const pipelineDropStart = effectiveRange.to.getTime() - PIPELINE_DROP_WINDOW_MS;
+
+  const logs = effectiveRange
+    .interval('30s')
+    .rate(1)
+    .generator((timestamp, index) => {
+      return [
+        ...generateCoreAppLogs({
+          timestamp,
+          index,
+          isLogsDb,
+        }),
+        ...generateAuditPipelineLogs({
+          timestamp,
+          index,
+          isLogsDb,
+          isHealthy: timestamp < pipelineDropStart,
+        }),
+      ];
+    });
+
+  return withClient(logsEsClient, logs);
+}
+
+export default createCliScenario(({ range, clients: { logsEsClient } }) =>
+  generateLogRateAnalysisDipData({ logsEsClient, range, isLogsDb: false })
+);

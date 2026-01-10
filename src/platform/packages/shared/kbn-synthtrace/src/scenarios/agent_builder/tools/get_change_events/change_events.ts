@@ -8,12 +8,15 @@
  */
 
 /**
- * SCENARIO: Generated Change Events
+ * SCENARIO: Simple Change Events
  *
  * Story: Simulates deployment and configuration change events for `checkout-service`.
  *
- * - Deployment of v1.1.0 (success)
- * - Configuration change: Feature flag `enable_fast_checkout` enabled
+ * - Deployment of v1.1.0 (success) at T-30m
+ * - Configuration change: Feature flag `enable_fast_checkout` enabled at T-15m
+ *
+ * For a more comprehensive scenario with K8s events, CI/CD traces, and version changes,
+ * see `rich_change_events.ts`.
  *
  * Validate via:
  *
@@ -29,58 +32,68 @@
  * ```
  */
 
+import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
 import { log } from '@kbn/synthtrace-client';
-import type { Scenario } from '../../../../cli/scenario';
-import { withClient } from '../../../../lib/utils/with_client';
+import { createCliScenario } from '../../../../lib/utils/create_scenario';
+import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
+import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
 
-const scenario: Scenario = async (runOptions) => {
-  return {
-    generate: ({ range, clients: { logsEsClient } }) => {
-      const deploymentTime = range.to.valueOf() - 30 * 60 * 1000; // 30 mins ago
-      const configChangeTime = range.to.valueOf() - 15 * 60 * 1000; // 15 mins ago
+/**
+ * Generates simple change events data (deployment + config change).
+ * Can be used both by CLI (via default export) and by API tests (via direct import).
+ */
+export function generateSimpleChangeEventsData({
+  logsEsClient,
+  range,
+}: {
+  logsEsClient: LogsSynthtraceEsClient;
+  range: Timerange;
+}): ScenarioReturnType<LogDocument> {
+  const deploymentTime = range.to.valueOf() - 30 * 60 * 1000; // 30 mins ago
+  const configChangeTime = range.to.valueOf() - 15 * 60 * 1000; // 15 mins ago
 
-      const data = range
-        .interval('1h') // Only need to run once as we inject specific timestamps
-        .rate(1)
-        .generator(() => {
-          const deploymentEvent = log
-            .create()
-            .timestamp(deploymentTime)
-            .message('Deployment of checkout-service v1.1.0 completed successfully')
-            .service('checkout-service')
-            .defaults({
-              'event.category': 'deployment',
-              'event.type': 'change',
-              'event.action': 'deployment-success',
-              'service.name': 'checkout-service',
-              'service.version': '1.1.0',
-              'service.environment': 'production',
-              // @ts-expect-error
-              'deployment.version': '1.1.0',
-              'deployment.environment': 'production',
-            });
-
-          const configEvent = log
-            .create()
-            .timestamp(configChangeTime)
-            .message('Configuration change: Feature flag enable_fast_checkout set to true')
-            .service('checkout-service')
-            .defaults({
-              'event.category': 'configuration',
-              'event.type': 'change',
-              'service.name': 'checkout-service',
-              'service.environment': 'production',
-              // @ts-expect-error
-              'feature_flag.key': 'enable_fast_checkout',
-              'feature_flag.variant': 'true',
-            });
-
-          return [deploymentEvent, configEvent];
+  const data = range
+    .interval('1h') // Only need to run once as we inject specific timestamps
+    .rate(1)
+    .generator(() => {
+      const deploymentEvent = log
+        .create()
+        .timestamp(deploymentTime)
+        .message('Deployment of checkout-service v1.1.0 completed successfully')
+        .service('checkout-service')
+        .defaults({
+          'event.category': 'deployment',
+          'event.type': 'change',
+          'event.action': 'deployment-success',
+          'service.name': 'checkout-service',
+          'service.version': '1.1.0',
+          'service.environment': 'production',
+          // @ts-expect-error
+          'deployment.version': '1.1.0',
+          'deployment.environment': 'production',
         });
 
-      return withClient(logsEsClient, data);
-    },
-  };
-};
+      const configEvent = log
+        .create()
+        .timestamp(configChangeTime)
+        .message('Configuration change: Feature flag enable_fast_checkout set to true')
+        .service('checkout-service')
+        .defaults({
+          'event.category': 'configuration',
+          'event.type': 'change',
+          'service.name': 'checkout-service',
+          'service.environment': 'production',
+          // @ts-expect-error
+          'feature_flag.key': 'enable_fast_checkout',
+          'feature_flag.variant': 'true',
+        });
 
-export default scenario;
+      return [deploymentEvent, configEvent];
+    });
+
+  return withClient(logsEsClient, data);
+}
+
+export default createCliScenario(({ range, clients: { logsEsClient } }) =>
+  generateSimpleChangeEventsData({ logsEsClient, range })
+);
