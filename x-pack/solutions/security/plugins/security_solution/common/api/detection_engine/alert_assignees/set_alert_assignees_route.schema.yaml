@@ -21,17 +21,9 @@ paths:
               $ref: '../model/set_alert_assignees_body.schema.yaml#/components/schemas/SetAlertAssigneesBody'
             examples:
               add:
-                value:
-                  assignees:
-                    add: ['u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0']
-                    remove: []
-                  ids: ['681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6']
+                $ref: '../model/set_alert_assignees_body.schema.yaml#/components/examples/SetAlertAssigneesBodyAdd'
               remove:
-                value:
-                  assignees:
-                    add: []
-                    remove: ['u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0']
-                  ids: ['681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6']
+                $ref: '../model/set_alert_assignees_body.schema.yaml#/components/examples/SetAlertAssigneesBodyRemove'
       responses:
         200:
           description: Indicates a successful call.
