@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
+import sentryIcon from '../../../assets/icons/sentry.svg';
 
 interface SentryAlertViewProps {
   alert: Alert;
@@ -205,7 +206,7 @@ export const SentryAlertView: React.FC<SentryAlertViewProps> = ({ alert }) => {
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="bug" size="xl" color="#362D59" />
+            <EuiIcon type={sentryIcon} size="xl" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="s">
@@ -336,9 +337,16 @@ export const SentryAlertView: React.FC<SentryAlertViewProps> = ({ alert }) => {
       {externalUrl && (
         <EuiFlexItem>
           <EuiLink href={externalUrl} target="_blank" external>
-            {i18n.translate('xpack.observability.sentryAlertView.viewInSentry', {
-              defaultMessage: 'View in Sentry',
-            })}
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={sentryIcon} size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.observability.sentryAlertView.viewInSentry', {
+                  defaultMessage: 'View in Sentry',
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiLink>
         </EuiFlexItem>
       )}

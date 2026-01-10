@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 // Import custom provider icons
 import datadogIcon from '../../../assets/icons/datadog.svg';
+import sentryIcon from '../../../assets/icons/sentry.svg';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -95,7 +96,7 @@ const SOURCE_CONFIG: Record<
   },
   sentry: {
     color: '#362D59',
-    icon: 'bug',
+    icon: sentryIcon,
     label: 'Sentry',
     textColor: 'white',
   },
