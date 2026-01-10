@@ -5,8 +5,9 @@
  * 2.0.
  */
 import type { ComponentType } from 'react';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
 
@@ -23,6 +24,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {}
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
-  onechat: OnechatPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
+  inference: InferencePublicStart;
   licensing: LicensingPluginStart;
 }

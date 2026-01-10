@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
-import { MAINTENANCE_WINDOWS_APP_ID } from '@kbn/maintenance-windows-plugin/common';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
@@ -85,7 +83,6 @@ export interface AlertingUIConfig {
       };
     };
   };
-  maintenanceWindow: { enabled: boolean };
 }
 
 export class AlertingPublicPlugin
@@ -104,8 +101,6 @@ export class AlertingPublicPlugin
   public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
 
-    const kibanaVersion = this.initContext.env.packageInfo.version;
-
     const registerNavigation = async (
       applicationId: string,
       ruleTypeId: string,
@@ -118,31 +113,6 @@ export class AlertingPublicPlugin
       applicationId: string,
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
-
-    if (plugins.maintenanceWindows && this.config.maintenanceWindow?.enabled) {
-      plugins.management.sections.section.insightsAndAlerting.registerApp({
-        id: MAINTENANCE_WINDOWS_APP_ID,
-        title: i18n.translate('xpack.alerting.management.section.title', {
-          defaultMessage: 'Maintenance Windows',
-        }),
-        async mount(params: ManagementAppMountParams) {
-          const { renderApp } = await import('./application/maintenance_windows');
-
-          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-            CoreStart,
-            AlertingPluginStart,
-            unknown
-          ];
-
-          return renderApp({
-            core: coreStart,
-            plugins: pluginsStart,
-            mountParams: params,
-            kibanaVersion,
-          });
-        },
-      });
-    }
 
     return {
       registerNavigation,

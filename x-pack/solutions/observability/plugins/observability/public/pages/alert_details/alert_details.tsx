@@ -92,7 +92,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
-    onechat,
+    agentBuilder,
     uiSettings,
     serverless,
     observabilityAgentBuilder,
@@ -178,14 +178,14 @@ export function AlertDetails() {
 
   // Configure agent builder global flyout with the current alert attachment
   useEffect(() => {
-    if (!onechat) return;
+    if (!agentBuilder) return;
     const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
 
     if (!alertUuid) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
       attachments: [
         {
@@ -208,9 +208,9 @@ export function AlertDetails() {
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, alertDetail, alertTitle]);
+  }, [agentBuilder, alertDetail, alertTitle]);
 
   useBreadcrumbs(
     [

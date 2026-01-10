@@ -53,7 +53,8 @@ dependsOn:
   - '@kbn/index-management-shared-types'
   - '@kbn/data-views-plugin'
   - '@kbn/cloud'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/scout-search'
 tags:
   - plugin
   - prod
@@ -66,6 +67,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

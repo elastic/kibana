@@ -56,10 +56,21 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']); // 'queue' TBD
+export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
+
+export const ConcurrencySettingsSchema = z.object({
+  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
+  strategy: CollisionStrategySchema.optional(), // 'queue', 'drop', or 'cancel-in-progress'
+  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+});
+export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
+
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
+  concurrency: ConcurrencySettingsSchema.optional(),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -165,6 +176,12 @@ export const WaitStepSchema = BaseStepSchema.extend({
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const DataSetStepSchema = BaseStepSchema.extend({
+  type: z.literal('data.set'),
+  with: z.record(z.string(), z.unknown()),
+});
+export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
@@ -442,6 +459,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    DataSetStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -457,6 +475,7 @@ export const BuiltInStepTypes = [
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
+  DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
 ];
@@ -589,6 +608,7 @@ export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 

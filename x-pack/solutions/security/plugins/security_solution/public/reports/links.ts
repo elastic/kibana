@@ -23,6 +23,7 @@ export const aiValueLinks: LinkItem = {
     defaultMessage: 'See ROI for Security AI features',
   }),
   path: AI_VALUE_PATH,
+  licenseType: 'enterprise',
   capabilities: [
     [
       SECURITY_UI_SHOW_PRIVILEGE,

@@ -21,7 +21,7 @@
             "section": "def-public.PublicStepDefinition",
             "text": "PublicStepDefinition"
           },
-          " extends ",
+          "<InputSchema, OutputSchema, ConfigSchema> extends ",
           {
             "pluginId": "workflowsExtensions",
             "scope": "common",
@@ -29,7 +29,7 @@
             "section": "def-common.CommonStepDefinition",
             "text": "CommonStepDefinition"
           },
-          "<z.ZodType, z.ZodType, z.ZodObject>"
+          "<InputSchema, OutputSchema, ConfigSchema>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
         "deprecated": false,
@@ -121,6 +121,20 @@
                 "text": "ActionsMenuGroup"
               },
               " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepDefinition.editorHandlers",
+            "type": "Object",
+            "tags": [],
+            "label": "editorHandlers",
+            "description": [],
+            "signature": [
+              "{ dynamicSchema: { getOutputSchema?: ((params: { input: z.infer<InputSchema>; config: z.infer<ConfigSchema>; }) => z.ZodType<z.infer<OutputSchema>>) | undefined; }; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
             "deprecated": false,
@@ -245,7 +259,7 @@
               "section": "def-public.PublicStepDefinition",
               "text": "PublicStepDefinition"
             },
-            ") => void"
+            "<z.ZodType, z.ZodType, z.ZodObject>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
           "deprecated": false,
@@ -267,7 +281,8 @@
                   "docId": "kibWorkflowsExtensionsPluginApi",
                   "section": "def-public.PublicStepDefinition",
                   "text": "PublicStepDefinition"
-                }
+                },
+                "<z.ZodType, z.ZodType, z.ZodObject>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
               "deprecated": false,
@@ -300,7 +315,7 @@
           "section": "def-public.PublicStepDefinition",
           "text": "PublicStepDefinition"
         },
-        ">"
+        "<z.ZodType, z.ZodType, z.ZodObject>>"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
       "deprecated": false,
@@ -512,6 +527,22 @@
             ],
             "signature": [
               "z.infer<TConfig>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.StepHandlerContext.rawInput",
+            "type": "Any",
+            "tags": [],
+            "label": "rawInput",
+            "description": [
+              "\nThe raw input configuration before template rendering.\nHas the same shape as input, but values may contain template strings."
+            ],
+            "signature": [
+              "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "deprecated": false,
@@ -980,7 +1011,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.DataMapStepTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "DataMapStepTypeId",
+        "description": [],
+        "signature": [
+          "\"data.map\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/steps/data/data_map_step.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
