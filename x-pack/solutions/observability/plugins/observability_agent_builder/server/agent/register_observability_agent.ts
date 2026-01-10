@@ -13,10 +13,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
 } from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
-<<<<<<< HEAD
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
-=======
->>>>>>> 37d4d260160ef611b11f48465e331bfdbf326c94
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
