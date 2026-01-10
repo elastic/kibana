@@ -176,7 +176,7 @@ export const listHealthScanRoute = createSloServerRoute({
               problematic_count: {
                 filter: {
                   term: {
-                    isProblematic: true,
+                    'health.isProblematic': true,
                   },
                 },
               },

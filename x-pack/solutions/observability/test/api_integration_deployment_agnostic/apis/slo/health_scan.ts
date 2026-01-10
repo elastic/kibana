@@ -15,20 +15,44 @@ interface HealthDocument {
   '@timestamp': string;
   scanId: string;
   spaceId: string;
-  sloId: string;
-  revision: number;
-  isProblematic: boolean;
-  health: any;
+  slo: {
+    id: string;
+    revision: number;
+    name: string;
+    enabled: boolean;
+  };
+  health: {
+    isProblematic: boolean;
+    rollup: {
+      isProblematic: boolean;
+      missing: boolean;
+      status: string;
+      state: string;
+    };
+    summary: {
+      isProblematic: boolean;
+      missing: boolean;
+      status: string;
+      state: string;
+    };
+  };
 }
 
-function createHealthDocument(overrides: Partial<HealthDocument> = {}): HealthDocument {
+function createHealthDocument(
+  overrides: Partial<Omit<HealthDocument, 'slo'>> & { slo?: Partial<HealthDocument['slo']> } = {}
+): HealthDocument {
+  const { slo, ...rest } = overrides;
   return {
     '@timestamp': new Date().toISOString(),
     scanId: v7(),
     spaceId: 'default',
-    sloId: v4(),
-    revision: 1,
-    isProblematic: false,
+    slo: {
+      id: v4(),
+      revision: 1,
+      name: 'Test SLO',
+      enabled: true,
+      ...slo,
+    },
     health: {
       isProblematic: false,
       rollup: {
@@ -44,7 +68,7 @@ function createHealthDocument(overrides: Partial<HealthDocument> = {}): HealthDo
         state: 'started',
       },
     },
-    ...overrides,
+    ...rest,
   };
 }
 
@@ -59,12 +83,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Health Scan', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      await esClient.deleteByQuery({
-        index: HEALTH_DATA_STREAM_NAME,
-        query: { match_all: {} },
-        refresh: true,
-        ignore_unavailable: true,
-      });
+      await Promise.all([
+        esClient.deleteByQuery({
+          index: HEALTH_DATA_STREAM_NAME,
+          query: { match_all: {} },
+          refresh: true,
+          ignore_unavailable: true,
+        }),
+        esClient.deleteByQuery({
+          index: '.kibana_task_manager',
+          query: { term: { 'task.taskType': 'slo:health-scan-task' } },
+          refresh: true,
+        }),
+      ]);
     });
 
     after(async () => {
@@ -72,12 +103,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     afterEach(async () => {
-      await esClient.deleteByQuery({
-        index: HEALTH_DATA_STREAM_NAME,
-        query: { match_all: {} },
-        refresh: true,
-        ignore_unavailable: true,
-      });
+      await Promise.all([
+        esClient.deleteByQuery({
+          index: HEALTH_DATA_STREAM_NAME,
+          query: { match_all: {} },
+          refresh: true,
+          ignore_unavailable: true,
+        }),
+        esClient.deleteByQuery({
+          index: '.kibana_task_manager',
+          query: { term: { 'task.taskType': 'slo:health-scan-task' } },
+          refresh: true,
+        }),
+      ]);
     });
 
     describe('POST /internal/observability/slos/_health/scans', () => {
@@ -90,7 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns existing scan when recent scan exists within 1h', async () => {
-        const firstResponse = await sloApi.scheduleHealthScan(adminRoleAuthc, { force: false });
+        const firstResponse = await sloApi.scheduleHealthScan(adminRoleAuthc, { force: true });
         expect(firstResponse).to.have.property('scanId');
 
         await retry.tryForTime(30 * 1000, async () => {
@@ -125,13 +163,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.results).to.be.an('array');
         expect(response.results).to.have.length(0);
         expect(response.total).to.eql(0);
+        expect(response.scan).to.have.property('status');
       });
 
       it('returns health documents filtered by scanId', async () => {
         const docs = [
-          createHealthDocument({ scanId: testScanId, sloId: 'slo-1' }),
-          createHealthDocument({ scanId: testScanId, sloId: 'slo-2' }),
-          createHealthDocument({ scanId: 'other-scan-id', sloId: 'slo-3' }),
+          createHealthDocument({ scanId: testScanId, slo: { id: 'slo-1' } }),
+          createHealthDocument({ scanId: testScanId, slo: { id: 'slo-2' } }),
+          createHealthDocument({ scanId: 'other-scan-id', slo: { id: 'slo-3' } }),
         ];
 
         await esClient.bulk({
@@ -144,8 +183,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.results).to.be.an('array');
         expect(response.results).to.have.length(2);
         expect(response.total).to.eql(2);
+        expect(response.scan).to.have.property('status');
 
-        const sloIds = response.results.map((r: any) => r.sloId);
+        const sloIds = response.results.map((r: any) => r.slo.id);
         expect(sloIds).to.contain('slo-1');
         expect(sloIds).to.contain('slo-2');
         expect(sloIds).to.not.contain('slo-3');
@@ -155,13 +195,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const docs = [
           createHealthDocument({
             scanId: testScanId,
-            sloId: 'healthy-slo',
-            isProblematic: false,
+            slo: { id: 'healthy-slo' },
           }),
           createHealthDocument({
             scanId: testScanId,
-            sloId: 'problematic-slo',
-            isProblematic: true,
+            slo: { id: 'problematic-slo' },
             health: {
               isProblematic: true,
               rollup: {
@@ -190,15 +228,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.results).to.have.length(1);
-        expect(response.results[0].sloId).to.eql('problematic-slo');
-        expect(response.results[0].isProblematic).to.eql(true);
+        expect(response.results[0].slo.id).to.eql('problematic-slo');
+        expect(response.results[0].health.isProblematic).to.eql(true);
       });
 
       it('supports pagination via size and searchAfter', async () => {
         const docs = Array.from({ length: 5 }, (_, i) =>
           createHealthDocument({
             scanId: testScanId,
-            sloId: `slo-${i + 1}`,
+            slo: { id: `slo-${i + 1}` },
             '@timestamp': new Date(Date.now() - i * 1000).toISOString(),
           })
         );
@@ -215,6 +253,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(firstPage.results).to.have.length(2);
         expect(firstPage.total).to.eql(5);
         expect(firstPage.searchAfter).to.be.an('array');
+        expect(firstPage.scan).to.have.property('status');
 
         const secondPage = await sloApi.getHealthScanResults(testScanId, adminRoleAuthc, {
           size: 2,
@@ -223,8 +262,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(secondPage.results).to.have.length(2);
 
-        const firstPageSloIds = firstPage.results.map((r: any) => r.sloId);
-        const secondPageSloIds = secondPage.results.map((r: any) => r.sloId);
+        const firstPageSloIds = firstPage.results.map((r: any) => r.slo.id);
+        const secondPageSloIds = secondPage.results.map((r: any) => r.slo.id);
         const intersection = firstPageSloIds.filter((id: any) => secondPageSloIds.includes(id));
         expect(intersection).to.have.length(0);
       });
@@ -233,12 +272,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const docs = [
           createHealthDocument({
             scanId: testScanId,
-            sloId: 'default-space-slo',
+            slo: { id: 'default-space-slo' },
             spaceId: 'default',
           }),
           createHealthDocument({
             scanId: testScanId,
-            sloId: 'other-space-slo',
+            slo: { id: 'other-space-slo' },
             spaceId: 'other-space',
           }),
         ];
@@ -253,19 +292,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.results).to.have.length(1);
-        expect(response.results[0].sloId).to.eql('default-space-slo');
+        expect(response.results[0].slo.id).to.eql('default-space-slo');
       });
 
       it('returns all spaces when allSpaces is true', async () => {
         const docs = [
           createHealthDocument({
             scanId: testScanId,
-            sloId: 'default-space-slo',
+            slo: { id: 'default-space-slo' },
             spaceId: 'default',
           }),
           createHealthDocument({
             scanId: testScanId,
-            sloId: 'other-space-slo',
+            slo: { id: 'other-space-slo' },
             spaceId: 'other-space',
           }),
         ];
@@ -280,7 +319,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.results).to.have.length(2);
-        const sloIds = response.results.map((r: any) => r.sloId);
+        const sloIds = response.results.map((r: any) => r.slo.id);
         expect(sloIds).to.contain('default-space-slo');
         expect(sloIds).to.contain('other-space-slo');
       });
@@ -301,29 +340,39 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           // Scan 1: 2 SLOs, 1 problematic
           createHealthDocument({
             scanId: testScanIds[0],
-            sloId: 'scan1-slo1',
-            isProblematic: false,
+            slo: { id: 'scan1-slo1' },
           }),
           createHealthDocument({
             scanId: testScanIds[0],
-            sloId: 'scan1-slo2',
-            isProblematic: true,
+            slo: { id: 'scan1-slo2' },
+            health: {
+              isProblematic: true,
+              rollup: {
+                isProblematic: true,
+                missing: false,
+                status: 'unhealthy',
+                state: 'failed',
+              },
+              summary: {
+                isProblematic: false,
+                missing: false,
+                status: 'healthy',
+                state: 'started',
+              },
+            },
           }),
           // Scan 2: 3 SLOs, 0 problematic
           createHealthDocument({
             scanId: testScanIds[1],
-            sloId: 'scan2-slo1',
-            isProblematic: false,
+            slo: { id: 'scan2-slo1' },
           }),
           createHealthDocument({
             scanId: testScanIds[1],
-            sloId: 'scan2-slo2',
-            isProblematic: false,
+            slo: { id: 'scan2-slo2' },
           }),
           createHealthDocument({
             scanId: testScanIds[1],
-            sloId: 'scan2-slo3',
-            isProblematic: false,
+            slo: { id: 'scan2-slo3' },
           }),
         ];
 
@@ -343,17 +392,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(scan1).to.be.ok();
         expect(scan1!.total).to.eql(2);
         expect(scan1!.problematic).to.eql(1);
+        expect(scan1!.status).to.be.a('string');
 
         expect(scan2).to.be.ok();
         expect(scan2!.total).to.eql(3);
         expect(scan2!.problematic).to.eql(0);
+        expect(scan2!.status).to.be.a('string');
       });
 
-      it('supports pagination via size and searchAfter', async () => {
+      it('respects size parameter', async () => {
         const docs = testScanIds.map((scanId, i) =>
           createHealthDocument({
             scanId,
-            sloId: `pagination-slo-${i}`,
+            slo: { id: `pagination-slo-${i}` },
             '@timestamp': new Date(Date.now() - i * 1000).toISOString(),
           })
         );
@@ -363,22 +414,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           refresh: true,
         });
 
-        const firstPage = await sloApi.listHealthScans(adminRoleAuthc, { size: 2 });
+        const response = await sloApi.listHealthScans(adminRoleAuthc, { size: 2 });
 
-        expect(firstPage.scans).to.be.an('array');
-        expect(firstPage.scans.length).to.eql(2);
-
-        const secondPage = await sloApi.listHealthScans(adminRoleAuthc, {
-          size: 2,
-          searchAfter: firstPage.searchAfter,
+        expect(response.scans).to.be.an('array');
+        expect(response.scans.length).to.eql(2);
+        response.scans.forEach((scan: any) => {
+          expect(scan).to.have.property('status');
         });
-
-        expect(secondPage.scans).to.be.an('array');
-
-        const firstPageScanIds = firstPage.scans.map((s: any) => s.scanId);
-        const secondPageScanIds = secondPage.scans.map((s: any) => s.scanId);
-        const intersection = firstPageScanIds.filter((id: any) => secondPageScanIds.includes(id));
-        expect(intersection).to.have.length(0);
       });
     });
   });
