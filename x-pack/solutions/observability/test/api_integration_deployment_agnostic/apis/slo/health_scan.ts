@@ -93,7 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const firstResponse = await sloApi.scheduleHealthScan(adminRoleAuthc, { force: false });
         expect(firstResponse).to.have.property('scanId');
 
-        retry.tryForTime(30 * 1000, async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           const secondResponse = await sloApi.scheduleHealthScan(adminRoleAuthc);
 
           expect(secondResponse).to.have.property('scanId');
