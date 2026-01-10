@@ -10,11 +10,11 @@ import { timerange } from '@kbn/synthtrace-client';
 import {
   type LogsSynthtraceEsClient,
   type ApmSynthtraceEsClient,
-  generateRichChangeEventsData,
   indexAll,
+  generateRichChangeEventsData,
 } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_change_events/tool';
-import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResultType } from '@kbn/agent-builder-common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
