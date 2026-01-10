@@ -77,6 +77,7 @@ export const getScreenshots = async (
       );
 
       const data = await browser.screenshot({
+        logger: kbnLogger,
         elementPosition: position,
         layout: options.layout,
         error: options.error,

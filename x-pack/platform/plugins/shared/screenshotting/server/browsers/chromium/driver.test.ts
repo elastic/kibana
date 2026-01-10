@@ -71,6 +71,7 @@ describe('chromium driver', () => {
     );
 
     const result = await driver.screenshot({
+      logger: mockLogger,
       elementPosition: {
         boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
         scroll: { x: 100, y: 300 },
@@ -93,6 +94,7 @@ describe('chromium driver', () => {
     const testSpy = jest.spyOn(driver, 'injectScreenshottingErrorHeader');
 
     const result = await driver.screenshot({
+      logger: mockLogger,
       elementPosition: {
         boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
         scroll: { x: 100, y: 300 },
@@ -123,6 +125,7 @@ describe('chromium driver', () => {
     const testSpy = jest.spyOn(layout, 'setPdfImageSize');
 
     await driver.screenshot({
+      logger: mockLogger,
       elementPosition: {
         boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
         scroll: { x: 100, y: 300 },

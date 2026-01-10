@@ -20,7 +20,7 @@ import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
-
+import { getStitchedScreenshot } from './stitched_screenshot';
 declare module 'puppeteer' {
   interface Page {
     _client(): CDPSession;
@@ -257,10 +257,12 @@ export class HeadlessChromiumDriver {
    * Receive a PNG buffer of the page screenshot from Chromium
    */
   public async screenshot({
+    logger,
     elementPosition,
     layout,
     error,
   }: {
+    logger: Logger;
     elementPosition: ElementPosition;
     layout: Layout;
     error?: Error;
@@ -276,25 +278,16 @@ export class HeadlessChromiumDriver {
       width: boundingClientRect.width,
     });
 
-    const screenshot = await this.page.screenshot({
-      clip: {
+    return await getStitchedScreenshot({
+      logger,
+      page: this.page,
+      rect: {
         x: boundingClientRect.left + scroll.x,
         y: boundingClientRect.top + scroll.y,
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
-      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
-
-    if (screenshot.byteLength) {
-      return Buffer.from(screenshot);
-    }
-
-    if (typeof screenshot === 'string') {
-      return Buffer.from(screenshot, 'base64');
-    }
-
-    return undefined;
   }
 
   evaluate<A extends unknown[], T = void>(

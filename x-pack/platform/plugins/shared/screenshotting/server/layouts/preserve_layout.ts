@@ -13,7 +13,7 @@ import { BaseLayout } from './base_layout';
 import type { PageSizeParams, PdfImageSize } from './base_layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
-const ZOOM: number = 2;
+export const ZOOM: number = 2;
 
 export class PreserveLayout extends BaseLayout implements Layout {
   public readonly selectors: LayoutSelectorDictionary;

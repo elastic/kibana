@@ -82,6 +82,8 @@ export const args = ({
   // As a workaround, we pass --enable-gpu to stop forcing swiftshader, see https://issues.chromium.org/issues/40256775#comment4
   if (os.arch() === 'arm64' && process.platform === 'darwin') {
     flags.push('--enable-gpu');
+      // hack to use software rendering on mac; DO NOT SHIP
+      flags.push('--use-gl=egl');
   } else {
     flags.push('--disable-gpu');
   }
