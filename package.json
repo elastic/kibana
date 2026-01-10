@@ -1936,7 +1936,7 @@
     "css-loader": "7.1.2",
     "cssnano": "7.1.2",
     "cssnano-preset-default": "7.0.10",
-    "cssstyle": "5.3.2",
+    "cssstyle": "5.3.5",
     "csstype": "3.0.7",
     "cypress": "13.17.0",
     "cypress-axe": "1.5.0",

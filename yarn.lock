@@ -217,16 +217,16 @@
     ai "^5.0.38"
     openai "^5.12.1"
 
-"@asamuzakjp/css-color@^4.0.3":
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@asamuzakjp/css-color/-/css-color-4.0.4.tgz#3c0a94e98593829d60f68916116814e8fbbdba6d"
-  integrity sha512-cKjSKvWGmAziQWbCouOsFwb14mp1betm8Y7Fn+yglDMUUu3r9DCbJ9iJbeFDenLMqFbIMC0pQP8K+B8LAxX3OQ==
+"@asamuzakjp/css-color@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@asamuzakjp/css-color/-/css-color-4.1.1.tgz#e5c662f488367dc74194609179fe6621f2586114"
+  integrity sha512-B0Hv6G3gWGMn0xKJ0txEi/jM5iFpT3MfDxmhZFb4W047GvytCf1DHQ1D69W3zHI4yWe2aTZAA0JnbMZ7Xc8DuQ==
   dependencies:
     "@csstools/css-calc" "^2.1.4"
-    "@csstools/css-color-parser" "^3.0.10"
+    "@csstools/css-color-parser" "^3.1.0"
     "@csstools/css-parser-algorithms" "^3.0.5"
     "@csstools/css-tokenizer" "^3.0.4"
-    lru-cache "^11.1.0"
+    lru-cache "^11.2.4"
 
 "@assemblyscript/loader@^0.10.1":
   version "0.10.1"
@@ -2335,7 +2335,7 @@
   resolved "https://registry.yarnpkg.com/@csstools/css-calc/-/css-calc-2.1.4.tgz#8473f63e2fcd6e459838dd412401d5948f224c65"
   integrity sha512-3N8oaj+0juUw/1H3YwmDDJXCgTB1gKU6Hc/bB502u9zR0q2vd786XJH9QfrKIEgFlZmhZiq6epXl4rHqhzsIgQ==
 
-"@csstools/css-color-parser@^3.0.10":
+"@csstools/css-color-parser@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@csstools/css-color-parser/-/css-color-parser-3.1.0.tgz#4e386af3a99dd36c46fef013cfe4c1c341eed6f0"
   integrity sha512-nbtKwh3a6xNVIp/VRuXV64yTKnb1IjTAEEh3irzS+HkKjAOYLTGNb9pmVNntZ8iVBHcWDA2Dof0QtPgFI1BaTA==
@@ -2348,10 +2348,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/css-parser-algorithms/-/css-parser-algorithms-3.0.5.tgz#5755370a9a29abaec5515b43c8b3f2cf9c2e3076"
   integrity sha512-DaDeUkXZKjdGhgYaHNJTV9pV7Y9B3b644jCLs9Upc3VeNGg6LWARAT6O+Q+/COo+2gg/bM5rhpMAtf70WqfBdQ==
 
-"@csstools/css-syntax-patches-for-csstree@^1.0.14":
-  version "1.0.14"
-  resolved "https://registry.yarnpkg.com/@csstools/css-syntax-patches-for-csstree/-/css-syntax-patches-for-csstree-1.0.14.tgz#96e8bd829dea29da6460ac7568ee922f48ecc382"
-  integrity sha512-zSlIxa20WvMojjpCSy8WrNpcZ61RqfTfX3XTaOeVlGJrt/8HF3YbzgFZa01yTbT4GWQLwfTcC3EB8i3XnB647Q==
+"@csstools/css-syntax-patches-for-csstree@^1.0.21":
+  version "1.0.22"
+  resolved "https://registry.yarnpkg.com/@csstools/css-syntax-patches-for-csstree/-/css-syntax-patches-for-csstree-1.0.22.tgz#7a14209eee004598dae61310e180f9826821d6c9"
+  integrity sha512-qBcx6zYlhleiFfdtzkRgwNC7VVoAwfK76Vmsw5t+PbvtdknO9StgRk7ROvq9so1iqbdW4uLIDAsXRsTfUrIoOw==
 
 "@csstools/css-tokenizer@^3.0.4":
   version "3.0.4"
@@ -18535,13 +18535,13 @@ cssom@~0.3.6:
   resolved "https://registry.yarnpkg.com/cssom/-/cssom-0.3.8.tgz#9f1276f5b2b463f2114d3f2c75250af8c1a36f4a"
   integrity sha512-b0tGHbfegbhPJpxpiBPU2sCkigAqtM9O121le6bbOlgyV+NyGyCmVfJ6QW9eRjz8CpNfWEOYBIMIGRYkLwsIYg==
 
-cssstyle@5.3.2:
-  version "5.3.2"
-  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-5.3.2.tgz#5ea3308bf2bfb45e2c17aae03df57401b7bd2f3d"
-  integrity sha512-zDMqXh8Vs1CdRYZQ2M633m/SFgcjlu8RB8b/1h82i+6vpArF507NSYIWJHGlJaTWoS+imcnctmEz43txhbVkOw==
+cssstyle@5.3.5:
+  version "5.3.5"
+  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-5.3.5.tgz#00bd24f150773bef3b1d7530366e413b74d06394"
+  integrity sha512-GlsEptulso7Jg0VaOZ8BXQi3AkYM5BOJKEO/rjMidSCq70FkIC5y0eawrCXeYzxgt3OCf4Ls+eoxN+/05vN0Ag==
   dependencies:
-    "@asamuzakjp/css-color" "^4.0.3"
-    "@csstools/css-syntax-patches-for-csstree" "^1.0.14"
+    "@asamuzakjp/css-color" "^4.1.1"
+    "@csstools/css-syntax-patches-for-csstree" "^1.0.21"
     css-tree "^3.1.0"
 
 cssstyle@^2.3.0:
@@ -25629,7 +25629,7 @@ lru-cache@10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.2.0.tgz#0bd445ca57363465900f4d1f9bd8db343a4d95c3"
   integrity sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==
 
-lru-cache@11.2.4, lru-cache@^11.0.0, lru-cache@^11.1.0:
+lru-cache@11.2.4, lru-cache@^11.0.0, lru-cache@^11.2.4:
   version "11.2.4"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.4.tgz#ecb523ebb0e6f4d837c807ad1abaea8e0619770d"
   integrity sha512-B5Y16Jr9LB9dHVkh6ZevG+vAbOsNOYCX+sXvFWFu7B3Iz5mijW3zdbMyhsh8ANd2mSWBYdJgnqi+mL7/LrOPYg==
