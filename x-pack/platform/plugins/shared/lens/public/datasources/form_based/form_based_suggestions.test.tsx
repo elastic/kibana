@@ -258,7 +258,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       operationType: 'terms',
                       sourceField: 'source',
                       params: expect.objectContaining({
-                        size: 5,
+                        size: 9,
                         orderBy: { columnId: 'id2', type: 'column' },
                       }),
                     }),
@@ -502,7 +502,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       operationType: 'terms',
                       sourceField: 'source',
                       params: expect.objectContaining({
-                        size: 5,
+                        size: 9,
                         orderBy: { columnId: 'id1', type: 'column' },
                       }),
                     }),
@@ -1003,7 +1003,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     newid: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'dest',
-                      params: expect.objectContaining({ size: 3 }),
+                      params: expect.objectContaining({ size: 9 }),
                     }),
                   },
                 }),
@@ -2155,7 +2155,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id3: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
-                      params: expect.objectContaining({ size: 5 }),
+                      params: expect.objectContaining({ size: 9 }),
                     }),
                     id2: expect.objectContaining({
                       operationType: 'count',
