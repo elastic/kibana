@@ -69,7 +69,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/4xx_response'
       x-code-samples:
-        - label: Curl example
+        - label: curl
           lang: curl
           source: |
             curl \
@@ -77,7 +77,7 @@ paths:
               --header "Authorization: $API_KEY" \
               --header "Content-Type: application/json"
               --header "kbn-xsrf: true"
-        - label: Console example
+        - label: Console
           lang: console
           source: |
             DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]
