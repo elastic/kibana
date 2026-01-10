@@ -14,7 +14,6 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'essentials' },
       { product_line: 'cloud', product_tier: 'essentials' },
     ])}`,
-    '--xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed=100',
   ],
   testFiles: [require.resolve('..')],
   junit: {
