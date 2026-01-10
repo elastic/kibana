@@ -68,16 +68,20 @@ export async function runHealthScan(
         '@timestamp': now,
         scanId,
         spaceId: sloById.get(result.id)?.spaceId ?? 'default',
-        sloId: result.id,
-        revision: result.revision,
-        isProblematic: result.health.isProblematic,
+        slo: {
+          id: result.id,
+          revision: result.revision,
+          name: result.name,
+          enabled: sloById.get(result.id)?.enabled ?? true,
+        },
+
         health: result.health,
       }));
 
       if (documents.length > 0) {
         await bulkInsertHealthDocuments(documents, dependencies);
         totalProcessed += documents.length;
-        totalProblematic += documents.filter((doc) => doc.isProblematic).length;
+        totalProblematic += documents.filter((doc) => doc.health.isProblematic).length;
       }
 
       if (totalProcessed >= MAX_SLOS_PROCESSED) {

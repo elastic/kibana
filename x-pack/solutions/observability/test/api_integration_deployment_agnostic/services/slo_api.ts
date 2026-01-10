@@ -382,11 +382,10 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
 
     async listHealthScans(
       roleAuthc: RoleCredentials,
-      params?: { size?: number; searchAfter?: string }
+      params?: { size?: number }
     ): Promise<ListHealthScanResponse> {
       const queryParams: Record<string, string | number> = {};
       if (params?.size !== undefined) queryParams.size = params.size;
-      if (params?.searchAfter) queryParams.searchAfter = params.searchAfter;
 
       const { body } = await supertestWithoutAuth
         .get(`/internal/observability/slos/_health/scans`)

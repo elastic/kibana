@@ -11,9 +11,12 @@ export interface HealthDocument {
   '@timestamp': string;
   scanId: string;
   spaceId: string;
-  sloId: string;
-  revision: number;
-  isProblematic: boolean;
+  slo: {
+    id: string;
+    revision: number;
+    name: string;
+    enabled: boolean;
+  };
   health: {
     isProblematic: boolean;
     rollup: TransformHealth;
