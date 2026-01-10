@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
@@ -28,6 +29,10 @@ import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 import { useKibana } from '../../utils/kibana_react';
 import { ALERT_SOURCE } from '../alerts_table/common/get_columns';
+import datadogIcon from '../../assets/icons/datadog.svg';
+
+// Actions API base path
+const ACTIONS_API_PATH = '/api/actions';
 
 /**
  * Checks if an alert is an external alert (from third-party source)
@@ -64,6 +69,7 @@ export function AlertActions(
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+  const [isMutedLocally, setIsMutedLocally] = useState(false);
 
   // External alert fields
   const externalUrl = alert['kibana.alert.external_url']?.[0] as string | undefined;
@@ -81,11 +87,11 @@ export function AlertActions(
     if (isExternal) {
       setViewInAppUrl(externalUrl);
     } else {
-      const alertLink = observabilityAlert.link;
-      if (!observabilityAlert.hasBasePath && prepend) {
-        setViewInAppUrl(prepend(alertLink ?? ''));
-      } else {
-        setViewInAppUrl(alertLink);
+    const alertLink = observabilityAlert.link;
+    if (!observabilityAlert.hasBasePath && prepend) {
+      setViewInAppUrl(prepend(alertLink ?? ''));
+    } else {
+      setViewInAppUrl(alertLink);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,12 +101,12 @@ export function AlertActions(
     if (isExternal) {
       setViewInAppUrl(externalUrl);
     } else {
-      const alertLink = observabilityAlert.link as unknown as string;
-      if (!observabilityAlert.hasBasePath) {
-        setViewInAppUrl(prepend(alertLink ?? ''));
-      } else {
-        setViewInAppUrl(alertLink);
-      }
+    const alertLink = observabilityAlert.link as unknown as string;
+    if (!observabilityAlert.hasBasePath) {
+      setViewInAppUrl(prepend(alertLink ?? ''));
+    } else {
+      setViewInAppUrl(alertLink);
+    }
     }
   }, [isExternal, externalUrl, observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
@@ -153,6 +159,108 @@ export function AlertActions(
     }
     closeActionsPopover();
   }, [externalUrl, closeActionsPopover]);
+
+  // Extract monitor ID from raw payload (Datadog specific)
+  const getMonitorId = useCallback((): number | undefined => {
+    const rawPayload = alert['kibana.alert.raw_payload']?.[0];
+    if (rawPayload) {
+      try {
+        const payload = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+        const rawId = payload.monitor_id || payload.monitorId || payload.alertId;
+        return rawId ? Number(rawId) : undefined;
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [alert]);
+
+  // Handle mute/unmute action for external alerts via connector
+  const handleMuteToggleInSource = useCallback(async () => {
+    if (!connectorId) {
+      notifications?.toasts.addWarning({
+        title: i18n.translate('xpack.observability.alerts.actions.noConnector', {
+          defaultMessage: 'No connector associated with this alert',
+        }),
+      });
+      closeActionsPopover();
+      return;
+    }
+
+    const monitorId = getMonitorId();
+
+    if (!monitorId || isNaN(monitorId)) {
+      notifications?.toasts.addWarning({
+        title: i18n.translate('xpack.observability.alerts.actions.noMonitorId', {
+          defaultMessage: 'Could not find monitor ID in alert payload',
+        }),
+      });
+      closeActionsPopover();
+      return;
+    }
+
+    const action = isMutedLocally ? 'unmuteMonitor' : 'muteMonitor';
+    const actionLabel = isMutedLocally ? 'unmuted' : 'muted';
+
+    try {
+      const { http } = services;
+      
+      // Execute the connector's mute/unmute action
+      const response = await http.post<{
+        status: string;
+        data?: { success?: boolean; error?: string; data?: unknown };
+        message?: string;
+      }>(`${ACTIONS_API_PATH}/connector/${connectorId}/_execute`, {
+        body: JSON.stringify({
+          params: {
+            subAction: action,
+            subActionParams: {
+              monitorId,
+              ...(isMutedLocally && { allScopes: true }), // Unmute all scopes
+            },
+          },
+        }),
+      });
+
+      // Check if the connector execution was successful
+      if (response.status === 'ok' && response.data?.success) {
+        setIsMutedLocally(!isMutedLocally);
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.observability.alerts.actions.muteToggleSuccess', {
+            defaultMessage: 'Monitor {action} in Datadog',
+            values: { action: actionLabel },
+          }),
+          text: i18n.translate('xpack.observability.alerts.actions.muteToggleSuccessText', {
+            defaultMessage: 'Monitor {monitorId} has been {action}',
+            values: { monitorId, action: actionLabel },
+          }),
+        });
+      } else if (response.status === 'error' || response.data?.error) {
+        throw new Error(response.data?.error || response.message || 'Unknown error');
+      } else {
+        // Assume success if no error
+        setIsMutedLocally(!isMutedLocally);
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.observability.alerts.actions.muteToggleSuccess', {
+            defaultMessage: 'Monitor {action} in Datadog',
+            values: { action: actionLabel },
+          }),
+        });
+      }
+      
+      refresh?.();
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('xpack.observability.alerts.actions.muteToggleError', {
+          defaultMessage: 'Failed to {action} monitor',
+          values: { action: isMutedLocally ? 'unmute' : 'mute' },
+        }),
+        text: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+
+    closeActionsPopover();
+  }, [connectorId, getMonitorId, isMutedLocally, services, notifications, closeActionsPopover, refresh]);
 
   // External alert menu items
   const externalAlertMenuItems = useMemo(() => {
@@ -217,23 +325,43 @@ export function AlertActions(
       );
     }
 
-    // Connector-specific actions (placeholder for future connector integration)
-    if (connectorId) {
+    // Connector-specific actions - Mute/Unmute alert in source system
+    if (connectorId && alertSource?.toLowerCase() === 'datadog') {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="mute-in-source-action"
+          key="muteInSource"
+          onClick={handleMuteToggleInSource}
+          icon={<EuiIcon type={datadogIcon} size="m" />}
+          size="s"
+        >
+          {isMutedLocally
+            ? i18n.translate('xpack.observability.alerts.actions.unmuteInDatadog', {
+                defaultMessage: 'Unmute in Datadog',
+              })
+            : i18n.translate('xpack.observability.alerts.actions.muteInDatadog', {
+                defaultMessage: 'Mute in Datadog',
+              })}
+        </EuiContextMenuItem>
+      );
+    } else if (connectorId) {
+      // For other sources, show disabled mute action with info
       items.push(
         <EuiContextMenuItem
           data-test-subj="mute-in-source-action"
           key="muteInSource"
           onClick={() => {
             notifications?.toasts.addInfo({
-              title: i18n.translate('xpack.observability.alerts.actions.muteInSourceInfo', {
-                defaultMessage: 'Mute action requires connector configuration',
+              title: i18n.translate('xpack.observability.alerts.actions.muteNotSupported', {
+                defaultMessage: 'Mute action not yet supported for {source}',
+                values: { source: alertSource || 'this source' },
               }),
             });
             closeActionsPopover();
           }}
           icon="bellSlash"
           size="s"
-          disabled={true} // Disabled until connector integration is complete
+          disabled={true}
         >
           {i18n.translate('xpack.observability.alerts.actions.muteInSource', {
             defaultMessage: 'Mute in {source}',
@@ -249,8 +377,10 @@ export function AlertActions(
     alertSource,
     connectorId,
     userCasesPermissions,
+    isMutedLocally,
     handleViewInSource,
     handleCopyAlertLink,
+    handleMuteToggleInSource,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     notifications,

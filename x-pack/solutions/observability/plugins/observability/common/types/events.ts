@@ -21,6 +21,7 @@ export interface ExternalEvent {
   links?: Array<{ label: string; url: string }>;
   raw_payload?: Record<string, unknown>;
   connector_id?: string;
+  fingerprint?: string; // Unique identifier for deduplication (source:monitor_id:group)
 }
 
 export interface ExternalEventInput {
@@ -34,6 +35,7 @@ export interface ExternalEventInput {
   links?: Array<{ label: string; url: string }>;
   raw_payload?: Record<string, unknown>;
   connector_id?: string;
+  fingerprint?: string; // Unique identifier for deduplication (source:monitor_id:group)
 }
 
 export interface GetEventsParams {
@@ -73,6 +75,7 @@ export const EXTERNAL_EVENTS_INDEX = '.external-events';
 export const EVENTS_API_URLS = {
   EVENTS: '/api/observability/events',
   EVENTS_MOCK: '/api/observability/events/mock',
+  EVENTS_WEBHOOK: '/api/observability/events/webhook',
 } as const;
 
 /**
@@ -131,10 +134,12 @@ export interface ExternalAlertDocument {
   'kibana.alert.status': string;
   'kibana.alert.severity'?: string;
   'kibana.alert.start': string;
+  'kibana.alert.end'?: string;
   'kibana.alert.source': string;
   'kibana.alert.connector_id'?: string;
   'kibana.alert.raw_payload'?: Record<string, unknown>;
   'kibana.alert.external_url'?: string;
+  'kibana.alert.fingerprint'?: string; // Unique identifier for deduplication
   'kibana.alert.rule.uuid': string;
   'kibana.alert.rule.category': string;
   'kibana.alert.rule.producer': string;
@@ -165,13 +170,14 @@ export function externalEventToAlertDocument(event: ExternalEvent): ExternalAler
     'kibana.alert.connector_id': event.connector_id,
     'kibana.alert.raw_payload': event.raw_payload,
     'kibana.alert.external_url': primaryLink,
+    'kibana.alert.fingerprint': event.fingerprint,
     // Required fields for alert table compatibility
     'kibana.alert.rule.uuid': `external-${event.source}-${event.id}`,
     'kibana.alert.rule.category': 'External Alert',
     'kibana.alert.rule.producer': 'observability',
     'kibana.alert.rule.consumer': 'logs',
     'kibana.alert.rule.type_id': 'external.alert',
-    'kibana.alert.instance.id': event.id,
+    'kibana.alert.instance.id': event.fingerprint || event.id, // Use fingerprint as instance ID for deduplication
     'kibana.space_ids': ['default'],
     tags: event.tags || [],
     'event.action': 'open',
@@ -207,5 +213,6 @@ export function alertDocumentToExternalEvent(doc: ExternalAlertDocument): Extern
       : undefined,
     raw_payload: doc['kibana.alert.raw_payload'],
     connector_id: doc['kibana.alert.connector_id'],
+    fingerprint: doc['kibana.alert.fingerprint'],
   };
 }

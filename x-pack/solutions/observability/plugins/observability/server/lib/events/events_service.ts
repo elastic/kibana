@@ -12,6 +12,8 @@ import type {
   ExternalEventInput,
   GetEventsParams,
   ExternalAlertDocument,
+  EventSeverity,
+  EventStatus,
 } from '../../../common/types/events';
 import {
   EXTERNAL_ALERTS_INDEX,
@@ -54,8 +56,10 @@ export class EventsService {
               'kibana.alert.status': { type: 'keyword' },
               'kibana.alert.severity': { type: 'keyword' },
               'kibana.alert.start': { type: 'date' },
+              'kibana.alert.end': { type: 'date' },
               'kibana.alert.source': { type: 'keyword' },
               'kibana.alert.connector_id': { type: 'keyword' },
+              'kibana.alert.fingerprint': { type: 'keyword' }, // For deduplication
               'kibana.alert.raw_payload': { type: 'flattened' },
               'kibana.alert.external_url': { type: 'keyword' },
               'kibana.alert.rule.uuid': { type: 'keyword' },
@@ -92,6 +96,7 @@ export class EventsService {
       links: input.links,
       raw_payload: input.raw_payload,
       connector_id: input.connector_id,
+      fingerprint: input.fingerprint,
     };
 
     // Convert to Kibana alert document format
@@ -202,6 +207,45 @@ export class EventsService {
     }
   }
 
+  async getEventsByIds(ids: string[]): Promise<{ events: ExternalEvent[]; total: number }> {
+    if (ids.length === 0) {
+      return { events: [], total: 0 };
+    }
+
+    try {
+      const response = await this.esClient.search<ExternalAlertDocument>({
+        index: EXTERNAL_ALERTS_INDEX,
+        size: ids.length,
+        query: {
+          ids: {
+            values: ids,
+          },
+        },
+      });
+
+      const events = response.hits.hits.map((hit) =>
+        alertDocumentToExternalEvent(hit._source as ExternalAlertDocument)
+      );
+      const total =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value || 0;
+
+      return { events, total };
+    } catch (error: unknown) {
+      // If index doesn't exist yet, return empty results
+      if (
+        error &&
+        typeof error === 'object' &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return { events: [], total: 0 };
+      }
+      throw error;
+    }
+  }
+
   async deleteAllEvents(): Promise<void> {
     try {
       await this.esClient.deleteByQuery({
@@ -218,6 +262,145 @@ export class EventsService {
         (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
       ) {
         return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Finds an existing alert by fingerprint.
+   * Returns the event if found (regardless of status), or null if not found.
+   */
+  async findAlertByFingerprint(fingerprint: string): Promise<ExternalEvent | null> {
+    try {
+      const searchResponse = await this.esClient.search<ExternalAlertDocument>({
+        index: EXTERNAL_ALERTS_INDEX,
+        size: 1,
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        query: {
+          term: { 'kibana.alert.fingerprint': fingerprint },
+        },
+      });
+
+      if (searchResponse.hits.hits.length === 0) {
+        return null;
+      }
+
+      const hit = searchResponse.hits.hits[0];
+      return alertDocumentToExternalEvent(hit._source as ExternalAlertDocument);
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Updates an alert's status.
+   */
+  async updateAlertStatus(
+    alertId: string,
+    status: 'open' | 'resolved'
+  ): Promise<ExternalEvent | null> {
+    try {
+      const kibanaStatus = status === 'resolved' ? 'recovered' : 'active';
+      const updateDoc: Record<string, unknown> = {
+        'kibana.alert.status': kibanaStatus,
+        '@timestamp': new Date().toISOString(),
+      };
+
+      if (status === 'resolved') {
+        updateDoc['kibana.alert.end'] = new Date().toISOString();
+      }
+
+      await this.esClient.update({
+        index: EXTERNAL_ALERTS_INDEX,
+        id: alertId,
+        doc: updateDoc,
+        refresh: true,
+      });
+
+      const getResponse = await this.esClient.get<ExternalAlertDocument>({
+        index: EXTERNAL_ALERTS_INDEX,
+        id: alertId,
+      });
+
+      return alertDocumentToExternalEvent(getResponse._source as ExternalAlertDocument);
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Updates an existing alert with new data (for re-triggered alerts).
+   */
+  async updateAlert(
+    alertId: string,
+    updates: {
+      title?: string;
+      message?: string;
+      severity?: EventSeverity;
+      status?: EventStatus;
+      timestamp?: string;
+      raw_payload?: Record<string, unknown>;
+    }
+  ): Promise<ExternalEvent | null> {
+    try {
+      const updateDoc: Record<string, unknown> = {
+        '@timestamp': updates.timestamp || new Date().toISOString(),
+      };
+
+      if (updates.title) {
+        updateDoc['kibana.alert.rule.name'] = updates.title;
+      }
+      if (updates.message) {
+        updateDoc['kibana.alert.reason'] = updates.message;
+      }
+      if (updates.severity) {
+        updateDoc['kibana.alert.severity'] = updates.severity;
+      }
+      if (updates.status) {
+        updateDoc['kibana.alert.status'] = updates.status === 'resolved' ? 'recovered' : 'active';
+      }
+      if (updates.raw_payload) {
+        updateDoc['kibana.alert.raw_payload'] = updates.raw_payload;
+      }
+
+      await this.esClient.update({
+        index: EXTERNAL_ALERTS_INDEX,
+        id: alertId,
+        doc: updateDoc,
+        refresh: true,
+      });
+
+      const getResponse = await this.esClient.get<ExternalAlertDocument>({
+        index: EXTERNAL_ALERTS_INDEX,
+        id: alertId,
+      });
+
+      return alertDocumentToExternalEvent(getResponse._source as ExternalAlertDocument);
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
       }
       throw error;
     }

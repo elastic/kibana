@@ -36,6 +36,8 @@ const getEventsRoute = createObservabilityServerRoute({
       severity: t.string,
       status: t.string,
       size: t.string,
+      id: t.string, // Single ID
+      ids: t.string, // Comma-separated IDs
     }),
   }),
   handler: async ({ context, params }): Promise<{ events: ExternalEvent[]; total: number }> => {
@@ -44,6 +46,13 @@ const getEventsRoute = createObservabilityServerRoute({
     const eventsService = new EventsService(esClient);
 
     const query = params?.query || {};
+
+    // If IDs are provided, fetch by IDs
+    if (query.id || query.ids) {
+      const idList = query.ids ? query.ids.split(',') : query.id ? [query.id] : [];
+      return eventsService.getEventsByIds(idList);
+    }
+
     return eventsService.getEvents({
       from: query.from,
       to: query.to,
@@ -68,32 +77,34 @@ const createEventsRoute = createObservabilityServerRoute({
   options: { access: 'public' },
   params: t.intersection([
     t.type({
-      body: t.union([
-        // Single event
+    body: t.union([
+      // Single event
         t.intersection([
-          t.type({
-            title: t.string,
-            message: t.string,
-            severity: t.string,
-            source: t.string,
-          }),
+      t.type({
+        title: t.string,
+        message: t.string,
+        severity: t.string,
+        source: t.string,
+      }),
           t.partial({
             timestamp: t.string,
             status: t.string,
             tags: t.array(t.string),
             links: t.array(t.type({ label: t.string, url: t.string })),
             raw_payload: t.record(t.string, t.unknown),
+            fingerprint: t.string,
+            connector_id: t.string,
           }),
         ]),
-        // Batch of events
-        t.type({
-          events: t.array(
+      // Batch of events
+      t.type({
+        events: t.array(
             t.intersection([
-              t.type({
-                title: t.string,
-                message: t.string,
-                severity: t.string,
-                source: t.string,
+          t.type({
+            title: t.string,
+            message: t.string,
+            severity: t.string,
+            source: t.string,
               }),
               t.partial({
                 timestamp: t.string,
@@ -101,12 +112,14 @@ const createEventsRoute = createObservabilityServerRoute({
                 tags: t.array(t.string),
                 links: t.array(t.type({ label: t.string, url: t.string })),
                 raw_payload: t.record(t.string, t.unknown),
+                fingerprint: t.string,
+                connector_id: t.string,
               }),
             ])
-          ),
-        }),
-      ]),
-    }),
+        ),
+      }),
+    ]),
+  }),
     t.partial({
       query: t.partial({
         connector_id: t.string,
@@ -121,24 +134,26 @@ const createEventsRoute = createObservabilityServerRoute({
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const eventsService = new EventsService(esClient);
 
-    const connectorId = params.query?.connector_id;
+    // connector_id can come from query param (legacy) or body (preferred)
+    const queryConnectorId = params.query?.connector_id;
     const body = params.body as ExternalEventInput | { events: ExternalEventInput[] };
 
     // Check if it's a batch request
     if ('events' in body && Array.isArray(body.events)) {
-      // Add connector_id to each event
+      // Use body connector_id if present, otherwise fall back to query param
       const eventsWithConnector = body.events.map((event) => ({
         ...event,
-        connector_id: connectorId,
+        connector_id: event.connector_id || queryConnectorId,
       }));
       const events = await eventsService.createEvents(eventsWithConnector);
       return { events, count: events.length };
     }
 
-    // Single event - add connector_id
+    // Single event - use body connector_id if present, otherwise fall back to query param
+    const singleEvent = body as ExternalEventInput;
     const eventWithConnector = {
-      ...(body as ExternalEventInput),
-      connector_id: connectorId,
+      ...singleEvent,
+      connector_id: singleEvent.connector_id || queryConnectorId,
     };
     const event = await eventsService.createEvent(eventWithConnector);
     return { event, count: 1 };
@@ -203,6 +218,9 @@ const createMockEventsRoute = createObservabilityServerRoute({
     return { events, count: events.length, provider };
   },
 });
+
+// Note: The webhook route is registered directly in plugin.ts to bypass strict body validation
+// See: ./webhook_route.ts
 
 export const eventsRouteRepository = {
   ...getEventsRoute,

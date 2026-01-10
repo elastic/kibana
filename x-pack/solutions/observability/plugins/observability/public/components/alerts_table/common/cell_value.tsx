@@ -7,6 +7,8 @@
 import { EuiLink, EuiText, EuiFlexGroup, EuiBadge, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
+// Import custom provider icons
+import datadogIcon from '../../../assets/icons/datadog.svg';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -87,7 +89,7 @@ const SOURCE_CONFIG: Record<
   },
   datadog: {
     color: '#632CA6',
-    icon: 'visAreaStacked',
+    icon: datadogIcon,
     label: 'Datadog',
     textColor: 'white',
   },

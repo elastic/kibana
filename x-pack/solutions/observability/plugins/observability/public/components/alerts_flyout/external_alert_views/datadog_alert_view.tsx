@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -18,14 +17,78 @@ import {
   EuiPanel,
   EuiText,
   EuiCodeBlock,
+  EuiImage,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
-import { ALERT_SOURCE } from '../../alerts_table/common/get_columns';
+import datadogIcon from '../../../assets/icons/datadog.svg';
 
 interface DatadogAlertViewProps {
   alert: Alert;
 }
+
+// Styles
+const rowStyles = css`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
+
+const labelStyles = css`
+  font-weight: 600;
+  min-width: 120px;
+  flex-shrink: 0;
+  color: #69707d;
+  font-size: 12px;
+`;
+
+const valueStyles = css`
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+`;
+
+const reasonStyles = css`
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 100%;
+`;
+
+const codeBlockContainerStyles = css`
+  max-width: 100%;
+  overflow: hidden;
+
+  & .euiCodeBlock__pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+`;
+
+/**
+ * Extracts snapshot graph URL from the alert message/reason
+ */
+function extractSnapshotUrl(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const markdownMatch = text.match(/\[!\[.*?\]\((https:\/\/p\.datadoghq\.com\/snapshot\/[^)]+)\)/);
+  if (markdownMatch) return markdownMatch[1];
+  const directMatch = text.match(/(https:\/\/p\.datadoghq\.com\/snapshot\/[^\s\])"]+)/);
+  if (directMatch) return directMatch[1];
+  return undefined;
+}
+
+const FieldRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <div css={rowStyles}>
+    <span css={labelStyles}>{label}</span>
+    <span css={valueStyles}>{children}</span>
+  </div>
+);
 
 export const DatadogAlertView: React.FC<DatadogAlertViewProps> = ({ alert }) => {
   const rawPayload = alert['kibana.alert.raw_payload'] as Record<string, unknown> | undefined;
@@ -37,306 +100,188 @@ export const DatadogAlertView: React.FC<DatadogAlertViewProps> = ({ alert }) => 
   const status = alert['kibana.alert.status']?.[0] as string;
   const timestamp = alert['@timestamp']?.[0] as string;
 
-  // Datadog-specific fields from raw payload
-  const monitorId = rawPayload?.monitor_id as string | undefined;
-  const monitorName = rawPayload?.monitor_name as string | undefined;
-  const monitorType = rawPayload?.monitor_type as string | undefined;
-  const priority = rawPayload?.priority as string | undefined;
-  const host = rawPayload?.host as string | undefined;
-  const service = rawPayload?.service as string | undefined;
-  const env = rawPayload?.env as string | undefined;
-  const alertQuery = rawPayload?.query as string | undefined;
-  const thresholds = rawPayload?.thresholds as Record<string, number> | undefined;
-  const currentValue = rawPayload?.current_value as number | undefined;
+  // Datadog-specific fields
+  const nestedPayload = rawPayload?.raw_payload as Record<string, unknown> | undefined;
+  const monitorId =
+    (rawPayload?.monitor_id as string) || (nestedPayload?.alertId as string) || undefined;
+  const priority = (nestedPayload?.alertPriority as string) || undefined;
+  const alertQuery = (nestedPayload?.alertQuery as string) || undefined;
 
-  const descriptionListItems = [
-    {
-      title: i18n.translate('xpack.observability.datadogAlertView.alertTitle', {
-        defaultMessage: 'Alert Title',
-      }),
-      description: alertTitle || '--',
-    },
-    {
-      title: i18n.translate('xpack.observability.datadogAlertView.status', {
-        defaultMessage: 'Status',
-      }),
-      description: (
-        <EuiBadge color={status === 'active' ? 'danger' : 'success'}>
-          {status?.toUpperCase() || 'UNKNOWN'}
-        </EuiBadge>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.observability.datadogAlertView.severity', {
-        defaultMessage: 'Severity',
-      }),
-      description: (
-        <EuiBadge
-          color={
-            severity === 'critical'
-              ? 'danger'
-              : severity === 'high'
-              ? 'warning'
-              : severity === 'medium'
-              ? 'primary'
-              : 'default'
-          }
-        >
-          {severity?.toUpperCase() || 'UNKNOWN'}
-        </EuiBadge>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.observability.datadogAlertView.timestamp', {
-        defaultMessage: 'Triggered At',
-      }),
-      description: timestamp ? new Date(timestamp).toLocaleString() : '--',
-    },
-  ];
+  const snapshotUrl = useMemo(() => {
+    const directSnapshot = nestedPayload?.snapshotUrl as string;
+    if (directSnapshot) return directSnapshot;
+    return extractSnapshotUrl(alertReason);
+  }, [nestedPayload, alertReason]);
 
-  const datadogSpecificItems = [
-    ...(monitorId
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.monitorId', {
-              defaultMessage: 'Monitor ID',
-            }),
-            description: monitorId,
-          },
-        ]
-      : []),
-    ...(monitorName
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.monitorName', {
-              defaultMessage: 'Monitor Name',
-            }),
-            description: monitorName,
-          },
-        ]
-      : []),
-    ...(monitorType
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.monitorType', {
-              defaultMessage: 'Monitor Type',
-            }),
-            description: <EuiBadge color="hollow">{monitorType}</EuiBadge>,
-          },
-        ]
-      : []),
-    ...(priority
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.priority', {
-              defaultMessage: 'Priority',
-            }),
-            description: <EuiBadge color="primary">{priority}</EuiBadge>,
-          },
-        ]
-      : []),
-    ...(host
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.host', {
-              defaultMessage: 'Host',
-            }),
-            description: host,
-          },
-        ]
-      : []),
-    ...(service
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.service', {
-              defaultMessage: 'Service',
-            }),
-            description: service,
-          },
-        ]
-      : []),
-    ...(env
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.environment', {
-              defaultMessage: 'Environment',
-            }),
-            description: <EuiBadge color="hollow">{env}</EuiBadge>,
-          },
-        ]
-      : []),
-    ...(currentValue !== undefined
-      ? [
-          {
-            title: i18n.translate('xpack.observability.datadogAlertView.currentValue', {
-              defaultMessage: 'Current Value',
-            }),
-            description: String(currentValue),
-          },
-        ]
-      : []),
-  ];
+  const connectorPageUrl = connectorId
+    ? `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/${connectorId}`
+    : undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      {/* Header with Datadog branding */}
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="visAreaStacked" size="xl" color="#632CA6" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('xpack.observability.datadogAlertView.title', {
-                  defaultMessage: 'Datadog Alert',
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          {connectorId && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">
-                {i18n.translate('xpack.observability.datadogAlertView.connectorId', {
-                  defaultMessage: 'Connector: {connectorId}',
-                  values: { connectorId },
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {/* Alert details */}
-      <EuiFlexItem>
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.observability.datadogAlertView.alertDetails', {
-                defaultMessage: 'Alert Details',
-              })}
-            </h4>
+    <>
+      {/* Header */}
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={datadogIcon} size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>Datadog Alert</h3>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList
-            type="column"
-            listItems={descriptionListItems}
-            columnWidths={[1, 3]}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
+        </EuiFlexItem>
+        {connectorId && connectorPageUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={connectorPageUrl} target="_blank">
+              <EuiBadge color="hollow" iconType="link" iconSide="left">
+                Connector: {connectorId.substring(0, 8)}...
+              </EuiBadge>
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
-      {/* Alert reason */}
-      {alertReason && (
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
+      <EuiSpacer size="m" />
+
+      {/* Snapshot Graph */}
+      {snapshotUrl && (
+        <>
+          <EuiPanel hasBorder paddingSize="s">
             <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.observability.datadogAlertView.reason', {
-                  defaultMessage: 'Reason',
-                })}
-              </h4>
+              <h4>Metric Graph</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s">{alertReason}</EuiText>
+            <EuiLink href={snapshotUrl} target="_blank">
+              <EuiImage
+                src={snapshotUrl}
+                alt="Datadog Metric Graph"
+                style={{ maxHeight: 180, width: '100%', objectFit: 'contain' }}
+                allowFullScreen
+              />
+            </EuiLink>
           </EuiPanel>
-        </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </>
       )}
 
-      {/* Datadog-specific metadata */}
-      {datadogSpecificItems.length > 0 && (
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
+      {/* Alert Details */}
+      <EuiPanel hasBorder paddingSize="s">
+        <EuiTitle size="xs">
+          <h4>Alert Details</h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <FieldRow label="Alert Title">
+          <EuiText size="s">{alertTitle || '--'}</EuiText>
+        </FieldRow>
+
+        <FieldRow label="Status">
+          <EuiBadge color={status === 'active' ? 'danger' : 'success'}>
+            {status?.toUpperCase() || 'UNKNOWN'}
+          </EuiBadge>
+        </FieldRow>
+
+        <FieldRow label="Severity">
+          <EuiBadge
+            color={
+              severity === 'critical'
+                ? 'danger'
+                : severity === 'high'
+                ? 'warning'
+                : 'default'
+            }
+          >
+            {priority || severity?.toUpperCase() || 'UNKNOWN'}
+          </EuiBadge>
+        </FieldRow>
+
+        <FieldRow label="Triggered At">
+          <EuiText size="s">{timestamp ? new Date(timestamp).toLocaleString() : '--'}</EuiText>
+        </FieldRow>
+
+        {monitorId && (
+          <FieldRow label="Monitor ID">
+            <EuiText size="s">{monitorId}</EuiText>
+          </FieldRow>
+        )}
+      </EuiPanel>
+
+      <EuiSpacer size="m" />
+
+      {/* Reason */}
+      {alertReason && (
+        <>
+          <EuiPanel hasBorder paddingSize="s">
             <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.observability.datadogAlertView.datadogMetadata', {
-                  defaultMessage: 'Datadog Metadata',
-                })}
-              </h4>
+              <h4>Reason</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiDescriptionList
-              type="column"
-              listItems={datadogSpecificItems}
-              columnWidths={[1, 3]}
-            />
+            <div css={reasonStyles}>{alertReason}</div>
           </EuiPanel>
-        </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </>
       )}
 
       {/* Query */}
       {alertQuery && (
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
+        <>
+          <EuiPanel hasBorder paddingSize="s">
             <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.observability.datadogAlertView.query', {
-                  defaultMessage: 'Monitor Query',
-                })}
-              </h4>
+              <h4>Monitor Query</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiCodeBlock language="text" fontSize="s" paddingSize="s">
-              {alertQuery}
-            </EuiCodeBlock>
+            <div css={codeBlockContainerStyles}>
+              <EuiCodeBlock
+                language="text"
+                fontSize="s"
+                paddingSize="s"
+                overflowHeight={80}
+                isCopyable
+              >
+                {alertQuery}
+              </EuiCodeBlock>
+            </div>
           </EuiPanel>
-        </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </>
       )}
 
-      {/* Thresholds */}
-      {thresholds && Object.keys(thresholds).length > 0 && (
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.observability.datadogAlertView.thresholds', {
-                  defaultMessage: 'Thresholds',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiDescriptionList
-              type="column"
-              listItems={Object.entries(thresholds).map(([key, value]) => ({
-                title: key,
-                description: String(value),
-              }))}
-              columnWidths={[1, 3]}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
-
-      {/* External link */}
+      {/* View in Datadog */}
       {externalUrl && (
-        <EuiFlexItem>
-          <EuiLink href={externalUrl} target="_blank" external>
-            {i18n.translate('xpack.observability.datadogAlertView.viewInDatadog', {
-              defaultMessage: 'View in Datadog',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={datadogIcon} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink href={externalUrl} target="_blank" external>
+                View in Datadog
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
       )}
 
-      {/* Raw payload */}
+      {/* Raw Payload */}
       {rawPayload && (
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.observability.datadogAlertView.rawPayload', {
-                  defaultMessage: 'Raw Payload',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock language="json" fontSize="s" paddingSize="s" overflowHeight={300}>
+        <EuiPanel hasBorder paddingSize="s">
+          <EuiTitle size="xs">
+            <h4>Raw Payload</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <div css={codeBlockContainerStyles}>
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              paddingSize="s"
+              overflowHeight={300}
+              isCopyable
+            >
               {JSON.stringify(rawPayload, null, 2)}
             </EuiCodeBlock>
-          </EuiPanel>
-        </EuiFlexItem>
+          </div>
+        </EuiPanel>
       )}
-    </EuiFlexGroup>
+    </>
   );
 };
-

@@ -91,13 +91,25 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   });
 
   const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
+  
+  // Get action type model early so we can use it for initializing test params
+  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
+  
   /**
    * Test connector
    */
 
+  // For spec-based connectors, we need to set the subAction to 'testConnection'
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
-  >({});
+  >(() => {
+    // Check if this is a spec-based connector
+    const model = actionTypeRegistry.get(connector.actionTypeId);
+    if (model?.source === ACTION_TYPE_SOURCES.spec) {
+      return { subAction: 'testConnection', subActionParams: {} };
+    }
+    return {};
+  });
 
   const onEditAction = useCallback(
     (field: string, value: unknown) =>
@@ -126,7 +138,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
   const disabled = !isFormModified || hasErrors || isSaving;
 
@@ -336,7 +347,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   }, [actionTypeModel, connector]);
 
   const isTestable =
-    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
+    !actionTypeModel?.source ||
+    actionTypeModel?.source === ACTION_TYPE_SOURCES.stack ||
+    actionTypeModel?.source === ACTION_TYPE_SOURCES.spec;
 
   return (
     <>

@@ -192,6 +192,10 @@ export interface ActionContext {
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /** The connector ID - useful for building webhook URLs that reference this connector */
+  connectorId?: string;
+  /** The Kibana URL - available when executed from workflows */
+  kibanaUrl?: string;
 }
 
 // ============================================================================

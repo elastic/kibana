@@ -59,9 +59,9 @@ export const getColumns = (
             ),
             id: ALERT_SOURCE,
             initialWidth: 120,
-          },
-        ]
-      : [];
+        },
+      ]
+    : [];
 
   return [
     {

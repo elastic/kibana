@@ -1,0 +1,121 @@
+version: '1'
+
+name: Pull Datadog Alerts
+description: Fetches monitors from Datadog and creates/updates alerts in Kibana
+enabled: true
+
+triggers:
+  - type: manual
+  # Can also be scheduled to run periodically
+  # - type: schedule
+  #   interval: 5m
+  #   enabled: true
+
+inputs:
+  - name: tags
+    type: string
+    default: ''
+    description: Filter monitors by tags (comma-separated)
+  - name: connector_id
+    type: string
+    default: datadog
+    description: The Datadog connector ID to use
+
+steps:
+  # Step 1: Fetch all monitors from Datadog
+  - name: fetch_monitors
+    type: datadog.listMonitors
+    connector-id: datadog
+    with:
+      pageSize: 1000
+
+  - name: log_monitors_found
+    type: console
+    with:
+      message: >-
+        Found {{ steps.fetch_monitors.output.total }} monitors in Datadog
+
+  # Step 2: Check if there are any monitors
+  - name: check_monitors
+    type: if
+    condition: 'steps.fetch_monitors.output.total > 0'
+    steps:
+      # Step 3: Create alerts for each monitor
+      - name: create_alerts
+        type: foreach
+        foreach: '{{ steps.fetch_monitors.output.monitors | json }}'
+        steps:
+          - name: log_creating_alert
+            type: console
+            with:
+              message: >-
+                📋 Creating alert for monitor "{{ foreach.item.name }}" ({{ foreach.item.overallState }})
+
+          # Create alert in Kibana using the events API
+          # Status: Alert/Warn/No Data -> open, OK -> resolved
+          - name: create_alert
+            type: kibana.request
+            with:
+                method: POST
+                path: /api/observability/events
+                body:
+                  title: '[Datadog] {{ foreach.item.name }}'
+                  message: >-
+                    Datadog monitor "{{ foreach.item.name }}" is in {{ foreach.item.overallState }} state.
+                    Type: {{ foreach.item.type }}
+                    {% if foreach.item.message %}Message: {{ foreach.item.message }}{% endif %}
+                  severity: >-
+                    {% if foreach.item.overallState == "Alert" %}critical{% elsif foreach.item.overallState == "Warn" %}high{% elsif foreach.item.overallState == "No Data" %}medium{% else %}low{% endif %}
+                  source: datadog
+                  status: >-
+                    {% if foreach.item.overallState == "OK" %}resolved{% else %}open{% endif %}
+                  tags:
+                    - datadog
+                    - 'monitor:{{ foreach.item.id }}'
+                    - 'type:{{ foreach.item.type }}'
+                    - 'state:{{ foreach.item.overallState }}'
+                  fingerprint: 'datadog:monitor:{{ foreach.item.id }}'
+                  links:
+                    - label: View in Datadog
+                      url: 'https://app.datadoghq.com/monitors/{{ foreach.item.id }}'
+                  raw_payload:
+                    monitor_id: '{{ foreach.item.id }}'
+                    monitor_name: '{{ foreach.item.name }}'
+                    monitor_type: '{{ foreach.item.type }}'
+                    overall_state: '{{ foreach.item.overallState }}'
+                  connector_id: '{{ inputs.connector_id }}'
+
+          - name: log_alert_created
+            type: console
+            with:
+              message: >-
+                ✅ Alert created for "{{ foreach.item.name }}" (status: {% if foreach.item.overallState == "OK" %}resolved{% else %}open{% endif %})
+
+      - name: show_success
+        type: console
+        with:
+          message: |
+            ============================================
+            DATADOG ALERTS SYNC COMPLETE
+            ============================================
+            
+            Total monitors synced: {{ steps.fetch_monitors.output.total }}
+            
+            Alerts have been created/updated in Kibana.
+            - Monitors in OK state → resolved
+            - Monitors in Alert/Warn/No Data → open
+            
+            View them in Observability → Alerts.
+            ============================================
+
+    else:
+      - name: show_no_monitors
+        type: console
+        with:
+          message: |
+            ============================================
+            DATADOG ALERTS SYNC COMPLETE
+            ============================================
+            
+            No monitors found in Datadog.
+            ============================================

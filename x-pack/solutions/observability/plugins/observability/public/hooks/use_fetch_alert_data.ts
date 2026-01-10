@@ -12,6 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useDataFetcher } from './use_data_fetcher';
+import { EVENTS_API_URLS, type ExternalEvent } from '../../common/types/events';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const validIds = useMemo(() => getValidValues(alertIds), [alertIds]);
@@ -32,6 +33,10 @@ const fetchAlerts = async (
   abortCtrl: AbortController,
   http: HttpSetup
 ): Promise<Record<string, unknown> | undefined> => {
+  const results: Record<string, unknown> = {};
+  const missingIds: string[] = [];
+
+  // First try to fetch from the standard RAC API (Kibana alerts)
   try {
     const response = await http.post<estypes.SearchResponse<Record<string, unknown>>>(
       `${BASE_RAC_ALERTS_API_PATH}/find`,
@@ -50,11 +55,42 @@ const fetchAlerts = async (
     );
 
     if (response) {
-      return getAlertsGroupedById(response);
+      const kibanaAlerts = getAlertsGroupedById(response);
+      Object.assign(results, kibanaAlerts);
+
+      // Find which IDs are still missing
+      for (const id of ids) {
+        if (!results[id]) {
+          missingIds.push(id);
+        }
+      }
     }
-  } catch (error) {
-    // ignore the failure
+  } catch {
+    // If RAC API fails, try all IDs with external events
+    missingIds.push(...ids);
   }
+
+  // If there are missing IDs, try to fetch from external events
+  if (missingIds.length > 0) {
+    try {
+      const externalResponse = await http.get<{ events: ExternalEvent[] }>(EVENTS_API_URLS.EVENTS, {
+        query: {
+          ids: missingIds.join(','),
+        },
+        signal: abortCtrl.signal,
+      });
+
+      if (externalResponse?.events) {
+        for (const event of externalResponse.events) {
+          results[event.id] = convertExternalEventToAlertFormat(event);
+        }
+      }
+    } catch {
+      // ignore error for retrieving external events
+    }
+  }
+
+  return Object.keys(results).length > 0 ? results : undefined;
 };
 
 const getAlertsGroupedById = (
@@ -71,6 +107,29 @@ const getAlertsGroupedById = (
     }),
     {}
   );
+};
+
+/**
+ * Converts an external event to the alert format expected by Cases
+ */
+const convertExternalEventToAlertFormat = (event: ExternalEvent): Record<string, unknown> => {
+  return {
+    _id: event.id,
+    _index: '.alerts-external.alerts-default',
+    '@timestamp': event.timestamp,
+    'kibana.alert.uuid': event.id,
+    'kibana.alert.rule.name': event.title,
+    'kibana.alert.reason': event.message,
+    'kibana.alert.status': event.status,
+    'kibana.alert.severity': event.severity,
+    'kibana.alert.source': event.source,
+    'kibana.alert.start': event.timestamp,
+    'kibana.alert.raw_payload': event.raw_payload,
+    tags: event.tags,
+    'kibana.alert.rule.category': 'External Alert',
+    'kibana.alert.rule.producer': 'observability',
+    'kibana.alert.instance.id': event.id,
+  };
 };
 
 const getValidValues = (ids: string[]): string[] => {

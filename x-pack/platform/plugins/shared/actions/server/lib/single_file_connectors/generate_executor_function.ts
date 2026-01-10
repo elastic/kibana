@@ -54,6 +54,8 @@ export const generateExecutorFunction = ({
       client: axiosInstance,
       secrets,
       config,
+      // Include connectorId so actions can reference it (e.g., for webhook URLs)
+      connectorId,
     };
 
     try {

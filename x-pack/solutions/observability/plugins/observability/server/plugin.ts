@@ -60,6 +60,7 @@ import {
   unifiedAlertsSearchStrategyProvider,
   UNIFIED_ALERTS_SEARCH_STRATEGY_NAME,
 } from './lib/search_strategy';
+import { registerWebhookRoute } from './routes/events/webhook_route';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -126,6 +127,10 @@ export class ObservabilityPlugin
     const { ruleDataService } = plugins.ruleRegistry;
 
     core.savedObjects.registerType(threshold);
+
+    // Register the webhook route for external alert sources (Datadog, etc.)
+    // This is registered directly to bypass strict body validation
+    registerWebhookRoute(core, this.logger);
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
       alertsLocator,

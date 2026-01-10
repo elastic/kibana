@@ -176,7 +176,7 @@ async function addExternalAlerts(
     const esClient = deps.esClient.asCurrentUser;
 
     // Build the query for external alerts
-    const externalQuery = buildExternalAlertsQuery(request);
+    const externalQuery = buildExternalAlertsQuery(request, logger);
 
     logger.info(
       `[UnifiedAlertsStrategy] Querying external alerts from ${EXTERNAL_ALERTS_INDEX} with query: ${JSON.stringify(externalQuery)}`
@@ -212,8 +212,21 @@ async function addExternalAlerts(
 /**
  * Builds the Elasticsearch query for external alerts based on the original request
  */
-function buildExternalAlertsQuery(request: RuleRegistrySearchRequest) {
+function buildExternalAlertsQuery(request: RuleRegistrySearchRequest, logger: Logger) {
   const filter: Array<Record<string, unknown>> = [];
+  let idsQuery: { ids: { values: string[] } } | null = null;
+
+  // Check for IDs query at the root level (used by Cases to fetch specific alerts)
+  const query = request.query as Record<string, unknown> | undefined;
+  if (query?.ids && typeof query.ids === 'object') {
+    const idsObj = query.ids as { values?: string[] };
+    if (Array.isArray(idsObj.values) && idsObj.values.length > 0) {
+      logger.info(`[UnifiedAlertsStrategy] Found IDs query with ${idsObj.values.length} alert IDs`);
+      // For external alerts, the _id field is the same as kibana.alert.uuid
+      // We need to query by both _id and kibana.alert.uuid to handle both cases
+      idsQuery = { ids: { values: idsObj.values } };
+    }
+  }
 
   // Apply any filters from the original request that are compatible with external alerts
   if (request.query?.bool?.filter) {
@@ -265,11 +278,33 @@ function buildExternalAlertsQuery(request: RuleRegistrySearchRequest) {
     return s;
   });
 
+  // Build the final query
+  let finalQuery: Record<string, unknown>;
+  if (idsQuery) {
+    // If we have an IDs query, use it directly (optionally with additional filters)
+    if (filter.length > 0) {
+      finalQuery = {
+        bool: {
+          must: [idsQuery],
+          filter,
+        },
+      };
+    } else {
+      finalQuery = idsQuery;
+    }
+  } else if (filter.length > 0) {
+    finalQuery = { bool: { filter } };
+  } else {
+    finalQuery = { match_all: {} };
+  }
+
+  logger.info(`[UnifiedAlertsStrategy] External query: ${JSON.stringify(finalQuery)}`);
+
   return {
     size,
     from: fromParam,
     sort,
-    query: filter.length > 0 ? { bool: { filter } } : { match_all: {} },
+    query: finalQuery,
     _source: false,
     fields: [
       { field: 'kibana.alert.*', include_unmapped: true },
