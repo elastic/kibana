@@ -101,10 +101,17 @@ export function mapNodesVersionCompatibility(
       nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
     };
   }
+
+  // Sort by version first, then by IP for stable ordering
+  const sortNodes = (a: NodeInfo, b: NodeInfo) => {
+    const versionCompare = a.version.localeCompare(b.version);
+    return versionCompare !== 0 ? versionCompare : a.ip.localeCompare(b.ip);
+  };
+
   const nodes = Object.keys(nodesInfoResponse.nodes)
-    .sort() // Sorting ensures a stable node ordering for comparison
     .map((key) => nodesInfoResponse.nodes[key])
-    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
+    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }))
+    .sort(sortNodes); // Sorting ensures stable ordering for comparison
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(
@@ -155,6 +162,7 @@ function compareNodesInfoErrorMessages(
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
+
   return (
     curr.isCompatible === prev.isCompatible &&
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&

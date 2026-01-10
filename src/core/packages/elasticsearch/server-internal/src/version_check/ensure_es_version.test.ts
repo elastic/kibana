@@ -11,7 +11,7 @@ import type { NodesInfo } from './ensure_es_version';
 import { mapNodesVersionCompatibility, pollEsNodesVersion } from './ensure_es_version';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { take, of, delay } from 'rxjs';
+import { take, of, delay, takeWhile } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 const mockLoggerFactory = loggingSystemMock.create();
@@ -333,12 +333,15 @@ describe('pollEsNodesVersion', () => {
   });
 
   it('only emits when node versions changed since the previous poll', (done) => {
+    // Test will cause 7 version polls before completing, but only 5 emissions
+    expect.assertions(5);
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // emit
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.1.0', '5.1.0')); // emit, no warning nodes, used to detect end of test
 
     pollEsNodesVersion({
       internalClient,
@@ -348,10 +351,10 @@ describe('pollEsNodesVersion', () => {
       log: mockLogger,
       healthCheckRetry: 1,
     })
-      .pipe(take(4))
+      .pipe(takeWhile((result) => !(result.warningNodes.length === 0), true))
       .subscribe({
         next: (result) => {
-          expect(result).toBeDefined();
+          expect(result.isCompatible).toBeDefined();
         },
         complete: () => {
           done();
