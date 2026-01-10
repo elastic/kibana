@@ -535,4 +535,70 @@ describe('barrel transform plugin', () => {
       expect(result?.code).toContain('@kbn/workflows/common/constants');
     });
   });
+
+  describe('import order with mixed transformable and non-transformable imports', () => {
+    // When an import has both transformable exports (re-exports from submodules) and
+    // non-transformable exports (local declarations in the barrel), the barrel import
+    // must come FIRST to ensure the barrel is fully loaded before any submodules
+    // that may depend on it (circular dependency safety).
+    const MIXED_BARREL_PATH = '/test/src/config-schema/index.ts';
+    const MIXED_BARREL_ROOT = '/test/src/config-schema';
+
+    const mixedBarrelIndex: TestBarrelIndex = {
+      [MIXED_BARREL_PATH]: {
+        packageName: '@kbn/config-schema',
+        packageRoot: MIXED_BARREL_ROOT,
+        exports: {
+          // offeringBasedSchema is a re-export from a submodule and CAN be transformed
+          offeringBasedSchema: {
+            path: `${MIXED_BARREL_ROOT}/src/helpers/offering_based_schema.ts`,
+            type: 'named',
+            localName: 'offeringBasedSchema',
+            importedName: 'offeringBasedSchema',
+            expectedPath: '@kbn/config-schema/src/helpers/offering_based_schema',
+          },
+          // 'schema' is NOT in the barrel index because it's a local export const,
+          // not a re-export from a submodule. This simulates real scanner behavior.
+        },
+      },
+    };
+
+    it('emits barrel import BEFORE direct imports for circular dependency safety', () => {
+      const result = transform({
+        code: `import { schema, offeringBasedSchema } from './config-schema';`,
+        barrelIndex: mixedBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Both imports should be present
+      expect(result?.code).toContain('@kbn/config-schema/src/helpers/offering_based_schema');
+      expect(result?.code).toMatch(/['"]\.\/config-schema['"]/);
+
+      // Critical: barrel import must come BEFORE direct import
+      // This ensures the barrel is fully loaded before submodules that depend on it
+      const barrelImportMatch = result?.code?.match(/['"]\.\/config-schema['"]/);
+      const barrelImportPos = barrelImportMatch?.index ?? -1;
+      const directImportPos =
+        result?.code?.indexOf('@kbn/config-schema/src/helpers/offering_based_schema') ?? -1;
+
+      expect(barrelImportPos).toBeGreaterThan(-1);
+      expect(directImportPos).toBeGreaterThan(-1);
+      expect(barrelImportPos).toBeLessThan(directImportPos);
+    });
+
+    it('preserves correct specifiers in each import declaration', () => {
+      const result = transform({
+        code: `import { schema, offeringBasedSchema } from './config-schema';`,
+        barrelIndex: mixedBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // 'schema' should remain in the barrel import (not found in index)
+      expect(result?.code).toMatch(/import\s*{\s*schema\s*}\s*from\s*['"]\.\/config-schema['"]/);
+      // 'offeringBasedSchema' should be in the direct import
+      expect(result?.code).toMatch(
+        /import\s*{\s*offeringBasedSchema\s*}\s*from\s*['"]@kbn\/config-schema\/src\/helpers\/offering_based_schema['"]/
+      );
+    });
+  });
 });

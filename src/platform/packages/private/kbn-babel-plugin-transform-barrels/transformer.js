@@ -140,9 +140,11 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   }
 
   if (unchangedSpecifiers.length > 0) {
+    // Insert fallback barrel import FIRST to ensure the barrel is fully loaded
+    // before any submodules that may depend on it (circular dependency safety)
     const fallback = t.importDeclaration(unchangedSpecifiers, t.stringLiteral(importSource));
     fallback.importKind = node.importKind;
-    newNodes.push(fallback);
+    newNodes.unshift(fallback);
   }
 
   if (newNodes.length === 1) {
