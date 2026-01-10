@@ -24,13 +24,12 @@ jest.mock('../services/cloud_connect_client');
 const flushPromises = async () => await new Promise((resolve) => setImmediate(resolve));
 
 describe('registerCloudConnectLicenseSync', () => {
-  let license$: Subject<any>;
   const licensing = {
-    license$: undefined as unknown as Subject<any>,
-  } as unknown as LicensingPluginStart;
+    license$: new Subject(),
+  };
 
   beforeEach(() => {
-    license$ = new Subject();
+    licensing.license$ = new Subject();
     jest.clearAllMocks();
   });
 
@@ -52,19 +51,19 @@ describe('registerCloudConnectLicenseSync', () => {
       encryptedSavedObjects: {
         getClient: jest.fn(),
       } as unknown as EncryptedSavedObjectsPluginStart,
-      licensing,
+      licensing: licensing as unknown as LicensingPluginStart,
       logger,
       cloudApiUrl: 'https://cloud.example/api/v1',
     });
 
-    license$.next({ type: 'platinum', uid: 'abc' });
+    licensing.license$.next({ type: 'platinum', uid: 'abc' });
     await flushPromises();
 
     expect(getApiKey).toHaveBeenCalled();
     expect(esInfo).not.toHaveBeenCalled();
     expect(updateCluster).not.toHaveBeenCalled();
     sub.unsubscribe();
-    license$.complete();
+    licensing.license$.complete();
   });
 
   it('syncs license changes to Cloud Connect when api key is present', async () => {
@@ -90,12 +89,12 @@ describe('registerCloudConnectLicenseSync', () => {
       encryptedSavedObjects: {
         getClient: jest.fn(),
       } as unknown as EncryptedSavedObjectsPluginStart,
-      licensing,
+      licensing: licensing as unknown as LicensingPluginStart,
       logger,
       cloudApiUrl: 'https://cloud.example/api/v1',
     });
 
-    license$.next({ type: 'basic', uid: 7 });
+    licensing.license$.next({ type: 'basic', uid: 7 });
     await flushPromises();
 
     expect(updateCluster).toHaveBeenCalledWith('k-123', 'c-456', {
@@ -110,7 +109,7 @@ describe('registerCloudConnectLicenseSync', () => {
       },
     });
     sub.unsubscribe();
-    license$.complete();
+    licensing.license$.complete();
   });
 
   it('logs a warning when sync fails', async () => {
@@ -137,18 +136,18 @@ describe('registerCloudConnectLicenseSync', () => {
       encryptedSavedObjects: {
         getClient: jest.fn(),
       } as unknown as EncryptedSavedObjectsPluginStart,
-      licensing,
+      licensing: licensing as unknown as LicensingPluginStart,
       logger,
       cloudApiUrl: 'https://cloud.example/api/v1',
     });
 
-    license$.next({ type: 'platinum', uid: 'abc' });
+    licensing.license$.next({ type: 'platinum', uid: 'abc' });
     await flushPromises();
 
     expect(logger.warn).toHaveBeenCalledWith('Failed to sync license to Cloud Connect', {
       error: err,
     });
     sub.unsubscribe();
-    license$.complete();
+    licensing.license$.complete();
   });
 });
