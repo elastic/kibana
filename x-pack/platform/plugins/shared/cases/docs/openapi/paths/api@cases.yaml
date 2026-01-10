@@ -66,7 +66,7 @@ delete:
         --header "Authorization: $API_KEY" \
         --header "Content-Type: application/json"
         --header "kbn-xsrf: true"
-  - label: Dev Console example
+  - label: Console example
     lang: console
     source: |
       DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]

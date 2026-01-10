@@ -77,7 +77,7 @@ paths:
               --header "Authorization: $API_KEY" \
               --header "Content-Type: application/json"
               --header "kbn-xsrf: true"
-        - label: Dev Console example
+        - label: Console example
           lang: console
           source: |
             DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]
@@ -1187,6 +1187,7 @@ components:
       required: true
     ids:
       name: ids
+      in: query
       description: |
         The cases that you want to removed. To get the case identifiers, use the search cases (`_find`) API. In the Dev Console, you can specify the array of cases in the following format: `ids=["e58e77e3-ef8e-4251-926f-efb115f3c4ec"]`. In `curl`, all non-ASCII characters must be URL encoded. For example: `ids=%5B%22e58e77e3-ef8e-4251-926f-efb115f3c4ec%22%5D`
       required: true
@@ -1196,9 +1197,7 @@ components:
           type: string
           minItems: 1
           maxItems: 100
-        example:
-          - d4e7abb0-b462-11ec-9a8d-698504725a43
-          - b77fd541-4184-44a6-9e25-81e7322a1dd6
+          example: d4e7abb0-b462-11ec-9a8d-698504725a43
     assignees_filter:
       in: query
       name: assignees
@@ -1421,7 +1420,7 @@ components:
             - tags
             - title
             - user
-      example: create_case
+          example: create_case
   schemas:
     assignees:
       type: array
@@ -3069,8 +3068,8 @@ components:
           type: array
           items:
             type: string
-            example:
-              - tag-1
+          example:
+            - tag-1
         title:
           type: string
     payload_delete:
@@ -4072,9 +4071,10 @@ components:
               profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             owner: cases
             payload:
-              comment: A new comment
-              owner: cases
-              type: user
+              comment:
+                comment: A new comment
+                owner: cases
+                type: user
             version: WzM1ODg4LDFa
             type: comment
           - id: 573c6980-6123-11ed-aa41-81a0a61fe447
@@ -4089,7 +4089,7 @@ components:
             owner: cases
             payload:
               assignees:
-                uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             version: WzM1ODg4LDFb
             type: assignees
     find_connector_response:

@@ -117,7 +117,7 @@
             "source": "curl \\\n  --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \\\n  --header \"Authorization: $API_KEY\" \\\n  --header \"Content-Type: application/json\"\n  --header \"kbn-xsrf: true\"\n"
           },
           {
-            "label": "Dev Console example",
+            "label": "Console example",
             "lang": "console",
             "source": "DELETE kbn:/api/cases?ids=[\"030e6e34-6470-4001-864f-b229511ad188\",\"e662ff34-0493-4538-b9d1-6706ced02ff2\"]\n"
           }
@@ -1825,6 +1825,7 @@
       },
       "ids": {
         "name": "ids",
+        "in": "query",
         "description": "The cases that you want to removed. To get the case identifiers, use the search cases (`_find`) API. In the Dev Console, you can specify the array of cases in the following format: `ids=[\"e58e77e3-ef8e-4251-926f-efb115f3c4ec\"]`. In `curl`, all non-ASCII characters must be URL encoded. For example: `ids=%5B%22e58e77e3-ef8e-4251-926f-efb115f3c4ec%22%5D`\n",
         "required": true,
         "schema": {
@@ -1832,12 +1833,9 @@
           "items": {
             "type": "string",
             "minItems": 1,
-            "maxItems": 100
-          },
-          "example": [
-            "d4e7abb0-b462-11ec-9a8d-698504725a43",
-            "b77fd541-4184-44a6-9e25-81e7322a1dd6"
-          ]
+            "maxItems": 100,
+            "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
+          }
         }
       },
       "assignees_filter": {
@@ -2135,10 +2133,10 @@
               "tags",
               "title",
               "user"
-            ]
+            ],
+            "example": "create_case"
           }
-        },
-        "example": "create_case"
+        }
       }
     },
     "schemas": {
@@ -4378,11 +4376,11 @@
           "tags": {
             "type": "array",
             "items": {
-              "type": "string",
-              "example": [
-                "tag-1"
-              ]
-            }
+              "type": "string"
+            },
+            "example": [
+              "tag-1"
+            ]
           },
           "title": {
             "type": "string"
@@ -5750,9 +5748,11 @@
               },
               "owner": "cases",
               "payload": {
-                "comment": "A new comment",
-                "owner": "cases",
-                "type": "user"
+                "comment": {
+                  "comment": "A new comment",
+                  "owner": "cases",
+                  "type": "user"
+                }
               },
               "version": "WzM1ODg4LDFa",
               "type": "comment"
@@ -5770,9 +5770,11 @@
               },
               "owner": "cases",
               "payload": {
-                "assignees": {
-                  "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-                }
+                "assignees": [
+                  {
+                    "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+                  }
+                ]
               },
               "version": "WzM1ODg4LDFb",
               "type": "assignees"
