@@ -32,10 +32,16 @@ import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useStreamsTour } from '../../../streams_tour';
+import { QueriesColumn } from './queries_column';
+import { SignificantEventsColumn } from './significant_events_column';
 import {
+  ACTIONS_COLUMN_HEADER,
+  FEATURES_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
+  QUERIES_COLUMN_HEADER,
   RUN_STREAM_DISCOVERY_BUTTON_LABEL,
+  SIGNIFICANT_EVENTS_COLUMN_HEADER,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
@@ -48,6 +54,7 @@ import {
   filterStreamsByQuery,
   shouldComposeTree,
 } from './utils';
+import { FeaturesColumn } from './features_column';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -352,8 +359,26 @@ export function StreamsTreeTable({
               },
             },
             {
+              name: FEATURES_COLUMN_HEADER,
+              width: '120px',
+              align: 'left',
+              render: (item: TableRow) => <FeaturesColumn streamName={item.stream.name} />,
+            },
+            {
+              name: QUERIES_COLUMN_HEADER,
+              width: '120px',
+              align: 'left',
+              render: (item: TableRow) => <QueriesColumn streamName={item.stream.name} />,
+            },
+            {
+              name: SIGNIFICANT_EVENTS_COLUMN_HEADER,
+              width: '200px',
+              align: 'left',
+              render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
+            },
+            {
               field: 'definition',
-              name: 'Actions',
+              name: ACTIONS_COLUMN_HEADER,
               width: '60px',
               align: 'left',
               sortable: false,
