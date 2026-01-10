@@ -92,6 +92,26 @@ export const sloKeys = {
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
+  allHealthScans: () => [...sloKeys.all, 'healthScans'] as const,
+  healthScans: (size?: number) => [...sloKeys.allHealthScans(), size] as const,
+  allHealthScanResults: () => [...sloKeys.all, 'healthScanResults'] as const,
+  healthScanResults: ({
+    scanId,
+    size,
+    searchAfter,
+    problematic,
+    allSpaces,
+  }: {
+    scanId: string;
+    size?: number;
+    searchAfter?: string;
+    problematic?: boolean;
+    allSpaces?: boolean;
+  }) =>
+    [
+      ...sloKeys.allHealthScanResults(),
+      { scanId, size, searchAfter, problematic, allSpaces },
+    ] as const,
 };
 
 export type SloKeys = typeof sloKeys;
