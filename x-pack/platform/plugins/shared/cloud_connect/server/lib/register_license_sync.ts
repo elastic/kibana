@@ -69,7 +69,7 @@ export function registerCloudConnectLicenseSync({
         })
         .catch((error) => {
           logger.warn('Failed to fetch cluster version for Cloud Connect license sync', { error });
-          return undefined;
+          throw error;
         });
     }
 
@@ -90,7 +90,6 @@ export function registerCloudConnectLicenseSync({
         const license: SelfManagedClusterLicense = {
           type: String(type),
           uid: String(uid),
-          ...(clusterInfo?.version ? { version: clusterInfo.version } : {}),
         };
 
         await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
