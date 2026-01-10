@@ -68,11 +68,6 @@ export const LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM = `logs-${DATASET}-default`;
  * Emits steady baseline logs and introduces a flood of timeout errors
  * in the last 20 minutes of the range so the tool can attribute the spike.
  *
- * @param options - Configuration options
- * @param options.logsEsClient - Logs synthtrace client
- * @param options.range - Optional time range (defaults to baseline/deviation windows)
- * @param options.isLogsDb - Whether to use logsdb format
- * @returns ScenarioReturnType with generated logs
  */
 export function generateLogRateAnalysisSpikeData({
   logsEsClient,

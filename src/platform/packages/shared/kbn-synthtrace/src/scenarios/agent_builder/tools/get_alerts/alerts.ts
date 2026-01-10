@@ -38,18 +38,6 @@ import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
 
 const ALERT_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
 
-/**
- * Generates synthetic alert documents for testing.
- * These are written directly to the alerts index, bypassing the alerting framework.
- *
- * @param options - Configuration options
- * @param options.range - Time range from synthtrace timerange()
- * @param options.logsEsClient - Logs synthtrace client (used for raw document indexing)
- * @param options.serviceName - Service name for APM alerts (default: 'checkout-service')
- * @param options.hostName - Host name for infra alerts (default: 'host-01')
- * @param options.environment - Environment name (default: 'production')
- * @returns ScenarioReturnType with generated alert documents
- */
 export function generateSyntheticAlerts({
   range,
   logsEsClient,

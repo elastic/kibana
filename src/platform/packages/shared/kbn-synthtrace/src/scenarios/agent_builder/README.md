@@ -6,7 +6,7 @@
 - **Tests:** `@x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
 - **Synthtrace Scenarios:** `@src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/`
 
-## How to validate Tools
+## How to Validate Tools
 
 ### Prerequisites
 
@@ -29,7 +29,7 @@ node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenario
 ### 2. Running the Tool via API
 
 To execute a tool via the Kibana API, use the following `curl` command.
-**Note:** Replace `<tool_name>` with the specific tool identifier (e.g., `process_list`, `aws_s3`).
+**Note:** Replace `<tool_name>` with the a valid tool name
 
 ```bash
 curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
@@ -44,7 +44,7 @@ curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
 
 You must specify the required `tool_params` for the selected tool.
 
-## How to validate AI Insight
+## How to Validate an AI Insight
 
 ### 1. Running a Synthtrace Scenario
 

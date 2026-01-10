@@ -34,6 +34,7 @@ const USER_PROMPT = 'Do I have any data sources? ';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID}`, function () {
     // LLM Proxy is not yet supported in cloud environments
@@ -55,8 +56,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        // Create synthtrace clients and generate data
-        const synthtrace = getService('synthtrace');
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
 
