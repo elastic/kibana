@@ -12,7 +12,7 @@
       "positions": "__flag__",
       "preference": "",
       "realtime": "__flag__",
-      "routing": "",
+      "routing": [],
       "term_statistics": "__flag__",
       "version": "",
       "version_type": [

@@ -104,6 +104,8 @@ dependsOn:
   - '@kbn/ebt-tools'
   - '@kbn/language-documentation'
   - '@kbn/shared-ux-markdown'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod

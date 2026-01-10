@@ -12,7 +12,7 @@ import { useAgentBuilderOptIn } from './use_agent_builder_opt_in';
 import * as useKibanaModule from './use_kibana';
 import * as useIsAgentBuilderEnabledModule from './use_is_agent_builder_enabled';
 
-interface OnechatStart {
+interface AgentBuilderStart {
   openConversationFlyout?: jest.Mock;
 }
 
@@ -37,7 +37,7 @@ interface KibanaServices {
   };
   plugins: {
     start: {
-      onechat?: OnechatStart;
+      agentBuilder?: AgentBuilderStart;
     };
   };
 }
@@ -67,7 +67,7 @@ const createMockServices = (overrides: Partial<KibanaServices> = {}): KibanaServ
     },
     plugins: {
       start: {
-        onechat: {
+        agentBuilder: {
           openConversationFlyout: jest.fn(),
         },
         ...(overrides.plugins?.start ?? {}),
@@ -95,11 +95,11 @@ describe('useAgentBuilderOptIn', () => {
       isAgentBuilderEnabled: false,
     });
     (mockServices.application!.capabilities as any).advancedSettings.save = true;
-    (mockServices.plugins.start.onechat as OnechatStart).openConversationFlyout =
+    (mockServices.plugins.start.agentBuilder as AgentBuilderStart).openConversationFlyout =
       jest.fn() as jest.Mock;
   });
 
-  it('shows opt-in CTA when user has agent builder access, can edit settings, chat experience is not Agent and onechat is available', () => {
+  it('shows opt-in CTA when user has agent builder access, can edit settings, chat experience is not Agent and agentBuilder is available', () => {
     const { result } = renderHook(() => useAgentBuilderOptIn());
     expect(result.current.showAgentBuilderOptInCta).toBe(true);
   });
@@ -136,9 +136,9 @@ describe('useAgentBuilderOptIn', () => {
     expect(result.current.showAgentBuilderOptInCta).toBe(false);
   });
 
-  it('hides opt-in CTA when the onechat plugin is not available', () => {
+  it('hides opt-in CTA when the agentBuilder plugin is not available', () => {
     const localServices = createMockServices({
-      plugins: { start: { onechat: undefined } },
+      plugins: { start: { agentBuilder: undefined } },
     });
 
     (useKibanaModule.useKibana as jest.Mock).mockReturnValueOnce({
@@ -192,7 +192,8 @@ describe('useAgentBuilderOptIn', () => {
       { path: '/' }
     );
     expect(
-      (servicesWithNavigation.plugins.start.onechat as OnechatStart).openConversationFlyout
+      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart)
+        .openConversationFlyout
     ).toHaveBeenCalledWith({ newConversation: true });
   });
 

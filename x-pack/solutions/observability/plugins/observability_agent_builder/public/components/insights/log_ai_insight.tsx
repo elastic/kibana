@@ -88,6 +88,10 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
       data: {
         summary,
         context,
+        attachmentLabel: i18n.translate(
+          'xpack.observabilityAgentBuilder.logAiInsight.attachmentLabel',
+          { defaultMessage: 'Log summary' }
+        ),
       },
     },
     {

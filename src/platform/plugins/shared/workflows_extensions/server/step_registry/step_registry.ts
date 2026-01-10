@@ -21,14 +21,14 @@ export class ServerStepRegistry {
    * @param definition - The step definition to register
    * @throws Error if a step with the same ID is already registered
    */
-  public register<TInput, TOutput>(definition: ServerStepDefinition<TInput, TOutput>): void {
+  public register(definition: ServerStepDefinition): void {
     const stepTypeId = String(definition.id);
     if (this.registry.has(stepTypeId)) {
       throw new Error(
         `Step type "${stepTypeId}" is already registered. Each step type must have a unique identifier.`
       );
     }
-    this.registry.set(stepTypeId, definition as ServerStepDefinition);
+    this.registry.set(stepTypeId, definition);
   }
 
   /**

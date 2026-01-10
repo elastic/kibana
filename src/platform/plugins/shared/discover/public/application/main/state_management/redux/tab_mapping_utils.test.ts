@@ -71,6 +71,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -150,6 +151,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -226,6 +228,7 @@ describe('tab mapping utils', () => {
       expect(savedSearch).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -296,6 +299,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -329,6 +333,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -377,6 +382,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "default_column",
           ],

@@ -92,12 +92,16 @@ describe('Grouping', () => {
     fireEvent.click(group1);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       1,
-      createGroupFilter(testProps.selectedGroup, [host1Name])
+      createGroupFilter(testProps.selectedGroup, [host1Name]),
+      testProps.selectedGroup,
+      expect.objectContaining({ key: [host1Name], selectedGroup: testProps.selectedGroup })
     );
     fireEvent.click(group2);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       2,
-      createGroupFilter(testProps.selectedGroup, [host2Name])
+      createGroupFilter(testProps.selectedGroup, [host2Name]),
+      testProps.selectedGroup,
+      expect.objectContaining({ key: [host2Name], selectedGroup: testProps.selectedGroup })
     );
   });
 
@@ -147,7 +151,15 @@ describe('Grouping', () => {
     lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
 
-    expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter('host.name'));
+    expect(renderChildComponent).toHaveBeenCalledWith(
+      getNullGroupFilter('host.name'),
+      testProps.selectedGroup,
+      expect.objectContaining({
+        key: ['-'],
+        selectedGroup: testProps.selectedGroup,
+        isNullGroup: true,
+      })
+    );
   });
 
   it('Renders groupPanelRenderer when provided', () => {

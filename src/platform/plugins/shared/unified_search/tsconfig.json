@@ -46,7 +46,7 @@
     "@kbn/language-documentation",
     "@kbn/esql-types",
     "@kbn/aiops-utils",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/background-search",
     "@kbn/split-button",
     "@kbn/cps",

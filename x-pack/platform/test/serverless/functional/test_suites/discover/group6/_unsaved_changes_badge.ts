@@ -95,6 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not show a badge after loading a saved search, only after changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await PageObjects.discover.waitUntilTabIsLoaded();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
@@ -107,6 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow to revert changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await PageObjects.discover.waitUntilTabIsLoaded();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       // test changes to columns
@@ -151,6 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should hide the badge once user manually reverts changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await PageObjects.discover.waitUntilTabIsLoaded();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       // changes to columns

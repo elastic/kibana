@@ -13,17 +13,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
-interface DimensionsFilterProps {
-  fields: Array<{
-    name: string;
-    dimensions: Dimension[];
-  }>;
+interface DimensionsSelectorProps {
+  fields: Array<{ dimensions: Dimension[] }>;
+  dimensions: Dimension[];
   selectedDimensions: Dimension[];
   fullWidth?: boolean;
   onChange: (dimensions: Dimension[]) => void;
@@ -33,69 +31,50 @@ interface DimensionsFilterProps {
 
 export const DimensionsSelector = ({
   fields,
+  dimensions,
   selectedDimensions,
   onChange,
   fullWidth = false,
   singleSelection = false,
   isLoading = false,
-}: DimensionsFilterProps) => {
-  const selectedDimensionNames = useMemo(
-    () => selectedDimensions.map((d) => d.name),
+}: DimensionsSelectorProps) => {
+  const selectedNamesSet = useMemo(
+    () => new Set(selectedDimensions.map((d) => d.name)),
     [selectedDimensions]
   );
 
-  // Create Set once for reuse in multiple memos
-  const selectedNamesSet = useMemo(() => new Set(selectedDimensionNames), [selectedDimensionNames]);
-
-  // Extract all unique dimensions from fields that match the search term
-  const allDimensions = useMemo(() => {
-    const dimensionMap = new Map<string, Dimension>();
-
-    fields
-      .flatMap((field) => field.dimensions)
-      .forEach((dimension) => {
-        if (!dimensionMap.has(dimension.name)) {
-          dimensionMap.set(dimension.name, dimension);
-        }
-      });
-
-    return [...dimensionMap.values()].sort((a, b) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-    );
-  }, [fields]);
-
-  // Calculate which dimensions intersect with currently selected dimensions
   const intersectingDimensions = useMemo(() => {
-    if (selectedDimensions.length === 0) {
-      return new Set(allDimensions.map((d) => d.name));
+    if (selectedNamesSet.size === 0) {
+      return new Set(dimensions.map((d) => d.name));
     }
 
-    const fieldDimensionSets = fields.map((f) => new Set(f.dimensions.map((d) => d.name)));
     const result = new Set<string>();
+    for (const field of fields) {
+      const fieldDimNames = new Set(field.dimensions.map((d) => d.name));
 
-    for (const dimSet of fieldDimensionSets) {
-      if (dimSet.size < selectedNamesSet.size) {
+      if (fieldDimNames.size < selectedNamesSet.size) {
         continue;
       }
 
-      let matches = true;
+      let hasAllSelected = true;
       for (const sel of selectedNamesSet) {
-        if (!dimSet.has(sel)) {
-          matches = false;
+        if (!fieldDimNames.has(sel)) {
+          hasAllSelected = false;
           break;
         }
       }
 
-      if (matches) {
-        dimSet.forEach((dim) => result.add(dim));
+      if (hasAllSelected) {
+        fieldDimNames.forEach((name) => result.add(name));
       }
     }
+
     return result;
-  }, [fields, selectedNamesSet, selectedDimensions.length, allDimensions]);
+  }, [fields, selectedNamesSet, dimensions]);
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-    return allDimensions.map<SelectableEntry>((dimension) => {
+    return dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
       const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
@@ -110,7 +89,7 @@ export const DimensionsSelector = ({
       };
     });
   }, [
-    allDimensions,
+    dimensions,
     selectedNamesSet,
     selectedDimensions.length,
     intersectingDimensions,
@@ -122,12 +101,12 @@ export const DimensionsSelector = ({
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
       const selectedValues = new Set(opts.map((p) => p.value));
-      const newSelection = allDimensions.filter((d) => selectedValues.has(d.name));
+      const newSelection = dimensions.filter((d) => selectedValues.has(d.name));
       // Enforce the maximum limit
       const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
       onChange(limitedSelection);
     },
-    [onChange, allDimensions]
+    [onChange, dimensions]
   );
 
   const buttonLabel = useMemo(() => {
@@ -168,7 +147,7 @@ export const DimensionsSelector = ({
   return (
     <ToolbarSelector
       data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensionNames}
+      data-selected-value={[...selectedNamesSet]}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}

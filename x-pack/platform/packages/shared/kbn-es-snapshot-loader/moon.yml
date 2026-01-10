@@ -20,9 +20,7 @@ project:
 dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/kibana-api-cli'
-  - '@kbn/logging'
   - '@kbn/tooling-log'
-  - '@kbn/logging-mocks'
 tags:
   - shared-common
   - package

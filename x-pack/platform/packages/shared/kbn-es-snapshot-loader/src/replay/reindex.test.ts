@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import {
   DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
   getDestinationInfo,
@@ -13,9 +14,13 @@ import {
 } from './reindex';
 import { createTimestampPipeline } from './pipeline';
 import { getMaxTimestampFromData } from '.';
-import { loggerMock } from '@kbn/logging-mocks';
 
-const logger = loggerMock.create();
+const log = new ToolingLog({
+  level: 'silent',
+  writeTo: {
+    write: () => {},
+  },
+});
 
 const createMockEsClient = (esqlResponse?: { values: unknown[][] }): Client =>
   ({
@@ -58,7 +63,7 @@ describe('createTimestampPipeline', () => {
     const maxTimestamp = '2024-01-15T12:00:00.000Z';
     const pipelineName = 'test-pipeline';
 
-    await createTimestampPipeline({ esClient, logger, pipelineName, maxTimestamp });
+    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp });
 
     expect(esClient.ingest.putPipeline).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -72,19 +77,6 @@ describe('createTimestampPipeline', () => {
         ]),
       })
     );
-  });
-
-  it('logs success message', async () => {
-    const esClient = createMockEsClient();
-
-    await createTimestampPipeline({
-      esClient,
-      logger,
-      pipelineName: 'test-pipeline',
-      maxTimestamp: '2024-01-15T12:00:00.000Z',
-    });
-
-    expect(logger.debug).toHaveBeenCalledWith('Timestamp pipeline created');
   });
 });
 
@@ -100,7 +92,7 @@ describe('reindexAllIndices', () => {
 
     const result = await reindexAllIndices({
       esClient,
-      logger,
+      log,
       restoredIndices: ['snapshot-loader-temp-a'],
       originalIndices: ['logs-nginx-default'],
       pipelineName: 'my-pipeline',
@@ -133,7 +125,7 @@ describe('reindexAllIndices', () => {
 
     const result = await reindexAllIndices({
       esClient,
-      logger,
+      log,
       restoredIndices: ['snapshot-loader-temp-a'],
       originalIndices: ['logs-nginx-default'],
       pipelineName: 'my-pipeline',
@@ -154,7 +146,7 @@ describe('reindexAllIndices', () => {
 
     const result = await reindexAllIndices({
       esClient,
-      logger,
+      log,
       restoredIndices: ['snapshot-loader-temp-a'],
       originalIndices: ['logs-nginx-default'],
       pipelineName: 'my-pipeline',
@@ -172,7 +164,7 @@ describe('getMaxTimestampFromData', () => {
 
     const result = await getMaxTimestampFromData({
       esClient,
-      logger,
+      log,
       tempIndices: ['snapshot-loader-temp-logs-1', 'snapshot-loader-temp-logs-2'],
     });
 
@@ -188,7 +180,7 @@ describe('getMaxTimestampFromData', () => {
     await expect(
       getMaxTimestampFromData({
         esClient,
-        logger,
+        log,
         tempIndices: ['snapshot-loader-temp-logs-1'],
       })
     ).rejects.toThrow(/No @timestamp found in restored indices/);

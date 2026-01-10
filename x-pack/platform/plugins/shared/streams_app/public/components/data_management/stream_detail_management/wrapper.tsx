@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem, EuiTourStep } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTourStep, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import { useStreamsTour, TAB_TO_TOUR_STEP_ID } from '../../streams_tour';
-import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { calculateDataQuality } from '../../../util/calculate_data_quality';
+import { FeedbackButton } from '../../feedback_button';
 import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
   LifecycleBadge,
   WiredStreamBadge,
 } from '../../stream_badges';
+import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../streams_tour';
 import { GroupStreamControls } from './group_stream_controls';
-import { FeedbackButton } from '../../feedback_button';
 
 export type ManagementTabs = Record<
   string,
@@ -145,7 +145,10 @@ export function Wrapper({
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton definition={definition} />
+                      <DiscoverBadgeButton
+                        definition={definition}
+                        isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
+                      />
                     )}
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
@@ -164,7 +167,7 @@ export function Wrapper({
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                {groupStreams.enabled && Streams.GroupStream.GetResponse.is(definition) && (
                   <GroupStreamControls />
                 )}
               </EuiFlexGroup>
