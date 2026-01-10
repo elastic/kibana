@@ -28,9 +28,17 @@ export const RULE_MIGRATION_STOPPED_DESCRIPTION = (totalRules: number) => {
   });
 };
 
-export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources',
+export const RULE_MIGRATION_READY_MISSING_RESOURCES_SPLUNK = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources.splunk',
   { defaultMessage: 'You can also upload the missing macros & lookups for more accurate results.' }
+);
+
+export const RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources.qradar',
+  {
+    defaultMessage:
+      'You can also upload the missing reference sets and enhancements for more accurate results.',
+  }
 );
 
 export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
