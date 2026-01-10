@@ -6,12 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import type { LogsSynthtraceEsClient, ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type LogsSynthtraceEsClient,
+  type ApmSynthtraceEsClient,
+  generateRichChangeEventsData,
+  indexAll,
+} from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_change_events/tool';
 import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createRichChangeEventsData } from '../utils/synthtrace_scenarios';
 
 interface GetChangeEventsToolResult {
   type: ToolResultType.other;
@@ -33,6 +38,7 @@ interface GetChangeEventsToolResult {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -43,9 +49,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-      ({ logsSynthtraceEsClient, apmSynthtraceEsClient } = await createRichChangeEventsData({
-        getService,
-      }));
+      logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+      await logsSynthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
+
+      const range = timerange('now-1h', 'now');
+      const scenarios = generateRichChangeEventsData({
+        range,
+        logsEsClient: logsSynthtraceEsClient,
+        apmEsClient: apmSynthtraceEsClient,
+      });
+
+      await indexAll(scenarios);
     });
 
     after(async () => {
@@ -110,10 +127,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(events.length).to.be.greaterThan(0);
       // Every event should have the service name (except maybe some infra events if not tagged, but synthtrace tags them)
       // Or at least checks that we got results.
-      const serviceNames = events
-        .map((e) => e.service?.name)
-        .filter((n) => n !== undefined);
-      
+      const serviceNames = events.map((e) => e.service?.name).filter((n) => n !== undefined);
+
       // Ensure all found service names match
       serviceNames.forEach((name) => expect(name).to.be('checkout-service'));
     });
