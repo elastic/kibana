@@ -38,9 +38,17 @@ export const HEALTH_INDEX_TEMPLATE: IndicesPutIndexTemplateRequest = {
         '@timestamp': { type: 'date' },
         scanId: { type: 'keyword' },
         spaceId: { type: 'keyword' },
-        sloId: { type: 'keyword' },
-        revision: { type: 'integer' },
-        isProblematic: { type: 'boolean' },
+        slo: {
+          properties: {
+            id: { type: 'keyword' },
+            revision: { type: 'integer' },
+          },
+        },
+        health: {
+          properties: {
+            isProblematic: { type: 'boolean' },
+          },
+        },
       },
     },
   },

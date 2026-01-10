@@ -20,7 +20,7 @@ const postHealthScanParamsSchema = t.type({
 interface PostHealthScanResponse {
   scanId: string;
   scheduledAt: string;
-  status: 'scheduled' | 'pending' | 'done';
+  status: 'scheduled' | 'pending' | 'completed';
   processed?: number;
   problematic?: number;
   error?: string;
@@ -44,7 +44,6 @@ const getHealthScanParamsSchema = t.type({
 const listHealthScanParamsSchema = t.partial({
   query: t.partial({
     size: toNumberRt,
-    searchAfter: t.string,
   }),
 });
 
@@ -53,20 +52,23 @@ interface HealthScanSummary {
   latestTimestamp: string;
   total: number;
   problematic: number;
+  status: 'pending' | 'completed';
 }
 
 interface ListHealthScanResponse {
   scans: HealthScanSummary[];
-  searchAfter?: string;
 }
 
 const healthScanResultResponseSchema = t.type({
   '@timestamp': dateRt,
   scanId: t.string,
   spaceId: t.string,
-  sloId: t.string,
-  revision: t.number,
-  isProblematic: t.boolean,
+  slo: t.type({
+    id: t.string,
+    name: t.string,
+    revision: t.number,
+    enabled: t.boolean,
+  }),
   health: t.type({
     isProblematic: t.boolean,
     rollup: transformHealthSchema,
@@ -78,6 +80,9 @@ type HealthScanResultResponse = t.OutputOf<typeof healthScanResultResponseSchema
 
 interface GetHealthScanResultsResponse {
   results: HealthScanResultResponse[];
+  scan: {
+    status: 'pending' | 'completed';
+  };
   total: number;
   searchAfter?: Array<string | number | null | boolean>;
 }
