@@ -10,8 +10,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
-import { API_VERSIONS, APP_ID, PAD_STATUS_URL } from '../../../../../../common/constants';
-
+import { API_VERSIONS, APP_ID,  } from '../../../../../../common/constants';
+import { PAD_STATUS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 

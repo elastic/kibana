@@ -14,9 +14,8 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-  PAD_INSTALL_URL,
 } from '../../../../../../common/constants';
-
+import { PAD_INSTALL_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
