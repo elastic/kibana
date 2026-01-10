@@ -13,6 +13,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -43,8 +44,7 @@ const getIndexInfoSchema = z.object({
     .describe(
       'Field name(s) to get values for (e.g., "host.name"). Required for "get-field-values".'
     ),
-  start: z.string().optional().describe('Start time (date math). Defaults to "now-24h".'),
-  end: z.string().optional().describe('End time (date math). Defaults to "now".'),
+  ...timeRangeSchemaOptional({ start: 'now-24h', end: 'now' }),
   kqlFilter: z
     .string()
     .optional()
@@ -106,8 +106,8 @@ export function createGetIndexInfoTool({
               esClient,
               index: params.index,
               userIntentDescription: params.intent,
-              start: params.start ?? 'now-24h',
-              end: params.end ?? 'now',
+              start: params.start,
+              end: params.end,
               kqlFilter: params.kqlFilter,
               modelProvider,
               logger,
