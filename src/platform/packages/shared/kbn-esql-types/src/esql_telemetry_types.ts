@@ -10,7 +10,9 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
-  onSuggestionsReady?: () => void; // Signal: suggestions data is ready.
+  onSuggestionsFetchStart?: () => void; // Called right before the suggestions fetch starts.
+  onSuggestionsFetched?: () => void; // Called when suggestions fetch resolves.
+  onSuggestionsReady?: () => void; // Called after suggestions data is ready for rendering.
 }
 
 export enum QuerySource {
@@ -38,23 +40,21 @@ export enum TelemetryControlCancelledReason {
   CLOSE_BUTTON = 'close_button',
 }
 
-export interface TelemetryLatencyMeta {
-  result: 'ok' | 'error';
-}
-
 export interface BaseLatencyPayload {
   duration: number;
-  queryLengthBucket: number;
-  queryLengthBucketLabel: string;
-  sessionId: string; // Id to correlate events within an editor session.
-  interactionId?: number; // Optional id to correlate events from the same interaction.
+  queryLength: number;
+  queryLines: number;
+  sessionId: string;
+  interactionId?: number;
+  isInitialLoad?: boolean;
 }
 
 export type InputLatencyPayload = BaseLatencyPayload;
 
-export type SuggestionsLatencyPayload = BaseLatencyPayload;
-
-export interface ValidationLatencyPayload extends BaseLatencyPayload {
-  errorCount: number; // Number of validation errors detected.
-  meta: TelemetryLatencyMeta;
+export interface SuggestionsLatencyPayload extends BaseLatencyPayload {
+  keystrokeToTriggerDuration: number;
+  fetchDuration: number;
+  postFetchDuration: number;
 }
+
+export type ValidationLatencyPayload = BaseLatencyPayload;

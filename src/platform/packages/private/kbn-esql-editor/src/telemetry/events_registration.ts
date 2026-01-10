@@ -25,12 +25,6 @@ export const ESQL_CONTROL_FLYOUT_OPENED = 'esql.control_flyout_opened';
 export const ESQL_CONTROL_CANCELLED = 'esql.control_cancelled';
 export const ESQL_CONTROL_SAVED = 'esql.control_saved';
 
-// Performance metrics
-export const ESQL_EDITOR_INIT_LATENCY = 'esql_editor_init_latency'; // component mount → editor ready
-export const ESQL_EDITOR_INPUT_LATENCY = 'esql_editor_input_latency'; // keystroke → React re-render
-export const ESQL_EDITOR_SUGGESTIONS_LATENCY = 'esql_editor_suggestions_latency'; // keystroke → suggestions ready
-export const ESQL_EDITOR_VALIDATION_LATENCY = 'esql_editor_validation_latency'; // execution only (excludes debounce delay)
-
 /**
  * Registers the esql editor analytics events.
  * This function is wrapped in `once` to ensure that the events are registered only once.

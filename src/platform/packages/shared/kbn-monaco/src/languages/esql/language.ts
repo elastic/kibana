@@ -154,14 +154,17 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       ): Promise<monaco.languages.CompletionList> {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
-        const suggestions = await suggest(fullText, offset, deps);
 
-        deps?.telemetry?.onSuggestionsReady?.();
+        deps?.telemetry?.onSuggestionsFetchStart?.();
+        const suggestions = await suggest(fullText, offset, deps);
+        deps?.telemetry?.onSuggestionsFetched?.();
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
           deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
         }
+
+        deps?.telemetry?.onSuggestionsReady?.();
 
         return wrapAsMonacoSuggestions(suggestions, fullText);
       },

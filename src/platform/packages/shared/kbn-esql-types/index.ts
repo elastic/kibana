@@ -53,7 +53,6 @@ export {
   QuerySource,
   TelemetryControlCancelledReason,
   type TelemetryQuerySubmittedProps,
-  type TelemetryLatencyMeta,
   type BaseLatencyPayload,
   type InputLatencyPayload,
   type SuggestionsLatencyPayload,

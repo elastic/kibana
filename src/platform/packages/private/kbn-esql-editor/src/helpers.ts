@@ -28,18 +28,27 @@ const KEYCODE_ARROW_DOWN = 40;
 export interface BaseTracking {
   hasFirstSample: boolean;
   startTime: number;
-  queryLengthBucket: number;
-  queryLengthBucketLabel: string;
+  queryLength: number;
+  queryLines: number;
   interactionId: number;
 }
 
-// Numeric buckets for aggregatable metrics: 1(<=50), 2(<=200), 3(<=500), 4(<=1000), 5(>1000)
-export const getQueryLengthBucketInfo = (length: number) => {
-  if (length <= 50) return { bucket: 1, label: '0-50' };
-  if (length <= 200) return { bucket: 2, label: '51-200' };
-  if (length <= 500) return { bucket: 3, label: '201-500' };
-  if (length <= 1000) return { bucket: 4, label: '501-1000' };
-  return { bucket: 5, label: '1000+' };
+export interface SuggestionsTracking extends BaseTracking {
+  triggerTime: number;
+  fetchStartTime: number;
+  fetchEndTime: number;
+}
+
+// First event always captured. Subsequent events use deterministic 10% sampling
+// based on interactionId (every 10th interaction is sampled)
+export const shouldSkipLatencySampling = (
+  tracking: BaseTracking,
+  interactionId: number
+): boolean => {
+  if (tracking.startTime > 0) return true;
+  if (!tracking.hasFirstSample) return false;
+
+  return interactionId % 10 !== 0;
 };
 
 export const startLatencyTracking = (
@@ -47,17 +56,91 @@ export const startLatencyTracking = (
   queryText: string,
   interactionId: number
 ): void => {
-  const { bucket, label } = getQueryLengthBucketInfo(queryText.length);
   tracking.startTime = performance.now();
-  tracking.queryLengthBucket = bucket;
-  tracking.queryLengthBucketLabel = label;
+  tracking.queryLength = queryText.length;
+  tracking.queryLines = queryText.split('\n').length;
   tracking.interactionId = interactionId;
+};
+
+export interface LatencyTrackingResult {
+  duration: number;
+  queryLength: number;
+  queryLines: number;
+  interactionId: number;
+  isInitialLoad: boolean;
+}
+
+export interface SuggestionsLatencyResult extends LatencyTrackingResult {
+  keystrokeToTriggerDuration: number;
+  fetchDuration: number;
+  postFetchDuration: number;
+}
+
+export const endLatencyTracking = (tracking: BaseTracking): LatencyTrackingResult | null => {
+  if (tracking.startTime <= 0) return null;
+
+  const result: LatencyTrackingResult = {
+    duration: performance.now() - tracking.startTime,
+    queryLength: tracking.queryLength,
+    queryLines: tracking.queryLines,
+    interactionId: tracking.interactionId,
+    isInitialLoad: !tracking.hasFirstSample,
+  };
+
+  tracking.hasFirstSample = true;
+  tracking.startTime = 0;
+  tracking.queryLength = 0;
+  tracking.queryLines = 0;
+  tracking.interactionId = 0;
+
+  return result;
+};
+
+export const endSuggestionsLatencyTracking = (
+  tracking: SuggestionsTracking
+): SuggestionsLatencyResult | null => {
+  const { triggerTime, fetchStartTime, fetchEndTime, startTime } = tracking;
+  if (fetchStartTime === 0 || fetchEndTime === 0) return null;
+
+  const endTime = performance.now();
+  const baseResult = endLatencyTracking(tracking);
+
+  if (!baseResult) {
+    tracking.triggerTime = 0;
+    tracking.fetchStartTime = 0;
+    tracking.fetchEndTime = 0;
+    return null;
+  }
+
+  const safeTriggerTime = triggerTime || fetchStartTime;
+  const keystrokeToTriggerDuration = safeTriggerTime - startTime;
+  const fetchDuration = fetchEndTime - fetchStartTime;
+  const postFetchDuration = endTime - fetchEndTime;
+
+  // Guard against out-of-order timestamps (e.g. fetchEndTime recorded before fetchStartTime).
+  if (keystrokeToTriggerDuration < 0 || fetchDuration < 0 || postFetchDuration < 0) {
+    tracking.triggerTime = 0;
+    tracking.fetchStartTime = 0;
+    tracking.fetchEndTime = 0;
+    return null;
+  }
+
+  tracking.triggerTime = 0;
+  tracking.fetchStartTime = 0;
+  tracking.fetchEndTime = 0;
+
+  return {
+    ...baseResult,
+    keystrokeToTriggerDuration,
+    fetchDuration,
+    postFetchDuration,
+  };
 };
 
 export const resetTracking = (tracking: BaseTracking): void => {
   tracking.startTime = 0;
-  tracking.queryLengthBucket = 0;
-  tracking.queryLengthBucketLabel = '';
+  tracking.queryLength = 0;
+  tracking.queryLines = 0;
   tracking.interactionId = 0;
 };
 

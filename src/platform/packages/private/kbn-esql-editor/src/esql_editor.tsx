@@ -44,7 +44,6 @@ import type {
   ESQLControlVariable,
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
-  TelemetryLatencyMeta,
 } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -69,8 +68,11 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import type { SuggestionsTracking } from './helpers';
 import {
   clearCacheWhenOld,
+  endLatencyTracking,
+  endSuggestionsLatencyTracking,
   filterDataErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
@@ -78,6 +80,7 @@ import {
   parseErrors,
   parseWarning,
   resetTracking,
+  shouldSkipLatencySampling,
   startLatencyTracking,
   useDebounceWithOptions,
 } from './helpers';
@@ -143,8 +146,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const inputTrackingRef = useRef({
     hasFirstSample: false,
     startTime: 0,
-    queryLengthBucket: 0,
-    queryLengthBucketLabel: '',
+    queryLength: 0,
+    queryLines: 0,
     interactionId: 0,
   });
 
@@ -152,18 +155,21 @@ const ESQLEditorInternal = function ESQLEditor({
   const validationTrackingRef = useRef({
     hasFirstSample: false,
     startTime: 0,
-    queryLengthBucket: 0,
-    queryLengthBucketLabel: '',
+    queryLength: 0,
+    queryLines: 0,
     interactionId: 0,
   });
 
   // Suggestions latency: keystroke → suggestions data ready
-  const suggestionsTrackingRef = useRef({
+  const suggestionsTrackingRef = useRef<SuggestionsTracking>({
     hasFirstSample: false,
     startTime: 0,
-    queryLengthBucket: 0,
-    queryLengthBucketLabel: '',
+    queryLength: 0,
+    queryLines: 0,
     interactionId: 0,
+    triggerTime: 0,
+    fetchStartTime: 0,
+    fetchEndTime: 0,
   });
 
   // Init latency: component mount → editor ready
@@ -253,65 +259,91 @@ const ESQLEditorInternal = function ESQLEditor({
     const interactionId = ++interactionIdRef.current;
     const tracking = inputTrackingRef.current;
 
-    // Skip if measurement in progress, or sampling (first event always, then 10%)
-    if (tracking.startTime > 0 || (tracking.hasFirstSample && Math.random() > 0.1)) {
-      return;
-    }
+    if (shouldSkipLatencySampling(tracking, interactionId)) return;
 
     startLatencyTracking(tracking, queryText, interactionId);
   }, []);
 
   const trackSuggestionsLatencyStart = useCallback((queryText: string) => {
     const tracking = suggestionsTrackingRef.current;
+    const interactionId = interactionIdRef.current;
 
-    // Skip if measurement in progress, or sampling (first event always, then 10%)
-    if (tracking.startTime > 0 || (tracking.hasFirstSample && Math.random() > 0.1)) {
+    // First sample: allow overwrite (last keystroke wins)
+    // This ensures we capture "first menu showing" even if early keystrokes don't trigger suggestions
+    if (!tracking.hasFirstSample) {
+      startLatencyTracking(tracking, queryText, interactionId);
+      tracking.fetchStartTime = 0;
+      tracking.fetchEndTime = 0;
+      tracking.triggerTime = 0;
       return;
     }
 
-    startLatencyTracking(tracking, queryText, interactionIdRef.current);
+    // After first sample: first wins + 10% sampling
+    if (tracking.startTime > 0 || interactionId % 10 !== 0) return;
+
+    startLatencyTracking(tracking, queryText, interactionId);
+    tracking.fetchStartTime = 0;
+    tracking.fetchEndTime = 0;
+    tracking.triggerTime = 0;
+  }, []);
+
+  const markSuggestionsTriggered = useCallback(() => {
+    const tracking = suggestionsTrackingRef.current;
+    if (tracking.startTime === 0 || tracking.triggerTime > 0) return;
+
+    tracking.triggerTime = performance.now();
+  }, []);
+
+  const markSuggestionsFetchStart = useCallback(() => {
+    const tracking = suggestionsTrackingRef.current;
+    if (tracking.startTime === 0 || tracking.fetchStartTime > 0) return;
+
+    tracking.fetchStartTime = performance.now();
+    if (tracking.triggerTime === 0) {
+      tracking.triggerTime = tracking.fetchStartTime;
+    }
+  }, []);
+
+  const markSuggestionsFetched = useCallback(() => {
+    const tracking = suggestionsTrackingRef.current;
+    if (tracking.startTime === 0 || tracking.fetchEndTime > 0) return;
+
+    if (tracking.fetchStartTime === 0) {
+      tracking.fetchStartTime = performance.now();
+    }
+
+    tracking.fetchEndTime = performance.now();
   }, []);
 
   const trackValidationLatencyStart = useCallback((queryText: string) => {
     const tracking = validationTrackingRef.current;
 
-    // Skip if measurement in progress, or sampling (first event always, then 10%)
-    if (tracking.startTime > 0 || (tracking.hasFirstSample && Math.random() > 0.1)) {
-      return;
-    }
+    if (shouldSkipLatencySampling(tracking, interactionIdRef.current)) return;
 
     startLatencyTracking(tracking, queryText, interactionIdRef.current);
   }, []);
 
   const trackValidationLatencyEnd = useCallback(
-    (active: boolean, errorsCount: number) => {
-      const tracking = validationTrackingRef.current;
+    (active: boolean) => {
+      if (!active) return;
 
-      if (!active || tracking.startTime <= 0) {
-        return;
-      }
-
-      const duration = performance.now() - tracking.startTime;
-      const result: TelemetryLatencyMeta['result'] = errorsCount > 0 ? 'error' : 'ok';
+      const result = endLatencyTracking(validationTrackingRef.current);
+      if (!result) return;
 
       telemetryService.trackValidationLatency({
-        duration,
-        queryLengthBucket: tracking.queryLengthBucket,
-        queryLengthBucketLabel: tracking.queryLengthBucketLabel,
+        ...result,
         sessionId: sessionIdRef.current,
-        errorCount: errorsCount,
-        interactionId: tracking.interactionId,
-        meta: { result },
       });
-
-      tracking.hasFirstSample = true;
-      resetTracking(tracking);
     },
     [telemetryService]
   );
 
   const resetSuggestionsTracking = useCallback(() => {
-    resetTracking(suggestionsTrackingRef.current);
+    const tracking = suggestionsTrackingRef.current;
+    resetTracking(tracking);
+    tracking.triggerTime = 0;
+    tracking.fetchStartTime = 0;
+    tracking.fetchEndTime = 0;
   }, []);
 
   const resetValidationTracking = useCallback(() => {
@@ -414,25 +446,13 @@ const ESQLEditorInternal = function ESQLEditor({
 
   // Input latency: measure keystroke → (before paint)
   useLayoutEffect(() => {
-    const tracking = inputTrackingRef.current;
+    const result = endLatencyTracking(inputTrackingRef.current);
+    if (!result) return;
 
-    // startTime is 0 when we didn't start a measurement for this cycle.
-    if (tracking.startTime === 0) {
-      return;
-    }
-
-    const duration = performance.now() - tracking.startTime;
     telemetryService.trackInputLatency({
-      duration,
-      queryLengthBucket: tracking.queryLengthBucket,
-      queryLengthBucketLabel: tracking.queryLengthBucketLabel,
+      ...result,
       sessionId: sessionIdRef.current,
-      interactionId: tracking.interactionId,
     });
-
-    tracking.hasFirstSample = true;
-
-    resetTracking(tracking);
   }, [code, telemetryService]);
 
   useEffect(() => {
@@ -471,9 +491,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
+      markSuggestionsTriggered();
       editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
     }, 0);
-  }, []);
+  }, [markSuggestionsTriggered]);
 
   const maybeTriggerSuggestions = useCallback(() => {
     const { current: editor } = editorRef;
@@ -687,29 +708,28 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
+      onSuggestionsFetchStart: () => {
+        markSuggestionsFetchStart();
+      },
+      onSuggestionsFetched: () => {
+        markSuggestionsFetched();
+      },
       onSuggestionsReady: () => {
-        const tracking = suggestionsTrackingRef.current;
-        // startTime is 0 when we didn't start a measurement, e.g. in the 90% of cycles
-        // we skip (10% sampling), the "ready" signal arrives without a matching start timestamp.
-        if (tracking.startTime === 0) {
+        const result = endSuggestionsLatencyTracking(suggestionsTrackingRef.current);
+
+        if (!result) {
+          resetSuggestionsTracking();
+
           return;
         }
 
-        const duration = performance.now() - tracking.startTime;
-
         telemetryService.trackSuggestionsLatency({
-          duration,
-          queryLengthBucket: tracking.queryLengthBucket,
-          queryLengthBucketLabel: tracking.queryLengthBucketLabel,
+          ...result,
           sessionId: sessionIdRef.current,
-          interactionId: tracking.interactionId,
         });
-
-        tracking.hasFirstSample = true;
-        resetTracking(tracking);
       },
     }),
-    [telemetryService]
+    [markSuggestionsFetchStart, markSuggestionsFetched, resetSuggestionsTracking, telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
@@ -927,7 +947,7 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
-      trackValidationLatencyEnd(active, allErrors.length);
+      trackValidationLatencyEnd(active);
 
       if (active) {
         setEditorMessages({ errors: allErrors, warnings: allWarnings });
@@ -1260,7 +1280,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     // Track editor init time (first event always captured)
                     if (initTrackingRef.current.startTime > 0) {
                       const initDuration = performance.now() - initTrackingRef.current.startTime;
-                      telemetryService.trackInitLatency(initDuration);
+                      telemetryService.trackInitLatency(initDuration, sessionIdRef.current);
                       initTrackingRef.current.startTime = 0;
                     }
 

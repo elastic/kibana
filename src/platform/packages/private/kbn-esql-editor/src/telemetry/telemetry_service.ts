@@ -26,10 +26,6 @@ import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
   ESQL_CONTROL_SAVED,
-  ESQL_EDITOR_INIT_LATENCY,
-  ESQL_EDITOR_INPUT_LATENCY,
-  ESQL_EDITOR_SUGGESTIONS_LATENCY,
-  ESQL_EDITOR_VALIDATION_LATENCY,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
@@ -200,54 +196,67 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackInitLatency(duration: number) {
+  // component mount → editor ready
+  public trackInitLatency(duration: number, sessionId?: string) {
     this._reportPerformanceEvent({
-      eventName: ESQL_EDITOR_INIT_LATENCY,
+      eventName: 'esql_editor_init_latency',
       duration: Math.round(duration),
+      meta: {
+        ...(sessionId ? { session_id: sessionId } : {}),
+      },
     });
   }
 
+  // keystroke → React re-render
   public trackInputLatency(payload: InputLatencyPayload) {
     this._reportPerformanceEvent({
-      eventName: ESQL_EDITOR_INPUT_LATENCY,
+      eventName: 'esql_editor_input_latency',
       duration: Math.round(payload.duration),
-      key1: 'query_length_bucket',
-      value1: payload.queryLengthBucket,
+      key1: 'query_length',
+      value1: payload.queryLength,
+      key2: 'query_lines',
+      value2: payload.queryLines,
       meta: {
-        query_length_bucket_label: payload.queryLengthBucketLabel,
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
       },
     });
   }
 
+  // keystroke → suggestions ready
   public trackSuggestionsLatency(payload: SuggestionsLatencyPayload) {
     this._reportPerformanceEvent({
-      eventName: ESQL_EDITOR_SUGGESTIONS_LATENCY,
+      eventName: 'esql_editor_suggestions_latency',
       duration: Math.round(payload.duration),
-      key1: 'query_length_bucket',
-      value1: payload.queryLengthBucket,
+      key1: 'query_length',
+      value1: payload.queryLength,
+      key2: 'query_lines',
+      value2: payload.queryLines,
       meta: {
-        query_length_bucket_label: payload.queryLengthBucketLabel,
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
+        keystroke_to_trigger_ms: Math.round(payload.keystrokeToTriggerDuration),
+        fetch_ms: Math.round(payload.fetchDuration),
+        post_fetch_ms: Math.round(payload.postFetchDuration),
       },
     });
   }
 
+  // validation execution only
   public trackValidationLatency(payload: ValidationLatencyPayload) {
     this._reportPerformanceEvent({
-      eventName: ESQL_EDITOR_VALIDATION_LATENCY,
+      eventName: 'esql_editor_validation_latency',
       duration: Math.round(payload.duration),
-      key1: 'query_length_bucket',
-      value1: payload.queryLengthBucket,
-      key2: 'errors',
-      value2: Math.round(payload.errorCount),
+      key1: 'query_length',
+      value1: payload.queryLength,
+      key2: 'query_lines',
+      value2: payload.queryLines,
       meta: {
-        result: payload.meta.result,
-        query_length_bucket_label: payload.queryLengthBucketLabel,
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
       },
     });
   }
