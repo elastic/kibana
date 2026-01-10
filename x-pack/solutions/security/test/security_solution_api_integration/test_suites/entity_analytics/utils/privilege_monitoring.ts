@@ -234,16 +234,6 @@ export const privilegeMonitoringRouteHelpersFactory = (
       assertStatusCode(expectStatusCode, response);
       return response;
     },
-    deleteSource: async (id: string, expectStatusCode: number = 200) => {
-      const response = await supertest
-        .delete(routeWithNamespace(`${MONITORING_ENTITY_SOURCE_URL}/${id}`, namespace))
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', API_VERSIONS.public.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send();
-      assertStatusCode(expectStatusCode, response);
-      return response;
-    },
   };
 };
 

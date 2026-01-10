@@ -84,9 +84,5 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not find list source api', async () => {
       await privilegedUserMonitoringRoutes.listSource(404);
     });
-
-    it('should not find delete source api', async () => {
-      await privilegedUserMonitoringRoutes.deleteSource('test', 404);
-    });
   });
 };

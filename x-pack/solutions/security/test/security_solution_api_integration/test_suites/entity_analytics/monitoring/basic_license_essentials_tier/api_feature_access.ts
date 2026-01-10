@@ -110,10 +110,5 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await privilegedUserMonitoringRoutes.listSource(403);
       expect(response.body.message).toEqual(licenseMessage);
     });
-
-    it('should not be able to access delete source api due to license', async () => {
-      const response = await privilegedUserMonitoringRoutes.deleteSource('test', 403);
-      expect(response.body.message).toEqual(licenseMessage);
-    });
   });
 };
