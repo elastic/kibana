@@ -76,7 +76,8 @@ export function generateLogChangePointsData({
   range?: Timerange;
 }): ScenarioReturnType<LogDocument> {
   const effectiveRange =
-    range ?? timerange(LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start, LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end);
+    range ??
+    timerange(LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start, LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end);
 
   const spikeStart = datemath.parse(LOG_CHANGE_POINTS_SPIKE_WINDOW.start)!.valueOf();
   const spikeEnd = datemath.parse(LOG_CHANGE_POINTS_SPIKE_WINDOW.end)!.valueOf();

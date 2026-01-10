@@ -278,7 +278,10 @@ export function generateLogRateAnalysisDipData({
 }): ScenarioReturnType<LogDocument> {
   const effectiveRange =
     range ??
-    timerange(LOG_RATE_ANALYSIS_DIP_BASELINE_WINDOW.start, LOG_RATE_ANALYSIS_DIP_DEVIATION_WINDOW.end);
+    timerange(
+      LOG_RATE_ANALYSIS_DIP_BASELINE_WINDOW.start,
+      LOG_RATE_ANALYSIS_DIP_DEVIATION_WINDOW.end
+    );
 
   const pipelineDropStart = effectiveRange.to.getTime() - PIPELINE_DROP_WINDOW_MS;
 
