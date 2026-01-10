@@ -27,6 +27,7 @@ export interface UseAlertsTableQueryParamsOptions
       | 'pageSize'
       | 'minScore'
       | 'trackScores'
+      | 'searchStrategy'
     >,
     'sort'
   > {
@@ -52,6 +53,7 @@ export const useAlertsTableQueryParams = ({
   pageSize,
   minScore,
   trackScores,
+  searchStrategy,
   dispatchBulkAction,
 }: UseAlertsTableQueryParamsOptions) => {
   const [queryParams, setQueryParams] = useState({
@@ -65,6 +67,7 @@ export const useAlertsTableQueryParams = ({
     pageSize,
     minScore,
     trackScores,
+    searchStrategy,
   });
 
   // Check if the pagination should restart when any of the query params change
@@ -107,6 +110,7 @@ export const useAlertsTableQueryParams = ({
         runtimeMappings,
         minScore,
         trackScores,
+        searchStrategy,
         // Go back to the first page if the query changes
         pageIndex: resetPageIndex ? 0 : pageIndex,
         pageSize,
@@ -121,6 +125,7 @@ export const useAlertsTableQueryParams = ({
     consumers,
     minScore,
     trackScores,
+    searchStrategy,
     pageSize,
     pageIndex,
     dispatchBulkAction,

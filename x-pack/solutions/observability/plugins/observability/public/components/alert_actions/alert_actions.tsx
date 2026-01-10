@@ -27,6 +27,15 @@ import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext }
 import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 import { useKibana } from '../../utils/kibana_react';
+import { ALERT_SOURCE } from '../alerts_table/common/get_columns';
+
+/**
+ * Checks if an alert is an external alert (from third-party source)
+ */
+function isExternalAlert(alert: Record<string, unknown>): boolean {
+  const source = alert[ALERT_SOURCE]?.[0] as string | undefined;
+  return !!source && source !== 'kibana' && source !== '--';
+}
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -48,12 +57,18 @@ export function AlertActions(
     cases,
   } = services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
-  const { telemetryClient } = useKibana().services;
+  const { telemetryClient, notifications } = useKibana().services;
 
+  const isExternal = isExternalAlert(alert);
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+
+  // External alert fields
+  const externalUrl = alert['kibana.alert.external_url']?.[0] as string | undefined;
+  const alertSource = alert[ALERT_SOURCE]?.[0] as string | undefined;
+  const connectorId = alert['kibana.alert.connector_id']?.[0] as string | undefined;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -63,23 +78,31 @@ export function AlertActions(
   const observabilityAlert = parseObservabilityAlert(alert);
 
   useEffect(() => {
-    const alertLink = observabilityAlert.link;
-    if (!observabilityAlert.hasBasePath && prepend) {
-      setViewInAppUrl(prepend(alertLink ?? ''));
+    if (isExternal) {
+      setViewInAppUrl(externalUrl);
     } else {
-      setViewInAppUrl(alertLink);
+      const alertLink = observabilityAlert.link;
+      if (!observabilityAlert.hasBasePath && prepend) {
+        setViewInAppUrl(prepend(alertLink ?? ''));
+      } else {
+        setViewInAppUrl(alertLink);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleViewInAppUrl = useCallback(() => {
-    const alertLink = observabilityAlert.link as unknown as string;
-    if (!observabilityAlert.hasBasePath) {
-      setViewInAppUrl(prepend(alertLink ?? ''));
+    if (isExternal) {
+      setViewInAppUrl(externalUrl);
     } else {
-      setViewInAppUrl(alertLink);
+      const alertLink = observabilityAlert.link as unknown as string;
+      if (!observabilityAlert.hasBasePath) {
+        setViewInAppUrl(prepend(alertLink ?? ''));
+      } else {
+        setViewInAppUrl(alertLink);
+      }
     }
-  }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
+  }, [isExternal, externalUrl, observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
   const onAddToCase = useCallback(
     ({ isNewCase }: { isNewCase: boolean }) => {
@@ -111,7 +134,131 @@ export function AlertActions(
     setIsPopoverOpen(!isPopoverOpen);
   };
 
-  const actionsMenuItems = [
+  // Handle external alert actions
+  const handleCopyAlertLink = useCallback(() => {
+    if (externalUrl) {
+      navigator.clipboard.writeText(externalUrl);
+      notifications?.toasts.addSuccess({
+        title: i18n.translate('xpack.observability.alerts.actions.linkCopied', {
+          defaultMessage: 'Link copied to clipboard',
+        }),
+      });
+    }
+    closeActionsPopover();
+  }, [externalUrl, notifications, closeActionsPopover]);
+
+  const handleViewInSource = useCallback(() => {
+    if (externalUrl) {
+      window.open(externalUrl, '_blank');
+    }
+    closeActionsPopover();
+  }, [externalUrl, closeActionsPopover]);
+
+  // External alert menu items
+  const externalAlertMenuItems = useMemo(() => {
+    const items: React.ReactElement[] = [];
+
+    if (externalUrl) {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="view-in-source-action"
+          key="viewInSource"
+          onClick={handleViewInSource}
+          icon="popout"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.viewInSource', {
+            defaultMessage: 'View in {source}',
+            values: { source: alertSource || 'Source' },
+          })}
+        </EuiContextMenuItem>
+      );
+
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="copy-alert-link-action"
+          key="copyAlertLink"
+          onClick={handleCopyAlertLink}
+          icon="copy"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.copyLink', {
+            defaultMessage: 'Copy link',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    // Add to case is still available for external alerts
+    if (userCasesPermissions?.createComment && userCasesPermissions?.read) {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="add-to-existing-case-action"
+          key="addToExistingCase"
+          onClick={handleAddToExistingCaseClick}
+          icon="folderClosed"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.addToCase', {
+            defaultMessage: 'Add to existing case',
+          })}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          data-test-subj="add-to-new-case-action"
+          key="addToNewCase"
+          onClick={handleAddToNewCaseClick}
+          icon="folderOpen"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
+            defaultMessage: 'Add to new case',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    // Connector-specific actions (placeholder for future connector integration)
+    if (connectorId) {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="mute-in-source-action"
+          key="muteInSource"
+          onClick={() => {
+            notifications?.toasts.addInfo({
+              title: i18n.translate('xpack.observability.alerts.actions.muteInSourceInfo', {
+                defaultMessage: 'Mute action requires connector configuration',
+              }),
+            });
+            closeActionsPopover();
+          }}
+          icon="bellSlash"
+          size="s"
+          disabled={true} // Disabled until connector integration is complete
+        >
+          {i18n.translate('xpack.observability.alerts.actions.muteInSource', {
+            defaultMessage: 'Mute in {source}',
+            values: { source: alertSource || 'Source' },
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    return items;
+  }, [
+    externalUrl,
+    alertSource,
+    connectorId,
+    userCasesPermissions,
+    handleViewInSource,
+    handleCopyAlertLink,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    notifications,
+    closeActionsPopover,
+  ]);
+
+  // Kibana alert menu items
+  const kibanaAlertMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
       ? [
           <EuiContextMenuItem
@@ -157,6 +304,8 @@ export function AlertActions(
     ),
   ];
 
+  const actionsMenuItems = isExternal ? externalAlertMenuItems : kibanaAlertMenuItems;
+
   const actionsToolTip =
     actionsMenuItems.length <= 0
       ? i18n.translate('xpack.observability.alertsTable.notEnoughPermissions', {
@@ -171,6 +320,16 @@ export function AlertActions(
   };
 
   const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
+
+  // For external alerts, show "View in Source" instead of "View in app"
+  const viewInAppLabel = isExternal
+    ? i18n.translate('xpack.observability.alertsTable.viewInSourceTextLabel', {
+        defaultMessage: 'View in {source}',
+        values: { source: alertSource || 'Source' },
+      })
+    : i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
+        defaultMessage: 'View in app',
+      });
 
   return (
     <>
@@ -194,21 +353,14 @@ export function AlertActions(
       )}
       {!hideViewInApp && (
         <EuiFlexItem>
-          <EuiToolTip
-            content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-              defaultMessage: 'View in app',
-            })}
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={viewInAppLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
-              aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-                defaultMessage: 'View in app',
-              })}
+              aria-label={viewInAppLabel}
               color="text"
               onMouseOver={handleViewInAppUrl}
-              onClick={() => window.open(viewInAppUrl)}
-              iconType="eye"
+              onClick={() => window.open(viewInAppUrl, isExternal ? '_blank' : '_self')}
+              iconType={isExternal ? 'popout' : 'eye'}
               size="s"
             />
           </EuiToolTip>

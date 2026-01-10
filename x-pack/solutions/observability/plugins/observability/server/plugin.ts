@@ -32,6 +32,11 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '@kbn/data-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { getLogsFeature } from './features/logs_feature';
 import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
@@ -51,14 +56,20 @@ import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
 import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
+import {
+  unifiedAlertsSearchStrategyProvider,
+  UNIFIED_ALERTS_SEARCH_STRATEGY_NAME,
+} from './lib/search_strategy';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
   cases?: CasesServerSetup;
+  data: DataPluginSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  security?: SecurityPluginSetup;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -69,6 +80,7 @@ interface PluginSetup {
 
 interface PluginStart {
   alerting: AlertingServerStart;
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
@@ -120,6 +132,40 @@ export class ObservabilityPlugin
       logsLocator,
     });
 
+    // Register the unified alerts search strategy during setup
+    // This wraps the original privateRuleRegistryAlertsSearchStrategy
+    // to also include external alerts from third-party sources
+    // Note: The strategy uses start services lazily when search is executed
+    try {
+      const unifiedSearchStrategy = unifiedAlertsSearchStrategyProvider(
+        plugins.data,
+        {
+          getStartServices: () =>
+            core.getStartServices().then(([coreStart, pluginStart]) => [
+              coreStart,
+              {
+                data: pluginStart.data,
+                alerting: pluginStart.alerting,
+                spaces: pluginStart.spaces,
+              },
+            ]),
+        },
+        this.logger,
+        plugins.security
+      );
+
+      plugins.data.search.registerSearchStrategy(
+        UNIFIED_ALERTS_SEARCH_STRATEGY_NAME,
+        unifiedSearchStrategy
+      );
+
+      this.logger.info(
+        `Registered ${UNIFIED_ALERTS_SEARCH_STRATEGY_NAME} search strategy for unified alerts`
+      );
+    } catch (err: any) {
+      this.logger.error(`Failed to register unified alerts search strategy: ${err.message}`);
+    }
+
     void core.getStartServices().then(([coreStart, pluginStart]) => {
       const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(
         'observability:complete_overview'
@@ -136,6 +182,7 @@ export class ObservabilityPlugin
           throw err;
         });
       }
+
       registerRoutes({
         core,
         dependencies: {

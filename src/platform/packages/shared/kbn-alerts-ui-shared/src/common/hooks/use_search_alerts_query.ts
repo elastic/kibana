@@ -16,7 +16,7 @@ import { AlertsQueryContext } from '../contexts/alerts_query_context';
 
 export type UseSearchAlertsQueryParams = SetOptional<
   Omit<SearchAlertsParams, 'signal'>,
-  'query' | 'sort' | 'pageIndex' | 'pageSize'
+  'query' | 'sort' | 'pageIndex' | 'pageSize' | 'searchStrategy'
 >;
 
 export const queryKeyPrefix = ['alerts', searchAlerts.name];
@@ -49,6 +49,7 @@ export const useSearchAlertsQuery = ({
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
     minScore,
     trackScores,
+    searchStrategy,
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
@@ -66,6 +67,7 @@ export const useSearchAlertsQuery = ({
         pageSize,
         minScore,
         trackScores,
+        searchStrategy,
       }),
     refetchOnWindowFocus: false,
     context: skipAlertsQueryContext ? undefined : AlertsQueryContext,

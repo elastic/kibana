@@ -7,7 +7,14 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiButton,
+  EuiPopover,
+  EuiContextMenu,
+} from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { usePageReady } from '@kbn/ebt-tools';
@@ -53,6 +60,8 @@ import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
+import { EVENTS_API_URLS } from '../../../common/types/events';
+import type { EventSource } from '../../../common/types/events';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -62,7 +71,8 @@ const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 
-const tableColumns = getColumns({ showRuleName: true });
+// Include the Source column to show Kibana vs External alerts
+const tableColumns = getColumns({ showRuleName: true, showSource: true });
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -119,6 +129,11 @@ function InternalAlertsPage() {
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  // Generate mock events state
+  const [isGeneratePopoverOpen, setIsGeneratePopoverOpen] = useState(false);
+  const [generatingProvider, setGeneratingProvider] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const [tableLoading, setTableLoading] = useState(true);
   const [tableCount, setTableCount] = useState(0);
@@ -263,7 +278,101 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Generate mock external events
+  const generateMockEvents = useCallback(
+    async (provider: EventSource | 'all') => {
+      setGeneratingProvider(provider);
+      try {
+        await http.post(EVENTS_API_URLS.EVENTS_MOCK, {
+          query: { provider, count: '5' },
+        });
+        toasts.addSuccess({
+          title: i18n.translate('xpack.observability.alerts.generateSuccess', {
+            defaultMessage: 'Generated mock events from {provider}',
+            values: { provider },
+          }),
+        });
+        setRefreshKey((prev) => prev + 1);
+      } catch (error) {
+        toasts.addDanger({
+          title: i18n.translate('xpack.observability.alerts.generateError', {
+            defaultMessage: 'Failed to generate mock events',
+          }),
+        });
+      } finally {
+        setGeneratingProvider(null);
+        setIsGeneratePopoverOpen(false);
+      }
+    },
+    [http, toasts]
+  );
+
+  const generateMenuItems = [
+    {
+      id: 0,
+      title: i18n.translate('xpack.observability.alerts.generateMockEventsTitle', {
+        defaultMessage: 'Generate Mock Events',
+      }),
+      items: [
+        {
+          name: 'Prometheus (5 events)',
+          icon: 'logoPrometheus',
+          onClick: () => generateMockEvents('prometheus'),
+          disabled: generatingProvider !== null,
+        },
+        {
+          name: 'Datadog (5 events)',
+          icon: 'visAreaStacked',
+          onClick: () => generateMockEvents('datadog'),
+          disabled: generatingProvider !== null,
+        },
+        {
+          name: 'Sentry (5 events)',
+          icon: 'bug',
+          onClick: () => generateMockEvents('sentry'),
+          disabled: generatingProvider !== null,
+        },
+        {
+          name: 'All Providers',
+          icon: 'apps',
+          onClick: () => generateMockEvents('all'),
+          disabled: generatingProvider !== null,
+        },
+      ],
+    },
+  ];
+
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+
+  const rightSideItems = [
+    ...renderRuleStats(
+      ruleStats,
+      manageRulesHref,
+      ruleStatsLoading,
+      locators.get<RulesLocatorParams>(rulesLocatorID)
+    ),
+    <EuiPopover
+      key="generateMockEventsPopover"
+      button={
+        <EuiButton
+          iconType="beaker"
+          onClick={() => setIsGeneratePopoverOpen(!isGeneratePopoverOpen)}
+          isLoading={generatingProvider !== null}
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.generateMockButton', {
+            defaultMessage: 'Generate Mock Events',
+          })}
+        </EuiButton>
+      }
+      isOpen={isGeneratePopoverOpen}
+      closePopover={() => setIsGeneratePopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+    >
+      <EuiContextMenu initialPanelId={0} panels={generateMenuItems} />
+    </EuiPopover>,
+  ];
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -273,12 +382,7 @@ function InternalAlertsPage() {
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
           ),
-          rightSideItems: renderRuleStats(
-            ruleStats,
-            manageRulesHref,
-            ruleStatsLoading,
-            locators.get<RulesLocatorParams>(rulesLocatorID)
-          ),
+          rightSideItems,
         }}
       >
         <HeaderMenu />
@@ -361,6 +465,7 @@ function InternalAlertsPage() {
                   });
                   return (
                     <ObservabilityAlertsTable
+                      key={refreshKey}
                       id={ALERTS_TABLE_ID}
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                       consumers={observabilityAlertFeatureIds}

@@ -226,7 +226,12 @@ const AlertsTableContent = typedForwardRef(
     // Memoized so that consumers can pass an inline object without causing re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const memoizedServices = useMemo(() => services, Object.values(services));
-    const { casesConfiguration, showInspectButton } = publicDataGridProps;
+    const {
+      casesConfiguration,
+      showInspectButton,
+      searchStrategy,
+      ...dataGridOnlyProps
+    } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -369,6 +374,7 @@ const AlertsTableContent = typedForwardRef(
       pageSize,
       minScore,
       trackScores,
+      searchStrategy,
       dispatchBulkAction,
     });
 
@@ -602,7 +608,7 @@ const AlertsTableContent = typedForwardRef(
 
     const dataGridProps: AlertsDataGridProps<AC> = useMemo(
       () => ({
-        ...publicDataGridProps,
+        ...dataGridOnlyProps,
         renderContext,
         columnVisibility: {
           visibleColumns,
@@ -627,7 +633,7 @@ const AlertsTableContent = typedForwardRef(
         onSortChange: onDataGridSortChange,
       }),
       [
-        publicDataGridProps,
+        dataGridOnlyProps,
         renderContext,
         visibleColumns,
         updateVisibleColumns,

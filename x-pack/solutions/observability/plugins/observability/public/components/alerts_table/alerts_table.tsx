@@ -24,7 +24,8 @@ import { AlertsTableCellValue } from './common/cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
 
-const columns = getColumns({ showRuleName: true });
+// Include the Source column to distinguish between Kibana and external alerts
+const columns = getColumns({ showRuleName: true, showSource: true });
 const initialSort = [
   {
     [ALERT_START]: {
@@ -38,9 +39,15 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
+// Use the unified alerts search strategy to include external events
+const UNIFIED_ALERTS_SEARCH_STRATEGY = 'observabilityUnifiedAlertsSearchStrategy';
+
 export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
   const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
+
+  // eslint-disable-next-line no-console
+  console.log('[ObservabilityAlertsTable] Using search strategy:', UNIFIED_ALERTS_SEARCH_STRATEGY);
 
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
@@ -48,6 +55,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
       sort={initialSort}
       casesConfiguration={caseConfiguration}
+      searchStrategy={UNIFIED_ALERTS_SEARCH_STRATEGY}
       additionalContext={{
         observabilityRuleTypeRegistry:
           observabilityRuleTypeRegistry ?? observability?.observabilityRuleTypeRegistry,

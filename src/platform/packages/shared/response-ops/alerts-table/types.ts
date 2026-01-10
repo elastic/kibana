@@ -547,6 +547,13 @@ export interface PublicAlertsDataGridProps
   trackScores?: boolean;
   consumers?: string[];
   /**
+   * Custom search strategy name to use instead of the default
+   * Allows solutions to provide their own search strategy that extends
+   * the default behavior (e.g., to include external alerts from third-party sources)
+   * @default 'privateRuleRegistryAlertsSearchStrategy'
+   */
+  searchStrategy?: string;
+  /**
    * If true, shows a button in the table toolbar to inspect the search alerts request
    */
   showInspectButton?: boolean;

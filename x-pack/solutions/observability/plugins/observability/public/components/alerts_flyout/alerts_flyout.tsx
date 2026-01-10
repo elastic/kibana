@@ -35,6 +35,8 @@ import { paths } from '../../../common/locators/paths';
 import { AlertOverview } from '../alert_overview/alert_overview';
 import { useKibana } from '../../utils/kibana_react';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import { ALERT_SOURCE } from '../alerts_table/common/get_columns';
+import { ExternalAlertOverview } from './external_alert_views';
 
 type TabId = 'overview' | 'table';
 
@@ -45,6 +47,30 @@ export interface AlertsFlyoutProps {
   onClose: () => void;
   headerAppend?: React.ReactNode;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+}
+
+/**
+ * Checks if an alert is an external alert (from third-party source)
+ */
+function isExternalAlert(alert: Alert): boolean {
+  const source = alert[ALERT_SOURCE]?.[0] as string | undefined;
+  return !!source && source !== 'kibana' && source !== '--';
+}
+
+/**
+ * Gets the display title for external alerts
+ */
+function getExternalAlertTitle(alert: Alert): string {
+  const source = alert[ALERT_SOURCE]?.[0] as string | undefined;
+  if (!source || source === '--') {
+    return i18n.translate('xpack.observability.alertFlyout.externalAlertTitle', {
+      defaultMessage: 'External Alert',
+    });
+  }
+  return i18n.translate('xpack.observability.alertFlyout.externalAlertTitleWithSource', {
+    defaultMessage: '{source} Alert',
+    values: { source: source.charAt(0).toUpperCase() + source.slice(1) },
+  });
 }
 
 export function AlertsFlyout({
@@ -61,9 +87,26 @@ export function AlertsFlyout({
     },
   } = useKibana().services;
 
-  const parsedAlert = alert ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
+  const isExternal = alert ? isExternalAlert(alert) : false;
+  const parsedAlert = alert && !isExternal ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
 
   const overviewTab = useMemo(() => {
+    if (isExternal && alert) {
+      // Use external alert overview for third-party alerts
+      return {
+        id: 'overview',
+        'data-test-subj': 'observabilityAlertFlyoutOverviewTab',
+        name: i18n.translate('xpack.observability.alertFlyout.overview', {
+          defaultMessage: 'Overview',
+        }),
+        content: (
+          <EuiPanel hasShadow={false} data-test-subj="observabilityAlertFlyoutOverviewTabPanel">
+            <ExternalAlertOverview alert={alert} />
+          </EuiPanel>
+        ),
+      };
+    }
+
     return {
       id: 'overview',
       'data-test-subj': 'observabilityAlertFlyoutOverviewTab',
@@ -76,7 +119,7 @@ export function AlertsFlyout({
         </EuiPanel>
       ),
     };
-  }, [parsedAlert, tableId]);
+  }, [parsedAlert, tableId, isExternal, alert]);
 
   const metadataTab = useMemo(
     () => ({
@@ -116,10 +159,23 @@ export function AlertsFlyout({
     return parsedAlert.link;
   }, [parsedAlert, prepend]);
 
-  const ariaLabel =
-    alert && alert[ALERT_RULE_CATEGORY]
-      ? getAlertFlyoutAriaLabel(String(alert[ALERT_RULE_CATEGORY]))
-      : ALERT_FLYOUT_DEFAULT_TITLE;
+  // External URL for external alerts
+  const externalUrl = alert?.['kibana.alert.external_url']?.[0] as string | undefined;
+
+  const ariaLabel = isExternal
+    ? getExternalAlertTitle(alert!)
+    : alert && alert[ALERT_RULE_CATEGORY]
+    ? getAlertFlyoutAriaLabel(String(alert[ALERT_RULE_CATEGORY]))
+    : ALERT_FLYOUT_DEFAULT_TITLE;
+
+  // Get the flyout title
+  const flyoutTitle = isExternal
+    ? getExternalAlertTitle(alert!)
+    : alert
+    ? getAlertTitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)
+    : i18n.translate('xpack.observability.alertFlyout.defaultTitle', {
+        defaultMessage: 'Alert detail',
+      });
 
   return (
     <EuiFlyout
@@ -132,22 +188,23 @@ export function AlertsFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-          <h2>
-            {alert
-              ? getAlertTitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)
-              : i18n.translate('xpack.observability.alertFlyout.defaultTitle', {
-                  defaultMessage: 'Alert detail',
-                })}
-          </h2>
+          <h2>{flyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         {alert?.[ALERT_RULE_NAME] && (
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.observability.alertFlyout.title.ruleName"
-                defaultMessage="Rule"
-              />
+              {isExternal ? (
+                <FormattedMessage
+                  id="xpack.observability.alertFlyout.title.alertName"
+                  defaultMessage="Alert"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.observability.alertFlyout.title.ruleName"
+                  defaultMessage="Rule"
+                />
+              )}
               :&nbsp;
             </EuiText>
             <EuiText size="s">{alert[ALERT_RULE_NAME]?.[0] as string}</EuiText>
@@ -175,32 +232,60 @@ export function AlertsFlyout({
         )
       )}
 
-      {parsedAlert && (
+      {/* Footer with action buttons */}
+      {alert && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
-            {!parsedAlert.link || tableId === SLO_ALERTS_TABLE_ID ? null : (
-              <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="alertsFlyoutViewInAppButton" fill href={viewInAppUrl}>
-                  {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
-                    defaultMessage: 'View in app',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
+            {isExternal ? (
+              // External alert actions
+              <>
+                {externalUrl && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="alertsFlyoutViewInSourceButton"
+                      fill
+                      href={externalUrl}
+                      target="_blank"
+                      iconType="popout"
+                      iconSide="right"
+                    >
+                      {i18n.translate('xpack.observability.alertsFlyout.viewInSourceButtonText', {
+                        defaultMessage: 'View in Source',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+              </>
+            ) : (
+              // Kibana alert actions
+              <>
+                {parsedAlert && !parsedAlert.link || tableId === SLO_ALERTS_TABLE_ID ? null : (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton data-test-subj="alertsFlyoutViewInAppButton" fill href={viewInAppUrl}>
+                      {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
+                        defaultMessage: 'View in app',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                {parsedAlert && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="alertsFlyoutAlertDetailsButton"
+                      fill
+                      href={
+                        prepend &&
+                        prepend(paths.observability.alertDetails(parsedAlert.fields['kibana.alert.uuid']))
+                      }
+                    >
+                      {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {
+                        defaultMessage: 'Alert details',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+              </>
             )}
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="alertsFlyoutAlertDetailsButton"
-                fill
-                href={
-                  prepend &&
-                  prepend(paths.observability.alertDetails(parsedAlert.fields['kibana.alert.uuid']))
-                }
-              >
-                {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {
-                  defaultMessage: 'Alert details',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       )}

@@ -24,6 +24,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
+/**
+ * Default search strategy for alerts
+ */
+export const DEFAULT_ALERTS_SEARCH_STRATEGY = 'privateRuleRegistryAlertsSearchStrategy';
+
 export interface SearchAlertsParams {
   // Dependencies
   /**
@@ -80,6 +85,13 @@ export interface SearchAlertsParams {
    * Whether to track the score of the query
    */
   trackScores?: boolean;
+  /**
+   * Custom search strategy name to use instead of the default
+   * Allows solutions to provide their own search strategy that extends
+   * the default behavior (e.g., to include external alerts)
+   * @default 'privateRuleRegistryAlertsSearchStrategy'
+   */
+  searchStrategy?: string;
 }
 
 export interface SearchAlertsResult {
@@ -107,8 +119,11 @@ export const searchAlerts = ({
   pageSize,
   minScore,
   trackScores,
-}: SearchAlertsParams): Promise<SearchAlertsResult> =>
-  lastValueFrom(
+  searchStrategy = DEFAULT_ALERTS_SEARCH_STRATEGY,
+}: SearchAlertsParams): Promise<SearchAlertsResult> => {
+  // eslint-disable-next-line no-console
+  console.log('[searchAlerts] Using search strategy:', searchStrategy);
+  return lastValueFrom(
     data.search
       .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
         {
@@ -123,7 +138,7 @@ export const searchAlerts = ({
           trackScores,
         },
         {
-          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          strategy: searchStrategy,
           abortSignal: signal,
         }
       )
@@ -162,6 +177,7 @@ export const searchAlerts = ({
         })
       )
   );
+};
 
 /**
  * Normalizes the total hits from the raw response
