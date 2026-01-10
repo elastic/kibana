@@ -332,8 +332,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  // TODO: This condition seems to not be working as expected.
-  it.skip('only emits when node versions changed since the previous poll', (done) => {
+  it('only emits when node versions changed since the previous poll', (done) => {
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
