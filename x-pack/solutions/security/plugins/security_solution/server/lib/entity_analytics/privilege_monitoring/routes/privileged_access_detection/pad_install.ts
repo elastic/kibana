@@ -9,13 +9,13 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { PAD_INSTALL_URL } from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { InstallPrivilegedAccessDetectionPackageResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../../../../../common/constants';
-import { PAD_INSTALL_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
