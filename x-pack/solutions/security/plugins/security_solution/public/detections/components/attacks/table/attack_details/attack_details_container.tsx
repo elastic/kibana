@@ -31,8 +31,8 @@ interface TabInfo {
 }
 
 interface AttackDetailsContainerProps {
-  /** The attack discovery alert document. If undefined, only the Alerts tab will be shown. */
-  attack?: AttackDiscoveryAlert;
+  /** The attack discovery alert document. */
+  attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
   /** Filters applied from grouping */
@@ -51,11 +51,9 @@ interface AttackDetailsContainerProps {
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
   ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
-    const tabs = useMemo<TabInfo[]>(() => {
-      const tabsList: TabInfo[] = [];
-
-      if (attack) {
-        tabsList.push({
+    const tabs = useMemo<TabInfo[]>(
+      () => [
+        {
           id: ATTACK_SUMMARY_TAB,
           name: i18n.ATTACK_SUMMARY,
           content: (
@@ -64,31 +62,29 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               <SummaryTab attack={attack} showAnonymized={showAnonymized} />
             </>
           ),
-        });
-      }
-
-      tabsList.push({
-        id: ALERTS_TAB,
-        name: i18n.ALERTS,
-        content: (
-          <>
-            <EuiSpacer size="s" />
-            <AlertsTab
-              groupingFilters={groupingFilters}
-              defaultFilters={defaultFilters}
-              isTableLoading={isTableLoading}
-            />
-          </>
-        ),
-        append: attack ? (
-          <EuiNotificationBadge size="m" color="subdued">
-            {attack.alertIds.length}
-          </EuiNotificationBadge>
-        ) : undefined,
-      });
-
-      return tabsList;
-    }, [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]);
+        },
+        {
+          id: ALERTS_TAB,
+          name: i18n.ALERTS,
+          content: (
+            <>
+              <EuiSpacer size="s" />
+              <AlertsTab
+                groupingFilters={groupingFilters}
+                defaultFilters={defaultFilters}
+                isTableLoading={isTableLoading}
+              />
+            </>
+          ),
+          append: attack ? (
+            <EuiNotificationBadge size="m" color="subdued">
+              {attack.alertIds.length}
+            </EuiNotificationBadge>
+          ) : undefined,
+        },
+      ],
+      [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]
+    );
 
     const firstTabId = useMemo(() => (attack ? ATTACK_SUMMARY_TAB : ALERTS_TAB), [attack]);
 
