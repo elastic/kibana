@@ -1876,10 +1876,18 @@ components:
           additionalProperties: false
           type: object
           properties:
+            anomaly_job_ids:
+              items:
+                type: string
+              type: array
             brute_force_victim:
               type: boolean
             new_country_login:
               type: boolean
+            rule_names:
+              items:
+                type: string
+              type: array
             used_usb_device:
               type: boolean
         EngineMetadata:
