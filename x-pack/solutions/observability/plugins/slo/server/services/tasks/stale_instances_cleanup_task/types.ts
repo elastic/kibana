@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export type TaskState = Record<string, unknown> & {
+export interface TaskState {
   searchAfter?: string;
   deleteTaskId?: string;
-};
+  [key: string]: unknown; // If needed for task manager
+}
 
 export interface SpaceSloSettings {
   spaceId: string;

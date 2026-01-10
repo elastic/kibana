@@ -26,7 +26,7 @@ const SPACES_PER_BATCH = 100;
 const MAX_BATCHES_PER_RUN = 10;
 const MAX_DOCS_PER_DELETE = 1_000_000;
 const REQUESTS_PER_SECOND = 300;
-const MAX_TASK_DURATION_NANOS = 24 * 60 * 60 * 1000 * 1000; // 24 hours
+const MAX_TASK_DURATION_NANOS = 24 * 60 * 60 * 1_000_000_000; // 24 hours
 
 /**
  * At most we will delete MAX_DOCS_PER_DELETE documents in the delete by query (DBQ), using REQUESTS_PER_SECOND deletion per seconds.
