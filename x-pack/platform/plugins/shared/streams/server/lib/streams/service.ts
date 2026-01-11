@@ -11,8 +11,8 @@ import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
 import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import type { FeatureClient } from './feature/feature_client';
 import type { AttachmentClient } from './attachments/attachment_client';
+import type { SystemClient } from './system/system_client';
 
 export class StreamsService {
   constructor(
@@ -25,12 +25,12 @@ export class StreamsService {
     request,
     attachmentClient,
     queryClient,
-    featureClient: featureClient,
+    systemClient,
   }: {
     request: KibanaRequest;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
-    featureClient: FeatureClient;
+    systemClient: SystemClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -42,8 +42,8 @@ export class StreamsService {
     return new StreamsClient({
       attachmentClient,
       queryClient,
-      featureClient,
       logger,
+      systemClient,
       scopedClusterClient,
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),

@@ -117,7 +117,6 @@ describe('RulesClient', () => {
         expect.objectContaining({
           id: 'rule-id-1',
           enabled: false,
-          scheduledTaskId: null,
           createdBy: 'elastic',
           updatedBy: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -126,7 +125,7 @@ describe('RulesClient', () => {
       );
     });
 
-    it('schedules a task when enabled and persists scheduledTaskId', async () => {
+    it('schedules a task when enabled', async () => {
       const client = createClient();
 
       const res = await client.createRule({
@@ -142,10 +141,13 @@ describe('RulesClient', () => {
           spaceId: 'space-1',
         }),
       });
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-id-2', {
-        scheduledTaskId: 'task-123',
-      });
-      expect(res.scheduledTaskId).toBe('task-123');
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+      expect(res).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-2',
+          enabled: true,
+        })
+      );
     });
 
     it('cleans up the saved object if scheduling fails', async () => {
@@ -206,7 +208,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('disables a rule by removing task and clearing scheduledTaskId', async () => {
+    it('disables a rule by removing task', async () => {
       const client = createClient();
 
       const existing: SavedObject<RuleSavedObjectAttributes> = {
@@ -216,7 +218,6 @@ describe('RulesClient', () => {
         attributes: {
           ...baseCreateData,
           enabled: true,
-          scheduledTaskId: 'task-aaa',
           createdBy: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic',
@@ -231,16 +232,20 @@ describe('RulesClient', () => {
         data: { enabled: false } as UpdateRuleData,
       });
 
-      expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-aaa');
+      expect(getRuleExecutorTaskIdMock).toHaveBeenCalledWith({
+        ruleId: 'rule-id-1',
+        spaceId: 'space-1',
+      });
+      expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:fallback');
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         'rule-id-1',
-        expect.objectContaining({ scheduledTaskId: null }),
+        expect.objectContaining({ enabled: false }),
         expect.any(Object)
       );
     });
 
-    it('enables a rule by ensuring the task exists and updating scheduledTaskId', async () => {
+    it('enables a rule by ensuring the task exists', async () => {
       const client = createClient();
 
       const existing: SavedObject<RuleSavedObjectAttributes> = {
@@ -250,7 +255,6 @@ describe('RulesClient', () => {
         attributes: {
           ...baseCreateData,
           enabled: false,
-          scheduledTaskId: null,
           createdBy: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic',
@@ -269,41 +273,9 @@ describe('RulesClient', () => {
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         'rule-id-2',
-        expect.objectContaining({ scheduledTaskId: 'task-123' }),
+        expect.objectContaining({ enabled: true }),
         expect.any(Object)
       );
-    });
-
-    it('uses fallback task id when scheduledTaskId is missing on disable', async () => {
-      const client = createClient();
-
-      const existing: SavedObject<RuleSavedObjectAttributes> = {
-        id: 'rule-id-3',
-        type: RULE_SAVED_OBJECT_TYPE,
-        version: 'WzEsMV0=',
-        attributes: {
-          ...baseCreateData,
-          enabled: true,
-          scheduledTaskId: null,
-          createdBy: 'elastic',
-          createdAt: '2025-01-01T00:00:00.000Z',
-          updatedBy: 'elastic',
-          updatedAt: '2025-01-01T00:00:00.000Z',
-        },
-        references: [],
-      };
-      savedObjectsClient.get.mockResolvedValueOnce(existing);
-
-      await client.updateRule({
-        id: 'rule-id-3',
-        data: { enabled: false } as UpdateRuleData,
-      });
-
-      expect(getRuleExecutorTaskIdMock).toHaveBeenCalledWith({
-        ruleId: 'rule-id-3',
-        spaceId: 'space-1',
-      });
-      expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:fallback');
     });
 
     it('throws 409 conflict when version is stale', async () => {
@@ -316,7 +288,6 @@ describe('RulesClient', () => {
         attributes: {
           ...baseCreateData,
           enabled: false,
-          scheduledTaskId: null,
           createdBy: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic',
@@ -334,6 +305,163 @@ describe('RulesClient', () => {
         client.updateRule({ id: 'rule-id-4', data: {} as UpdateRuleData })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
+      });
+    });
+  });
+
+  describe('getRule', () => {
+    it('returns a rule by id', async () => {
+      const client = createClient();
+
+      const existing: SavedObject<RuleSavedObjectAttributes> = {
+        id: 'rule-id-get-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        version: 'WzEsMV0=',
+        attributes: {
+          ...baseCreateData,
+          enabled: true,
+          createdBy: 'elastic',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        references: [],
+      };
+      savedObjectsClient.get.mockResolvedValueOnce(existing);
+
+      const res = await client.getRule({ id: 'rule-id-get-1' });
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-id-get-1');
+      expect(res).toEqual({
+        id: 'rule-id-get-1',
+        ...existing.attributes,
+      });
+    });
+
+    it('throws 404 when rule is not found', async () => {
+      const client = createClient();
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-id-get-404'
+        )
+      );
+
+      await expect(client.getRule({ id: 'rule-id-get-404' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  describe('deleteRule', () => {
+    it('removes the scheduled task and deletes the rule', async () => {
+      const client = createClient();
+
+      const existing: SavedObject<RuleSavedObjectAttributes> = {
+        id: 'rule-id-del-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        version: 'WzEsMV0=',
+        attributes: {
+          ...baseCreateData,
+          enabled: true,
+          createdBy: 'elastic',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        references: [],
+      };
+      savedObjectsClient.get.mockResolvedValueOnce(existing);
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:delete');
+
+      await client.deleteRule({ id: 'rule-id-del-1' });
+
+      expect(getRuleExecutorTaskIdMock).toHaveBeenCalledWith({
+        ruleId: 'rule-id-del-1',
+        spaceId: 'space-1',
+      });
+      expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:delete');
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-del-1'
+      );
+    });
+
+    it('throws 404 when rule is not found', async () => {
+      const client = createClient();
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-id-del-404'
+        )
+      );
+
+      await expect(client.deleteRule({ id: 'rule-id-del-404' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  describe('findRules', () => {
+    it('returns a paginated list of rules', async () => {
+      const client = createClient();
+
+      const so1: SavedObject<RuleSavedObjectAttributes> = {
+        id: 'rule-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        version: 'WzEsMV0=',
+        attributes: {
+          ...baseCreateData,
+          name: 'rule-1',
+          enabled: true,
+          createdBy: 'elastic',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        references: [],
+      };
+      const so2: SavedObject<RuleSavedObjectAttributes> = {
+        id: 'rule-2',
+        type: RULE_SAVED_OBJECT_TYPE,
+        version: 'WzEsMV0=',
+        attributes: {
+          ...baseCreateData,
+          name: 'rule-2',
+          enabled: false,
+          createdBy: 'elastic',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        references: [],
+      };
+
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [so1, so2],
+        total: 2,
+      } as any);
+
+      const res = await client.findRules({ page: 2, perPage: 50 });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          page: 2,
+          perPage: 50,
+          sortField: 'updatedAt',
+          sortOrder: 'desc',
+        })
+      );
+
+      expect(res).toEqual({
+        items: [
+          { id: 'rule-1', ...so1.attributes },
+          { id: 'rule-2', ...so2.attributes },
+        ],
+        total: 2,
+        page: 2,
+        perPage: 50,
       });
     });
   });

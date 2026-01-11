@@ -24,7 +24,13 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
-import type { CreateRuleParams, RuleResponse, UpdateRuleData } from './types';
+import type {
+  CreateRuleParams,
+  FindRulesParams,
+  FindRulesResponse,
+  RuleResponse,
+  UpdateRuleData,
+} from './types';
 
 @injectable()
 export class RulesClient {
@@ -60,9 +66,7 @@ export class RulesClient {
     try {
       createRuleDataSchema.validate(params.data);
     } catch (error) {
-      throw Boom.badRequest(
-        `Error validating create ES|QL rule data - ${(error as Error).message}`
-      );
+      throw Boom.badRequest(`Error validating create rule data - ${(error as Error).message}`);
     }
 
     const id = params.options?.id ?? SavedObjectsUtils.generateId();
@@ -78,7 +82,6 @@ export class RulesClient {
       timeField: params.data.timeField,
       lookbackWindow: params.data.lookbackWindow,
       groupingKey: params.data.groupingKey ?? [],
-      scheduledTaskId: null,
       createdBy: username,
       createdAt: nowIso,
       updatedBy: username,
@@ -96,15 +99,14 @@ export class RulesClient {
       );
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`ES|QL rule with id "${id}" already exists`);
+        throw Boom.conflict(`Rule with id "${id}" already exists`);
       }
       throw e;
     }
 
-    let scheduledTaskId: string | null = null;
     if (ruleAttributes.enabled) {
       try {
-        const { id: taskId } = await ensureRuleExecutorTaskScheduled({
+        await ensureRuleExecutorTaskScheduled({
           services: { taskManager: this.taskManager },
           input: {
             ruleId: id,
@@ -113,10 +115,6 @@ export class RulesClient {
             request: this.request as unknown as CoreKibanaRequest,
           },
         });
-        scheduledTaskId = taskId;
-        await savedObjectsClient.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, {
-          scheduledTaskId,
-        });
       } catch (e) {
         await savedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id).catch(() => {});
         throw e;
@@ -124,7 +122,7 @@ export class RulesClient {
     }
 
     // Keep response shape identical to the previous method implementation.
-    return { id, ...ruleAttributes, scheduledTaskId };
+    return { id, ...ruleAttributes };
   }
 
   public async updateRule({
@@ -140,9 +138,7 @@ export class RulesClient {
     try {
       updateRuleDataSchema.validate(data);
     } catch (error) {
-      throw Boom.badRequest(
-        `Error validating update ES|QL rule data - ${(error as Error).message}`
-      );
+      throw Boom.badRequest(`Error validating update rule data - ${(error as Error).message}`);
     }
 
     const username = await this.getUserName();
@@ -159,7 +155,7 @@ export class RulesClient {
       existingVersion = doc.version;
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`ES|QL rule with id "${id}" not found`);
+        throw Boom.notFound(`Rule with id "${id}" not found`);
       }
       throw e;
     }
@@ -167,24 +163,22 @@ export class RulesClient {
     const wasEnabled = Boolean(existingAttrs.enabled);
     const willBeEnabled = data.enabled !== undefined ? Boolean(data.enabled) : wasEnabled;
 
-    let nextAttrs: RuleSavedObjectAttributes = {
+    const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       ...data,
       updatedBy: username,
       updatedAt: nowIso,
     };
 
-    // Disable transition: remove task and clear task id.
+    // Disable transition: remove the scheduled task.
     if (wasEnabled && !willBeEnabled) {
-      const taskId =
-        existingAttrs.scheduledTaskId ?? getRuleExecutorTaskId({ ruleId: id, spaceId });
+      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
       await this.taskManager.removeIfExists(taskId);
-      nextAttrs = { ...nextAttrs, scheduledTaskId: null };
     }
 
     // If enabled, ensure task exists and schedule is up-to-date (also handles schedule changes).
     if (willBeEnabled) {
-      const { id: taskId } = await ensureRuleExecutorTaskScheduled({
+      await ensureRuleExecutorTaskScheduled({
         services: { taskManager: this.taskManager },
         input: {
           ruleId: id,
@@ -193,7 +187,6 @@ export class RulesClient {
           request: this.request as unknown as CoreKibanaRequest,
         },
       });
-      nextAttrs = { ...nextAttrs, scheduledTaskId: taskId };
     }
 
     try {
@@ -212,6 +205,68 @@ export class RulesClient {
       throw e;
     }
 
-    return { id, ...nextAttrs, scheduledTaskId: nextAttrs.scheduledTaskId ?? null };
+    return { id, ...nextAttrs };
+  }
+
+  public async getRule({ id }: { id: string }): Promise<RuleResponse> {
+    const savedObjectsClient = this.getSavedObjectsClient();
+
+    try {
+      const doc = await savedObjectsClient.get<RuleSavedObjectAttributes>(
+        RULE_SAVED_OBJECT_TYPE,
+        id
+      );
+      const attrs = doc.attributes;
+      return { id, ...attrs };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Rule with id "${id}" not found`);
+      }
+      throw e;
+    }
+  }
+
+  public async deleteRule({ id }: { id: string }): Promise<void> {
+    const savedObjectsClient = this.getSavedObjectsClient();
+    const { spaceId } = this.getSpaceContext();
+
+    try {
+      await savedObjectsClient.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Rule with id "${id}" not found`);
+      }
+      throw e;
+    }
+
+    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+    await this.taskManager.removeIfExists(taskId);
+
+    await savedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id);
+  }
+
+  public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
+    const savedObjectsClient = this.getSavedObjectsClient();
+
+    const page = params.page ?? 1;
+    const perPage = params.perPage ?? 20;
+
+    const res = await savedObjectsClient.find<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      page,
+      perPage,
+      sortField: 'updatedAt',
+      sortOrder: 'desc',
+    });
+
+    return {
+      items: res.saved_objects.map((so) => ({
+        id: so.id,
+        ...so.attributes,
+      })),
+      total: res.total,
+      page,
+      perPage,
+    };
   }
 }

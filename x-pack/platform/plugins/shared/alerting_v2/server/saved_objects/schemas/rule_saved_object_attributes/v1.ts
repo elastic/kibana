@@ -24,8 +24,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   lookbackWindow: schema.string(),
   groupingKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
 
-  scheduledTaskId: schema.maybe(schema.nullable(schema.string())),
-
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   updatedAt: schema.string(),
