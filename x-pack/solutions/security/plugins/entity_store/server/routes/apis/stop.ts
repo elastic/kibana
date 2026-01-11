@@ -7,23 +7,19 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
-import type { EntityStorePluginRouter } from '../types';
-import { ALL_ENTITY_TYPES, EntityType } from '../domain/definitions/entity_type';
-import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
+import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import type { EntityStorePluginRouter } from '../../types';
+import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
+import { stopExtractEntityTasks } from '../../tasks/extract_entity_task';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional(),
-  logExtractionFrequency: z
-    .string()
-    .regex(/^\d+[smdh]$/)
-    .optional(),
 });
 
-export function registerInstall(router: EntityStorePluginRouter) {
+export function registerStop(router: EntityStorePluginRouter) {
   router.versioned
-    .post({
-      path: '/internal/security/entity-store/install',
+    .put({
+      path: '/internal/security/entity-store/stop',
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -42,23 +38,21 @@ export function registerInstall(router: EntityStorePluginRouter) {
       async (ctx, req, res) => {
         const entityStoreCtx = await ctx.entityStore;
         const logger = entityStoreCtx.getLogger();
-        const resourcesService = entityStoreCtx.getResourcesService();
         const { taskManagerStart } = entityStoreCtx.getTaskManagers();
-        const { entityTypes = ALL_ENTITY_TYPES, logExtractionFrequency } = req.body;
-        logger.debug('Install api called');
-        resourcesService.install(entityTypes);
+        const { entityTypes = ALL_ENTITY_TYPES } = req.body;
 
-        await scheduleExtractEntityTasks({
+        logger.info('Stop API invoked', { entityTypes });
+
+        const stoppedTasks = await stopExtractEntityTasks({
           taskManager: taskManagerStart,
           logger,
           entityTypes,
-          resourcesService,
-          frequency: logExtractionFrequency,
         });
 
         return res.ok({
           body: {
             ok: true,
+            stoppedTasks,
           },
         });
       }
