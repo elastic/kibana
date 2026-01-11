@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import type { EntityStoreRequestHandlerContext } from './types';
+import type {
+  EntityStoreRequestHandlerContext,
+  EntityStoreSetupPlugins,
+  EntityStoreStartPlugins,
+} from './types';
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
-import type { EntityStorePlugins } from './types';
 import { registerTasks } from './tasks/register_tasks';
 
 export class EntityStorePlugin implements Plugin {
@@ -20,19 +29,19 @@ export class EntityStorePlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: EntityStorePlugins) {
+  public setup(core: CoreSetup, plugins: EntityStoreSetupPlugins) {
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) =>
-        createRequestHandlerContext({ context, core, logger: this.logger, plugins })
+        createRequestHandlerContext({ context, core, logger: this.logger })
     );
 
     registerTasks(plugins.taskManager, this.logger);
     registerRoutes(router);
   }
 
-  public start() {
+  public start(core: CoreStart, plugins: EntityStoreStartPlugins) {
     this.logger.info('Initializing plugin');
   }
 

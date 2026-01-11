@@ -13,7 +13,7 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_ty
 import { scheduleExtractEntityTasks } from '../../tasks/extract_entity_task';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional(),
+  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
   logExtractionFrequency: z
     .string()
     .regex(/^\d+[smdh]$/)
@@ -41,16 +41,13 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       async (ctx, req, res) => {
         const entityStoreCtx = await ctx.entityStore;
-        const logger = entityStoreCtx.getLogger();
-        const resourcesService = entityStoreCtx.getResourcesService();
-        const { taskManagerStart } = entityStoreCtx.getTaskManagers();
-        const { entityTypes = ALL_ENTITY_TYPES, logExtractionFrequency } = req.body;
+        const { logger, resourcesService, taskManagerStart } = entityStoreCtx;
+        const { entityTypes, logExtractionFrequency } = req.body;
         logger.debug('Install api called');
         resourcesService.install(entityTypes);
 
         await scheduleExtractEntityTasks({
           taskManager: taskManagerStart,
-          logger,
           entityTypes,
           resourcesService,
           frequency: logExtractionFrequency,
