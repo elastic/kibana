@@ -98,6 +98,9 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickFullScreenMode() {
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+    }
     this.log.debug(`clickFullScreenMode`);
     await this.testSubjects.click('dashboardFullScreenMode');
     await this.testSubjects.exists('exitFullScreenModeButton');
@@ -327,12 +330,24 @@ export class DashboardPageObject extends FtrService {
 
   public async getIsInEditMode() {
     this.log.debug('getIsInEditMode');
-    return await this.testSubjects.exists('dashboardViewOnlyMode');
+    // Check if the "switch to view mode" button exists (indicates we're in edit mode)
+    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
+      return true;
+    }
+    // In edit mode, either quick save button (saved dashboard) or interactive save button (new dashboard) is present
+    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem');
+    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem');
+    return hasQuickSave || hasInteractiveSave;
   }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
-    return await this.testSubjects.exists('dashboardEditMode');
+    // Check if the "edit" button exists (indicates we're in view mode)
+    if (await this.testSubjects.exists('dashboardEditMode')) {
+      return true;
+    }
+    // If we're not in edit mode, we're in view mode
+    return !(await this.getIsInEditMode());
   }
 
   public async ensureDashboardIsInEditMode() {
@@ -345,12 +360,22 @@ export class DashboardPageObject extends FtrService {
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
+
     await this.retry.waitFor('leave edit mode button enabled', async () => {
+      // Open overflow menu if the button is not visible and overflow menu exists
+      if (
+        !(await this.testSubjects.exists('dashboardViewOnlyMode')) &&
+        (await this.testSubjects.exists('app-menu-overflow-button'))
+      ) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
       const leaveEditModeButton = await this.testSubjects.find('dashboardViewOnlyMode');
       const isDisabled = await leaveEditModeButton.getAttribute('disabled');
       return !isDisabled;
     });
+
     await this.testSubjects.click('dashboardViewOnlyMode');
+
     if (accept) {
       const confirmation = await this.testSubjects.exists('confirmModalTitleText');
       if (confirmation) {
@@ -391,9 +416,9 @@ export class DashboardPageObject extends FtrService {
     }
     await this.retry.try(async () => {
       // avoid flaky test by surrounding in retry
-      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.existOrFail('split-button-notification-indicator');
       await this.clickQuickSave();
-      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.missingOrFail('split-button-notification-indicator');
       await this.testSubjects.click('toastCloseButton');
     });
     if (switchMode) {
@@ -404,14 +429,14 @@ export class DashboardPageObject extends FtrService {
   public async expectUnsavedChangesBadge() {
     this.log.debug('Expect unsaved changes badge to be present');
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.existOrFail('split-button-notification-indicator');
     });
   }
 
   public async expectMissingUnsavedChangesBadge() {
     this.log.debug('Expect there to be no unsaved changes badge');
     await this.retry.try(async () => {
-      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.missingOrFail('split-button-notification-indicator');
     });
   }
 
@@ -460,6 +485,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('openSettingsFlyout');
     const isOpen = await this.isSettingsOpen();
     if (!isOpen) {
+      await this.testSubjects.click('app-menu-overflow-button');
       return await this.testSubjects.click('dashboardSettingsButton');
     }
   }
@@ -538,7 +564,9 @@ export class DashboardPageObject extends FtrService {
       }
 
       this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
-      return await this.testSubjects.exists('dashboardUnsavedChangesBadge', { timeout: 1500 });
+      return await this.testSubjects.exists('split-button-notification-indicator', {
+        timeout: 1500,
+      });
     });
   }
 

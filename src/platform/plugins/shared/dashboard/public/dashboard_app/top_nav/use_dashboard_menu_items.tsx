@@ -8,7 +8,7 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -20,7 +20,6 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
-import { i18n } from '@kbn/i18n';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { UI_SETTINGS } from '../../../common/constants';
@@ -31,16 +30,9 @@ import { getDashboardBackupService } from '../../services/dashboard_backup_servi
 import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
-import { topNavStrings, getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import {
-  executeCreateTimeSliderControlPanelAction,
-  isTimeSliderControlCreationCompatible,
-} from '../../dashboard_actions/execute_create_time_slider_control_panel_action';
-import { executeCreateControlPanelAction } from '../../dashboard_actions/execute_create_control_panel_action';
-import { executeCreateESQLControlPanelAction } from '../../dashboard_actions/execute_create_esql_control_panel_action';
-import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
-import { addFromLibrary } from '../../dashboard_renderer/add_panel_from_library';
+import { useDashboardAddItems } from './add_menu/use_dashboard_add_items';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -58,7 +50,6 @@ export const useDashboardMenuItems = ({
   const appId = useObservable(coreServices.application.currentAppId$);
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-  const [canCreateTimeSlider, setCanCreateTimeSlider] = useState(false);
 
   const dashboardApi = useDashboardApi();
 
@@ -167,6 +158,8 @@ export const useDashboardMenuItems = ({
     }
   }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
 
+  const addMenuItems = useDashboardAddItems({ dashboardApi });
+
   const exportItems = useDashboardExportItems({
     dashboardApi,
     objectId: lastSavedId,
@@ -221,120 +214,6 @@ export const useDashboardMenuItems = ({
       : topNavStrings.share.writeRestrictedModeTooltipContent;
   }, [isInEditAccessMode, dashboardApi.isAccessControlEnabled]);
 
-  const openAddPanelFlyout = useCallback(async () => {
-    const { openLazyFlyout: openFlyout } = await import('@kbn/presentation-util');
-    openFlyout({
-      core: coreServices,
-      parentApi: dashboardApi,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }: any) => {
-        const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
-        return (
-          <AddPanelFlyout
-            dashboardApi={dashboardApi}
-            closeFlyout={closeFlyout}
-            ariaLabelledBy={ariaLabelledBy}
-          />
-        );
-      },
-      flyoutProps: {
-        'data-test-subj': 'dashboardPanelSelectionFlyout',
-        triggerId: 'dashboardAddTopNavButton',
-      },
-    });
-  }, [dashboardApi]);
-
-  const addMenuItems = useMemo(() => {
-    const controlItems: AppMenuItemType[] = [
-      {
-        id: 'control',
-        label: i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
-          defaultMessage: 'Control',
-        }),
-        iconType: 'empty',
-        order: 1,
-        testId: 'controls-create-button',
-        run: () => executeCreateControlPanelAction(dashboardApi),
-      } as AppMenuItemType,
-      {
-        id: 'variableControl',
-        label: i18n.translate('dashboard.solutionToolbar.addESQLControlButtonLabel', {
-          defaultMessage: 'Variable control',
-        }),
-        iconType: 'empty',
-        order: 2,
-        testId: 'esql-control-create-button',
-        run: () => executeCreateESQLControlPanelAction(dashboardApi),
-      } as AppMenuItemType,
-      {
-        id: 'timeSliderControl',
-        label: i18n.translate('dashboard.solutionToolbar.addTimeSliderControlButtonLabel', {
-          defaultMessage: 'Time slider control',
-        }),
-        iconType: 'empty',
-        order: 3,
-        testId: 'controls-create-timeslider-button',
-        disableButton: !canCreateTimeSlider,
-        tooltipContent: canCreateTimeSlider
-          ? undefined
-          : i18n.translate('dashboard.timeSlider.disabledTooltip', {
-              defaultMessage: 'Only one time slider control can be added per dashboard.',
-            }),
-        run: () => executeCreateTimeSliderControlPanelAction(dashboardApi),
-      } as AppMenuItemType,
-    ];
-
-    return [
-      {
-        id: 'createVisualization',
-        label: getCreateVisualizationButtonTitle(),
-        iconType: 'lensApp',
-        order: 1,
-        testId: 'dashboardCreateNewVisButton',
-        run: () => executeAddLensPanelAction(dashboardApi),
-      } as AppMenuItemType,
-      {
-        id: 'newPanel',
-        label: i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-          defaultMessage: 'New panel',
-        }),
-        iconType: 'plusInCircle',
-        order: 2,
-        testId: 'dashboardOpenAddPanelFlyoutButton',
-        run: openAddPanelFlyout,
-      } as AppMenuItemType,
-      {
-        id: 'collapsibleSection',
-        label: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
-          defaultMessage: 'Collapsible section',
-        }),
-        iconType: 'section',
-        order: 3,
-        testId: 'dashboardAddCollapsibleSectionButton',
-        run: () => dashboardApi.addNewSection(),
-      } as AppMenuItemType,
-      {
-        id: 'controls',
-        label: i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
-          defaultMessage: 'Controls',
-        }),
-        iconType: 'controlsHorizontal',
-        order: 4,
-        testId: 'dashboard-controls-menu-button',
-        items: controlItems,
-      } as AppMenuItemType,
-      {
-        id: 'fromLibrary',
-        label: i18n.translate('dashboard.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel', {
-          defaultMessage: 'From library',
-        }),
-        iconType: 'folderOpen',
-        order: 5,
-        testId: 'dashboardAddFromLibraryButton',
-        run: () => addFromLibrary(dashboardApi),
-      } as AppMenuItemType,
-    ];
-  }, [dashboardApi, openAddPanelFlyout, canCreateTimeSlider]);
-
   const resetChangesMenuItem = useMemo(() => {
     return {
       order: viewMode === 'edit' ? 2 : 4,
@@ -366,6 +245,7 @@ export const useDashboardMenuItems = ({
 
   const menuItems = useMemo(() => {
     return {
+      // Regular menu items
       fullScreen: {
         order: 1,
         label: topNavStrings.fullScreen.label,
@@ -376,69 +256,7 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
       } as AppMenuItemType,
 
-      labs: {
-        label: topNavStrings.labs.label,
-        id: 'labs',
-        testId: 'dashboardLabs',
-        run: () => setIsLabsShown(!isLabsShown),
-      } as AppMenuItemType,
-
-      edit: {
-        label: topNavStrings.edit.label,
-        id: 'edit',
-        iconType: 'pencil',
-        testId: 'dashboardEditMode',
-        hidden: ['s', 'xs'], // hide for small screens - editing doesn't work in mobile mode.
-        run: () => {
-          getDashboardBackupService().storeViewMode('edit');
-          dashboardApi.setViewMode('edit');
-          dashboardApi.clearOverlays();
-        },
-        disableButton: isEditButtonDisabled,
-        tooltipContent: getEditTooltip(),
-        color: 'text',
-      } as AppMenuSecondaryActionItem,
-
-      quickSave: {
-        label: topNavStrings.quickSave.label,
-        id: 'quick-save',
-        iconType: 'save',
-        testId: 'dashboardQuickSaveMenuItem',
-        disableButton: isQuickSaveButtonDisabled,
-        run: () => quickSaveDashboard(),
-        popoverWidth: 150,
-        splitButtonProps: {
-          items: [
-            {
-              id: 'save-as',
-              label: i18n.translate('dashboard.topNav.saveAsButtonLabel', {
-                defaultMessage: 'Save as',
-              }),
-              iconType: 'save',
-              order: 1,
-              testId: 'dashboardSaveAsMenuItem',
-              disableButton: isSaveInProgress,
-              run: () => dashboardInteractiveSave(),
-            },
-            resetChangesMenuItem,
-          ],
-          isMainButtonLoading: isSaveInProgress,
-          isMainButtonDisabled: !hasUnsavedChanges,
-          secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
-          secondaryButtonIcon: 'arrowDown',
-          secondaryButtonFill: true,
-          isSecondaryButtonDisabled: isSaveInProgress,
-          notifcationIndicatorTooltipContent: i18n.translate(
-            'dashboard.topNav.unsavedChangesTooltip',
-            {
-              defaultMessage: 'You have unsaved changes',
-            }
-          ),
-          showNotificationIndicator: hasUnsavedChanges,
-        },
-      } as AppMenuPrimaryActionItem,
-
-      interactiveSave: {
+      viewModeInteractiveSave: {
         order: 2,
         disableButton: disableTopNav,
         id: 'interactive-save',
@@ -460,7 +278,7 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       backgroundSearch: {
-        order: 5,
+        order: 6,
         label: topNavStrings.backgroundSearch.label,
         id: 'backgroundSearch',
         iconType: 'backgroundTask',
@@ -493,10 +311,11 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
         items: exportItems,
         popoverWidth: 160,
+        popoverTestId: 'exportPopoverPanel',
       } as AppMenuItemType,
 
       settings: {
-        order: 4,
+        order: 5,
         iconType: 'gear',
         label: topNavStrings.settings.label,
         id: 'settings',
@@ -506,6 +325,7 @@ export const useDashboardMenuItems = ({
         run: () => openSettingsFlyout(dashboardApi),
       } as AppMenuItemType,
 
+      // Action items
       add: {
         label: topNavStrings.add.label,
         id: 'add',
@@ -518,6 +338,74 @@ export const useDashboardMenuItems = ({
         popoverWidth: 200,
         items: addMenuItems,
       } as AppMenuSecondaryActionItem,
+
+      edit: {
+        label: topNavStrings.edit.label,
+        id: 'edit',
+        iconType: 'pencil',
+        testId: 'dashboardEditMode',
+        hidden: ['s', 'xs'], // hide for small screens - editing doesn't work in mobile mode.
+        run: () => {
+          getDashboardBackupService().storeViewMode('edit');
+          dashboardApi.setViewMode('edit');
+          dashboardApi.clearOverlays();
+        },
+        disableButton: isEditButtonDisabled,
+        tooltipContent: getEditTooltip(),
+        color: 'text',
+      } as AppMenuPrimaryActionItem,
+
+      quickSave: {
+        label: topNavStrings.quickSave.label,
+        id: 'quick-save',
+        iconType: 'save',
+        testId: 'dashboardQuickSaveMenuItem',
+        disableButton: isQuickSaveButtonDisabled,
+        run: () => quickSaveDashboard(),
+        popoverWidth: 150,
+        splitButtonProps: {
+          items: [
+            {
+              id: 'save-as',
+              label: topNavStrings.editModeInteractiveSave.label,
+              iconType: 'save',
+              order: 1,
+              testId: 'dashboardInteractiveSaveMenuItem',
+              disableButton: isSaveInProgress,
+              run: () => dashboardInteractiveSave(),
+            },
+            resetChangesMenuItem,
+          ],
+          isMainButtonLoading: isSaveInProgress,
+          isMainButtonDisabled: !hasUnsavedChanges,
+          secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
+          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonFill: true,
+          isSecondaryButtonDisabled: isSaveInProgress,
+          notifcationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
+          showNotificationIndicator: hasUnsavedChanges,
+        },
+      } as AppMenuPrimaryActionItem,
+
+      editModeInteractiveSave: {
+        order: 2,
+        disableButton: disableTopNav,
+        id: 'interactive-save',
+        testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: 'save',
+        run: dashboardInteractiveSave,
+        label: topNavStrings.quickSave.label,
+        color: 'text',
+      } as AppMenuPrimaryActionItem,
+
+      // Labs item
+      labs: {
+        order: 7,
+        label: topNavStrings.labs.label,
+        id: 'labs',
+        testId: 'dashboardLabs',
+        run: () => setIsLabsShown(!isLabsShown),
+      } as AppMenuItemType,
     };
   }, [
     disableTopNav,
@@ -552,15 +440,14 @@ export const useDashboardMenuItems = ({
     return shareService.availableIntegrations('dashboard', 'export').length > 0;
   }, []);
 
-  // Check time slider control compatibility
-  useEffect(() => {
-    isTimeSliderControlCreationCompatible(dashboardApi).then(setCanCreateTimeSlider);
-  }, [dashboardApi]);
-
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.fullScreen, menuItems.interactiveSave];
+    const items: AppMenuItemType[] = [menuItems.fullScreen];
+
+    if (showWriteControls) {
+      items.push(menuItems.viewModeInteractiveSave);
+    }
 
     // Only show the export button if the current user meets the requirements for at least one registered export integration
     if (shareService && hasExportIntegration) {
@@ -579,32 +466,38 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.backgroundSearch);
     }
 
+    if (isLabsEnabled) {
+      items.push(menuItems.labs);
+    }
+
     const viewModeConfig: AppMenuConfig = {
       items,
     };
 
     if (showWriteControls && !dashboardApi.isManaged) {
-      viewModeConfig.secondaryActionItem = menuItems.edit;
+      viewModeConfig.primaryActionItem = menuItems.edit;
     }
 
     return viewModeConfig;
   }, [
     menuItems.fullScreen,
-    menuItems.interactiveSave,
+    menuItems.viewModeInteractiveSave,
     menuItems.export,
     menuItems.share,
     menuItems.edit,
     menuItems.backgroundSearch,
+    menuItems.labs,
     resetChangesMenuItem,
     hasExportIntegration,
     dashboardApi.isManaged,
     showResetChange,
+    isLabsEnabled,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.switchToViewMode];
+    const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
 
     // Only show the export button if the current user meets the requirements for at least one registered export integration
     if (shareService && hasExportIntegration) {
@@ -615,16 +508,18 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.share);
     }
 
-    items.push(menuItems.settings);
-
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
       items.push(menuItems.backgroundSearch);
+    }
+
+    if (isLabsEnabled) {
+      items.push(menuItems.labs);
     }
 
     const editModeConfig: AppMenuConfig = {
       items,
       secondaryActionItem: menuItems.add,
-      primaryActionItem: menuItems.quickSave,
+      primaryActionItem: lastSavedId ? menuItems.quickSave : menuItems.editModeInteractiveSave,
     };
 
     return editModeConfig;
@@ -636,15 +531,12 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.add,
     menuItems.quickSave,
+    menuItems.editModeInteractiveSave,
+    menuItems.labs,
     hasExportIntegration,
+    lastSavedId,
+    isLabsEnabled,
   ]);
 
-  const labsConfig = useMemo(() => {
-    if (!isLabsEnabled) return null;
-    return {
-      items: [menuItems.labs],
-    };
-  }, [isLabsEnabled, menuItems.labs]);
-
-  return { viewModeTopNavConfig, editModeTopNavConfig, labsConfig };
+  return { viewModeTopNavConfig, editModeTopNavConfig };
 };

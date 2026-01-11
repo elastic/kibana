@@ -110,12 +110,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('non-default sort value should cause unsaved changes', async () => {
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await testSubjects.existOrFail('split-button-notification-indicator');
       });
 
       it('returning to default sort value should remove unsaved changes', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await testSubjects.missingOrFail('split-button-notification-indicator');
       });
 
       it('can sort numeric options lists suggestions', async () => {
@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.editExistingControl(controlId);
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
         await dashboardControls.controlEditorSave();
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await testSubjects.existOrFail('split-button-notification-indicator');
       });
 
       it('wildcard searching works as expected', async () => {
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.editExistingControl(controlId);
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
         await dashboardControls.controlEditorSave();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await testSubjects.missingOrFail('split-button-notification-indicator');
       });
 
       it('can search numeric options list', async () => {

@@ -10,6 +10,7 @@
 import { useMemo } from 'react';
 import { useI18n } from '@kbn/i18n-react';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import { shareService } from '../../../services/kibana_services';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import {
@@ -53,8 +54,14 @@ export const useDashboardExportItems = ({
       shareableUrlLocatorParams: buildShareableUrlLocatorParams(locatorParams),
     };
 
-    const exportIntegrations = shareService.availableIntegrations('dashboard', 'export');
-    const exportDerivatives = shareService.availableIntegrations('dashboard', 'exportDerivatives');
+    const exportIntegrations: ShareActionIntents[] = shareService.availableIntegrations(
+      'dashboard',
+      'export'
+    );
+    const exportDerivatives: ShareActionIntents[] = shareService.availableIntegrations(
+      'dashboard',
+      'exportDerivatives'
+    );
 
     const exportItems = exportIntegrations
       .filter((item) => item.shareType === 'integration')
@@ -62,7 +69,6 @@ export const useDashboardExportItems = ({
         return {
           ...mapExportIntegrationToMetaData(item.id),
           id: item.id,
-          testId: `export-${item.id}`,
           run: async () => {
             const handler = await shareService?.getExportHandler(baseOptions, item.id, intl);
             await handler?.();
@@ -78,7 +84,6 @@ export const useDashboardExportItems = ({
       .map((item) => ({
         ...mapExportIntegrationToMetaData(item.id),
         id: item.id,
-        testId: `export-derivative-${item.id}`,
         run: async () => {
           const handler = await shareService?.getExportDerivativeHandler(baseOptions, item.id);
           await handler?.();

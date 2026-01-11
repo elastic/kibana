@@ -194,7 +194,6 @@ export class ShareMenuManager {
             objectType: options.objectType,
             objectTypeAlias: options.objectTypeAlias,
             objectTypeMeta: options.objectTypeMeta,
-            anchorElement: undefined,
             publicAPIEnabled: !isServerless,
             allowShortUrl: options.allowShortUrl,
             sharingData: options.sharingData,

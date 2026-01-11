@@ -317,6 +317,9 @@ export const topNavStrings = {
       defaultMessage: 'Additional save options',
     }),
   },
+  unsavedChangesTooltip: i18n.translate('dashboard.topNav.unsavedChangesTooltip', {
+    defaultMessage: 'You have unsaved changes',
+  }),
 };
 
 export const contentEditorFlyoutStrings = {
