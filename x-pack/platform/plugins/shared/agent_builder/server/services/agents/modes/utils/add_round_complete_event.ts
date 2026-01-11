@@ -34,7 +34,10 @@ import {
   isReasoningEvent,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
-import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
+import type {
+  ConversationInternalState,
+  RoundModelUsageStats,
+} from '@kbn/agent-builder-common/chat';
 import type {
   ConversationStateManager,
   ModelProvider,
@@ -57,6 +60,7 @@ export const addRoundCompleteEvent = ({
   userInput,
   startTime,
   endTime,
+  getConversationState,
   modelProvider,
   stateManager,
 }: {
@@ -65,6 +69,7 @@ export const addRoundCompleteEvent = ({
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
+  getConversationState: () => ConversationInternalState;
   endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
@@ -98,6 +103,7 @@ export const addRoundCompleteEvent = ({
             data: {
               round,
               resumed: pendingRound !== undefined,
+              conversation_state: getConversationState(),
             },
           };
 
