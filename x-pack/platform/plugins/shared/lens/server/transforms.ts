@@ -28,17 +28,27 @@ export const getLensServerTransforms = (
   };
 };
 
-export const legacyPanelSchema = lensItemDataSchema.extends({
+const legacyPanelAttributesSchema = lensItemDataSchema.extends({
   type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
 });
 
-const lensPanelSchema = schema.object(
+const lensByValuePanelSchema = schema.object(
   {
     // TODO: add missing config properties
-    attributes: schema.oneOf([lensApiStateSchema, legacyPanelSchema]),
+    attributes: schema.oneOf([lensApiStateSchema, legacyPanelAttributesSchema]),
   },
   { unknowns: 'allow' }
 );
+
+const lensByRefPanelSchema = schema.object(
+  {
+    // TODO: add missing config properties
+    savedObjectId: schema.string(),
+  },
+  { unknowns: 'allow' }
+);
+
+const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema]);
 
 function getExtraServerTransformProps(
   builder: LensConfigBuilder
