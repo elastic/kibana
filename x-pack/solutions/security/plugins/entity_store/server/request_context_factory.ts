@@ -21,7 +21,9 @@ interface EntityStoreApiRequestHandlerContextDeps {
   logger: Logger;
 }
 
-export async function getTaskManagerStart(core: CoreSetup<EntityStoreStartPlugins, void>): Promise<TaskManagerStartContract> {
+export async function getTaskManagerStart(
+  core: CoreSetup<EntityStoreStartPlugins, void>
+): Promise<TaskManagerStartContract> {
   const [, startPlugins] = await core.getStartServices();
 
   return startPlugins.taskManager;
