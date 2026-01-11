@@ -135,6 +135,7 @@
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-http-browser-mocks",
     "@kbn/react-query",
+    "@kbn/fleet-plugin"
   ],
   "exclude": ["target/**/*"]
 }
