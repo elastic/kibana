@@ -13,6 +13,7 @@ import type {
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { ResourcesService } from './domain/resources_service';
+import { TaskManagers } from './tasks/task_manager';
 
 export interface EntityStorePlugins {
   taskManager: TaskManagerSetupContract;
@@ -22,6 +23,7 @@ export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   getResourcesService: () => ResourcesService;
   getLogger: () => Logger;
+  getTaskManagers: () => TaskManagers;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{

@@ -16,7 +16,7 @@ export interface EntityStoreTaskConfig extends Omit<TaskRegisterDefinition, 'cre
 export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
   [EntityStoreTaskType.Values.extractEntity]: {
     title: 'Entity Store - Execute Entity Task',
-    type: 'entity_store:v2:extract_entity',
+    type: 'entity_store:v2:extract_entity_task',
     timeout: '25s',
     interval: '30s',
   },

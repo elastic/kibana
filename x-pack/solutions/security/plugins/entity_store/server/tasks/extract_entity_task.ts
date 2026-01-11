@@ -23,21 +23,22 @@ function getTaskName(entityType: EntityType): string {
 }
 
 function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCreatorFunction {
-  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+  return ({ taskInstance, abortController }: { taskInstance: ConcreteTaskInstance, abortController: AbortController }) => {
     const taskLogger = logger.get(taskInstance.id);
     return {
-      run: async () => await run({ taskInstance, entityType, logger: taskLogger }),
-      cancel: async () => await cancel({ logger: taskLogger }),
+      run: async () => await run({ taskInstance, abortController, entityType, logger: taskLogger })
     };
   };
 }
 
 async function run({
   taskInstance,
+  abortController,
   entityType,
   logger,
 }: {
   taskInstance: ConcreteTaskInstance;
+  abortController: AbortController;
   entityType: EntityType;
   logger: Logger;
 }): Promise<RunResult> {
@@ -47,7 +48,7 @@ async function run({
   // Extract the resources service from the task instance params
   const { resourcesService } = taskInstance.params as { resourcesService: ResourcesService };
 
-  logger.info(`Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}`);
+  logger.info(`Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}, abortController: ${abortController}`);
   try {
     // TODO: Implement your entity extraction logic here
     // use resourcesService domain related operations
@@ -71,19 +72,6 @@ async function run({
       },
     };
   }
-}
-
-async function cancel({ logger }: { logger: Logger }): Promise<RunResult | void> {
-  // The cancel method is called when the task is cancelled (e.g., due to timeout or manual cancellation)
-  // This is a good place to:
-  // 1. Set cancellation flags if you have long-running operations
-  // 2. Clean up any resources
-  // 3. Log the cancellation
-
-  // If you have async operations that support cancellation, you should:
-  // - Check for abortController.signal.aborted in your run method
-  // - Abort any ongoing operations here
-  logger.warn('Cancellation requested');
 }
 
 export function registerExtractEntityTasks({
@@ -124,11 +112,11 @@ export async function scheduleExtractEntityTasks({
   logger: Logger;
   entityTypes: EntityType[];
   resourcesService: ResourcesService;
-  frequency?: number;
+  frequency?: string;
 }): Promise<void> {
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    const interval = frequency ? `${frequency}s` : config.interval;
+    const interval = frequency || config.interval;
     for (const type of entityTypes) {
       const taskName = getTaskName(type);
       await taskManager.ensureScheduled({
