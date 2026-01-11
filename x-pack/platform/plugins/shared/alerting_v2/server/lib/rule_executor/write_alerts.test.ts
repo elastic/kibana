@@ -39,7 +39,6 @@ describe('writeEsqlAlerts', () => {
           timeField: '@timestamp',
           lookbackWindow: '5m',
           groupingKey: ['host.name'],
-          scheduledTaskId: null,
           createdBy: 'u',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'u',

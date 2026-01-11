@@ -16,6 +16,9 @@ import { configSchema } from './config';
 import { AlertingRetryService } from './lib/services/retry_service';
 import { registerFeaturePrivileges } from './lib/security/privileges';
 import { CreateRuleRoute } from './routes/create_rule_route';
+import { DeleteRuleRoute } from './routes/delete_rule_route';
+import { GetRuleRoute } from './routes/get_rule_route';
+import { GetRulesRoute } from './routes/get_rules_route';
 import { UpdateRuleRoute } from './routes/update_rule_route';
 import { initializeRuleExecutorTaskDefinition } from './lib/rule_executor';
 import { AlertingResourcesService } from './lib/services/alerting_resources_service';
@@ -29,6 +32,9 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 export const module = new ContainerModule(({ bind }) => {
   // Register HTTP routes via DI
   bind(Route).toConstantValue(CreateRuleRoute);
+  bind(Route).toConstantValue(DeleteRuleRoute);
+  bind(Route).toConstantValue(GetRuleRoute);
+  bind(Route).toConstantValue(GetRulesRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
 
   // Request-scoped rules client

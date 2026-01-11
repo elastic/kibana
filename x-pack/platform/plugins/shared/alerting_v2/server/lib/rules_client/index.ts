@@ -7,4 +7,11 @@
 
 export { RulesClient } from './rules_client';
 export { createRuleDataSchema, updateRuleDataSchema } from './schemas';
-export type { CreateRuleData, CreateRuleParams, RuleResponse, UpdateRuleData } from './types';
+export type {
+  CreateRuleData,
+  CreateRuleParams,
+  FindRulesParams,
+  FindRulesResponse,
+  RuleResponse,
+  UpdateRuleData,
+} from './types';
