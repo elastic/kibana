@@ -50,6 +50,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           taskManager: taskManagerStart,
           entityTypes,
           resourcesService,
+          logger,
           frequency: logExtractionFrequency,
         });
 

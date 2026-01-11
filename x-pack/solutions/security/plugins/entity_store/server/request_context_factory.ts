@@ -16,15 +16,15 @@ import type {
 import { ResourcesService } from './domain/resources_service';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  core: CoreSetup;
+  core: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
 }
 
-export async function getTaskManagerStart(core: CoreSetup): Promise<TaskManagerStartContract> {
+export async function getTaskManagerStart(core: CoreSetup<EntityStoreStartPlugins, void>): Promise<TaskManagerStartContract> {
   const [, startPlugins] = await core.getStartServices();
 
-  return (startPlugins as EntityStoreStartPlugins).taskManager;
+  return startPlugins.taskManager;
 }
 
 export async function createRequestHandlerContext({
