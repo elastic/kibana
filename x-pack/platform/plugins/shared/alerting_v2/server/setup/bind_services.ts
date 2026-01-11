@@ -6,8 +6,6 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { ElasticsearchServiceStart } from '@kbn/core/server';
-import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
@@ -20,6 +18,7 @@ import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
+import type { AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
@@ -31,7 +30,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(QueryService)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
-      const data = get(PluginStart('data')) as DataPluginStart;
+      const data = get(PluginStart<AlertingServerStartDependencies['data']>('data'));
       const loggerService = get(LoggerService);
       const searchClient = data.search.asScoped(request);
       return new QueryService(searchClient, loggerService);
@@ -41,7 +40,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(StorageServiceScopedToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
-      const elasticsearch = get(CoreStart('elasticsearch')) as ElasticsearchServiceStart;
+      const elasticsearch = get(CoreStart('elasticsearch'));
       const loggerService = get(LoggerService);
       const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
       return new StorageService(esClient, loggerService);
@@ -50,7 +49,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(StorageServiceInternalToken)
     .toDynamicValue(({ get }) => {
-      const elasticsearch = get(CoreStart('elasticsearch')) as ElasticsearchServiceStart;
+      const elasticsearch = get(CoreStart('elasticsearch'));
       const loggerService = get(LoggerService);
       const esClient = elasticsearch.client.asInternalUser;
       return new StorageService(esClient, loggerService);
