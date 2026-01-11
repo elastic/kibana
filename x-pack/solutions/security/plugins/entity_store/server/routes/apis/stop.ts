@@ -13,7 +13,7 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_ty
 import { stopExtractEntityTasks } from '../../tasks/extract_entity_task';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional(),
+  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
 });
 
 export function registerStop(router: EntityStorePluginRouter) {
@@ -37,11 +37,10 @@ export function registerStop(router: EntityStorePluginRouter) {
       },
       async (ctx, req, res) => {
         const entityStoreCtx = await ctx.entityStore;
-        const logger = entityStoreCtx.getLogger();
-        const { taskManagerStart } = entityStoreCtx.getTaskManagers();
-        const { entityTypes = ALL_ENTITY_TYPES } = req.body;
+        const { taskManagerStart, logger } = entityStoreCtx;
+        const { entityTypes } = req.body;
 
-        logger.info('Stop API invoked', { entityTypes });
+        logger.info('Stop API invoked');
 
         const stoppedTasks = await stopExtractEntityTasks({
           taskManager: taskManagerStart,

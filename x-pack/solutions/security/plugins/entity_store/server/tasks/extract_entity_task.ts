@@ -149,23 +149,23 @@ export async function scheduleExtractEntityTasks({
 }
 
 export async function stopExtractEntityTasks({
-  taskManager,
-  logger,
-  entityTypes,
+    taskManager,
+    logger,
+    entityTypes,
 }: {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  entityTypes: EntityType[];
+    taskManager: TaskManagerStartContract;
+    logger: Logger;
+    entityTypes: EntityType[];
 }): Promise<number> {
-  // Construct task IDs based on entity types (format: taskType:entityType)
-  const taskIds = entityTypes.map((entityType) => getTaskName(entityType));
+    // Construct task IDs based on entity types (format: taskType:entityType)
+    const taskIds = entityTypes.map((entityType) => getTaskId(entityType));
 
-  if (taskIds.length > 0) {
-    await taskManager.bulkRemove(taskIds);
-    logger.info(`Successfully stopped ${taskIds.length} task(s)`, { taskIds });
-  } else {
-    logger.info('No tasks to stop', { entityTypes });
-  }
+    if (taskIds.length > 0) {
+        await taskManager.bulkRemove(taskIds);
+        logger.info(`Successfully stopped ${taskIds.length} task(s)`);
+    } else {
+        logger.info('No tasks to stop');
+    }
 
-  return taskIds.length;
+    return taskIds.length;
 }
