@@ -14,7 +14,10 @@ import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional(),
-  logExtractionFrequency: z.string().regex(/^\d+[smdh]$/).optional()
+  logExtractionFrequency: z
+    .string()
+    .regex(/^\d+[smdh]$/)
+    .optional(),
 });
 
 export function registerInstall(router: EntityStorePluginRouter) {

@@ -23,10 +23,16 @@ function getTaskName(entityType: EntityType): string {
 }
 
 function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCreatorFunction {
-  return ({ taskInstance, abortController }: { taskInstance: ConcreteTaskInstance, abortController: AbortController }) => {
+  return ({
+    taskInstance,
+    abortController,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    abortController: AbortController;
+  }) => {
     const taskLogger = logger.get(taskInstance.id);
     return {
-      run: async () => await run({ taskInstance, abortController, entityType, logger: taskLogger })
+      run: async () => await run({ taskInstance, abortController, entityType, logger: taskLogger }),
     };
   };
 }
@@ -48,7 +54,9 @@ async function run({
   // Extract the resources service from the task instance params
   const { resourcesService } = taskInstance.params as { resourcesService: ResourcesService };
 
-  logger.info(`Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}, abortController: ${abortController}`);
+  logger.info(
+    `Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}, abortController: ${abortController}`
+  );
   try {
     // TODO: Implement your entity extraction logic here
     // use resourcesService domain related operations
