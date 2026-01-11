@@ -9,7 +9,6 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type {
   EntityStoreApiRequestHandlerContext,
-  EntityStoreSetupPlugins,
   EntityStoreRequestHandlerContext,
   EntityStoreStartPlugins,
 } from './types';
@@ -18,7 +17,6 @@ import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
-  plugins: EntityStoreSetupPlugins;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
 }
