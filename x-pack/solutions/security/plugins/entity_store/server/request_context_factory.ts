@@ -7,13 +7,13 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreRequestHandlerContext,
   EntityStoreStartPlugins,
 } from './types';
 import { ResourcesService } from './domain/resources_service';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
@@ -30,9 +30,8 @@ export async function getTaskManagerStart(core: CoreSetup): Promise<TaskManagerS
 export async function createRequestHandlerContext({
   logger,
   context,
-  core
+  core,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
-
   return {
     core: await context.core,
     logger,
