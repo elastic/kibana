@@ -98,4 +98,3 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   });
 };
-
