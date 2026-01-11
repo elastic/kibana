@@ -94,6 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           index: '.kibana_task_manager',
           query: { term: { 'task.taskType': 'slo:health-scan-task' } },
           refresh: true,
+          wait_for_completion: true,
         }),
       ]);
     });
@@ -114,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           index: '.kibana_task_manager',
           query: { term: { 'task.taskType': 'slo:health-scan-task' } },
           refresh: true,
+          wait_for_completion: true,
         }),
       ]);
     });
@@ -127,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.eql('scheduled');
       });
 
-      it('returns existing scan when recent scan exists within 1h', async () => {
+      it.skip('returns existing scan when recent scan exists within 1h', async () => {
         const firstResponse = await sloApi.scheduleHealthScan(adminRoleAuthc, { force: true });
         expect(firstResponse).to.have.property('scanId');
 

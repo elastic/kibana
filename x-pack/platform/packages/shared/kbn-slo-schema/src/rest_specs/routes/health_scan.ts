@@ -80,9 +80,7 @@ type HealthScanResultResponse = t.OutputOf<typeof healthScanResultResponseSchema
 
 interface GetHealthScanResultsResponse {
   results: HealthScanResultResponse[];
-  scan: {
-    status: 'pending' | 'completed';
-  };
+  scan: HealthScanSummary;
   total: number;
   searchAfter?: Array<string | number | null | boolean>;
 }
