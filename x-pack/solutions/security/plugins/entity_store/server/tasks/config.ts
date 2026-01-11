@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
+import type { IntervalSchedule, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { EntityStoreTaskType } from './constants';
 
-export interface EntityStoreTaskConfig extends Omit<TaskRegisterDefinition, 'createTaskRunner'> {
+type TaskScheduleConfig = Omit<TaskRegisterDefinition, 'createTaskRunner'> & IntervalSchedule;
+
+export interface EntityStoreTaskConfig extends TaskScheduleConfig {
   type: string;
-  interval: string;
 }
 
 export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
