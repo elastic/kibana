@@ -16,6 +16,7 @@ import {
 } from '@kbn/slo-schema';
 import { v7 } from 'uuid';
 import { HEALTH_DATA_STREAM_NAME } from '../../../common/constants';
+import { IllegalArgumentError } from '../../errors';
 import {
   HEALTH_SCAN_TASK_TYPE,
   type HealthScanTaskParams,
@@ -24,7 +25,6 @@ import {
 import type { HealthDocument } from '../../services/tasks/health_scan_task/types';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { IllegalArgumentError } from '../../errors';
 
 export const postHealthScanRoute = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_health/scans',
@@ -138,103 +138,88 @@ export const listHealthScanRoute = createSloServerRoute({
       })
       .catch(() => ({ docs: [] }));
 
-    try {
-      interface ScanBucket {
-        key: { scanId: string };
-        doc_count: number;
-        latest_timestamp: { value: number; value_as_string: string };
-        problematic_count: { doc_count: number };
-      }
+    interface ScanBucket {
+      key: { scanId: string };
+      doc_count: number;
+      latest_timestamp: { value: number; value_as_string: string };
+      problematic: { doc_count: number };
+    }
 
-      const result = await scopedClusterClient.asInternalUser.search<
-        unknown,
-        { scans: { buckets: ScanBucket[] } }
-      >({
-        index: HEALTH_DATA_STREAM_NAME,
-        size: 0,
-        aggs: {
-          scans: {
-            composite: {
-              size,
-              sources: [
-                {
-                  scanId: {
-                    terms: {
-                      order: 'desc',
-                      field: 'scanId',
-                    },
+    const result = await scopedClusterClient.asInternalUser.search<
+      unknown,
+      { scans: { buckets: ScanBucket[] } }
+    >({
+      index: HEALTH_DATA_STREAM_NAME,
+      size: 0,
+      aggs: {
+        scans: {
+          composite: {
+            size,
+            sources: [
+              {
+                scanId: {
+                  terms: {
+                    order: 'desc',
+                    field: 'scanId',
                   },
                 },
-              ],
+              },
+            ],
+          },
+          aggs: {
+            latest_timestamp: {
+              max: {
+                field: '@timestamp',
+              },
             },
-            aggs: {
-              latest_timestamp: {
-                max: {
-                  field: '@timestamp',
+            problematic: {
+              filter: {
+                term: {
+                  'health.isProblematic': true,
                 },
               },
-              problematic_count: {
-                filter: {
-                  term: {
-                    'health.isProblematic': true,
-                  },
-                },
-              },
-              sorted: {
-                bucket_sort: {
-                  sort: [{ latest_timestamp: { order: 'desc' } }],
-                },
+            },
+            sorted: {
+              bucket_sort: {
+                sort: [{ latest_timestamp: { order: 'desc' } }],
               },
             },
           },
         },
-      });
+      },
+    });
 
-      const buckets = result.aggregations?.scans.buckets ?? [];
-      const scanIds = buckets.map((bucket) => bucket.key.scanId);
+    const buckets = result.aggregations?.scans.buckets ?? [];
+    const scanIds = buckets.map((bucket) => bucket.key.scanId);
 
-      // scans that are still running (if any) and did not produce any document yet
-      const scheduledScans = recentTasks.docs.filter((t) => !scanIds.includes(t.id));
-      const pendingScans = recentTasks.docs
-        .filter((t) => scanIds.includes(t.id) && t.state.isDone === false)
-        .map((t) => t.id);
+    // scans that are scheduled or still running (if any) and did not produce any document yet
+    const scheduledScans = recentTasks.docs.filter((t) => !scanIds.includes(t.id));
+    const pendingScans = recentTasks.docs
+      .filter((t) => scanIds.includes(t.id) && t.state.isDone === false)
+      .map((t) => t.id);
 
-      const scans = buckets.map((bucket) => ({
-        scanId: bucket.key.scanId,
-        latestTimestamp: bucket.latest_timestamp.value_as_string,
-        total: bucket.doc_count,
-        problematic: bucket.problematic_count.doc_count,
-        status: pendingScans.includes(bucket.key.scanId)
-          ? ('pending' as const) // recent task found and not done = pending
-          : ('completed' as const), // not recent, considere completed
-      }));
+    const scans = buckets.map((bucket) => ({
+      scanId: bucket.key.scanId,
+      latestTimestamp: bucket.latest_timestamp.value_as_string,
+      total: bucket.doc_count,
+      problematic: bucket.problematic.doc_count,
+      status: pendingScans.includes(bucket.key.scanId)
+        ? ('pending' as const) // recent task found and not done = pending
+        : ('completed' as const), // not recent, considere completed
+    }));
 
-      return {
-        scans: [
-          ...scheduledScans.map((task) => ({
-            scanId: task.id,
-            latestTimestamp: task.scheduledAt.toISOString(),
-            total: 0,
-            problematic: 0,
-            status: 'pending' as const,
-          })),
-          ...scans,
-        ].slice(0, size),
-      };
-    } catch (err) {
-      if (err.meta && err.meta.statusCode === 404) {
-        return {
-          scans: recentTasks.docs.map((task) => ({
-            scanId: task.id,
-            latestTimestamp: task.scheduledAt.toISOString(),
-            total: 0,
-            problematic: 0,
-            status: 'pending' as const,
-          })),
-        };
-      }
-      throw err;
-    }
+    return {
+      scans: [
+        ...scheduledScans.map((task) => ({
+          scanId: task.id,
+          latestTimestamp: task.scheduledAt.toISOString(),
+          total: 0,
+          problematic: 0,
+          status: 'pending' as const,
+        })),
+        ...scans,
+      ].slice(0, size),
+    };
   },
 });
 
@@ -278,57 +263,89 @@ export const getHealthScanRoute = createSloServerRoute({
 
     const scanTask = await taskManager.get(scanId).catch(() => null);
 
-    try {
-      const result = await scopedClusterClient.asInternalUser.search<HealthDocument>({
-        index: HEALTH_DATA_STREAM_NAME,
-        size,
-        query: {
-          bool: {
-            filter: [
-              { term: { scanId } },
-              ...(allSpaces ? [] : [{ term: { spaceId } }]),
-              ...(problematic ? [{ term: { 'health.isProblematic': problematic } }] : []),
-            ],
+    const result = await scopedClusterClient.asInternalUser.search<HealthDocument>({
+      index: HEALTH_DATA_STREAM_NAME,
+      size,
+      query: {
+        bool: {
+          filter: [
+            { term: { scanId } },
+            ...(allSpaces ? [] : [{ term: { spaceId } }]),
+            ...(problematic ? [{ term: { 'health.isProblematic': problematic } }] : []),
+          ],
+        },
+      },
+      sort: [
+        { '@timestamp': 'desc' },
+        { scanId: 'desc' },
+        { spaceId: 'asc' },
+        { 'health.isProblematic': 'asc' },
+        { 'slo.id': 'asc' },
+      ],
+      search_after: searchAfter,
+    });
+
+    const hits = result.hits.hits;
+    const total =
+      typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+    const lastHit = hits[hits.length - 1];
+    const nextSearchAfter = lastHit && hits.length === size ? lastHit.sort : undefined;
+
+    const results = hits
+      .map((hit) => hit._source)
+      .filter((source): source is HealthScanResultResponse => source !== undefined);
+
+    const isScanScheduledSoon = !scanTask && total === 0;
+
+    interface SummaryAgg {
+      latest_timestamp: { value: number; value_as_string: string };
+      processed: { value: number };
+      problematic: { doc_count: number };
+    }
+
+    const summary = await scopedClusterClient.asInternalUser.search<unknown, SummaryAgg>({
+      index: HEALTH_DATA_STREAM_NAME,
+      size: 0,
+      query: { bool: { filter: [{ term: { scanId } }] } },
+      aggs: {
+        latest_timestamp: {
+          max: {
+            field: '@timestamp',
           },
         },
-        sort: [
-          { '@timestamp': 'desc' },
-          { scanId: 'desc' },
-          { spaceId: 'asc' },
-          { 'health.isProblematic': 'asc' },
-          { 'slo.id': 'asc' },
-        ],
-        search_after: searchAfter,
-      });
-
-      const hits = result.hits.hits;
-      const total =
-        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
-      const lastHit = hits[hits.length - 1];
-      const nextSearchAfter = lastHit && hits.length === size ? lastHit.sort : undefined;
-
-      const results = hits
-        .map((hit) => hit._source)
-        .filter((source): source is HealthScanResultResponse => source !== undefined);
-
-      return {
-        results,
-        scan: {
-          status: scanTask?.state.isDone === false ? 'pending' : 'completed',
+        processed: {
+          value_count: {
+            field: 'scanId',
+          },
         },
-        total,
-        searchAfter: nextSearchAfter,
-      };
-    } catch (err) {
-      if (err.meta && err.meta.statusCode === 404) {
-        return {
-          scan: { status: scanTask?.state.isDone === false ? 'pending' : 'completed' },
-          results: [],
-          total: 0,
-        };
-      }
-      throw err;
-    }
+        problematic: {
+          filter: {
+            term: {
+              'health.isProblematic': true,
+            },
+          },
+        },
+      },
+    });
+
+    const summaryAgg = summary.aggregations;
+
+    return {
+      results,
+      scan: {
+        scanId,
+        latestTimestamp: summaryAgg?.latest_timestamp.value_as_string ?? new Date().toISOString(),
+        total: summaryAgg?.processed.value ?? 0,
+        problematic: summaryAgg?.problematic.doc_count ?? 0,
+        status: isScanScheduledSoon
+          ? 'pending'
+          : scanTask?.state.isDone === false
+          ? 'pending'
+          : 'completed',
+      },
+      total,
+      searchAfter: nextSearchAfter,
+    };
   },
 });
 
