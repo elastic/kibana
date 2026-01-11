@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PostHealthScanResponse } from '@kbn/slo-schema';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { v7 } from 'uuid';
@@ -16,6 +17,7 @@ import {
 
 interface Dependencies {
   taskManager: TaskManagerStartContract;
+  request: KibanaRequest;
 }
 
 interface Params {
@@ -24,7 +26,7 @@ interface Params {
 
 export async function scheduleHealthScan(
   params: Params,
-  { taskManager }: Dependencies
+  { taskManager, request }: Dependencies
 ): Promise<PostHealthScanResponse> {
   const { force = false } = params;
 
@@ -68,14 +70,17 @@ export async function scheduleHealthScan(
 
   const scanId = v7();
   const scheduledAt = new Date(Date.now() + 3 * 1000);
-  await taskManager.ensureScheduled({
-    id: scanId,
-    taskType: HEALTH_SCAN_TASK_TYPE,
-    scope: ['observability', 'slo'],
-    state: { isDone: false },
-    runAt: scheduledAt,
-    params: { scanId } satisfies HealthScanTaskParams,
-  });
+  await taskManager.ensureScheduled(
+    {
+      id: scanId,
+      taskType: HEALTH_SCAN_TASK_TYPE,
+      scope: ['observability', 'slo'],
+      state: { isDone: false },
+      runAt: scheduledAt,
+      params: { scanId } satisfies HealthScanTaskParams,
+    },
+    { request }
+  );
 
   return {
     scanId,
