@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
+import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -49,7 +49,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   }, [timeState.start, timeState.end]);
 
   const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
-
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
@@ -60,7 +59,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
 
