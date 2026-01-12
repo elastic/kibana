@@ -530,21 +530,9 @@ export function initializeLayoutManager(
                 pick(currentLayout.panels, childrenWithUnsavedChanges)
               ).length;
               if (!(layoutIsEqual && childrenAreEqual)) {
-                if (!layoutIsEqual) {
-                  logStateDiff(
-                    'dashboard panel layout',
-                    lastSavedLayout.panels,
-                    currentLayout.panels
-                  );
-                }
-                if (!childrenAreEqual) {
-                  logStateDiff(
-                    'dashboard panel children',
-                    pick(lastSavedChildState, childrenWithUnsavedChanges),
-                    pick(currentChildState, childrenWithUnsavedChanges)
-                  );
-                }
                 const { panels } = serializeLayout(currentLayout, currentChildState);
+                const { panels: oldPanels } = serializeLayout(lastSavedLayout, lastSavedChildState);
+                logStateDiff('dashboard panels', oldPanels, panels);
                 return { panels };
               }
               return {};
@@ -557,22 +545,12 @@ export function initializeLayoutManager(
                 pick(currentLayout.controls, childrenWithUnsavedChanges)
               ).length;
               if (!(layoutIsEqual && childrenAreEqual)) {
-                if (!layoutIsEqual) {
-                  logStateDiff(
-                    'dashboard pinned panel layout',
-                    lastSavedLayout.controls,
-                    currentLayout.controls
-                  );
-                }
-                if (!childrenAreEqual) {
-                  logStateDiff(
-                    'dashboard panel children',
-                    pick(lastSavedChildState, childrenWithUnsavedChanges),
-                    pick(currentChildState, childrenWithUnsavedChanges)
-                  );
-                }
-
                 const { controlGroupInput } = serializeLayout(currentLayout, currentChildState);
+                const { controlGroupInput: oldControlGroupInput } = serializeLayout(
+                  lastSavedLayout,
+                  lastSavedChildState
+                );
+                logStateDiff('dashboard pinned panels', oldControlGroupInput, controlGroupInput);
                 return { controlGroupInput };
               }
               return {};
