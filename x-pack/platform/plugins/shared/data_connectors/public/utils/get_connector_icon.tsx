@@ -6,10 +6,20 @@
  */
 
 import React, { Suspense } from 'react';
-import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiSkeletonCircle } from '@elastic/eui';
 import type { IconSize } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import type { Connector } from '../types/connector';
+
+// Map IconSize to EuiSkeletonCircle size (only supports s, m, l, xl)
+const iconToSkeletonSizeMap: Record<IconSize, 's' | 'm' | 'l' | 'xl'> = {
+  s: 's',
+  m: 'm',
+  l: 'l',
+  xl: 'xl',
+  xxl: 'xl', // xxl not supported, fallback to xl
+  original: 'm', // original not supported, fallback to m
+};
 
 /**
  * Utility function to get the appropriate icon for a connector.
@@ -28,10 +38,9 @@ export function getConnectorIcon(
   if (connector.type?.startsWith('.')) {
     const LazyIcon = ConnectorIconsMap.get(connector.type);
     if (LazyIcon) {
-      // EuiLoadingSpinner doesn't support "original" size, so we use "m" as fallback
-      const spinnerSize = size === 'original' ? 'm' : size;
+      const skeletonSize = iconToSkeletonSizeMap[size];
       return (
-        <Suspense fallback={<EuiLoadingSpinner size={spinnerSize} />}>
+        <Suspense fallback={<EuiSkeletonCircle size={skeletonSize} />}>
           <LazyIcon size={size} />
         </Suspense>
       );
