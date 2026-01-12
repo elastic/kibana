@@ -43,6 +43,7 @@ export const PutSettingsRequestSchema = {
         meta: {
           deprecated: true,
         },
+        maxSize: 10,
       })
     ),
     kibana_ca_sha256: schema.maybe(
@@ -67,7 +68,7 @@ export const GetSpaceSettingsRequestSchema = {};
 export const SpaceSettingsResponseSchema = schema.object({
   item: schema.object({
     managed_by: schema.maybe(schema.string()),
-    allowed_namespace_prefixes: schema.arrayOf(schema.string()),
+    allowed_namespace_prefixes: schema.arrayOf(schema.string(), { maxSize: 100 }),
   }),
 });
 
@@ -105,7 +106,8 @@ export const PutSpaceSettingsRequestSchema = {
               return 'Must not contain -';
             }
           },
-        })
+        }),
+        { maxSize: 10 }
       )
     ),
   }),
@@ -130,9 +132,10 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
         has_fleet_server: schema.maybe(schema.boolean()),
         fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-        space_ids: schema.maybe(schema.arrayOf(schema.string())),
+        space_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
         data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-      })
+      }),
+      { maxSize: 10000 }
     ),
     has_active: schema.boolean(),
     host: schema.maybe(FleetServerHostSchema),
