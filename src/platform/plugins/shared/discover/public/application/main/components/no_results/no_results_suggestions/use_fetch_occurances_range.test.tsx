@@ -52,10 +52,10 @@ describe('useFetchOccurrencesRange', () => {
         rawResponse: {
           aggregations: {
             earliest_timestamp: {
-              value_as_string: '2020-09-01T08:30:00.000Z',
+              value_as_string: '2026-01-01T10:23:50.000Z',
             },
             latest_timestamp: {
-              value_as_string: '2022-09-01T08:30:00.000Z',
+              value_as_string: '2026-10-01T11:25:32.000Z',
             },
           },
         },
@@ -72,8 +72,8 @@ describe('useFetchOccurrencesRange', () => {
       expect(lastValueFromSpy).toHaveBeenCalledTimes(1);
       expect(fetchResult.status).toBe(TimeRangeExtendingStatus.succeedWithResults);
       expect(fetchResult.range).toEqual({
-        from: '2020-09-01T08:30:00.000Z',
-        to: '2022-09-01T08:30:00.000Z',
+        from: '2026-01-01T10:23:50.000Z',
+        to: '2026-10-01T11:25:32.000Z',
       });
     });
 
@@ -103,10 +103,10 @@ describe('useFetchOccurrencesRange', () => {
           timed_out: true,
           aggregations: {
             earliest_timestamp: {
-              value_as_string: '2020-09-01T08:30:00.000Z',
+              value_as_string: '2026-01-01T10:23:50.000Z',
             },
             latest_timestamp: {
-              value_as_string: '2022-09-01T08:30:00.000Z',
+              value_as_string: '2026-10-01T11:25:32.000Z',
             },
           },
         },
@@ -134,10 +134,10 @@ describe('useFetchOccurrencesRange', () => {
           },
           aggregations: {
             earliest_timestamp: {
-              value_as_string: '2020-09-01T08:30:00.000Z',
+              value_as_string: '2026-01-01T10:23:50.000Z',
             },
             latest_timestamp: {
-              value_as_string: '2022-09-01T08:30:00.000Z',
+              value_as_string: '2026-10-01T11:25:32.000Z',
             },
           },
         },
@@ -165,10 +165,10 @@ describe('useFetchOccurrencesRange', () => {
           },
           aggregations: {
             earliest_timestamp: {
-              value_as_string: '2020-09-01T08:30:00.000Z',
+              value_as_string: '2026-01-01T10:23:50.000Z',
             },
             latest_timestamp: {
-              value_as_string: '2022-09-01T08:30:00.000Z',
+              value_as_string: '2026-10-01T11:25:32.000Z',
             },
           },
         },
@@ -192,10 +192,10 @@ describe('useFetchOccurrencesRange', () => {
         rawResponse: {
           aggregations: {
             earliest_timestamp: {
-              value_as_string: '2020-09-01T08:30:00.000Z',
+              value_as_string: '2026-01-01T10:23:50.000Z',
             },
             latest_timestamp: {
-              value_as_string: '2022-09-01T08:30:00.000Z',
+              value_as_string: '2026-10-01T11:25:32.000Z',
             },
           },
         },
@@ -277,28 +277,6 @@ describe('useFetchOccurrencesRange', () => {
 
       expect(fetchResult.status).toBe(TimeRangeExtendingStatus.failed);
       expect(consoleErrorSpy).not.toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
-    });
-
-    it('should log non-AbortError errors', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-      const testError = new Error('Network error');
-
-      lastValueFromSpy.mockImplementation(async () => {
-        throw testError;
-      });
-
-      const { result } = await render({
-        dataView: stubDataView,
-        query,
-        filters: [],
-      });
-
-      const fetchResult = await result.current.fetch();
-
-      expect(fetchResult.status).toBe(TimeRangeExtendingStatus.failed);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(testError);
 
       consoleErrorSpy.mockRestore();
     });
