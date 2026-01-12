@@ -365,15 +365,15 @@ export class ConnectorTokenClient {
     id,
     token,
     refreshToken,
-    expiresAtMillis,
-    refreshTokenExpiresAtMillis,
+    expiresIn,
+    refreshTokenExpiresIn,
     tokenType,
   }: {
     id: string;
     token: string;
     refreshToken?: string;
-    expiresAtMillis?: string;
-    refreshTokenExpiresAtMillis?: string;
+    expiresIn?: number;
+    refreshTokenExpiresIn?: number;
     tokenType?: string;
   }): Promise<ConnectorToken | null> {
     const { attributes, references, version } =
@@ -381,7 +381,11 @@ export class ConnectorTokenClient {
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         id
       );
-    const updateTime = Date.now();
+    const now = Date.now();
+    const expiresInMillis = expiresIn ? new Date(now + expiresIn * 1000).toISOString() : undefined;
+    const refreshTokenExpiresInMillis = refreshTokenExpiresIn
+      ? new Date(now + refreshTokenExpiresIn * 1000).toISOString()
+      : undefined;
 
     try {
       const updateOperation = () => {
@@ -394,11 +398,11 @@ export class ConnectorTokenClient {
               ...attributesWithoutId,
               token,
               refreshToken: refreshToken ?? attributes.refreshToken,
-              expiresAt: expiresAtMillis,
+              expiresAt: expiresInMillis,
               refreshTokenExpiresAt:
-                refreshTokenExpiresAtMillis ?? attributes.refreshTokenExpiresAt,
+                refreshTokenExpiresInMillis ?? attributes.refreshTokenExpiresAt,
               tokenType: tokenType ?? 'access_token',
-              updatedAt: new Date(updateTime).toISOString(),
+              updatedAt: new Date(now).toISOString(),
             },
             isUndefined
           ) as ConnectorToken,

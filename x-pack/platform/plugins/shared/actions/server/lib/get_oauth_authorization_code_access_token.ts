@@ -110,7 +110,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
       return null;
     }
 
-    // Check if refresh token is expired
+    // Check if the refresh token is expired
     if (
       connectorToken.refreshTokenExpiresAt &&
       Date.parse(connectorToken.refreshTokenExpiresAt) <= now
@@ -121,8 +121,6 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
     // Refresh the token
     logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
-    const requestTokenStart = Date.now();
-
     try {
       const tokenResult = await requestOAuthRefreshToken(
         tokenUrl,
@@ -142,24 +140,14 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
       // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
       const normalizedTokenType = startCase(tokenResult.tokenType);
       const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
-      const newRefreshToken = tokenResult.refreshToken || connectorToken.refreshToken;
-
-      // Calculate expiration times
-      const accessTokenExpiresAt = tokenResult.expiresIn
-        ? new Date(requestTokenStart + tokenResult.expiresIn * 1000).toISOString()
-        : undefined;
-
-      const refreshTokenExpiresAt = tokenResult.refreshTokenExpiresIn
-        ? new Date(requestTokenStart + tokenResult.refreshTokenExpiresIn * 1000).toISOString()
-        : connectorToken.refreshTokenExpiresAt;
 
       // Update stored token
       await connectorTokenClient.updateWithRefreshToken({
         id: connectorToken.id!,
         token: newAccessToken,
-        refreshToken: newRefreshToken,
-        expiresAtMillis: accessTokenExpiresAt,
-        refreshTokenExpiresAtMillis: refreshTokenExpiresAt,
+        refreshToken: tokenResult.refreshToken || connectorToken.refreshToken,
+        expiresIn: tokenResult.expiresIn,
+        refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
         tokenType: 'access_token',
       });
 
