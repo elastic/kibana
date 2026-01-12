@@ -52,11 +52,34 @@ export class AnalyticsService {
       );
       this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
         agent_id: normalizedAgentId,
-        tools_included: toolsIncluded,
+        tool_ids: toolsIncluded,
       });
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report AgentCreated telemetry event', { error });
+    }
+  }
+
+  reportAgentUpdated({
+    agentId,
+    toolSelection,
+  }: {
+    agentId: string;
+    toolSelection: ToolSelection[];
+  }): void {
+    try {
+      const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+      const toolIds = toolSelection.flatMap((selection) => selection.tool_ids);
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
+      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentUpdated, {
+        agent_id: normalizedAgentId,
+        tool_ids: toolsIncluded,
+      });
+    } catch (error) {
+      // Do not fail the request if telemetry fails
+      this.logger.debug('Failed to report AgentUpdated telemetry event', { error });
     }
   }
 

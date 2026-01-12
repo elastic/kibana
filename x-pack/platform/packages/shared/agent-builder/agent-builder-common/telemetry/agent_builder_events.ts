@@ -16,6 +16,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
+  AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
   ToolCreated: `${TELEMETRY_PREFIX}_tool_created`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
@@ -73,7 +74,12 @@ export interface ReportRoundErrorParams {
 
 export interface ReportAgentCreatedParams {
   agent_id: string;
-  tools_included: string[];
+  tool_ids: string[];
+}
+
+export interface ReportAgentUpdatedParams {
+  agent_id: string;
+  tool_ids: string[];
 }
 
 export interface ReportToolCreatedParams {
@@ -86,6 +92,7 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
+  [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
@@ -96,6 +103,7 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportAgentCreatedParams>
+  | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportRoundErrorParams>;
@@ -105,6 +113,7 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundError;
@@ -182,7 +191,7 @@ const AGENT_CREATED_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    tools_included: {
+    tool_ids: {
       type: 'array',
       items: {
         type: 'keyword',
@@ -194,6 +203,35 @@ const AGENT_CREATED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'Tool IDs included in the created agent (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
+      },
+    },
+  },
+};
+
+const AGENT_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.AgentUpdated,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the updated agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the updated agent (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the updated agent (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
         optional: false,
       },
     },
@@ -412,6 +450,7 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   AGENT_CREATED_EVENT,
+  AGENT_UPDATED_EVENT,
   TOOL_CREATED_EVENT,
   ROUND_COMPLETE_EVENT,
   ROUND_ERROR_EVENT,

@@ -303,6 +303,10 @@ export function registerAgentRoutes({
         const { agents } = getInternalServices();
         const service = await agents.getRegistry({ request });
         const profile = await service.update(request.params.id, request.body);
+        analyticsService?.reportAgentUpdated({
+          agentId: profile.id,
+          toolSelection: profile.configuration.tools,
+        });
         return response.ok<UpdateAgentResponse>({ body: profile });
       })
     );

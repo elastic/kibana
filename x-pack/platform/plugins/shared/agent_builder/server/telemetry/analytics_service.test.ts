@@ -180,7 +180,7 @@ describe('AnalyticsService', () => {
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
         agent_id: agentBuilderDefaultAgentId,
-        tools_included: ['custom-3c9388baa67aef90'],
+        tool_ids: ['custom-3c9388baa67aef90'],
       });
     });
 
@@ -196,7 +196,25 @@ describe('AnalyticsService', () => {
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
         agent_id: 'custom-da3031a511e7fadf',
-        tools_included: [],
+        tool_ids: [],
+      });
+    });
+  });
+
+  describe('reportAgentUpdated', () => {
+    it('reports the AgentUpdated event', () => {
+      service.reportAgentUpdated({
+        agentId: agentBuilderDefaultAgentId,
+        toolSelection: [
+          {
+            tool_ids: ['my_custom_tool', 'my_custom_tool'],
+          },
+        ],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentUpdated, {
+        agent_id: agentBuilderDefaultAgentId,
+        tool_ids: ['custom-3c9388baa67aef90'],
       });
     });
   });
