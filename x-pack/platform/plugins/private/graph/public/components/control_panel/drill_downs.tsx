@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles, noUserSelectStyles } from '../../styles';
@@ -47,9 +47,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
                     <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />{' '}
                   </>
                 )}
-                <a aria-hidden="true" onClick={onOpenUrlTemplate}>
-                  {urlTemplate.description}
-                </a>
+                <EuiLink onClick={onOpenUrlTemplate}>{urlTemplate.description}</EuiLink>
               </li>
             );
           })}

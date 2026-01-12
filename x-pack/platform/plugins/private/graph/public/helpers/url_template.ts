@@ -8,14 +8,21 @@
 export const urlTemplatePlaceholder = '{{gquery}}';
 export const urlTemplateRegex = /\{\{gquery\}\}/g;
 const defaultKibanaQuery = /,query:\(language:kuery,query:'.*?'\)/g;
+const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:'];
 
 /**
  * Checks whether a given string is a url template. This is the
  * case if it contains the placeholder `{{gquery}}`
  * @param url The url to check
  */
-export function isUrlTemplateValid(url: string) {
-  return url.search(urlTemplateRegex) > -1;
+export function isUrlTemplateValid(urlString: string) {
+  try {
+    // with window.location.origin we can also handle also relative paths correctly
+    const url = new URL(urlString, window.location.origin);
+    return ALLOWED_PROTOCOLS.includes(url.protocol) && urlString.includes(urlTemplatePlaceholder);
+  } catch {
+    return false;
+  }
 }
 
 /**
