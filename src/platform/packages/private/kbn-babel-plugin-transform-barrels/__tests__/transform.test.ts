@@ -710,4 +710,73 @@ describe('barrel transform plugin', () => {
       expect(result?.code).toContain(`export * from './unknown-barrel'`);
     });
   });
+
+  describe('enum export transformations', () => {
+    const ENUM_BARREL_PATH = '/test/src/enums/index.ts';
+
+    const enumBarrelIndex: TestBarrelIndex = {
+      [ENUM_BARREL_PATH]: {
+        exports: {
+          Status: {
+            path: '/test/src/enums/types.ts',
+            type: 'named',
+            localName: 'Status',
+            importedName: 'Status',
+            expectedPath: './enums/types',
+          },
+          Priority: {
+            path: '/test/src/enums/types.ts',
+            type: 'named',
+            localName: 'Priority',
+            importedName: 'Priority',
+            expectedPath: './enums/types',
+          },
+        },
+      },
+    };
+
+    it('transforms enum imports to direct paths', () => {
+      const result = transform({
+        code: `import { Status } from './enums';`,
+        barrelIndex: enumBarrelIndex,
+      });
+
+      expect(result?.code).toContain('./enums/types');
+      expect(result?.code).toContain('Status');
+      expect(result?.code).not.toMatch(/['"]\.\/enums['"]/);
+    });
+
+    it('transforms multiple enum imports from same source', () => {
+      const result = transform({
+        code: `import { Status, Priority } from './enums';`,
+        barrelIndex: enumBarrelIndex,
+      });
+
+      expect(result?.code).toContain('./enums/types');
+      expect(result?.code).toContain('Status');
+      expect(result?.code).toContain('Priority');
+    });
+
+    it('transforms export * to include enum exports', () => {
+      const result = transform({
+        code: `export * from './enums';`,
+        barrelIndex: enumBarrelIndex,
+      });
+
+      expect(result?.code).toContain('./enums/types');
+      expect(result?.code).toContain('Status');
+      expect(result?.code).toContain('Priority');
+      expect(result?.code).not.toContain('export *');
+    });
+
+    it('transforms named enum re-export', () => {
+      const result = transform({
+        code: `export { Status } from './enums';`,
+        barrelIndex: enumBarrelIndex,
+      });
+
+      expect(result?.code).toContain('./enums/types');
+      expect(result?.code).toContain('Status');
+    });
+  });
 });

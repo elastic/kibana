@@ -379,6 +379,8 @@ function parseBarrelExports(content, filePath) {
           decl.id
         ) {
           names = [decl.id.name];
+        } else if (decl.type === 'TSEnumDeclaration' && decl.id) {
+          names = [decl.id.name];
         }
 
         for (const name of names) {
@@ -662,6 +664,14 @@ function extractDirectExports(content, filePath) {
             localName: name,
             importedName: name,
           };
+        } else if (decl.type === 'TSEnumDeclaration' && decl.id) {
+          const name = decl.id.name;
+          exports[name] = {
+            path: filePath,
+            type: 'named',
+            localName: name,
+            importedName: name,
+          };
         }
       }
 
@@ -836,6 +846,8 @@ function parseAllFileExports(filePath, visited) {
           (decl.type === 'TSTypeAliasDeclaration' || decl.type === 'TSInterfaceDeclaration') &&
           decl.id
         ) {
+          names = [decl.id.name];
+        } else if (decl.type === 'TSEnumDeclaration' && decl.id) {
           names = [decl.id.name];
         }
 

@@ -688,4 +688,148 @@ export const LocalExport = 'local';`
       expect(exports.LocalExport).toBeUndefined();
     });
   });
+
+  describe('enum export handling', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-enum-test-'));
+
+      // Source file with enum export
+      await Fsp.writeFile(
+        Path.join(tempDir, 'types.ts'),
+        `export enum Status {
+  Active = 'active',
+  Inactive = 'inactive',
+}
+
+export enum Priority {
+  Low = 1,
+  Medium = 2,
+  High = 3,
+}`
+      );
+
+      // Barrel with export * that includes enums
+      await Fsp.writeFile(Path.join(tempDir, 'index.ts'), `export * from './types';`);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('detects exported enums through export * chains', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Status enum should be detected
+      expect(exports.Status).toBeDefined();
+      expect(exports.Status.path).toBe(Path.join(tempDir, 'types.ts'));
+      expect(exports.Status.localName).toBe('Status');
+      expect(exports.Status.type).toBe('named');
+
+      // Priority enum should also be detected
+      expect(exports.Priority).toBeDefined();
+      expect(exports.Priority.path).toBe(Path.join(tempDir, 'types.ts'));
+      expect(exports.Priority.localName).toBe('Priority');
+      expect(exports.Priority.type).toBe('named');
+    });
+  });
+
+  describe('nested export * with enums', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-nested-enum-test-'));
+
+      // Deep source file with enum
+      await Fsp.mkdir(Path.join(tempDir, 'constants'), { recursive: true });
+      await Fsp.writeFile(
+        Path.join(tempDir, 'constants', 'chat_experience.ts'),
+        `export enum AIChatExperience {
+  Classic = 'classic',
+  Agent = 'agent',
+}`
+      );
+
+      // Middle barrel that re-exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'constants', 'index.ts'),
+        `export * from './chat_experience';`
+      );
+
+      // Top-level barrel
+      await Fsp.writeFile(Path.join(tempDir, 'index.ts'), `export * from './constants';`);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('follows nested export * chains to find enum source', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // AIChatExperience should trace to the deep source file
+      expect(exports.AIChatExperience).toBeDefined();
+      expect(exports.AIChatExperience.path).toBe(
+        Path.join(tempDir, 'constants', 'chat_experience.ts')
+      );
+      expect(exports.AIChatExperience.localName).toBe('AIChatExperience');
+    });
+  });
+
+  describe('mixed enum and other exports', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-mixed-enum-test-'));
+
+      // Source file with enum, const, function, and class
+      await Fsp.writeFile(
+        Path.join(tempDir, 'mixed.ts'),
+        `export enum MyEnum {
+  Value = 'value',
+}
+
+export const myConst = 'const';
+export function myFunction() {}
+export class MyClass {}`
+      );
+
+      // Barrel with export *
+      await Fsp.writeFile(Path.join(tempDir, 'index.ts'), `export * from './mixed';`);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('detects enums alongside other export types', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // All export types should be detected
+      expect(exports.MyEnum).toBeDefined();
+      expect(exports.MyEnum.path).toBe(Path.join(tempDir, 'mixed.ts'));
+
+      expect(exports.myConst).toBeDefined();
+      expect(exports.myConst.path).toBe(Path.join(tempDir, 'mixed.ts'));
+
+      expect(exports.myFunction).toBeDefined();
+      expect(exports.myFunction.path).toBe(Path.join(tempDir, 'mixed.ts'));
+
+      expect(exports.MyClass).toBeDefined();
+      expect(exports.MyClass.path).toBe(Path.join(tempDir, 'mixed.ts'));
+    });
+  });
 });
