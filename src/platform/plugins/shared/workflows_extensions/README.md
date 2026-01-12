@@ -307,24 +307,26 @@ Use inputs for **what/where to process** - the step's payload:
 # Config properties (step-level) - Control step behavior
 - name: send_notification
   type: myPlugin.sendNotification
-  connector: slack-webhook    # Config: which connector to use (controls behavior)
-  mode: async                 # Config: execution mode (controls behavior)
+  connector: slack-webhook                      # Config: which connector to use (controls behavior)
+  mode: async                                   # Config: execution mode (controls behavior)
+  timeout: 10s                                  # Config: time limit (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
-    channel: "#alerts"        # Input: WHERE - target destination
+    channel: "#alerts"                          # Input: WHERE - target destination
     message: ${{ steps.process.output.alert }}  # Input: WHAT - data to send
-    priority: high            # Input: WHAT - processing parameter
+    priority: high                              # Input: WHAT - processing parameter
 
 - name: process_data
   type: myPlugin.processData
-  agentId: data-processor-1   # Config: which agent to use (controls behavior)
-  strategy: parallel          # Config: processing strategy (controls behavior)
+  if: steps.previous.output.data.length > 10.   # Config: by which condition to run this step (control behavior)
+  agentId: data-processor-1                     # Config: which agent to use (controls behavior)
+  strategy: parallel                            # Config: processing strategy (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
-    index: logs-*             # Input: WHERE - data source
-    query: "status:error"     # Input: WHAT - data to process
-    outputIndex: processed-*  # Input: WHERE - output destination
-    transform:                # Input: WHAT - transformation logic
+    index: logs-*                               # Input: WHERE - data source
+    query: "status:error"                       # Input: WHAT - data to process
+    outputIndex: processed-*                    # Input: WHERE - output destination
+    transform:                                  # Input: WHAT - transformation logic
       field: timestamp
       format: iso8601
 ```
