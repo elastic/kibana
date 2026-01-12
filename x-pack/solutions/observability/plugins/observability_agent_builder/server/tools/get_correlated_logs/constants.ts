@@ -27,11 +27,6 @@ export const DEFAULT_CORRELATION_IDENTIFIER_FIELDS = [
   'process.pid',
 ];
 
-/**
- * Filter for high-severity logs (warn, error, critical, fatal)
- * Uses shared helper that works with both ECS and OTel schemas
- */
-
 export const DEFAULT_LOG_SOURCE_FIELDS = [
   '@timestamp',
   'message',
