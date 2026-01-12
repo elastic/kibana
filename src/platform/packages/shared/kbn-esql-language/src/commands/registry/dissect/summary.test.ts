@@ -6,18 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { synth } from '../../../..';
+import { summary } from './summary';
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import {
-  createEsqlControlInject,
-  createEsqlControlExtract,
-} from './esql_control_persistable_state';
+describe('DISSECT > summary', () => {
+  it('adds the DISSECT pattern columns as fields', () => {
+    const result = summary(synth.cmd`DISSECT agent "%{firstWord}"`, '');
 
-export const esqlStaticControlPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
-  return {
-    id: ESQL_CONTROL,
-    extract: createEsqlControlExtract(),
-    inject: createEsqlControlInject(),
-  };
-};
+    expect(result).toEqual({ newColumns: new Set(['firstWord']) });
+  });
+});

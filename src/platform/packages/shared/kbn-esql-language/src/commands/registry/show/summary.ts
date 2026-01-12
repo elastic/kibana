@@ -6,15 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLCommand } from '../../../types';
+import type { ESQLCommandSummary } from '../types';
+import { SHOW_INFO_FIELDS } from './columns_after';
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import { createTimeSliderExtract, createTimeSliderInject } from './time_slider_persistable_state';
-
-export const timeSliderPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
-  return {
-    id: TIME_SLIDER_CONTROL,
-    extract: createTimeSliderExtract(),
-    inject: createTimeSliderInject(),
-  };
+export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
+  return { newColumns: new Set(SHOW_INFO_FIELDS.map((col) => col.name)) };
 };
