@@ -10,7 +10,7 @@ import fs from 'fs/promises';
 import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
-import pMap from 'p-map';
+
 import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
@@ -38,9 +38,7 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
-import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
+
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
@@ -61,6 +59,8 @@ import {
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
+
+import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -172,7 +172,12 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
-  await ensureFleetGlobalEsAssets(soClient, esClient);
+  await ensureFleetGlobalEsAssets(
+    { soClient, esClient, logger },
+    {
+      reinstallPackages: true,
+    }
+  );
   stepSpan?.end();
 
   // Ensure that required packages are always installed even if they're left out of the config
@@ -277,43 +282,6 @@ async function createSetupSideEffects(
     isInitialized: true,
     nonFatalErrors,
   };
-}
-
-/**
- * Ensure ES assets shared by all Fleet index template are installed
- */
-export async function ensureFleetGlobalEsAssets(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
-  const logger = appContextService.getLogger();
-  // Ensure Global Fleet ES assets are installed
-  logger.debug('Creating Fleet component template and ingest pipeline');
-  const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplates(esClient, logger), // returns an array
-    ensureFleetFinalPipelineIsInstalled(esClient, logger),
-  ]);
-  const assetResults = globalAssetsRes.flat();
-  if (assetResults.some((asset) => asset.isCreated)) {
-    // Update existing index template
-    const installedPackages = await getInstallations(soClient);
-    await pMap(
-      installedPackages.saved_objects,
-      async ({ attributes: installation }) => {
-        await reinstallPackageForInstallation({
-          soClient,
-          esClient,
-          installation,
-        }).catch((err) => {
-          apm.captureError(err);
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
-          );
-        });
-      },
-      { concurrency: 10 }
-    );
-  }
 }
 
 /**

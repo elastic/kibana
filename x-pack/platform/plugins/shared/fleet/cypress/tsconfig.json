@@ -2,6 +2,8 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "include": [
     "**/*",
+    "../cypress.config.ts",
+    "../cypress.config.space_awareness.ts",
     "../../../../../../typings/**/*"
   ],
   "exclude": [
@@ -19,9 +21,9 @@
   "kbn_references": [
     "@kbn/test",
     "@kbn/axe-config",
-    "@kbn/cypress-config",
     "@kbn/rison",
     "@kbn/actions-plugin",
     "@kbn/fleet-plugin",
+    "@kbn/cypress-config",
   ]
 }

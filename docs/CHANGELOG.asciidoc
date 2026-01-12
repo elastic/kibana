@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.10>>
+* <<release-notes-8.19.9>>
 * <<release-notes-8.19.8>>
 * <<release-notes-8.19.7>>
 * <<release-notes-8.19.6>>
@@ -115,6 +117,76 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+
+[[release-notes-8.19.10]]
+== {kib} 8.19.10
+
+The 8.19.10 release includes the following fixes.
+
+[float]
+[[enhancement-v8.19.10]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.19.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+[float]
+[[fixes-v8.19.10]]
+=== Fixes
+Alerting and cases:
+* Adds maximum character validation to the email connector params and configuration ({kibana-pull}246453[#246453]).
+* Adds encoding to search terms in the **Cases** page to prevent decoding errors ({kibana-pull}247992[#247992]).
+Dashboards and Visualizations::
+* Fixes compound filters showing unsaved changes on dashboard load ({kibana-pull}247309[#247309]).
+Elastic Observability solution::
+* Fixes trace links calculating date ranges incorrectly ({kibana-pull}247531[#247531]).
+* Adds the refusal field to AI assistant conversations ({kibana-pull}243423[#243423]).
+* Fixes a validation issue that caused an unsupported key error for synthetics project monitors ({kibana-pull}247880[#247880]).
+* Enables linked dashboards to appear for {{es}} query and other stack rules supported in {{observability}} ({kibana-pull}247564[#247564]).
+* Fixes an issue where the **Console** tab on the **Test Run Details** page always displayed the browser console output from Step 1, regardless of which step was currently selected ({kibana-pull}247376[#247376]). 
+* Uses unicode escaping to prevent the agent from interpreting JS template literals as policy variables ({kibana-pull}247284[#247284]). 
+* Enables updating only those Synthetics package policies that use maintenance windows when maintenance windows are updated or deleted ({kibana-pull}246088[#246088]).
+Elastic Security solution::
+For the Elastic Security 8.19.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Kibana platform::
+* Fixes `createAuditEvents` always returning failure as the outcome ({kibana-pull}247152[#247152]).
+Machine Learning::
+* Fixes the display of map view in Data Visualizer for small screen sizes ({kibana-pull}247615[#247615]).
+
+[[release-notes-8.19.9]]
+== {kib} 8.19.9
+
+The 8.19.9 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.9]]
+=== Enhancements
+Data ingestion and Fleet::
+* Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index ({kibana-pull}242612[#242612]).
+
+Kibana platform::
+* The **API keys** management page now defaults to showing personal API keys only ({kibana-pull}245261[#245261]).
+* Adds a warning when deleting API keys currently used by alerting rules ({kibana-pull}243353[#243353]).
+
+[float]
+[[fixes-v8.19.9]]
+=== Fixes
+Alerting::
+* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view modes ({kibana-pull}245253[#245253]).
+* Adds `consecutiveMatches` to action context ({kibana-pull}244997[#244997]).
+Elastic Observability solution::
+* Handles alias resolution when checking lock index mappings ({kibana-pull}244559[#244559]).
+Elastic Security solution::
+For the Elastic Security 8.19.9 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes "now" and mixed-format date handling in the **Share** menu ({kibana-pull}245539[#245539]).
+* Fixes an issue with authentication when multiple OIDC providers are configured ({kibana-pull}243869[#243869]).
+* Fixes an ECS incompatibility with the `kibana_started.elasticsearch.waitTime` value in logs ({kibana-pull}245706[#245706]).
+* Fixes the serialization of `meta.error` in JSON layouts. If it is an `Error` instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs ({kibana-pull}244364[#244364]).
+* Fixes an issue where Upgrade Assistant gave incorrect warnings about nodes exceeding the `storage low watermark` when the `max headroom` setting was configured ({kibana-pull}243906[#243906]).
+
+
+
+
 [[release-notes-8.19.8]]
 == {kib} 8.19.8
 The 8.19.8 release includes the following enhancements and fixes.
@@ -157,7 +229,12 @@ Machine Learning::
 [[release-notes-8.19.7]]
 == {kib} 8.19.7
 
-The 8.19.7 release includes the following enhancements and fixes.
+The 8.19.7 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.19.7]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[enhancement-v8.19.7]]

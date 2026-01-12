@@ -32,6 +32,10 @@ export class DiscoverApp {
     await this.page.waitForLoadingIndicatorHidden();
   }
 
+  getSelectedDataView(): Locator {
+    return this.page.testSubj.locator('discover-dataView-switch-link');
+  }
+
   async clickNewSearch() {
     await this.page.testSubj.hover('discoverNewButton');
     await this.page.testSubj.click('discoverNewButton');

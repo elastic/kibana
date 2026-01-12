@@ -147,6 +147,18 @@ describe('Config schema', () => {
     expect(validatedConfig.internal?.retrySetupOnBoot).toBe(true);
   });
 
+  it('should allow to specify fleetPolicyRevisionsCleanup configuration', () => {
+    expect(() => {
+      config.schema.validate({
+        fleetPolicyRevisionsCleanup: {
+          maxRevisions: 20,
+          interval: '2h',
+          maxPoliciesPerRun: 50,
+        },
+      });
+    }).not.toThrow();
+  });
+
   describe('deprecations', () => {
     it('should add a depreciations when trying to enable a non existing experimental feature', () => {
       const res = applyConfigDeprecations({

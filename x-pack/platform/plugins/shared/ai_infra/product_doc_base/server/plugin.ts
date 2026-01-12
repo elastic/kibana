@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import Path from 'path';
 import type { Logger } from '@kbn/logging';
-import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -86,7 +84,7 @@ export class ProductDocBasePlugin
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       kibanaVersion: this.context.env.packageInfo.version,
-      artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
+      artifactsFolder: 'ai-kb-artifacts',
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),

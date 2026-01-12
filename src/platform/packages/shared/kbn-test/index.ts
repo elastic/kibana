@@ -23,6 +23,7 @@ export {
   getKibanaCliArg,
   getKibanaCliLoggers,
   cleanupElasticsearch,
+  fipsIsEnabled,
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';

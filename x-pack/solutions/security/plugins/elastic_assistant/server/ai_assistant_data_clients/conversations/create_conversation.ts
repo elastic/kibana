@@ -94,6 +94,7 @@ export const transformToCreateScheme = (
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
       content: message.content,
+      ...(message.refusal ? { refusal: message.refusal } : {}),
       is_error: message.isError,
       reader: message.reader,
       role: message.role,

@@ -5579,7 +5579,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5588,6 +5599,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -5604,7 +5623,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5613,6 +5643,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -5739,7 +5777,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5748,6 +5797,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",

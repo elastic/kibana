@@ -10,9 +10,12 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 
-import { Role } from './role';
-import { User } from './user';
-import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import { fipsIsEnabled } from '@kbn/test';
+
+import type { Role } from './role';
+import type { User } from './user';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 const TEST_USER_NAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
@@ -55,7 +58,7 @@ export class TestUser extends FtrService {
      * Test user is configured to get `defaultRole` which is being overridden in `fips_overrides.ts` to the most privileged
      * roles available so that more tests can be run successfully
      */
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
+    if (fipsIsEnabled()) {
       this.log.debug(
         `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
       );

@@ -43758,6 +43758,9 @@ components:
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { type ReadStream, createReadStream, createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import Path from 'path';
+import { type ReadStream, createReadStream } from 'fs';
 import fetch from 'node-fetch';
+import { createWriteStream, getSafePath } from '@kbn/fs';
+import { pipeline } from 'stream/promises';
 import { resolveLocalArtifactsPath } from './local_artifacts';
 
-export const downloadToDisk = async (fileUrl: string, filePath: string) => {
-  const dirPath = Path.dirname(filePath);
-  await mkdir(dirPath, { recursive: true });
-  const writeStream = createWriteStream(filePath);
-  let readStream: ReadStream | NodeJS.ReadableStream;
+export const downloadToDisk = async (
+  fileUrl: string,
+  filePathAtVolume: string
+): Promise<string> => {
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+  const writeStream = createWriteStream(filePathAtVolume);
+  let readStream: ReadStream;
 
   const parsedUrl = new URL(fileUrl);
 
@@ -25,14 +27,10 @@ export const downloadToDisk = async (fileUrl: string, filePath: string) => {
   } else {
     const res = await fetch(fileUrl);
 
-    readStream = res.body;
+    readStream = res.body as ReadStream;
   }
 
-  await new Promise((resolve, reject) => {
-    readStream.pipe(writeStream);
-    // @ts-expect-error upgrade typescript v5.9.3
-    readStream.on('error', reject);
-    // @ts-expect-error upgrade typescript v5.9.3
-    writeStream.on('finish', resolve);
-  });
+  await pipeline(readStream, writeStream);
+
+  return artifactFullPath;
 };
