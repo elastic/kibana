@@ -81,6 +81,11 @@ function getProps(
 
   return {
     stateContainer,
+    embeddableState: {
+      isByValueEditor: () => false,
+      isEmbeddedEditor: () => false,
+      transferBackToEditor: () => {},
+    },
     savedQuery: '',
     onFieldEdited: jest.fn(),
   };

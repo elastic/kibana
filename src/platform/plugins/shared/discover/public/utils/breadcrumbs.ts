@@ -13,13 +13,23 @@ import type { DiscoverServices } from '../build_services';
 
 const rootPath = '#/';
 
-function getRootBreadcrumbs({ breadcrumb }: { breadcrumb?: string }): ChromeBreadcrumb[] {
+function getRootBreadcrumbs({
+  breadcrumb,
+  isEmbeddable,
+}: {
+  breadcrumb?: string;
+  isEmbeddable: boolean;
+}): ChromeBreadcrumb[] {
   return [
     {
-      text: i18n.translate('discover.rootBreadcrumb', {
-        defaultMessage: 'Discover',
-      }),
-      deepLinkId: 'discover',
+      text: isEmbeddable
+        ? i18n.translate('discover.rootDashboardsEditorBreadcrumb', {
+            defaultMessage: 'Dashboards',
+          })
+        : i18n.translate('discover.rootBreadcrumb', {
+            defaultMessage: 'Discover',
+          }),
+      deepLinkId: isEmbeddable ? 'dashboards' : 'discover',
       href: breadcrumb || rootPath,
     },
   ];
@@ -38,16 +48,36 @@ export function setBreadcrumbs({
   titleBreadcrumbText?: string;
   services: DiscoverServices;
 }) {
-  const rootBreadcrumbs = getRootBreadcrumbs({
-    breadcrumb: rootBreadcrumbPath,
-  });
-  const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
-    defaultMessage: 'Discover',
-  });
+  const isEmbeddable = Boolean(
+    services.embeddable.getStateTransfer().getIncomingEditorState('discover')
+  );
 
   if (titleBreadcrumbText) {
-    services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
+    const rootBreadcrumbs = getRootBreadcrumbs({
+      breadcrumb: rootBreadcrumbPath,
+      isEmbeddable,
+    });
+
+    services.chrome.setBreadcrumbs([
+      ...rootBreadcrumbs,
+      {
+        text: isEmbeddable
+          ? i18n.translate('discover.dashboardsEditorBreadcrumbEditingTitle', {
+              defaultMessage: 'Editing {title}',
+              values: { title: titleBreadcrumbText },
+            })
+          : titleBreadcrumbText,
+      },
+    ]);
   } else {
+    const discoverBreadcrumbsTitle = isEmbeddable
+      ? i18n.translate('discover.dashboardsEditorBreadcrumbTitle', {
+          defaultMessage: 'Dashboards',
+        })
+      : i18n.translate('discover.discoverBreadcrumbTitle', {
+          defaultMessage: 'Discover',
+        });
+
     services.chrome.setBreadcrumbs([
       {
         text: discoverBreadcrumbsTitle,

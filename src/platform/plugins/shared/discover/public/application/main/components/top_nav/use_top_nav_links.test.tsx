@@ -67,6 +67,11 @@ describe('useTopNavLinks', () => {
           shouldShowESQLToDataViewTransitionModal: false,
           hasShareIntegration,
           persistedDiscoverSession: undefined,
+          embeddableState: {
+            isByValueEditor: () => false,
+            isEmbeddedEditor: () => false,
+            transferBackToEditor: () => {},
+          },
           ...hookAttrs,
         }),
       {
@@ -271,6 +276,11 @@ describe('useTopNavLinks', () => {
             shouldShowESQLToDataViewTransitionModal: false,
             hasShareIntegration: true,
             persistedDiscoverSession: undefined,
+            embeddableState: {
+              isByValueEditor: () => false,
+              isEmbeddedEditor: () => false,
+              transferBackToEditor: () => {},
+            },
           }),
         {
           wrapper: Wrapper,

@@ -207,13 +207,17 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         ? `: ${persistedDiscoverSession.title}`
         : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-      setBreadcrumbs({ titleBreadcrumbText: persistedDiscoverSession?.title, services });
+      setBreadcrumbs({
+        titleBreadcrumbText: persistedDiscoverSession?.title,
+        services,
+      });
     }
   }, [
     chrome.docTitle,
     persistedDiscoverSession?.title,
     customizationContext.displayMode,
     services,
+    props.embeddableState,
   ]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);

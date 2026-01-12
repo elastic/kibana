@@ -26,8 +26,8 @@ export function useEmbeddedState() {
 
   return useMemo(
     () => ({
-      isByValueEditor: () => !Boolean(embeddableState?.searchSessionId),
-      isEmbeddedEditor: () => Boolean(embeddableState),
+      isByValueEditor: () => !!embeddableState && !Boolean(embeddableState.searchSessionId),
+      isEmbeddedEditor: () => !!embeddableState,
       transferBackToEditor: () => {
         if (embeddableState) {
           const app = embeddableState.originatingApp;
