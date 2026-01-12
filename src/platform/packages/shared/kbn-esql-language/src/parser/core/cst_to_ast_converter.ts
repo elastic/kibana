@@ -288,8 +288,9 @@ export class CstToAstConverter {
     const leftCtx = ctx.identifier();
     const constantCtx = ctx.constant();
     const mapExpressionCtx = ctx.mapExpression();
+    const assignToken = ctx.ASSIGN();
 
-    if (!leftCtx || (!constantCtx && !mapExpressionCtx)) {
+    if (!leftCtx) {
       return null;
     }
 
@@ -316,6 +317,16 @@ export class CstToAstConverter {
         expression.incomplete = true;
       }
 
+      return expression;
+    }
+    // Handle missing value (incomplete assignment)
+    if (assignToken) {
+      const expression = this.toBinaryExpression('=', ctx, [left, []]);
+      expression.incomplete = true;
+      expression.location = {
+        min: left.location.min,
+        max: assignToken.symbol.stop,
+      };
       return expression;
     }
 

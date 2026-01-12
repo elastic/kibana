@@ -34,23 +34,11 @@ export async function autocomplete(
   const settingLeftSide = isBinaryExpression(settingArg) ? settingArg.args[0] : null;
   const settingRightSide = isBinaryExpression(settingArg) ? settingArg.args[1] : null;
 
-  // SET /
   if (!settingArg) {
-    const hasAssignmentOperator = /SET\s+\S+\s*=\s*$/.test(innerText);
+    // settingLeftSide is not built until user types '=', so we need to check with regex if the leftside is present
     const hasSettingLeftSide = /SET\s+\S+\s+$/.test(innerText);
-
-    // SET <setting> = /
-    if (hasAssignmentOperator) {
-      const settingNameMatch = innerText.match(/SET\s+(\S+)\s*=/);
-      // left side without the assignment operator
-      const settingName = settingNameMatch ? settingNameMatch[1] : '';
-      const settingsValueCompletions = COMPLETIONS_BY_SETTING_NAME[settingName] ?? [];
-      return settingsValueCompletions.map((item) => ({
-        ...item,
-        text: `"${item.text}";`,
-      }));
-      // SET <setting> /
-    } else if (hasSettingLeftSide) {
+    // SET <setting> /
+    if (hasSettingLeftSide) {
       return [{ ...assignCompletionItem, detail: '' }];
       // SET /
     } else {
@@ -63,7 +51,11 @@ export async function autocomplete(
     COMPLETIONS_BY_SETTING_NAME[isIdentifier(settingLeftSide) ? settingLeftSide.text : ''] ?? [];
 
   // SET <setting> = /
-  if (!settingRightSide || isUnknownNode(settingRightSide)) {
+  if (
+    !settingRightSide ||
+    isUnknownNode(settingRightSide) ||
+    (Array.isArray(settingRightSide) && settingRightSide.length === 0)
+  ) {
     return settingsValueCompletions.map((item) => ({
       ...item,
       text: `"${item.text}";`,
