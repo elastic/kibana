@@ -32,6 +32,8 @@ export const getTestSnapshots: Task = async (ctx, task) => {
       title: `Take snapshot of current SO type definitions`,
       task: async () => {
         ctx.to = await takeSnapshot(ctx.registeredTypes!);
+        // console.log('SNAPSHOT', JSON.stringify(ctx.to, null, 2));
+        // throw new Error('STOP');
       },
     },
   ];

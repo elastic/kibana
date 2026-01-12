@@ -297,6 +297,33 @@ const myType: SavedObjectsType = {
 };
 ```
 
+### Defining model versions for existing Saved Objects
+
+If you are updating a legacy Saved Object type that lacks an existing model version, you must establish a baseline by creating an initial version, which defines the current, existing shape of the Saved Object.
+
+While the example below shows the minimal configuration for an initial version, we recommend defining `create` and `forwardCompatibility` schemas that closely match your Saved Object's structure. Doing so ensures you benefit from full **Saved Objects Repository (SOR)** validation during both creation and retrieval.
+
+```ts
+const myType: SavedObjectsType = {
+  ...
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: schema.object({}, { unknowns: 'allow' }),
+        forwardCompatibility: (attrs) => _.pick([
+          'knownField1',
+          'knownField2',
+          ...
+          'knownFieldN',
+        ]),
+      },
+    },
+  ...
+```
+
+If your Saved Object type was defining `schemas:` along with the legacy `migrations:`, you can simply use the latest schema for the initial version.
+
 ## Structure of a model version [_structure_of_a_model_version]
 
 [Model versions](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20) are not just functions as the previous migrations were, but structured objects describing how the version behaves and what changed since the last one.

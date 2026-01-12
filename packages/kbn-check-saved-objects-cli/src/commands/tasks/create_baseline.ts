@@ -30,11 +30,14 @@ export const createBaseline: Task = async (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
     {
       title: `Delete pre-existing '${defaultKibanaIndex}' index`,
-      task: async () =>
+      task: async () => {
+        // TODO the delete operation does not seem to delete the system index
+        // this causes issues when running multiple times with the --server and --client flags
         await client.indices.delete({
           index: defaultKibanaIndex,
           ignore_unavailable: true,
-        }),
+        });
+      },
     },
     {
       title: `Create '${defaultKibanaIndex}' index with previous version mappings`,

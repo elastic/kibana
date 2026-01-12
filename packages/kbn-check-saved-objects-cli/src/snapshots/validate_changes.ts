@@ -130,6 +130,13 @@ function validateLastModelVersion(name: string, mvs: ModelVersionSummary[]) {
       `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'create' schema definition.`
     );
   }
+  if (mvs.length === 1 && mv.changeTypes.length) {
+    // Do NOT allow changes in the first (initial) modelVersion, only schema additions.
+    // This guarantees rollback safety towards previous versions.
+    throw new Error(
+      `❌ The new model version '${mv.version}' for SO type '${name}' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
+    );
+  }
 }
 
 function getMutatedModelVersions(
