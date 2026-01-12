@@ -22,7 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -362,7 +362,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       switch (listType) {
         case ExceptionListTypeEnum.ENDPOINT: {
           return setInitialExceptionItems(
-            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+            defaultEndpointExceptionItems(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id, exceptionItemName, alertData)
           );
         }
         case ExceptionListTypeEnum.RULE_DEFAULT: {

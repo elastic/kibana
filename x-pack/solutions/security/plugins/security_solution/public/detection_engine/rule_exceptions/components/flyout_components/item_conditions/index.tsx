@@ -26,7 +26,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { hasEqlSequenceQuery } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -126,7 +126,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       return 'endpoint_list';
     }
 
-    const defaultValue = isEndpointException ? ENDPOINT_LIST_ID : undefined;
+    const defaultValue = isEndpointException ? ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id : undefined;
 
     return isEdit ? exceptionListItems[0].list_id : defaultValue;
   }, [isEndpointException, isEdit, exceptionListItems]);

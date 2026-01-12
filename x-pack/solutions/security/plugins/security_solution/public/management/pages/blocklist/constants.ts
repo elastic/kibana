@@ -9,19 +9,15 @@ import type {
   CreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_BLOCKLISTS_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export const BLOCKLISTS_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS;
 
 export const BLOCKLISTS_LIST_DEFINITION: CreateExceptionListSchema = {
-  name: ENDPOINT_BLOCKLISTS_LIST_NAME,
+  name: ENDPOINT_ARTIFACT_LISTS.blocklists.name,
   namespace_type: 'agnostic',
-  description: ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION,
-  list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+  description: ENDPOINT_ARTIFACT_LISTS.blocklists.description,
+  list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
   type: BLOCKLISTS_LIST_TYPE,
 };
 
