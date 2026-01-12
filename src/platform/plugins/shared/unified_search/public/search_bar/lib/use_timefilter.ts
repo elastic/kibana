@@ -92,8 +92,9 @@ function getRefreshIntervalWithFallback(props: UseTimefilterProps, useDefault: b
   const timefilterRefreshInterval = useDefault
     ? props.timefilter.getRefreshIntervalDefaults()
     : props.timefilter.getRefreshInterval();
+
   return {
     value: props.refreshInterval || timefilterRefreshInterval.value,
-    pause: props.isRefreshPaused || timefilterRefreshInterval.pause,
+    pause: props.isRefreshPaused ?? timefilterRefreshInterval.pause,
   };
 }
