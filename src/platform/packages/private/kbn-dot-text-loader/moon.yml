@@ -27,6 +27,7 @@ tags:
 fileGroups:
   src:
     - index.js
+    - jest.config.js
 tasks:
   jest:
     args:

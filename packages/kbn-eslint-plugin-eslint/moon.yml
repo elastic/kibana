@@ -29,6 +29,7 @@ fileGroups:
     - rules/**/*
     - helpers/**/*
     - index.js
+    - jest.config.js
     - lib.js
 tasks:
   jest:
