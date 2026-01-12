@@ -92,38 +92,3 @@ export async function createMcpConnector(
 
   return { id: response.body.id };
 }
-
-/**
- * Sets up an MCP connector with the test server
- */
-export async function setupMcpConnector(
-  getService: AgentBuilderApiFtrProviderContext['getService'],
-  serverUrl: string,
-  options: { name?: string } = {}
-): Promise<{ id: string }> {
-  const supertest = getService('supertest');
-  return createMcpConnector(serverUrl, supertest, options);
-}
-
-/**
- * Deletes all tools matching a prefix
- */
-export async function deleteToolsByPrefix(
-  supertest: SuperTest.Agent,
-  prefix: string
-): Promise<void> {
-  // List all tools
-  const response = await supertest.get('/api/agent_builder/tools').expect(200);
-  const tools = response.body.results || [];
-
-  // Filter by prefix and delete
-  for (const tool of tools) {
-    if (tool.id.startsWith(prefix)) {
-      try {
-        await supertest.delete(`/api/agent_builder/tools/${tool.id}`).set('kbn-xsrf', 'true');
-      } catch {
-        // Tool may already be deleted
-      }
-    }
-  }
-}

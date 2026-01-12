@@ -6,16 +6,26 @@
  */
 
 import expect from '@kbn/expect';
+import type SuperTest from 'supertest';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 import { createTestMcpServer, type McpServerSimulator } from '../../utils/mcp_server_simulator';
-import {
-  createMcpConnector,
-  deleteConnectors,
-  deleteToolsByPrefix,
-} from '../../utils/connector_helpers';
+import { createMcpConnector, deleteConnectors } from '../../utils/connector_helpers';
 
 const TOOL_PREFIX = 'ftr.mcp.';
+
+async function deleteToolsByPrefix(supertest: SuperTest.Agent, prefix: string): Promise<void> {
+  const response = await supertest.get('/api/agent_builder/tools').expect(200);
+  const tools = response.body.results || [];
+
+  await Promise.allSettled(
+    tools
+      .filter((tool: { id: string }) => tool.id.startsWith(prefix))
+      .map((tool: { id: string }) =>
+        supertest.delete(`/api/agent_builder/tools/${tool.id}`).set('kbn-xsrf', 'true')
+      )
+  );
+}
 
 export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
@@ -274,7 +284,9 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
     });
 
     describe('error handling', function () {
-      it('should show error banner when MCP server is unavailable during tool creation', async () => {
+      let errorTestConnector: Awaited<ReturnType<typeof createMcpConnector>>;
+
+      before(async () => {
         // Stop the MCP server to simulate unavailability
         await mcpServer.stop();
 
@@ -282,10 +294,17 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
         // The MCP connector has a 15-minute backend cache for listTools results (see LIST_TOOLS_CACHE_TTL_MS).
         // If we reuse the existing connector, cached tools would be returned even though the server is down.
         // A new connector has a different cache key, so it will actually try to reach the (now stopped) server.
-        const errorTestConnector = await createMcpConnector(mcpServerUrl, supertest, {
+        errorTestConnector = await createMcpConnector(mcpServerUrl, supertest, {
           name: 'ftr-error-test-connector',
         });
+      });
 
+      after(async () => {
+        // Restart the MCP server for any tests that follow
+        await mcpServer.start();
+      });
+
+      it('should show error banner when MCP server is unavailable during tool creation', async () => {
         await agentBuilder.navigateToToolsLanding();
         await agentBuilder.navigateToNewTool();
 
