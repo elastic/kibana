@@ -28,6 +28,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { LockManagerService } from '@kbn/lock-manager';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -54,7 +56,6 @@ import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
