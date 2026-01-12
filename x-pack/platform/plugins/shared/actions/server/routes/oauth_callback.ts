@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import startCase from 'lodash/startCase';
+import type { ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
@@ -170,7 +170,7 @@ export const oauthCallbackRoute = (
   licenseState: ILicenseState,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  getEncryptedSavedObjects: (() => Promise<EncryptedSavedObjectsPluginStart>) | undefined,
+  coreSetup: CoreSetup<ActionsPluginsStart>,
   oauthRateLimiter: OAuthRateLimiter
 ) => {
   router.get(
@@ -244,12 +244,7 @@ export const oauthCallbackRoute = (
         }
 
         try {
-          // Get encrypted saved objects client
-          if (!getEncryptedSavedObjects) {
-            throw new Error('EncryptedSavedObjects plugin not available');
-          }
-
-          const encryptedSavedObjects = await getEncryptedSavedObjects();
+          const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['oauth_state'],
           });

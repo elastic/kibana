@@ -7,7 +7,6 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, CoreSetup } from '@kbn/core/server';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
@@ -35,22 +34,13 @@ export interface RouteOptions {
   licenseState: ILicenseState;
   actionsConfigUtils: ActionsConfigurationUtilities;
   usageCounter?: UsageCounter;
-  getEncryptedSavedObjects?: () => Promise<EncryptedSavedObjectsPluginStart>;
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const {
-    router,
-    licenseState,
-    actionsConfigUtils,
-    getEncryptedSavedObjects,
-    logger,
-    core,
-    oauthRateLimiter,
-  } = opts;
+  const { router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter } = opts;
 
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
@@ -63,22 +53,8 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionKPIRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
-  oauthAuthorizeRoute(
-    router,
-    licenseState,
-    logger,
-    core,
-    getEncryptedSavedObjects,
-    oauthRateLimiter
-  );
-  oauthCallbackRoute(
-    router,
-    licenseState,
-    actionsConfigUtils,
-    logger,
-    getEncryptedSavedObjects,
-    oauthRateLimiter
-  );
+  oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter);
+  oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 }

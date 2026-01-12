@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
@@ -30,7 +29,6 @@ export const oauthAuthorizeRoute = (
   licenseState: ILicenseState,
   logger: Logger,
   coreSetup: CoreSetup<ActionsPluginsStart>,
-  getEncryptedSavedObjects: (() => Promise<EncryptedSavedObjectsPluginStart>) | undefined,
   oauthRateLimiter: OAuthRateLimiter
 ) => {
   router.post(
@@ -72,17 +70,10 @@ export const oauthAuthorizeRoute = (
 
           const actionsClient = (await context.actions).getActionsClient();
 
-          if (!getEncryptedSavedObjects) {
-            throw new Error('EncryptedSavedObjects plugin not available');
-          }
-
-          const encryptedSavedObjects = await getEncryptedSavedObjects();
+          const [coreStart, { encryptedSavedObjects }] = await coreSetup.getStartServices();
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action', 'oauth_state'],
           });
-
-          // Get Kibana base URL
-          const [coreStart] = await coreSetup.getStartServices();
           const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
 
           if (!kibanaUrl) {
@@ -120,8 +111,6 @@ export const oauthAuthorizeRoute = (
           const { state, codeChallenge } = await oauthStateClient.create({
             connectorId,
             redirectUri,
-            authorizationUrl: oauthConfig.authorizationUrl,
-            scope: oauthConfig.scope,
             kibanaReturnUrl,
           });
 

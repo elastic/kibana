@@ -398,10 +398,6 @@ export class ActionsPlugin
       logger: this.logger,
       core,
       oauthRateLimiter,
-      getEncryptedSavedObjects: async () => {
-        const [, { encryptedSavedObjects }] = await core.getStartServices();
-        return encryptedSavedObjects;
-      },
     });
 
     return {

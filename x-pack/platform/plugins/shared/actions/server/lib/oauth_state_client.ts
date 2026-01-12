@@ -38,8 +38,6 @@ interface ConstructorOptions {
 interface CreateStateOptions {
   connectorId: string;
   redirectUri: string;
-  authorizationUrl: string;
-  scope?: string;
   kibanaReturnUrl: string;
   createdBy?: string;
 }
@@ -79,8 +77,6 @@ export class OAuthStateClient {
   public async create({
     connectorId,
     redirectUri,
-    authorizationUrl,
-    scope,
     kibanaReturnUrl,
     createdBy,
   }: CreateStateOptions): Promise<{
@@ -94,12 +90,7 @@ export class OAuthStateClient {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + STATE_EXPIRATION_MS);
 
-    this.logger.debug(
-      `Creating OAuth state for connectorId "${connectorId}" with authorizationUrl: ${authorizationUrl}${
-        scope ? `, scope: ${scope}` : ''
-      }`
-    );
-
+    this.logger.debug(`Creating OAuth state for connectorId "${connectorId}"`);
     try {
       const result = await this.unsecuredSavedObjectsClient.create(
         OAUTH_STATE_SAVED_OBJECT_TYPE,
