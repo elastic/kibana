@@ -97,16 +97,11 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
     getGenerationTask: async () => {
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
+        'GET /api/streams/{name}/significant_events/_status 2023-10-31',
         {
           signal,
           params: {
             path: { name },
-            query: {
-              from: '',
-              to: '',
-            },
-            body: {},
           },
         }
       );
@@ -118,19 +113,17 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     ) => {
       const { from, to } = getLast24HoursTimeRange();
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
+        'POST /api/streams/{name}/significant_events/_task 2023-10-31',
         {
           signal,
           params: {
             path: { name },
-            query: {
-              schedule: true,
+            body: {
+              action: 'schedule' as const,
               connectorId,
               from,
               to,
               sampleDocsSize,
-            },
-            body: {
               systems,
             },
           },
@@ -139,34 +132,28 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
     cancelGenerationTask: async () => {
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
+        'POST /api/streams/{name}/significant_events/_task 2023-10-31',
         {
           signal,
           params: {
             path: { name },
-            query: {
-              cancel: true,
-              from: '',
-              to: '',
+            body: {
+              action: 'cancel' as const,
             },
-            body: {},
           },
         }
       );
     },
     acknowledgeGenerationTask: async () => {
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
+        'POST /api/streams/{name}/significant_events/_task 2023-10-31',
         {
           signal,
           params: {
             path: { name },
-            query: {
-              acknowledge: true,
-              from: '',
-              to: '',
+            body: {
+              action: 'acknowledge' as const,
             },
-            body: {},
           },
         }
       );
