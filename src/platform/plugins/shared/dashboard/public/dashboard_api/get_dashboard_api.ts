@@ -43,6 +43,7 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
+import { initializeRelatedPanelsManager } from './related_panels_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -169,6 +170,8 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
+  const relatedPanelsManager = initializeRelatedPanelsManager(trackPanel, layoutManager);
+
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -290,6 +293,7 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
+    ...relatedPanelsManager.api,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };
