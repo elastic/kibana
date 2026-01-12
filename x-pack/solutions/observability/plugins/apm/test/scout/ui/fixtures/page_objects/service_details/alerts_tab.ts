@@ -31,10 +31,6 @@ export class AlertsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad() {
-    await await this.page.testSubj
-      .locator('showQueryBarMenu')
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-
-    await Promise.any([this.alertsTableEmptyState.waitFor(), this.alertsTable.ensureGridVisible()]);
+    await this.page.testSubj.locator('showQueryBarMenu').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 }
