@@ -157,7 +157,16 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
         // Update search query unconditionally to show correct suggestions even when input is cleared
         setSearchQuery(searchVal);
       },
-      [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
+      [
+        handleError,
+        handleSpacesWarning,
+        isRequired,
+        onChange,
+        selectedField,
+        touched,
+        warning,
+        handleWarning,
+      ]
     );
 
     const handleCreateOption = useCallback(
