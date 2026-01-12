@@ -388,7 +388,7 @@ Use inputs for **what/where to process** - the step's payload:
 
 - name: process_data
   type: myPlugin.processData
-  if: steps.previous.output.data.length > 10.   # Config: by which condition to run this step (control behavior)
+  if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
   agentId: data-processor-1                     # Config: which agent to use (controls behavior)
   strategy: parallel                            # Config: processing strategy (controls behavior)
   # Inputs (with section) - What/Where to process
