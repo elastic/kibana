@@ -20,7 +20,7 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
 import type { SidebarServiceSetup, SidebarServiceStart } from './sidebar';
@@ -153,6 +153,32 @@ export interface ChromeStart {
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
   ): () => void;
+
+  /**
+   * Set badges to be displayed in the breadcrumbs area.
+   * The badges will always be displayed as the last {@link ChromeBreadcrumbsAppendExtension} in the breadcrumbs.
+   * By default, when navigating within the same application, badges are not cleared automatically, you need to handle
+   * their removal manually.
+   *
+   * @param badges - Array of {@link ChromeBreadcrumbsBadge} to display in the breadcrumbs area.
+   *
+   * @example
+   * ```tsx
+   * useEffect(() => {
+   *  const badges: ChromeBreadcrumbsBadge[] = [
+   *   { badgeText: 'Example', color: '#F6E58D' },
+   *  ];
+   *
+   *  core.chrome.setBreadcrumbsBadges(badges);
+   *
+   *  return () => {
+   *    // Clear badges when component unmounts
+   *    core.chrome.setBreadcrumbsBadges([]);
+   *  };
+   * }, [core.chrome]);
+   * ```
+   */
+  setBreadcrumbsBadges(badges: ChromeBreadcrumbsBadge[]): void;
 
   /**
    * Get an observable of the current custom nav link
