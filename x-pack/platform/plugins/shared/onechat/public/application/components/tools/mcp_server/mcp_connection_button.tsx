@@ -16,8 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { docLinks } from '../../../../../common/doc_links';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { MCP_SERVER_PATH } from '../../../../../common/mcp';
@@ -25,7 +23,6 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
 export const McpConnectionButton = () => {
-  const mcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
   const { createOnechatUrl } = useNavigation();
   const { kibanaUrl } = useKibanaUrl();
 
