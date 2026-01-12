@@ -63,7 +63,7 @@ export async function openSaveModal({
       return undefined;
     }
     const shouldAddAccessControl =
-      Boolean(!lastSavedId) && Boolean((await coreServices.userProfile.getCurrent()).uid);
+      Boolean(!lastSavedId) && Boolean(await coreServices.userProfile.getCurrent());
 
     const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
     return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
