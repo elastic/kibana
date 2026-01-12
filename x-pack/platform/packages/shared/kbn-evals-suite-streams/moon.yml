@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/core'
   - '@kbn/dissect-heuristics'
+  - '@kbn/sse-utils-client'
 tags:
   - functional-tests
   - package
