@@ -661,7 +661,8 @@
             "section": "def-common.ToolType",
             "text": "ToolType"
           },
-          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"configuration\">"
+          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"configuration\">,",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -792,29 +793,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-server",
-            "id": "def-common.BuiltinToolDefinition.availability",
-            "type": "Object",
-            "tags": [],
-            "label": "availability",
-            "description": [
-              "\nOptional dynamic availability configuration.\nRefer to {@link ToolAvailabilityConfig}"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/agent-builder-server",
-                "scope": "common",
-                "docId": "kibKbnAgentBuilderServerPluginApi",
-                "section": "def-common.ToolAvailabilityConfig",
-                "text": "ToolAvailabilityConfig"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -927,7 +905,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -1143,6 +1121,23 @@
                 "text": "LlmDescriptionHandler"
               },
               "<TConfig> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.InternalToolDefinition.confirmation",
+            "type": "Object",
+            "tags": [],
+            "label": "confirmation",
+            "description": [
+              "\nTool call policy to control tool call confirmation behavior"
+            ],
+            "signature": [
+              "ToolConfirmationPolicy",
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
             "deprecated": false,
@@ -1775,6 +1770,39 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.RunToolParams.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\nOptional source of the tool invocation.\nDefaults to 'unknown'."
+            ],
+            "signature": [
+              "\"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.RunToolParams.promptState",
+            "type": "Object",
+            "tags": [],
+            "label": "promptState",
+            "description": [
+              "\nOptional prompt storage state to use for tool invocation."
+            ],
+            "signature": [
+              "PromptStorageState",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.RunToolParams.onEvent",
             "type": "Function",
             "tags": [],
@@ -2024,7 +2052,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -2075,7 +2103,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -2740,7 +2768,8 @@
               "\nGet the status for the given confirmation prompt"
             ],
             "signature": [
-              "(promptId: string) => ConfirmationInfo"
+              "(promptId: string) => ",
+              "ConfirmationInfo"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/prompt_manager.ts",
             "deprecated": false,
@@ -3681,7 +3710,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ onEvent?: ",
+              "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -3708,7 +3737,7 @@
           "\nParam type for {@link ExecutableToolHandlerFn}"
         ],
         "signature": [
-          "{ onEvent?: ",
+          "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -4187,7 +4216,7 @@
           "\nParams for {@link ScopedRunner.runTool}"
         ],
         "signature": [
-          "{ onEvent?: ",
+          "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -4243,7 +4272,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ onEvent?: ",
+              "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -4276,15 +4305,8 @@
             "section": "def-common.EsqlToolDefinition",
             "text": "EsqlToolDefinition"
           },
-          ", \"readonly\"> & { availability?: ",
-          {
-            "pluginId": "@kbn/agent-builder-server",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderServerPluginApi",
-            "section": "def-common.ToolAvailabilityConfig",
-            "text": "ToolAvailabilityConfig"
-          },
-          " | undefined; }"
+          ", \"readonly\"> & ",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -4301,15 +4323,8 @@
         "signature": [
           "Omit<",
           "IndexSearchToolDefinition",
-          ", \"readonly\"> & { availability?: ",
-          {
-            "pluginId": "@kbn/agent-builder-server",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderServerPluginApi",
-            "section": "def-common.ToolAvailabilityConfig",
-            "text": "ToolAvailabilityConfig"
-          },
-          " | undefined; }"
+          ", \"readonly\"> & ",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -4371,15 +4386,8 @@
         "signature": [
           "Omit<",
           "WorkflowToolDefinition",
-          ", \"readonly\"> & { availability?: ",
-          {
-            "pluginId": "@kbn/agent-builder-server",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderServerPluginApi",
-            "section": "def-common.ToolAvailabilityConfig",
-            "text": "ToolAvailabilityConfig"
-          },
-          " | undefined; }"
+          ", \"readonly\"> & ",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
