@@ -20,6 +20,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSearchBar,
   EuiTourStep,
   useEuiTheme,
 } from '@elastic/eui';
@@ -31,10 +32,16 @@ import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useStreamsTour } from '../../../streams_tour';
+import { QueriesColumn } from './queries_column';
+import { SignificantEventsColumn } from './significant_events_column';
 import {
+  ACTIONS_COLUMN_HEADER,
+  FEATURES_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
+  QUERIES_COLUMN_HEADER,
   RUN_STREAM_DISCOVERY_BUTTON_LABEL,
+  SIGNIFICANT_EVENTS_COLUMN_HEADER,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
@@ -47,6 +54,7 @@ import {
   filterStreamsByQuery,
   shouldComposeTree,
 } from './utils';
+import { FeaturesColumn } from './features_column';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -247,130 +255,158 @@ export function StreamsTreeTable({
   };
 
   return (
-    <EuiInMemoryTable<TableRow>
-      selection={selection}
-      loading={loading}
-      data-test-subj="streamsTable"
-      columns={[
-        {
-          field: 'nameSortKey',
-          name: nameColumnHeader,
-          sortable: (row: TableRow) => row.rootNameSortKey,
-          dataType: 'string',
-          render: (_: unknown, item: TableRow) => {
-            // Only show expand/collapse if tree mode is active and has children
-            const treeMode = shouldComposeTree(sortField);
-            const hasChildren = !!item.children && item.children.length > 0;
-            const isCollapsed = collapsed.has(item.stream.name);
-            return (
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                className={css`
-                  margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
-                `}
-              >
-                {treeMode && item.children && hasChildren && (
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type={isCollapsed ? 'arrowRight' : 'arrowDown'}
-                      color="text"
-                      size="m"
-                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
-                        item.stream.name
-                      }`}
-                      aria-label={i18n.translate(
-                        isCollapsed
-                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
-                        {
-                          defaultMessage: isCollapsed
-                            ? 'Collapsed node with {childCount} children'
-                            : 'Expanded node with {childCount} children',
-                          values: { childCount: item.children.length },
-                        }
-                      )}
-                      onClick={(e: React.MouseEvent) => {
-                        handleToggleCollapse(item.stream.name);
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      onKeyDown={(e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleToggleCollapse(item.stream.name);
-                        }
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </EuiFlexItem>
-                )}
-                {treeMode && !hasChildren && (
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj={`streamsNameLink-${item.stream.name}`}
-                    href={router.link('/{key}', { path: { key: item.stream.name } })}
-                  >
-                    <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
-                  </EuiLink>
-                </EuiFlexItem>
-                {false && (
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            );
-          },
-        },
-        {
-          field: 'definition',
-          name: 'Actions',
-          width: '60px',
-          align: 'left',
-          sortable: false,
-          dataType: 'string',
-          render: (_: unknown, item: TableRow) => {
-            return (
-              <EuiButtonIcon
-                iconType="securitySignalDetected"
-                aria-label={RUN_STREAM_DISCOVERY_BUTTON_LABEL}
-              />
-            );
-          },
-        },
-      ]}
-      itemId="nameSortKey"
-      items={items}
-      sorting={sorting}
-      noItemsMessage={NO_STREAMS_MESSAGE}
-      onTableChange={handleTableChange}
-      pagination={{
-        initialPageSize: 25,
-        pageSizeOptions: [25, 50, 100],
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
-      }}
-      executeQueryOptions={{ enabled: false }}
-      search={{
-        query: searchQuery,
-        onChange: handleQueryChange,
-        box: {
-          incremental: true,
-          'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
-        },
-        toolsRight: (
-          <div className={datePickerStyle}>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiSearchBar
+              query={searchQuery}
+              onChange={handleQueryChange}
+              box={{
+                incremental: true,
+                'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className={datePickerStyle}>
             <StreamsAppSearchBar showDatePicker />
-          </div>
-        ),
-      }}
-      tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
-    />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiInMemoryTable<TableRow>
+          selection={selection}
+          loading={loading}
+          data-test-subj="streamsTable"
+          columns={[
+            {
+              field: 'nameSortKey',
+              name: nameColumnHeader,
+              sortable: (row: TableRow) => row.rootNameSortKey,
+              dataType: 'string',
+              render: (_: unknown, item: TableRow) => {
+                // Only show expand/collapse if tree mode is active and has children
+                const treeMode = shouldComposeTree(sortField);
+                const hasChildren = !!item.children && item.children.length > 0;
+                const isCollapsed = collapsed.has(item.stream.name);
+                return (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    className={css`
+                      margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
+                    `}
+                  >
+                    {treeMode && item.children && hasChildren && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                          color="text"
+                          size="m"
+                          data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
+                            item.stream.name
+                          }`}
+                          aria-label={i18n.translate(
+                            isCollapsed
+                              ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
+                              : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
+                            {
+                              defaultMessage: isCollapsed
+                                ? 'Collapsed node with {childCount} children'
+                                : 'Expanded node with {childCount} children',
+                              values: { childCount: item.children.length },
+                            }
+                          )}
+                          onClick={(e: React.MouseEvent) => {
+                            handleToggleCollapse(item.stream.name);
+                          }}
+                          tabIndex={0}
+                          role="button"
+                          onKeyDown={(e: React.KeyboardEvent) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleToggleCollapse(item.stream.name);
+                            }
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    {treeMode && !hasChildren && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiLink
+                        data-test-subj={`streamsNameLink-${item.stream.name}`}
+                        href={router.link('/{key}', { path: { key: item.stream.name } })}
+                      >
+                        <EuiHighlight search={searchQuery?.text ?? ''}>
+                          {item.stream.name}
+                        </EuiHighlight>
+                      </EuiLink>
+                    </EuiFlexItem>
+                    {false && (
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner size="m" />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                );
+              },
+            },
+            {
+              name: FEATURES_COLUMN_HEADER,
+              width: '120px',
+              align: 'left',
+              render: (item: TableRow) => <FeaturesColumn streamName={item.stream.name} />,
+            },
+            {
+              name: QUERIES_COLUMN_HEADER,
+              width: '120px',
+              align: 'left',
+              render: (item: TableRow) => <QueriesColumn streamName={item.stream.name} />,
+            },
+            {
+              name: SIGNIFICANT_EVENTS_COLUMN_HEADER,
+              width: '200px',
+              align: 'left',
+              render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
+            },
+            {
+              field: 'definition',
+              name: ACTIONS_COLUMN_HEADER,
+              width: '60px',
+              align: 'left',
+              sortable: false,
+              dataType: 'string',
+              render: (_: unknown, item: TableRow) => {
+                return (
+                  <EuiButtonIcon
+                    iconType="securitySignalDetected"
+                    aria-label={RUN_STREAM_DISCOVERY_BUTTON_LABEL}
+                  />
+                );
+              },
+            },
+          ]}
+          itemId="nameSortKey"
+          items={items}
+          sorting={sorting}
+          noItemsMessage={NO_STREAMS_MESSAGE}
+          onTableChange={handleTableChange}
+          pagination={{
+            initialPageSize: 25,
+            pageSizeOptions: [25, 50, 100],
+            pageIndex: pagination.pageIndex,
+            pageSize: pagination.pageSize,
+          }}
+          tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

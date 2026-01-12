@@ -729,7 +729,7 @@ src/platform/packages/shared/shared-ux/router/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-presentation-team
+src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-exploration-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
@@ -935,6 +935,7 @@ x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
+x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
@@ -962,7 +963,7 @@ x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-t
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
-x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra @elastic/search-inference-team
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
@@ -2159,9 +2160,9 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
-!src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
+!/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
 # Exclude usage collection schema from @elastic/kibana-core ownership
-!src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
+!/src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
