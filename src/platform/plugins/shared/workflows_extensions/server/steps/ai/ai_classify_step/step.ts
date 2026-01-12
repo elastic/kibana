@@ -82,6 +82,7 @@ export const aiClassifyStepDefinition = (
         schema: responseZodSchema,
         expectedCategories: context.input.categories,
         fallbackCategory: context.input.fallbackCategory,
+        responseMetadata: invocationResult.raw.response_metadata,
       });
 
       return {
