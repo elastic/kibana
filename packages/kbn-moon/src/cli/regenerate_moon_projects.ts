@@ -186,7 +186,7 @@ function applyTsConfigSettings(
     projectConfig.fileGroups = {
       src: compactFilePathsToGlobs(
         fs.globSync('**/{*.js,*.ts,*.jsx,*.tsx}', {
-          exclude: (f) => f.endsWith('config.js') || f.includes('__fixtures__'),
+          exclude: (f) => f.includes('__fixtures__'),
           cwd: projectConfig.project?.metadata?.sourceRoot,
         })
       ),
