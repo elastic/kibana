@@ -104,6 +104,9 @@ interface Props {
   errors?: Error[];
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
+  showCriticalPath?: boolean;
+  defaultShowCriticalPath?: boolean;
+  onShowCriticalPathChange?: (value: boolean) => void;
 }
 
 export function TraceWaterfallContextProvider({
@@ -122,6 +125,9 @@ export function TraceWaterfallContextProvider({
   errors,
   agentMarks,
   showCriticalPathControl,
+  showCriticalPath: controlledValue,
+  defaultShowCriticalPath = false,
+  onShowCriticalPathChange,
 }: Props) {
   const {
     duration,
@@ -140,7 +146,20 @@ export function TraceWaterfallContextProvider({
     onErrorClick,
   });
 
-  const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
+  const isCriticalPathControlled = controlledValue !== undefined;
+  const showCriticalPath = isCriticalPathControlled ? controlledValue : uncontrolledValue;
+
+  const setShowCriticalPath = useCallback(
+    (newValue: boolean) => {
+      onShowCriticalPathChange?.(newValue);
+      if (!isCriticalPathControlled) {
+        setUncontrolledValue(newValue);
+      }
+    },
+    [isCriticalPathControlled, onShowCriticalPathChange]
+  );
+
   const [isAccordionOpen, setAccordionOpen] = useState(true);
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>

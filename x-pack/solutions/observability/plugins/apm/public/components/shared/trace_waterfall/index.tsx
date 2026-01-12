@@ -45,6 +45,9 @@ export interface Props {
   isFiltered?: boolean;
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
+  showCriticalPath?: boolean;
+  defaultShowCriticalPath?: boolean;
+  onShowCriticalPathChange?: (value: boolean) => void;
 }
 
 export function TraceWaterfall({
@@ -62,6 +65,9 @@ export function TraceWaterfall({
   isFiltered,
   agentMarks,
   showCriticalPathControl = false,
+  showCriticalPath,
+  defaultShowCriticalPath,
+  onShowCriticalPathChange,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -79,6 +85,9 @@ export function TraceWaterfall({
       errors={errors}
       agentMarks={agentMarks}
       showCriticalPathControl={showCriticalPathControl}
+      showCriticalPath={showCriticalPath}
+      defaultShowCriticalPath={defaultShowCriticalPath}
+      onShowCriticalPathChange={onShowCriticalPathChange}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
