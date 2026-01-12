@@ -55,8 +55,15 @@ describe('buildDataPart', () => {
       expect(typeof result[0].content).toBe('string');
     });
 
-    it('should use text marker for markdown', () => {
+    it('should use json marker for markdown', () => {
       const input = { name: 'John', age: 30 };
+      const result = buildDataPart(input);
+
+      expect(result[0].content).toContain('```json');
+    });
+
+    it('should use text marker for markdown', () => {
+      const input = 'foo bar';
       const result = buildDataPart(input);
 
       expect(result[0].content).toContain('```text');
@@ -319,7 +326,7 @@ describe('buildInstructionsPart', () => {
 
       // Should still return the instructions even if just whitespace
       // (behavior depends on implementation - adjust if needed)
-      expect(Array.isArray(result)).toBe(true);
+      expect(result).toEqual([]);
     });
   });
 
@@ -327,8 +334,7 @@ describe('buildInstructionsPart', () => {
     it('should return an empty array when instructions are undefined', () => {
       const result = buildInstructionsPart(undefined);
 
-      expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBe(0);
+      expect(result).toEqual([]);
     });
   });
 });

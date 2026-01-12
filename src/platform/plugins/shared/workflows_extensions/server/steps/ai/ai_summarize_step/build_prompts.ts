@@ -75,7 +75,7 @@ ${resolvedInput}
 }
 
 export function buildInstructionsPart(instructions: string | undefined): MessageFieldWithRole[] {
-  if (!instructions) {
+  if (!instructions?.trim()) {
     return [];
   }
 
