@@ -17,7 +17,7 @@ import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { QueriesTable } from './components/queries_table';
-import { StreamsTree } from './components/streams_tree/streams_tree';
+import { StreamsView } from './components/streams_view/streams_view';
 
 const discoveryTabs = ['streams', 'queries'] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
@@ -108,7 +108,7 @@ export function SignificantEventsDiscoveryPage() {
         tabs={tabs}
       />
       <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsTree />}
+        {tab === 'streams' && <StreamsView />}
         {tab === 'queries' && <QueriesTable />}
       </StreamsAppPageTemplate.Body>
     </>
