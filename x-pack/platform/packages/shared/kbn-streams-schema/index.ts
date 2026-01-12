@@ -161,3 +161,5 @@ export {
 } from './src/models/processing_simulation';
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
+
+export { TaskStatus } from './src/tasks/types';
