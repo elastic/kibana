@@ -80,7 +80,12 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     settings,
   });
   const { from } = useGlobalTime();
-  const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true, start: from });
+  const { data } = useFindAttackDiscoveries({
+    http,
+    isAssistantEnabled: true,
+    start: from,
+    scheduled: true,
+  });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
   // showing / hiding the flyout:
