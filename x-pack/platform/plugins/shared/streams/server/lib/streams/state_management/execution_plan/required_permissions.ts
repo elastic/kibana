@@ -73,7 +73,7 @@ export function getRequiredPermissionsForActions({
     delete_dot_streams_document,
     delete_queries,
     unlink_assets,
-    unlink_features,
+    unlink_systems,
     update_failure_store,
     ...rest
   } = actionsByType;
