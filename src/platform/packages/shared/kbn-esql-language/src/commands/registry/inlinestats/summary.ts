@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ReBroadcastMouseDownEvents } from './components/rebroadcast_mouse_down_events';
-export { type ContextMenuAction, useContextMenuUtils } from './hooks/use_context_menu_utils';
-export { useFullScreen } from './hooks/use_fullscreen';
-export { useCopy } from './hooks/use_copy';
-export { usePlaceholder } from './hooks/use_placeholder';
-export { useFitToContent } from './hooks/use_fit_content';
+import type { ESQLCommand } from '../../../types';
+import type { ESQLCommandSummary } from '../types';
+import { summary as summaryStats } from '../stats/summary';
+
+export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
+  return summaryStats(command, query);
+};
