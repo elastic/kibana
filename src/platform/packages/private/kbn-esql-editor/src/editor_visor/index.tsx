@@ -24,8 +24,6 @@ export interface QuickSearchVisorProps {
   isSpaceReduced?: boolean;
   // Whether the visor is visible
   isVisible: boolean;
-  // Callback when the visor is closed
-  onClose: () => void;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   // Kql autocomplete service
@@ -41,7 +39,6 @@ export function QuickSearchVisor({
   isSpaceReduced,
   isVisible,
   kql,
-  onClose,
   onUpdateAndSubmitQuery,
 }: QuickSearchVisorProps) {
   const isDarkMode = useKibanaIsDarkMode();
@@ -99,12 +96,7 @@ export function QuickSearchVisor({
     if (isVisible && kqlInputRef.current) {
       // Find the textarea within the KQL input and focus it
       const textArea = kqlInputRef.current.querySelector('textarea');
-      if (textArea) {
-        // Small delay to ensure the component is fully rendered
-        setTimeout(() => {
-          textArea.focus();
-        }, 0);
-      }
+      textArea?.focus();
     }
   }, [isVisible]);
 

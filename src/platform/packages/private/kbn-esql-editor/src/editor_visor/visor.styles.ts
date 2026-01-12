@@ -95,7 +95,7 @@ export const visorStyles = (
       }
 
       .kbnQueryBar__textarea {
-        border-radius: ${euiTheme.size.s};
+        border-radius: ${euiTheme.size.s} !important;
         box-shadow: none;
         &:focus,
         &:hover {
