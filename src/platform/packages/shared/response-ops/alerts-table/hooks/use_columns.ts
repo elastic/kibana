@@ -192,6 +192,7 @@ export const useColumns = ({
           defaultColumns,
         });
 
+        // Toggle the column in the visible columns as well
         updateVisibleColumns((oldVisibleColumns) =>
           toggleVisibleColumn({
             columnId,
