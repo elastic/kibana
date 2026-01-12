@@ -57,7 +57,7 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const { [streamName]: queryLinks } = await queryClient.getQueryLinks([streamName]);
+    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
 
     return {
       queries: queryLinks.map((queryLink) => queryLink.query),
