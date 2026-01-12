@@ -8,7 +8,13 @@
  */
 
 import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../types';
-import { isBinaryExpression, isIdentifier, isStringLiteral, withAutoSuggest } from '../../../..';
+import {
+  isBinaryExpression,
+  isIdentifier,
+  isMap,
+  isStringLiteral,
+  withAutoSuggest,
+} from '../../../..';
 import { UnmappedFieldsTreatment, type ISuggestionItem } from '../../registry/types';
 import { SuggestionCategory } from '../../../shared/sorting/types';
 import { settings } from '../generated/settings';
@@ -36,7 +42,7 @@ export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionI
 /**
  * Given a SET command, it returs the name and the value of the setting, or undefined if some is not present.
  */
-export function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
+function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
   settingName?: string;
   settingValue?: string;
 } {
@@ -44,8 +50,16 @@ export function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
   const leftSide = isBinaryExpression(settingArg) ? settingArg.args[0] : undefined;
   const rigthSide = isBinaryExpression(settingArg) ? settingArg.args[1] : undefined;
 
-  const settingName = isIdentifier(leftSide) ? leftSide.text : undefined;
-  const settingValue = isStringLiteral(rigthSide) ? rigthSide.valueUnquoted : undefined;
+  const settingName = isIdentifier(leftSide) ? leftSide.name : undefined;
+
+  let settingValue;
+  if (isStringLiteral(rigthSide)) {
+    settingValue = rigthSide.valueUnquoted;
+  }
+
+  if (isMap(rigthSide)) {
+    settingValue = rigthSide.text;
+  }
 
   return {
     settingName,
