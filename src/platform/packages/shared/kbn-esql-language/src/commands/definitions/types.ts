@@ -240,7 +240,7 @@ export interface ValidationErrors {
     message: string;
     type: { name: string | number };
   };
-  unmappedFieldWarning: {
+  unmappedColumnWarning: {
     message: string;
     type: { name: string | number };
   };

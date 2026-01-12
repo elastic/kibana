@@ -34,7 +34,7 @@ export class ColumnValidator {
       if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
         return [errors.unknownColumn(this.column)];
       } else {
-        return [errors.unmappedFieldWarning(this.column)];
+        return [errors.unmappedColumnWarning(this.column)];
       }
     }
 

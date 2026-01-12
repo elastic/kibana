@@ -44,9 +44,9 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
-    case 'unmappedFieldWarning':
+    case 'unmappedColumnWarning':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unmappedFieldWarning', {
+        message: i18n.translate('kbn-esql-language.esql.validation.unmappedColumnWarning', {
           defaultMessage: `"{name}" column isn't mapped in any searched indices. If you are not intentionally referencing an unmapped field, check that the field exists or that it is spelled correctly in your query.`,
           values: { name: out.name },
         }),
@@ -489,9 +489,9 @@ export const errors = {
       'getColumnsFor'
     ),
 
-  unmappedFieldWarning: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
+  unmappedColumnWarning: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
     tagSemanticError(
-      errors.byId('unmappedFieldWarning', column.location, { name: column.name }),
+      errors.byId('unmappedColumnWarning', column.location, { name: column.name }),
       'getColumnsFor'
     ),
 

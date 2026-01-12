@@ -359,7 +359,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
 export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    return !['unknownIndex', 'unknownColumn', 'unmappedFieldWarning'].includes(error.code);
+    return !['unknownIndex', 'unknownColumn', 'unmappedColumnWarning'].includes(error.code);
   });
 };
 
