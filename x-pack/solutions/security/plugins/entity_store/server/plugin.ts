@@ -29,12 +29,11 @@ export class EntityStorePlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: EntityStoreSetupPlugins) {
+  public setup(core: CoreSetup<EntityStoreStartPlugins, void>, plugins: EntityStoreSetupPlugins) {
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (context, request) =>
-        createRequestHandlerContext({ context, core, logger: this.logger })
+      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger })
     );
 
     registerTasks(plugins.taskManager, this.logger);
