@@ -37,6 +37,7 @@ examples/saved_objects @elastic/kibana-core
 examples/screenshot_mode_example @elastic/response-ops
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
+examples/sidebar_examples @elastic/kibana-core
 examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
@@ -137,6 +138,7 @@ src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-shar
 src/core/packages/chrome/layout/core-chrome-layout-feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
 src/core/packages/chrome/navigation @elastic/appex-sharedux
+src/core/packages/chrome/sidebar @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
@@ -653,6 +655,7 @@ src/platform/packages/shared/presentation/presentation_containers @elastic/kiban
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-presentation
+src/platform/packages/shared/react/context_registry @elastic/appex-sharedux
 src/platform/packages/shared/react/env @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/env @elastic/appex-sharedux
