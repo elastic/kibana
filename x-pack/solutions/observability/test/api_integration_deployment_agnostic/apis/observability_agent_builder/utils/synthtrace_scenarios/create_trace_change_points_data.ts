@@ -9,7 +9,7 @@ import datemath from '@elastic/datemath';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { apm, timerange } from '@kbn/synthtrace-client';
 
-const SERVICE_NAME = 'test-service';
+export const SERVICE_NAME = 'test-service';
 export const TRACE_CHANGE_POINTS_INDEX = `traces-apm.app.${SERVICE_NAME}-default`;
 export const TRACE_CHANGE_POINTS_ANALYSIS_WINDOW = {
   start: 'now-60m',

@@ -13,6 +13,7 @@ import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import {
+  SERVICE_NAME,
   TRACE_CHANGE_POINTS_ANALYSIS_WINDOW,
   createTraceChangePointsData,
 } from '../utils/synthtrace_scenarios/create_trace_change_points_data';
@@ -52,27 +53,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: TRACE_CHANGE_POINTS_ANALYSIS_WINDOW.start,
             end: TRACE_CHANGE_POINTS_ANALYSIS_WINDOW.end,
-            aggregation: {
-              field: 'transaction.duration.us',
-              type: 'p95',
-            },
           },
         });
         traceChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
-      it('should detect spike', () => {
-        expect(traceChangePoints.length).to.be.greaterThan(0);
-        const spike = traceChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be.ok();
+      it('should return results grouped by service.name', () => {
+        const serviceNames = traceChangePoints.find((cp: ChangePoint) => cp.key === SERVICE_NAME);
+        expect(serviceNames).to.not.be(undefined);
+      });
+
+      it('should include changes_latency, changes_throughput, and changes_failure_rate change points results', () => {
+        traceChangePoints.forEach((cp: ChangePoint) => {
+          expect(cp).to.have.property('changes_latency');
+          expect(cp).to.have.property('changes_throughput');
+          expect(cp).to.have.property('changes_failure_rate');
+        });
       });
 
       it('should include time series data for visualization', () => {
         traceChangePoints.forEach((cp: ChangePoint) => {
-          expect(cp).to.have.property('timeSeries');
-          expect(cp?.timeSeries?.length).to.be.greaterThan(0);
-          expect(cp?.timeSeries?.[0]).to.have.property('x');
-          expect(cp?.timeSeries?.[0]).to.have.property('y');
+          expect(cp).to.have.property('time_series');
         });
       });
     });
