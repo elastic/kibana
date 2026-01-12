@@ -178,6 +178,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
+      editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
+
       return mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
