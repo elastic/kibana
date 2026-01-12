@@ -12,7 +12,10 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-common';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
-import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  THREAT_HUNTING_AGENT_ID,
+} from '../../../../../../common/constants';
 import { KibanaServices } from '../../../../../common/lib/kibana/services';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -43,6 +46,7 @@ export const useAgentBuilderStream = () => {
       try {
         const http = KibanaServices.get().http;
         const payload = {
+          agent_id: THREAT_HUNTING_AGENT_ID,
           input: `Create detection rule based on the following query: ${message}`,
           connector_id: connectorId,
           capabilities: getKibanaDefaultAgentCapabilities(),
