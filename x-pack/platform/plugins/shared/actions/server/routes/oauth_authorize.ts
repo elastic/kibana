@@ -93,10 +93,9 @@ export const oauthAuthorizeRoute = (
               includedHiddenTypes: ['action'],
             }),
             kibanaBaseUrl: kibanaUrl,
-            logger: routeLogger,
           });
           const oauthConfig = await oauthService.getOAuthConfig(connectorId);
-          const redirectUri = oauthService.getRedirectUri(oauthConfig);
+          const redirectUri = oauthService.getRedirectUri();
 
           // Validate and build return URL for post-OAuth redirect
           const requestedReturnUrl = req.body?.returnUrl;

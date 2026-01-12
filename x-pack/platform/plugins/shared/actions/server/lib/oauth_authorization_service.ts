@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ActionsClient } from '../actions_client';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
@@ -19,7 +18,6 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   scope?: string;
-  redirectUri?: string;
 }
 
 /**
@@ -34,7 +32,6 @@ interface OAuthConnectorConfig {
   clientId?: string;
   tokenUrl?: string;
   scope?: string;
-  redirectUri?: string;
 }
 
 /**
@@ -44,7 +41,6 @@ export interface OAuthConfig {
   authorizationUrl: string;
   clientId: string;
   scope?: string;
-  redirectUri?: string;
 }
 
 /**
@@ -70,7 +66,6 @@ interface ConstructorOptions {
   actionsClient: ActionsClient;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   kibanaBaseUrl: string;
-  logger: Logger;
 }
 
 /**
@@ -85,18 +80,11 @@ export class OAuthAuthorizationService {
   private readonly actionsClient: ActionsClient;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private readonly kibanaBaseUrl: string;
-  private readonly logger: Logger;
 
-  constructor({
-    actionsClient,
-    encryptedSavedObjectsClient,
-    kibanaBaseUrl,
-    logger,
-  }: ConstructorOptions) {
+  constructor({ actionsClient, encryptedSavedObjectsClient, kibanaBaseUrl }: ConstructorOptions) {
     this.actionsClient = actionsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.kibanaBaseUrl = kibanaBaseUrl;
-    this.logger = logger;
   }
 
   /**
@@ -140,8 +128,6 @@ export class OAuthAuthorizationService {
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
-    const redirectUri = secrets.redirectUri || config?.redirectUri;
-
     if (!authorizationUrl || !clientId) {
       throw new Error(
         'Connector missing required OAuth configuration (authorizationUrl, clientId)'
@@ -152,7 +138,6 @@ export class OAuthAuthorizationService {
       authorizationUrl,
       clientId,
       scope,
-      redirectUri,
     };
   }
 
@@ -160,21 +145,12 @@ export class OAuthAuthorizationService {
    * Builds the redirect URI for OAuth callbacks
    *
    * The redirect URI is where the OAuth provider will send the user after authorization.
-   * If a custom redirectURI is provided, it will be used. Otherwise, it points to the
-   * oauth_callback route in this Kibana instance.
+   * It points to the oauth_callback route in this Kibana instance.
    *
    * @returns The complete redirect URI
-   * @throws Error if Kibana public base URL is not configured and no custom URI provided
-   * @param config
+   * @throws Error if Kibana public base URL is not configured
    */
-  getRedirectUri(config: OAuthConnectorConfig): string {
-    // If user configured a custom redirect URI, use that
-    if (config.redirectUri) {
-      this.logger.debug(`Using custom redirect URI: ${config.redirectUri}`);
-      return config.redirectUri;
-    }
-
-    // Otherwise, fallback to Kibana URL-based redirect URI
+  getRedirectUri(): string {
     if (!this.kibanaBaseUrl) {
       throw new Error(
         'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'

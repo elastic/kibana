@@ -131,10 +131,6 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
-export const OAUTH_REDIRECT_URI_LABEL = i18n.translate('connectorSpecs.oauthRedirectURI.label', {
-  defaultMessage: 'Redirect URI',
-});
-
 export const OAUTH_USE_BASIC_AUTH_LABEL = i18n.translate('connectorSpecs.oauthUseBasicAuth.label', {
   defaultMessage: 'Use HTTP Basic Authentication for token endpoint',
 });
