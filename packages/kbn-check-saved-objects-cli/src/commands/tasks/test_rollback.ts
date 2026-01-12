@@ -26,7 +26,7 @@ export const testRollback: Task = async (ctx, task) => {
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run rollback migration on rollback-testable types: '${updatedTypes
+      title: `Run rollback migration on updated types: '${updatedTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await performRollback(),
