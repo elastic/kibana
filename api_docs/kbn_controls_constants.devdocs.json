@@ -24,6 +24,81 @@
     "misc": [
       {
         "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.ACTION_CREATE_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_CREATE_CONTROL",
+        "description": [],
+        "signature": [
+          "\"createControl\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/control_action_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.ACTION_CREATE_ESQL_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_CREATE_ESQL_CONTROL",
+        "description": [],
+        "signature": [
+          "\"createEsqlControl\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/control_action_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.ACTION_CREATE_TIME_SLIDER",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_CREATE_TIME_SLIDER",
+        "description": [],
+        "signature": [
+          "\"createTimeSlider\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/control_action_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.CONTROL_HOVER_TRIGGER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTROL_HOVER_TRIGGER_ID",
+        "description": [],
+        "signature": [
+          "\"CONTROL_HOVER_TRIGGER\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.CONTROL_MENU_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "CONTROL_MENU_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"CONTROL_MENU_TRIGGER\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
         "id": "def-common.CONTROL_WIDTH_LARGE",
         "type": "string",
         "tags": [],
@@ -32,7 +107,7 @@
         "signature": [
           "\"large\""
         ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +122,7 @@
         "signature": [
           "\"medium\""
         ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -59,40 +134,10 @@
         "tags": [],
         "label": "CONTROL_WIDTH_SMALL",
         "description": [
-          "Control specific state"
+          "This state is only relevant for sticky controls"
         ],
         "signature": [
           "\"small\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROLS_CHAINING_HIERARCHICAL",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROLS_CHAINING_HIERARCHICAL",
-        "description": [],
-        "signature": [
-          "\"HIERARCHICAL\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROLS_CHAINING_NONE",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROLS_CHAINING_NONE",
-        "description": [],
-        "signature": [
-          "\"NONE\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
@@ -110,36 +155,6 @@
         ],
         "signature": [
           "\"control_group\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROLS_LABEL_POSITION_ONE_LINE",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROLS_LABEL_POSITION_ONE_LINE",
-        "description": [],
-        "signature": [
-          "\"oneLine\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROLS_LABEL_POSITION_TWO_LINE",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROLS_LABEL_POSITION_TWO_LINE",
-        "description": [],
-        "signature": [
-          "\"twoLine\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
@@ -171,7 +186,7 @@
         "signature": [
           "false"
         ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -186,20 +201,20 @@
         "signature": [
           "\"medium\""
         ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_CONTROLS_CHAINING",
-        "type": "string",
+        "id": "def-common.DEFAULT_IGNORE_VALIDATIONS",
+        "type": "boolean",
         "tags": [],
-        "label": "DEFAULT_CONTROLS_CHAINING",
+        "label": "DEFAULT_IGNORE_VALIDATIONS",
         "description": [],
         "signature": [
-          "\"HIERARCHICAL\""
+          "false"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
@@ -208,13 +223,28 @@
       },
       {
         "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_CONTROLS_LABEL_POSITION",
+        "id": "def-common.DEFAULT_SEARCH_TECHNIQUE",
         "type": "string",
         "tags": [],
-        "label": "DEFAULT_CONTROLS_LABEL_POSITION",
+        "label": "DEFAULT_SEARCH_TECHNIQUE",
         "description": [],
         "signature": [
-          "\"oneLine\""
+          "\"prefix\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.DEFAULT_USE_GLOBAL_FILTERS",
+        "type": "boolean",
+        "tags": [],
+        "label": "DEFAULT_USE_GLOBAL_FILTERS",
+        "description": [],
+        "signature": [
+          "true"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "deprecated": false,
@@ -285,15 +315,15 @@
     "objects": [
       {
         "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_IGNORE_PARENT_SETTINGS",
+        "id": "def-common.OPTIONS_LIST_DEFAULT_SORT",
         "type": "Object",
         "tags": [],
-        "label": "DEFAULT_IGNORE_PARENT_SETTINGS",
+        "label": "OPTIONS_LIST_DEFAULT_SORT",
         "description": [],
         "signature": [
-          "{ readonly ignoreFilters: false; readonly ignoreQuery: false; readonly ignoreTimerange: false; readonly ignoreValidations: false; }"
+          "{ readonly by: \"_count\"; readonly direction: \"desc\"; }"
         ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

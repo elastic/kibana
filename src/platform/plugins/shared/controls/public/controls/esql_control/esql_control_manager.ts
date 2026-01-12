@@ -33,6 +33,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { hasStartEndParams } from '@kbn/esql-utils';
 
+import type { TimeRange } from '@kbn/es-query';
 import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
@@ -136,6 +137,7 @@ export function initializeESQLControlManager(
   // For Values From Query controls, update values on dashboard load/reload
   // or when dependencies change in case of chaining controls
   let previousESQLVariables: ESQLControlVariable[] = [];
+  let previousTimeRange: TimeRange | undefined;
   let hasInitialFetch = false;
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
@@ -153,12 +155,17 @@ export function initializeESQLControlManager(
           (variable) => variable.key !== currentVariableName
         );
 
+        // Check if timeRange has changed
+        const timeRangeChanged = !deepEqual(previousTimeRange, timeRange);
+
         const shouldFetch =
           !hasInitialFetch ||
+          timeRangeChanged ||
           haveVariablesValuesChanged(externalVariables, previousESQLVariables, variablesInQuery);
 
         if (shouldFetch) {
           previousESQLVariables = [...externalVariables];
+          previousTimeRange = timeRange ? { ...timeRange } : undefined;
           hasInitialFetch = true;
         }
 
@@ -288,6 +295,7 @@ export function initializeESQLControlManager(
       title$.next(lastSaved?.title);
       temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
+      previousTimeRange = undefined;
       hasInitialFetch = false;
     },
     getLatestState: () => {
