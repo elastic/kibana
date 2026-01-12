@@ -12,14 +12,22 @@ import { BehaviorSubject } from 'rxjs';
 import type { ComponentType } from 'react';
 import type { z } from '@kbn/zod/v4';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SidebarComponentProps<TState> {}
-export type SidebarComponentType<TState> = ComponentType<SidebarComponentProps<TState>>;
+/**
+ * Props passed to sidebar app components
+ */
+export interface SidebarComponentProps<TParams> {
+  /** Current params for the sidebar app */
+  params: TParams;
+  /** Update params (merges with existing params, persists to localStorage) */
+  setParams: (params: Partial<TParams>) => void;
+}
+
+export type SidebarComponentType<TParams> = ComponentType<SidebarComponentProps<TParams>>;
 
 /**
  * Content configuration for a sidebar app panel
  */
-export interface SidebarAppContent<TState = unknown> {
+export interface SidebarAppContent<TParams = unknown> {
   /**
    * Title displayed at the top of the sidebar panel
    */
@@ -27,35 +35,35 @@ export interface SidebarAppContent<TState = unknown> {
   /**
    * Asynchronously loads the main component for the sidebar app
    */
-  loadComponent: () => Promise<SidebarComponentType<TState>>;
+  loadComponent: () => Promise<SidebarComponentType<TParams>>;
   /**
-   * Function that returns a Zod schema defining the state structure and default values.
+   * Function that returns a Zod schema defining the params structure and default values.
    *
-   * Initial state is created by calling `getStateSchema().parse({})`.
+   * Initial params are created by calling `getParamsSchema().parse({})`.
    * Use `.default()` on schema fields to provide initial values.
    *
    * Lazy evaluation ensures schemas are only built when needed.
    *
-   * Validation occurs on initialization and reset only (not on setState calls).
+   * Params are persisted to localStorage and restored on page reload.
    *
    * @example
    * ```typescript
    * import { z } from '@kbn/zod/v4';
    *
-   * const getMyStateSchema = () => z.object({
+   * const getMyParamsSchema = () => z.object({
    *   userName: z.string().default(''),
    *   count: z.number().int().nonnegative().default(0),
    * });
    *
-   * type MyState = z.infer<ReturnType<typeof getMyStateSchema>>;
+   * type MyParams = z.infer<ReturnType<typeof getMyParamsSchema>>;
    *
    * registerApp({
-   *   getStateSchema: getMyStateSchema,
+   *   getParamsSchema: getMyParamsSchema,
    *   // ...
    * });
    * ```
    */
-  getStateSchema: () => z.ZodType<TState>;
+  getParamsSchema: () => z.ZodType<TParams>;
 }
 
 /**
@@ -75,9 +83,9 @@ export interface SidebarAppButton {
 /**
  * Complete app definition for sidebar registration
  */
-export interface SidebarApp<TAppState = unknown>
+export interface SidebarApp<TParams = unknown>
   extends SidebarAppButton,
-    SidebarAppContent<TAppState> {
+    SidebarAppContent<TParams> {
   /**
    * Unique identifier for the sidebar app
    */
@@ -87,7 +95,7 @@ export interface SidebarApp<TAppState = unknown>
 export interface SidebarRegistryServiceApi {
   apps$: Observable<SidebarApp[]>;
   getApps: () => SidebarApp[];
-  registerApp<TAppState = {}>(app: SidebarApp<TAppState>): void;
+  registerApp<TParams = {}>(app: SidebarApp<TParams>): void;
   getApp(appId: string): SidebarApp;
   hasApp: (appId: string) => boolean;
 }
@@ -99,7 +107,7 @@ export class SidebarRegistryService implements SidebarRegistryServiceApi {
 
   constructor() {}
 
-  registerApp<TAppState = {}>(app: SidebarApp<TAppState>): void {
+  registerApp<TParams = {}>(app: SidebarApp<TParams>): void {
     if (this.registeredApps.has(app.appId)) {
       throw new Error(`[Sidebar Registry] App already registered: ${app.appId}`);
     }

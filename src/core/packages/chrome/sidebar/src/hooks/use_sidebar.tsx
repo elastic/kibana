@@ -16,9 +16,10 @@ import { useSidebarService } from '../providers';
  */
 export interface UseSidebarResult {
   isOpen: boolean;
-  open: (appId: string) => void;
+  open: <TParams = {}>(appId: string, params?: Partial<TParams>) => void;
   close: () => void;
   setWidth: (width: number) => void;
+  setParams: <TParams = {}>(appId: string, params: Partial<TParams>) => void;
   currentAppId: string | null;
 }
 
@@ -26,14 +27,23 @@ export interface UseSidebarResult {
  * React hook for accessing the sidebar state and actions
  */
 export function useSidebar(): UseSidebarResult {
-  const sidebar = useSidebarService().state;
+  const sidebarService = useSidebarService();
+  const sidebar = sidebarService.state;
 
   const isOpen = useObservable(sidebar.isOpen$, sidebar.isOpen());
   const currentAppId = useObservable(sidebar.currentAppId$, sidebar.getCurrentAppId());
 
-  const open = useCallback((appId: string) => sidebar.open(appId), [sidebar]);
+  const open = useCallback(
+    <TParams = {},>(appId: string, params?: Partial<TParams>) => sidebar.open(appId, params),
+    [sidebar]
+  );
   const close = useCallback(() => sidebar.close(), [sidebar]);
   const setWidth = useCallback((newWidth: number) => sidebar.setWidth(newWidth), [sidebar]);
+  const setParams = useCallback(
+    <TParams = {},>(appId: string, params: Partial<TParams>) =>
+      sidebarService.appState.setParams(appId, params),
+    [sidebarService]
+  );
 
   return useMemo(
     () => ({
@@ -42,8 +52,9 @@ export function useSidebar(): UseSidebarResult {
       open,
       close,
       setWidth,
+      setParams,
     }),
-    [isOpen, currentAppId, open, close, setWidth]
+    [isOpen, currentAppId, open, close, setWidth, setParams]
   );
 }
 

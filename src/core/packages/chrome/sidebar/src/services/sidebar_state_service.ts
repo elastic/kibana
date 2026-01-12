@@ -11,11 +11,12 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map } from 'rxjs';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
+import type { SidebarAppStateService } from './sidebar_app_state_service';
 
 export interface SidebarStateServiceApi {
   isOpen$: Observable<boolean>;
   isOpen: () => boolean;
-  open: (appId: string) => void;
+  open: <TParams = {}>(appId: string, params?: Partial<TParams>) => void;
   close: () => void;
 
   width$: Observable<number>;
@@ -37,12 +38,16 @@ export class SidebarStateService implements SidebarStateServiceApi {
   public readonly isOpen$ = this._currentAppId$.pipe(map((appId) => appId !== null));
   public readonly width$ = this._width$.asObservable();
 
-  constructor(private readonly registry: SidebarRegistryServiceApi) {}
+  constructor(
+    private readonly registry: SidebarRegistryServiceApi,
+    private readonly appStateService: SidebarAppStateService
+  ) {}
 
   start() {
     const currentAppId = StorageHelper.get<string>('currentAppId') ?? null;
 
     if (currentAppId && this.registry.hasApp(currentAppId)) {
+      // On restore, don't pass params - let the app state service load from storage
       this.open(currentAppId);
     }
 
@@ -52,12 +57,17 @@ export class SidebarStateService implements SidebarStateServiceApi {
     }
   }
 
-  open(appId: string): void {
+  open<TParams = {}>(appId: string, params?: Partial<TParams>): void {
     if (!this.registry.hasApp(appId)) {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
-    this._currentAppId$.next(appId);
 
+    // Initialize params if provided (merges with defaults from schema)
+    if (params) {
+      this.appStateService.initializeParams(appId, params);
+    }
+
+    this._currentAppId$.next(appId);
     StorageHelper.set('currentAppId', appId);
   }
 

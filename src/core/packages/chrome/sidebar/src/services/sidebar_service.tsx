@@ -21,7 +21,7 @@ export interface SidebarServiceSetup {
 }
 
 export interface SidebarServiceStart extends SidebarStateServiceApi {
-  appState: SidebarAppStateServiceApi;
+  setParams: SidebarAppStateServiceApi['setParams'];
 }
 
 /**
@@ -29,19 +29,19 @@ export interface SidebarServiceStart extends SidebarStateServiceApi {
  *
  * Composes:
  * - SidebarRegistryService: Manages app registration
- * - SidebarStateService: Manages UI state
- * - SidebarAppStateService: Manages app-specific state
+ * - SidebarStateService: Manages UI state (open/close, width)
+ * - SidebarAppStateService: Manages params passed to sidebar app components
  * - wrapInProvider method to wrap application in Sidebar context
  */
 export class SidebarService {
   readonly registry: SidebarRegistryServiceApi;
+  readonly appState: SidebarAppStateService;
   readonly state: SidebarStateServiceApi;
-  readonly appState: SidebarAppStateServiceApi;
 
   constructor() {
     this.registry = new SidebarRegistryService();
-    this.state = new SidebarStateService(this.registry);
     this.appState = new SidebarAppStateService(this.registry);
+    this.state = new SidebarStateService(this.registry, this.appState);
   }
 
   setup(): SidebarServiceSetup {
@@ -56,7 +56,7 @@ export class SidebarService {
     return {
       ...this.registry,
       ...this.state,
-      appState: this.appState,
+      setParams: this.appState.setParams.bind(this.appState),
     };
   }
 

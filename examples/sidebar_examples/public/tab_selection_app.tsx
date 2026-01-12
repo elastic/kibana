@@ -10,33 +10,26 @@
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import { createSidebarAppHooks } from '@kbn/core-chrome-sidebar';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
-export const getTabSelectionStateSchema = () =>
+export const getTabSelectionParamsSchema = () =>
   z.object({
     selectedTab: z.string().default('overview'),
   });
 
-export type TabSelectionSidebarState = z.infer<ReturnType<typeof getTabSelectionStateSchema>>;
+export type TabSelectionSidebarParams = z.infer<ReturnType<typeof getTabSelectionParamsSchema>>;
 
-export const tabApp = createSidebarAppHooks<TabSelectionSidebarState>(tabSelectionAppId)(
-  ({ set, open }) => ({
-    selectTab: (tab: string) => set({ selectedTab: tab }),
-    openTab: (tab: string) => {
-      set({ selectedTab: tab });
-      open();
-    },
-    reset: () => set({ selectedTab: 'overview' }),
-  })
-);
-
-const selectSelectedTab = (s: TabSelectionSidebarState) => s.selectedTab;
-
-export function TabSelectionApp() {
-  const selectedTab = tabApp.useSelector(selectSelectedTab);
-  const { openTab } = tabApp.useActions();
+/**
+ * Tab selection app that receives params and setParams as props.
+ * Params are persisted to localStorage automatically.
+ */
+export function TabSelectionApp({
+  params,
+  setParams,
+}: SidebarComponentProps<TabSelectionSidebarParams>) {
+  const { selectedTab } = params;
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -52,7 +45,7 @@ export function TabSelectionApp() {
       <EuiSpacer size="m" />
 
       <EuiText size="s" color="subdued">
-        <p>Simple tab selection with state persistence.</p>
+        <p>Simple tab selection with params persistence.</p>
       </EuiText>
 
       <EuiSpacer size="l" />
@@ -65,7 +58,7 @@ export function TabSelectionApp() {
             label: tab.label,
           }))}
           idSelected={selectedTab}
-          onChange={(id) => openTab(id)}
+          onChange={(id) => setParams({ selectedTab: id })}
         />
       </EuiFormRow>
 
@@ -73,7 +66,7 @@ export function TabSelectionApp() {
 
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="xs">
-          <pre>{JSON.stringify({ selectedTab }, null, 2)}</pre>
+          <pre>{JSON.stringify(params, null, 2)}</pre>
         </EuiText>
       </EuiPanel>
     </EuiPanel>

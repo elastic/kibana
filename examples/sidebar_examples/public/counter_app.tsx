@@ -20,41 +20,38 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import { createSidebarAppHooks } from '@kbn/core-chrome-sidebar';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
 
-export const getCounterStateSchema = () =>
+export const getCounterParamsSchema = () =>
   z.object({
     counter: z.number().default(0),
   });
 
-export type CounterSidebarState = z.infer<ReturnType<typeof getCounterStateSchema>>;
+export type CounterSidebarParams = z.infer<ReturnType<typeof getCounterParamsSchema>>;
 
-export const counterApp = createSidebarAppHooks<CounterSidebarState>(counterAppId)(
-  ({ get, set }) => ({
-    increment: () => set({ counter: get().counter + 1 }),
-    decrement: () => set({ counter: get().counter - 1 }),
-    incrementBy: (amount: number) => set({ counter: get().counter + amount }),
-    reset: () => set({ counter: 0 }),
-  })
-);
+/**
+ * Counter app that receives params and setParams as props.
+ * Params are persisted to localStorage automatically.
+ */
+export function CounterApp({ params, setParams }: SidebarComponentProps<CounterSidebarParams>) {
+  const { counter } = params;
 
-const selectCounter = (s: CounterSidebarState) => s.counter;
-
-export function CounterApp() {
-  const counter = counterApp.useSelector(selectCounter);
-  const { increment, decrement, incrementBy, reset } = counterApp.useActions();
+  const increment = () => setParams({ counter: counter + 1 });
+  const decrement = () => setParams({ counter: counter - 1 });
+  const incrementBy = (amount: number) => setParams({ counter: counter + amount });
+  const reset = () => setParams({ counter: 0 });
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
       <EuiTitle size="s">
-        <h2>Counter Example (Custom Actions)</h2>
+        <h2>Counter Example (Params-based)</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
 
       <EuiText size="s" color="subdued">
-        <p>Counter with custom increment/decrement actions.</p>
+        <p>Counter value is passed as params and persisted to localStorage.</p>
       </EuiText>
 
       <EuiSpacer size="l" />
@@ -91,7 +88,7 @@ export function CounterApp() {
 
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="xs">
-          <pre>{JSON.stringify({ counter }, null, 2)}</pre>
+          <pre>{JSON.stringify(params, null, 2)}</pre>
         </EuiText>
       </EuiPanel>
     </EuiPanel>

@@ -21,34 +21,33 @@ import {
 } from '@elastic/eui';
 import { useSidebar } from '@kbn/core-chrome-sidebar';
 import React from 'react';
-import { counterApp } from './counter_app';
-import { textApp } from './text_input_app';
-import { tabApp } from './tab_selection_app';
+import { counterAppId, type CounterSidebarParams } from './counter_app';
+import { textInputAppId, type TextInputSidebarParams } from './text_input_app';
+import { tabSelectionAppId, type TabSelectionSidebarParams } from './tab_selection_app';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
 export function App({}: Props) {
-  const { close, setWidth } = useSidebar();
-  const { open: openCounterApp, reset: resetCounter } = counterApp.useActions();
-  const { open: openTextInputApp, clear: resetTextInput } = textApp.useActions();
-  const { open: openTabsApp, reset: resetTabs } = tabApp.useActions();
+  const { close, setWidth, open, setParams } = useSidebar();
 
-  const handleOpenTextApp = () => {
-    openTextInputApp();
-  };
+  // Text Input App handlers
+  const handleOpenTextApp = () => open(textInputAppId);
+  const handleResetTextInput = () =>
+    setParams<TextInputSidebarParams>(textInputAppId, { userName: '' });
 
-  const handleOpenCounterApp = () => {
-    openCounterApp();
-  };
+  // Counter App handlers
+  const handleOpenCounterApp = () => open(counterAppId);
+  const handleOpenCounterWithValue = () =>
+    open<CounterSidebarParams>(counterAppId, { counter: 10 });
+  const handleResetCounter = () => setParams<CounterSidebarParams>(counterAppId, { counter: 0 });
 
-  const handleOpenTabsApp = () => {
-    openTabsApp();
-  };
+  // Tab Selection App handlers
+  const handleOpenTabsApp = () => open(tabSelectionAppId);
+  const handleResetTabs = () =>
+    setParams<TabSelectionSidebarParams>(tabSelectionAppId, { selectedTab: 'overview' });
 
-  const handleCloseSidebar = () => {
-    close();
-  };
+  const handleCloseSidebar = () => close();
 
   return (
     <EuiPage paddingSize="l">
@@ -67,7 +66,7 @@ export function App({}: Props) {
                 <EuiButton onClick={handleOpenTextApp}>Open Text Input</EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => resetTextInput()}>Reset Text Input</EuiButton>
+                <EuiButton onClick={handleResetTextInput}>Reset Text Input</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -85,7 +84,12 @@ export function App({}: Props) {
                 <EuiButton onClick={handleOpenCounterApp}>Open Counter</EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => resetCounter()}>Reset Counter</EuiButton>
+                <EuiButton onClick={handleOpenCounterWithValue}>
+                  Open Counter (start at 10)
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={handleResetCounter}>Reset Counter</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -103,7 +107,7 @@ export function App({}: Props) {
                 <EuiButton onClick={handleOpenTabsApp}>Open Tabs</EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => resetTabs()}>Reset Tabs</EuiButton>
+                <EuiButton onClick={handleResetTabs}>Reset Tabs</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

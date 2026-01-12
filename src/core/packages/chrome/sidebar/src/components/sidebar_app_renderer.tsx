@@ -7,23 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense, useMemo, useCallback } from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { useObservable } from '@kbn/use-observable';
 import type { SidebarComponentType } from '../services';
+import { useSidebarAppStateService } from '../providers';
 
-interface SidebarAppRendererProps<TState> {
-  loadComponent: () => Promise<SidebarComponentType<TState>>;
+interface SidebarAppRendererProps {
+  appId: string;
+  loadComponent: () => Promise<SidebarComponentType<any>>;
 }
 
-export function SidebarAppRenderer<TState>({ loadComponent }: SidebarAppRendererProps<TState>) {
+export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererProps) {
+  const appStateService = useSidebarAppStateService();
+
   const LazyComponent = useMemo(
     () => lazy(() => loadComponent().then((c) => ({ default: c }))),
     [loadComponent]
   );
 
+  // Subscribe to params changes
+  const params = useObservable(appStateService.getParams$(appId), appStateService.getParams(appId));
+
+  // Create setParams callback bound to this app
+  const setParams = useCallback(
+    (newParams: Record<string, unknown>) => appStateService.setParams(appId, newParams),
+    [appStateService, appId]
+  );
+
   return (
     <Suspense fallback={<Fallback />}>
-      <LazyComponent />
+      <LazyComponent params={params} setParams={setParams} />
     </Suspense>
   );
 }

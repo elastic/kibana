@@ -11,9 +11,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { counterAppId, getCounterStateSchema } from './counter_app';
-import { tabSelectionAppId, getTabSelectionStateSchema } from './tab_selection_app';
-import { textInputAppId, getTextInputStateSchema } from './text_input_app';
+import { counterAppId, getCounterParamsSchema } from './counter_app';
+import { tabSelectionAppId, getTabSelectionParamsSchema } from './tab_selection_app';
+import { textInputAppId, getTextInputParamsSchema } from './text_input_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -21,12 +21,11 @@ interface SetupDeps {
 
 export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
-    debugger;
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
       iconType: 'editorAlignLeft',
       title: 'Text Input Example',
-      getStateSchema: getTextInputStateSchema,
+      getParamsSchema: getTextInputParamsSchema,
       loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
     });
 
@@ -34,7 +33,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       appId: counterAppId,
       iconType: 'number',
       title: 'Counter Example',
-      getStateSchema: getCounterStateSchema,
+      getParamsSchema: getCounterParamsSchema,
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
@@ -42,7 +41,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       appId: tabSelectionAppId,
       iconType: 'documents',
       title: 'Tab Selection Example',
-      getStateSchema: getTabSelectionStateSchema,
+      getParamsSchema: getTabSelectionParamsSchema,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
 

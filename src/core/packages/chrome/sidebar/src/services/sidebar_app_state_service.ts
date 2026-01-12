@@ -12,90 +12,91 @@ import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
-const isDev = process.env.NODE_ENV !== 'production';
-
+/**
+ * API for managing sidebar app params
+ */
 export interface SidebarAppStateServiceApi {
-  /** Get observable stream of app state */
-  get$<T>(appId: string): Observable<T>;
+  /** Get observable stream of app params */
+  getParams$<T>(appId: string): Observable<T>;
 
-  /** Get current app state synchronously */
-  get<T>(appId: string): T;
+  /** Get current app params synchronously */
+  getParams<T>(appId: string): T;
 
-  /** Set complete app state (no merge) */
-  set<T>(appId: string, state: T, merge: false): void;
-
-  /** Merge partial state with existing state (default) */
-  set<T>(appId: string, state: Partial<T>, merge?: true): void;
-
-  /** Reset app state back to the initial state */
-  reset(appId: string): void;
+  /** Update app params (merges with existing params) */
+  setParams<T>(appId: string, params: Partial<T>): void;
 }
 
 /**
- * Service for managing app-specific state in the sidebar
+ * Service for managing params passed to sidebar app components
  *
- * Each sidebar app can store its own state independently using a generic interface.
- * State is stored in-memory and persisted to localStorage, isolated per app ID.
+ * Params are persisted to localStorage and restored on page reload.
+ * Components receive params as React props and can manage their own internal state.
  */
 export class SidebarAppStateService implements SidebarAppStateServiceApi {
-  private readonly appStates = new Map<string, BehaviorSubject<any>>();
+  private readonly appParams = new Map<string, BehaviorSubject<any>>();
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
 
-  get$<T>(appId: string): Observable<T> {
-    return this.getOrCreateState<T>(appId);
+  getParams$<T>(appId: string): Observable<T> {
+    return this.getOrCreateParams<T>(appId);
   }
 
-  get<T>(appId: string): T {
-    return this.getOrCreateState<T>(appId).getValue();
+  getParams<T>(appId: string): T {
+    return this.getOrCreateParams<T>(appId).getValue();
   }
 
-  set<T>(appId: string, state: T, merge: false): void;
-  set<T>(appId: string, state: Partial<T>, merge?: true): void;
-  set<T>(appId: string, state: T | Partial<T>, merge: boolean = true): void {
-    const newState = merge ? { ...this.get<T>(appId), ...state } : state;
+  setParams<T>(appId: string, params: Partial<T>): void {
+    const currentParams = this.getParams<T>(appId);
+    const newParams = { ...currentParams, ...params };
 
-    if (isDev) {
-      this.validateState(appId, newState as T);
-    }
-
-    this.getOrCreateState<T>(appId).next(newState as T);
-
-    this.saveToStorage(appId, newState as T);
-  }
-
-  reset(appId: string): void {
-    const initialState = this.createInitialState(appId);
-    this.set(appId, initialState, false);
-  }
-
-  private getOrCreateState<T>(appId: string): BehaviorSubject<T> {
-    if (!this.appStates.has(appId)) {
-      const storedState = this.loadFromStorage<T>(appId);
-      const initialState = storedState ?? this.createInitialState<T>(appId);
-
-      this.appStates.set(appId, new BehaviorSubject<T>(initialState));
-    }
-    return this.appStates.get(appId)!;
+    this.getOrCreateParams<T>(appId).next(newParams as T);
+    this.saveToStorage(appId, newParams as T);
   }
 
   /**
-   * Creates initial state from schema defaults with validation and error handling
+   * Initialize params for an app, optionally with provided initial values
+   * @internal Used by sidebar state service when opening an app
    */
-  private createInitialState<T>(appId: string): T {
-    return this.validateState(appId, {});
+  initializeParams<T>(appId: string, initialParams?: Partial<T>): void {
+    const defaultParams = this.createDefaultParams<T>(appId);
+    const mergedParams = initialParams ? { ...defaultParams, ...initialParams } : defaultParams;
+
+    if (this.appParams.has(appId)) {
+      this.appParams.get(appId)!.next(mergedParams);
+    } else {
+      this.appParams.set(appId, new BehaviorSubject<T>(mergedParams as T));
+    }
+
+    this.saveToStorage(appId, mergedParams as T);
+  }
+
+  private getOrCreateParams<T>(appId: string): BehaviorSubject<T> {
+    if (!this.appParams.has(appId)) {
+      const storedParams = this.loadFromStorage<T>(appId);
+      const initialParams = storedParams ?? this.createDefaultParams<T>(appId);
+
+      this.appParams.set(appId, new BehaviorSubject<T>(initialParams));
+    }
+    return this.appParams.get(appId)!;
   }
 
   /**
-   * Validates state against app's schema
+   * Creates default params from schema defaults
    */
-  private validateState<T>(appId: string, state: unknown): T {
-    const schema = this.registry.getApp(appId).getStateSchema();
+  private createDefaultParams<T>(appId: string): T {
+    return this.validateParams(appId, {});
+  }
+
+  /**
+   * Validates params against app's schema
+   */
+  private validateParams<T>(appId: string, params: unknown): T {
+    const schema = this.registry.getApp(appId).getParamsSchema();
     try {
-      return schema.parse(state) as T;
+      return schema.parse(params) as T;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(`[Sidebar] Invalid state for app '${appId}': ${z.prettifyError(error)}`);
+        throw new Error(`[Sidebar] Invalid params for app '${appId}': ${z.prettifyError(error)}`);
       }
       throw error;
     }
@@ -106,7 +107,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   }
 
   /**
-   * Loads state from localStorage and validates against schema.
+   * Loads params from localStorage and validates against schema.
    * Returns null if not found, corrupted, or validation fails.
    */
   private loadFromStorage<T>(appId: string): T | null {
@@ -116,8 +117,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
       if (!stored) return null;
 
       const parsed = JSON.parse(stored);
-      // Validate against schema
-      return this.validateState(appId, parsed);
+      return this.validateParams(appId, parsed);
     } catch (error) {
       // Invalid data - drop it
       return null;
@@ -125,16 +125,17 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   }
 
   /**
-   * Saves state to localStorage.
+   * Saves params to localStorage.
    * Fails silently on errors (quota exceeded, unavailable, etc.)
    */
-  private saveToStorage<T>(appId: string, state: T): void {
+  private saveToStorage<T>(appId: string, params: T): void {
     try {
       const key = this.getStorageKey(appId);
-      localStorage.setItem(key, JSON.stringify(state));
+      localStorage.setItem(key, JSON.stringify(params));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn(`[Sidebar] localStorage error for '${appId}':`, error);
     }
   }
 }
+

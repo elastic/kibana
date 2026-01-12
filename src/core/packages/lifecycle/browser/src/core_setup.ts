@@ -22,7 +22,6 @@ import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-browser';
 import type { SecurityServiceSetup } from '@kbn/core-security-browser';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-browser';
-import type { ChromeSetup } from '@kbn/core-chrome-browser';
 import type { CoreStart } from './core_start';
 
 /**

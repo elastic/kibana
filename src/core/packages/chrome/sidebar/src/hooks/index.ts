@@ -8,5 +8,3 @@
  */
 export { useSidebar, useSidebarWidth } from './use_sidebar';
 export type { UseSidebarResult } from './use_sidebar';
-export { createSidebarAppHooks } from './use_sidebar_app';
-export type { SidebarAppHooks } from './use_sidebar_app';

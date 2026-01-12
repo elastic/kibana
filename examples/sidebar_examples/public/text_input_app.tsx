@@ -10,27 +10,23 @@
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import { createSidebarAppHooks } from '@kbn/core-chrome-sidebar';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 
 export const textInputAppId = 'sidebarExampleText';
 
-export const getTextInputStateSchema = () =>
+export const getTextInputParamsSchema = () =>
   z.object({
     userName: z.string().default(''),
   });
 
-export type TextInputSidebarState = z.infer<ReturnType<typeof getTextInputStateSchema>>;
+export type TextInputSidebarParams = z.infer<ReturnType<typeof getTextInputParamsSchema>>;
 
-export const textApp = createSidebarAppHooks<TextInputSidebarState>(textInputAppId)(({ set }) => ({
-  setUserName: (userName: string) => set({ userName }),
-  clear: () => set({ userName: '' }),
-}));
-
-const selectUserName = (s: TextInputSidebarState) => s.userName;
-
-export function TextInputApp() {
-  const userName = textApp.useSelector(selectUserName);
-  const { setUserName } = textApp.useActions();
+/**
+ * Text input app that receives params and setParams as props.
+ * Params are persisted to localStorage automatically.
+ */
+export function TextInputApp({ params, setParams }: SidebarComponentProps<TextInputSidebarParams>) {
+  const { userName } = params;
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
@@ -40,7 +36,7 @@ export function TextInputApp() {
       <EuiSpacer size="m" />
 
       <EuiText size="s" color="subdued">
-        <p>Simple text input with state persistence.</p>
+        <p>Simple text input with params persistence.</p>
       </EuiText>
 
       <EuiSpacer size="l" />
@@ -49,7 +45,7 @@ export function TextInputApp() {
         <EuiFieldText
           placeholder="Enter your name"
           value={userName || ''}
-          onChange={(e) => setUserName(e.target.value)}
+          onChange={(e) => setParams({ userName: e.target.value })}
         />
       </EuiFormRow>
 
@@ -57,7 +53,7 @@ export function TextInputApp() {
 
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="xs">
-          <pre>{JSON.stringify({ userName }, null, 2)}</pre>
+          <pre>{JSON.stringify(params, null, 2)}</pre>
         </EuiText>
       </EuiPanel>
     </EuiPanel>
