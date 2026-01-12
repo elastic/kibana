@@ -131,38 +131,63 @@ export class AccessControlService {
     }
 
     const { typeMap } = authorizationResult;
-    const unauthorizedTypes: Set<string> = new Set();
 
-    const addUnauthorizedTypes = (type: string, action: A): void => {
+    // Track unauthorized types separately to provide context-specific error messages:
+    // - unauthorizedAccessControlTypes: non-owner users lacking manage_access_control privilege
+    // - unauthorizedRbacTypes: owners who lost space access or RBAC privileges
+    const unauthorizedAccessControlTypes: Set<string> = new Set();
+    const unauthorizedRbacTypes: Set<string> = new Set();
+
+    /**
+     * Checks if a type is unauthorized for the given action and adds it to the target set.
+     * A type is considered unauthorized if:
+     * - No authorization info exists for the action, OR
+     * - User lacks global authorization AND lacks authorization in the current space
+     */
+    const addUnauthorizedType = (type: string, action: A, targetSet: Set<string>): void => {
       const typeAuth = typeMap.get(type);
       const actionAuth = typeAuth?.[action];
       if (!actionAuth) {
-        unauthorizedTypes.add(type);
+        targetSet.add(type);
       } else {
         // Check if user has global authorization or authorization in the current space
         if (
           !actionAuth.isGloballyAuthorized &&
           (!actionAuth.authorizedSpaces || !actionAuth.authorizedSpaces.includes(currentSpace))
         ) {
-          unauthorizedTypes.add(type);
+          targetSet.add(type);
         }
       }
     };
 
+    // Check manage_access_control privilege for non-owner types
     for (const type of typesRequiringAccessControl) {
       if (!this.typeRegistry?.supportsAccessControl(type)) {
         continue;
       }
-      addUnauthorizedTypes(type, MANAGE_ACCESS_CONTROL_ACTION as A);
+      addUnauthorizedType(type, MANAGE_ACCESS_CONTROL_ACTION as A, unauthorizedAccessControlTypes);
     }
 
+    // Check RBAC/space privileges for owner types
     for (const type of typesRequiringRbac) {
-      addUnauthorizedTypes(type, UPDATE_ACTION as A);
+      addUnauthorizedType(type, UPDATE_ACTION as A, unauthorizedRbacTypes);
     }
 
-    // If we found unauthorized types, throw an error
-    if (unauthorizedTypes.size > 0) {
-      const typeList = [...unauthorizedTypes].sort();
+    // Throw context-specific errors based on which authorization check failed.
+    // Owner RBAC errors are thrown first as they are typically more actionable for the user.
+    if (unauthorizedRbacTypes.size > 0) {
+      const typeList = [...unauthorizedRbacTypes].sort();
+      addAuditEventFn?.(typeList);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error(
+          `Access denied: Unable to perform operation on ${typeList}. You may have lost access to this space or required privileges have been revoked.`
+        )
+      );
+    }
+
+    // Non-owner users lacking manage_access_control privilege
+    if (unauthorizedAccessControlTypes.size > 0) {
+      const typeList = [...unauthorizedAccessControlTypes].sort();
       addAuditEventFn?.(typeList);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(
