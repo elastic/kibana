@@ -26,6 +26,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
+  useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -68,29 +69,14 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
-  const {
-    tabId,
-    query,
-    appFilters,
-    globalFilters,
-    refreshInterval,
-    timeRange,
-    timeRangeRelative,
-    esqlVariables,
-    searchDraftUiState,
-    esqlEditorUiState,
-  } = useCurrentTabSelector((state) => ({
-    tabId: state.id,
-    query: state.appState.query,
-    appFilters: state.appState.filters,
-    globalFilters: state.globalState.filters,
-    refreshInterval: state.globalState.refreshInterval,
-    timeRange: state.dataRequestParams.timeRangeAbsolute,
-    timeRangeRelative: state.dataRequestParams.timeRangeRelative,
-    esqlVariables: state.esqlVariables,
-    searchDraftUiState: state.uiState.searchDraft,
-    esqlEditorUiState: state.uiState.esqlEditor,
-  }));
+  const query = useAppStateSelector((state) => state.query);
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const { timeRangeAbsolute, timeRangeRelative } = useCurrentTabSelector(
+    (tab) => tab.dataRequestParams
+  );
+  const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
+  const appFilters = useAppStateSelector((state) => state.filters);
+  const globalFilters = useCurrentTabSelector((state) => state.globalState.filters);
 
   const filtersMemoized = useMemo(() => {
     if (isOfAggregateQueryType(query)) {
@@ -263,28 +249,30 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
+  const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
+  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
   const onSearchDraftChange = useCallback(
     (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
-        internalStateActions.setSearchDraftUiState({
-          tabId,
+        setSearchDraftUiState({
           searchDraftUiState: newSearchDraftUiState,
         })
       );
     },
-    [dispatch, tabId]
+    [dispatch, setSearchDraftUiState]
   );
 
+  const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
+  const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
   const onEsqlEditorInitialStateChange = useCallback(
     (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
       dispatch(
-        internalStateActions.setESQLEditorUiState({
-          tabId,
+        setEsqlEditorUiState({
           esqlEditorUiState: newEsqlEditorUiState,
         })
       );
     },
-    [dispatch, tabId]
+    [dispatch, setEsqlEditorUiState]
   );
 
   const shouldHideDefaultDataviewPicker =
@@ -347,7 +335,7 @@ export const DiscoverTopNav = ({
                 controlsWrapper: (
                   <ControlGroupRenderer
                     onApiAvailable={setControlGroupApi}
-                    timeRange={timeRange}
+                    timeRange={timeRangeAbsolute}
                     getCreationOptions={async (initialState) => {
                       const initialChildControlState =
                         getActivePanels() ?? initialState.initialChildControlState ?? {};
