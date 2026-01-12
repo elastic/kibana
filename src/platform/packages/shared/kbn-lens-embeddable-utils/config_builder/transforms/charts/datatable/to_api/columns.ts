@@ -130,16 +130,16 @@ type DatatableColumnsESQLAndMapping = Pick<
   'metrics' | 'rows' | 'split_metrics_by'
 > & { columnIdMapping: ColumnIdMapping };
 
+export interface ColumnIdMappingValue {
+  type: 'metric' | 'row' | 'split_metrics_by';
+  index: number;
+}
+
 /**
  * Maps old column IDs to their new type and index in the API format.
  * Used to translate sorting column references during transformation.
  */
-export interface ColumnIdMapping {
-  [oldColumnId: string]: {
-    type: 'metric' | 'row' | 'split_metrics_by';
-    index: number;
-  };
-}
+export type ColumnIdMapping = Map<string, ColumnIdMappingValue>;
 
 export function convertDatatableColumnsToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'>,
@@ -159,7 +159,7 @@ export function convertDatatableColumnsToAPI(
   }
 
   // Used for the sorting columnId mapping during transformation to API format
-  const columnIdMapping: ColumnIdMapping = {};
+  const columnIdMapping: ColumnIdMapping = new Map();
 
   // Create a lookup map from columnId to visualization column state
   const columnStateMap = new Map(columns.map((col) => [col.columnId, col]));
@@ -184,7 +184,7 @@ export function convertDatatableColumnsToAPI(
           throw new Error(
             `Metric column ${columnId} must be a metric operation (got ${apiOperation.operation})`
           );
-        columnIdMapping[columnId] = { type: 'metric', index: metrics.length };
+        columnIdMapping.set(columnId, { type: 'metric', index: metrics.length });
         metrics.push({
           ...apiOperation,
           ...buildMetricsAPI(column),
@@ -194,14 +194,14 @@ export function convertDatatableColumnsToAPI(
           throw new Error(
             `Split metric column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
           );
-        columnIdMapping[columnId] = { type: 'split_metrics_by', index: splitMetricsBy.length };
+        columnIdMapping.set(columnId, { type: 'split_metrics_by', index: splitMetricsBy.length });
         splitMetricsBy.push(apiOperation);
       } else {
         if (!isAPIColumnOfBucketType(apiOperation))
           throw new Error(
             `Row column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
           );
-        columnIdMapping[columnId] = { type: 'row', index: rows.length };
+        columnIdMapping.set(columnId, { type: 'row', index: rows.length });
         rows.push({
           ...apiOperation,
           ...buildRowsAPINoESQL(column),
@@ -231,16 +231,16 @@ export function convertDatatableColumnsToAPI(
     if (!apiOperation) throw new Error(`Column with id ${columnId} not found`);
 
     if (isMetricColumnESQL(column, layer.columns)) {
-      columnIdMapping[columnId] = { type: 'metric', index: metrics.length };
+      columnIdMapping.set(columnId, { type: 'metric', index: metrics.length });
       metrics.push({
         ...apiOperation,
         ...buildMetricsAPI(column),
       });
     } else if (column.isTransposed) {
-      columnIdMapping[columnId] = { type: 'split_metrics_by', index: splitMetricsBy.length };
+      columnIdMapping.set(columnId, { type: 'split_metrics_by', index: splitMetricsBy.length });
       splitMetricsBy.push(apiOperation);
     } else {
-      columnIdMapping[columnId] = { type: 'row', index: rows.length };
+      columnIdMapping.set(columnId, { type: 'row', index: rows.length });
       rows.push({ ...apiOperation, ...buildRowsAPIESQL(column) });
     }
   }

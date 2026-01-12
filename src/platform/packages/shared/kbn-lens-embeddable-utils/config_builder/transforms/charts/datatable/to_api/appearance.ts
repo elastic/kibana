@@ -87,7 +87,7 @@ function parseSplitMetricsBySorting(
 
   // The last part is the metric column ID
   const metricColumnId = last(parts);
-  const mapped = metricColumnId ? columnIdMapping[metricColumnId] : undefined;
+  const mapped = metricColumnId ? columnIdMapping.get(metricColumnId) : undefined;
 
   if (!mapped || mapped.type !== 'metric') {
     return undefined;
@@ -128,7 +128,7 @@ function parseSortingToAPI(
   }
 
   // Look up the columnId in the mapping
-  const mapped = columnIdMapping[columnId];
+  const mapped = columnIdMapping.get(columnId);
   if (!mapped || mapped.type === 'split_metrics_by') {
     return undefined;
   }
