@@ -23,23 +23,26 @@ import type { HealthScanSummary } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useListHealthScans } from '../../../hooks/use_list_health_scans';
+import { useScheduleHealthScan } from '../../../hooks/use_schedule_health_scan';
 
 interface Props {
-  scans: HealthScanSummary[];
-  isLoading: boolean;
-  onSelectScan: (scan: HealthScanSummary) => void;
-  onRunScan: () => void;
-  isScheduling: boolean;
+  onSelectScanId: (scanId: string) => void;
 }
 
-export function ScanHistoryList({
-  scans,
-  onSelectScan,
-  onRunScan,
-  isLoading,
-  isScheduling,
-}: Props) {
+export function ScanHistoryList({ onSelectScanId }: Props) {
   const { uiSettings } = useKibana().services;
+  const { data, isLoading } = useListHealthScans({
+    refetchInterval: 10000,
+  });
+  const { mutate: scheduleHealthScan, isLoading: isScheduling } = useScheduleHealthScan({
+    onSuccess: (scanId: string) => onSelectScanId(scanId),
+  });
+
+  const handleRunScan = () => {
+    scheduleHealthScan({ force: true });
+  };
+
   const dateFormat = uiSettings.get('dateFormat');
 
   const columns: Array<EuiBasicTableColumn<HealthScanSummary>> = [
@@ -94,13 +97,12 @@ export function ScanHistoryList({
         {
           render: (scan: HealthScanSummary) => (
             <EuiButtonIcon
-              disabled={scan.status === 'pending'}
               iconType="inspect"
               aria-label={i18n.translate(
                 'xpack.slo.healthScanFlyout.scanHistoryList.viewResultsAriaLabel',
                 { defaultMessage: 'View results' }
               )}
-              onClick={() => onSelectScan(scan)}
+              onClick={() => onSelectScanId(scan.scanId)}
               data-test-subj={`healthScanViewResults-${scan.scanId}`}
             />
           ),
@@ -109,7 +111,7 @@ export function ScanHistoryList({
     },
   ];
 
-  if (isLoading && scans.length === 0) {
+  if (isLoading && data?.scans.length === 0) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" style={{ minHeight: 200 }}>
         <EuiFlexItem grow={false}>
@@ -133,7 +135,7 @@ export function ScanHistoryList({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            onClick={onRunScan}
+            onClick={handleRunScan}
             isLoading={isScheduling}
             iconType="play"
             size="s"
@@ -148,7 +150,17 @@ export function ScanHistoryList({
 
       <EuiSpacer size="m" />
 
-      {scans.length === 0 ? (
+      {data?.scans && data.scans.length > 0 ? (
+        <EuiBasicTable
+          tableCaption="health scans"
+          items={data?.scans}
+          columns={columns}
+          rowProps={(scan) => ({
+            'data-test-subj': `healthScanRow-${scan.scanId}`,
+          })}
+          data-test-subj="healthScanHistoryTable"
+        />
+      ) : (
         <EuiEmptyPrompt
           iconType="inspect"
           title={
@@ -165,16 +177,6 @@ export function ScanHistoryList({
               })}
             </p>
           }
-        />
-      ) : (
-        <EuiBasicTable
-          tableCaption="health scans"
-          items={scans}
-          columns={columns}
-          rowProps={(scan) => ({
-            'data-test-subj': `healthScanRow-${scan.scanId}`,
-          })}
-          data-test-subj="healthScanHistoryTable"
         />
       )}
     </>

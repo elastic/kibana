@@ -20,15 +20,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, type HealthScanResultResponse, type HealthScanSummary } from '@kbn/slo-schema';
+import { ALL_VALUE, type HealthScanResultResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import moment from 'moment';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGetHealthScanResults } from '../../../hooks/use_get_health_scan_results';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Props {
-  scan: HealthScanSummary;
+  scanId: string;
 }
 
 function getHealthStatus(result: HealthScanResultResponse): string {
@@ -91,15 +91,24 @@ function getHealthStatus(result: HealthScanResultResponse): string {
       });
 }
 
-export function ScanResultsPanel({ scan }: Props) {
+export function ScanResultsPanel({ scanId }: Props) {
   const { uiSettings, http } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
+  const [isPending, setIsPending] = useState<boolean>(true);
+
   const { data, isLoading, isError } = useGetHealthScanResults({
-    scanId: scan.scanId,
+    scanId,
     problematic: true,
+    allSpaces: true,
     size: 100,
-    refetchInterval: scan.status !== 'completed' ? 5000 : false,
+    refetchInterval: isPending ? 5000 : false,
   });
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      setIsPending(data.scan.status !== 'completed');
+    }
+  }, [isLoading, data]);
 
   const columns: Array<EuiBasicTableColumn<HealthScanResultResponse>> = [
     {
@@ -171,12 +180,15 @@ export function ScanResultsPanel({ scan }: Props) {
     );
   }
 
+  const hasIssues = !!data?.scan && data.scan.problematic > 0;
+  const noIssues = !!data?.scan && data.scan.problematic === 0;
+
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiStat
-            title={moment(scan.latestTimestamp).format(dateFormat)}
+            title={moment(data?.scan.latestTimestamp).format(dateFormat)}
             description={i18n.translate('xpack.slo.healthScanFlyout.scanResults.scanDate', {
               defaultMessage: 'Scan date',
             })}
@@ -185,7 +197,16 @@ export function ScanResultsPanel({ scan }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
-            title={scan.total}
+            title={data?.scan.status}
+            description={i18n.translate('xpack.slo.healthScanFlyout.scanResults.status', {
+              defaultMessage: 'Status',
+            })}
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiStat
+            title={data?.scan.total}
             description={i18n.translate('xpack.slo.healthScanFlyout.scanResults.totalScanned', {
               defaultMessage: 'Total scanned',
             })}
@@ -194,8 +215,8 @@ export function ScanResultsPanel({ scan }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
-            title={scan.problematic}
-            titleColor={scan.problematic > 0 ? 'danger' : 'success'}
+            title={data?.scan.problematic}
+            titleColor={data?.scan.problematic ?? 0 > 0 ? 'danger' : 'success'}
             description={i18n.translate('xpack.slo.healthScanFlyout.scanResults.problematic', {
               defaultMessage: 'Issues found',
             })}
@@ -206,44 +227,82 @@ export function ScanResultsPanel({ scan }: Props) {
 
       <EuiSpacer size="l" />
 
-      {scan.problematic === 0 ? (
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesTitle', {
-            defaultMessage: 'All SLOs are healthy',
-          })}
-          color="success"
-          iconType="check"
-        >
-          <p>
-            {i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesBody', {
-              defaultMessage: 'No operational issues were found during this scan.',
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {isPending && (
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.pendingTitle', {
+              defaultMessage: 'Scan in progress',
             })}
-          </p>
-        </EuiCallOut>
-      ) : (
-        <>
-          <EuiText size="s">
-            <h4>
-              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.problematicSlosTitle', {
-                defaultMessage: 'Problematic SLOs',
+            color="warning"
+            iconType="check"
+          >
+            <p>
+              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.pendingBody', {
+                defaultMessage:
+                  'The health scan is still running. Results will update automatically as they become available.',
               })}
-            </h4>
-          </EuiText>
+            </p>
+          </EuiCallOut>
+        )}
 
-          <EuiSpacer size="s" />
-
-          <EuiBasicTable
-            tableCaption="health scan results"
-            items={data?.results ?? []}
-            columns={columns}
-            rowProps={(result) => ({
-              'data-test-subj': `healthScanResult-${result.slo.id}`,
+        {!isPending && noIssues && (
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesTitle', {
+              defaultMessage: 'All SLOs are healthy',
             })}
-            data-test-subj="healthScanResultsTable"
-          />
-        </>
-      )}
+            color="success"
+            iconType="check"
+          >
+            <p>
+              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesBody', {
+                defaultMessage: 'No operational issues were found during this scan.',
+              })}
+            </p>
+          </EuiCallOut>
+        )}
+
+        {!isPending && hasIssues && (
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesTitle', {
+              defaultMessage: 'Some SLOs have issues',
+            })}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesBody', {
+                defaultMessage:
+                  'Review the problematic SLOs listed below to resolve operational issues.',
+              })}
+            </p>
+          </EuiCallOut>
+        )}
+
+        {hasIssues && (
+          <>
+            <EuiText size="s">
+              <h4>
+                {i18n.translate('xpack.slo.healthScanFlyout.scanResults.problematicSlosTitle', {
+                  defaultMessage: 'Problematic SLOs',
+                })}
+              </h4>
+            </EuiText>
+
+            <EuiBasicTable
+              tableCaption="Problematic health scan results"
+              items={data?.results ?? []}
+              columns={columns}
+              rowProps={(result) => ({
+                'data-test-subj': `healthScanResult-${result.slo.id}`,
+              })}
+              data-test-subj="healthScanResultsTable"
+            />
+          </>
+        )}
+      </EuiFlexGroup>
     </>
   );
 }

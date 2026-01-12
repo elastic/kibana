@@ -8,15 +8,19 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { ListHealthScanResponse, PostHealthScanResponse } from '@kbn/slo-schema';
-
+import type { PostHealthScanResponse } from '@kbn/slo-schema';
 import { sloKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useScheduleHealthScan() {
+interface Props {
+  onSuccess?: (scanId: string) => void;
+}
+
+export function useScheduleHealthScan(props: Props = {}) {
+  const { onSuccess } = props;
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -24,12 +28,7 @@ export function useScheduleHealthScan() {
   const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<
-    PostHealthScanResponse,
-    ServerError,
-    { force?: boolean } | undefined,
-    { previousScan: ListHealthScanResponse | undefined }
-  >(
+  return useMutation<PostHealthScanResponse, ServerError, { force?: boolean } | undefined>(
     ['scheduleHealthScan'],
     (params) => {
       return sloClient.fetch('POST /internal/observability/slos/_health/scans', {
@@ -48,22 +47,6 @@ export function useScheduleHealthScan() {
       },
       onSuccess: (response) => {
         if (response?.status === 'scheduled') {
-          const currentList = queryClient.getQueryData<ListHealthScanResponse>(
-            sloKeys.healthScans()
-          );
-          queryClient.setQueryData(sloKeys.healthScans(), {
-            ...currentList,
-            scans: [
-              {
-                latestTimestamp: response.scheduledAt,
-                problematic: 0,
-                total: 0,
-                status: response.status,
-                scanId: response.scanId,
-              },
-              ...(currentList?.scans ?? []),
-            ],
-          });
           toasts.addSuccess(
             i18n.translate('xpack.slo.healthScan.scheduleSuccessNotification', {
               defaultMessage: 'Health scan scheduled',
@@ -72,6 +55,7 @@ export function useScheduleHealthScan() {
         } else {
           queryClient.invalidateQueries({ queryKey: sloKeys.allHealthScans(), exact: false });
         }
+        onSuccess?.(response.scanId);
       },
     }
   );
