@@ -77,6 +77,18 @@ export interface PublicStepDefinition<
     input?: {
       [K in FlattenPaths<z.infer<Input>>]?: StepPropertyHandler<PathValue<z.infer<Input>, K>>;
     };
+    dynamicSchema: {
+      /**
+       * Dynamic Zod schema for validating step output based on input.
+       * Allows for more flexible output structure based on the specific input provided.
+       * @param input The input data for the step.
+       * @returns A Zod schema defining structure and validation rules for the output of the step.
+       */
+      getOutputSchema?: (params: {
+        input: z.infer<Input>;
+        config: z.infer<Config>;
+      }) => z.ZodType<z.infer<Output>>;
+    };
   };
 }
 
