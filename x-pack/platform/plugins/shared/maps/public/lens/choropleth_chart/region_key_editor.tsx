@@ -106,6 +106,7 @@ export function RegionKeyEditor(props: Props) {
         isColumnCompressed
         value={props.state.emsLayerId ? props.state.emsLayerId : null}
         onChange={onEmsLayerSelect}
+        fullWidth
       />
       {emsFieldSelect}
     </div>
