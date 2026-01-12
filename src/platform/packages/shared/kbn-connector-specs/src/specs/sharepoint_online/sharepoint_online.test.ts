@@ -38,6 +38,16 @@ interface SharePointPage {
 }
 
 /**
+ * SharePoint drive information
+ */
+interface SharePointDrive {
+  id: string;
+  name: string;
+  driveType: string;
+  webUrl: string;
+}
+
+/**
  * SharePoint search response structure
  */
 interface SharePointSearchResponse {
@@ -81,7 +91,7 @@ describe('SharepointOnline', () => {
     jest.clearAllMocks();
   });
 
-  describe('listAllSites action', () => {
+  describe('getAllSites action', () => {
     it('should list all sites', async () => {
       const mockResponse = {
         data: {
@@ -101,7 +111,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.listAllSites.handler(
+      const result = (await SharepointOnline.actions.getAllSites.handler(
         mockContext,
         {}
       )) as SharePointListResponse<SharePointSite>;
@@ -122,7 +132,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.listAllSites.handler(
+      const result = (await SharepointOnline.actions.getAllSites.handler(
         mockContext,
         {}
       )) as SharePointListResponse<SharePointSite>;
@@ -137,7 +147,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.listAllSites.handler(
+      const result = (await SharepointOnline.actions.getAllSites.handler(
         mockContext,
         undefined
       )) as SharePointListResponse<SharePointSite>;
@@ -152,12 +162,12 @@ describe('SharepointOnline', () => {
       mockClient.get.mockRejectedValue(new Error('Access denied'));
 
       await expect(
-        SharepointOnline.actions.listAllSites.handler(mockContext, {})
+        SharepointOnline.actions.getAllSites.handler(mockContext, {})
       ).rejects.toThrow('Access denied');
     });
   });
 
-  describe('listSitePages action', () => {
+  describe('getSitePages action', () => {
     it('should list pages for a given site', async () => {
       const mockResponse = {
         data: {
@@ -177,7 +187,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.listSitePages.handler(mockContext, {
+      const result = (await SharepointOnline.actions.getSitePages.handler(mockContext, {
         siteId: 'site-123',
       })) as SharePointListResponse<SharePointPage>;
 
@@ -199,7 +209,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.listSitePages.handler(mockContext, {
+      const result = (await SharepointOnline.actions.getSitePages.handler(mockContext, {
         siteId: 'empty-site',
       })) as SharePointListResponse<SharePointPage>;
 
@@ -213,7 +223,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.listSitePages.handler(mockContext, {
+      const result = (await SharepointOnline.actions.getSitePages.handler(mockContext, {
         siteId: 'contoso.sharepoint.com,abc-123,def-456',
       })) as SharePointListResponse<SharePointPage>;
 
@@ -227,7 +237,86 @@ describe('SharepointOnline', () => {
       mockClient.get.mockRejectedValue(new Error('Site not found'));
 
       await expect(
-        SharepointOnline.actions.listSitePages.handler(mockContext, {
+        SharepointOnline.actions.getSitePages.handler(mockContext, {
+          siteId: 'nonexistent-site',
+        })
+      ).rejects.toThrow('Site not found');
+    });
+  });
+
+  describe('getSiteDrives action', () => {
+    it('should list all drives for a given site', async () => {
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              id: 'drive-1',
+              name: 'Documents',
+              driveType: 'documentLibrary',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/Documents',
+            },
+            {
+              id: 'drive-2',
+              name: 'Shared Documents',
+              driveType: 'documentLibrary',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/Shared%20Documents',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getSiteDrives.handler(mockContext, {
+        siteId: 'site-123',
+      })) as SharePointListResponse<SharePointDrive>;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/drives/'
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint getting all drives of site site-123'
+      );
+      expect(result).toEqual(mockResponse.data);
+      expect(result.value).toHaveLength(2);
+    });
+
+    it('should handle empty drives list', async () => {
+      const mockResponse = {
+        data: {
+          value: [],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getSiteDrives.handler(mockContext, {
+        siteId: 'empty-site',
+      })) as SharePointListResponse<SharePointDrive>;
+
+      expect(result).toEqual(mockResponse.data);
+      expect(result.value).toHaveLength(0);
+    });
+
+    it('should handle special characters in siteId', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getSiteDrives.handler(mockContext, {
+        siteId: 'contoso.sharepoint.com,abc-123,def-456',
+      })) as SharePointListResponse<SharePointDrive>;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives/'
+      );
+      expect(result.value).toEqual([]);
+    });
+
+    it('should propagate site not found errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Site not found'));
+
+      await expect(
+        SharepointOnline.actions.getSiteDrives.handler(mockContext, {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');

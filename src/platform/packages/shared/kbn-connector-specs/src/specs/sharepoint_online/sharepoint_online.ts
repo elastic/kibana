@@ -56,7 +56,7 @@ export const SharepointOnline: ConnectorSpec = {
   }),
 
   actions: {
-    listAllSites: {
+    getAllSites: {
       isTool: true,
       input: z.object({}).optional(),
       handler: async (ctx, input) => {
@@ -68,7 +68,7 @@ export const SharepointOnline: ConnectorSpec = {
       },
     },
 
-    listSitePages: {
+    getSitePages: {
       isTool: true,
       input: z.object({
         siteId: z.string().describe('Site ID'),
@@ -101,6 +101,22 @@ export const SharepointOnline: ConnectorSpec = {
 
         ctx.log.debug(`SharePoint getting site info via ${url}`);
         const response = await ctx.client.get(url);
+        return response.data;
+      },
+    },
+
+    getSiteDrives: {
+      isTool: true,
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {siteId: string};
+
+        ctx.log.debug(`SharePoint getting all drives of site ${typedInput.siteId}`);
+        const response = await ctx.client.get(
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives/`
+        );
         return response.data;
       },
     },
