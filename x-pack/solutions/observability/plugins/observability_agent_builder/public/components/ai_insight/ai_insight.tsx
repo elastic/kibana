@@ -30,6 +30,7 @@ import {
   useStreamingAiInsight,
   type InsightStreamEvent,
 } from '../../hooks/use_streaming_ai_insight';
+import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { useMarkdownPluginsWithCursor, CURSOR } from './loading_cursor';
@@ -60,6 +61,8 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
+  const { hasConnectors } = useGenAIConnectors();
+
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
@@ -80,6 +83,7 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
   }, [agentBuilder, buildAttachments, summary, context]);
 
   if (
+    !hasConnectors ||
     !agentBuilder ||
     !isAgentChatExperienceEnabled ||
     !hasAgentBuilderAccess ||
