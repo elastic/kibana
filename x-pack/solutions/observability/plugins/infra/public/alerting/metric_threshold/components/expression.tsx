@@ -67,22 +67,20 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
   {
     id: 'recover',
     label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.recover', {
-      defaultMessage: "Recover if there's no data",
-    }),
-  },
-  {
-    id: 'remainActive',
-    label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.remainActive', {
-      defaultMessage: "Remain active if there's no data",
+      defaultMessage: 'Recover active alerts',
     }),
   },
   {
     id: 'alertOnNoData',
     label: (
       <>
-        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnNoData', {
-          defaultMessage: "Alert me if there's no data",
-        })}{' '}
+        {hasGroupBy
+          ? i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnMissingGroup', {
+              defaultMessage: 'Alert me about missing group',
+            })
+          : i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnNoData', {
+              defaultMessage: "Alert me if there's no data",
+            })}{' '}
         <EuiIconTip
           size="s"
           type="question"
@@ -101,6 +99,12 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
         />
       </>
     ),
+  },
+  {
+    id: 'remainActive',
+    label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.remainActive', {
+      defaultMessage: 'Do nothing',
+    }),
   },
 ];
 
@@ -459,25 +463,24 @@ export const Expressions: React.FC<Props> = (props) => {
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiPanel color="subdued">
-        <EuiFormRow
-          label={
-            <span style={{ cursor: 'default' }}>
-              {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehaviorLabel', {
-                defaultMessage: 'If there is no data',
-              })}
-            </span>
-          }
-        >
-          <EuiRadioGroup
-            name="noDataBehavior"
-            options={getNoDataBehaviorOptions(hasGroupBy)}
-            idSelected={getNoDataBehaviorValue(ruleParams, hasGroupBy)}
-            onChange={(id) => {
-              setRuleParams('noDataBehavior', id as NoDataBehavior);
-            }}
-            data-test-subj="metrics-alert-no-data-behavior"
-          />
-        </EuiFormRow>
+        <EuiRadioGroup
+          name="noDataBehavior"
+          legend={{
+            children: (
+              <span>
+                {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehaviorLabel', {
+                  defaultMessage: 'If there is no data',
+                })}
+              </span>
+            ),
+          }}
+          options={getNoDataBehaviorOptions(hasGroupBy)}
+          idSelected={getNoDataBehaviorValue(ruleParams, hasGroupBy)}
+          onChange={(id) => {
+            setRuleParams('noDataBehavior', id as NoDataBehavior);
+          }}
+          data-test-subj="metrics-alert-no-data-behavior"
+        />
       </EuiPanel>
     </>
   );
