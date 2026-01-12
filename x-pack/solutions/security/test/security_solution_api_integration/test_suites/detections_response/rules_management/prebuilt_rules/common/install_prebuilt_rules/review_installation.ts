@@ -749,7 +749,32 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('tags with special characters', () => {
-          [' ', ':', '%', '&', '\\', '–', '{', '('].forEach((specialChar, index) => {
+          [
+            ' ',
+            '%',
+            '+',
+            '-',
+            '=',
+            '&&',
+            '||',
+            '>',
+            '<',
+            '!',
+            '(',
+            ')',
+            '{',
+            '}',
+            '[',
+            ']',
+            '^',
+            '"',
+            '~',
+            '*',
+            '?',
+            ':',
+            '\\',
+            '/',
+          ].forEach((specialChar, index) => {
             it(`matches tag with special character "${specialChar}"`, async () => {
               const tag = `tag-with-${specialChar}-in-it`;
               const ruleAsset = createRuleAssetSavedObject({

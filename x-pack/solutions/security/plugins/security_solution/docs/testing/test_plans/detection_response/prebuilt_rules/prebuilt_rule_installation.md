@@ -456,7 +456,8 @@ Then only the available prebuilt rules having this tag should be shown
 
 **Examples:**
 
-`<tag_with_special_chars>` = any tag containing special characters like commas, braces, underscores, spaces, etc.
+`<tag_with_special_chars>` = tag containing Query DSL reserved characters (+ - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /)
+More info in query DSL reserved characters: https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query#_reserved_characters
 
 #### **Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Rule Installation page**
 
@@ -800,12 +801,7 @@ Examples:
 Given <num_prebuilt_rule_assets> non-installed prebuilt rule assets exist in Kibana  
 When user calls the review installation endpoint with <page> and <per_page> parameters  
 And <page> * <per_page> is greater than <num_prebuilt_rule_assets>  
-Then the endpoint should return an empty list  
-
-Examples:
-| num_prebuilt_rule_assets | page | per_page |
-|--------------------------|------|----------|
-| 1                        | 2    | 3        |
+Then the endpoint should return an empty list
 ```
 
 

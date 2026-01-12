@@ -64,6 +64,28 @@ export const reviewRuleInstallationHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
+    // eslint-disable-next-line no-inner-declarations
+    async function fetchStats(): Promise<{ tags: string[]; numRulesToInstall: number }> {
+      // If there's no filter, we can reuse already fetched installable rule versions array
+      const requestHasFilter = Boolean(Object.keys(filter ?? {}).length);
+
+      const installableVersionsWithoutFilter = requestHasFilter
+        ? await getInstallableRuleVersions(
+            ruleAssetsClient,
+            logger,
+            mlAuthz,
+            installedRuleVersionsMap
+          )
+        : installableVersions;
+
+      const tags = await ruleAssetsClient.fetchTagsByVersion(installableVersionsWithoutFilter);
+
+      return {
+        tags,
+        numRulesToInstall: installableVersionsWithoutFilter.length,
+      };
+    }
+
     const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
     logger.debug(
       `reviewRuleInstallationHandler: Found ${installedRuleVersions.length} currently installed prebuilt rules`
@@ -71,8 +93,6 @@ export const reviewRuleInstallationHandler = async (
     const installedRuleVersionsMap = new Map(
       installedRuleVersions.map((version) => [version.rule_id, version])
     );
-
-    const requestHasFilter = Boolean(Object.keys(filter ?? {}).length);
 
     const installableVersions = await getInstallableRuleVersions(
       ruleAssetsClient,
@@ -83,22 +103,13 @@ export const reviewRuleInstallationHandler = async (
       filter
     );
 
-    const installableVersionsWithoutFilter = requestHasFilter
-      ? await getInstallableRuleVersions(
-          ruleAssetsClient,
-          logger,
-          mlAuthz,
-          installedRuleVersionsMap
-        )
-      : installableVersions;
-
     const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
 
     const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
       installableVersionsPage
     );
 
-    const tags = await ruleAssetsClient.fetchTagsByVersion(installableVersionsWithoutFilter);
+    const { tags, numRulesToInstall } = await fetchStats();
 
     const body: ReviewRuleInstallationResponseBody = {
       page,
@@ -106,7 +117,7 @@ export const reviewRuleInstallationHandler = async (
       total: installableVersions.length, // Number of rules matching the filter
       stats: {
         tags,
-        num_rules_to_install: installableVersionsWithoutFilter.length, // Number of installable rules without applying filters
+        num_rules_to_install: numRulesToInstall, // Number of installable rules without applying filters
       },
       rules: installableRuleAssetsPage.map((prebuiltRuleAsset) =>
         convertPrebuiltRuleAssetToRuleResponse(prebuiltRuleAsset)
@@ -142,9 +153,7 @@ async function getInstallableRuleVersions(
   });
 
   logger.debug(
-    `reviewRuleInstallationHandler: Fetched ${
-      latestRuleVersions.length
-    } latest rule versions from assets ${filter ? 'WITH filter' : 'without filter'}`
+    `reviewRuleInstallationHandler: Fetched ${latestRuleVersions.length} latest rule versions from assets`
   );
 
   const nonInstalledLatestRuleVersions = latestRuleVersions.filter(
