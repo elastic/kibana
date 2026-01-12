@@ -33,11 +33,11 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { FeatureClient } from './feature/feature_client';
 import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import type { SystemClient } from './system/system_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -73,8 +73,8 @@ export class StreamsClient {
       scopedClusterClient: IScopedClusterClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
+      systemClient: SystemClient;
       storageClient: StreamsStorageClient;
-      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
