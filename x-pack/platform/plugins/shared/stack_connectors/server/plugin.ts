@@ -50,7 +50,7 @@ export class StackConnectorsPlugin
     const awsSesConfig = actions.getActionsConfigurationUtilities().getAwsSesConfig();
 
     getWellKnownEmailServiceRoute(router, awsSesConfig);
-    getWebhookSecretHeadersKeyRoute(router, core.getStartServices, this.experimentalFeatures);
+    getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
 
     registerConnectorTypes({
       actions,

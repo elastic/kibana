@@ -6,6 +6,9 @@
   "visibility": "shared",
   "plugin": {
     "id": "kql",
+    // We are getting config from unifiedSearch plugin
+    // that way we don't need to change the configs for users
+    "configPath": "unifiedSearch",
     "server": true,
     "browser": true,
     "optionalPlugins": [

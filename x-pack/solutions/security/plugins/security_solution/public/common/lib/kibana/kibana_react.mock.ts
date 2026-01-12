@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
@@ -115,6 +116,7 @@ export const createStartServicesMock = (
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const customDataService = dataPluginMock.createStartContract();
+  const logger = loggingSystemMock.createLogger();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
@@ -158,6 +160,7 @@ export const createStartServicesMock = (
     apm,
     cases,
     kql,
+    logger,
     unifiedSearch,
     navigation,
     discover,

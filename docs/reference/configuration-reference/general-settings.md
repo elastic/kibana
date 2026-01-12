@@ -517,10 +517,10 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
 
     This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowChangingOptInStatus) to `false`. **Default: `true`**
 
-`kql.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`unifiedSearch.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Time in milliseconds to wait for autocomplete suggestions from {{es}}. This value must be a whole number greater than zero. **Default: `"1000"`**
 
-`kql.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`unifiedSearch.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Maximum number of documents loaded by each shard to generate autocomplete suggestions. This value must be a whole number greater than zero. **Default: `"100000"`**
 
     ::::{note}

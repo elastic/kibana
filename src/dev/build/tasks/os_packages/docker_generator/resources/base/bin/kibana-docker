@@ -53,11 +53,11 @@ kibana_vars=(
     data.search.sessions.notTouchedTimeout
     data.search.sessions.pageSize
     data.search.sessions.trackingInterval
-    kql.autocomplete.valueSuggestions.terminateAfter
-    kql.autocomplete.valueSuggestions.timeout
-    kql.autocomplete.querySuggestions.enabled
-    kql.autocomplete.valueSuggestions.enabled
-    kql.autocomplete.valueSuggestions.tiers
+    unifiedSearch.autocomplete.valueSuggestions.terminateAfter
+    unifiedSearch.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.querySuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.tiers
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries

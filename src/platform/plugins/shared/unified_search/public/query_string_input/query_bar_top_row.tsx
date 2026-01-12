@@ -280,6 +280,7 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
     const { euiTheme } = useEuiTheme();
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
@@ -298,6 +299,12 @@ export const QueryBarTopRow = React.memo(
 
       return () => window.removeEventListener('resize', handleResize);
     }, [euiTheme.breakpoint.m, submitButtonStyle]);
+
+    useEffect(() => {
+      if (!props.isLoading) {
+        setIsCancelling(false);
+      }
+    }, [props.isLoading]);
 
     const {
       showQueryInput = true,
@@ -442,6 +449,7 @@ export const QueryBarTopRow = React.memo(
         event.preventDefault();
 
         if (propsOnCancel) {
+          setIsCancelling(true);
           propsOnCancel();
         }
       },
@@ -667,6 +675,8 @@ export const QueryBarTopRow = React.memo(
             color="text"
             data-test-subj="queryCancelButton"
             iconType="cross"
+            isMainButtonLoading={isCancelling}
+            isDisabled={isCancelling}
             isSecondaryButtonDisabled={!canSendToBackground}
             isSecondaryButtonLoading={isSendingToBackground}
             onClick={onClickCancelButton}
@@ -691,6 +701,8 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
+            isLoading={isCancelling}
+            isDisabled={isCancelling}
           >
             {buttonLabelCancel}
           </EuiButtonIcon>
@@ -705,6 +717,8 @@ export const QueryBarTopRow = React.memo(
           size="s"
           data-test-subj="queryCancelButton"
           color="text"
+          isLoading={isCancelling}
+          isDisabled={isCancelling}
         >
           {buttonLabelCancel}
         </EuiButton>

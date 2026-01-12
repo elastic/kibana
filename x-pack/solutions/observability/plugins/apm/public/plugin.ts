@@ -77,7 +77,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type {
@@ -172,7 +172,7 @@ export interface ApmPluginStartDeps {
   share?: SharePublicStart;
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
-  onechat?: OnechatPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
 }
 

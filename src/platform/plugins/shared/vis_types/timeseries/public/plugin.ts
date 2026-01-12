@@ -67,7 +67,6 @@ export interface TimeseriesVisDependencies extends Partial<CoreStart> {
   timefilter: TimefilterContract;
   appName: string;
   kql: KqlPluginStart;
-  core: CoreStart;
   notifications: CoreStart['notifications'];
   storage: IStorageWrapper;
   data: DataPublicPluginStart;

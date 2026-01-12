@@ -112,6 +112,7 @@ mapped_pages:
 | Name | Description |
 | --- | --- |
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
+| [agentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md) | Home of the Agent Builder framework. |
 | [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |
@@ -135,7 +136,7 @@ mapped_pages:
 | [contentConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/content_connectors/README.mdx) | This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins. |
 | [crossClusterReplication](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cross_cluster_replication/README.md) | You can run a local cluster and simulate a remote cluster within a single Kibana directory. |
 | [customBranding](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/custom_branding/README.md) | This is a plugin to configure custom branding. Plugin server-side only. Plugin has three main functions: |
-| [dashboardAgent](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dashboard_agent/README.md) | Server-side plugin that provides a specialized AI agent and tools for dashboard management via the Onechat framework. |
+| [dashboardAgent](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dashboard_agent/README.md) | Server-side plugin that provides a specialized AI agent and tools for dashboard management via the AgentBuilder framework. |
 | [dashboardEnhanced](dashboard-enhanced-plugin.md) | Adds drilldown capabilities to dashboard.  Owned by the Kibana App team. |
 | [dataConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_connectors/README.md) | Home of the Data Connectors plugin. |
 | [dataQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_quality/README.md) | Page where users can see the quality of their log data sets. |
@@ -152,6 +153,7 @@ mapped_pages:
 | [encryptedSavedObjects](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/encrypted_saved_objects/README.md) | The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with security and spaces filtering. |
 | [enterpriseSearch](https://github.com/elastic/kibana/blob/main/x-pack/solutions/search/plugins/enterprise_search/README.md) | This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search. |
 | [entityManager](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/entity_manager/README.md) | This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more. |
+| [entityStore](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/entity_store/README.md) | Central place for Entities management and logs extraction |
 | [eventLog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/event_log/README.md) | The event log plugin provides a persistent history of alerting and action activities. |
 | [exploratoryView](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/exploratory_view/README.md) | A shared component for visualizing observability data types via lens embeddable. For further details. |
 | [features](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/features/README.md) | The features plugin enhance Kibana with a per-feature privilege system. |
@@ -197,7 +199,6 @@ mapped_pages:
 | [observabilityLogsExplorer](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md) | This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances. |
 | [observabilityOnboarding](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_onboarding/README.md) | This plugin provides an onboarding framework for observability solutions: Logs and APM. |
 | [observabilityShared](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_shared/README.md) | A plugin that contains components and utilities shared by all Observability plugins. |
-| [onechat](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/onechat/README.md) | Home of the Agent Builder framework. |
 | [osquery](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/osquery/README.md) | This plugin adds extended support to Security Solution Fleet Osquery integration |
 | [painlessLab](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/painless_lab/README.md) | This plugin helps users learn how to use the Painless scripting language. |
 | [productDocBase](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md) | This plugin provides APIs to install, update, and uninstall knowledge base artifacts for AI Assistants. It supports two resource types: |

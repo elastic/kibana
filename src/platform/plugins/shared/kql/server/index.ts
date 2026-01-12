@@ -12,8 +12,6 @@ import type { ConfigSchema } from './config';
 import { configSchema } from './config';
 import type { KQLServerPlugin, KQLServerPluginSetup, KQLServerPluginStart } from './plugin';
 
-import { autocompleteConfigDeprecationProvider } from './config_deprecations';
-
 /**
  * Static code to be shared externally
  * @public
@@ -28,7 +26,6 @@ export type { KQLServerPluginSetup as PluginSetup, KQLServerPluginStart as Plugi
 export type { KQLServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
   },

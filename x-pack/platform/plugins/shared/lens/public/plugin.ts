@@ -428,7 +428,9 @@ export class LensPlugin {
                 } satisfies LensByRefSerializedState,
               },
             },
-            true
+            {
+              displaySuccessMessage: true,
+            }
           );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,

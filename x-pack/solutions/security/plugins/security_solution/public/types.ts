@@ -66,8 +66,9 @@ import type { ProductFeatureKeyType, ProductFeatureKeys } from '@kbn/security-so
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { Logger } from '@kbn/logging';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -170,7 +171,7 @@ export interface StartPlugins {
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
   inference: InferencePublicStart;
   share?: SharePluginStart;
-  onechat?: OnechatPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -211,6 +212,7 @@ export type StartServices = CoreStart &
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
     productDocBase: ProductDocBasePluginStart;
+    logger: Logger;
   };
 
 export type StartRenderServices = Pick<

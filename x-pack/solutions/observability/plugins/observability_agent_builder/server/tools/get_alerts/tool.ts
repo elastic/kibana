@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ObservabilityAgentBuilderPluginStart,
@@ -31,10 +31,12 @@ export const defaultFields = [
   'kibana.alert.instance.id',
   'kibana.alert.reason',
   'kibana.alert.rule.category',
+  'kibana.alert.rule.consumer',
   'kibana.alert.rule.name',
+  'kibana.alert.rule.rule_type_id',
   'kibana.alert.rule.tags',
-  'kibana.alert.start',
   'kibana.alert.status',
+  'kibana.alert.evaluation.threshold',
   'kibana.alert.time_range.gte',
   'kibana.alert.time_range.lte',
   'kibana.alert.workflow_status',
@@ -54,13 +56,23 @@ export const defaultFields = [
 
 const getAlertsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  query: z.string().min(1).describe('Natural language query to guide relevant field selection.'),
-  kqlFilter: z.string().optional().describe('Filter alerts by field:value pairs'),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'Optional KQL (Kibana Query Language) filter to narrow down alerts. Examples: \'service.name: "frontend"\' (alerts for the frontend service), \'service.name: "checkout" AND host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU"\'.'
+    ),
   includeRecovered: z
     .boolean()
     .optional()
     .describe(
       'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned.'
+    ),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional list of fields to include in the alert documents. If not specified, a default set of common alert fields is returned. Use this to request specific fields like "error.message", "url.full", or any custom alert fields.'
     ),
 });
 
@@ -77,7 +89,14 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
+    description: `Retrieves Observability alerts within a specified time range.
+
+When to use:
+- Checking if there are active alerts for a service or host
+- Investigating what triggered during an incident
+- Finding alerts related to specific infrastructure or services
+
+Supports filtering by status (active/recovered) and KQL queries.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
     availability: {
@@ -86,26 +105,24 @@ export function createGetAlertsTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      {
+    handler: async (toolParams, { request }) => {
+      const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
         includeRecovered,
-        query,
-      },
-      { request }
-    ) => {
+        fields,
+      } = toolParams;
+
       try {
-        const { alerts, selectedFields, total } = await getToolHandler({
+        const { alerts, total } = await getToolHandler({
           core,
           request,
-          logger,
           start,
           end,
-          query,
           kqlFilter,
           includeRecovered,
+          fields,
         });
 
         return {
@@ -115,7 +132,6 @@ export function createGetAlertsTool({
               data: {
                 total,
                 alerts,
-                selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,
               },
             },
           ],
