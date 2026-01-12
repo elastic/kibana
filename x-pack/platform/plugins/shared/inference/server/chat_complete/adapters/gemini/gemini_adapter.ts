@@ -10,7 +10,7 @@ import { defer, map } from 'rxjs';
 import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorResponse } from '../../utils';
+import { handleConnectorStreamResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
@@ -52,7 +52,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
         },
       });
     }).pipe(
-      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
+      handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
       }),

@@ -7,7 +7,7 @@
 
 import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { isNativeFunctionCallingSupported, handleConnectorResponse } from '../../utils';
+import { isNativeFunctionCallingSupported, handleConnectorStreamResponse } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
@@ -55,7 +55,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         },
       });
     }).pipe(
-      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
+      handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity

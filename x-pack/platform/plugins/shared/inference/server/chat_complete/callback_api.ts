@@ -176,6 +176,7 @@ export function createChatCompleteCallbackApi({
                       modelName,
                       abortSignal,
                       metadata,
+                      stream,
                     })
                     .pipe(
                       chunksIntoMessage({

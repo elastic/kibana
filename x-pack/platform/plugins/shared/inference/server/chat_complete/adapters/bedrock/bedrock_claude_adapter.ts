@@ -17,7 +17,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isPlainObject } from 'lodash';
 import type { Readable } from 'stream';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorResponse } from '../../utils';
+import { handleConnectorStreamResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockToolUsePart } from './types';
 import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import type { ConverseCompletionChunk } from './process_completion_chunks';
@@ -69,7 +69,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       const result = res.data as { stream: Readable };
       return { ...res, data: result?.stream };
     }).pipe(
-      handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
+      handleConnectorStreamResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
         if (
           isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [

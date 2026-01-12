@@ -48,3 +48,25 @@ export function tokenCountFromOpenAI(
     ...(model ? { model } : {}),
   };
 }
+
+export function chunkFromCompletionResponse(
+  completion: OpenAI.ChatCompletion
+): ChatCompletionChunkEvent {
+  const message = completion.choices[0].message;
+  return {
+    type: ChatCompletionEventType.ChatCompletionChunk,
+    content: message.content ?? '',
+    refusal: message.refusal ?? undefined,
+    tool_calls:
+      message.tool_calls?.map((toolCall, i) => {
+        return {
+          function: {
+            name: toolCall.function?.name ?? '',
+            arguments: toolCall.function?.arguments ?? '',
+          },
+          toolCallId: toolCall.id ?? '',
+          index: i,
+        };
+      }) ?? [],
+  };
+}
