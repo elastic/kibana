@@ -66,31 +66,6 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
   });
 
-  it('creates connector type without executor and params for workflows-only connectors even with actions', () => {
-    const spec = createMockSpec({
-      metadata: {
-        id: 'workflows-only-connector',
-        description: 'foobar',
-        displayName: 'Workflows Only Connector',
-        minimumLicense: 'basic',
-        supportedFeatureIds: [WorkflowsConnectorFeatureId],
-      },
-      actions: {
-        testAction: {
-          input: z4.object({ test: z4.string() }),
-          handler: jest.fn(),
-        },
-      },
-    });
-
-    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
-
-    expect(connectorType.id).toBe('workflows-only-connector');
-    expect(connectorType.executor).toBeUndefined();
-    expect(connectorType.validate.params).toBeUndefined();
-    expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
-  });
-
   it('creates connector type with executor and params for workflows connectors with multiple feature IDs', () => {
     const spec = createMockSpec({
       metadata: {
@@ -143,7 +118,6 @@ describe('createConnectorTypeFromSpec', () => {
         minimumLicense: 'basic',
         supportedFeatureIds: [WorkflowsConnectorFeatureId],
       },
-      actions: {},
     });
 
     const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);

@@ -23,7 +23,6 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
-import { isWorkflowsOnlyConnectorType } from './lib/single_file_connectors/is_workflows_only_connector';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -200,64 +199,6 @@ export class ActionTypeRegistry {
           defaultMessage:
             'Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature',
         })
-      );
-    }
-
-    // Only workflows-only connectors (with no other feature IDs) can be registered without execute and params
-    const hasExecutor = !!actionType.executor;
-    const hasParamsValidator = !!actionType.validate.params;
-    const isWorkflowsOnlyConnector = isWorkflowsOnlyConnectorType(actionType);
-    const hasMultipleFeatureIds = actionType.supportedFeatureIds.length > 1;
-
-    // For workflows-only connectors: both executor and params must be missing
-    if (isWorkflowsOnlyConnector && (hasExecutor || hasParamsValidator)) {
-      throw new Error(
-        i18n.translate(
-          'xpack.actions.actionTypeRegistry.register.workflowsOnlyConnectorHasExecutorOrParams',
-          {
-            defaultMessage:
-              'Connector type "{connectorTypeId}" is a workflows-only connector and must not have executor or params validator. Both must be omitted.',
-            values: {
-              connectorTypeId: actionType.id,
-            },
-          }
-        )
-      );
-    }
-
-    // For connectors with multiple feature IDs (including workflows + others): both executor and params must be present
-    if (hasMultipleFeatureIds && (!hasExecutor || !hasParamsValidator)) {
-      throw new Error(
-        i18n.translate(
-          'xpack.actions.actionTypeRegistry.register.missingExecutorOrParamsForMultiFeature',
-          {
-            defaultMessage:
-              'Connector type "{connectorTypeId}" has multiple feature IDs and must have both executor and params validator.',
-            values: {
-              connectorTypeId: actionType.id,
-            },
-          }
-        )
-      );
-    }
-
-    // For non-workflows connectors: both executor and params must be present
-    if (
-      !isWorkflowsOnlyConnector &&
-      !hasMultipleFeatureIds &&
-      (!hasExecutor || !hasParamsValidator)
-    ) {
-      throw new Error(
-        i18n.translate(
-          'xpack.actions.actionTypeRegistry.register.missingExecutorOrParamsForNonWorkflows',
-          {
-            defaultMessage:
-              'Connector type "{connectorTypeId}" must have both executor and params validator.',
-            values: {
-              connectorTypeId: actionType.id,
-            },
-          }
-        )
       );
     }
 

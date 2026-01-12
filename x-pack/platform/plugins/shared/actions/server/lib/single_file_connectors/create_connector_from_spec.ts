@@ -20,7 +20,6 @@ import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
-import { isWorkflowsOnlyConnectorType } from './is_workflows_only_connector';
 
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
@@ -28,10 +27,8 @@ export const createConnectorTypeFromSpec = (
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
 
-  // Only workflows-only connectors (with no other feature IDs) can skip executor and params
-  const isWorkflowsOnlyConnector = isWorkflowsOnlyConnectorType(spec.metadata);
-  const shouldGenerateExecutor = !isWorkflowsOnlyConnector;
-  const shouldGenerateParams = !isWorkflowsOnlyConnector;
+  const shouldGenerateExecutor = Boolean(spec.actions);
+  const shouldGenerateParams = Boolean(spec.actions);
 
   const executor = shouldGenerateExecutor
     ? generateExecutorFunction({

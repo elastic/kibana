@@ -14,8 +14,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     displayName: 'Test Single File Connector',
     description: 'Functional testing for single file connector registration',
     minimumLicense: 'gold',
-    // more than 1 feature id is needed so that an execute function is generated
-    supportedFeatureIds: ['workflows', 'alerting'],
+    supportedFeatureIds: ['workflows'],
   },
 
   auth: {
