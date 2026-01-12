@@ -59,6 +59,10 @@ export class AlertActionRoute {
       action: result.data,
     });
 
-    return this.response.ok({ body: {} });
+    return this.response.ok({
+      body: {
+        message: 'not implemented yet',
+      },
+    });
   }
 }

@@ -37,6 +37,8 @@ export class AlertActionsClient {
       }] by user [${username ?? 'unknown'}]`,
     });
 
-    // Empty implementation for now
+    // find alert by series id
+    // throw if not found
+    // perform action on alert
   }
 }
