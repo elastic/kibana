@@ -103,7 +103,7 @@ export const IndexActionsContextMenu = ({
     plugins: { reindexService },
     core: { getUrlForApp, application, http },
     history,
-    config: { enableIndexActions },
+    config: { enableIndexActions, isServerless },
   } = useAppContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -126,23 +126,29 @@ export const IndexActionsContextMenu = ({
   const isConvertableToLookupIndex = (indexName: string) => {
     const selectedIndex = indices.find((index) => index.name === indexName);
 
-    if (
-      !selectedIndex ||
-      selectedIndex.documents === undefined ||
-      selectedIndex.primary === undefined
-    ) {
+    if (!selectedIndex || selectedIndex.documents === undefined) {
       return false;
     }
 
-    if (
-      selectedIndex.documents >= 0 &&
-      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
-      Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
-    ) {
-      return true;
+    // In non-serverless mode, we also need to check primary shards
+    if (!isServerless && selectedIndex.primary === undefined) {
+      return false;
     }
 
-    return false;
+    const isWithinDocumentLimit =
+      selectedIndex.documents >= 0 &&
+      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX;
+
+    const hasSinglePrimaryShard =
+      Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX;
+
+    // In serverless mode, only check document limit
+    // In non-serverless mode, require both document limit and single primary shard
+    if (isServerless) {
+      return isWithinDocumentLimit;
+    }
+
+    return isWithinDocumentLimit && hasSinglePrimaryShard;
   };
 
   const getPanels = () => {

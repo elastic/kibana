@@ -70,6 +70,7 @@ export class ReindexWorker {
   private readonly security: SecurityPluginStart;
   private currentWorkerPadding: number = INITIAL_WORKER_PADDING_MS;
   private rollupsEnabled: boolean;
+  private isServerless: boolean;
 
   public static create(
     client: SavedObjectsClientContract,
@@ -78,7 +79,8 @@ export class ReindexWorker {
     log: Logger,
     licensing: LicensingPluginStart,
     security: SecurityPluginStart,
-    version: Version
+    version: Version,
+    isServerless: boolean = false
   ): ReindexWorker {
     if (ReindexWorker.workerSingleton) {
       log.debug(`More than one ReindexWorker cannot be created, returning existing worker.`);
@@ -90,7 +92,9 @@ export class ReindexWorker {
         log,
         licensing,
         security,
-        version
+        version,
+        true, // rollupsEnabled
+        isServerless
       );
     }
 
@@ -105,11 +109,13 @@ export class ReindexWorker {
     private licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version,
-    rollupsEnabled: boolean = true
+    rollupsEnabled: boolean = true,
+    isServerless: boolean = false
   ) {
     this.log = log.get('reindex_worker');
     this.security = security;
     this.rollupsEnabled = rollupsEnabled;
+    this.isServerless = isServerless;
     ReindexWorker.version = version;
 
     const callAsInternalUser = this.clusterClient.asInternalUser;
@@ -125,7 +131,8 @@ export class ReindexWorker {
       ),
       log,
       this.licensing,
-      version
+      version,
+      isServerless
     );
   }
 
@@ -235,7 +242,8 @@ export class ReindexWorker {
       actions,
       this.log,
       this.licensing,
-      ReindexWorker.version
+      ReindexWorker.version,
+      this.isServerless
     );
   };
 

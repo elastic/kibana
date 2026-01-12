@@ -40,6 +40,7 @@ interface ReindexHandlerArgs {
   security?: SecurityPluginStart;
   version: Version;
   rollupsEnabled: boolean;
+  isServerless: boolean;
 }
 
 export const reindexHandler = async ({
@@ -55,6 +56,7 @@ export const reindexHandler = async ({
   security,
   version,
   rollupsEnabled,
+  isServerless,
 }: // accept index settings as params
 ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
@@ -70,7 +72,8 @@ ReindexHandlerArgs): Promise<ReindexOperation> => {
     reindexActions,
     log,
     licensing,
-    version
+    version,
+    isServerless
   );
 
   if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
