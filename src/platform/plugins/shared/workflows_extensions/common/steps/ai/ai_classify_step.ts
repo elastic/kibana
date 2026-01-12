@@ -77,10 +77,12 @@ export function buildStructuredOutputSchema(
 
   if (allowMultipleCategories) {
     shape = {
+      ...shape,
       categories: z.array(z.string()),
     };
   } else {
     shape = {
+      ...shape,
       category: z.string(),
     };
   }
