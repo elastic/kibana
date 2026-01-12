@@ -10,6 +10,8 @@ import { getAlertEventsResourceDefinition } from './alert_events';
 import { ResourceInitializer } from '../lib/services/resource_service/resource_initializer';
 import type { ResourcesService } from '../lib/services/resource_service/resources_service';
 import type { ResourceDefinition } from './types';
+import { getAlertTransitionsResourceDefinition } from './alert_transitions';
+import { getAlertActionsResourceDefinition } from './alert_actions';
 
 export interface RegisterResourcesOptions {
   resourcesService: ResourcesService;
@@ -25,5 +27,9 @@ export function registerResources({ resourcesService, esClient }: RegisterResour
 }
 
 function getDataStreamResourceDefinitions(): ResourceDefinition[] {
-  return [getAlertEventsResourceDefinition()];
+  return [
+    getAlertEventsResourceDefinition(),
+    getAlertTransitionsResourceDefinition(),
+    getAlertActionsResourceDefinition(),
+  ];
 }

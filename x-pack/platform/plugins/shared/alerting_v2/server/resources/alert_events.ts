@@ -7,10 +7,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.alerts-events';
-export const ALERT_EVENTS_ILM_POLICY_NAME = '.alerts-v2-ilm-policy';
+export const ALERT_EVENTS_ILM_POLICY_NAME = '.alerts-events-ilm-policy';
+
 export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
   _meta: { managed: true },
   phases: {
@@ -28,9 +30,7 @@ export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
 const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
-    // Timestamp when the alert event is written to the index
     '@timestamp': { type: 'date' },
-    // Timestamp when the rule is scheduled to be evaluated
     scheduled_timestamp: { type: 'date' },
     rule: {
       properties: {
@@ -53,6 +53,28 @@ const mappings: estypes.MappingTypeMapping = {
     tags: { type: 'keyword' },
   },
 };
+
+export const alertEventSchema = z.object({
+  '@timestamp': z.string(),
+  scheduled_timestamp: z.string(),
+  rule: z.object({
+    id: z.string(),
+    tags: z.array(z.string()),
+  }),
+  grouping: z.object({
+    key: z.string(),
+    value: z.string(),
+  }),
+  data: z.record(z.string(), z.any()),
+  parent_rule_id: z.string(),
+  status: z.string(),
+  alert_id: z.string(),
+  alert_series_id: z.string(),
+  source: z.string(),
+  tags: z.array(z.string()),
+});
+
+export type AlertEvent = z.infer<typeof alertEventSchema>;
 
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,
