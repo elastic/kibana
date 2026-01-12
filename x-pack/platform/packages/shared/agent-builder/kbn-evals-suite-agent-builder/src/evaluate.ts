@@ -15,26 +15,11 @@ export const evaluate = base.extend<
   }
 >({
   agentBuilderSetup: [
-    async ({ fetch, log }, use) => {
-      // Ensure AgentBuilder API is enabled before running the evaluation
-      const currentSettings = (await fetch('/internal/kibana/settings')) as any;
-      const isAgentBuilderEnabled =
-        currentSettings?.settings?.['agentBuilder:enabled']?.userValue === true;
-
-      if (isAgentBuilderEnabled) {
-        log.debug('Agent Builder is already enabled');
-      } else {
-        await fetch('/internal/kibana/settings', {
-          method: 'POST',
-          body: JSON.stringify({
-            changes: {
-              ['agentBuilder:enabled']: true,
-            },
-          }),
-        });
-        log.debug('Agent Builder enabled for the evaluation');
-      }
-
+    async ({ uiSettings, log }, use) => {
+      // Ensure AgentBuilder API is enabled before running the evaluation.
+      // Using Scout's uiSettings fixture is more robust than calling /internal/kibana/settings directly.
+      await uiSettings.set({ ['agentBuilder:enabled']: true });
+      log.debug('Agent Builder enabled for the evaluation');
       await use();
     },
     {
