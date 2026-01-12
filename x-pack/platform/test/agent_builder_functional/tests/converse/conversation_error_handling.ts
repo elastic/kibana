@@ -86,25 +86,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Assert the successful response is visible
       let attemptCount = 0;
       await retry.try(async () => {
+        await testSubjects.find('agentBuilderRoundResponse');
         attemptCount++;
-        const responseElements = await testSubjects.findAll('agentBuilderRoundResponse');
-        log.debug(
-          `>>> [DEBUG] Step 9 (attempt ${attemptCount}): Found ${responseElements.length} agentBuilderRoundResponse elements`
-        );
 
-        // Log content of each response element
-        for (let i = 0; i < responseElements.length; i++) {
-          const text = await responseElements[i].getVisibleText();
-          const truncated = text.substring(0, 150).replace(/\n/g, '\\n');
-          const suffix = text.length > 150 ? '...' : '';
-          log.debug(`>>> [DEBUG] Response element ${i}: "${truncated}${suffix}"`);
-        }
+        // Assert the successful response is visible
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
 
-        const lastResponse = responseElements[responseElements.length - 1];
-        const responseText = await lastResponse.getVisibleText();
         log.debug(
-          `>>> [DEBUG] Using last response (index ${responseElements.length - 1}), ` +
-            `text length: ${responseText.length}`
+          `>>> [DEBUG] Step 9 (attempt ${attemptCount}): Found agentBuilderRoundResponse element`
         );
         expect(responseText).to.contain(MOCKED_RESPONSE);
       });
