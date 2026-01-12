@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { injectable } from 'inversify';
 import type { LoggerService } from '../logger_service/logger_service';
 
-interface BulkIndexDocsParams {
+interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
-  docs: Record<string, any>[];
+  docs: TDocument[];
 }
 
 @injectable()
@@ -22,12 +22,18 @@ export class StorageService {
     private readonly logger: LoggerService
   ) {}
 
-  public async bulkIndexDocs({ index, docs }: BulkIndexDocsParams): Promise<void> {
+  public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
+    index,
+    docs,
+  }: BulkIndexDocsParams<TDocument>): Promise<void> {
     if (docs.length === 0) {
       return;
     }
 
-    const operations = docs.flatMap((doc) => [{ index: { _index: index } }, doc]);
+    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
+      { index: { _index: index } },
+      doc,
+    ]);
 
     try {
       const response = await this.esClient.bulk({
