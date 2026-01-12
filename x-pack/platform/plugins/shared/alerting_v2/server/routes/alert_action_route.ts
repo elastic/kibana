@@ -8,6 +8,7 @@
 import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
+import { AlertActionsClient } from '../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
 import {
@@ -38,11 +39,12 @@ export class AlertActionRoute {
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<AlertActionParams, unknown, AlertActionBody>,
-    @inject(Response) private readonly response: KibanaResponseFactory
+    @inject(Response) private readonly response: KibanaResponseFactory,
+    @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
   ) {}
 
   async handle() {
-    const { action_type } = this.request.params;
+    const { alert_series_id, action_type } = this.request.params;
     const body = this.request.body ?? {};
     const result = alertActionSchema.safeParse({ action_type, ...body });
 
@@ -52,6 +54,11 @@ export class AlertActionRoute {
       });
     }
 
-    return this.response.ok({ body: { result } });
+    await this.alertActionsClient.executeAction({
+      alertSeriesId: alert_series_id,
+      action: result.data,
+    });
+
+    return this.response.ok({ body: {} });
   }
 }
