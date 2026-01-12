@@ -18,7 +18,7 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { SECURITY_FEATURE_ID, RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import {
   buildPerPolicyTag,
   isPolicySelectionTag,
@@ -398,7 +398,6 @@ export default function ({ getService }: FtrProviderContext) {
               base: [],
               feature: {
                 [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
-                [RULES_FEATURE_ID]: ['all'],
               },
               spaces: ['*'],
             },

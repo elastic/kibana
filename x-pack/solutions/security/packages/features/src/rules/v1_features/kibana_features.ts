@@ -37,7 +37,7 @@ import {
   RULES_UI_READ,
   SERVER_APP_ID,
   USERS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ALL,
   SECURITY_SOLUTION_RULES_APP_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
@@ -97,7 +97,7 @@ export const getRulesBaseKibanaFeature = (
         minimal: [
           {
             feature: RULES_FEATURE_ID_V2,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
           },
         ],
       },

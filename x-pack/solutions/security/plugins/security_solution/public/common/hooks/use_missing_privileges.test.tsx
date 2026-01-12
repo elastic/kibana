@@ -115,7 +115,7 @@ describe('useMissingPrivileges', () => {
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           rules: { edit: false, read: true },
-          exceptions: { crud: false, read: true },
+          exceptions: { edit: false, read: true },
         },
       })
     );
@@ -159,7 +159,7 @@ describe('useMissingPrivileges', () => {
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           rules: { edit: true, read: true },
-          exceptions: { crud: true, read: true },
+          exceptions: { edit: true, read: true },
         },
       })
     );

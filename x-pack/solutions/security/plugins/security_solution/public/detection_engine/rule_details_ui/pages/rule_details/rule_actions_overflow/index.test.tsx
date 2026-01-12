@@ -66,7 +66,7 @@ describe('RuleActionsOverflow', () => {
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: true },
-        exceptions: { read: true, crud: true },
+        exceptions: { read: true, edit: true },
       },
     });
   });
@@ -193,7 +193,7 @@ describe('RuleActionsOverflow', () => {
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           rules: { read: true, edit: false },
-          exceptions: { read: true, crud: false },
+          exceptions: { read: true, edit: false },
         },
       });
 

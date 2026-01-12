@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { FC } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
@@ -60,13 +60,10 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     handleConfirmExceptionFlyout,
   } = useListWithSearchComponent(list, refreshExceptions);
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
-  const canCrudExceptions = useUserPrivileges().rulesPrivileges.exceptions.crud;
+  const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
 
-  const canAddException = useMemo(
-    () =>
-      listType === ExceptionListTypeEnum.ENDPOINT ? canWriteEndpointExceptions : canCrudExceptions,
-    [canCrudExceptions, canWriteEndpointExceptions, listType]
-  );
+  const canAddException =
+    listType === ExceptionListTypeEnum.ENDPOINT ? canWriteEndpointExceptions : canEditExceptions;
 
   return (
     <>

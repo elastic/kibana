@@ -83,7 +83,7 @@ const RuleActionsOverflowComponent = ({
   const { scheduleRuleRun } = useScheduleRuleRun();
   const {
     rules: { edit: canEditRules, read: canReadRules },
-    exceptions: { crud: canCrudExceptions },
+    exceptions: { edit: canEditExceptions },
   } = useUserPrivileges().rulesPrivileges;
 
   const onRuleDeletedCallback = useCallback(() => {
@@ -110,7 +110,7 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const modalDuplicationConfirmationResult = canCrudExceptions
+                const modalDuplicationConfirmationResult = canEditExceptions
                   ? await showBulkDuplicateExceptionsConfirmation()
                   : DuplicateOptions.withoutExceptions;
                 if (modalDuplicationConfirmationResult === null) {
@@ -249,7 +249,7 @@ const RuleActionsOverflowComponent = ({
       doesBaseVersionExist,
       startTransaction,
       closePopover,
-      canCrudExceptions,
+      canEditExceptions,
       showBulkDuplicateExceptionsConfirmation,
       executeBulkAction,
       navigateToApp,

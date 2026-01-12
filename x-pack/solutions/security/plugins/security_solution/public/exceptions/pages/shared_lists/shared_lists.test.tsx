@@ -240,7 +240,7 @@ describe('SharedLists', () => {
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: false },
-        exceptions: { read: true, crud: false },
+        exceptions: { read: true, edit: false },
       },
     });
 
@@ -258,7 +258,7 @@ describe('SharedLists', () => {
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: false },
-        exceptions: { read: true, crud: false },
+        exceptions: { read: true, edit: false },
       },
     });
 
