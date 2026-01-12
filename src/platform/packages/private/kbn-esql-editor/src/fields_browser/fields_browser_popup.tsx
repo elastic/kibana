@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -132,6 +133,7 @@ interface FieldsBrowserPopupProps {
   onSelectField: (fieldName: string, oldLength: number) => void;
   getColumnMap?: GetColumnMapFn;
   anchorElement?: HTMLElement;
+  position?: { top?: number; left?: number };
 }
 
 export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
@@ -140,7 +142,9 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
   onSelectField,
   getColumnMap,
   anchorElement,
+  position,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [fields, setFields] = useState<ESQLFieldWithMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -280,6 +284,21 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
   );
 
   return (
+    <div
+    style={{
+      ...position,
+      backgroundColor: euiTheme.colors.emptyShade,
+      borderRadius: euiTheme.border.radius.small,
+      position: 'absolute',
+      overflowY: 'auto',
+      maxHeight: '400px',
+      outline: 'none',
+      zIndex: 1001,
+      border: euiTheme.border.thin,
+    }}
+    tabIndex={-1} // Make the popover div focusable
+    role="button" // Make it interactive for mouse events
+    >
     <EuiPopover
       button={button}
       isOpen={isOpen}
@@ -379,6 +398,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
         )}
       </EuiSelectable>
     </EuiPopover>
+    </div>
   );
 };
 
