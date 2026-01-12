@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { OBSERVABILITY_GET_ALERTS_TOOL_ID, defaultFields } from './get_alerts/tool';
+export { OBSERVABILITY_GET_ALERTS_TOOL_ID } from './get_alerts/tool';
 export { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from './get_log_categories/tool';
 export { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from './run_log_rate_analysis/tool';
 export { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from './get_anomaly_detection_jobs/tool';
