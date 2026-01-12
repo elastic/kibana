@@ -15,8 +15,8 @@ import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
-import type { ServiceMapConnectionInfoResponse } from './get_service_map_connection_info';
-import { getServiceMapConnectionInfo } from './get_service_map_connection_info';
+import type { ServiceMapEdgeInfoResponse } from './get_service_map_edge_info';
+import { getServiceMapEdgeInfo } from './get_service_map_edge_info';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
@@ -182,13 +182,13 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   },
 });
 
-const serviceMapConnectionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/connection',
+const serviceMapEdgeRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/edge',
   params: t.type({
     query: t.intersection([
       t.type({
         sourceServiceName: t.string,
-        dependencyName: t.union([t.string, t.array(t.string)]),
+        resources: t.union([t.string, t.array(t.string)]),
       }),
       environmentRt,
       rangeRt,
@@ -196,7 +196,7 @@ const serviceMapConnectionRoute = createApmServerRoute({
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<ServiceMapConnectionInfoResponse> => {
+  handler: async (resources): Promise<ServiceMapEdgeInfoResponse> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
@@ -209,13 +209,22 @@ const serviceMapConnectionRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { sourceServiceName, dependencyName, environment, start, end, offset },
+      query: {
+        sourceServiceName,
+        resources: destinationResources,
+        environment,
+        start,
+        end,
+        offset,
+      },
     } = params;
 
-    return getServiceMapConnectionInfo({
+    return getServiceMapEdgeInfo({
       apmEventClient,
       sourceServiceName,
-      dependencyName,
+      resources: Array.isArray(destinationResources)
+        ? destinationResources
+        : [destinationResources],
       start,
       end,
       environment,
@@ -228,5 +237,5 @@ export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
-  ...serviceMapConnectionRoute,
+  ...serviceMapEdgeRoute,
 };

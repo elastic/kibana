@@ -32,22 +32,26 @@ interface Options {
   apmEventClient: APMEventClient;
   environment: string;
   sourceServiceName: string;
-  dependencyName: string | string[];
+  resources: string[];
   start: number;
   end: number;
   offset?: string;
 }
+export interface ServiceMapEdgeInfoResponse {
+  currentPeriod: NodeStats;
+  previousPeriod: NodeStats | undefined;
+}
 
-function getServiceMapConnectionInfoForTimeRange({
+function getServiceMapEdgeInfoForTimeRange({
   environment,
   sourceServiceName,
-  dependencyName,
+  resources,
   apmEventClient,
   start,
   end,
   offset,
 }: Options): Promise<NodeStats> {
-  return withApmSpan('get_service_map_connection_stats', async () => {
+  return withApmSpan('get_service_map_edge_stats', async () => {
     const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
       start,
       end,
@@ -70,9 +74,7 @@ function getServiceMapConnectionInfoForTimeRange({
       ...getOutcomeAggregation(ApmDocumentType.ServiceDestinationMetric),
     };
 
-    const dependencyNames = Array.isArray(dependencyName) ? dependencyName : [dependencyName];
-
-    const response = await apmEventClient.search('get_service_map_connection_stats', {
+    const response = await apmEventClient.search('get_service_map_edge_stats', {
       apm: {
         events: [ProcessorEvent.metric],
       },
@@ -83,7 +85,7 @@ function getServiceMapConnectionInfoForTimeRange({
           filter: [
             ...getDocumentTypeFilterForServiceDestinationStatistics(true),
             { term: { [SERVICE_NAME]: sourceServiceName } },
-            { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyNames } },
+            { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: resources } },
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
           ],
@@ -163,32 +165,27 @@ function getServiceMapConnectionInfoForTimeRange({
   });
 }
 
-export interface ServiceMapConnectionInfoResponse {
-  currentPeriod: NodeStats;
-  previousPeriod: NodeStats | undefined;
-}
-
-export async function getServiceMapConnectionInfo({
+export async function getServiceMapEdgeInfo({
   apmEventClient,
   sourceServiceName,
-  dependencyName,
+  resources,
   start,
   end,
   environment,
   offset,
-}: Options): Promise<ServiceMapConnectionInfoResponse> {
+}: Options): Promise<ServiceMapEdgeInfoResponse> {
   const commonProps = {
     environment,
     apmEventClient,
     sourceServiceName,
-    dependencyName,
+    resources,
     start,
     end,
   };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
-    getServiceMapConnectionInfoForTimeRange(commonProps),
-    offset ? getServiceMapConnectionInfoForTimeRange({ ...commonProps, offset }) : undefined,
+    getServiceMapEdgeInfoForTimeRange(commonProps),
+    offset ? getServiceMapEdgeInfoForTimeRange({ ...commonProps, offset }) : undefined,
   ]);
 
   return { currentPeriod, previousPeriod };

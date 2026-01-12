@@ -177,9 +177,16 @@ function mapNodes({
       if (serviceNode) {
         const serviceAnomalyStats = anomaliesByServiceName.get(serviceNode.id);
 
+        // Preserve the original span.destination.service.resource when mapping exit span to service
+        // This is needed for service-to-service edge metrics
+        const originalResource = isExitSpan(node)
+          ? (node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE]
+          : undefined;
+
         mappedNodes.set(node.id, {
           ...serviceNode,
           ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+          ...(originalResource && { [SPAN_DESTINATION_SERVICE_RESOURCE]: originalResource }),
         });
       }
     } else {
@@ -216,10 +223,21 @@ function mapEdges({
       return acc;
     }
 
+    const id = getEdgeId(sourceData.id, targetData.id);
+    const resource = targetData[SPAN_DESTINATION_SERVICE_RESOURCE] as string | undefined;
+
+    // Check if edge already exists (multiple resources can map to the same service-to-service edge)
+    const existingEdge = acc.get(id);
+    if (existingEdge) {
+      if (resource && !existingEdge.resources.includes(resource)) {
+        existingEdge.resources.push(resource);
+      }
+      return acc;
+    }
+
     const label = `${
       sourceData[SERVICE_NAME] || sourceData[SPAN_DESTINATION_SERVICE_RESOURCE]
     } to ${targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
-    const id = getEdgeId(sourceData.id, targetData.id);
 
     acc.set(id, {
       source: sourceData.id,
@@ -228,10 +246,11 @@ function mapEdges({
       id,
       sourceData,
       targetData,
+      resources: resource ? [resource] : [],
     });
 
     return acc;
-  }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
+  }, new Map<string, ConnectionEdge>());
 
   return [...connections.values()];
 }

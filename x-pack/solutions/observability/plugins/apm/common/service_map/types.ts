@@ -92,6 +92,9 @@ export interface ConnectionEdge {
   label?: string;
   bidirectional?: boolean;
   isInverseEdge?: boolean;
+  sourceData: ConnectionNode;
+  targetData: ConnectionNode;
+  resources: string[];
 }
 
 export type NodeItem = {
