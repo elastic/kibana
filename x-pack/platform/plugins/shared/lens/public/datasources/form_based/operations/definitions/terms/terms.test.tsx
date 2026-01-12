@@ -844,10 +844,10 @@ describe('terms', () => {
           displayName: 'test',
         },
       });
-      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 3 }));
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 9 }));
     });
 
-    it('should use a size of 5 when there are no other buckets', () => {
+    it('should use the default size when there are no other buckets', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
@@ -859,7 +859,7 @@ describe('terms', () => {
           displayName: 'test',
         },
       });
-      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 5 }));
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 9 }));
     });
 
     it('should set a parentFormat as "terms" if a numeric field is passed', () => {
