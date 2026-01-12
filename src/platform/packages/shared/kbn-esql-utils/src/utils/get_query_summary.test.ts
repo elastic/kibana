@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getQuerySummary } from './get_user_defined_columns';
+import { getQuerySummary } from './get_query_summary';
 
 describe('getQuerySummary', () => {
   it('returns new columns from ROW command', () => {
