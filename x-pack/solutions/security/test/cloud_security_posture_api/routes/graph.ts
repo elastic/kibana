@@ -1040,6 +1040,121 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should return label nodes with correct ID pattern confirming boolean handling', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+            originEventIds: [
+              { id: 'kabcd1234efgh5678', isAlert: true },
+              { id: 'failed-event', isAlert: false },
+            ],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes');
+
+        const labelNodes = response.body.nodes.filter(
+          (n: NodeDataModel) => n.shape === 'label'
+        ) as LabelNodeDataModel[];
+
+        // Verify label node IDs contain the expected pattern oe([01])oa([01])
+        // This confirms isOrigin and isOriginAlert booleans are converted to 0/1
+        labelNodes.forEach((labelNode: LabelNodeDataModel) => {
+          expect(labelNode.id).to.match(/oe\([01]\)oa\([01]\)/);
+        });
+      });
+
+      it('should handle events with null event.id gracefully', async () => {
+        // Create a test event with null event.id to test the edge case
+        // Use logs-* pattern which is a data stream, requires op_type: 'create'
+        const testDataStream = 'logs-test.graph-default';
+
+        const createResponse = await es.index({
+          index: testDataStream,
+          op_type: 'create', // Required for data streams
+          document: {
+            '@timestamp': '2024-09-01T12:00:00.000Z',
+            'event.action': 'test_action_null_event_id',
+            // Deliberately omit event.id to test null handling
+            'user.entity.id': 'test-user-null-event-id',
+            'host.target.entity.id': 'test-target-null-event-id',
+          },
+          refresh: 'wait_for',
+        });
+
+        const createdDocId = createResponse._id;
+        const createdIndex = createResponse._index;
+
+        try {
+          // Verify the event was created without event.id
+          const verifyResponse = await es.search({
+            index: testDataStream,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      _id: createdDocId,
+                    },
+                  },
+                ],
+                must_not: [
+                  {
+                    exists: {
+                      field: 'event.id',
+                    },
+                  },
+                ],
+              },
+            },
+          });
+
+          expect(verifyResponse.hits.hits.length).to.be.greaterThan(
+            0,
+            'Test event with null event.id should exist'
+          );
+
+          const response = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+              originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+            },
+          }).expect(result(200));
+
+          expect(response.body).to.have.property('nodes');
+          const labelNodes = response.body.nodes.filter(
+            (n: NodeDataModel) => n.shape === 'label'
+          ) as LabelNodeDataModel[];
+
+          // All label nodes should have valid IDs with the pattern oe([01])oa([01])
+          // This confirms COALESCE ensures boolean isOrigin and isOriginAlert values
+          // even when event.id is null
+          labelNodes.forEach((labelNode: LabelNodeDataModel) => {
+            expect(labelNode.id).to.match(/oe\([01]\)oa\([01]\)/);
+          });
+
+          // Verify we got results (confirming events with potentially null event.id were processed)
+          expect(labelNodes.length).to.be.greaterThan(0);
+        } finally {
+          // Clean up: delete the test event using the actual backing index
+          if (createdDocId && createdIndex) {
+            await es
+              .delete({
+                index: createdIndex,
+                id: createdDocId,
+                refresh: 'wait_for',
+              })
+              .catch(() => {
+                // Ignore errors if already deleted
+              });
+          }
+        }
+      });
+
       describe('Graph without data enrichment', () => {
         before(async () => {
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });

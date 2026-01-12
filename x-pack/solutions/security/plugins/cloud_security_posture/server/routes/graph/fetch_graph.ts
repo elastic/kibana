@@ -312,12 +312,14 @@ ${
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
+      ? `COALESCE(event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')}))`
       : 'false'
   }
-| EVAL isOriginAlert = isOrigin AND ${
+| EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
+      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+          .map((_id, idx) => `?og_alrt_id${idx}`)
+          .join(', ')}))`
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
