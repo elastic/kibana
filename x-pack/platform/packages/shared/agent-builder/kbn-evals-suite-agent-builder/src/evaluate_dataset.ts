@@ -23,6 +23,15 @@ import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  extractAllStrings,
+  extractMaxSemver,
+  extractReleaseDateNearVersion,
+  getBooleanMeta,
+  getFinalAssistantMessage,
+  getStringMeta,
+  getToolCallSteps,
+} from '@kbn/evals';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -81,8 +90,10 @@ export function createEvaluateDataset({
       output,
       metadata,
     }) => {
+      const agentId = getStringMeta(metadata, 'agentId');
       const response = await chatClient.converse({
         messages: [{ message: input.question }],
+        options: agentId ? { agentId } : undefined,
       });
 
       // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
@@ -149,6 +160,65 @@ export function createEvaluateDataset({
         task: callConverseAndEvaluate,
       },
       selectEvaluators([
+        // Conditional CODE evaluators (cheap + deterministic). These only enforce checks when metadata opts-in.
+        {
+          name: 'ToolUsageOnly',
+          kind: 'CODE' as const,
+          evaluate: async ({ output, metadata }) => {
+            const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+            if (!expectedOnlyToolId) return { score: 1 };
+
+            const toolCalls = getToolCallSteps(output as TaskOutput);
+            if (toolCalls.length === 0) {
+              return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
+            }
+
+            const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+            const hasExpected = usedToolIds.includes(expectedOnlyToolId);
+            const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
+
+            return {
+              score: hasExpected && allExpected ? 1 : 0,
+              metadata: { expectedOnlyToolId, usedToolIds },
+            };
+          },
+        },
+        {
+          name: 'DocVersionReleaseDate',
+          kind: 'CODE' as const,
+          evaluate: async ({ output, metadata }) => {
+            if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) return { score: 1 };
+
+            const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+            const toolCalls = getToolCallSteps(output as TaskOutput);
+            const matching = expectedOnlyToolId
+              ? toolCalls.filter((t) => t.tool_id === expectedOnlyToolId)
+              : toolCalls;
+
+            const strings: string[] = [];
+            for (const call of matching) {
+              extractAllStrings(call.results, strings);
+            }
+            const toolText = strings.join('\n');
+
+            const maxVersion = extractMaxSemver(toolText);
+            const releaseDate = maxVersion
+              ? extractReleaseDateNearVersion(toolText, maxVersion)
+              : undefined;
+            const answer = getFinalAssistantMessage(output as TaskOutput);
+
+            const hasVersion = Boolean(maxVersion) && answer.includes(maxVersion!);
+            const hasDate = Boolean(releaseDate) && answer.includes(releaseDate!);
+
+            return {
+              score: hasVersion && hasDate ? 1 : 0,
+              metadata: {
+                extracted: { maxVersion, releaseDate },
+                answerPreview: answer.slice(0, 500),
+              },
+            };
+          },
+        },
         ...createQuantitativeCorrectnessEvaluators(),
         createQuantitativeGroundednessEvaluator(),
         ...ragEvaluators,
