@@ -7,24 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  map,
-  type Observable,
-  tap,
-  type Subject,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, type Subject } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-containers';
-import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import type {
   PublishesSavedObjectId,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { apiHasSerializableState } from '@kbn/presentation-publishing';
 
 import { of } from 'rxjs';
 import type { DashboardState } from '../../common';
@@ -74,45 +64,25 @@ export function initializeUnsavedChangesManager({
 
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
-  const childrenWithUnsavedChanges$: Observable<string[]> = childrenUnsavedChanges$(
-    layoutManager.api.children$
-  ).pipe(
-    tap((childrenWithChanges) => {
-      // propagate the latest serialized state back to the layout manager.
-      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
-        const childApi = layoutManager.api.children$.value[uuid];
-        if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-        layoutManager.internalApi.setChildState(uuid, childApi.serializeState());
-      }
-    }),
-    map((childrenWithChanges) => {
-      return childrenWithChanges
-        .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
-        .map(({ uuid }) => uuid);
-    })
-  );
+  const { hasPanelUnsavedChanges$, hasPinnedPanelUnsavedChanges$ } =
+    layoutManager.internalApi.startComparing(lastSavedState$);
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing$(lastSavedState$),
     unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
-    layoutManager.internalApi.startComparing$(lastSavedState$),
+    hasPanelUnsavedChanges$,
+    hasPinnedPanelUnsavedChanges$,
     projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
   ]).pipe(
-    map(([settings, unifiedSearch, panels, projectRouting]) => {
-      return { ...settings, ...unifiedSearch, ...panels, ...projectRouting };
+    map(([settings, unifiedSearch, panels, pinnedPanels, projectRouting]) => {
+      return { ...settings, ...unifiedSearch, ...panels, ...pinnedPanels, ...projectRouting };
     })
   );
 
-  const unsavedChangesSubscription = combineLatest([
-    viewMode$,
-    dashboardStateChanges$,
-    childrenWithUnsavedChanges$,
-  ])
+  const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, childrenWithUnsavedChanges]) => {
-      const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
-      const hasLayoutChanges = dashboardChanges.panels;
-      const hasUnsavedChanges = hasDashboardChanges || Boolean(childrenWithUnsavedChanges.length);
+    .subscribe(([viewMode, dashboardChanges]) => {
+      const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
@@ -125,26 +95,6 @@ export function initializeUnsavedChangesManager({
           viewMode,
           ...restOfDashboardChanges,
         };
-
-        // Backup latest state from children that have unsaved changes
-        if (childrenWithUnsavedChanges.length || hasLayoutChanges) {
-          // get the serialized state for the panels that have actually changed
-          const {
-            panels: panelsWithUnsavedChanges = [],
-            controlGroupInput: controlsWithUnsavedChanges = { controls: [] },
-          } = layoutManager.internalApi.serializeLayout(childrenWithUnsavedChanges);
-          // get the full serialized state
-          const { panels, controlGroupInput, references } =
-            layoutManager.internalApi.serializeLayout();
-
-          // dashboardStateToBackup.references will be used instead of savedObjectResult.references
-          // To avoid missing references, make sure references contains all references
-          // even if panels or control group does not have unsaved changes
-          dashboardBackupState.references = references ?? [];
-          if (panelsWithUnsavedChanges.length) dashboardBackupState.panels = panels;
-          if (controlsWithUnsavedChanges.controls.length)
-            dashboardBackupState.controlGroupInput = controlGroupInput;
-        }
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
     });

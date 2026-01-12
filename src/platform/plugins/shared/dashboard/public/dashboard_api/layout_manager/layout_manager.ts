@@ -30,7 +30,7 @@ import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddab
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
-import type { PanelPackage } from '@kbn/presentation-containers';
+import { childrenUnsavedChanges$, type PanelPackage } from '@kbn/presentation-containers';
 import type { SerializedPanelState, SerializedTitles } from '@kbn/presentation-publishing';
 import {
   apiHasLibraryTransforms,
@@ -115,6 +115,22 @@ export function initializeLayoutManager(
     ([layout, panelResizeSettings]) => {
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
     }
+  );
+
+  const childrenWithUnsavedChanges$: Observable<string[]> = childrenUnsavedChanges$(children$).pipe(
+    tap((childrenWithChanges) => {
+      // propagate the latest serialized state back to the layout manager.
+      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
+        const childApi = children$.value[uuid];
+        if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
+        setChildState(uuid, childApi.serializeState());
+      }
+    }),
+    map((childrenWithChanges) => {
+      return childrenWithChanges
+        .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
+        .map(({ uuid }) => uuid);
+    })
   );
 
   /** Observable that publishes `true` when all children APIs are available */
@@ -243,6 +259,9 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(first.embeddableId);
   }
 
+  // --------------------------------------------------------------------------------------
+  // API definition
+  // --------------------------------------------------------------------------------------
   function getDashboardPanelFromId(panelId: string) {
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
@@ -276,9 +295,10 @@ export function initializeLayoutManager(
     return uuid;
   };
 
-  // --------------------------------------------------------------------------------------
-  // API definition
-  // --------------------------------------------------------------------------------------
+  const setChildState = (uuid: string, state: SerializedPanelState<object>) => {
+    currentChildState[uuid] = state;
+  };
+
   const addNewPanel = async <ApiType>(
     panelPackage: PanelPackage,
     options?: {
@@ -490,13 +510,16 @@ export function initializeLayoutManager(
       reset: resetLayout,
       serializeLayout: (subset?: string[]) =>
         serializeLayout(layout$.value, currentChildState, subset),
-      startComparing$: (
+
+      startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{
-        panels?: DashboardState['panels'];
-        controlGroupInput?: DashboardState['controlGroupInput'];
-      }> => {
-        return layout$.pipe(
+      ): {
+        hasPanelUnsavedChanges$: Observable<{ panels?: DashboardState['panels'] }>;
+        hasPinnedPanelUnsavedChanges$: Observable<{
+          controlGroupInput?: DashboardState['controlGroupInput'];
+        }>;
+      } => {
+        const updateLastSavedStatePipe = combineLatest([layout$, childrenWithUnsavedChanges$]).pipe(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
@@ -508,30 +531,68 @@ export function initializeLayoutManager(
                 lastSavedLayout = layout;
               })
             )
-          ),
-          map(([currentLayout]) => {
-            const panelsAreEqual = arePanelLayoutsEqual(lastSavedLayout, currentLayout);
-            const controlsAreEqual = arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
-            if (!(panelsAreEqual && controlsAreEqual)) {
-              logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              const { panels, controlGroupInput, references } = serializeLayout(
-                currentLayout,
-                currentChildState
-              );
-              return {
-                ...(!panelsAreEqual && { panels }),
-                ...(!controlsAreEqual && { controlGroupInput }),
-                references,
-              };
-            }
-            return {};
-          })
+          )
         );
+        return {
+          hasPanelUnsavedChanges$: updateLastSavedStatePipe.pipe(
+            map(([[currentLayout, childrenWithUnsavedChanges]]) => {
+              const layoutIsEqual = arePanelLayoutsEqual(lastSavedLayout, currentLayout);
+              const childrenAreEqual = !Object.keys(
+                pick(currentLayout.panels, childrenWithUnsavedChanges)
+              ).length;
+              if (!(layoutIsEqual && childrenAreEqual)) {
+                if (!layoutIsEqual) {
+                  logStateDiff(
+                    'dashboard panel layout',
+                    lastSavedLayout.panels,
+                    currentLayout.panels
+                  );
+                }
+                if (!childrenAreEqual) {
+                  logStateDiff(
+                    'dashboard panel children',
+                    pick(lastSavedChildState, childrenWithUnsavedChanges),
+                    pick(currentChildState, childrenWithUnsavedChanges)
+                  );
+                }
+                const { panels } = serializeLayout(currentLayout, currentChildState);
+                return { panels };
+              }
+              return {};
+            })
+          ),
+          hasPinnedPanelUnsavedChanges$: updateLastSavedStatePipe.pipe(
+            map(([[currentLayout, childrenWithUnsavedChanges]]) => {
+              const layoutIsEqual = arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
+              const childrenAreEqual = !Object.keys(
+                pick(currentLayout.controls, childrenWithUnsavedChanges)
+              ).length;
+              if (!(layoutIsEqual && childrenAreEqual)) {
+                if (!layoutIsEqual) {
+                  logStateDiff(
+                    'dashboard pinned panel layout',
+                    lastSavedLayout.controls,
+                    currentLayout.controls
+                  );
+                }
+                if (!childrenAreEqual) {
+                  logStateDiff(
+                    'dashboard panel children',
+                    pick(lastSavedChildState, childrenWithUnsavedChanges),
+                    pick(currentChildState, childrenWithUnsavedChanges)
+                  );
+                }
+
+                const { controlGroupInput } = serializeLayout(currentLayout, currentChildState);
+                return { controlGroupInput };
+              }
+              return {};
+            })
+          ),
+        };
       },
 
-      setChildState: (uuid: string, state: SerializedPanelState<object>) => {
-        currentChildState[uuid] = state;
-      },
+      setChildState,
       isSectionCollapsed,
     },
     api: {
