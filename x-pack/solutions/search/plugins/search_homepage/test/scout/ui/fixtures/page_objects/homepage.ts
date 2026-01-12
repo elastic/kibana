@@ -118,32 +118,6 @@ export class Homepage {
     return this.page.testSubj.locator('endpointValueField');
   }
 
-  // Cloud Resources methods
-  // Serverless cards
-  async getBillingCard() {
-    return this.page.testSubj.locator('cloudResourceCard-billing');
-  }
-
-  async getAutoopsCard() {
-    return this.page.testSubj.locator('cloudResourceCard-autoops');
-  }
-
-  async getCloudResourceCardAction(cardTestSubj: string) {
-    const card = this.page.testSubj.locator(cardTestSubj);
-    return card.locator('[data-test-subj="searchHomepageSearchCloudResourceCardAction"]');
-  }
-
-  // Check if Cloud Resources section is visible (requires admin + billing admin in serverless)
-  async isCloudResourcesVisible() {
-    const billingCard = await this.getBillingCard();
-    try {
-      await billingCard.waitFor({ state: 'visible', timeout: 2000 });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   // Body Links methods
   async getBodyLinks() {
     return this.page.testSubj.locator('searchHomepageBodyLinkLink');
