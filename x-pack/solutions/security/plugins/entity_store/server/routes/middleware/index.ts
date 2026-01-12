@@ -9,17 +9,14 @@ import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn
 import type { EntityStoreRequestHandlerContext } from '../../types';
 import { featureFlagEnabledMiddleware } from './feature_flag_enabled';
 
-export type Middleware = (
-  ctx: EntityStoreRequestHandlerContext,
-  req: KibanaRequest,
-  res: KibanaResponseFactory
-) => Promise<IKibanaResponse | undefined>;
-
-type ReqHandler<P, Q, B> = (
+export type Handler = <P, Q, B, R> = (
   ctx: EntityStoreRequestHandlerContext,
   req: KibanaRequest<P, Q, B>,
   res: KibanaResponseFactory
-) => Promise<IKibanaResponse>;
+) => Promise<R>;
+
+export type Middleware = Handler<unknown, unknown, unknown, IKibanaResponse | undefined>
+type ReqHandler<P, Q, B> = Handler<P, Q, B, IKibanaResponse>
 
 const REGISTERED_MIDDLEWARES: Readonly<Middleware>[] = [featureFlagEnabledMiddleware];
 
