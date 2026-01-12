@@ -386,10 +386,10 @@
             "tags": [],
             "label": "clear",
             "description": [
-              "\nClear all selected options by clicking the clear button"
+              "\nClear all selected options and wait for the UI to settle.\n\nNotes:\n- Some EUI combobox usages render `comboBoxClearButton` outside of the element that carries the\n  consumer-provided `data-test-subj` (e.g. on a wrapper). This method searches a broader scope.\n- If the clear button is not available, it falls back to removing pills via Backspace."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
             "deprecated": false,
