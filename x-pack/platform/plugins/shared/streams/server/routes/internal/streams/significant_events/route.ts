@@ -72,7 +72,7 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
       return isStale(task.created_at) ? { status: TaskStatus.Stale } : { status: task.status };
     } else if (task.status === TaskStatus.Failed) {
       return {
-        status: TaskStatus.Failed,
+        status: task.status,
         error: task.task.error,
       };
     } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
