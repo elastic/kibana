@@ -17,10 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     kbnTestServer: {
       ...kbnTestServer,
-      serverArgs: [
-        ...kbnTestServer.serverArgs,
-        '--feature_flags.overrides.discover.tabsEnabled=false',
-      ],
+      serverArgs: [...kbnTestServer.serverArgs],
     },
     testFiles: [require.resolve('.')],
   };
