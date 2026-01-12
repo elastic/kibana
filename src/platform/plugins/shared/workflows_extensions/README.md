@@ -288,6 +288,12 @@ Use config to **control step behavior** - how/when/who the step executes:
 - Execution context (e.g., `connector: 'slack-webhook'`, `agentId: 'agent-123'`)
 - Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
 
+**Built-in step-level config examples:**
+- `if`: Conditional execution (e.g., `if: '${{ steps.check.output.passed }}'`)
+- `foreach`: Iteration over collections (e.g., `foreach: '${{ steps.list.output.items }}'`)
+- `on-failure`: Error handling policy with `continue`, `retry`, or `fallback` strategies
+- `timeout`: Execution time limits (e.g., `timeout: 30s`)
+
 **Inputs (the `with` section):**
 Use inputs for **what/where to process** - the step's payload:
 - Target destinations (e.g., `index`, `channel`, `namespace`, `bucket`)
