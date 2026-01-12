@@ -11,7 +11,7 @@ import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import {
   EXCEPTIONS_API_ALL,
   EXCEPTIONS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ALL,
   EXCEPTIONS_UI_EDIT,
   EXCEPTIONS_UI_READ,
   LISTS_API_ALL,
@@ -45,7 +45,7 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
       groupType: 'independent',
       privileges: [
         {
-          id: EXCEPTIONS_SUBFEATURE_ID_ALL,
+          id: EXCEPTIONS_SUBFEATURE_ALL,
           includeIn: 'all',
           name: TRANSLATIONS.all,
           savedObject: {

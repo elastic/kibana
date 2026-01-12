@@ -39,7 +39,7 @@ import {
   EXCEPTIONS_API_ALL,
   EXCEPTIONS_API_READ,
   USERS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ALL,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -109,7 +109,7 @@ export const getSecurityV3BaseKibanaFeature = ({
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           {
             feature: RULES_FEATURE_ID_V2,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
           },
         ],
       },

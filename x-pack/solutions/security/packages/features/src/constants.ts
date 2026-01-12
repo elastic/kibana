@@ -37,7 +37,8 @@ export const CASES_FEATURE_ID_V3 = 'securitySolutionCasesV3' as const;
 
 export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
 export const EXCEPTIONS_SUBFEATURE_ID = 'securitySolutionExceptions' as const;
-export const EXCEPTIONS_SUBFEATURE_ID_ALL = 'securitySolutionExceptionsAll' as const;
+
+export const EXCEPTIONS_SUBFEATURE_ALL = 'security_solution_exceptions_all' as const;
 
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
@@ -74,7 +75,7 @@ export const RULES_UI_DETECTIONS_PRIVILEGE =
 export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
   `${RULES_FEATURE_ID_V2}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
-export const EXCEPTIONS_UI_EDIT = 'crudExceptions' as const;
+export const EXCEPTIONS_UI_EDIT = 'editExceptions' as const;
 export const EXCEPTIONS_UI_READ_PRIVILEGES =
   `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_READ}` as const;
 export const EXCEPTIONS_UI_EDIT_PRIVILEGES =

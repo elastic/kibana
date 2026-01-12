@@ -40,7 +40,7 @@ import {
   SECURITY_UI_CRUD,
   SECURITY_UI_SHOW,
   CLOUD_DEFEND_APP_ID,
-  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ALL,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -110,7 +110,7 @@ export const getSecurityV4BaseKibanaFeature = ({
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           {
             feature: RULES_FEATURE_ID_V2,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
           },
         ],
       },

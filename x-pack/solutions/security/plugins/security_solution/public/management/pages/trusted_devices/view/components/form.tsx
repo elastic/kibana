@@ -552,9 +552,10 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
     const handleFieldChange = useCallback(
       (value: string) => {
-        updateConditionField({ field: value });
+        updateConditionField({ field: value, value: '' });
+        updateVisitedFields({ entries: false });
       },
-      [updateConditionField]
+      [updateConditionField, updateVisitedFields]
     );
 
     const handleOperatorChange = useCallback(

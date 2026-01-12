@@ -13,7 +13,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { TopNavMenuConfigBeta } from './top_nav_menu_beta';
 import type {
   TopNavMenuProps,
   TopNavMenuExtensionsRegistrySetup,
@@ -32,13 +31,6 @@ export interface NavigationPublicStart {
   ui: {
     TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
     AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
-    TopNavMenuBeta: ({
-      config,
-      visible,
-    }: {
-      config: TopNavMenuConfigBeta;
-      visible?: boolean;
-    }) => React.ReactElement;
     createTopNavWithCustomContext: (
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,
       customExtensions?: RegisteredTopNavMenuData[]

@@ -85,6 +85,7 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
+import * as secretsModule from './secrets';
 
 jest.mock('./spaces/helpers', () => {
   return {
@@ -280,7 +281,10 @@ jest.mock('./secrets', () => ({
     isSecretRef: true,
   })),
   extractAndWriteSecrets: jest.fn(),
+  deleteSecretsIfNotReferenced: jest.fn(),
 }));
+
+const mockedSecretsModule = secretsModule as jest.Mocked<typeof secretsModule>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
@@ -3113,7 +3117,7 @@ describe('Package policy service', () => {
 
         calls.forEach((call, idx) => {
           expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
-          expect(call[3]).toMatchObject({ removeProtection: false });
+          expect(call[3]).toMatchObject({ removeProtection: undefined });
         });
       });
 
@@ -4548,6 +4552,196 @@ describe('Package policy service', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
       expect(res).toEqual([]);
+    });
+
+    it('should delete secrets for regular package policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Clear mock calls from previous tests
+      mockedSecretsModule.deleteSecretsIfNotReferenced.mockClear();
+
+      const packagePolicyWithSecrets = {
+        ...createPackagePolicyMock(),
+        id: 'policy-with-secrets',
+        secret_references: [{ id: 'secret-1' }, { id: 'secret-2' }],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-with-secrets',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyWithSecrets,
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        id: 'policy-with-secrets',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        attributes: packagePolicyWithSecrets,
+        references: [],
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'test',
+        version: '1.0.0',
+      } as PackageInfo);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-with-secrets',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, ['policy-with-secrets']);
+
+      // Verify that deleteSecretsIfNotReferenced was called with the correct secret IDs
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledWith({
+        esClient,
+        soClient,
+        ids: ['secret-1', 'secret-2'],
+      });
+    });
+
+    it('should NOT delete secrets for package policies with cloud_connector_id', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Clear mock calls from previous tests
+      mockedSecretsModule.deleteSecretsIfNotReferenced.mockClear();
+
+      const packagePolicyWithCloudConnector = {
+        ...createPackagePolicyMock(),
+        id: 'policy-with-cloud-connector',
+        cloud_connector_id: 'test-cloud-connector-123',
+        secret_references: [{ id: 'cloud-connector-secret-1' }, { id: 'cloud-connector-secret-2' }],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-with-cloud-connector',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyWithCloudConnector,
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        id: 'policy-with-cloud-connector',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        attributes: packagePolicyWithCloudConnector,
+        references: [],
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'test',
+        version: '1.0.0',
+      } as PackageInfo);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-with-cloud-connector',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, ['policy-with-cloud-connector']);
+
+      // Verify that deleteSecretsIfNotReferenced was NOT called for cloud connector secrets
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+    });
+
+    it('should handle mixed package policies - some with cloud connector, some without', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Clear mock calls from previous tests
+      mockedSecretsModule.deleteSecretsIfNotReferenced.mockClear();
+
+      const regularPackagePolicy = {
+        ...createPackagePolicyMock(),
+        id: 'regular-policy',
+        secret_references: [{ id: 'regular-secret-1' }],
+      };
+
+      const cloudConnectorPackagePolicy = {
+        ...createPackagePolicyMock(),
+        id: 'cloud-connector-policy',
+        cloud_connector_id: 'test-cloud-connector-123',
+        secret_references: [{ id: 'cloud-connector-secret-1' }],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'regular-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: regularPackagePolicy,
+          },
+          {
+            id: 'cloud-connector-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: cloudConnectorPackagePolicy,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'test',
+        version: '1.0.0',
+      } as PackageInfo);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'regular-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+          {
+            id: 'cloud-connector-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [
+        'regular-policy',
+        'cloud-connector-policy',
+      ]);
+
+      // Should have been called once for the regular policy secrets only
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledTimes(1);
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledWith({
+        esClient,
+        soClient,
+        ids: ['regular-secret-1'],
+      });
     });
   });
 
