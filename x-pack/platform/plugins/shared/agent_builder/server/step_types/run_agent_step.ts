@@ -19,7 +19,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { message, schema } = context.input;
+        const { message, schema, attachments } = context.input;
         const { agent_id: agentId } = context.config;
 
         context.logger.debug('agentBuilder.runAgent step started');
@@ -30,6 +30,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
 
         context.logger.debug('Executing agentBuilder.runAgent step', {
           agentId: agentId || agentBuilderDefaultAgentId,
+          attachmentCount: attachments?.length ?? 0,
         });
 
         const runner = await serviceManager.internalStart?.runnerFactory?.getRunner();
@@ -41,11 +42,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: agentId || agentBuilderDefaultAgentId,
           request,
           abortSignal: context.abortSignal,
+          defaultConnectorId: 'gpt41Azure', // Fix this
           agentParams: {
             structuredOutput: !!schema,
             outputSchema: schema ? JSON.parse(schema) : undefined,
             nextInput: {
               message,
+              attachments,
             },
           },
         });

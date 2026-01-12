@@ -287,6 +287,7 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
+  deletedAt: Date | null;
   createdAt: string;
   createdBy: string;
   lastUpdatedAt: string;

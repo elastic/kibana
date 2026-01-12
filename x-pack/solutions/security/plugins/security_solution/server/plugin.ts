@@ -19,6 +19,11 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
+import { bootstrapPreinstalledWorkflows } from './lib/workflows';
+import {
+  PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
+  PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT,
+} from '../common/constants';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAgents } from './agent_builder/agents';
@@ -175,6 +180,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
+  private workflowsManagementSetup?: SecuritySolutionPluginSetupDependencies['workflowsManagement'];
   private policyWatcher?: PolicyWatcher;
   private telemetryConfigProvider: TelemetryConfigProvider;
   private telemetryWatcher?: TelemetryConfigWatcher;
@@ -670,6 +676,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
 
+    if (plugins.workflowsManagement) {
+      this.workflowsManagementSetup = plugins.workflowsManagement;
+    }
+
     return {
       setProductFeaturesConfigurator:
         productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
@@ -945,6 +955,32 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
+    }
+
+    if (this.workflowsManagementSetup) {
+      this.logger.info('[PreinstalledWorkflows] WorkflowsManagement plugin available, checking feature flag for pre-installed workflows');
+      core.featureFlags
+        .getBooleanValue(PREINSTALLED_WORKFLOWS_FEATURE_FLAG, PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT)
+        .then((isEnabled) => {
+          this.logger.info(`[PreinstalledWorkflows] Pre-installed workflows feature flag: ${isEnabled}`);
+          if (isEnabled) {
+            this.logger.info('[PreinstalledWorkflows] Starting bootstrap of pre-installed workflows');
+            return bootstrapPreinstalledWorkflows(
+              this.workflowsManagementSetup!,
+              'default',
+              this.logger
+            );
+          } else {
+            this.logger.info('[PreinstalledWorkflows] Pre-installed workflows feature flag is disabled, skipping bootstrap');
+          }
+        })
+        .catch((error) => {
+          this.logger.error(`[PreinstalledWorkflows] Error bootstrapping pre-installed workflows: ${error.message}`, {
+            error: error.stack,
+          });
+        });
+    } else {
+      this.logger.info('[PreinstalledWorkflows] WorkflowsManagement plugin not available, skipping pre-installed workflows bootstrap');
     }
 
     return {};

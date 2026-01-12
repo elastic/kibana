@@ -81,7 +81,8 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
-      "llmTasks"
+      "llmTasks",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "esUiShared",
