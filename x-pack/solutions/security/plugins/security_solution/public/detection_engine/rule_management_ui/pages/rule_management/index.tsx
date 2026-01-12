@@ -70,9 +70,8 @@ const RulesPageComponent: React.FC = () => {
   const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
     'aiAssistedRuleCreationEnabled'
   );
-  const { isAgentChatExperienceEnabled, hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
-  const isAiRuleCreationAvailable =
-    aiAssistedRuleCreationEnabled && isAgentChatExperienceEnabled && hasAgentBuilderPrivilege;
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const isAiRuleCreationAvailable = aiAssistedRuleCreationEnabled && isAgentBuilderEnabled;
 
   if (
     redirectToDetections(
