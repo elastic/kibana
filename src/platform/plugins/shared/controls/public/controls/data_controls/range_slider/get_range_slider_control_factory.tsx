@@ -41,7 +41,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
   return {
     type: RANGE_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -68,11 +68,9 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...dataControlManager.getLatestState(),
-            ...editorStateManager.getLatestState(),
-            value: selections.value$.getValue(),
-          },
+          ...dataControlManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
+          value: selections.value$.getValue(),
         };
       }
 
@@ -93,9 +91,9 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           };
         },
         onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved?.rawState);
-          editorStateManager.reinitializeState(lastSaved?.rawState);
-          selections.setValue(lastSaved?.rawState.value);
+          dataControlManager.reinitializeState(lastSaved);
+          editorStateManager.reinitializeState(lastSaved);
+          selections.setValue(lastSaved?.value);
         },
       });
 
