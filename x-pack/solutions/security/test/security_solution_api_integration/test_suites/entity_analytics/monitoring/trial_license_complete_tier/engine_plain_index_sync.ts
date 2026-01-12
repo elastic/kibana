@@ -110,7 +110,12 @@ export default ({ getService }: FtrProviderContext) => {
         const user1AfterFirstSync = privMonUtils.findUser(usersAfterFirstSync, user1.name);
         log.info(`User 1 after first sync: ${JSON.stringify(user1AfterFirstSync)}`);
 
-        const usersAfterSecondSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        // Explicitly trigger a second sync by scheduling the engine again
+        // This ensures the sync actually runs even if the data hasn't changed
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
+        // Wait for user count to stabilize after second sync
+        const { body: usersAfterSecondSync } = await api.listPrivMonUsers({ query: {} });
         const user1AfterSecondSync = privMonUtils.findUser(usersAfterSecondSync, user1.name);
         log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 

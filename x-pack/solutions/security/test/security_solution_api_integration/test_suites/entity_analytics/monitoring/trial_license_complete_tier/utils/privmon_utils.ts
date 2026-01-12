@@ -183,9 +183,11 @@ export const PrivMonUtils = (
     });
   };
 
+  // TaskManager README reference: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/task_manager/README.md
   const waitForSyncTaskRun = async (): Promise<void> => {
     const initialTime = new Date();
 
+    // First, wait for the task to be scheduled (runAt time updated)
     await waitFor(
       async () => {
         const task = await kibanaServer.savedObjects.get({
@@ -196,7 +198,22 @@ export const PrivMonUtils = (
 
         return !!runAtTime && new Date(runAtTime) > initialTime;
       },
-      'waitForSyncTaskRun',
+      'waitForSyncTaskRun - scheduling',
+      log
+    );
+
+    // Then, wait for the task to complete (status should be 'idle' after running)
+    // Wait for the task to complete
+    await waitFor(
+      async () => {
+        const task = await kibanaServer.savedObjects.get({
+          type: 'task',
+          id: TASK_ID,
+        });
+        // status: 'idle' means finished, 'running' means still in progress
+        return task.attributes.status === 'idle';
+      },
+      'waitForSyncTaskRun - completion',
       log
     );
   };
@@ -229,8 +246,10 @@ export const PrivMonUtils = (
           `PrivMon users sync check: found ${currentLength} users (expected: ${expectedLength})`
         );
         lastSeenLength = currentLength;
+        stableCount = 0; // Reset stability counter when count changes
       }
 
+      // Only return true when count matches exactly and is stable
       if (currentLength === expectedLength) {
         stableCount++;
         if (stableCount >= 3) {
@@ -241,7 +260,8 @@ export const PrivMonUtils = (
         stableCount = 0;
       }
 
-      return currentLength >= expectedLength;
+      // Don't return true if count is greater than expected - this prevents false positives
+      return false;
     });
   };
 
