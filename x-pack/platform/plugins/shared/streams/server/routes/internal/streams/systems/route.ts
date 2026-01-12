@@ -6,13 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import {
-  streamObjectNameSchema,
-  featureSchema,
-  type Feature,
-  featureTypeSchema,
-  TaskStatus,
-} from '@kbn/streams-schema';
+import type { System } from '@kbn/streams-schema';
+import { streamObjectNameSchema, systemSchema, TaskStatus } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -329,7 +324,7 @@ export const systemsStatusRoute = createServerRoute({
     const { read } = await checkAccess({ name, scopedClusterClient });
 
     if (!read) {
-      throw new SecurityError(`Cannot read features for stream ${name}, insufficient privileges`);
+      throw new SecurityError(`Cannot read systems for stream ${name}, insufficient privileges`);
     }
 
     const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
