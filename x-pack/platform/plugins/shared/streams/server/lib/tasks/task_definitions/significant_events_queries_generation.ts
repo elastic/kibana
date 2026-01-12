@@ -8,12 +8,13 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type {
-  GeneratedSignificantEventQuery,
-  SignificantEventsQueriesGenerationResult,
-  System,
+import {
+  TaskStatus,
+  getStreamTypeFromDefinition,
+  type GeneratedSignificantEventQuery,
+  type SignificantEventsQueriesGenerationResult,
+  type System,
 } from '@kbn/streams-schema';
-import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -129,7 +130,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   SignificantEventsQueriesGenerationResult
                 >({
                   ..._task,
-                  status: 'completed',
+                  status: TaskStatus.Completed,
                   task: {
                     params: {
                       connectorId,
@@ -162,7 +163,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.update<SignificantEventsQueriesGenerationTaskParams>({
                   ..._task,
-                  status: 'failed',
+                  status: TaskStatus.Failed,
                   task: {
                     params: {
                       connectorId,

@@ -7,6 +7,7 @@
 import { conflict } from '@hapi/boom';
 import { conditionSchema } from '@kbn/streamlang';
 import {
+  TaskStatus,
   systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
@@ -311,14 +312,14 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
 
-    if (task.status === 'in_progress') {
-      return isStale(task.created_at) ? { status: 'stale' } : { status: task.status };
-    } else if (task.status === 'failed') {
+    if (task.status === TaskStatus.InProgress) {
+      return isStale(task.created_at) ? { status: TaskStatus.Stale } : { status: task.status };
+    } else if (task.status === TaskStatus.Failed) {
       return {
-        status: 'failed',
+        status: TaskStatus.Failed,
         error: task.task.error,
       };
-    } else if (task.status === 'completed' || task.status === 'acknowledged') {
+    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
       return {
         status: task.status,
         ...task.task.payload,
@@ -424,7 +425,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
         });
 
         return {
-          status: 'in_progress',
+          status: TaskStatus.InProgress,
         };
       } catch (error) {
         if (error instanceof CancellationInProgressError) {
@@ -437,7 +438,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       await taskClient.cancel(getSignificantEventsQueriesGenerationTaskId(name));
 
       return {
-        status: 'being_canceled',
+        status: TaskStatus.BeingCanceled,
       };
     }
 
@@ -449,7 +450,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       >(getSignificantEventsQueriesGenerationTaskId(name));
 
       return {
-        status: 'acknowledged',
+        status: TaskStatus.Acknowledged,
         ...task.task.payload,
       };
     } catch (error) {
