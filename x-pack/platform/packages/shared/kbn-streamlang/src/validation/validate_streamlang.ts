@@ -242,6 +242,7 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'join':
     case 'manual_ingest_pipeline':
       // These processors don't create new fields, they remove or drop
       break;
@@ -382,6 +383,7 @@ function getProcessorOutputType(
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'join':
     case 'manual_ingest_pipeline':
       // These processors don't produce typed output or type is unknown
       return 'unknown';
@@ -456,6 +458,7 @@ function getExpectedInputType(
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'join':
     case 'manual_ingest_pipeline':
       // These processors don't have strict type requirements for their inputs
       return null;
@@ -527,6 +530,7 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
         break;
       case 'append':
       case 'drop_document':
+      case 'join':
       case 'manual_ingest_pipeline':
       case 'remove_by_prefix':
         // These processors don't use specific fields in a way that requires type validation
@@ -748,6 +752,7 @@ function validateProcessorValues(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
+    case 'join':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

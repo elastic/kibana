@@ -223,6 +223,16 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "set": Object {
+        "description": undefined,
+        "field": "combined_message",
+        "if": undefined,
+        "ignore_failure": undefined,
+        "tag": undefined,
+        "value": "{{{message1}}}, {{{message2}}}, {{{message3}}}",
+      },
+    },
+    Object {
       "uppercase": Object {
         "field": "message",
         "target_field": "message_uppercase",
