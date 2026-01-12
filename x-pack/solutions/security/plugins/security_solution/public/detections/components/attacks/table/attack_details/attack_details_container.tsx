@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 import { EuiSpacer, EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 
+import { useLocalStorage } from '../../../../../common/components/local_storage';
+import { getSettingKey } from '../../../../../common/components/local_storage/helpers';
+import {
+  ATTACK_GROUP_DETAILS_CATEGORY,
+  ATTACKS_PAGE,
+  SELECTED_TAB_SETTING_NAME,
+} from '../../constants';
 import { AlertsTab } from './alerts_tab';
 import { SummaryTab } from './summary_tab';
 import * as i18n from './translations';
@@ -31,8 +38,8 @@ interface TabInfo {
 }
 
 interface AttackDetailsContainerProps {
-  /** The attack discovery alert document. If undefined, only the Alerts tab will be shown. */
-  attack?: AttackDiscoveryAlert;
+  /** The attack discovery alert document. */
+  attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
   /** Filters applied from grouping */
@@ -51,11 +58,18 @@ interface AttackDetailsContainerProps {
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
   ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
-    const tabs = useMemo<TabInfo[]>(() => {
-      const tabsList: TabInfo[] = [];
+    const [selectedTabId, setSelectedTabId] = useLocalStorage<string>({
+      defaultValue: ATTACK_SUMMARY_TAB,
+      key: getSettingKey({
+        page: ATTACKS_PAGE,
+        category: ATTACK_GROUP_DETAILS_CATEGORY,
+        setting: SELECTED_TAB_SETTING_NAME,
+      }),
+    });
 
-      if (attack) {
-        tabsList.push({
+    const tabs = useMemo<TabInfo[]>(
+      () => [
+        {
           id: ATTACK_SUMMARY_TAB,
           name: i18n.ATTACK_SUMMARY,
           content: (
@@ -64,47 +78,33 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               <SummaryTab attack={attack} showAnonymized={showAnonymized} />
             </>
           ),
-        });
-      }
-
-      tabsList.push({
-        id: ALERTS_TAB,
-        name: i18n.ALERTS,
-        content: (
-          <>
-            <EuiSpacer size="s" />
-            <AlertsTab
-              groupingFilters={groupingFilters}
-              defaultFilters={defaultFilters}
-              isTableLoading={isTableLoading}
-            />
-          </>
-        ),
-        append: attack ? (
-          <EuiNotificationBadge size="m" color="subdued">
-            {attack.alertIds.length}
-          </EuiNotificationBadge>
-        ) : undefined,
-      });
-
-      return tabsList;
-    }, [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]);
-
-    const firstTabId = useMemo(() => (attack ? ATTACK_SUMMARY_TAB : ALERTS_TAB), [attack]);
-
-    const [selectedTabId, setSelectedTabId] = useState(firstTabId);
+        },
+        {
+          id: ALERTS_TAB,
+          name: i18n.ALERTS,
+          content: (
+            <>
+              <EuiSpacer size="s" />
+              <AlertsTab
+                groupingFilters={groupingFilters}
+                defaultFilters={defaultFilters}
+                isTableLoading={isTableLoading}
+              />
+            </>
+          ),
+          append: attack ? (
+            <EuiNotificationBadge size="m" color="subdued">
+              {attack.alertIds.length}
+            </EuiNotificationBadge>
+          ) : undefined,
+        },
+      ],
+      [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]
+    );
 
     const selectedTabContent = useMemo(() => {
       return tabs.find((obj) => obj.id === selectedTabId)?.content;
     }, [selectedTabId, tabs]);
-
-    const onSelectedTabChanged = useCallback((id: string) => setSelectedTabId(id), []);
-
-    useEffect(() => {
-      // Reset to the first tab if the attack changes,
-      // because (for example) the workflow status of the alerts may have changed:
-      setSelectedTabId(firstTabId);
-    }, [attack, firstTabId]);
 
     return (
       <>
@@ -113,7 +113,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             <EuiTab
               key={index}
               isSelected={tab.id === selectedTabId}
-              onClick={() => onSelectedTabChanged(tab.id)}
+              onClick={() => setSelectedTabId(tab.id)}
               append={tab.append}
             >
               {tab.name}
