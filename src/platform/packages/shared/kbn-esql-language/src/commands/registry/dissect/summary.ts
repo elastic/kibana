@@ -6,34 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { ESQLCommand } from '../../../types';
+import type { ESQLCommandSummary } from '../types';
 import { walk } from '../../../ast/walker';
-import { type ESQLCommand } from '../../../types';
-import type { ESQLColumnData } from '../types';
 import { unquoteTemplate, extractDissectColumnNames } from './utils';
 
-export const columnsAfter = (
-  command: ESQLCommand,
-  previousColumns: ESQLColumnData[],
-  query: string
-) => {
-  const columns: string[] = [];
-
+export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
+  const newColumns: string[] = [];
   walk(command, {
     visitLiteral: (node) => {
       const dissectPattern = unquoteTemplate(String(node.value));
-      columns.push(...extractDissectColumnNames(dissectPattern));
+      newColumns.push(...extractDissectColumnNames(dissectPattern));
     },
   });
 
-  return [
-    ...previousColumns,
-    ...columns.map((column) => {
-      const newColumn: ESQLColumnData = {
-        name: column,
-        type: 'keyword' as const,
-        userDefined: false,
-      };
-      return newColumn;
-    }),
-  ];
+  return { newColumns: new Set(newColumns) };
 };
