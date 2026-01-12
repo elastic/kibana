@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import type { PropertyValidationContext } from '@kbn/workflows/types/latest';
 import {
@@ -17,26 +17,25 @@ import {
 } from '../../common/step_types/external_step';
 import type { IExampleExternalService } from '../../common/external_service/types';
 
-export const getExternalStepDefinition: (deps: {
-  externalService: IExampleExternalService;
-}) => PublicStepDefinition = (deps) => ({
-  ...externalStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/globe').then(({ icon }) => ({ default: icon }))
-  ),
-  label: i18n.translate('workflowsExtensionsExample.externalStep.label', {
-    defaultMessage: 'External Step',
-  }),
-  description: i18n.translate('workflowsExtensionsExample.externalStep.description', {
-    defaultMessage: 'Executes an external service operation',
-  }),
-  documentation: {
-    details: i18n.translate('workflowsExtensionsExample.externalStep.documentation.details', {
-      defaultMessage: `The ${ExternalStepTypeId} step allows you to store values in the workflow context that can be referenced in later steps using template syntax like {templateSyntax}.`,
-      values: { templateSyntax: '`{{ steps.stepName.output.response }}`' }, // Needs to be extracted so it is not interpreted as a variable by the i18n plugin
+export const getExternalStepDefinition = (deps: { externalService: IExampleExternalService }) =>
+  createPublicStepDefinition({
+    ...externalStepCommonDefinition,
+    icon: React.lazy(() =>
+      import('@elastic/eui/es/components/icon/assets/globe').then(({ icon }) => ({ default: icon }))
+    ),
+    label: i18n.translate('workflowsExtensionsExample.externalStep.label', {
+      defaultMessage: 'External Step',
     }),
-    examples: [
-      `## Execute an external service operation
+    description: i18n.translate('workflowsExtensionsExample.externalStep.description', {
+      defaultMessage: 'Executes an external service operation',
+    }),
+    documentation: {
+      details: i18n.translate('workflowsExtensionsExample.externalStep.documentation.details', {
+        defaultMessage: `The ${ExternalStepTypeId} step allows you to store values in the workflow context that can be referenced in later steps using template syntax like {templateSyntax}.`,
+        values: { templateSyntax: '`{{ steps.stepName.output.response }}`' }, // Needs to be extracted so it is not interpreted as a variable by the i18n plugin
+      }),
+      examples: [
+        `## Execute an external service operation
 \`\`\`yaml
 - name: external_step
   type: ${ExternalStepTypeId}
@@ -44,7 +43,7 @@ export const getExternalStepDefinition: (deps: {
     input: "Hello World"
 \`\`\``,
 
-      `## Execute an external service operation with a proxy
+        `## Execute an external service operation with a proxy
 \`\`\`yaml
 - name: external_step
   type: ${ExternalStepTypeId}
@@ -52,43 +51,42 @@ export const getExternalStepDefinition: (deps: {
   with:
     input: "Hello World"
 \`\`\``,
-    ],
-  },
-  propertyHandlers: {
-    config: {
-      'proxy.id': {
-        complete: async (currentValue: unknown) => {
-          const proxies = await deps.externalService.getProxies();
-          const currentValueString = typeof currentValue === 'string' ? currentValue.trim() : '';
-          if (currentValueString.length === 0) {
-            return proxies.map((proxy) => ({
-              label: proxy.id,
-              value: proxy.id,
-              detail: 'Proxy details',
-            }));
-          }
-          return proxies
-            .filter((proxy) => proxy.id.includes(currentValueString))
-            .map((proxy) => ({
-              label: proxy.id,
-              value: proxy.id,
-              detail: 'Proxy details',
-            }));
-        },
-        validate: async (value: unknown, _context: PropertyValidationContext) => {
-          if (value === null) {
-            return { severity: null };
-          }
-          if (typeof value !== 'string') {
-            return { severity: 'error', message: 'Proxy ID must be a string' };
-          }
-          const proxy = await deps.externalService.getProxy(value);
-          if (!proxy) {
-            return { severity: 'error', message: 'Proxy not found' };
-          }
-          return { severity: null, afterMessage: '✓ Proxy connected' };
+      ],
+    },
+    editorHandlers: {
+      config: {
+        'proxy.id': {
+          complete: async (currentValue) => {
+            const proxies = await deps.externalService.getProxies();
+            const currentValueString = typeof currentValue === 'string' ? currentValue.trim() : '';
+            return proxies
+              .filter(
+                (proxy) => currentValueString.length === 0 || proxy.id.includes(currentValueString)
+              )
+              .map((proxy) => ({
+                label: proxy.id,
+                value: proxy.id,
+                detail: 'URL: ' + proxy.url,
+              }));
+          },
+          validate: async (value, _context: PropertyValidationContext) => {
+            if (value === null) {
+              return { severity: null };
+            }
+            if (typeof value !== 'string') {
+              return { severity: 'error', message: 'Proxy ID must be a string' };
+            }
+            const proxy = await deps.externalService.getProxy(value);
+            if (!proxy) {
+              return {
+                severity: 'error',
+                message: 'Proxy not found',
+                hoverMessage: 'Manage your proxies [here](https://example.com/proxies)',
+              };
+            }
+            return { severity: null, afterMessage: '✓ Proxy connected' };
+          },
         },
       },
     },
-  },
-});
+  });

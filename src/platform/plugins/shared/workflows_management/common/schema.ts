@@ -106,7 +106,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         examples: stepDefinition.documentation?.examples
           ? { snippet: stepDefinition.documentation?.examples.join('\n') }
           : undefined,
-        propertyHandlers: stepDefinition.propertyHandlers,
+        propertyHandlers: stepDefinition.editorHandlers,
       };
     }
     return definition;
@@ -398,5 +398,5 @@ export const getPropertyHandler = (
   propertyKey: string
 ): StepPropertyHandler | null => {
   const connector = stepSchemas.getAllConnectorsMapCache()?.get(stepType);
-  return connector?.propertyHandlers?.[scope]?.[propertyKey] ?? null;
+  return connector?.editorHandlers?.[scope]?.[propertyKey] ?? null;
 };

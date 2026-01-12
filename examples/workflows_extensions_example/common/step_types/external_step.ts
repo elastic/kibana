@@ -52,7 +52,8 @@ export type ExternalStepOutputSchema = typeof OutputSchema;
  */
 export const externalStepCommonDefinition: CommonStepDefinition<
   ExternalStepInputSchema,
-  ExternalStepOutputSchema
+  ExternalStepOutputSchema,
+  typeof ConfigSchema
 > = {
   id: ExternalStepTypeId,
   inputSchema: InputSchema,

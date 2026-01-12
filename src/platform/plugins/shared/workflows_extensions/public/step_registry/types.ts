@@ -8,13 +8,34 @@
  */
 
 import type { StepPropertyHandler } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
+
+/**
+ * Helper function to create a PublicStepDefinition with automatic type inference.
+ * This ensures that the editorHandlers' types are correctly inferred
+ * from the inputSchema and configSchema without needing explicit type annotations.
+ *
+ **/
+export function createPublicStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+>(
+  definition: PublicStepDefinition<Input, Output, Config>
+): PublicStepDefinition<Input, Output, Config> {
+  return definition;
+}
 
 /**
  * User-facing metadata for a workflow step.
  * This is used by the UI to display step information (label, description, icon, schemas, documentation).
  */
-export interface PublicStepDefinition extends CommonStepDefinition {
+export interface PublicStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> extends CommonStepDefinition<Input, Output, Config> {
   /**
    * User-facing label/title for this step type.
    * Displayed in the UI when selecting or viewing steps.
@@ -49,9 +70,13 @@ export interface PublicStepDefinition extends CommonStepDefinition {
   /**
    * Property handlers for the step.
    */
-  propertyHandlers?: {
-    config?: Record<string, StepPropertyHandler>;
-    input?: Record<string, StepPropertyHandler>;
+  editorHandlers?: {
+    config?: {
+      [K in FlattenPaths<z.infer<Config>>]?: StepPropertyHandler<PathValue<z.infer<Config>, K>>;
+    };
+    input?: {
+      [K in FlattenPaths<z.infer<Input>>]?: StepPropertyHandler<PathValue<z.infer<Input>, K>>;
+    };
   };
 }
 
@@ -95,3 +120,21 @@ export interface StepDocumentation {
    */
   examples?: string[];
 }
+
+// Utility type to flatten nested object paths with dot notation
+type FlattenPaths<T, Prefix extends string = ''> = T extends object
+  ? {
+      [K in keyof T & string]: T[K] extends object
+        ? FlattenPaths<T[K], `${Prefix}${K}.`> | `${Prefix}${K}`
+        : `${Prefix}${K}`;
+    }[keyof T & string]
+  : never;
+
+// Extract value type from a dot-path
+type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
+  ? K extends keyof T
+    ? PathValue<T[K], Rest>
+    : never
+  : P extends keyof T
+  ? T[P]
+  : never;

@@ -393,7 +393,7 @@ export interface BaseConnectorContract {
   documentation?: string | null;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
-  propertyHandlers?: {
+  editorHandlers?: {
     config?: Record<string, StepPropertyHandler>;
     input?: Record<string, StepPropertyHandler>;
   };
@@ -484,6 +484,7 @@ export interface PropertyValidationResult {
   hoverMessage?: string;
 }
 
+// TODO: Add other context for cross-field validation
 export interface PropertyValidationContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
