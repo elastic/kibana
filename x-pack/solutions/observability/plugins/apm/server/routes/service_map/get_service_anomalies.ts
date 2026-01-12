@@ -19,6 +19,7 @@ import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_w
 import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   anomalySearch,
   ML_SERVICE_NAME_FIELD,
@@ -87,11 +88,12 @@ export async function getServiceAnomalies({
               aggs: {
                 metrics: {
                   top_metrics: {
-                    metrics: [
+                    metrics: asMutableArray([
                       { field: 'actual' },
                       { field: ML_TRANSACTION_TYPE_FIELD },
                       { field: 'record_score' },
-                    ],
+                    ] as const),
+                    size: 1,
                     sort: {
                       record_score: 'desc' as const,
                     },
@@ -138,8 +140,8 @@ export async function getServiceAnomalies({
         return {
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
-          transactionType: metrics?.[ML_TRANSACTION_TYPE_FIELD] as string,
-          actualValue: metrics?.actual as number,
+          transactionType: metrics?.by_field_value,
+          actualValue: metrics?.actual,
           anomalyScore,
           healthStatus,
         };
