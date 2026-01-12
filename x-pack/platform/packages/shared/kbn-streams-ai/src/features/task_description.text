@@ -1,7 +1,17 @@
 Task: Create a system prompt for an LLM to extract "features" from log data.
 
 ## What are Features?
-Features are stable facts about real system entities (environment, deployment, agent, runtime, etc.) that are explicitly supported by log evidence. They follow the BaseFeature schema with properties: type, name, description, value (object), confidence (0-100), evidence (array), tags (array), and meta (object).
+Features are stable facts about real system entities (environment, deployment, agent, runtime, etc.) that are explicitly supported by log evidence. 
+
+**Required BaseFeature schema fields** (ALL must be present in every feature):
+- `type` (string): "infrastructure", "technology", or "dependency"
+- `name` (string): Generic name in snake_case
+- `description` (string): A summary of what this feature represents
+- `value` (object): Stable, low-cardinality properties for deduplication (e.g., cloud provider, library name)
+- `confidence` (number): 0-100 score
+- `evidence` (array of strings): Supporting evidence from logs
+- `tags` (array of strings): Descriptive tags
+- `meta` (object): High-cardinality or variable data (e.g., availability zones, API endpoints), can be empty {}
 
 ## Feature Types
 - **infrastructure**: Cloud providers, container orchestration (Kubernetes, Docker), operating systems, networking, hardware
@@ -20,6 +30,25 @@ Features are stable facts about real system entities (environment, deployment, a
   - Bad: `{name: "java_runtime", value: {version: "11"}}`
 - Use snake_case for feature names
 - Keep names descriptive but concise
+
+## Value vs Meta Field Usage
+The `value` field should contain **stable, low-cardinality properties** that enable feature deduplication. High-cardinality or highly variable data should go in `meta` instead.
+
+**Use `value` for**:
+- Cloud provider name (aws, gcp, azure)
+- Programming language and major version
+- Database type (postgresql, mysql)
+- Service names in dependencies
+
+**Use `meta` for**:
+- Availability zones/regions (high cardinality across deployments)
+- Specific API endpoints or HTTP operations (many possible values)
+- Instance IDs, pod names, container IDs
+- Detailed version patches that change frequently
+
+**Example**: For a REST API dependency:
+- `value: {source: "api-service", target: "user-service"}` (stable, dedupable)
+- `meta: {endpoints: ["/users", "/users/:id", "/users/:id/profile"]}` (high cardinality)
 
 ## Inference Rules
 - Allow **one-level inference** from strong patterns with lower confidence
@@ -51,21 +80,50 @@ This is why extracting libraries/frameworks (like log4j) and their versions is i
 
 ## Input Context
 The LLM receives:
-- dataset_analysis: Field mappings, statistics, patterns from the logs
-- sample_documents: 10 actual log examples
+- sample_documents: Sample log documents (typically 20 examples)
 
 ## Output Format
 Return features following the BaseFeature schema structure using the finalize_features tool.
 
+## Example Format Requirements
+
+**CRITICAL**: All examples MUST include ALL required schema fields:
+- `type` (string)
+- `name` (string) 
+- `description` (string) - A summary of what the feature represents
+- `value` (object)
+- `confidence` (number)
+- `evidence` (array)
+- `tags` (array)
+- `meta` (object) - Can be empty {} or contain relevant metadata
+
+Use **full JSON format in code blocks** for examples (not inline shorthand). Each example must be complete and valid.
+
 ## Examples to Include
 1. Infrastructure feature with clean semantic version (e.g., OS version stripped of codenames)
-2. Infrastructure feature with consolidation (cloud provider + region)
-3. Technology feature with version (e.g., log4j with version number)
-4. Inferred feature with lower confidence (e.g., Java inferred from exceptions)
-5. Dependency feature (e.g., service connecting to database)
+2. Infrastructure feature showing value vs meta (e.g., cloud provider in value, availability zones in meta)
+3. Technology feature with version (e.g., log4j with version number, include security note in meta)
+4. Inferred feature with lower confidence (e.g., Java inferred from exceptions, explain inference in meta)
+5. Dependency feature showing value vs meta (e.g., stable service names in value, API endpoints in meta)
+
+## Prompt Structure
+The prompt should follow this structure:
+1. Opening paragraph: Define features, list all required fields (type, name, description, value, confidence, evidence, tags, meta), state downstream purpose
+2. Feature Types section: List the three types (infrastructure, technology, dependency) with example names
+3. Consolidation Rules section: When to consolidate vs separate with examples
+4. Naming Conventions section: Generic names with good/bad examples using checkmarks
+5. Value vs Meta Fields section: Explain stable/low-cardinality in value, high-cardinality in meta, with examples
+6. Inference & Confidence section: One-level inference rules with examples, confidence scoring bands
+7. Evidence & Versions section: Evidence requirements and version formatting rules with examples
+8. Examples section: 5 complete examples with ALL schema fields in code blocks
+9. Closing: "Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results."
 
 ## Style Requirements
-- Keep prompt concise (400-600 words)
+- Keep prompt concise but complete
 - Use clear, directive language (imperatives: "Extract", "Consolidate", "Tag")
-- Provide concrete examples over abstract descriptions
+- Use markdown headers (##) for major sections
+- Provide concrete examples with ALL schema fields included
 - Emphasize practical application for query generation
+- Format examples as complete JSON objects in code blocks (triple backticks)
+- Include both empty meta objects {} and populated ones to show flexibility
+- Every example must have a descriptive title like "Example 1 - Infrastructure with clean version"

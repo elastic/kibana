@@ -1,5 +1,7 @@
 You are extracting features from log data. Features are stable facts about real system entities (environment, deployment, runtime, agent, etc.) that are explicitly supported by log evidence. These features will be used to generate queries for significant events, error patterns, and CVEs.
 
+**All features must include**: type, name, description (summary of the feature), value (object with specific details), confidence (0-100), evidence (array), tags (array), and meta (object).
+
 ## Feature Types
 
 Extract features in three categories:
@@ -24,6 +26,15 @@ Use generic names with specific values:
 - ❌ `{name: "java_runtime", value: {version: "11"}}`
 
 Use snake_case and keep names concise but descriptive.
+
+## Value vs Meta Fields
+
+The `value` field must contain **stable, low-cardinality properties** that enable deduplication. High-cardinality or variable data belongs in `meta`.
+
+**In `value`**: Cloud provider, language/library names, service names, major versions
+**In `meta`**: Availability zones, API endpoints, instance IDs, pod names, detailed patches
+
+Example: Cloud deployment should have `value: {provider: "aws"}` (stable) with `meta: {zones: ["us-east-1a", "us-east-1b"]}` (variable)
 
 ## Inference & Confidence
 
@@ -53,6 +64,7 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 {
   "type": "infrastructure",
   "name": "operating_system",
+  "description": "Ubuntu Linux operating system version 20.04.6",
   "value": {"os": "ubuntu", "version": "20.04.6"},
   "confidence": 95,
   "evidence": ["host.os.name: Ubuntu", "host.os.version: 20.04.6 LTS (Focal Fossa)"],
@@ -61,16 +73,17 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 }
 ```
 
-**Example 2 - Consolidated infrastructure:**
+**Example 2 - Infrastructure with value vs meta:**
 ```
 {
   "type": "infrastructure",
   "name": "cloud_provider",
+  "description": "AWS cloud deployment across multiple availability zones",
   "value": {"provider": "aws", "region": "us-east-1"},
   "confidence": 95,
-  "evidence": ["cloud.provider: aws", "cloud.region: us-east-1"],
+  "evidence": ["cloud.provider: aws", "cloud.region: us-east-1", "cloud.availability_zone: us-east-1a"],
   "tags": ["infrastructure", "cloud"],
-  "meta": {}
+  "meta": {"availability_zones": ["us-east-1a", "us-east-1b", "us-east-1c"]}
 }
 ```
 
@@ -79,6 +92,7 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 {
   "type": "technology",
   "name": "logging_library",
+  "description": "Apache Log4j logging library version 2.14.1",
   "value": {"library": "log4j", "version": "2.14.1"},
   "confidence": 90,
   "evidence": ["org.apache.logging.log4j", "log4j-core-2.14.1.jar"],
@@ -92,6 +106,7 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 {
   "type": "technology",
   "name": "programming_language",
+  "description": "Java programming language (inferred from exception patterns)",
   "value": {"language": "java"},
   "confidence": 45,
   "evidence": ["NullPointerException at com.example.Service", "java.lang.OutOfMemoryError"],
@@ -100,17 +115,18 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 }
 ```
 
-**Example 5 - Dependency:**
+**Example 5 - Dependency with value vs meta:**
 ```
 {
   "type": "dependency",
-  "name": "database_connection",
-  "value": {"source": "api-service", "target": "postgresql", "host": "db.internal"},
+  "name": "service_dependency",
+  "description": "API gateway calling user service REST API",
+  "value": {"source": "api-gateway", "target": "user-service", "protocol": "http"},
   "confidence": 85,
-  "evidence": ["Connecting to postgresql://db.internal:5432", "query execution time: 45ms"],
-  "tags": ["dependency", "database"],
-  "meta": {}
+  "evidence": ["GET /user-service/users", "POST /user-service/users/:id/profile", "upstream: user-service:8080"],
+  "tags": ["dependency", "rest-api"],
+  "meta": {"endpoints": ["/users", "/users/:id", "/users/:id/profile"], "methods": ["GET", "POST", "PUT"]}
 }
 ```
 
-Extract all features that meet the confidence threshold and have supporting evidence from the sample documents provided.
+Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.
