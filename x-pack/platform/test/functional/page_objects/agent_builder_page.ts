@@ -513,6 +513,7 @@ export class AgentBuilderPageObject extends FtrService {
     const labelsButton = await this.find.byCssSelector(labelsButtonSelector);
     await labelsButton.click();
     await this.find.clickByCssSelector(optionSelector);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async countAgentsListRows() {
