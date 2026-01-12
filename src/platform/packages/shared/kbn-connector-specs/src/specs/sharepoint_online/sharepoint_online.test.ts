@@ -48,6 +48,16 @@ interface SharePointDrive {
 }
 
 /**
+ * SharePoint list information
+ */
+interface SharePointList {
+  id: string;
+  name: string;
+  displayName: string;
+  webUrl: string;
+}
+
+/**
  * SharePoint search response structure
  */
 interface SharePointSearchResponse {
@@ -317,6 +327,85 @@ describe('SharepointOnline', () => {
 
       await expect(
         SharepointOnline.actions.getSiteDrives.handler(mockContext, {
+          siteId: 'nonexistent-site',
+        })
+      ).rejects.toThrow('Site not found');
+    });
+  });
+
+  describe('getSiteLists action', () => {
+    it('should list all lists for a given site', async () => {
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              id: 'list-1',
+              name: 'Tasks',
+              displayName: 'Tasks',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/Lists/Tasks',
+            },
+            {
+              id: 'list-2',
+              name: 'Announcements',
+              displayName: 'Announcements',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/Lists/Announcements',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getSiteLists.handler(mockContext, {
+        siteId: 'site-123',
+      })) as SharePointListResponse<SharePointList>;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/'
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint getting all lists of site site-123'
+      );
+      expect(result).toEqual(mockResponse.data);
+      expect(result.value).toHaveLength(2);
+    });
+
+    it('should handle empty lists', async () => {
+      const mockResponse = {
+        data: {
+          value: [],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getSiteLists.handler(mockContext, {
+        siteId: 'empty-site',
+      })) as SharePointListResponse<SharePointList>;
+
+      expect(result).toEqual(mockResponse.data);
+      expect(result.value).toHaveLength(0);
+    });
+
+    it('should handle special characters in siteId', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getSiteLists.handler(mockContext, {
+        siteId: 'contoso.sharepoint.com,abc-123,def-456',
+      })) as SharePointListResponse<SharePointList>;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/'
+      );
+      expect(result.value).toEqual([]);
+    });
+
+    it('should propagate site not found errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Site not found'));
+
+      await expect(
+        SharepointOnline.actions.getSiteLists.handler(mockContext, {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
