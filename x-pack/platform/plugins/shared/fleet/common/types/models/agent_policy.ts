@@ -66,6 +66,7 @@ export interface NewAgentPolicy {
     };
   };
   required_versions?: AgentTargetVersion[] | null;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentTargetVersion {

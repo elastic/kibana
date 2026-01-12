@@ -27,6 +27,7 @@ const _allowedExperimentalValues = {
   enableSloTemplates: false,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
   enableAgentRollback: false, // When enabled, agent upgrade rollback will be available in the API and UI.
+  enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
 };
 
 /**

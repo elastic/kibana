@@ -78,6 +78,7 @@ export interface AgentPolicySOAttributes {
   global_data_tags?: Array<{ name: string; value: string | number }>;
   agentless?: AgentlessPolicy;
   version?: string;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentSOAttributes {
