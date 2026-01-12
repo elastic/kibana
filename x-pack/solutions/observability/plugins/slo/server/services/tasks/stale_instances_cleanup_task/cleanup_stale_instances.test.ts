@@ -104,7 +104,7 @@ describe('cleanupStaleInstances', () => {
     });
 
     it('should cancel the DBQ task when it exceeds MAX_TASK_DURATION_NANOS', async () => {
-      const maxDurationNanos = 24 * 60 * 60 * 1000 * 1000; // 24 hours
+      const maxDurationNanos = 24 * 60 * 60 * 1_000_000_000; // 24 hours in nanoseconds
       esClient.tasks.get.mockResolvedValueOnce(
         createMockTaskResponse(false, maxDurationNanos + 1000)
       );
@@ -144,7 +144,7 @@ describe('cleanupStaleInstances', () => {
     });
 
     it('should handle task cancellation failure gracefully', async () => {
-      const maxDurationNanos = 24 * 60 * 60 * 1000 * 1000;
+      const maxDurationNanos = 24 * 60 * 60 * 1_000_000_000; // 24 hours in nanoseconds
       esClient.tasks.get.mockResolvedValueOnce(
         createMockTaskResponse(false, maxDurationNanos + 1000)
       );
