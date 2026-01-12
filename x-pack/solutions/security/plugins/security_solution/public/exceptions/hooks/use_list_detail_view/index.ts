@@ -416,7 +416,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     listName: list?.name,
     listDescription: list?.description,
     listId: exceptionListId,
-    canUserEditList,
+    canUserEditList: canUserEditList && canUserWriteCurrentList,
     linkedRules,
     exportedList,
     handleOnDownload,
