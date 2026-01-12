@@ -18,11 +18,11 @@ export type Handler<P, Q, B, R> = (
 export type Middleware = Handler<unknown, unknown, unknown, IKibanaResponse | undefined>;
 type ReqHandler<P, Q, B> = Handler<P, Q, B, IKibanaResponse>;
 
-const REGISTERED_MIDDLEWARES: Middleware[] = [featureFlagEnabledMiddleware];
+const REGISTERED_MIDDLEWARES: readonly Middleware[] = [featureFlagEnabledMiddleware];
 
 export function wrapMiddlewares<P, Q, B>(
   handler: ReqHandler<P, Q, B>,
-  middlewares: Middleware[] = REGISTERED_MIDDLEWARES
+  middlewares: readonly Middleware[] = REGISTERED_MIDDLEWARES
 ) {
   return async (
     ctx: EntityStoreRequestHandlerContext,
