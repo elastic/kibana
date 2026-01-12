@@ -11,6 +11,34 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
   defaultMessage: 'Name',
 });
 
+export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnName',
+  {
+    defaultMessage: 'Significant Events',
+  }
+);
+
+export const QUERIES_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.queriesColumnName',
+  {
+    defaultMessage: 'Queries',
+  }
+);
+
+export const FEATURES_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.featuresColumnName',
+  {
+    defaultMessage: 'Features',
+  }
+);
+
+export const ACTIONS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.actionsColumnName',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
 export const NO_STREAMS_MESSAGE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.noStreamsMessage',
   {

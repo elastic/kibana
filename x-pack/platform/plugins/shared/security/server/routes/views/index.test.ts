@@ -25,6 +25,8 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/security/reset_session",
+        "/security/unauthenticated",
         "/security/access_agreement",
       ]
     `);
@@ -51,6 +53,8 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/security/reset_session",
+        "/security/unauthenticated",
         "/security/access_agreement",
         "/login",
       ]
@@ -79,6 +83,8 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/security/reset_session",
+        "/security/unauthenticated",
         "/security/access_agreement",
         "/login",
       ]
@@ -107,6 +113,8 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/security/reset_session",
+        "/security/unauthenticated",
         "/security/access_agreement",
         "/login",
       ]
@@ -134,6 +142,8 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/security/reset_session",
+        "/security/unauthenticated",
         "/login",
       ]
     `);

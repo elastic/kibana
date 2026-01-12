@@ -37,6 +37,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     resultStore,
+    attachmentStateManager,
     logger,
     promptManager,
     stateManager,
@@ -57,6 +58,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
     }),
     resultStore,
+    attachmentStateManager,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
