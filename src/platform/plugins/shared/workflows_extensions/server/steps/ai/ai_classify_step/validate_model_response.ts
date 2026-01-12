@@ -42,7 +42,7 @@ export function validateModelResponse({
   ]);
 
   const unexpectedCategories = returnedCategories.filter(
-    (returnedCategory) => !categoriesSet.has(returnedCategory)
+    (returnedCategory: string) => !categoriesSet.has(returnedCategory)
   );
 
   if (unexpectedCategories.length) {
