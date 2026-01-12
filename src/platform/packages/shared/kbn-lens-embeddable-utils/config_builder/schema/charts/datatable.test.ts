@@ -559,6 +559,7 @@ describe('Datatable Schema', () => {
             alignment: 'left',
             apply_color_to: 'background',
             visible: true,
+            width: 200,
             summary: { type: 'avg', label: 'Average bytes' },
             color: {
               type: 'dynamic',
@@ -590,6 +591,7 @@ describe('Datatable Schema', () => {
             fields: ['geo.dest'],
             size: 10,
             alignment: 'right',
+            width: 100,
             apply_color_to: 'value',
             visible: true,
             click_filter: true,

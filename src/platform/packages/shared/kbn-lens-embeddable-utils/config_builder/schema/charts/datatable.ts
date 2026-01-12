@@ -193,6 +193,15 @@ const datatableStateCommonOptionsSchema = {
    * Whether to show the column
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
+  /**
+   * Column width in pixels
+   */
+  width: schema.maybe(
+    schema.number({
+      min: 0,
+      meta: { description: 'Column width in pixels' },
+    })
+  ),
 };
 
 const datatableStateRowsOptionsNoESQLSchema = schema.object({

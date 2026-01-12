@@ -19,13 +19,14 @@ import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
 import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
 type APIMetricRowCommonProps = Partial<
-  Pick<DatatableState['metrics'][number], 'visible' | 'alignment'>
+  Pick<DatatableState['metrics'][number], 'visible' | 'alignment' | 'width'>
 >;
 
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
   return {
     ...(column.hidden !== undefined ? { visible: !column.hidden } : {}),
     ...(column.alignment ? { alignment: column.alignment } : {}),
+    ...(column.width !== undefined ? { width: column.width } : {}),
   };
 }
 

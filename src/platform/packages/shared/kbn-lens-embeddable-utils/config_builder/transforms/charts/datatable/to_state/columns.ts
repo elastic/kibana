@@ -37,11 +37,12 @@ function buildCommonMetricRowState(
   config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
 ): Pick<
   ColumnState,
-  'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping'
+  'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping' | 'width'
 > {
   return {
     ...(config.visible != null ? { hidden: !config.visible } : {}),
     ...(config.alignment ? { alignment: config.alignment } : {}),
+    ...(config.width != null ? { width: config.width } : {}),
     ...buildColorProps(config),
     isTransposed: false,
   };
