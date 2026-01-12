@@ -104,14 +104,8 @@ describe('validateSettingsWithDryRun', () => {
     ).not.toHaveBeenCalled();
   });
 
-  it('only sends allowed settings in serverless mode', async () => {
-    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
-      .fn()
-      .mockResolvedValue({
-        data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
-      });
-
-    await validateSettingsWithDryRun({
+  it('rejects disallowed settings in serverless mode', async () => {
+    const result = await validateSettingsWithDryRun({
       scopedClusterClient: mockScopedClusterClient,
       streamName: 'logs-test-default',
       settings: {
@@ -123,13 +117,14 @@ describe('validateSettingsWithDryRun', () => {
     });
 
     // In serverless mode, only refresh_interval is allowed
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(2);
+    expect(result.errors[0].message).toContain('index.number_of_replicas');
+    expect(result.errors[0].message).toContain('not allowed in serverless');
+    expect(result.errors[1].message).toContain('index.number_of_shards');
     expect(
       mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
-    ).toHaveBeenCalledWith({
-      name: 'logs-test-default',
-      settings: { 'index.refresh_interval': '5s' },
-      dry_run: true,
-    });
+    ).not.toHaveBeenCalled();
   });
 
   it('sends all settings in non-serverless mode', async () => {
@@ -161,5 +156,60 @@ describe('validateSettingsWithDryRun', () => {
       },
       dry_run: true,
     });
+  });
+
+  it('returns valid when data stream does not exist (new stream creation)', async () => {
+    const error = new Error('index_not_found_exception');
+    (error as any).meta = { statusCode: 404 };
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+      .fn()
+      .mockRejectedValue(error);
+
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-new-stream',
+      settings: { 'index.refresh_interval': { value: '5s' } },
+      isServerless: true,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('still rejects disallowed settings even when data stream does not exist', async () => {
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-new-stream',
+      settings: { 'index.number_of_replicas': { value: 2 } },
+      isServerless: true,
+    });
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].message).toContain('index.number_of_replicas');
+    expect(result.errors[0].message).toContain('not allowed in serverless');
+    // ES call should not have been made since allowlist check failed first
+    expect(
+      mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
+    ).not.toHaveBeenCalled();
+  });
+
+  it('allows all settings in non-serverless mode regardless of allowlist', async () => {
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValue({
+        data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
+      });
+
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: { 'index.number_of_replicas': { value: 2 } },
+      isServerless: false,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings).toHaveBeenCalled();
   });
 });

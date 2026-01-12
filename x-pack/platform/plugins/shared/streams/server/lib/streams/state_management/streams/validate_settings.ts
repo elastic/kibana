@@ -18,6 +18,8 @@ interface DataStreamSettingsResponse {
   }>;
 }
 
+const SERVERLESS_SETTINGS_ALLOWLIST = ['index.refresh_interval'];
+
 export async function validateSettingsWithDryRun({
   scopedClusterClient,
   streamName,
@@ -29,6 +31,21 @@ export async function validateSettingsWithDryRun({
   settings: IngestStreamSettings;
   isServerless: boolean;
 }): Promise<ValidationResult> {
+  // Local validation: Check serverless allowlist
+  if (isServerless) {
+    const disallowedSettings = Object.keys(settings).filter(
+      (setting) => !SERVERLESS_SETTINGS_ALLOWLIST.includes(setting)
+    );
+    if (disallowedSettings.length > 0) {
+      return {
+        isValid: false,
+        errors: disallowedSettings.map(
+          (setting) => new Error(`Setting [${setting}] is not allowed in serverless`)
+        ),
+      };
+    }
+  }
+
   const formattedSettings = formatSettings(settings, isServerless);
 
   const settingsToValidate = Object.fromEntries(
@@ -49,14 +66,7 @@ export async function validateSettingsWithDryRun({
   } catch (e) {
     const statusCode = e?.meta?.statusCode;
     if (statusCode === 404) {
-      return {
-        isValid: false,
-        errors: [
-          new Error(
-            `Cannot validate stream settings because backing Data Stream "${streamName}" was not found`
-          ),
-        ],
-      };
+      return { isValid: true, errors: [] };
     }
     throw e;
   }

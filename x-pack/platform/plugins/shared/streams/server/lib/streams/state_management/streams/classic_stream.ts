@@ -25,7 +25,7 @@ import _, { cloneDeep } from 'lodash';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
 import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';
-import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
+import { validateBracketsInFieldNames } from '../../helpers/validate_stream';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../stream_crud';
@@ -232,18 +232,14 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
-    validateSettings(this._definition, this.dependencies.isServerless);
-
-    const [, settingsValidation] = await Promise.all([
+    const [settingsValidation] = await Promise.all([
+      validateSettingsWithDryRun({
+        scopedClusterClient: this.dependencies.scopedClusterClient,
+        streamName: this._definition.name,
+        settings: this._definition.ingest.settings,
+        isServerless: this.dependencies.isServerless,
+      }),
       validateSimulation(this._definition, this.dependencies.scopedClusterClient),
-      this._changes.settings
-        ? validateSettingsWithDryRun({
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-            streamName: this._definition.name,
-            settings: this._definition.ingest.settings,
-            isServerless: this.dependencies.isServerless,
-          })
-        : Promise.resolve({ isValid: true, errors: [] } as ValidationResult),
     ]);
 
     if (!settingsValidation.isValid) {

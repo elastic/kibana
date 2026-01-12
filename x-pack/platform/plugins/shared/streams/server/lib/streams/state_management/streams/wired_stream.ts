@@ -47,7 +47,6 @@ import {
 import {
   validateRootStreamChanges,
   validateBracketsInFieldNames,
-  validateSettings,
 } from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
@@ -525,31 +524,28 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    validateSettings(this._definition, this.dependencies.isServerless);
-
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
       (id) => desiredState.get(id)!
     ) as WiredStream[];
 
-    // Settings can be applied due to an upstream stream change, so validate when any stream in the chain changed.
+    const inheritedSettings = getInheritedSettings(
+      ancestorsAndSelf.map((ancestor) => ancestor.definition) as Streams.WiredStream.Definition[]
+    );
+
     const shouldValidateSettingsWithDryRun =
-      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+      !existsInStartingState || ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
 
     // Run ES validations in parallel to avoid sequential latency
-    const [, settingsValidation] = await Promise.all([
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+    const [settingsValidation] = await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({
             scopedClusterClient: this.dependencies.scopedClusterClient,
             streamName: this._definition.name,
-            settings: getInheritedSettings(
-              ancestorsAndSelf.map(
-                (ancestor) => ancestor.definition
-              ) as Streams.WiredStream.Definition[]
-            ),
+            settings: inheritedSettings,
             isServerless: this.dependencies.isServerless,
           })
         : Promise.resolve({ isValid: true, errors: [] } as ValidationResult),
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
     ]);
 
     if (!settingsValidation.isValid) {
