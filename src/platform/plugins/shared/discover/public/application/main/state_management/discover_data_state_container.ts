@@ -254,14 +254,12 @@ export function getDataStateContainer({
   let abortControllerFetchMore: AbortController;
 
   function subscribe() {
-    numberOfFetches = 0;
-    unsubscribeIsRequested = false;
-
     const subscription = fetch$
       .pipe(
         mergeMap(async ({ options }) => {
           numberOfFetches += 1;
           if (unsubscribeIsRequested) {
+            unsubscribeIsRequested = false;
             subscription.unsubscribe();
           }
 
