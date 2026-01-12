@@ -14,8 +14,7 @@ import type {
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
-import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
-import { timeRangeFilter } from '../../utils/dsl_filters';
+import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
 
 export async function getToolHandler({
@@ -25,7 +24,8 @@ export async function getToolHandler({
   index,
   start,
   end,
-  terms,
+  kqlFilter: kuery,
+  fields,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -36,11 +36,12 @@ export async function getToolHandler({
   index?: string;
   start: string;
   end: string;
-  terms?: Record<string, string>;
+  kqlFilter?: string;
+  fields: string[];
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const baseFilters = timeRangeFilter('@timestamp', {
-    ...getShouldMatchOrNotExistFilter(terms),
+    ...kqlFilter(kuery),
     start: parseDatemath(start),
     end: parseDatemath(end, { roundUp: true }),
   });
@@ -82,7 +83,7 @@ export async function getToolHandler({
       boolQuery: { filter: messageFilters, must_not: lowSeverityLogLevels },
       logger,
       categoryCount: 20,
-      terms,
+      fields,
       field: 'message',
     }),
     getFilteredLogCategories({
@@ -91,7 +92,7 @@ export async function getToolHandler({
       boolQuery: { filter: messageFilters, must: lowSeverityLogLevels },
       logger,
       categoryCount: 10,
-      terms,
+      fields,
       field: 'message',
     }),
     // OTel exception events - these are always high severity (no log.level, uses event_name: "exception")
@@ -101,7 +102,7 @@ export async function getToolHandler({
       boolQuery: { filter: spanExceptionFilters },
       logger,
       categoryCount: 10,
-      terms,
+      fields,
       field: 'exception.message',
     }),
   ]);
@@ -128,7 +129,7 @@ export async function getFilteredLogCategories({
   boolQuery,
   logger,
   categoryCount,
-  terms,
+  fields,
   field = 'message',
 }: {
   esClient: IScopedClusterClient;
@@ -136,7 +137,7 @@ export async function getFilteredLogCategories({
   boolQuery: QueryDslBoolQuery;
   logger: Logger;
   categoryCount: number;
-  terms: Record<string, string> | undefined;
+  fields: string[];
   field?: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
@@ -188,7 +189,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: [field, '@timestamp', ...Object.keys(terms ?? {})],
+                  fields: ['message', '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },
