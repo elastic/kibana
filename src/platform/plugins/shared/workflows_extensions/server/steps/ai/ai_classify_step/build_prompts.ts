@@ -103,7 +103,7 @@ AVAILABLE CATEGORIES:
 ${categories.map((cat) => `- ${cat}`).join('\n')}
 
 CLASSIFICATION RULES:
-${classificationRules.map((x) => x.trim()).join('\n- ')}
+${classificationRules.map((rule) => rule.trim()).join('\n- ')}
 `.trim(),
     },
   ];

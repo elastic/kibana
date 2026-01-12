@@ -44,7 +44,7 @@ export const aiClassifyStepDefinition = (
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,
-          maxRetries: 0, // Allow retries for validation failures
+          maxRetries: 0, // Disable automatic retries; validation is handled via validateModelResponse
         },
       });
 
