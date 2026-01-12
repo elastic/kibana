@@ -9,8 +9,13 @@
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '../..';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
-import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
-import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
+import {
+  UnmappedFieldsTreatment,
+  type ESQLColumnData,
+  type ESQLPolicy,
+} from '../commands/registry/types';
+import { getCurrentQueryAvailableColumns, getFieldsFromES, getUnmappedFields } from './helpers';
+import { getUnmappedFieldsTreatment } from '../commands/definitions/utils/settings';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -206,6 +211,19 @@ export class QueryColumns {
       getPolicies,
       this.originalQueryText
     );
+
+    if (query.header) {
+      // Unmapped fields are fields that are used in the query but not present in the indexes mapping.
+      // We can't be sure if they are typos or actual fields that the index hasn't mapped.
+      const unmmapedFieldsTreatment = getUnmappedFieldsTreatment(query.header);
+      if (
+        unmmapedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY ||
+        unmmapedFieldsTreatment === UnmappedFieldsTreatment.LOAD
+      ) {
+        const unmappedFields = getUnmappedFields(query.commands, availableFields);
+        availableFields.push(...unmappedFields);
+      }
+    }
 
     return availableFields;
   }

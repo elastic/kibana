@@ -13,12 +13,14 @@ import {
   isSource,
   mutate,
   synth,
+  Walker,
   type ESQLAstCommand,
 } from '../..';
 import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
 import type { ESQLAstQueryExpression } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
+import { columnIsPresent } from '../commands/definitions/utils/columns';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -86,6 +88,33 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
   return fieldsWithMetadata;
 }
 
+export function getUnmappedFields(
+  commands: ESQLAstCommand[],
+  previousPipeFields: ESQLColumnData[]
+): ESQLColumnData[] {
+  const unmappedFields: ESQLColumnData[] = [];
+
+  const columsSet = new Set(previousPipeFields.map((col) => col.name));
+
+  Walker.walk(commands, {
+    visitColumn: (node) => {
+      if (
+        !columnIsPresent(node, columsSet) &&
+        unmappedFields.findIndex((f) => f.name === node.name) === -1
+      ) {
+        unmappedFields.push({
+          name: node.name, // HD build from parts?
+          type: 'keyword', // Unmapped fields are treated as type keyword
+          isUnmappedField: true,
+          userDefined: false,
+        });
+      }
+    },
+  });
+
+  return unmappedFields;
+}
+
 /**
  * @param query, the ES|QL query
  * @param commands, the AST commands
@@ -104,9 +133,6 @@ export async function getCurrentQueryAvailableColumns(
   }
   const lastCommand = commands[commands.length - 1];
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
-  if (!commandDef?.methods.columnsAfter) {
-    return previousPipeFields;
-  }
 
   const getJoinFields = createGetJoinFields(fetchFields);
   const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);

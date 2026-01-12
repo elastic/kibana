@@ -70,6 +70,7 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterOverlappingWarnings,
   getEditorOverwrites,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -761,7 +762,9 @@ const ESQLEditorInternal = function ESQLEditor({
       }
 
       const unerlinedWarnings = allWarnings.filter((warning) => warning.underlinedWarning);
-      const underlinedMessages = [...allErrors, ...unerlinedWarnings];
+      const nonOverlappingWarnings = filterOverlappingWarnings(allErrors, unerlinedWarnings);
+
+      const underlinedMessages = [...allErrors, ...nonOverlappingWarnings];
       const markers = [];
 
       if (dataErrorsControl?.enabled === false) {
