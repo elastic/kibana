@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ActiveSource } from '../../types/connector';
+import { queryKeys } from '../query_keys';
 
 interface ListDataConnectorsResponse {
   connectors: ActiveSource[];
@@ -20,7 +21,7 @@ export const useActiveSources = () => {
     services: { http },
   } = useKibana();
 
-  const { data, isLoading, error } = useQuery(['dataConnectors', 'list'], async () => {
+  const { data, isLoading, error } = useQuery(queryKeys.dataConnectors.list(), async () => {
     return await http.get<ListDataConnectorsResponse>(API_BASE_PATH);
   });
 

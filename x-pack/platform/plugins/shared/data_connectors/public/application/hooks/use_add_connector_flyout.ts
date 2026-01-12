@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
+import { queryKeys } from '../query_keys';
 
 export interface UseAddConnectorFlyoutOptions {
   onConnectorCreated?: (connector: ActionConnector) => void;
@@ -99,7 +100,7 @@ export const useAddConnectorFlyout = ({
       );
 
       // Invalidate queries to refresh Active Sources table
-      queryClient.invalidateQueries(['dataConnectors', 'list']);
+      queryClient.invalidateQueries(queryKeys.dataConnectors.list());
     },
     onError: (error, variables) => {
       // Dismiss loading toast

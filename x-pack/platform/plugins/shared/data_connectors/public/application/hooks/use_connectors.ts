@@ -11,6 +11,7 @@ import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/commo
 import type { Connector } from '../../types/connector';
 import { DataConnectorTypesService } from '../../services';
 import { useKibana } from './use_kibana';
+import { queryKeys } from '../query_keys';
 
 /**
  * Transforms a data source type from the registry to our internal Connector type
@@ -34,7 +35,7 @@ export const useConnectors = () => {
   } = useKibana();
 
   const { data, isLoading, error } = useQuery(
-    ['connectorTypes', 'list'],
+    queryKeys.connectorTypes.list(),
     async () => {
       const service = new DataConnectorTypesService({ http });
       const connectorTypes = await service.list();
