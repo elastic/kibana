@@ -1,5 +1,5 @@
 name: Synthetics Scalability Test
-description: Minimal test
+description: Scalability test for Synthetics monitors
 
 params:
   - name: github_token
@@ -33,17 +33,97 @@ params:
     type: automation
     automation: gcp_auth
 
+  - name: http_monitor_count
+    description: Number of HTTP monitors to create
+    type: string
+
+  - name: tcp_monitor_count
+    description: Number of TCP monitors to create
+    type: string
+
+  - name: icmp_monitor_count
+    description: Number of ICMP monitors to create
+    type: string
+
+  - name: browser_monitor_count
+    description: Number of Browser monitors to create
+    type: string
+
 steps:
-  - name: Create OBLT CCS Cluster
-    id: create_ccs_cluster
-    type: providers.oblt_cli.create_ccs_cluster
+
+  - name: Find unstable kibana version (e.g. 9.4.0-snapshot)
+    id: artifact
+    type: services.artifacts.search
+    with:
+      channel: "unstable"
+      github_token: "{{ param.github_token }}"
+
+  - name: Create ess cluster
+    id: cluster
+    type: providers.oblt_cli.create_custom_cluster
     with:
       gcp_app_credentials: ".secrets/credentials.json"
-      remote_cluster: 'edge-oblt'
+      github_username: "{{ param.github_username }}"
+      github_email: "{{ param.github_email }}"
       github_token: '{{ param.github_token }}'
-      github_username: '{{ param.github_username }}'
-      github_email: '{{ param.github_email }}'
+      template: ess
+      parameters:
+        StackVersion: "{{ step.artifact.data.version }}"
+        ElasticsearchDockerImage: "{{ step.artifact.data.docker.elasticsearch }}"
+        KibanaDockerImage: "{{ step.artifact.data.docker.kibana }}"
+        EnableIntegrations: true
+        EphemeralCluster: true
+        ExpiryDate: '{{ now() + timedelta(hours=6) }}'
     resources:
       - type: file
         content: "{{ param.gcp_app_credentials }}"
         filename: ".secrets/credentials.json"
+    retry:
+      max: 3
+      interval: 5
+
+  - name: Wait for cluster to be ready
+    id: wait_cluster
+    type: builtin.wait
+    with:
+      time: 60
+
+  - name: Run Synthetics Forge
+    id: run_forge
+    type: providers.shell.run
+    with:
+      script_file: run_forge.sh
+    resources:
+      - type: env
+        variables:
+          KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+          KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+          KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+          HTTP_MONITOR_COUNT: "{{ param.http_monitor_count }}"
+          TCP_MONITOR_COUNT: "{{ param.tcp_monitor_count }}"
+          ICMP_MONITOR_COUNT: "{{ param.icmp_monitor_count }}"
+          BROWSER_MONITOR_COUNT: "{{ param.browser_monitor_count }}"
+          FORGE_ACTION: "create"
+      - type: file
+        filename: run_forge.sh
+        content: |
+          #!/bin/bash
+          set -e
+          echo "KIBANA_URL: $KIBANA_URL"
+          echo "KIBANA_USERNAME: $KIBANA_USERNAME"
+          echo "KIBANA_PASSWORD: $KIBANA_PASSWORD"
+          node /Users/faisal/elastic/kibana/x-pack/scripts/synthetics_forge.js
+
+  - name: Delete cluster
+    type: providers.oblt_cli.delete_cluster
+    with:
+      gcp_app_credentials: ".secrets/credentials.json"
+      github_username: "{{ param.github_username }}"
+      github_email: "{{ param.github_email }}"
+      github_token: '{{ param.github_token }}'
+      cluster_name: "{{ step.cluster.data.cluster_name }}"
+    resources:
+      - type: file
+        content: "{{ param.gcp_app_credentials }}"
+        filename: ".secrets/credentials.json"
+    when: always
