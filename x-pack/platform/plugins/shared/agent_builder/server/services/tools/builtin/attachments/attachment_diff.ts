@@ -89,21 +89,26 @@ export const createAttachmentDiffTool = ({
       ],
     };
   },
-  cleanHistory: (result) => {
+  cleanHistory: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
     if (data.__attachment_operation__ !== 'diff') return undefined;
 
-    return {
-      summary: `Compared attachment "${data.attachment_id}" v${data.from_version} to v${
-        data.to_version
-      }: ${data.change_type || 'changes found'}`,
-      metadata: {
-        attachment_id: data.attachment_id,
-        from_version: data.from_version,
-        to_version: data.to_version,
-        change_type: data.change_type,
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Compared attachment "${data.attachment_id}" v${data.from_version} to v${
+            data.to_version
+          }: ${data.change_type || 'changes found'}`,
+          attachment_id: data.attachment_id,
+          from_version: data.from_version,
+          to_version: data.to_version,
+          change_type: data.change_type,
+        },
       },
-    };
+    ];
   },
 });

@@ -69,6 +69,7 @@ export const createAttachmentReadTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
+            attachment_id: attachmentId,
             type: attachment.type,
             version: versionData.version,
             data: versionData.data,
@@ -77,17 +78,23 @@ export const createAttachmentReadTool = ({
       ],
     };
   },
-  cleanHistory: (result) => {
+  cleanHistory: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
 
-    return {
-      summary: `Read ${data.type || 'attachment'} "${data.attachment_id}" v${data.version ?? '?'}`,
-      metadata: {
-        attachment_id: data.attachment_id,
-        type: data.type,
-        version: data.version,
+    const attachmentId = data.attachment_id || 'unknown';
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Read ${data.type || 'attachment'} "${attachmentId}" v${data.version ?? '?'}`,
+          attachment_id: attachmentId,
+          type: data.type,
+          version: data.version,
+        },
       },
-    };
+    ];
   },
 });

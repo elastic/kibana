@@ -57,15 +57,20 @@ export const createAttachmentListTool = ({
       ],
     };
   },
-  cleanHistory: (result) => {
+  cleanHistory: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
 
-    return {
-      summary: `Listed ${data.count ?? '?'} attachments`,
-      metadata: {
-        count: data.count,
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Listed ${data.count ?? '?'} attachments`,
+          count: data.count,
+        },
       },
-    };
+    ];
   },
 });

@@ -78,7 +78,9 @@ export const createAttachmentUpdateTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
+            attachment_id: attachmentId,
             type: updated.type,
+            previous_version: previousVersion,
             version: updated.current_version,
             version_created: updated.current_version !== previousVersion,
           },
@@ -86,7 +88,9 @@ export const createAttachmentUpdateTool = ({
       ],
     };
   },
-  cleanHistory: (result) => {
+  cleanHistory: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
 
@@ -95,14 +99,18 @@ export const createAttachmentUpdateTool = ({
       ? `Updated attachment "${data.attachment_id}" from v${data.previous_version} to v${data.version}`
       : `Updated attachment "${data.attachment_id}" metadata (no content change)`;
 
-    return {
-      summary,
-      metadata: {
-        attachment_id: data.attachment_id,
-        type: data.type,
-        version: data.version,
-        version_created: data.version_created,
+    return [
+      {
+        ...result,
+        data: {
+          summary,
+          attachment_id: data.attachment_id,
+          type: data.type,
+          previous_version: data.previous_version,
+          version: data.version,
+          version_created: data.version_created,
+        },
       },
-    };
+    ];
   },
 });

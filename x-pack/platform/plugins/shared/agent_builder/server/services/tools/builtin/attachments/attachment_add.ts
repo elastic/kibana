@@ -62,17 +62,22 @@ export const createAttachmentAddTool = ({
       ],
     };
   },
-  cleanHistory: (result) => {
+  cleanHistory: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
 
-    return {
-      summary: `Added new ${data.type || 'attachment'} "${data.attachment_id}"`,
-      metadata: {
-        attachment_id: data.attachment_id,
-        type: data.type,
-        version: data.version,
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Added new ${data.type || 'attachment'} "${data.attachment_id}"`,
+          attachment_id: data.attachment_id,
+          type: data.type,
+          version: data.version,
+        },
       },
-    };
+    ];
   },
 });

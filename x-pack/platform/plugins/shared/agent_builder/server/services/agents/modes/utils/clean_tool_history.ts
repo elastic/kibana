@@ -8,10 +8,10 @@
 import type {
   ConversationRound,
   ConversationRoundStep,
+  ToolCallWithResult,
   ToolResult,
 } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
-import type { CleanedHistoryResult } from '@kbn/agent-builder-server';
 import type { ToolRegistry } from '../../../tools';
 
 /**
@@ -33,44 +33,69 @@ export const isCleanedResult = (data: unknown): boolean => {
 };
 
 /**
- * Creates the cleaned data structure from a CleanedHistoryResult.
+ * Checks if all results in a tool return have already been cleaned.
  */
-const createCleanedData = (cleanedResult: CleanedHistoryResult): Record<string, unknown> => ({
-  [CLEANED_MARKER]: true,
-  summary: cleanedResult.summary,
-  ...cleanedResult.metadata,
-});
+const areAllResultsCleaned = (results: ToolResult[]): boolean => {
+  return results.every((result) => {
+    if ('data' in result) {
+      return isCleanedResult(result.data);
+    }
+    return false;
+  });
+};
 
 /**
- * Cleans a single tool result using the tool's cleanHistory function.
+ * Marks a result as cleaned by adding the cleaned marker to its data.
+ * The cleaner function should return results with cleaned data (summary, metadata),
+ * and we add the marker to prevent double-cleaning.
  */
-const cleanToolResult = async (
-  toolId: string,
-  result: ToolResult,
+const markResultAsCleaned = (result: ToolResult): ToolResult => {
+  if ('data' in result && typeof result.data === 'object' && result.data !== null) {
+    const data = result.data as Record<string, unknown>;
+    // Only add marker if it's not already there
+    if (!isCleanedResult(data)) {
+      return {
+        ...result,
+        data: {
+          ...data,
+          [CLEANED_MARKER]: true,
+        },
+      } as ToolResult;
+    }
+  }
+  return result;
+};
+
+/**
+ * Cleans all tool results from a single tool call using the tool's cleanHistory function.
+ * This allows the cleaner to see all results together and aggregate/summarize them.
+ */
+const cleanToolResults = async (
+  step: ToolCallWithResult,
   toolRegistry: ToolRegistry
-): Promise<ToolResult> => {
-  // Check if this result has already been cleaned
-  if ('data' in result && isCleanedResult(result.data)) {
-    return result;
+): Promise<ToolResult[]> => {
+  if (areAllResultsCleaned(step.results)) {
+    return step.results;
+  }
+
+  if (step.results.length === 0) {
+    return step.results;
   }
 
   try {
-    const tool = await toolRegistry.get(toolId);
+    const tool = await toolRegistry.get(step.tool_id);
     if (!tool?.cleanHistory) {
-      return result;
+      return step.results;
     }
 
-    const cleanedResult = tool.cleanHistory(result);
-    if (!cleanedResult) {
-      return result;
+    const cleanedReturn = tool.cleanHistory(step);
+    if (!cleanedReturn) {
+      return step.results;
     }
 
-    return {
-      ...result,
-      data: createCleanedData(cleanedResult),
-    } as ToolResult;
+    return cleanedReturn.map(markResultAsCleaned);
   } catch {
-    return result;
+    return step.results;
   }
 };
 
@@ -85,9 +110,7 @@ const cleanStep = async (
     return step;
   }
 
-  const cleanedResults = await Promise.all(
-    step.results.map((result) => cleanToolResult(step.tool_id, result, toolRegistry))
-  );
+  const cleanedResults = await cleanToolResults(step, toolRegistry);
 
   return {
     ...step,

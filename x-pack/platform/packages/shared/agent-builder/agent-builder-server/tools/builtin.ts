@@ -8,7 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolDefinition, ToolType, ToolResult } from '@kbn/agent-builder-common';
+import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
@@ -69,30 +69,19 @@ export interface ToolAvailabilityConfig {
 }
 
 /**
- * Result of cleaning a tool result for history.
- * If the tool result should not be cleaned, return undefined.
- */
-export interface CleanedHistoryResult {
-  /**
-   * A human-readable summary of what the tool did.
-   * This replaces the full tool result in conversation history.
-   */
-  summary: string;
-  /**
-   * Optional metadata to preserve for context.
-   * Should contain only essential information like IDs, types, versions.
-   */
-  metadata?: Record<string, unknown>;
-}
-
-/**
- * Function to clean a tool result for conversation history.
+ * Function to clean tool results for conversation history.
  * Used to reduce context size by replacing large tool results with summaries.
  *
- * @param result - The tool result to clean
- * @returns The cleaned result, or undefined if no cleaning should be applied
+ * This function receives all results from a single tool call, allowing it to
+ * aggregate and summarize multiple results together (e.g., converting 10 search
+ * results into a single summary like "search returned 10 docs, ids are: ...").
+ *
+ * @param toolReturn - All results from a single tool call
+ * @returns The cleaned results, or undefined if no cleaning should be applied
  */
-export type ToolHistoryCleanerFn = (result: ToolResult) => CleanedHistoryResult | undefined;
+export type ToolHistoryCleanerFn = (
+  toolReturn: ToolCallWithResult
+) => ToolCallWithResult["results"] | undefined;
 
 /**
  * Built-in tool, as registered as static tool.

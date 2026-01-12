@@ -52,16 +52,22 @@ const createToolResult = (data: Record<string, unknown>): ToolResult => ({
 // Mock cleaner that generates a summary
 const createMockCleaner =
   (prefix: string): ToolHistoryCleanerFn =>
-  (result) => {
+  (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (result.type !== ToolResultType.other) return undefined;
     const data = result.data as Record<string, unknown>;
-    return {
-      summary: `${prefix}: ${data.attachment_id || 'unknown'}`,
-      metadata: {
-        attachment_id: data.attachment_id,
-        type: data.type,
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: `${prefix}: ${data.attachment_id || 'unknown'}`,
+          attachment_id: data.attachment_id,
+          type: data.type,
+        },
       },
-    };
+    ];
   };
 
 // Create a mock tool registry
@@ -93,30 +99,54 @@ const createMockCleaners = (): Map<string, ToolHistoryCleanerFn> => {
   cleaners.set(platformCoreTools.attachmentRead, createMockCleaner('Read'));
   cleaners.set(platformCoreTools.attachmentUpdate, createMockCleaner('Updated'));
   cleaners.set(platformCoreTools.attachmentAdd, createMockCleaner('Added'));
-  cleaners.set(platformCoreTools.attachmentList, (result) => {
+  cleaners.set(platformCoreTools.attachmentList, (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
     if (result.type !== ToolResultType.other) return undefined;
     const data = result.data as Record<string, unknown>;
-    return {
-      summary: `Listed ${data.count ?? '?'} attachments`,
-      metadata: { count: data.count },
-    };
-  });
-  cleaners.set(platformCoreTools.attachmentDiff, (result) => {
-    if (result.type !== ToolResultType.other) return undefined;
-    const data = result.data as Record<string, unknown>;
-    return {
-      summary: `Compared ${data.attachment_id} v${data.from_version} to v${data.to_version}`,
-      metadata: {
-        attachment_id: data.attachment_id,
-        from_version: data.from_version,
-        to_version: data.to_version,
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Listed ${data.count ?? '?'} attachments`,
+          count: data.count,
+        },
       },
-    };
+    ];
   });
-  cleaners.set(platformCoreTools.createVisualization, () => ({
-    summary: 'Created visualization',
-    metadata: {},
-  }));
+  cleaners.set(platformCoreTools.attachmentDiff, (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
+    if (result.type !== ToolResultType.other) return undefined;
+    const data = result.data as Record<string, unknown>;
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Compared ${data.attachment_id} v${data.from_version} to v${data.to_version}`,
+          attachment_id: data.attachment_id,
+          from_version: data.from_version,
+          to_version: data.to_version,
+        },
+      },
+    ];
+  });
+  cleaners.set(platformCoreTools.createVisualization, (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
+    if (result.type !== ToolResultType.other) return undefined;
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: 'Created visualization',
+        },
+      },
+    ];
+  });
 
   return cleaners;
 };
