@@ -29,4 +29,23 @@ describe('compactMap', () => {
 
     expect(compactMap(values, (value) => value)).toEqual([0, '', false, {}]);
   });
+
+  it('maps iterable collections into a new array', () => {
+    const values = new Set([0, 1, 1, 2, 3, 4, 4, 5]);
+
+    expect(compactMap(values, (value) => (value % 2 === 0 ? `${value}` : undefined))).toEqual([
+      '0',
+      '2',
+      '4',
+    ]);
+
+    const valuesMap = new Map([
+      ['a', 1],
+      ['b', 2],
+      ['c', 3],
+      ['c', 4],
+    ]);
+
+    expect(compactMap(valuesMap, ([key, value]) => (key === 'b' ? null : value))).toEqual([1, 4]);
+  });
 });

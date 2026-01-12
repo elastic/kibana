@@ -27,15 +27,15 @@ import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils'
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
-  FieldDefinitionConfig,
-  InheritedFieldDefinitionConfig,
   FieldDefinition,
+  SimulationError,
+  DocSimulationStatus,
+  SimulationDocReport,
+  ProcessorMetrics,
+  DetectedField,
+  ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import {
-  getInheritedFieldsFromAncestors,
-  isNamespacedEcsField,
-  Streams,
-} from '@kbn/streams-schema';
+import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
@@ -65,55 +65,6 @@ export interface SimulateProcessingDeps {
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
-}
-
-export interface BaseSimulationError {
-  message: string;
-}
-
-export type SimulationError = BaseSimulationError &
-  (
-    | {
-        type: 'field_mapping_failure';
-      }
-    | {
-        type: 'generic_processor_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'generic_simulation_failure';
-        processor_id?: string;
-      }
-    | {
-        type: 'ignored_fields_failure';
-        ignored_fields: Array<Record<string, string>>;
-      }
-    | {
-        type: 'non_namespaced_fields_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'reserved_field_failure';
-        processor_id: string;
-      }
-  );
-
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
-
-export interface SimulationDocReport {
-  detected_fields: Array<{ processor_id: string; name: string }>;
-  errors: SimulationError[];
-  status: DocSimulationStatus;
-  value: FlattenRecord;
-}
-
-export interface ProcessorMetrics {
-  detected_fields: string[];
-  errors: SimulationError[];
-  failed_rate: number;
-  skipped_rate: number;
-  parsed_rate: number;
-  dropped_rate: number;
 }
 
 // Narrow down the type to only successful processor results
@@ -146,15 +97,6 @@ export type IngestSimulationResult =
       error: SimulationError;
     };
 
-export type DetectedField =
-  | WithNameAndEsType
-  | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
-
-export type WithNameAndEsType<TObj = {}> = TObj & {
-  name: string;
-  esType?: string;
-  suggestedType?: string;
-};
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
@@ -162,7 +104,7 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
-}: SimulateProcessingDeps) => {
+}: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
@@ -372,7 +314,7 @@ const prepareIngestSimulationBody = (
  * If the simulation fails, we won't be able to extract the documents reports and the processor metrics.
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
-const executePipelineSimulation = async (
+export const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
@@ -387,12 +329,12 @@ const executePipelineSimulation = async (
     };
   } catch (error) {
     if (error instanceof esErrors.ResponseError) {
-      const { processor_tag, reason } = error.body?.error;
+      const { processor_tag } = error.body?.error;
 
       return {
         status: 'failure',
         error: {
-          message: reason,
+          message: error.message,
           processor_id: processor_tag,
           type: 'generic_simulation_failure',
         },
@@ -553,6 +495,7 @@ const computePipelineSimulationResult = (
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
     const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
+    const processedBy = collectProcessedByProcessorIds(pipelineDocResult.processor_results);
 
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
@@ -597,6 +540,7 @@ const computePipelineSimulationResult = (
     return {
       detected_fields: diff.detected_fields,
       errors,
+      processed_by: processedBy,
       status,
       value,
     };
@@ -773,16 +717,6 @@ const computeSimulationDocDiff = (
 
     diffResult.detected_fields.push(...processorDetectedFields);
 
-    if (isWiredStream) {
-      const nonNamespacedFields = addedFields.filter((field) => !isNamespacedEcsField(field));
-      if (!isEmpty(nonNamespacedFields)) {
-        diffResult.errors.push({
-          processor_id: nextDoc.processor_id,
-          type: 'non_namespaced_fields_failure',
-          message: `The fields generated by the processor do not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
-        });
-      }
-    }
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
         processor_id: nextDoc.processor_id,
@@ -793,6 +727,22 @@ const computeSimulationDocDiff = (
   }
 
   return diffResult;
+};
+
+const collectProcessedByProcessorIds = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results']
+) => {
+  const processedBy = new Set<string>();
+
+  processorResults.forEach((processor) => {
+    if (!processor.tag || isSkippedProcessor(processor)) {
+      return;
+    }
+
+    processedBy.add(processor.tag);
+  });
+
+  return Array.from(processedBy);
 };
 
 const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {

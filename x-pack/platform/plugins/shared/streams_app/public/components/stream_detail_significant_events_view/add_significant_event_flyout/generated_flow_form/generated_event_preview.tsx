@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -26,13 +26,14 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
-import { NO_FEATURE } from '../utils/default_query';
+import { SeveritySelector } from '../common/severity_selector';
+import { ALL_DATA_OPTION } from '../../feature_selector';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   onSave: (query: StreamQueryKql) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Omit<System, 'description'>[];
   dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -51,20 +52,10 @@ export function GeneratedEventPreview({
 
   const [query, setQuery] = useState<StreamQueryKql>(initialQuery);
 
-  const options = features
-    .map((feature) => ({
-      value: feature,
-      inputDisplay: feature.name,
-    }))
-    .concat([
-      {
-        value: NO_FEATURE,
-        inputDisplay: i18n.translate(
-          'xpack.streams.addSignificantEventFlyout.manualFlow.noFeatureOptionLabel',
-          { defaultMessage: 'No feature' }
-        ),
-      },
-    ]);
+  const options = [
+    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
+    ...features.map((feature) => ({ value: feature, inputDisplay: feature.name })),
+  ];
 
   const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
   const validation = validateQuery(query);
@@ -179,6 +170,26 @@ export function GeneratedEventPreview({
           label={
             <EuiFormLabel>
               {i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSeverityLabel',
+                { defaultMessage: 'Severity' }
+              )}
+            </EuiFormLabel>
+          }
+        >
+          <SeveritySelector
+            disabled={!isEditing}
+            severityScore={query.severity_score}
+            onChange={(score) => {
+              setQuery({ ...query, severity_score: score });
+              setTouched((prev) => ({ ...prev, severity: true }));
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <EuiFormLabel>
+              {i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldFeatureLabel',
                 { defaultMessage: 'Feature' }
               )}
@@ -188,19 +199,27 @@ export function GeneratedEventPreview({
           <EuiSuperSelect
             options={options}
             valueOfSelected={
-              options.find((option) => option.value.name === query.feature?.name)?.value
+              query.feature
+                ? options.find(
+                    (option) =>
+                      option.value.name === query.feature?.name &&
+                      option.value.type === query.feature?.type
+                  )?.value
+                : ALL_DATA_OPTION.value
             }
             onBlur={() => {
               setTouched((prev) => ({ ...prev, feature: true }));
             }}
             onChange={(value) => {
-              setQuery({
-                ...query,
-                feature: {
-                  name: value.name,
-                  filter: value.filter,
-                },
-              });
+              const feature =
+                value.type === ALL_DATA_OPTION.value.type
+                  ? undefined
+                  : {
+                      name: value.name,
+                      filter: value.filter,
+                      type: value.type,
+                    };
+              setQuery({ ...query, feature });
               setTouched((prev) => ({ ...prev, feature: true }));
             }}
             placeholder={i18n.translate(

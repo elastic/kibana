@@ -16,16 +16,18 @@ import type { OnUpdateFields } from '../types';
 
 interface CaseViewObservablesProps {
   caseData: CaseUI;
+  searchTerm?: string;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
 export const CaseViewObservables = ({
   caseData,
+  searchTerm,
   isLoading,
   onUpdateField,
 }: CaseViewObservablesProps) => {
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
 
   const caseDataWithFilteredObservables: CaseUI = useMemo(() => {
     return {

@@ -35,10 +35,18 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/inference-langchain'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/core-application-common'
   - '@kbn/i18n'
   - '@kbn/features-plugin'
   - '@kbn/task-manager-plugin'
+  - '@kbn/logging'
+  - '@kbn/i18n-react'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
@@ -48,6 +56,7 @@ tags:
 fileGroups:
   src:
     - index.ts
+    - public/**/*
     - server/**/*.ts
     - common/**/*.ts
     - '!target/**/*'

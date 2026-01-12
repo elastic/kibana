@@ -7,12 +7,25 @@
 
 import * as t from 'io-ts';
 
-export const sloSettingsSchema = t.type({
+const storedSloSettingsSchema = t.intersection([
+  t.type({
+    useAllRemoteClusters: t.boolean,
+    selectedRemoteClusters: t.array(t.string),
+  }),
+  // was added later, so it can be missing in some stored settings
+  t.partial({
+    staleThresholdInHours: t.number,
+  }),
+]);
+
+const sloSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
   staleThresholdInHours: t.number,
 });
 
-export const sloServerlessSettingsSchema = t.type({
+const serverlessSloSettingsSchema = t.type({
   staleThresholdInHours: t.number,
 });
+
+export { serverlessSloSettingsSchema, sloSettingsSchema, storedSloSettingsSchema };

@@ -8,7 +8,7 @@
   "plugin": {
     "id": "automaticImportVTwo",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": [
       "xpack",
       "automatic_import_v2"
@@ -24,5 +24,8 @@
       "features",
       "taskManager"
     ],
+    "requiredBundles": [
+      "esUiShared"
+    ]
   }
 }

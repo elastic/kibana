@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { useKibana } from './use_kibana';
 
 export const useNavigateToApp = () => {
@@ -14,7 +15,12 @@ export const useNavigateToApp = () => {
   } = useKibana();
 
   const navigateToApp = useCallback(
-    (appId: string) => {
+    (appId: string, options?: NavigateToAppOptions) => {
+      if (options?.path) {
+        application?.navigateToApp(appId, options);
+        return;
+      }
+
       const appUrl = chrome?.navLinks.get(appId)?.url;
 
       if (appUrl) {

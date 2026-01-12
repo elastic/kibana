@@ -86,7 +86,6 @@ dependsOn:
   - '@kbn/observability-alert-details'
   - '@kbn/custom-integrations-plugin'
   - '@kbn/dashboard-plugin'
-  - '@kbn/controls-plugin'
   - '@kbn/core-http-server'
   - '@kbn/profiling-plugin'
   - '@kbn/logs-shared-plugin'
@@ -150,11 +149,10 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/control-group-renderer'
   - '@kbn/zod'
-  - '@kbn/onechat-server'
-  - '@kbn/onechat-common'
-  - '@kbn/onechat-plugin'
-  - '@kbn/observability-agent-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/observability-agent-builder-plugin'
 tags:
   - plugin
   - prod

@@ -11,8 +11,6 @@ import { Group, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import type { QueryAsset } from '../../../../common/assets';
 
 export interface GroupObjectGetResponse {
   group: Streams.GroupStream.Definition['group'];
@@ -77,7 +75,7 @@ const upsertGroupRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context }) => {
-    const { streamsClient, assetClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -100,7 +98,7 @@ const upsertGroupRoute = createServerRoute({
     }
 
     const [assets, attachments] = await Promise.all([
-      assetClient.getAssets(name),
+      queryClient.getAssets(name),
       attachmentClient.getAttachments(name),
     ]);
 
@@ -112,11 +110,9 @@ const upsertGroupRoute = createServerRoute({
       .filter((attachment) => attachment.type === 'rule')
       .map((attachment) => attachment.id);
 
-    const queries = assets
-      .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
-      .map((asset) => asset.query);
+    const queries = assets.map((asset) => asset.query);
 
-    const { name: _name, ...stream } = definition;
+    const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
     const upsertRequest: Streams.GroupStream.UpsertRequest = {
       dashboards,

@@ -44,4 +44,12 @@ export const testSubjectIds = {
   PREVIEW_SECTION_BANNER_PANEL: 'previewSectionBannerPanel',
   GENERIC_ENTITY_PANEL_HEADER_TEST_ID: 'generic-panel-header',
   GROUPED_ITEM_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItem',
+  GRAPH_CALLOUT_TEST_ID: 'cloudSecurityGraphGraphInvestigationCallout',
+  GRAPH_NODE_ENTITY_DETAILS_ID: 'cloudSecurityGraphGraphInvestigationEntityNodeDetails',
+  GRAPH_NODE_ENTITY_TAG_TEXT_ID: 'cloudSecurityGraphGraphInvestigationTagText',
+  GROUPED_ITEM_TITLE_TEST_ID_LINK: 'GraphGroupedNodePreviewPanelGroupedItemTitleLink',
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT: 'GraphGroupedNodePreviewPanelGroupedItemTitleText',
+  GROUPED_ITEM_ACTOR_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemActor',
+  GROUPED_ITEM_TARGET_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemTarget',
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID: 'previewSectionCloseButton',
 };

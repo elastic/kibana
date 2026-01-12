@@ -7,8 +7,19 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { navigateToSettingsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiToolTip,
+} from '@elastic/eui';
+import {
+  navigateToSettingsManagementApp,
+  useAgentBuilderOptIn,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
@@ -16,6 +27,7 @@ import {
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { isSupportedConnectorType } from '@kbn/inference-common';
+import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
@@ -28,16 +40,26 @@ type ConnectorLists = [
 export function ChatActionsMenu({
   connectors,
   disabled,
+  isConversationApp,
   navigateToConnectorsManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
+  isConversationApp: boolean;
   navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
-  const { application, http, triggersActionsUi } = useKibana().services;
+  const { application, http, triggersActionsUi, docLinks } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
+
+  const {
+    showAgentBuilderOptInCta,
+    isAgentBuilderConfirmationModalOpen,
+    openAgentBuilderConfirmationModal,
+    closeAgentBuilderConfirmationModal,
+    confirmAgentBuilderOptIn,
+  } = useAgentBuilderOptIn({ navigateFromConversationApp: isConversationApp });
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -75,6 +97,74 @@ export function ChatActionsMenu({
       connectors.reloadConnectors();
     }
   };
+
+  const contextMenuItems = [
+    ...(knowledgeBase?.status.value?.enabled
+      ? [
+          {
+            name: i18n.translate('xpack.aiAssistant.chatHeader.actions.knowledgeBase', {
+              defaultMessage: 'Manage knowledge base',
+            }),
+            onClick: () => {
+              toggleActionsMenu();
+              handleNavigateToSettingsKnowledgeBase();
+            },
+          },
+        ]
+      : []),
+    {
+      name: i18n.translate('xpack.aiAssistant.chatHeader.actions.settings', {
+        defaultMessage: 'AI Assistant Settings',
+      }),
+      onClick: () => {
+        toggleActionsMenu();
+        navigateToSettingsManagementApp(application!);
+      },
+    },
+    {
+      name: (
+        <div className="eui-textTruncate">
+          {i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
+            defaultMessage: 'Connector',
+          })}{' '}
+          <strong>
+            {connectors.connectors?.find(({ id }) => id === connectors.selectedConnector)?.name}
+          </strong>
+        </div>
+      ),
+      panel: !connectors.isConnectorSelectionRestricted ? 1 : undefined,
+    },
+    ...(showAgentBuilderOptInCta
+      ? [
+          {
+            isSeparator: true as const,
+            key: 'agentBuilderOptInSeparator',
+          },
+          {
+            renderItem: () => (
+              <EuiPopoverFooter paddingSize="s">
+                <EuiButton
+                  fullWidth
+                  size="s"
+                  color="accent"
+                  style={{ marginInlineStart: 'auto' }}
+                  onClick={() => {
+                    toggleActionsMenu();
+                    openAgentBuilderConfirmationModal();
+                  }}
+                >
+                  <RobotIcon size="m" />
+                  {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
+                    defaultMessage: 'Try AI Agent',
+                  })}
+                </EuiButton>
+              </EuiPopoverFooter>
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
       <EuiPopover
@@ -104,91 +194,61 @@ export function ChatActionsMenu({
         panelPaddingSize="none"
         closePopover={toggleActionsMenu}
       >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: i18n.translate('xpack.aiAssistant.chatHeader.actions.title', {
-                defaultMessage: 'Actions',
-              }),
-              items: [
-                ...(knowledgeBase?.status.value?.enabled
-                  ? [
-                      {
-                        name: i18n.translate('xpack.aiAssistant.chatHeader.actions.knowledgeBase', {
-                          defaultMessage: 'Manage knowledge base',
-                        }),
-                        onClick: () => {
-                          toggleActionsMenu();
-                          handleNavigateToSettingsKnowledgeBase();
-                        },
-                      },
-                    ]
-                  : []),
-                {
-                  name: i18n.translate('xpack.aiAssistant.chatHeader.actions.settings', {
-                    defaultMessage: 'AI Assistant Settings',
-                  }),
-                  onClick: () => {
-                    toggleActionsMenu();
-                    navigateToSettingsManagementApp(application!);
-                  },
-                },
-                {
-                  name: (
-                    <div className="eui-textTruncate">
-                      {i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-                        defaultMessage: 'Connector',
-                      })}{' '}
-                      <strong>
-                        {
-                          connectors.connectors?.find(
-                            ({ id }) => id === connectors.selectedConnector
-                          )?.name
-                        }
-                      </strong>
-                    </div>
-                  ),
-                  panel: !connectors.isConnectorSelectionRestricted ? 1 : undefined,
-                },
-              ],
-            },
-            {
-              id: 1,
-              width: 256,
-              title: i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-                defaultMessage: 'Connector',
-              }),
-              content: (
-                <ConnectorSelectable
-                  customConnectors={customConnectors}
-                  preConfiguredConnectors={preConfiguredConnectors}
-                  value={connectors.selectedConnector}
-                  defaultConnectorId={connectors.defaultConnector}
-                  onValueChange={(id: string) => {
-                    connectors.selectConnector(id);
-                    toggleActionsMenu();
-                  }}
-                  onAddConnectorClick={() => {
-                    toggleActionsMenu();
-                    setConnectorFlyoutOpen(true);
-                  }}
-                  onManageConnectorsClick={() => {
-                    toggleActionsMenu();
-                    navigateToConnectorsManagementApp(application!);
-                  }}
-                />
-              ),
-            },
-          ]}
-        />
+        <div>
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[
+              {
+                id: 0,
+                title: i18n.translate('xpack.aiAssistant.chatHeader.actions.title', {
+                  defaultMessage: 'Actions',
+                }),
+                items: contextMenuItems,
+              },
+              {
+                id: 1,
+                width: 256,
+                title: i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
+                  defaultMessage: 'Connector',
+                }),
+                content: (
+                  <ConnectorSelectable
+                    customConnectors={customConnectors}
+                    preConfiguredConnectors={preConfiguredConnectors}
+                    value={connectors.selectedConnector}
+                    defaultConnectorId={connectors.defaultConnector}
+                    onValueChange={(id: string) => {
+                      connectors.selectConnector(id);
+                      toggleActionsMenu();
+                    }}
+                    onAddConnectorClick={() => {
+                      toggleActionsMenu();
+                      setConnectorFlyoutOpen(true);
+                    }}
+                    onManageConnectorsClick={() => {
+                      toggleActionsMenu();
+                      navigateToConnectorsManagementApp(application!);
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        </div>
       </EuiPopover>
       {connectorFlyoutOpen && (
         <ConnectorFlyout
           featureId={GenerativeAIForObservabilityConnectorFeatureId}
           onConnectorCreated={onConnectorCreated}
           onClose={() => setConnectorFlyoutOpen(false)}
+        />
+      )}
+
+      {isAgentBuilderConfirmationModalOpen && docLinks?.links && (
+        <AIAgentConfirmationModal
+          onConfirm={confirmAgentBuilderOptIn}
+          onCancel={closeAgentBuilderConfirmationModal}
+          docLinks={docLinks.links}
         />
       )}
     </>

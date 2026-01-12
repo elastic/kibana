@@ -14,6 +14,16 @@ export const dataStreamSchemaV1 = schema.object({
   integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
   data_stream_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
   created_by: schema.string({ minLength: 1 }),
+  title: schema.string(),
+  description: schema.string(),
+  input_types: schema.arrayOf(
+    schema.oneOf(
+      Object.values(INPUT_TYPES).map((status) => schema.literal(status)) as [Type<string>]
+    ),
+    {
+      minSize: 1,
+    }
+  ),
   job_info: schema.object({
     job_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
     job_type: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }), // TODO: Add Enum
@@ -36,17 +46,14 @@ export const dataStreamSchemaV1 = schema.object({
           },
         })
       ),
-      input_type: schema.maybe(
-        schema.oneOf(
-          Object.values(INPUT_TYPES).map((status) => schema.literal(status)) as [Type<string>]
-        )
-      ),
     },
     { unknowns: 'allow' }
   ),
-  result: schema.object({
-    ingest_pipeline: schema.maybe(schema.string()),
-    field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    connector: schema.maybe(schema.string()),
-  }),
+  result: schema.maybe(
+    schema.object({
+      ingest_pipeline: schema.maybe(schema.string()),
+      field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+      connector: schema.maybe(schema.string()),
+    })
+  ),
 });

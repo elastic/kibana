@@ -74,7 +74,7 @@
         "label": "SplitButtonWithNotification",
         "description": [],
         "signature": [
-          "({ showNotificationIndicator, notificationIndicatorColor, notificationIndicatorSize, notifcationIndicatorTooltipContent, ...splitButtonProps }: ",
+          "({ showNotificationIndicator, notificationIndicatorColor, notificationIndicatorSize, notifcationIndicatorTooltipContent, notificationIndicatorPosition, notificationIndicatorHasStroke, ...splitButtonProps }: ",
           {
             "pluginId": "@kbn/split-button",
             "scope": "common",
@@ -93,7 +93,7 @@
             "id": "def-common.SplitButtonWithNotification.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  showNotificationIndicator = false,\n  notificationIndicatorColor = 'primary',\n  notificationIndicatorSize = 'l',\n  notifcationIndicatorTooltipContent,\n  ...splitButtonProps\n}",
+            "label": "{\n  showNotificationIndicator = false,\n  notificationIndicatorColor = 'primary',\n  notificationIndicatorSize = 'l',\n  notifcationIndicatorTooltipContent,\n  notificationIndicatorPosition,\n  notificationIndicatorHasStroke = true,\n  ...splitButtonProps\n}",
             "description": [],
             "signature": [
               {
@@ -167,7 +167,7 @@
             "section": "def-common.SplitButtonProps",
             "text": "SplitButtonProps"
           },
-          " & { showNotificationIndicator?: boolean | undefined; notificationIndicatorColor?: string | undefined; notificationIndicatorSize?: \"m\" | \"s\" | \"l\" | \"original\" | \"xl\" | \"xxl\" | undefined; notifcationIndicatorTooltipContent?: string | undefined; }"
+          " & { showNotificationIndicator?: boolean | undefined; notificationIndicatorColor?: string | undefined; notificationIndicatorSize?: \"m\" | \"original\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined; notifcationIndicatorTooltipContent?: string | undefined; notificationIndicatorPosition?: { top?: number | undefined; right?: number | undefined; left?: number | undefined; bottom?: number | undefined; } | undefined; notificationIndicatorHasStroke?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button_with_notification.tsx",
         "deprecated": false,

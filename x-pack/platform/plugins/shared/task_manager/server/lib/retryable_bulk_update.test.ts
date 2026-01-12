@@ -10,6 +10,7 @@ import { retryableBulkUpdate } from './retryable_bulk_update';
 import { taskStoreMock } from '../task_store.mock';
 import { TaskStatus } from '../task';
 import { taskManagerMock } from '../mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 describe('retryableBulkUpdate()', () => {
   const taskIds = ['1', '2', '3'];
@@ -59,6 +60,26 @@ describe('retryableBulkUpdate()', () => {
     expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[1]], {
       validate: false,
       mergeAttributes: false,
+    });
+  });
+
+  it('should call store.bulkUpdate with options when defined', async () => {
+    const mockRequest = httpServerMock.createKibanaRequest();
+    filter.mockImplementation((task) => task.id === '2');
+    await retryableBulkUpdate({
+      taskIds,
+      getTasks,
+      filter,
+      map,
+      store,
+      validate: false,
+      mergeAttributes: false,
+      options: { request: mockRequest },
+    });
+    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[1]], {
+      validate: false,
+      mergeAttributes: false,
+      options: { request: mockRequest },
     });
   });
 

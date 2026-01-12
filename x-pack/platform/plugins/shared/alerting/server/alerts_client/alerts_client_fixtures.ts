@@ -25,6 +25,8 @@ export const alertRuleData: AlertRuleData = {
   spaceId: 'default',
   tags: ['rule-', '-tags'],
   alertDelay: 0,
+  muteAll: false,
+  mutedInstanceIds: [],
 };
 
 export const mockAAD = {

@@ -66,7 +66,8 @@ export class ScheduledReportsService {
     private logger: Logger,
     private responseFactory: KibanaResponseFactory,
     private savedObjectsClient: SavedObjectsClientContract,
-    private taskManager: TaskManagerStartContract
+    private taskManager: TaskManagerStartContract,
+    private request: KibanaRequest
   ) {}
 
   static async build({
@@ -93,7 +94,8 @@ export class ScheduledReportsService {
       logger,
       responseFactory,
       savedObjectsClient,
-      taskManager
+      taskManager,
+      request
     );
   }
 
@@ -148,10 +150,12 @@ export class ScheduledReportsService {
     user,
     page = 1,
     size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
+    search,
   }: {
     user: ReportingUser;
     page: number;
     size: number;
+    search?: string;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
       const username = this._getUsername(user);
@@ -160,6 +164,8 @@ export class ScheduledReportsService {
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         page,
         perPage: size,
+        search,
+        searchFields: ['title', 'created_by'],
         ...(!this.userCanManageReporting
           ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
           : {}),
@@ -486,7 +492,9 @@ export class ScheduledReportsService {
     id,
     schedule,
   }: { id: string } & UpdateScheduledReportParams) {
-    if (schedule) await this.taskManager.bulkUpdateSchedules([id], schedule);
+    if (schedule) {
+      await this.taskManager.bulkUpdateSchedules([id], schedule, { request: this.request });
+    }
   }
 
   private async _canUpdateReport({
@@ -674,8 +682,8 @@ export class ScheduledReportsService {
     updatedScheduledReportIds: Set<string>;
   }) {
     const resultFromUpdatingTasks = shouldEnable
-      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false)
-      : await this.taskManager.bulkDisable(taskIdsToUpdate);
+      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false, { request: this.request })
+      : await this.taskManager.bulkDisable(taskIdsToUpdate, false, { request: this.request });
 
     for (const error of resultFromUpdatingTasks.errors) {
       bulkErrors.push({

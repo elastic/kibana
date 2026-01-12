@@ -12479,7 +12479,7 @@
               "\nIf set, the component will only re-render if any of the listed properties change.\nWhen set to `['data', 'error']`, the component will only re-render when the `data` or `error` properties change.\nWhen set to `'all'`, the component will re-render whenever a query is updated.\nBy default, access to properties will be tracked, and the component will only re-render when one of the tracked properties change."
             ],
             "signature": [
-              "\"all\" | (\"error\" | \"data\" | \"status\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"isInitialLoading\" | \"refetch\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"fetchStatus\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isRefetching\" | \"isStale\")[] | undefined"
+              "\"all\" | (\"error\" | \"status\" | \"data\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"isInitialLoading\" | \"refetch\" | \"isRefetching\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"fetchStatus\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isStale\")[] | undefined"
             ],
             "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
             "deprecated": false,
@@ -12533,11 +12533,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_incident_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_severity.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_fields.tsx"
               },
               {
                 "plugin": "cases",
@@ -12674,20 +12670,12 @@
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_unified_alerts_fields.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/public/hooks/use_find_maintenance_windows.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/public/hooks/use_get_rule_types.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/public/hooks/use_get_maintenance_window.ts"
-              },
-              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/hooks/use_load_rules_query.ts"
+              },
+              {
+                "plugin": "@kbn/response-ops-rules-apis",
+                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_find_templates_query.ts"
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
@@ -12718,6 +12706,10 @@
                 "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
               },
               {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
               },
@@ -12739,15 +12731,15 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_supported_action_connectors.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
               },
               {
                 "plugin": "cases",
@@ -12771,11 +12763,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_incident_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_severity.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_fields.tsx"
               },
               {
                 "plugin": "cases",
@@ -12835,10 +12823,6 @@
               },
               {
                 "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_connectors/index.tsx"
               },
               {
@@ -12868,6 +12852,18 @@
               {
                 "plugin": "@kbn/inference-endpoint-ui-common",
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
+              },
+              {
+                "plugin": "maintenanceWindows",
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_find_maintenance_windows.ts"
+              },
+              {
+                "plugin": "maintenanceWindows",
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_get_rule_types.ts"
+              },
+              {
+                "plugin": "maintenanceWindows",
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_get_maintenance_window.ts"
               },
               {
                 "plugin": "osquery",
@@ -12930,8 +12926,12 @@
                 "path": "x-pack/platform/plugins/shared/stack_connectors/public/common/auth/use_secret_headers.tsx"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/public/connector_types/slack_api/use_valid_channels.tsx"
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_features/stream_features/hooks/use_stream_features.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
               },
               {
                 "plugin": "osquery",
@@ -13163,6 +13163,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_get_missing_index_privileges/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review.ts"
               },
               {
@@ -13195,7 +13199,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_get_missing_index_privileges/index.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/unified_alerts/hooks/use_search_unified_alerts.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14835,7 +14839,7 @@
         "label": "MutationStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"success\" | \"idle\" | \"loading\""
+          "\"error\" | \"success\" | \"loading\" | \"idle\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "deprecated": false,

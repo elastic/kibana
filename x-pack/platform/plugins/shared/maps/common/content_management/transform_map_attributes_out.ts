@@ -15,11 +15,11 @@ import { transformLayersOut } from './transform_layers_out';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
-  references: Reference[]
+  findReference: (name: string) => Reference | undefined
 ): MapAttributes {
   const { attributes: injectedAttributes } = injectReferences({
     attributes: storedMapAttributes,
-    references,
+    findReference,
   });
   return {
     title: injectedAttributes.title,

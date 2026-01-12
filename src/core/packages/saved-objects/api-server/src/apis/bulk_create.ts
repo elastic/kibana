@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '../..';
+import type { SavedObjectAccessControl, SavedObjectReference } from '../..';
 
 /**
  * Object parameters for the bulk create operation
@@ -64,4 +64,12 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
+  /**
+   * The access control settings for the object
+   *
+   * We specifically exclude the owner property, as that is set during the operation
+   * using the current user's profile ID.
+   */
+  accessControl?: Pick<SavedObjectAccessControl, 'accessMode'>;
 }

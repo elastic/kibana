@@ -74,34 +74,40 @@ describe('knowledge_base_index', () => {
 
       const afterCall = new Date().toISOString();
 
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+          query: {
+            match: { package_name: 'test-package' },
+          },
         },
-      });
+        undefined
+      );
 
-      expect(mockEsClient.bulk).toHaveBeenCalledWith({
-        operations: [
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test1.md' } },
-          {
-            package_name: 'test-package',
-            filename: 'test1.md',
-            content: 'Test content 1',
-            version: '1.0.0',
-            installed_at: expect.any(String),
-          },
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test2.md' } },
-          {
-            package_name: 'test-package',
-            filename: 'test2.md',
-            content: 'Test content 2',
-            version: '1.0.0',
-            installed_at: expect.any(String),
-          },
-        ],
-        refresh: 'wait_for',
-      });
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(
+        {
+          operations: [
+            { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test1.md' } },
+            {
+              package_name: 'test-package',
+              filename: 'test1.md',
+              content: 'Test content 1',
+              version: '1.0.0',
+              installed_at: expect.any(String),
+            },
+            { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test2.md' } },
+            {
+              package_name: 'test-package',
+              filename: 'test2.md',
+              content: 'Test content 2',
+              version: '1.0.0',
+              installed_at: expect.any(String),
+            },
+          ],
+          refresh: 'wait_for',
+        },
+        undefined
+      );
 
       // Verify the function returns the expected document IDs
       expect(result).toEqual(['test-package-test1.md', 'test-package-test2.md']);
@@ -134,12 +140,15 @@ describe('knowledge_base_index', () => {
         knowledgeBaseContent: [],
       });
 
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+          query: {
+            match: { package_name: 'test-package' },
+          },
         },
-      });
+        undefined
+      );
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
       expect(result).toEqual([]);
     });
@@ -152,12 +161,15 @@ describe('knowledge_base_index', () => {
         knowledgeBaseContent: undefined as any,
       });
 
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+          query: {
+            match: { package_name: 'test-package' },
+          },
         },
-      });
+        undefined
+      );
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
       expect(result).toEqual([]);
     });
@@ -192,13 +204,16 @@ describe('knowledge_base_index', () => {
 
       const result = await getPackageKnowledgeBaseFromIndex(mockEsClient, 'test-package');
 
-      expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
-        query: {
-          match: { package_name: 'test-package' },
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        {
+          index: INTEGRATION_KNOWLEDGE_INDEX,
+          query: {
+            match: { package_name: 'test-package' },
+          },
+          size: 1000,
         },
-        size: 1000,
-      });
+        undefined
+      );
 
       expect(result).toEqual([
         {
@@ -243,23 +258,29 @@ describe('knowledge_base_index', () => {
     it('should delete by package name only', async () => {
       await deletePackageKnowledgeBase(mockEsClient, 'test-package');
 
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+          query: {
+            match: { package_name: 'test-package' },
+          },
         },
-      });
+        undefined
+      );
     });
 
     it('should delete by package name', async () => {
       await deletePackageKnowledgeBase(mockEsClient, 'test-package');
 
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+          query: {
+            match: { package_name: 'test-package' },
+          },
         },
-      });
+        undefined
+      );
     });
   });
 });

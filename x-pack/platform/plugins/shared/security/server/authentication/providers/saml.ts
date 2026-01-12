@@ -19,6 +19,7 @@ import {
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
+import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -298,24 +299,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.notHandled();
     }
 
-    // When SAML authentication provider is in UIAM mode, UIAM service is responsible for
-    // invalidating the user session tokens.
-    if (this.useUiam) {
-      if (state?.accessToken) {
-        try {
-          await this.options.uiam?.invalidateSessionTokens(state.accessToken, state.refreshToken!);
-        } catch (err) {
-          this.logger.error(
-            () => `Failed to deauthenticate UIAM user: ${getDetailedErrorMessage(err)}`
-          );
-          return DeauthenticationResult.failed(err);
-        }
+    // When the provider is in UIAM mode, the UIAM service is responsible for invalidating the user session tokens.
+    // Additionally, when in UIAM mode, SAML Single Logout (SLO) is not supported. Therefore, the code should never
+    // reach the `else if` branch below. However, even if it does, it will result in a no-op call to Elasticsearch.
+    if (state && this.isUiamToken(state.accessToken)) {
+      try {
+        await this.options.uiam.invalidateSessionTokens(state.accessToken!, state.refreshToken!);
+      } catch (err) {
+        this.logger.error(
+          () => `Failed to deauthenticate UIAM user: ${getDetailedErrorMessage(err)}`
+        );
+        return DeauthenticationResult.failed(err);
       }
-
-      return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
-    }
-
-    if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
+    } else if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
       try {
         // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
         // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
@@ -498,8 +494,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         `${this.options.basePath.get(request)}/`,
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
-        userProfileGrant: this.useUiam
-          ? this.options.uiam?.getUserProfileGrant(result.access_token)
+        userProfileGrant: this.isUiamToken(result.access_token)
+          ? this.options.uiam.getUserProfileGrant(result.access_token)
           : { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
@@ -617,8 +613,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    const authHeaders: Record<string, string> | undefined = this.useUiam
-      ? this.options.uiam?.getAuthenticationHeaders(accessToken)
+    const authHeaders: Record<string, string> | undefined = this.isUiamToken(accessToken)
+      ? this.options.uiam.getAuthenticationHeaders(accessToken)
       : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
 
     try {
@@ -652,16 +648,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     let refreshTokenResult: RefreshTokenResult;
 
     try {
-      if (this.useUiam && this.options.uiam) {
+      if (this.isUiamToken(state.refreshToken)) {
         this.logger.debug('SAML provider is in UIAM mode, calling UIAM service to refresh tokens.');
 
-        const { accessToken, refreshToken } = await this.options.uiam?.refreshSessionTokens(
+        const { accessToken, refreshToken } = await this.options.uiam.refreshSessionTokens(
           state.refreshToken
         );
 
         const uiamAuthenticatedUser = await this.getUser(
           request,
-          this.options.uiam?.getAuthenticationHeaders(accessToken)!
+          this.options.uiam.getAuthenticationHeaders(accessToken)!
         );
 
         this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
@@ -703,8 +699,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
-        ...(this.useUiam && {
-          userProfileGrant: this.options.uiam?.getUserProfileGrant(accessToken),
+        ...(this.isUiamToken(accessToken) && {
+          userProfileGrant: this.options.uiam.getUserProfileGrant(accessToken),
         }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
@@ -884,5 +880,22 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // initial handshake, but is essential when both access and refresh tokens are expired.
       { state: state ? state : null }
     );
+  }
+
+  /**
+   * Determines whether the provided token is a UIAM token. Generally, we shouldn't rely on the
+   * shape of the UIAM tokens to trigger UIAM-specific logic, but this is necessary for the
+   * transition period while we support both SAML and UIAM tokens at the same time.
+   * @param token ES native or UIAM access or refresh token.
+   */
+  private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
+    const isUiamToken = !!token?.startsWith('essu_');
+    if (isUiamToken && !this.useUiam) {
+      this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');
+    } else if (!isUiamToken && this.useUiam) {
+      this.logger.warn('Detected non-UIAM token, but the provider is configured to use UIAM.');
+    }
+
+    return this.useUiam && isUiamToken;
   }
 }

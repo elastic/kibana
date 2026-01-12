@@ -21,6 +21,7 @@ export function removeDiscriminatorsWithoutMapping(document: OpenAPIV3.Document)
         return [key, value];
       }
       if (value.discriminator && !value.discriminator.mapping) {
+        console.warn(`Discriminator ${key} has no mapping, removing it`);
         delete value.discriminator;
       }
       return [key, value];

@@ -87,6 +87,7 @@ describe('getContextSchemaForPath', () => {
         consts: z.object({
           test: z.literal('test'),
         }),
+        variables: z.object({}).optional(),
       })
     );
   });
@@ -112,6 +113,7 @@ describe('getContextSchemaForPath', () => {
         consts: z.object({
           test: z.literal('test'),
         }),
+        variables: z.object({}).optional(),
       })
     );
   });

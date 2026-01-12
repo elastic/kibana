@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { addMeta, getMeta } from '../../../schema_connector_metadata';
 import {
   getDiscriminatorFieldValue,
@@ -81,10 +82,31 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
   fieldProps,
   formConfig,
 }) => {
-  const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
-  const [selectedOption, setSelectedOption] = useState(() =>
-    getDiscriminatorFieldValue(defaultOption, discriminatorKey)
-  );
+  const [selectedOption, setSelectedOption] = useState(() => {
+    const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
+    return getDiscriminatorFieldValue(defaultOption, discriminatorKey);
+  });
+
+  const [formData] = useFormData();
+  const { setFieldValue } = useFormContext();
+
+  const hasInitializedFromFormData = useRef(false);
+  const discriminatorValueFromForm = formData[rootPath]?.[discriminatorKey] as string | undefined;
+  const discriminatorFieldPath = `${rootPath}.${discriminatorKey}`;
+
+  useEffect(() => {
+    if (discriminatorValueFromForm && !hasInitializedFromFormData.current) {
+      setSelectedOption(discriminatorValueFromForm);
+      hasInitializedFromFormData.current = true;
+      return;
+    }
+
+    // After initialization: Sync selectedOption changes back to form data
+    // This happens when user clicks a different option
+    if (hasInitializedFromFormData.current && discriminatorValueFromForm !== selectedOption) {
+      setFieldValue(discriminatorFieldPath, selectedOption);
+    }
+  }, [discriminatorFieldPath, discriminatorValueFromForm, selectedOption, setFieldValue]);
 
   const isFieldsetDisabled = formConfig.disabled || getMeta(schema).disabled;
 

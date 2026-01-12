@@ -35,6 +35,7 @@ import ai21Icon from '../assets/images/ai21_labs_default.svg';
 import llamaIcon from '../assets/images/llama_stack_default.svg';
 import defaultIcon from '../assets/images/default_connector_icon.svg';
 import contextualAiIcon from '../assets/images/contextual_ai_icon.svg';
+import groqIcon from '../assets/images/grok.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -164,6 +165,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: llamaIcon,
     name: 'Llama Stack',
     solutions: ['Search'],
+  },
+  [ServiceProviderKeys.groq]: {
+    icon: groqIcon,
+    name: 'Groq',
+    solutions: ['Observability', 'Security', 'Search'],
   },
 };
 

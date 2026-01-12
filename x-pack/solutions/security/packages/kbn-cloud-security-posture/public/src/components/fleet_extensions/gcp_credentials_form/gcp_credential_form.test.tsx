@@ -16,8 +16,8 @@ import type {
 import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
-  GCP_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 
 import { GcpCredentialsForm } from './gcp_credential_form';
 import { GCP_CREDENTIALS_TYPE } from '../constants';
@@ -286,7 +286,7 @@ describe('GcpCredentialsForm', () => {
               vars: {
                 ...mockInput.streams[0].vars,
                 'gcp.account_type': {
-                  value: GCP_ORGANIZATION_ACCOUNT,
+                  value: ORGANIZATION_ACCOUNT,
                   type: 'text',
                 },
               },

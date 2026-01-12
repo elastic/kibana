@@ -27,11 +27,26 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/management-settings-ids'
   - '@kbn/config-schema'
+  - '@kbn/data-sources-registry-plugin'
+  - '@kbn/connector-specs'
+  - '@kbn/actions-plugin'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-http-server'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -40,4 +55,16 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

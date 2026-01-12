@@ -13,7 +13,8 @@ import {
   groupMessagesByPattern,
 } from '@kbn/dissect-heuristics';
 import { lastValueFrom } from 'rxjs';
-import { showErrorToast } from '../../../../../../../hooks/use_streams_app_fetch';
+import type { useAbortController } from '@kbn/react-hooks';
+import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
 import {
   usePatternSuggestionDependencies,
   prepareSamplesForPatternExtraction,
@@ -28,16 +29,19 @@ export interface DissectPatternSuggestionParams {
   fieldName: string;
 }
 
-export function useDissectPatternSuggestion() {
+export function useDissectPatternSuggestion(
+  abortController: ReturnType<typeof useAbortController>
+) {
   const {
     notifications,
     telemetryClient,
     streamsRepositoryClient,
-    abortController,
     stepsWithoutCurrent,
     previewDocsFilter,
     originalSamples,
   } = usePatternSuggestionDependencies();
+
+  const showFetchErrorToast = useFetchErrorToast();
 
   return useAsyncFn(
     async (params: DissectPatternSuggestionParams | null) => {
@@ -131,7 +135,7 @@ export function useDissectPatternSuggestion() {
         };
       } catch (error) {
         finishTrackingAndReport(0, [0]);
-        showErrorToast(notifications, error);
+        showFetchErrorToast(error);
         throw error;
       }
     },

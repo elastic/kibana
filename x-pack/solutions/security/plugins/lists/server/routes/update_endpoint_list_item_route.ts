@@ -12,6 +12,7 @@ import {
   UpdateEndpointListItemRequestBody,
   UpdateEndpointListItemResponse,
 } from '@kbn/securitysolution-endpoint-exceptions-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -26,7 +27,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
       path: ENDPOINT_LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

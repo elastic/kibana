@@ -8,7 +8,6 @@
  */
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
-import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -28,7 +27,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: AtomicGraphNode,
-    private stepDefinition: ServerStepDefinition<CommonStepDefinition>,
+    private stepDefinition: ServerStepDefinition,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
@@ -59,7 +58,6 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       const handlerContext = this.createHandlerContext(input);
       const result = await this.stepDefinition.handler(handlerContext);
 
-      // TODO: Return execution error from the handler
       const stepResult: RunStepResult = { input, output: result.output, error: undefined };
       if (result.error) {
         stepResult.error = ExecutionError.fromError(result.error).toSerializableObject();
@@ -74,9 +72,11 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   /**
    * Create the handler context
    */
-  private createHandlerContext(input: unknown): StepHandlerContext<unknown> {
+  private createHandlerContext(input: unknown): StepHandlerContext {
     return {
       input,
+      rawInput: this.node.configuration.with || {},
+      config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
       contextManager: {
         getContext: () => {
           return this.stepExecutionRuntime.contextManager.getContext();
@@ -84,8 +84,14 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getScopedEsClient: () => {
           return this.stepExecutionRuntime.contextManager.getEsClientAsUser();
         },
-        renderInputTemplate: (value) => {
-          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value);
+        renderInputTemplate: (value, additionalContext) => {
+          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+            value,
+            additionalContext
+          );
+        },
+        getFakeRequest: () => {
+          return this.stepExecutionRuntime.contextManager.getFakeRequest();
         },
       },
       logger: {

@@ -12,13 +12,13 @@ import { getSchemaForAuthType } from './get_schema_for_auth_type';
 
 describe('getSchemaForAuthType()', () => {
   test('correctly returns schema for auth type definition when only type ID is provided', () => {
-    const schema = getSchemaForAuthType('basic');
+    const { schema } = getSchemaForAuthType('basic');
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
     expect(schema.meta()).toEqual({ label: 'Basic authentication' });
   });
 
   test('correctly returns schema for auth type definition when defaults are provided', () => {
-    const schema = getSchemaForAuthType({
+    const { schema } = getSchemaForAuthType({
       type: 'api_key_header',
       defaults: {
         headerField: 'custom-api-key-field',
@@ -33,7 +33,7 @@ describe('getSchemaForAuthType()', () => {
   });
 
   test('correctly returns schema for auth type definition when defaults and meta overrides are provided', () => {
-    const schema = getSchemaForAuthType({
+    const { schema } = getSchemaForAuthType({
       type: 'api_key_header',
       defaults: {
         headerField: 'custom-api-key-field',
@@ -54,7 +54,7 @@ describe('getSchemaForAuthType()', () => {
   });
 
   test('ignores defaults for key that is not in auth type schema', () => {
-    const schema = getSchemaForAuthType({
+    const { schema } = getSchemaForAuthType({
       type: 'api_key_header',
       defaults: {
         noField: 'custom-api-key-field2',

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import type { WorkflowsRouter } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 // Pagination constants
@@ -40,7 +41,7 @@ export function parseExecutionTypes(
 }
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: WorkflowsRouter;
   api: WorkflowsManagementApi;
   logger: Logger;
   spaces: SpacesServiceStart;

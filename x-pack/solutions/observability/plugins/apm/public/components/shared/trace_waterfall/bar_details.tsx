@@ -23,7 +23,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { SpanLinksBadge } from './badges/span_links_badge';
+import { SpanLinksBadge, SyncBadge } from './badges';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -75,6 +75,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
+        {item.icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem
           grow={false}
           css={css`
@@ -155,6 +160,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             />
           </EuiFlexItem>
         ) : null}
+        <SyncBadge sync={item.sync} agentName={item.agentName} />
         <SpanLinksBadge
           outgoingCount={item.spanLinksCount.outgoing}
           incomingCount={item.spanLinksCount.incoming}

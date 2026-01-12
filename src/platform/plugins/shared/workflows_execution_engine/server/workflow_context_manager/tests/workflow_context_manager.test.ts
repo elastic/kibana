@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type {
   ConnectorStep,
   EsWorkflowExecution,
@@ -81,6 +82,10 @@ describe('WorkflowContextManager', () => {
       delete: jest.fn(),
     } as any;
 
+    workflowExecutionState.getLatestStepExecution = jest
+      .fn()
+      .mockReturnValue({} as EsWorkflowStepExecution);
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
@@ -89,6 +94,8 @@ describe('WorkflowContextManager', () => {
       workflowExecutionState,
       esClient,
       dependencies,
+      fakeRequest: {} as KibanaRequest,
+      coreStart: {} as CoreStart,
     });
 
     return {
@@ -268,6 +275,7 @@ describe('WorkflowContextManager', () => {
 
       const context = testContainer.underTest.getContext();
       expect(context.inputs).toEqual({
+        name: '', // Default value from workflow definition is applied
         remainingKey: 'some string',
         overridenKey: false,
         newKey: 123,

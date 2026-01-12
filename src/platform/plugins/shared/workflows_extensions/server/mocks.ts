@@ -8,14 +8,10 @@
  */
 
 import type { ServerStepDefinition } from './step_registry/types';
-import type {
-  WorkflowsExtensionsSetupContract,
-  WorkflowsExtensionsStartContract,
-} from '../common/types';
+import type { WorkflowsExtensionsServerPluginSetup } from './types';
+import type { WorkflowsExtensionsStartContract } from '../common/types';
 
-const createSetupMock: () => jest.Mocked<
-  WorkflowsExtensionsSetupContract<ServerStepDefinition>
-> = () => {
+const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
   };

@@ -72,7 +72,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>"
                 ],
                 "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv_esql.ts",
                 "deprecated": false,
@@ -165,6 +165,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$8",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -248,7 +263,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>"
                 ],
                 "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
@@ -351,6 +366,36 @@
                 "description": [],
                 "signature": [
                   "Writable"
+                ],
+                "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvGenerator.Unnamed.$9",
+                "type": "boolean",
+                "tags": [],
+                "label": "isServerless",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvGenerator.Unnamed.$10",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,

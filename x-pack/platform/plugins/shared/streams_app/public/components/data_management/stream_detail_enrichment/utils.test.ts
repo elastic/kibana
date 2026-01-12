@@ -171,7 +171,11 @@ describe('utils', () => {
         message: { type: 'match_only_text' },
       };
 
-      const result = buildUpsertStreamRequestPayload(wiredDefinition, mockSteps, updatedFields);
+      const result = buildUpsertStreamRequestPayload(
+        wiredDefinition,
+        convertUIStepsToDSL(mockSteps),
+        updatedFields
+      );
 
       expect(result).toEqual({
         ingest: {
@@ -191,7 +195,11 @@ describe('utils', () => {
         severity: { type: 'keyword' },
       };
 
-      const result = buildUpsertStreamRequestPayload(classicDefinition, mockSteps, overrides);
+      const result = buildUpsertStreamRequestPayload(
+        classicDefinition,
+        convertUIStepsToDSL(mockSteps),
+        overrides
+      );
 
       expect(result).toEqual({
         ingest: {
@@ -227,9 +235,10 @@ describe('utils', () => {
       stream: {
         name: 'wired-stream',
         description: 'A wired stream',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { dsl: { data_retention: '1d' } },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           wired: {
             fields: { '@timestamp': { type: 'date' } },
@@ -252,9 +261,10 @@ describe('utils', () => {
       stream: {
         name: 'classic-stream',
         description: 'A classic stream',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { dsl: { data_retention: '1d' } },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           classic: {
             field_overrides: { '@timestamp': { type: 'date' } },

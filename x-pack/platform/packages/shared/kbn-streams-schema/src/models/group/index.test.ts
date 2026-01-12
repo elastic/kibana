@@ -14,30 +14,43 @@ describe('GroupStream', () => {
       {
         name: 'group-stream',
         description: '',
+        updated_at: new Date().toISOString(),
         group: {
           metadata: {},
           tags: [],
           members: [],
         },
       },
-    ])('is valid', (val) => {
+    ] satisfies GroupStream.Definition[])('is valid', (val) => {
       expect(GroupStream.Definition.is(val)).toBe(true);
       expect(GroupStream.Definition.right.parse(val)).toEqual(val);
     });
 
     it.each([
+      // Missing description
       {
         name: 'group-stream',
         description: null,
+        updated_at: new Date().toISOString(),
         group: {
           members: [],
         },
       },
+      // Missing updated_at
+      {
+        name: 'group-stream',
+        description: '',
+        group: {
+          members: [],
+        },
+      },
+      // Missing members
       {
         name: 'group-stream',
         description: '',
         group: {},
       },
+      // Invalid members
       {
         name: 'group-stream',
         description: '',
@@ -56,6 +69,7 @@ describe('GroupStream', () => {
         stream: {
           name: 'group-stream',
           description: '',
+          updated_at: new Date().toISOString(),
           group: {
             metadata: {},
             tags: [],
@@ -64,7 +78,7 @@ describe('GroupStream', () => {
         },
         ...emptyAssets,
       },
-    ])('is valid', (val) => {
+    ] satisfies GroupStream.GetResponse[])('is valid', (val) => {
       expect(GroupStream.GetResponse.is(val)).toBe(true);
       expect(GroupStream.GetResponse.right.parse(val)).toEqual(val);
     });
@@ -116,7 +130,7 @@ describe('GroupStream', () => {
         },
         ...emptyAssets,
       },
-    ])('is valid', (val) => {
+    ] satisfies GroupStream.UpsertRequest[])('is valid', (val) => {
       expect(GroupStream.UpsertRequest.is(val)).toBe(true);
       expect(GroupStream.UpsertRequest.right.parse(val)).toEqual(val);
     });
@@ -148,6 +162,18 @@ describe('GroupStream', () => {
             members: [],
           },
         },
+      },
+      {
+        stream: {
+          description: 'updated_at should not be present',
+          updated_at: new Date().toISOString(),
+          group: {
+            metadata: {},
+            tags: [],
+            members: [],
+          },
+        },
+        ...emptyAssets,
       },
     ])('is not valid', (val) => {
       expect(GroupStream.UpsertRequest.is(val as any)).toBe(false);

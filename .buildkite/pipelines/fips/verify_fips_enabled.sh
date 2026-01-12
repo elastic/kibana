@@ -3,8 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-export DISABLE_BOOTSTRAP_VALIDATION=false
-.buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
 
 echo --- Verify FIPS enabled

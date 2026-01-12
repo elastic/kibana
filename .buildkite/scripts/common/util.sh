@@ -40,19 +40,23 @@ check_for_changed_files() {
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
       echo ""
-      echo "Auto-committing & pushing these changes now."
 
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -A -- . ':!config/node.options' ':!config/kibana.yml'
-
       git commit -m "$CUSTOM_FIX_MESSAGE"
-      git push
 
-      # Wait to ensure all commits arrive before we terminate the build
-      sleep 300
-      # Still exit with error to fail the current build, a new build should be started after the push
+      # If COLLECT_COMMITS_MARKER_FILE is set, we're in batch mode (e.g., called from quick checks runner)
+      # Just record the commit for later batch push
+      # Otherwise, commit and push immediately (standalone usage)
+      if [[ -n "${COLLECT_COMMITS_MARKER_FILE:-}" ]]; then
+        echo "Auto-committing these changes (will push after all checks complete)."
+        echo "$CUSTOM_FIX_MESSAGE" >> "$COLLECT_COMMITS_MARKER_FILE"
+      else
+        echo "Auto-committing and pushing these changes."
+        git push
+      fi
       exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
@@ -126,33 +130,6 @@ set_git_merge_base() {
   fi
 
   export GITHUB_PR_MERGE_BASE
-}
-
-# If npm install is terminated early, e.g. because the build was cancelled in buildkite,
-# a package directory is left behind in a bad state that can cause all subsequent installs to fail
-# So this function contains some cleanup/retry logic to try to recover from this kind of situation
-npm_install_global() {
-  package="$1"
-  version="${2:-latest}"
-  toInstall="$package@$version"
-
-  npmRoot=$(npm root -g)
-  packageRoot="${npmRoot:?}/$package"
-
-  # The success flag file exists just to try to make sure we know that the full install was done
-  # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
-  successFlag="${packageRoot:?}/.install-success"
-
-  if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
-    echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
-    rm -rf "$packageRoot"
-  fi
-
-  if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
-    rm -rf "$packageRoot"
-    echo "Trying again to install $toInstall..."
-    npm install -g "$toInstall" && touch "$successFlag"
-  fi
 }
 
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage

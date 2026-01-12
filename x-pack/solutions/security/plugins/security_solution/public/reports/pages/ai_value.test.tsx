@@ -159,10 +159,10 @@ describe('AIValue', () => {
       sourcererDataView: {} as Record<string, unknown>,
     });
     mockUseAlertsPrivileges.mockReturnValue({
-      hasKibanaREAD: true,
       hasIndexRead: true,
       hasIndexUpdateDelete: false,
-      hasKibanaCRUD: false,
+      hasAlertsRead: false,
+      hasAlertsAll: false,
       loading: false,
       isAuthenticated: true,
       hasEncryptionKey: true,

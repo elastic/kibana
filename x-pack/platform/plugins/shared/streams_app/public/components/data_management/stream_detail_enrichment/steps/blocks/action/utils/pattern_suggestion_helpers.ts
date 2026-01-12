@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { get } from 'lodash';
-import { useAbortController } from '@kbn/react-hooks';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { get } from 'lodash';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
-import {
-  selectOriginalPreviewRecords,
-  selectPreviewRecords,
-} from '../../../../state_management/simulation_state_machine/selectors';
-import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
-import { simulateProcessing } from '../../../../state_management/simulation_state_machine/simulation_runner_actor';
 import type {
   PreviewDocsFilterOption,
   SampleDocumentWithUIAttributes,
 } from '../../../../state_management/simulation_state_machine';
+import {
+  selectOriginalPreviewRecords,
+  selectPreviewRecords,
+} from '../../../../state_management/simulation_state_machine/selectors';
+import { simulateProcessing } from '../../../../state_management/simulation_state_machine/simulation_runner_actor';
+import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 
 /**
  * Prepares samples for pattern extraction by:
@@ -54,11 +53,11 @@ export async function prepareSamplesForPatternExtraction(
       },
     });
 
-    samples = selectPreviewRecords({
-      samples: originalSamples,
+    samples = selectPreviewRecords.resultFunc(
+      originalSamples,
       previewDocsFilter,
-      simulation,
-    });
+      simulation.documents
+    );
   }
 
   return samples;
@@ -93,7 +92,6 @@ export function usePatternSuggestionDependencies() {
     },
   } = useKibana();
 
-  const abortController = useAbortController();
   const stepsWithoutCurrent = useSimulatorSelector((snapshot) =>
     snapshot.context.steps.slice(0, -1)
   );
@@ -106,7 +104,6 @@ export function usePatternSuggestionDependencies() {
     notifications,
     telemetryClient,
     streamsRepositoryClient,
-    abortController,
     stepsWithoutCurrent,
     previewDocsFilter,
     originalSamples,

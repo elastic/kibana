@@ -6,6 +6,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   REVIEW_RULE_UPGRADE_URL,
   ReviewRuleUpgradeRequestBody,
@@ -25,7 +26,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
       path: REVIEW_RULE_UPGRADE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
       options: {

@@ -22,6 +22,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
+  AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
@@ -48,6 +49,7 @@ const SETTING_KEYS = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
+  AI_CHAT_EXPERIENCE_TYPE,
 ];
 
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {

@@ -18,7 +18,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { api } from './api';
 import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
-import { createExternalService, type WorkflowsServiceFunction } from './service';
+import {
+  createExternalService,
+  type ScheduleWorkflowServiceFunction,
+  type WorkflowsServiceFunction,
+} from './service';
 import * as i18n from './translations';
 import type {
   ExecutorParams,
@@ -36,6 +40,7 @@ export interface WorkflowsRuleActionParams {
   subAction: 'run';
   subActionParams: {
     workflowId: string;
+    summaryMode?: boolean;
   };
   [key: string]: unknown;
 }
@@ -43,6 +48,7 @@ export interface WorkflowsRuleActionParams {
 // Interface for dependency injection, similar to GetCasesConnectorTypeArgs
 export interface GetWorkflowsConnectorTypeArgs {
   getWorkflowsService?: (request: KibanaRequest) => Promise<WorkflowsServiceFunction>;
+  getScheduleWorkflowService?: (request: KibanaRequest) => Promise<ScheduleWorkflowServiceFunction>;
 }
 
 // connector type definition
@@ -72,6 +78,7 @@ export function getConnectorType(
     executor: (execOptions) => executor(execOptions, deps),
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     isSystemActionType: true,
+    allowMultipleSystemActions: true,
   };
 }
 
@@ -101,13 +108,25 @@ export async function executor(
     }
   }
 
+  let scheduleWorkflowServiceFunction: ScheduleWorkflowServiceFunction | undefined;
+  if (deps?.getScheduleWorkflowService && request) {
+    try {
+      scheduleWorkflowServiceFunction = await deps.getScheduleWorkflowService(
+        request as KibanaRequest
+      );
+    } catch (error) {
+      logger.error(`Failed to get schedule workflows service: ${error.message}`);
+    }
+  }
+
   const externalService = createExternalService(
     actionId,
     logger,
     configurationUtilities,
     connectorUsageCollector,
     request as KibanaRequest,
-    workflowsServiceFunction
+    workflowsServiceFunction,
+    scheduleWorkflowServiceFunction
   );
 
   if (!api[subAction]) {
@@ -151,7 +170,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
         }
 
-        const { workflowId } = subActionParams;
+        const { workflowId, summaryMode = true } = subActionParams;
         if (!workflowId) {
           throw new Error(
             `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
@@ -172,6 +191,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId,
             inputs: { event: alertEvent },
             spaceId,
+            summaryMode,
           },
         };
       } catch (error) {
@@ -180,6 +200,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
+            summaryMode: params?.subActionParams?.summaryMode ?? true,
           },
         };
       }
