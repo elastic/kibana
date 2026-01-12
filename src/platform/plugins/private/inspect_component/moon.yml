@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/logging'
   - '@kbn/developer-toolbar-plugin'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
