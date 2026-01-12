@@ -178,6 +178,26 @@
           },
           {
             "parentPluginId": "observabilityAgentBuilder",
+            "id": "def-public.ObservabilityAgentBuilderPluginStartDependencies.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "public",
+                "docId": "kibInferencePluginApi",
+                "section": "def-public.InferencePublicStart",
+                "text": "InferencePublicStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgentBuilder",
             "id": "def-public.ObservabilityAgentBuilderPluginStartDependencies.licensing",
             "type": "Object",
             "tags": [],
