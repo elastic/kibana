@@ -41,8 +41,7 @@ export async function registerObservabilityAgent({
       },
     },
     configuration: {
-      instructions: 'You are an observability specialist agent.\n' +
-      ENTITY_LINKING_PROMPT,
+      instructions: 'You are an observability specialist agent.\n' + ENTITY_LINKING_PROMPT,
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
