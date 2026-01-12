@@ -11488,7 +11488,7 @@
               "The dynamic property of the mapping, either `false` or `'strict'`. If\nunspecified `dynamic: 'strict'` will be inherited from the top-level\nindex mappings."
             ],
             "signature": [
-              "false | \"strict\" | \"false\" | undefined"
+              "false | \"false\" | \"strict\" | undefined"
             ],
             "path": "src/core/packages/saved-objects/server/src/mapping_definition.ts",
             "deprecated": false,
@@ -12505,7 +12505,7 @@
           "MappingProperty",
           " & ",
           "MappingPropertyBase",
-          " & { dynamic?: false | \"strict\" | \"false\" | undefined; properties?: Record<string, ",
+          " & { dynamic?: false | \"false\" | \"strict\" | undefined; properties?: Record<string, ",
           "MappingProperty",
           "> | undefined; }"
         ],

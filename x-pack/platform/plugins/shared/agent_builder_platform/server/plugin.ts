@@ -29,7 +29,7 @@ export class AgentBuilderPlatformPlugin
   // @ts-expect-error unused for now
   private logger: Logger;
   // @ts-expect-error unused for now
-  private config: OnechatConfig;
+  private config: AgentBuilderConfig;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();

@@ -42,6 +42,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
@@ -53,6 +54,7 @@ import type {
   NavigationTreeDefinition,
   SolutionId,
 } from '@kbn/core-chrome-browser';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
@@ -67,14 +69,14 @@ import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import type { InternalChromeStart } from './types';
+import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
 import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
-import { SideNavCollapseButton } from './ui/project/sidenav/collapse_button';
 import type { NavigationProps } from './ui/project/sidenav/types';
+import { HeaderBreadcrumbsBadges } from './ui/header/header_breadcrumbs_badges';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -94,7 +96,7 @@ export interface StartDeps {
   docLinks: DocLinksStart;
   http: InternalHttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
-  notifications: NotificationsStart;
+  getNotifications: () => Promise<NotificationsStart>;
   customBranding: CustomBrandingStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
@@ -161,9 +163,10 @@ export class ChromeService {
 
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
 
-  public setup({ analytics }: SetupDeps) {
+  public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
+    return {};
   }
 
   public async start({
@@ -171,7 +174,7 @@ export class ChromeService {
     docLinks,
     http,
     injectedMetadata,
-    notifications,
+    getNotifications,
     customBranding,
     i18n: i18nService,
     theme,
@@ -189,7 +192,7 @@ export class ChromeService {
     });
 
     handleSystemColorModeChange({
-      notifications,
+      getNotifications,
       coreStart: { i18n: i18nService, theme, userProfile },
       stop$: this.stop$,
       http,
@@ -209,9 +212,11 @@ export class ChromeService {
     const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
       []
     );
+    const breadcrumbsBadges$ = new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
+    const appMenu$ = new BehaviorSubject<AppMenuConfig | undefined>(undefined);
     // ChromeStyle is set to undefined by default, which means that no header will be rendered until
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
@@ -277,6 +282,8 @@ export class ChromeService {
       helpExtension$.next(undefined);
       breadcrumbs$.next([]);
       badge$.next(undefined);
+      appMenu$.next(undefined);
+      breadcrumbsBadges$.next([]);
       docTitle.reset();
     });
 
@@ -336,13 +343,15 @@ export class ChromeService {
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.legacyBrowserWarning"
-            defaultMessage="Your browser does not meet the security requirements for Kibana."
-          />
-        ),
+      getNotifications().then((notifications) => {
+        notifications.toasts.addWarning({
+          title: mountReactNode(
+            <FormattedMessage
+              id="core.chrome.legacyBrowserWarning"
+              defaultMessage="Your browser does not meet the security requirements for Kibana."
+            />
+          ),
+        });
       });
     }
 
@@ -378,7 +387,7 @@ export class ChromeService {
         badge$={badge$.pipe(takeUntil(this.stop$))}
         basePath={http.basePath}
         breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
         kibanaDocLink={docLinks.links.kibana.guide}
         docLinks={docLinks}
@@ -396,8 +405,25 @@ export class ChromeService {
         navControlsRight$={navControls.getRight$()}
         navControlsExtension$={navControls.getExtension$()}
         customBranding$={customBranding$}
+        appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
       />
     );
+
+    const breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]> =
+      combineLatest([breadcrumbsAppendExtensions$, breadcrumbsBadges$]).pipe(
+        map(([extensions, badges]) => {
+          if (badges.length === 0) {
+            return extensions;
+          }
+          return [
+            ...extensions,
+            {
+              content: mountReactNode(<HeaderBreadcrumbsBadges badges={badges} />),
+            },
+          ];
+        }),
+        takeUntil(this.stop$)
+      );
 
     // create observables once here to avoid re-renders, TODO: do it for everything else
     const navLinks$ = navLinks.getNavLinks$();
@@ -422,6 +448,7 @@ export class ChromeService {
       dataTestSubj$: activeDataTestSubj$,
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       feedbackUrlParams$,
+      onToggleCollapsed: setIsSideNavCollapsed,
     };
 
     const getProjectHeader = ({
@@ -455,8 +482,9 @@ export class ChromeService {
         application={application}
         globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
         actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
+        appMenu$={includeAppMenu ? appMenu$.pipe(takeUntil(this.stop$)) : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customBranding$={customBranding$}
         helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
         helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
@@ -471,19 +499,13 @@ export class ChromeService {
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
       >
-        {includeSideNav ? (
+        {includeSideNav && (
           <Router history={application.history}>
             <FixedLayoutProjectSideNav
               isCollapsed$={this.isSideNavCollapsed$}
-              toggle={setIsSideNavCollapsed}
               navProps={navProps}
             />
           </Router>
-        ) : (
-          <SideNavCollapseButton
-            isCollapsed={this.isSideNavCollapsed$}
-            toggle={setIsSideNavCollapsed}
-          />
         )}
       </ProjectHeader>
     );
@@ -569,7 +591,13 @@ export class ChromeService {
         );
       },
       getProjectAppMenuComponent: () => {
-        return <AppMenuBar appMenuActions$={application.currentActionMenu$} isFixed={false} />;
+        return (
+          <AppMenuBar
+            appMenuActions$={application.currentActionMenu$}
+            appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
+            isFixed={false}
+          />
+        );
       },
 
       // chrome APIs
@@ -598,6 +626,12 @@ export class ChromeService {
 
       setBreadcrumbs: setClassicBreadcrumbs,
 
+      getAppMenu$: () => appMenu$.pipe(takeUntil(this.stop$)),
+
+      setAppMenu: (config?: AppMenuConfig) => {
+        appMenu$.next(config);
+      },
+
       getBreadcrumbsAppendExtensions$: () =>
         breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$)),
 
@@ -616,6 +650,10 @@ export class ChromeService {
               .filter((ext) => ext !== breadcrumbsAppendExtension)
           );
         };
+      },
+
+      setBreadcrumbsBadges: (badges: ChromeBreadcrumbsBadge[]) => {
+        breadcrumbsBadges$.next(badges);
       },
 
       getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),

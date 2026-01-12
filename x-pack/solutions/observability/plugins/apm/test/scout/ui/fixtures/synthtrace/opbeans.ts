@@ -7,7 +7,17 @@
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange, generateLongId, generateShortId } from '@kbn/synthtrace-client';
 import { shuffle, compact } from 'lodash';
-import { ERROR_MESSAGE, PRODUCT_TRANSACTION_NAME } from '../constants';
+import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
+import {
+  ERROR_MESSAGE,
+  PRODUCT_TRANSACTION_NAME,
+  SERVICE_OPBEANS_JAVA,
+  SERVICE_OPBEANS_NODE,
+  SERVICE_OPBEANS_RUM,
+  SERVICE_GO,
+  SERVICE_NODE,
+  OPBEANS_JAVA_INSTANCE,
+} from '../constants';
 
 const SERVICE_GO_TRANSACTION_NAMES = ['GET', 'PUT', 'DELETE', 'UPDATE'].flatMap((method) =>
   [
@@ -23,6 +33,7 @@ const SERVICE_GO_TRANSACTION_NAMES = ['GET', 'PUT', 'DELETE', 'UPDATE'].flatMap(
     '/users',
   ].map((resource) => `${method} ${resource}`)
 );
+
 function generateExternalSpanLinks() {
   return Array(2)
     .fill(0)
@@ -50,30 +61,30 @@ export function opbeans({
 
   const opbeansJava = apm
     .service({
-      name: 'opbeans-java',
+      name: SERVICE_OPBEANS_JAVA,
       environment: 'production',
       agentName: 'java',
     })
-    .instance('opbeans-java-prod-1')
-    .podId('opbeans-java-prod-1-pod');
+    .instance(OPBEANS_JAVA_INSTANCE)
+    .podId(`${OPBEANS_JAVA_INSTANCE}-pod`);
 
   const opbeansNode = apm
     .service({
-      name: 'opbeans-node',
+      name: SERVICE_OPBEANS_NODE,
       environment: 'production',
       agentName: 'nodejs',
     })
     .instance('opbeans-node-prod-1');
 
   const opbeansRum = apm.browser({
-    serviceName: 'opbeans-rum',
+    serviceName: SERVICE_OPBEANS_RUM,
     environment: 'production',
     userAgent: apm.getChromeUserAgentDefaults(),
   });
 
   const opbeansGo = apm
     .service({
-      name: 'service-go',
+      name: SERVICE_GO,
       environment: 'production',
       agentName: 'go',
     })
@@ -81,7 +92,7 @@ export function opbeans({
 
   const serviceNode = apm
     .service({
-      name: 'service-node',
+      name: SERVICE_NODE,
       environment: 'production',
       agentName: 'nodejs',
     })
@@ -102,83 +113,119 @@ export function opbeans({
       )
   );
 
-  const serializedOpbeansJavaInternalOnlyEvents = Array.from(opbeansJavaInternalOnlyEvents).flatMap(
-    (event) => event.serialize()
-  );
+  // Pre-shuffle once to avoid expensive shuffle operations in the generator callback
+  let shuffledSpanLinks: SpanLink[] | null = null;
+  const getShuffledSpanLinks = () => {
+    if (shuffledSpanLinks === null) {
+      const events: ApmFields[] = [];
+      let count = 0;
+      const maxEvents = 10; // Reduced from 100 to minimize memory usage
+      for (const event of opbeansJavaInternalOnlyEvents) {
+        events.push(...event.serialize());
+        count++;
+        if (count >= maxEvents) {
+          break;
+        }
+      }
+      const spanLinksFromEvents = getSpanLinksFromEvents(events);
+      shuffledSpanLinks = shuffle([...generateExternalSpanLinks(), ...spanLinksFromEvents]);
+    }
+    return shuffledSpanLinks;
+  };
 
-  return range
-    .interval('1s')
-    .rate(1)
-    .generator((timestamp) => [
-      opbeansJava
-        .transaction({ transactionName: PRODUCT_TRANSACTION_NAME })
-        .timestamp(timestamp)
-        .duration(1000)
-        .failure()
-        .errors(
-          opbeansJava.error({ message: ERROR_MESSAGE, type: 'Exception' }).timestamp(timestamp)
-        )
-        .children(
-          opbeansJava
-            .span({
-              spanName: 'SELECT * FROM product',
-              spanType: 'db',
-              spanSubtype: 'postgresql',
-            })
-            .timestamp(timestamp)
-            .duration(50)
-            .failure()
-            .destination('postgresql'),
-          opbeansJava
-            .span({ spanName: 'Span B', spanType: 'messaging', spanSubtype: 'kafka' })
-            .defaults({
-              'span.links': shuffle([
-                ...generateExternalSpanLinks(),
-                ...getSpanLinksFromEvents(serializedOpbeansJavaInternalOnlyEvents),
-              ]),
-            })
-            .timestamp(timestamp)
-            .duration(900)
-        ),
-      opbeansNode
-        .transaction({ transactionName: 'GET /api/product/:id' })
-        .timestamp(timestamp)
-        .duration(500)
-        .success(),
-      opbeansNode
+  // Pre-compute Go transaction builders
+  const goTransactionBuilders = SERVICE_GO_TRANSACTION_NAMES.map((transactionName) => ({
+    transactionName,
+    build: (timestamp: number) =>
+      opbeansGo
         .transaction({
-          transactionName: 'Worker job',
-          transactionType: 'Worker',
-        })
-        .timestamp(timestamp)
-        .duration(1000)
-        .success(),
-      opbeansRum.transaction({ transactionName: '/' }).timestamp(timestamp).duration(1000),
-      ...SERVICE_GO_TRANSACTION_NAMES.map((transactionName) =>
-        opbeansGo
-          .transaction({
-            transactionName,
-            transactionType: 'request',
-          })
-          .timestamp(timestamp)
-          .duration(500)
-          .success()
-      ),
-      serviceNode
-        .transaction({
-          transactionName: 'GET /api/users',
+          transactionName,
           transactionType: 'request',
         })
         .timestamp(timestamp)
         .duration(500)
         .success(),
-      serviceNode
-        .transaction({
-          transactionName: 'Background job',
-          transactionType: 'Worker',
-        })
-        .timestamp(timestamp)
-        .duration(500)
-        .success(),
-    ]);
+  }));
+
+  // Sample Go transactions: generate only 4 per second (rotating through all 40 over time)
+  // This reduces volume by 90% while still covering all transaction types
+  const GO_TRANSACTIONS_PER_SECOND = 4;
+
+  return range
+    .interval('1s')
+    .rate(1)
+    .generator((timestamp, index) => {
+      // Rotate through Go transactions: generate 4 different ones each second
+      const goStartIndex = (index * GO_TRANSACTIONS_PER_SECOND) % goTransactionBuilders.length;
+      const selectedGoTransactions = goTransactionBuilders.slice(
+        goStartIndex,
+        goStartIndex + GO_TRANSACTIONS_PER_SECOND
+      );
+      // If we're near the end, wrap around
+      const remaining = GO_TRANSACTIONS_PER_SECOND - selectedGoTransactions.length;
+      if (remaining > 0) {
+        selectedGoTransactions.push(...goTransactionBuilders.slice(0, remaining));
+      }
+
+      return [
+        opbeansJava
+          .transaction({ transactionName: PRODUCT_TRANSACTION_NAME })
+          .timestamp(timestamp)
+          .duration(1000)
+          .failure()
+          .errors(
+            opbeansJava.error({ message: ERROR_MESSAGE, type: 'Exception' }).timestamp(timestamp)
+          )
+          .children(
+            opbeansJava
+              .span({
+                spanName: 'SELECT * FROM product',
+                spanType: 'db',
+                spanSubtype: 'postgresql',
+              })
+              .timestamp(timestamp)
+              .duration(50)
+              .failure()
+              .destination('postgresql'),
+            opbeansJava
+              .span({ spanName: 'Span B', spanType: 'messaging', spanSubtype: 'kafka' })
+              .defaults({
+                'span.links': getShuffledSpanLinks(),
+              })
+              .timestamp(timestamp)
+              .duration(900)
+          ),
+        opbeansNode
+          .transaction({ transactionName: 'GET /api/product/:id' })
+          .timestamp(timestamp)
+          .duration(500)
+          .success(),
+        opbeansNode
+          .transaction({
+            transactionName: 'Worker job',
+            transactionType: 'Worker',
+          })
+          .timestamp(timestamp)
+          .duration(1000)
+          .success(),
+        opbeansRum.transaction({ transactionName: '/' }).timestamp(timestamp).duration(1000),
+        ...selectedGoTransactions.map((builder) => builder.build(timestamp)),
+        serviceNode
+          .transaction({
+            transactionName: 'GET /api/users',
+            transactionType: 'request',
+          })
+          .timestamp(timestamp)
+          .duration(500)
+          .success(),
+        serviceNode
+          .transaction({
+            transactionName: 'Background job',
+            transactionType: 'Worker',
+          })
+          .timestamp(timestamp)
+          .duration(500)
+          .success(),
+      ];
+    });
 }
