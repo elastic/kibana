@@ -12926,6 +12926,14 @@
                 "path": "x-pack/platform/plugins/shared/stack_connectors/public/common/auth/use_secret_headers.tsx"
               },
               {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_features/stream_features/hooks/use_stream_features.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_status.ts"
               },

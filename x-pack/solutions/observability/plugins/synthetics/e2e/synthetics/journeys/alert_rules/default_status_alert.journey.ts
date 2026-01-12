@@ -56,9 +56,20 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await syntheticsApp.navigateToOverview(true, 15);
   });
 
-  step('should create default status alert', async () => {
+  step('should wait for and edit default status alert', async () => {
+    // Wait for the default alert to be created asynchronously after monitor creation
     await page.getByTestId('syntheticsAlertsRulesButton').click();
+
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.waitForSelector(byTestId('manageStatusRuleName'), { timeout: 5 * 1000 });
+    });
+
     await page.getByTestId('manageStatusRuleName').click();
+
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.waitForSelector(byTestId('editDefaultStatusRule'), { timeout: 5 * 1000 });
+    });
+
     await page.isDisabled(byTestId('editDefaultStatusRule'));
     await page.getByTestId('editDefaultStatusRule').click();
 

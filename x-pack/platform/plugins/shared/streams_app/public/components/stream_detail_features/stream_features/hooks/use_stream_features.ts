@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import type { System } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
@@ -16,8 +16,8 @@ export const useStreamFeatures = (streamName: string) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const showFetchErrorToast = useFetchErrorToast();
 
-  const fetchFeatures = async ({ signal }: QueryFunctionContext) => {
-    return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
+  const fetchSystems = async ({ signal }: QueryFunctionContext) => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems', {
       params: {
         path: {
           name: streamName,
@@ -27,22 +27,22 @@ export const useStreamFeatures = (streamName: string) => {
     });
   };
 
-  const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
+  const { data, isLoading, error, refetch } = useQuery<{ systems: System[] }, Error>({
     queryKey: ['features', streamName],
-    queryFn: fetchFeatures,
+    queryFn: fetchSystems,
     onError: showFetchErrorToast,
   });
 
-  const features = useMemo(() => data?.features ?? [], [data?.features]);
+  const systems = useMemo(() => data?.systems ?? [], [data?.systems]);
 
   const featuresByName = useMemo(
-    () => Object.fromEntries(features.map((f) => [f.name, f])),
-    [features]
+    () => Object.fromEntries(systems.map((s) => [s.name, s])),
+    [systems]
   );
 
   return {
     refreshFeatures: refetch,
-    features,
+    features: systems,
     featuresByName,
     featuresLoading: isLoading,
     error,
