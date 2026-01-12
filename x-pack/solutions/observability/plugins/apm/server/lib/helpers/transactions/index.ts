@@ -10,17 +10,18 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { getHasTransactionsEvents } from '@kbn/apm-data-access-plugin/server/utils';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
-  TRANSACTION_DURATION,
-  TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
   TRANSACTION_DURATION_SUMMARY,
 } from '../../../../common/es_fields/apm';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../../common/document_type';
 
-export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/utils';
+export {
+  getBackwardCompatibleDocumentTypeFilter,
+  isSummaryFieldSupportedByDocType,
+  getDurationFieldForTransactions,
+} from '@kbn/apm-data-access-plugin/server/utils';
 
 export async function getSearchTransactionsEvents({
   config,
@@ -50,45 +51,6 @@ export async function getSearchTransactionsEvents({
     case SearchAggregatedTransactionSetting.never:
       return false;
   }
-}
-
-export function isSummaryFieldSupportedByDocType(
-  typeOrSearchAgggregatedTransactions:
-    | ApmDocumentType.ServiceTransactionMetric
-    | ApmDocumentType.TransactionMetric
-    | ApmDocumentType.TransactionEvent
-    | boolean
-) {
-  let type: ApmDocumentType;
-
-  if (typeOrSearchAgggregatedTransactions === true) {
-    type = ApmDocumentType.TransactionMetric;
-  } else if (typeOrSearchAgggregatedTransactions === false) {
-    type = ApmDocumentType.TransactionEvent;
-  } else {
-    type = typeOrSearchAgggregatedTransactions;
-  }
-
-  return (
-    type === ApmDocumentType.ServiceTransactionMetric || type === ApmDocumentType.TransactionMetric
-  );
-}
-export function getDurationFieldForTransactions(
-  typeOrSearchAgggregatedTransactions:
-    | ApmDocumentType.ServiceTransactionMetric
-    | ApmDocumentType.TransactionMetric
-    | ApmDocumentType.TransactionEvent
-    | boolean,
-  useDurationSummaryField?: boolean
-) {
-  if (isSummaryFieldSupportedByDocType(typeOrSearchAgggregatedTransactions)) {
-    if (useDurationSummaryField) {
-      return TRANSACTION_DURATION_SUMMARY;
-    }
-    return TRANSACTION_DURATION_HISTOGRAM;
-  }
-
-  return TRANSACTION_DURATION;
 }
 
 export function getProcessorEventForTransactions(

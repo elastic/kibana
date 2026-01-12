@@ -22,10 +22,16 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import type { TraceMetricsItem } from '../../data_registry/data_registry_types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+
+export interface TraceMetricsItem {
+  group: string;
+  latency: number | null;
+  throughput: number;
+  failureRate: number;
+}
 
 const MAX_NUMBER_OF_GROUPS = 100;
 

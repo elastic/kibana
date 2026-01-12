@@ -141,13 +141,6 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
-export interface TraceMetricsItem {
-  group: string;
-  latency: number | null;
-  throughput: number;
-  failureRate: number;
-}
-
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
