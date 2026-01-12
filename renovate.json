@@ -3261,6 +3261,28 @@
       "enabled": true
     },
     {
+      "groupName": "browserlist-and-co",
+      "matchDepNames": [
+        "baseline-browser-mapping",
+        "browserslist",
+        "caniuse-lite",
+        "caniuse-api"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "http2",
       "matchDepNames": [
         "http2-proxy",
