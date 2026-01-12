@@ -80,8 +80,8 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
 
       if (position === 'left') {
         // Position to the left of the element
-        let leftPosition = rect.left + window.scrollX - PREVIEW_WIDTH - euiTheme.base;
-        const topPosition = rect.top + window.scrollY;
+        let leftPosition = rect.left + window.scrollX - PREVIEW_WIDTH - euiTheme.base - 30; // extra 30 to push it off the EUI selectable menu
+        const topPosition = rect.top + window.scrollY - euiTheme.base / 2;
 
         // Ensure preview doesn't go off left edge
         if (leftPosition < window.scrollX) {
