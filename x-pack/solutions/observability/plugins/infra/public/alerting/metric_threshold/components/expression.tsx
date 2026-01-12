@@ -104,6 +104,22 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
   },
 ];
 
+export const getNoDataBehaviorValue = (
+  ruleParams: AlertParams,
+  hasGroupBy: boolean
+): NoDataBehavior => {
+  if (ruleParams.noDataBehavior) {
+    return ruleParams.noDataBehavior;
+  }
+
+  // Derive from legacy params for backwards compatibility
+  if (hasGroupBy) {
+    return ruleParams.alertOnGroupDisappear ? 'alertOnNoData' : 'recover';
+  }
+
+  return ruleParams.alertOnNoData ? 'alertOnNoData' : 'recover';
+};
+
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source } = useSourceContext();
@@ -455,12 +471,7 @@ export const Expressions: React.FC<Props> = (props) => {
           <EuiRadioGroup
             name="noDataBehavior"
             options={getNoDataBehaviorOptions(hasGroupBy)}
-            idSelected={
-              ruleParams.noDataBehavior ||
-              (ruleParams.alertOnNoData || ruleParams.alertOnGroupDisappear
-                ? 'alertOnNoData'
-                : 'recover')
-            }
+            idSelected={getNoDataBehaviorValue(ruleParams, hasGroupBy)}
             onChange={(id) => {
               setRuleParams('noDataBehavior', id as NoDataBehavior);
             }}
