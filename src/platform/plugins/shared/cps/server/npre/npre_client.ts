@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { ProjectRouting } from '@kbn/es-query';
+import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
+import type { AcknowledgeResponse } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
 /**
  * Represents a project routing expression.
  */
-export interface NpreExpression {
-  expression: string;
+export interface NpreExpressionResponse {
+  expression: ProjectRouting;
 }
 
 /**
@@ -23,20 +26,20 @@ export interface INpreClient {
    * Retrieves a project routing expression by name.
    * @param expressionName the name of the expression to retrieve.
    */
-  getNpre(expressionName: string): Promise<NpreExpression>;
+  getNpre(expressionName: string): Promise<NpreExpressionResponse>;
 
   /**
    * Creates or updates a project routing expression.
    * @param expressionName the name of the expression.
    * @param expression the Lucene expression string.
    */
-  putNpre(expressionName: string, expression: string): Promise<void>;
+  putNpre(expressionName: string, expression: ProjectRouting): Promise<AcknowledgeResponse>;
 
   /**
    * Deletes a project routing expression.
    * @param expressionName the name of the expression to delete.
    */
-  deleteNpre(expressionName: string): Promise<void>;
+  deleteNpre(expressionName: string): Promise<AcknowledgeResponse>;
 }
 
 /**
@@ -49,39 +52,35 @@ export class NpreClient implements INpreClient {
     private readonly request: KibanaRequest
   ) {}
 
-  public async getNpre(expressionName: string): Promise<NpreExpression> {
-    this.logger.info(`NpreService.getNpre() for expression: ${expressionName}`);
+  public async getNpre(expressionName: string): Promise<NpreExpressionResponse> {
+    this.logger.debug(`Getting NPRE for expression: ${expressionName}`);
 
     try {
-      const response = await this.client.asScoped(this.request).asCurrentUser.transport.request({
+      return this.client.asScoped(this.request).asCurrentUser.transport.request({
         method: 'GET',
         path: `/_project_routing/${encodeURIComponent(expressionName)}`,
       });
-
-      return response as NpreExpression;
     } catch (error) {
       this.logger.error(
-        `Failed to get project routing expression ${expressionName}: ${error.message}`
+        `Failed to get project routing expression ${expressionName}: ${getDetailedErrorMessage(
+          error.message
+        )}`
       );
       throw error;
     }
   }
 
-  public async putNpre(expressionName: string, expression: string): Promise<void> {
-    this.logger.info(`NpreService.putNpre() for expression: ${expressionName}`);
+  public async putNpre(expressionName: string, expression: string): Promise<AcknowledgeResponse> {
+    this.logger.debug(`Putting NPRE for expression: ${expressionName} with value: ${expression}`);
 
     try {
-      await this.client.asScoped(this.request).asCurrentUser.transport.request({
+      return this.client.asScoped(this.request).asCurrentUser.transport.request({
         method: 'PUT',
         path: `/_project_routing/${encodeURIComponent(expressionName)}`,
         body: {
           expression,
         },
       });
-
-      this.logger.debug(
-        `Successfully created/updated project routing expression ${expressionName}`
-      );
     } catch (error) {
       this.logger.error(
         `Failed to put project routing expression ${expressionName}: ${error.message}`
@@ -90,17 +89,14 @@ export class NpreClient implements INpreClient {
     }
   }
 
-  public async deleteNpre(expressionName: string): Promise<void> {
-    this.logger.debug(`NpreService.deleteNpre() for expression: ${expressionName}`);
+  public async deleteNpre(expressionName: string): Promise<AcknowledgeResponse> {
+    this.logger.debug(`Deleting NPRE for expression: ${expressionName}`);
 
-    return;
     try {
-      await this.client.asScoped(this.request).asCurrentUser.transport.request({
+      return this.client.asScoped(this.request).asCurrentUser.transport.request({
         method: 'DELETE',
         path: `/_project_routing/${encodeURIComponent(expressionName)}`,
       });
-
-      this.logger.debug(`Successfully deleted project routing expression ${expressionName}`);
     } catch (error) {
       this.logger.error(
         `Failed to delete project routing expression ${expressionName}: ${error.message}`

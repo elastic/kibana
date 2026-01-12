@@ -9,8 +9,11 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { EditSpaceTabFooter } from './footer';
@@ -27,9 +30,6 @@ import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { SpaceValidator } from '../lib';
 import type { CustomizeSpaceFormValues } from '../types';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ProjectRouting } from '@kbn/es-query';
-import type { CPSPluginStart } from '@kbn/cps/public';
 
 interface Props {
   space: Space;

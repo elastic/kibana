@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { INpreClient, NpreExpression } from './npre_client';
+export type { INpreClient, NpreExpressionResponse } from './npre_client';

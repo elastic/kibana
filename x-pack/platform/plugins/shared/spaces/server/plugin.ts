@@ -16,6 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
@@ -39,7 +40,6 @@ import { getUiSettings } from './ui_settings';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
 import { SpacesLicenseService } from '../common/licensing';
-import { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;

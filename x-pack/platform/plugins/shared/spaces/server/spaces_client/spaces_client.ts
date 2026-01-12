@@ -14,6 +14,8 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { INpreClient } from '@kbn/cps/server/npre';
+import type { CPSServerSetup } from '@kbn/cps/server/types';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
@@ -21,9 +23,7 @@ import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
-import { INpreClient } from '@kbn/cps/server/npre';
+import { getSpaceDefaultNpreName } from '../npre/get_space_default_npre_name';
 
 const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
@@ -133,7 +133,15 @@ export class SpacesClient implements ISpacesClient {
 
   public async get(id: string) {
     const savedObject = await this.repository.get('space', id);
-    return this.transformSavedObjectToSpace(savedObject);
+    const space = this.transformSavedObjectToSpace(savedObject);
+
+    if (this.cpsSetup?.getCpsEnabled()) {
+      space.projectRouting = (
+        await this.npreClient.getNpre(getSpaceDefaultNpreName(id))
+      )?.expression;
+    }
+
+    return space;
   }
 
   public async create(space: v1.Space) {
@@ -202,22 +210,29 @@ export class SpacesClient implements ISpacesClient {
     }
 
     if (Object.hasOwn(space, 'projectRouting')) {
-      if (!this.cpsSetup?.getCpsEnabled()) {
+      if (this.cpsSetup?.getCpsEnabled()) {
+        await this.npreClient.putNpre(getSpaceDefaultNpreName(id), space.projectRouting);
+        // Remove projectRouting from space so it is not saved as part of the saved object
+        delete space.projectRouting;
+      } else {
         throw Boom.badRequest(
           'Unable to update Space, projectRouting property is only allowed when CPS is enabled'
         );
-      } else {
-        await this.npreClient.putNpre(`kibana_space_${id}_default`, '');
-        const npre = await this.npreClient.getNpre(`kibana_space_${id}_default`);
-        console.log(npre, 'npre');
-        //TODO delete project routing from object
       }
     }
 
     const attributes = this.generateSpaceAttributes(space);
     await this.repository.update('space', id, attributes);
     const updatedSavedObject = await this.repository.get('space', id);
-    return this.transformSavedObjectToSpace(updatedSavedObject);
+    const updatedSpace = this.transformSavedObjectToSpace(updatedSavedObject);
+
+    if (this.cpsSetup?.getCpsEnabled()) {
+      updatedSpace.projectRouting = (
+        await this.npreClient.getNpre(getSpaceDefaultNpreName(id))
+      )?.expression;
+    }
+
+    return updatedSpace;
   }
 
   public createSavedObjectFinder(id: string) {
