@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { HEALTH_DATA_STREAM_NAME } from '@kbn/slo-plugin/common/constants';
+import {
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  HEALTH_DATA_STREAM_NAME,
+} from '@kbn/slo-plugin/common/constants';
 import { v4, v7 } from 'uuid';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { DEFAULT_SLO } from './fixtures/slo';
+import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+import type { TransformHelper } from './helpers/transform';
+import { createTransformHelper } from './helpers/transform';
 
 interface HealthDocument {
   '@timestamp': string;
@@ -77,12 +86,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const sloApi = getService('sloApi');
   const samlAuth = getService('samlAuth');
   const retry = getService('retry');
+  const logger = getService('log');
+  const dataViewApi = getService('dataViewApi');
+
+  const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+  const DATA_VIEW_ID = 'data-view-id-health-scan';
 
   let adminRoleAuthc: RoleCredentials;
+  let transformHelper: TransformHelper;
 
   describe('Health Scan', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      transformHelper = createTransformHelper(getService);
       await Promise.all([
         esClient.deleteByQuery({
           index: HEALTH_DATA_STREAM_NAME,
@@ -425,6 +441,97 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         response.scans.forEach((scan: any) => {
           expect(scan).to.have.property('status');
         });
+      });
+    });
+
+    describe('Health Scan with real SLOs', function () {
+      // // Increase timeout for dataforge setup and transform operations
+      // this.timeout(300000);
+
+      before(async () => {
+        await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+
+        await dataViewApi.create({
+          roleAuthc: adminRoleAuthc,
+          name: DATA_VIEW,
+          id: DATA_VIEW_ID,
+          title: DATA_VIEW,
+        });
+
+        await sloApi.deleteAllSLOs(adminRoleAuthc);
+      });
+
+      after(async () => {
+        await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
+        await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+        await sloApi.deleteAllSLOs(adminRoleAuthc);
+      });
+
+      it('detects problematic transforms from stopped and deleted transforms', async () => {
+        const [slo1Response, slo2Response] = await Promise.all([
+          sloApi.create(DEFAULT_SLO, adminRoleAuthc),
+          sloApi.create(DEFAULT_SLO, adminRoleAuthc),
+        ]);
+
+        expect(slo1Response).to.have.property('id');
+        expect(slo2Response).to.have.property('id');
+
+        const slo1Id = slo1Response.id;
+        const slo2Id = slo2Response.id;
+        const sloRevision = 1;
+
+        await Promise.all([
+          transformHelper.assertTransformIsStarted(getSLOTransformId(slo1Id, sloRevision)),
+          transformHelper.assertTransformIsStarted(getSLOSummaryTransformId(slo1Id, sloRevision)),
+          transformHelper.assertTransformIsStarted(getSLOTransformId(slo2Id, sloRevision)),
+          transformHelper.assertTransformIsStarted(getSLOSummaryTransformId(slo2Id, sloRevision)),
+        ]);
+
+        await esClient.transform.stopTransform({
+          transform_id: getSLOSummaryTransformId(slo1Id, sloRevision),
+          wait_for_completion: true,
+        });
+        await esClient.transform.deleteTransform({
+          transform_id: getSLOTransformId(slo2Id, sloRevision),
+          force: true,
+        });
+
+        await transformHelper.assertTransformIsStopped(
+          getSLOSummaryTransformId(slo1Id, sloRevision)
+        );
+        await transformHelper.assertNotFound(getSLOTransformId(slo2Id, sloRevision));
+
+        const scheduleResponse = await sloApi.scheduleHealthScan(adminRoleAuthc, { force: true });
+        expect(scheduleResponse).to.have.property('scanId');
+        const { scanId } = scheduleResponse;
+
+        let scanResults: any;
+        await retry.waitForWithTimeout('health scan to complete', 120000, async () => {
+          const response = await sloApi.getHealthScanResults(scanId, adminRoleAuthc, {});
+          if (response.scan.status !== 'completed') {
+            throw new Error(`Scan status is ${response.scan.status}, waiting for completed`);
+          }
+          scanResults = response;
+          return true;
+        });
+
+        expect(scanResults.results).to.be.an('array');
+        expect(scanResults.total).to.be.greaterThan(0);
+
+        const slo1Health = scanResults.results.find((r: any) => r.slo.id === slo1Id);
+        const slo2Health = scanResults.results.find((r: any) => r.slo.id === slo2Id);
+
+        expect(slo1Health).to.be.ok();
+        expect(slo1Health.health.isProblematic).to.eql(true);
+        expect(slo1Health.health.summary.isProblematic).to.eql(true);
+        expect(slo1Health.health.summary.state).to.eql('stopped');
+        expect(slo1Health.health.rollup.isProblematic).to.eql(false);
+        expect(slo1Health.health.rollup.state).to.eql('started');
+
+        expect(slo2Health).to.be.ok();
+        expect(slo2Health.health.isProblematic).to.eql(true);
+        expect(slo2Health.health.rollup.isProblematic).to.eql(true);
+        expect(slo2Health.health.rollup.missing).to.eql(true);
       });
     });
   });
