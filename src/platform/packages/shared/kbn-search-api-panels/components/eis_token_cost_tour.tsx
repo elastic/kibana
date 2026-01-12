@@ -74,6 +74,7 @@ export const EisTokenCostTour = ({
           <p>{i18n.EIS_COSTS_TOUR_DESCRIPTION}</p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}

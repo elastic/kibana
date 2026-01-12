@@ -90,6 +90,7 @@ export const InferenceCostsTransparencyTour = ({
           </p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}
