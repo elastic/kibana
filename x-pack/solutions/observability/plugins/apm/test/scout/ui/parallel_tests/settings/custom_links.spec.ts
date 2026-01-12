@@ -47,9 +47,9 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await expect(page).toHaveURL(/.*custom-links$/);
     // Wait for the custom link row to be visible in the table (with extended timeout for slow loading)
-    await customLinksPage
-      .getCustomLinkRow(uniqueLabel)
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
 
     await test.step('shows create button', async () => {
       await customLinksPage.goto();
@@ -69,9 +69,9 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
 
       // Verify we're back on the main page and our link row appears in the table (with extended timeout for slow loading)
       await expect(page).toHaveURL(/.*custom-links$/);
-      await customLinksPage
-        .getCustomLinkRow(uniqueDeleteLabel)
-        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await expect(customLinksPage.getCustomLinkRow(uniqueDeleteLabel)).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
 
       // Then delete the specific link we created
       await customLinksPage.clickEditCustomLinkForRow(uniqueDeleteLabel);
@@ -79,12 +79,14 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
 
       // Verify deletion - the specific link row should no longer be present
       await expect(page).toHaveURL(/.*custom-links$/);
-      await expect(customLinksPage.getCustomLinkRow(uniqueDeleteLabel)).toBeHidden();
+      await expect(customLinksPage.getCustomLinkRow(uniqueDeleteLabel)).toBeHidden({
+        timeout: EXTENDED_TIMEOUT,
+      });
 
       // Verify the previously created link row is still present
-      await customLinksPage
-        .getCustomLinkRow(uniqueLabel)
-        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
   });
 });

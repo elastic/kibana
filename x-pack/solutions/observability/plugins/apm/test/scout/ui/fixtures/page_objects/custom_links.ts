@@ -64,11 +64,18 @@ export class CustomLinksPage {
   }
 
   async clickEditCustomLinkForRow(labelText: string) {
+    // EuiBasicTable adds aria-busy="true" when loading
+    const table = this.page.testSubj.locator('customLinksTable').locator('table');
+    await expect(table).not.toHaveAttribute('aria-busy', 'true', { timeout: EXTENDED_TIMEOUT });
+
     // Click edit button for a specific custom link by finding its row first
     const row = this.getCustomLinkRow(labelText);
     // Wait for the row to be visible before clicking to avoid race conditions
     await row.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
+    // Wait for the edit button to be visible and stable before clicking
     const editButton = row.getByTestId('editCustomLink');
+    await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
   }
 }

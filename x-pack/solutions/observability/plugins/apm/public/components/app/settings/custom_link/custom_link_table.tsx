@@ -105,6 +105,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       />
       <EuiSpacer size="s" />
       <ManagedTable
+        data-test-subj="customLinksTable"
         noItemsMessage={
           isEmpty(items) ? <LoadingStatePrompt /> : <NoResultFound value={searchTerm} />
         }
