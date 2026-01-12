@@ -230,12 +230,10 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Remove global empty state redirect [#237612]({{kib-pull}}237612).
 % !!TODO!! The above PR had a lengthy release note description:
 % Users will now land on the Elasticsearch home page by default instead of being redirected to the create index page. This ensures immediate access to tutorials and educational content, improving discoverability of Kibana features while removing the previous global empty state redirect.
-* Gap auto fill scheduler UI and API [#244719]({{kib-pull}}244719).
 * Feature branch [#224552]({{kib-pull}}224552).
 % !!TODO!! The above PR had a lengthy release note description:
 % Kibana Dashboards now support ownership and "write_restricted" mode. Users can now keep dashboards publicly editable or in a write-restricted state until they are ready to publish, giving them more control over who can edit their dashboards, regardless of broader space permissions.
 * Linux now supports populate_file_data advanced option which enables entropy and header_bytes fields in file events [#246197]({{kib-pull}}246197).
-* Adds new gap fill status for rules [#242595]({{kib-pull}}242595).
 * Adds rows per page selector to tools, agents, and agent tools selection [#242207]({{kib-pull}}242207).
 * Remove workflow execution details from tool calls [#241040]({{kib-pull}}241040).
 % !!TODO!! The above PR had a lengthy release note description:
@@ -445,7 +443,6 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 % Fixes an issue where the retriever query copied from the "Search your data" JavaScript tutorial fails with a `parsing_exception` when passed via the query parameter in the Node.js Elasticsearch client. Retriever queries must be passed via the body parameter to ensure they are serialized correctly.
 * Fixes link's color contrast [#247721]({{kib-pull}}247721).
 * Improve anonymization error messages when NER model is not available [#247696]({{kib-pull}}247696).
-* Truncate text for value list column in value list modal [#246679]({{kib-pull}}246679).
 * Adds table caption for empty top categories in logs category table [#246041]({{kib-pull}}246041).
 * Fixes the alert history chart background color in dark mode [#246017]({{kib-pull}}246017).
 * Fix(security,uiam): bump UIAM containers health check timeouts and populate UIAM shared secret for Elasticsearch [#245238]({{kib-pull}}245238).
@@ -455,7 +452,6 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Adds refusal field to assistant conversations [#243423]({{kib-pull}}243423).
 * Disable custom suggestion on embedded console [#241516]({{kib-pull}}241516).
 * Fixed infinite loop bug in investigation guide editor [#240472]({{kib-pull}}240472).
-* Review of action response codes [#240420]({{kib-pull}}240420).
 * Hide filtering capabilities in Hosts Metrics [#239724]({{kib-pull}}239724).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
