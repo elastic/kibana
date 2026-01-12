@@ -238,7 +238,10 @@ const migrateArtifactsToSpaceAware = async (
             };
 
             // Ensure that Endpoint Exceptions all have the `global` tag if no assignment tag is currently assigned to the artifact
-            if (artifact.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id && !hasGlobalOrPerPolicyTag(artifact)) {
+            if (
+              artifact.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
+              !hasGlobalOrPerPolicyTag(artifact)
+            ) {
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               artifactUpdate.tags!.push(GLOBAL_ARTIFACT_TAG);
             }

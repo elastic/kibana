@@ -362,7 +362,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       switch (listType) {
         case ExceptionListTypeEnum.ENDPOINT: {
           return setInitialExceptionItems(
-            defaultEndpointExceptionItems(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id, exceptionItemName, alertData)
+            defaultEndpointExceptionItems(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              exceptionItemName,
+              alertData
+            )
           );
         }
         case ExceptionListTypeEnum.RULE_DEFAULT: {

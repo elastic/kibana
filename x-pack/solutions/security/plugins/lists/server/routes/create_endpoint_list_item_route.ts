@@ -7,7 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
 import {
   CreateEndpointListItemRequestBody,

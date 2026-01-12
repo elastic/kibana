@@ -126,7 +126,9 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       return 'endpoint_list';
     }
 
-    const defaultValue = isEndpointException ? ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id : undefined;
+    const defaultValue = isEndpointException
+      ? ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      : undefined;
 
     return isEdit ? exceptionListItems[0].list_id : defaultValue;
   }, [isEndpointException, isEdit, exceptionListItems]);

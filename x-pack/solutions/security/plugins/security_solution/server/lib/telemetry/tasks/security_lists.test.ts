@@ -41,7 +41,9 @@ describe('security list telemetry task test', () => {
     );
 
     expect(mockTelemetryReceiver.fetchTrustedApplications).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+    expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
+      ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+    );
     expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
       ENDPOINT_ARTIFACT_LISTS.eventFilters.id
     );

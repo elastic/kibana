@@ -6,7 +6,10 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   FindEndpointListItemsRequestQuery,

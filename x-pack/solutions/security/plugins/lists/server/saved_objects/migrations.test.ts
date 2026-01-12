@@ -7,9 +7,7 @@
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type { ExceptionListSoSchema } from '../schemas/saved_objects';
 
@@ -163,7 +161,10 @@ describe('7.12.0 lists migrations', () => {
   const migration = migrations['7.12.0'];
 
   test('should not convert non trusted apps lists', () => {
-    const doc = createExceptionListSoSchemaSavedObject({ list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id, tags: [] });
+    const doc = createExceptionListSoSchemaSavedObject({
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      tags: [],
+    });
 
     expect(migration(doc)).toEqual(
       createExceptionListSoSchemaSavedObject({

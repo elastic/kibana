@@ -98,7 +98,9 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
         // Lists Telemetry: Endpoint Exceptions
 
-        const epExceptions = await receiver.fetchEndpointList(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+        const epExceptions = await receiver.fetchEndpointList(
+          ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+        );
         if (epExceptions?.data) {
           const epExceptionsJson = templateExceptionList(
             epExceptions.data,

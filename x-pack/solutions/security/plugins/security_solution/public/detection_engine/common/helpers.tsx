@@ -233,7 +233,9 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
 
   return {
     author,
-    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) ?? false,
+    isAssociatedToEndpointList:
+      exceptionsList?.some(({ id }) => id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) ??
+      false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',

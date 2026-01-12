@@ -157,7 +157,10 @@ export const useFetchOrCreateRuleExceptionList = ({
         let exceptionListToUse: ExceptionListSchema;
         const matchingList = exceptionLists.find((list) => {
           if (exceptionListType === 'endpoint') {
-            return list.type === exceptionListType && list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
+            return (
+              list.type === exceptionListType &&
+              list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+            );
           } else {
             return list.type === exceptionListType;
           }
