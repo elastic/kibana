@@ -64,3 +64,10 @@ export const RUN_STREAM_DISCOVERY_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Run Stream Discovery',
   }
 );
+
+export const OCCURRENCES_CHART_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.occurrencesChartTitle',
+  {
+    defaultMessage: 'Detected event occurrences',
+  }
+);

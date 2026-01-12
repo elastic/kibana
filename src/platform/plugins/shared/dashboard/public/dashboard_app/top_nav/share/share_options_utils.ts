@@ -50,7 +50,6 @@ export function buildDashboardShareOptions({
     ...unsavedDashboardState,
     controlGroupInput:
       unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
-    references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
 
   const locatorParams: DashboardLocatorParams = {
