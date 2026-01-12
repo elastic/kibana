@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
 import type { Connector } from '../../types/connector';
 import { DataConnectorTypesService } from '../../services';
@@ -29,39 +30,32 @@ const transformDataSourceType = (dataTypeDefinition: DataTypeDefinition): Connec
  */
 export const useConnectors = () => {
   const {
-    services: { http },
+    services: { http, notifications },
   } = useKibana();
 
-  const [connectors, setConnectors] = useState<Connector[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error } = useQuery(
+    ['connectorTypes', 'list'],
+    async () => {
+      const service = new DataConnectorTypesService({ http });
+      const connectorTypes = await service.list();
 
-  useEffect(() => {
-    const fetchConnectorTypes = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const service = new DataConnectorTypesService({ http });
-        const connectorTypes = await service.list();
-
-        // Transform connector types to our internal Connector interface
-        const transformedConnectors = connectorTypes.map(transformDataSourceType);
-        setConnectors(transformedConnectors);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to fetch connector types'));
-        // eslint-disable-next-line no-console
-        console.error('Error fetching connector types:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchConnectorTypes();
-  }, [http]);
+      // Transform connector types to our internal Connector interface
+      return connectorTypes.map(transformDataSourceType);
+    },
+    {
+      onError: (err: Error) => {
+        notifications?.toasts.addError(err, {
+          title: i18n.translate('xpack.dataConnectors.useConnectors.errorToast', {
+            defaultMessage: 'Failed to load connector types',
+          }),
+          toastMessage: err.message,
+        });
+      },
+    }
+  );
 
   return {
-    connectors,
+    connectors: data ?? [],
     isLoading,
     error,
   };

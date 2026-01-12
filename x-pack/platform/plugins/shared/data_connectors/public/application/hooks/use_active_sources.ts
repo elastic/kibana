@@ -20,11 +20,8 @@ export const useActiveSources = () => {
     services: { http },
   } = useKibana();
 
-  const { data, isLoading, error } = useQuery<ListDataConnectorsResponse>({
-    queryKey: ['dataConnectors', 'list'],
-    queryFn: async () => {
-      return await http.get<ListDataConnectorsResponse>(API_BASE_PATH);
-    },
+  const { data, isLoading, error } = useQuery(['dataConnectors', 'list'], async () => {
+    return await http.get<ListDataConnectorsResponse>(API_BASE_PATH);
   });
 
   return {

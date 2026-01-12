@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useRef } from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useQueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
 
 export interface UseAddConnectorFlyoutOptions {
   onConnectorCreated?: (connector: ActionConnector) => void;
   dataSourceType?: string;
+}
+
+interface CreateDataConnectorPayload {
+  name: string;
+  stack_connector_id: string;
+  type: string;
 }
 
 /**
@@ -35,7 +41,7 @@ export const useAddConnectorFlyout = ({
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedConnectorType, setSelectedConnectorType] = useState<string | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
+  const loadingToastRef = useRef<ReturnType<typeof toasts.addInfo> | undefined>();
 
   const openFlyout = useCallback((actionTypeId?: string) => {
     setSelectedConnectorType(actionTypeId);
@@ -45,19 +51,17 @@ export const useAddConnectorFlyout = ({
   const closeFlyout = useCallback(() => {
     setIsOpen(false);
     setSelectedConnectorType(undefined);
-    setIsSaving(false);
   }, []);
 
-  const handleConnectorCreated = useCallback(
-    async (connector: ActionConnector) => {
-      // If no dataSourceType, close immediately (no additional processing needed)
-      if (!dataSourceType) {
-        onConnectorCreated?.(connector);
-        closeFlyout();
-        return;
-      }
-
-      // Show loading toast immediately
+  // Mutation for creating data connector
+  const createDataConnectorMutation = useMutation({
+    mutationFn: async (payload: CreateDataConnectorPayload) => {
+      return http.post(`${API_BASE_PATH}`, {
+        body: JSON.stringify(payload),
+      });
+    },
+    onMutate: ({ name }) => {
+      // Show loading toast
       const loadingToast = toasts.addInfo(
         {
           title: i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.creatingTitle', {
@@ -66,7 +70,7 @@ export const useAddConnectorFlyout = ({
           text: i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.creatingText', {
             defaultMessage: 'Setting up {connectorName}...',
             values: {
-              connectorName: connector.name,
+              connectorName: name,
             },
           }),
         },
@@ -74,52 +78,66 @@ export const useAddConnectorFlyout = ({
           toastLifeTimeMs: 30000,
         }
       );
+      loadingToastRef.current = loadingToast;
+      return { loadingToast };
+    },
+    onSuccess: (data, variables) => {
+      // Dismiss loading toast
+      if (loadingToastRef.current) {
+        toasts.remove(loadingToastRef.current);
+        loadingToastRef.current = undefined;
+      }
+
+      // Show success toast
+      toasts.addSuccess(
+        i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.createSuccessText', {
+          defaultMessage: 'Data source {connectorName} connected successfully',
+          values: {
+            connectorName: variables.name,
+          },
+        })
+      );
+
+      // Invalidate queries to refresh Active Sources table
+      queryClient.invalidateQueries(['dataConnectors', 'list']);
+    },
+    onError: (error, variables) => {
+      // Dismiss loading toast
+      if (loadingToastRef.current) {
+        toasts.remove(loadingToastRef.current);
+        loadingToastRef.current = undefined;
+      }
+
+      // Show error toast
+      toasts.addError(error as Error, {
+        title: i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.createErrorTitle', {
+          defaultMessage: 'Failed to create data connector',
+        }),
+      });
+    },
+  });
+
+  const handleConnectorCreated = useCallback(
+    (connector: ActionConnector) => {
+      // Call user callback first
+      onConnectorCreated?.(connector);
 
       // Close flyout immediately
-      onConnectorCreated?.(connector);
       closeFlyout();
 
-      // Continue creating data connector in the background
-      try {
-        await http.post(`${API_BASE_PATH}`, {
-          body: JSON.stringify({
-            name: connector.name,
-            stack_connector_id: connector.id,
-            type: dataSourceType,
-          }),
-        });
-
-        // Dismiss loading toast
-        toasts.remove(loadingToast);
-
-        // Show success toast
-        toasts.addSuccess(
-          i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.createSuccessText', {
-            defaultMessage: 'Data source {connectorName} connected successfully',
-            values: {
-              connectorName: connector.name,
-            },
-          })
-        );
-
-        // Refresh Active Sources table
-        queryClient.invalidateQueries(['dataConnectors', 'list']);
-      } catch (error) {
-        // Dismiss loading toast
-        toasts.remove(loadingToast);
-
-        // Show error toast
-        toasts.addError(error as Error, {
-          title: i18n.translate(
-            'xpack.dataConnectors.hooks.useAddConnectorFlyout.createErrorTitle',
-            {
-              defaultMessage: 'Failed to create data connector',
-            }
-          ),
-        });
+      // If no dataSourceType, skip data connector creation
+      if (!dataSourceType) {
+        return;
       }
+
+      // Create data connector in the background using mutation
+      createDataConnectorMutation.mutate({
+        name: connector.name,
+        stack_connector_id: connector.id,
+        type: dataSourceType,
+      });
     },
-    [dataSourceType, http, toasts, onConnectorCreated, closeFlyout, queryClient]
+    [dataSourceType, onConnectorCreated, closeFlyout, createDataConnectorMutation]
   );
 
   const flyout = useMemo(() => {
@@ -142,7 +160,7 @@ export const useAddConnectorFlyout = ({
     openFlyout,
     closeFlyout,
     isOpen,
-    isSaving,
+    isSaving: createDataConnectorMutation.isLoading,
     flyout,
   };
 };
