@@ -213,26 +213,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.saveSearch('single-timefilter-search');
         await discover.waitUntilTabIsLoaded();
 
+        // get number of filters in URLs
+
         // get shared URL value
         const sharedURL = await browser.getCurrentUrl();
-
-        const reportURL = await getReportPostUrl();
-
-        // get number of filters in URLs
-        const timeFiltersNumberInReportURL =
-          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
-        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
-
-        expect(timeFiltersNumberInSharedURL).to.be(1);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
+        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
+        expect(timeFiltersNumberInSharedURL).to.be(1);
 
+        // get report POST URL value
+        const reportURL = await getReportPostUrl();
+        expect(reportURL.includes('timeRange:(from:now-24h/h,to:now)')).to.be(true);
+        const timeFiltersNumberInReportURL =
+          reportURL.split('timeRange:(from:now-24h/h,to:now)').length - 1;
         expect(timeFiltersNumberInReportURL).to.be(1);
-
-        expect(
-          reportURL.includes(
-            `query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))`
-          )
-        ).to.be(true);
 
         // return keyboard state
         await browser.getActions().keyUp(Key.CONTROL).perform();

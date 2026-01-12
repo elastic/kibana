@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -148,13 +147,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Discover: Generate CSV report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvV2(
           {
             browserTimezone: 'UTC',
-            searchSource: {} as SerializedSearchSourceFields,
+            locatorParams: [
+              {
+                id: 'DISCOVER_APP_LOCATOR',
+                params: { dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953' },
+                version: '9.2.0',
+              },
+            ],
             objectType: 'search',
             title: 'test disallowed',
-            version: '7.14.0',
+            version: '9.2.0',
           },
           reportingAPI.DATA_ANALYST_USERNAME,
           reportingAPI.DATA_ANALYST_PASSWORD
@@ -163,18 +168,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does allow user with the role-based privilege', async () => {
-        const res = await reportingAPI.generateCsv(
+        const res = await reportingAPI.generateCsvV2(
           {
             browserTimezone: 'UTC',
             title: 'allowed search',
             objectType: 'search',
-            searchSource: {
-              version: true,
-              fields: [{ field: '*', include_unmapped: true }],
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            } as unknown as SerializedSearchSourceFields,
-            columns: [],
-            version: '7.13.0',
+            locatorParams: [
+              {
+                id: 'DISCOVER_APP_LOCATOR',
+                params: { dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953' },
+                version: '9.2.0',
+              },
+            ],
+            version: '9.2.0',
           },
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD
@@ -409,10 +415,16 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await reportingAPI.scheduleCsv(
           {
             browserTimezone: 'UTC',
-            searchSource: {} as SerializedSearchSourceFields,
+            locatorParams: [
+              {
+                id: 'DISCOVER_APP_LOCATOR',
+                params: { dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953' },
+                version: '9.2.0',
+              },
+            ],
             objectType: 'search',
             title: 'test disallowed',
-            version: '7.14.0',
+            version: '9.2.0',
           },
           reportingAPI.DATA_ANALYST_USERNAME,
           reportingAPI.DATA_ANALYST_PASSWORD
@@ -426,13 +438,14 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'allowed search',
             objectType: 'search',
-            searchSource: {
-              version: true,
-              fields: [{ field: '*', include_unmapped: true }],
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            } as unknown as SerializedSearchSourceFields,
-            columns: [],
-            version: '7.13.0',
+            locatorParams: [
+              {
+                id: 'DISCOVER_APP_LOCATOR',
+                params: { dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953' },
+                version: '9.2.0',
+              },
+            ],
+            version: '9.2.0',
           },
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD
@@ -446,7 +459,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);
         expect(taskResult.status).to.eql(200);
-        testExpectedTask(res.body.job.id, 'csv_searchsource', taskResult.body);
+        testExpectedTask(res.body.job.id, 'csv_v2', taskResult.body);
         scheduledReportTaskIds.push(res.body.job.id);
       });
     });

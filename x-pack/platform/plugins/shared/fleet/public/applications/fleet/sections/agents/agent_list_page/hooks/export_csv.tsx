@@ -105,6 +105,7 @@ export function useExportCSV() {
     const decoratedJobParams = apiClient.getDecoratedJobParams(
       getJobParams(agents, columns, sortOptions)
     );
+    // FIXME: csv_searchsource is deprecated, and should be replaced with csv_v2
     return apiClient
       .createReportingShareJob('csv_searchsource', decoratedJobParams)
       .then(() => {
