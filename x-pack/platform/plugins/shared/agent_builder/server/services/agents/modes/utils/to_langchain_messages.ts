@@ -98,11 +98,7 @@ const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessa
   return createUserMessage(content);
 };
 
-const formatAttachment = ({
-  attachment,
-}: {
-  attachment: ProcessedAttachment;
-}): XmlNode => {
+const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
   return {
     tagName: 'attachment',
     attributes: {
