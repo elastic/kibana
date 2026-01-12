@@ -11,6 +11,9 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
+import { TRANSACTION_DURATION_SUMMARY } from '../../../../common/es_fields/apm';
+import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { getLatencyAggregation } from '../../../lib/helpers/latency_aggregation_type';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import { getOutcomeAggregation } from '../../../lib/helpers/transaction_error_rate';
@@ -100,6 +103,7 @@ export async function getTraceChangePoints({
   const durationField = getDurationFieldForTransactions(documentType, hasDurationSummaryField);
   const outcomeAggs = getOutcomeAggregation(documentType);
   const bucketSizeInSeconds = intervalToSeconds(rollupInterval);
+  const latencyAggregationType = getLatencyAggregationType(latencyType);
 
   const calculateFailedTransactionRate =
     'params.successful_or_failed != null && params.successful_or_failed > 0 ? (params.successful_or_failed - params.success) / params.successful_or_failed : 0';
@@ -129,25 +133,14 @@ export async function getTraceChangePoints({
             aggs: {
               ...outcomeAggs,
               latency:
-                // Avoid unsupported aggregation on downsampled index, see example error:
-                // "reason": {
-                //   "type": "unsupported_aggregation_on_downsampled_index",
-                //   "reason": "Field [transaction.duration.summary] of type [aggregate_metric_double] is not supported for aggregation [percentiles]"
-                // }
-                durationField !== 'transaction.duration.summary' &&
-                (latencyType === 'p95' || latencyType === 'p99')
+                // cant calculate percentile aggregation on transaction.duration.summary field
+                durationField === TRANSACTION_DURATION_SUMMARY
                   ? {
-                      percentiles: {
-                        field: durationField,
-                        percents: [Number(`${latencyType.split('p')[1]}.0`)],
-                        keyed: true,
-                      },
-                    }
-                  : {
                       avg: {
                         field: durationField,
                       },
-                    },
+                    }
+                  : getLatencyAggregation(latencyAggregationType, durationField).latency,
               failure_rate:
                 documentType === ApmDocumentType.ServiceTransactionMetric
                   ? {
