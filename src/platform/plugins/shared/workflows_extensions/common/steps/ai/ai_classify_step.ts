@@ -71,20 +71,14 @@ export function buildStructuredOutputSchema(
 ): typeof OutputSchema {
   const { allowMultipleCategories, includeRationale } = params;
 
-  let shape: Record<string, z.ZodType> = {
+  const shape: Record<string, z.ZodType> = {
     metadata: z.record(z.string(), z.any()),
   };
 
   if (allowMultipleCategories) {
-    shape = {
-      ...shape,
-      categories: z.array(z.string()),
-    };
+    shape.categories = z.array(z.string());
   } else {
-    shape = {
-      ...shape,
-      category: z.string(),
-    };
+    shape.category = z.string();
   }
 
   if (includeRationale) {
