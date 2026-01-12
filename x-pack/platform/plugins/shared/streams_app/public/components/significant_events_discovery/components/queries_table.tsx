@@ -9,13 +9,10 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiLoadingElastic,
-  EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -32,14 +29,10 @@ import { LoadingPanel } from '../../loading_panel';
 import { SparkPlot } from '../../spark_plot';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
-export function SignificantEventsTable() {
+export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
-
-  // TODO: Replace with actual loading state from the task that detects significant events
-  // For now, this is manually set to simulate loading
-  const [isLoading] = useState(false);
 
   // TODO: Replace with new endpoint that fetches significant events from all streams
   const streamName = 'logs';
@@ -76,10 +69,10 @@ export function SignificantEventsTable() {
       width: '40px',
       render: () => (
         <EuiButtonIcon
-          data-test-subj="significantEventDetailsButton"
+          data-test-subj="queriesDetailsButton"
           iconType="expand"
           aria-label={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.table.detailsButtonAriaLabel',
+            'xpack.streams.significantEventsDiscovery.queriesTable.detailsButtonAriaLabel',
             { defaultMessage: 'View details' }
           )}
           onClick={() => {}}
@@ -88,7 +81,7 @@ export function SignificantEventsTable() {
     },
     {
       field: 'query.title',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.table.titleColumn', {
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.titleColumn', {
         defaultMessage: 'Title',
       }),
       render: (_: unknown, item: SignificantEventItem) => (
@@ -96,14 +89,14 @@ export function SignificantEventsTable() {
       ),
     },
     {
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.table.streamColumn', {
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.streamColumn', {
         defaultMessage: 'Stream',
       }),
       render: () => <EuiBadge color="hollow">{streamName}</EuiBadge>,
     },
     {
       field: 'query.feature',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.table.featuresColumn', {
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.featuresColumn', {
         defaultMessage: 'Features',
       }),
       render: (_: unknown, item: SignificantEventItem) => {
@@ -113,7 +106,7 @@ export function SignificantEventsTable() {
     },
     {
       field: 'query.severity_score',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.table.impactColumn', {
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.impactColumn', {
         defaultMessage: 'Impact',
       }),
       render: (_: unknown, item: SignificantEventItem) => {
@@ -122,9 +115,12 @@ export function SignificantEventsTable() {
     },
     {
       field: 'occurrences',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.table.lastOccurredColumn', {
-        defaultMessage: 'Last occurred',
-      }),
+      name: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.queriesTable.lastOccurredColumn',
+        {
+          defaultMessage: 'Last occurred',
+        }
+      ),
       render: (_: unknown, item: SignificantEventItem) => {
         const lastOccurrence = item.occurrences.findLast((occurrence) => occurrence.y !== 0);
         if (!lastOccurrence) {
@@ -147,15 +143,18 @@ export function SignificantEventsTable() {
     },
     {
       field: 'occurrences',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.table.occurrencesColumn', {
-        defaultMessage: 'Occurrences',
-      }),
+      name: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesColumn',
+        {
+          defaultMessage: 'Occurrences',
+        }
+      ),
       render: (_: unknown, item: SignificantEventItem) => {
         return (
           <SparkPlot
             id={`sparkplot-${item.query.id}`}
             name={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.table.occurrencesTooltipName',
+              'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesTooltipName',
               { defaultMessage: 'Occurrences' }
             )}
             type="bar"
@@ -172,102 +171,70 @@ export function SignificantEventsTable() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiCallOut announceOnMount color="primary">
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiLoadingElastic size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.streams.significantEventsDiscovery.loadingBanner.title', {
-                    defaultMessage:
-                      'We are generating your results, once we detect an event, or an insight, we will start populating the views...',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
-      {!isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              <EuiFieldSearch
-                placeholder={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.table.searchPlaceholder',
-                  { defaultMessage: 'Search' }
-                )}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                isClearable
-                aria-label={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.table.searchAriaLabel',
-                  { defaultMessage: 'Search significant events' }
-                )}
-                fullWidth
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <StreamsAppSearchBar showDatePicker />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiFieldSearch
+              placeholder={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.queriesTable.searchPlaceholder',
+                { defaultMessage: 'Search' }
+              )}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              isClearable
+              aria-label={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.queriesTable.searchAriaLabel',
+                { defaultMessage: 'Search queries' }
+              )}
+              fullWidth
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StreamsAppSearchBar showDatePicker />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder hasShadow={false}>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h3>
-                  {i18n.translate('xpack.streams.significantEventsDiscovery.chart.title', {
-                    defaultMessage: 'Detected event occurrences',
-                  })}
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.queriesTable.chart.title',
+                    {
+                      defaultMessage: 'Detected event occurrences',
+                    }
+                  )}
                 </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              {isLoading ? (
-                <EuiFlexGroup
-                  justifyContent="center"
-                  alignItems="center"
-                  css={css`
-                    height: 180px;
-                  `}
-                >
-                  <EuiLoadingChart size="l" />
-                </EuiFlexGroup>
-              ) : (
-                <SparkPlot
-                  id="aggregated-occurrences"
-                  name={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.chart.seriesName',
-                    {
-                      defaultMessage: 'Occurrences',
-                    }
-                  )}
-                  type="bar"
-                  timeseries={data?.aggregated_occurrences ?? []}
-                  annotations={[]}
-                  height={180}
-                />
-              )}
+              <SparkPlot
+                id="aggregated-occurrences"
+                name={i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.queriesTable.chart.seriesName',
+                  {
+                    defaultMessage: 'Occurrences',
+                  }
+                )}
+                type="bar"
+                timeseries={data?.aggregated_occurrences ?? []}
+                annotations={[]}
+                height={180}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
-      {!isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            {i18n.translate('xpack.streams.significantEventsDiscovery.table.eventsCount', {
-              defaultMessage: '{count} Significant events',
-              values: { count: items.length },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.eventsCount', {
+            defaultMessage: '{count} Queries',
+            values: { count: items.length },
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           css={css`
@@ -276,18 +243,21 @@ export function SignificantEventsTable() {
             }
           `}
           tableCaption={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.table.tableCaption',
-            { defaultMessage: 'Significant events table' }
+            'xpack.streams.significantEventsDiscovery.queriesTable.tableCaption',
+            { defaultMessage: 'Queries table' }
           )}
           columns={columns}
           itemId="query.id"
-          items={isLoading ? [] : items}
-          loading={isLoading}
+          items={items}
+          loading={loading}
           noItemsMessage={
-            !isLoading
-              ? i18n.translate('xpack.streams.significantEventsDiscovery.table.noItemsMessage', {
-                  defaultMessage: 'No significant events found',
-                })
+            !loading
+              ? i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.queriesTable.noItemsMessage',
+                  {
+                    defaultMessage: 'No queries found',
+                  }
+                )
               : ''
           }
           selection={{

@@ -16,10 +16,10 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { SignificantEventsTable } from './components/significant_events_table';
+import { QueriesTable } from './components/queries_table';
 import { StreamsTree } from './components/streams_tree/streams_tree';
 
-const discoveryTabs = ['streams', 'sigEvents'] as const;
+const discoveryTabs = ['streams', 'queries'] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -72,12 +72,12 @@ export function SignificantEventsDiscoveryPage() {
       isSelected: tab === 'streams',
     },
     {
-      id: 'sigEvents',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.sigEventsTab', {
-        defaultMessage: 'Significant events',
+      id: 'queries',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+        defaultMessage: 'Queries',
       }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'sigEvents' } }),
-      isSelected: tab === 'sigEvents',
+      href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
+      isSelected: tab === 'queries',
     },
   ];
 
@@ -109,7 +109,7 @@ export function SignificantEventsDiscoveryPage() {
       />
       <StreamsAppPageTemplate.Body grow>
         {tab === 'streams' && <StreamsTree />}
-        {tab === 'sigEvents' && <SignificantEventsTable />}
+        {tab === 'queries' && <QueriesTable />}
       </StreamsAppPageTemplate.Body>
     </>
   );
