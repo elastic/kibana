@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
-import type { OverviewTestBed } from '../overview.helpers';
 import { setupOverviewPage } from '../overview.helpers';
 import { esCriticalAndWarningDeprecations, esNoDeprecations } from './mock_es_issues';
 
 describe('Overview - Fix deprecation issues step', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -28,25 +27,20 @@ describe('Overview - Fix deprecation issues step', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esCriticalAndWarningDeprecations);
 
-      await act(async () => {
-        const deprecationService = deprecationsServiceMock.createStartContract();
-        kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage(httpSetup, {
-          services: {
-            core: {
-              deprecations: deprecationService,
-            },
+      await setupOverviewPage(httpSetup, {
+        services: {
+          core: {
+            deprecations: deprecationService,
           },
-        });
+        },
       });
-
-      testBed.component.update();
     });
 
     test('renders step as incomplete', async () => {
-      const { exists } = testBed;
-      expect(exists(`fixIssuesStep-incomplete`)).toBe(true);
+      expect(await screen.findByTestId('fixIssuesStep-incomplete')).toBeInTheDocument();
     });
   });
 
@@ -54,25 +48,20 @@ describe('Overview - Fix deprecation issues step', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
 
-      await act(async () => {
-        const deprecationService = deprecationsServiceMock.createStartContract();
-        kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage(httpSetup, {
-          services: {
-            core: {
-              deprecations: deprecationService,
-            },
+      await setupOverviewPage(httpSetup, {
+        services: {
+          core: {
+            deprecations: deprecationService,
           },
-        });
+        },
       });
-
-      testBed.component.update();
     });
 
     test('renders step as complete', async () => {
-      const { exists } = testBed;
-      expect(exists(`fixIssuesStep-complete`)).toBe(true);
+      expect(await screen.findByTestId('fixIssuesStep-complete')).toBeInTheDocument();
     });
   });
 });

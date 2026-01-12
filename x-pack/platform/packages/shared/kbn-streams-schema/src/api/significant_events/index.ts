@@ -10,7 +10,6 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamQueryKql } from '../../queries';
-import type { FeatureType } from '../../feature';
 
 /**
  * SignificantEvents Get Response
@@ -59,7 +58,7 @@ interface GeneratedSignificantEventQuery {
   feature?: {
     name: string;
     filter: Condition;
-    type: FeatureType;
+    type: 'system';
   };
   severity_score: number;
   evidence?: string[];
