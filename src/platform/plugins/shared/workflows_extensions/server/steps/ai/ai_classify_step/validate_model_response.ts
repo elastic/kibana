@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionError } from '@kbn/workflows/common/errors';
 import type { z } from '@kbn/zod/v4';
 import type { AiClassifyStepOutputSchema } from '../../../../common/steps/ai';
-import { ExecutionError } from '@kbn/workflows/common/errors';
 
 export function validateModelResponse({
   modelResponse,
