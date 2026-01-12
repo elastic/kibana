@@ -7,8 +7,6 @@
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { OnechatAgentsCreate } from './pages/agent_create';
 import { OnechatAgentsEdit } from './pages/agent_edit';
 import { OnechatAgentsPage } from './pages/agents';
