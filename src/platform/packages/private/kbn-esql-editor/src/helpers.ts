@@ -370,18 +370,17 @@ export const filterOverlappingWarnings = (
   errors: MonacoMessage[],
   warnings: MonacoMessage[]
 ): MonacoMessage[] => {
-  const hasOverlap = (warning: MonacoMessage, error: MonacoMessage) => {
-    const isSameLine =
-      warning.startLineNumber === error.startLineNumber &&
-      warning.endLineNumber === error.endLineNumber;
-    const isOverlappingColumn =
-      (warning.startColumn >= error.startColumn && warning.startColumn <= error.endColumn) ||
-      (warning.endColumn >= error.startColumn && warning.endColumn <= error.endColumn);
-    return isSameLine && isOverlappingColumn;
+  const hasOverlap = (warning: MonacoMessage) => {
+    return errors.some((error) => {
+      const isOverlappingLine =
+        warning.startLineNumber <= error.endLineNumber &&
+        warning.endLineNumber >= error.startLineNumber;
+      const isOverlappingColumn =
+        warning.startColumn <= error.endColumn && warning.endColumn >= error.startColumn;
+
+      return isOverlappingLine && isOverlappingColumn;
+    });
   };
 
-  return warnings.filter((warning) => {
-    const isOverlapping = errors.some((error) => hasOverlap(warning, error));
-    return !isOverlapping;
-  });
+  return warnings.filter((warning) => !hasOverlap(warning));
 };

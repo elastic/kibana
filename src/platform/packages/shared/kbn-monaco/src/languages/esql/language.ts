@@ -38,6 +38,8 @@ export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
 export type MonacoMessage = monaco.editor.IMarkerData & {
   code: string;
+
+  // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: boolean;
 };
 

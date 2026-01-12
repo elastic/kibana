@@ -103,8 +103,9 @@ export function getUnmappedFields(
         unmappedFields.findIndex((f) => f.name === node.name) === -1
       ) {
         unmappedFields.push({
-          name: node.name, // HD build from parts?
-          type: 'keyword', // Unmapped fields are treated as type keyword
+          name: node.parts.join('.'),
+          // Unmapped fields are treated as keyword type
+          type: 'keyword',
           isUnmappedField: true,
           userDefined: false,
         });
