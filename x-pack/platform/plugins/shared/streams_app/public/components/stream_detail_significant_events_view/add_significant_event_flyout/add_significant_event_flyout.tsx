@@ -39,7 +39,6 @@ import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
-import { useStreamDescriptionApi } from '../../stream_detail_features/stream_description/use_stream_description_api';
 
 interface Props {
   refreshDefinition: () => void;
@@ -81,13 +80,6 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const {
-    onGenerateDescription: generateDescription,
-    onSaveDescription: saveDescription,
-    abort: abortDescription,
-    isGenerating: isGeneratingDescription,
-  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
-
   const { cancelGenerationTask, getGenerationTask, scheduleGenerationTask } =
     useSignificantEventsApi({ name: definition.stream.name });
 
@@ -118,8 +110,7 @@ export function AddSignificantEventFlyout({
     task?.status === 'in_progress' ||
     isBeingCanceled ||
     isGettingTask ||
-    isSchedulingGenerationTask ||
-    isGeneratingDescription;
+    isSchedulingGenerationTask;
 
   const prevTaskStatusRef = useRef<string | undefined>(undefined);
 
@@ -164,10 +155,7 @@ export function AddSignificantEventFlyout({
         getTask();
       });
     }
-    if (isGeneratingDescription) {
-      abortDescription();
-    }
-  }, [abortDescription, cancelGenerationTask, getTask, task?.status, isGeneratingDescription]);
+  }, [cancelGenerationTask, getTask, task?.status]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -195,11 +183,6 @@ export function AddSignificantEventFlyout({
       const effectiveFeatures = featuresOverride ?? selectedFeatures;
 
       (async () => {
-        if (!definition.stream.description && effectiveFeatures.length === 0) {
-          const description = await generateDescription();
-          if (!description) return;
-          await saveDescription(description);
-        }
         await doScheduleGenerationTask(connectorId, effectiveFeatures);
         getTask();
       })();
@@ -209,9 +192,6 @@ export function AddSignificantEventFlyout({
       selectedFeatures,
       doScheduleGenerationTask,
       getTask,
-      definition.stream.description,
-      generateDescription,
-      saveDescription,
     ]
   );
 
