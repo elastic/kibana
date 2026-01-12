@@ -41,6 +41,7 @@ import { AttackDetailsContainer } from './attack_details/attack_details_containe
 import { AlertsTab } from './attack_details/alerts_tab';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
+import { buildConnectorIdFilter } from './filtering_configs';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -69,21 +70,6 @@ export interface TableSectionProps {
    * The list of selected connectors ID to filter the table
    */
   selectedConnectorNames: string[];
-}
-
-function buildConnectorIdFilter(connectorNames: string[]): Filter {
-  return {
-    meta: {
-      key: 'kibana.alert.attack_discovery.api_config.name',
-      type: 'term',
-      index: '.alerts-security.attack.discovery.alerts',
-    },
-    query: {
-      terms: {
-        'kibana.alert.attack_discovery.api_config.name': connectorNames,
-      },
-    },
-  };
 }
 
 /**
@@ -164,7 +150,7 @@ export const TableSection = React.memo(
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
-        ...(selectedConnectorNames.length ? [buildConnectorIdFilter(selectedConnectorNames)] : []),
+        ...buildConnectorIdFilter(selectedConnectorNames),
       ],
       [
         showBuildingBlockAlerts,
