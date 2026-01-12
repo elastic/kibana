@@ -390,7 +390,7 @@ describe('take action dropdown', () => {
           getUserPrivilegesMockDefaultValue({
             rulesPrivileges: {
               rules: { read: true, edit: true },
-              exceptions: { read: true, crud: true },
+              exceptions: { read: true, edit: true },
             },
           })
         );

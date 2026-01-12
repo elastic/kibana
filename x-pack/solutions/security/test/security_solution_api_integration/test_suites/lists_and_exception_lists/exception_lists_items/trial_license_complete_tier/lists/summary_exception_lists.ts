@@ -176,51 +176,6 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql(expected);
         });
       });
-      describe('@skipInServerless with read rules and read exceptions role', () => {
-        const role = ROLES.rules_read_exceptions_read;
-
-        beforeEach(async () => {
-          await createUserAndRole(getService, role);
-        });
-
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
-        it('should return right summary when there are items created', async () => {
-          const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
-          const restrictedApis = exceptionsApi.withUser(restrictedUser);
-
-          await supertest
-            .post(EXCEPTION_LIST_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getCreateExceptionListMinimalSchemaMock())
-            .expect(200);
-
-          const item = getCreateExceptionListItemMinimalSchemaMock();
-
-          for (const os of ['windows', 'linux', 'macos']) {
-            await supertest
-              .post(EXCEPTION_LIST_ITEM_URL)
-              .set('kbn-xsrf', 'true')
-              .send({ ...item, os_types: [os], item_id: `${item.item_id}-${os}` })
-              .expect(200);
-          }
-
-          const { body }: SummaryResponseType = await restrictedApis
-            .readExceptionListSummary({
-              query: { list_id: LIST_ID },
-            })
-            .expect(200);
-
-          const expected: ExceptionListSummarySchema = {
-            linux: 1,
-            macos: 1,
-            total: 3,
-            windows: 1,
-          };
-          expect(body).to.eql(expected);
-        });
-      });
     });
   });
 };

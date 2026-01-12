@@ -60,12 +60,12 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     handleConfirmExceptionFlyout,
   } = useListWithSearchComponent(list, refreshExceptions);
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
-  const canCrudExceptions = useUserPrivileges().rulesPrivileges.exceptions.crud;
+  const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
 
   const canAddException = useMemo(
     () =>
-      listType === ExceptionListTypeEnum.ENDPOINT ? canWriteEndpointExceptions : canCrudExceptions,
-    [canCrudExceptions, canWriteEndpointExceptions, listType]
+      listType === ExceptionListTypeEnum.ENDPOINT ? canWriteEndpointExceptions : canEditExceptions,
+    [canEditExceptions, canWriteEndpointExceptions, listType]
   );
 
   return (

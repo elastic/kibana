@@ -86,7 +86,7 @@ const ExceptionsTable = styled(EuiFlexGroup)`
 `;
 
 export const SharedLists = React.memo(() => {
-  const { crud: canCrudExceptions, read: canReadExceptions } =
+  const { edit: canEditExceptions, read: canReadExceptions } =
     useUserPrivileges().rulesPrivileges.exceptions;
 
   const { loading: listsConfigLoading } = useListsConfig();
@@ -449,7 +449,7 @@ export const SharedLists = React.memo(() => {
   };
   const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
-  const isReadOnly = canReadExceptions && !canCrudExceptions;
+  const isReadOnly = canReadExceptions && !canEditExceptions;
 
   useEffect(() => {
     if (isSearchingExceptions && hasNoExceptions) {
@@ -499,7 +499,7 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              canCrudExceptions && (
+              canEditExceptions && (
                 <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
                   {i18n.CREATE_BUTTON}
                 </EuiButton>
@@ -533,7 +533,7 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          (canCrudExceptions || canWriteEndpointExceptions) && (
+          (canEditExceptions || canWriteEndpointExceptions) && (
             <EuiButton
               data-test-subj="importSharedExceptionList"
               iconType={'importAction'}

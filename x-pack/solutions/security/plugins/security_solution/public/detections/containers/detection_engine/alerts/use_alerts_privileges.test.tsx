@@ -78,7 +78,7 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
   siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
-  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, crud: false } },
+  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, edit: false } },
 };
 
 describe('useAlertsPrivileges', () => {
@@ -185,7 +185,7 @@ describe('useAlertsPrivileges', () => {
       draft.detectionEnginePrivileges.result = privilege;
       draft.rulesPrivileges = {
         rules: { edit: false, read: true },
-        exceptions: { read: true, crud: false },
+        exceptions: { read: true, edit: false },
       };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
@@ -212,7 +212,7 @@ describe('useAlertsPrivileges', () => {
       draft.detectionEnginePrivileges.result = privilege;
       draft.rulesPrivileges = {
         rules: { edit: false, read: false },
-        exceptions: { read: false, crud: false },
+        exceptions: { read: false, edit: false },
       };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);

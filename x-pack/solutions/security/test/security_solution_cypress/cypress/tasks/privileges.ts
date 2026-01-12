@@ -211,8 +211,6 @@ export const rulesAll: Role = {
     kibana: [
       {
         feature: {
-          // siemV5: ['all'], // TODO: Remove before merge
-          // securitySolutionRulesV1: ['all'],
           securitySolutionRulesV2: ['all', 'securitySolutionExceptionsAll'],
           actions: ['all'],
           indexPatterns: ['all'],

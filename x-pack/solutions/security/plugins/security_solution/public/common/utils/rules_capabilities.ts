@@ -7,7 +7,7 @@
 
 import type { Capabilities } from '@kbn/core/types';
 import {
-  EXCEPTIONS_UI_CRUD,
+  EXCEPTIONS_UI_EDIT,
   EXCEPTIONS_UI_READ,
   RULES_UI_EDIT,
   RULES_UI_READ,
@@ -16,12 +16,12 @@ import { RULES_FEATURE_ID } from '../../../common/constants';
 
 export interface RulesUICapabilities {
   rules: { read: boolean; edit: boolean };
-  exceptions: { read: boolean; crud: boolean };
+  exceptions: { read: boolean; edit: boolean };
 }
 
 export const getRulesCapabilitiesInitialState = () => ({
   rules: { read: false, edit: false },
-  exceptions: { read: false, crud: false },
+  exceptions: { read: false, edit: false },
 });
 
 export const extractRulesCapabilities = (capabilities: Capabilities): RulesUICapabilities => {
@@ -33,10 +33,10 @@ export const extractRulesCapabilities = (capabilities: Capabilities): RulesUICap
 
   // Exceptions permissions
   const readExceptions = rulesCapabilities?.[EXCEPTIONS_UI_READ] === true;
-  const crudExceptions = rulesCapabilities?.[EXCEPTIONS_UI_CRUD] === true;
+  const crudExceptions = rulesCapabilities?.[EXCEPTIONS_UI_EDIT] === true;
 
   return {
     rules: { read: readRules, edit: editRules },
-    exceptions: { read: readExceptions, crud: crudExceptions },
+    exceptions: { read: readExceptions, edit: crudExceptions },
   };
 };

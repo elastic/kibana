@@ -72,7 +72,7 @@ export const useExceptionsListCard = ({
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
   const [showIncludeExpiredExceptionsModal, setShowIncludeExpiredExceptionsModal] =
     useState<CheckExceptionTtlActionTypes | null>(null);
-  const { read: canReadExceptions, crud: canCrudExceptions } =
+  const { read: canReadExceptions, edit: canEditExceptions } =
     useUserPrivileges().rulesPrivileges.exceptions;
 
   const {
@@ -120,7 +120,7 @@ export const useExceptionsListCard = ({
   const [toggleAccordion, setToggleAccordion] = useState(false);
   const openAccordionId = useGeneratedHtmlId({ prefix: 'openAccordion' });
 
-  const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList) || !canCrudExceptions;
+  const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList) || !canEditExceptions;
 
   const emptyViewerTitle = useMemo(() => {
     return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';
