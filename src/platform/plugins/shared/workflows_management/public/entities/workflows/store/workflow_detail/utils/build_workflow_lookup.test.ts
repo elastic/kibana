@@ -530,6 +530,7 @@ steps:
 describe('buildWorkflowLookup', () => {
   it('should build a workflow lookup from a yaml string', () => {
     const yaml = `
+name: test
 steps:
   - name: step1
     type: console
