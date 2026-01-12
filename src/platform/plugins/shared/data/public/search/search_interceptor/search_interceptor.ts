@@ -64,6 +64,8 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -103,6 +105,7 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   searchConfig: SearchConfigSchema;
+  getCPSManager?: () => ICPSManager | undefined;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -181,10 +184,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId } = options;
+    const { sessionId, projectRouting } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
+      projectRouting,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -281,6 +285,9 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
+    if (combined.projectRouting !== undefined) {
+      serializableOptions.projectRouting = combined.projectRouting;
+    }
 
     return serializableOptions;
   }
@@ -303,10 +310,12 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
+      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
       return this.runSearch(
         { id, ...request },
         {
           ...options,
+          projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,

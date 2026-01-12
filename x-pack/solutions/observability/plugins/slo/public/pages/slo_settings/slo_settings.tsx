@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { SettingsForm } from './settings_form';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { SettingsForm } from './settings_form';
 
 export function SloSettingsPage() {
   const {

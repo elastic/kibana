@@ -187,7 +187,7 @@ export const ImportExceptionListFlyout = React.memo(
             initialPromptText={i18n.IMPORT_PROMPT}
             onChange={handleFileChange}
             display={'large'}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label={i18n.IMPORT_FILE_PICKER_ARIA_LABEL}
           />
 
           {alreadyExistingItem && (

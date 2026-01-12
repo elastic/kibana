@@ -321,6 +321,8 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
+      // Suggestions must be rendered above flyouts
+      z-index: 1100 !important;
     }
 
     .suggest-details-container {

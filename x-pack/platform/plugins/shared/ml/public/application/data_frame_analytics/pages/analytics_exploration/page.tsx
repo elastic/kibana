@@ -149,18 +149,10 @@ export const Page: FC<{
         <MlPageHeader>
           <PageTitle
             title={
-              jobIdToUse !== undefined ? (
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsExploration.titleWithId"
-                  defaultMessage="Explore results for job ID {id}"
-                  values={{ id: jobIdToUse }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsExploration.title"
-                  defaultMessage="Explore results"
-                />
-              )
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsExploration.title"
+                defaultMessage="Results explorer"
+              />
             }
           />
         </MlPageHeader>

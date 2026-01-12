@@ -53,3 +53,24 @@ export const LOGS_TAB_TEST_SUBJECTS = {
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
   RULE_DETAILS: 'ruleDetails',
 } as const;
+
+/**
+ * Constants for data-test-subj values used in custom threshold rule tests
+ */
+export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
+  // Rule Type Selection
+  CUSTOM_THRESHOLD_RULE_TYPE_CARD: 'observability.rules.custom_threshold-SelectOption',
+
+  // Rule Form
+  RULE_FORM: 'ruleForm',
+  RULE_NAME_INPUT: 'ruleDetailsNameInput',
+
+  // Data View Selection
+  DATA_VIEW_EXPRESSION: 'selectDataViewExpression',
+  INDEX_PATTERN_INPUT: 'indexPattern-switcher--input',
+  EXPLORE_MATCHING_INDICES_BUTTON: 'explore-matching-indices-button',
+
+  // Rule Save
+  RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
+  CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
+} as const;

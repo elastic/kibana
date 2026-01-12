@@ -84,19 +84,16 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
-      transformOutInjectsReferences: true,
       transformIn: changePointTransformIn,
       transformOut: changePointTransformOut,
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
-      transformOutInjectsReferences: true,
       transformIn: patternAnalysisTransformIn,
       transformOut: patternAnalysisTransformOut,
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
-      transformOutInjectsReferences: true,
       transformIn: logRateTransformIn,
       transformOut: logRateTransformOut,
     });
