@@ -52,52 +52,92 @@ function httpRequest(
   });
 }
 
-async function getES(log: ToolingLog, ssl: boolean = true): Promise<ElasticsearchConnection> {
+async function testCredentials(
+  baseUrl: string,
+  credentials: ElasticsearchCredentials,
+  ssl: boolean,
+  log: ToolingLog
+): Promise<boolean> {
+  try {
+    const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+    const { statusCode } = await httpRequest(
+      baseUrl,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+        rejectUnauthorized: false,
+      },
+      undefined,
+      ssl
+    );
+
+    return statusCode === 200;
+  } catch (error) {
+    if (error.code === 'EPROTO') {
+      log.debug('Protocol mismatch detected — attempting to connect with HTTP');
+      throw new Error('Protocol mismatch error');
+    }
+
+    throw new Error('Failed to connect to Elasticsearch', { cause: error });
+  }
+}
+
+async function getES(log: ToolingLog) {
   log.debug('Determining Elasticsearch connection');
 
-  const protocol = ssl ? 'https' : 'http';
-  const baseUrl = `${protocol}://localhost:9200`;
+  const localhost = 'localhost:9200';
+  const protocols = ['https', 'http'];
 
-  // Check environment variables first
   const envUsername = process.env.ES_USERNAME || process.env.ELASTICSEARCH_USERNAME;
   const envPassword = process.env.ES_PASSWORD || process.env.ELASTICSEARCH_PASSWORD;
 
+  const credentialsToTry: {
+    username: string;
+    password: string;
+    type: string;
+  }[] = [];
+
   if (envUsername && envPassword) {
-    log.debug('Using credentials from environment variables');
-    return { baseUrl, credentials: { username: envUsername, password: envPassword }, ssl };
+    credentialsToTry.push({
+      username: envUsername,
+      password: envPassword,
+      type: 'environment variable',
+    });
   }
 
-  // Try default credentials
-  const credentialsToTry = [
-    { username: 'elastic', password: 'changeme' },
-    { username: 'elastic_serverless', password: 'changeme' },
-  ];
+  credentialsToTry.push(
+    { username: 'elastic', password: 'changeme', type: 'default' },
+    { username: 'elastic_serverless', password: 'changeme', type: 'default' }
+  );
 
-  for (const credentials of credentialsToTry) {
-    log.debug(`Trying credentials: ${credentials.username}`);
-    try {
-      const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString(
-        'base64'
-      );
-      const { statusCode } = await httpRequest(
-        baseUrl,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Basic ${auth}`,
-          },
-          rejectUnauthorized: false,
-        },
-        undefined,
-        ssl
-      );
+  for (const protocol of protocols) {
+    const baseUrl = `${protocol}://${localhost}`;
 
-      if (statusCode === 200) {
-        log.debug(`Credentials ${credentials.username} authorized`);
-        return { baseUrl, credentials, ssl };
+    for (const credentials of credentialsToTry) {
+      const isSsl = protocol === 'https';
+      try {
+        log.debug(`Trying ${credentials.type} credentials: ${credentials.username}`);
+
+        const isValid = await testCredentials(baseUrl, credentials, isSsl, log);
+
+        if (isValid) {
+          log.debug(
+            `Authorized with ${credentials.type} credentials ${credentials.username} (${protocol})`
+          );
+
+          return {
+            baseUrl,
+            credentials,
+            ssl: isSsl,
+          };
+        }
+      } catch (error) {
+        if (error.message === 'Protocol mismatch error') {
+          break; // stop trying creds, move to next protocol
+        }
       }
-    } catch (error) {
-      // Continue to next credentials
     }
   }
 
@@ -135,9 +175,7 @@ async function setCcmApiKey(
 
   const maxRetries = 3;
   const retryDelayMs = 2000;
-  const ccmEndpoint = '_inference/_ccm';
-  let esUrl = `${es.baseUrl}/${ccmEndpoint}`;
-  let ssl = es.ssl;
+  const esUrl = `${es.baseUrl}/_inference/_ccm`;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -158,7 +196,7 @@ async function setCcmApiKey(
           rejectUnauthorized: false,
         },
         body,
-        ssl
+        es.ssl
       );
 
       if (statusCode >= 200 && statusCode < 300) {
@@ -168,21 +206,6 @@ async function setCcmApiKey(
 
       throw new Error(`HTTP ${statusCode}`);
     } catch (error) {
-      const handshakeFailurePatterns = [
-        'EPROTO',
-        'ERR_SSL_WRONG_VERSION_NUMBER',
-        'packet length too long',
-      ];
-      const handshakeFailure = handshakeFailurePatterns.some((p) => error.message.includes(p));
-
-      if (handshakeFailure && ssl) {
-        log.info('HTTPS handshake failed due to protocol mismatch — falling back to HTTP');
-        ssl = false;
-        esUrl = `http://localhost:9200/${ccmEndpoint}`;
-        // Retry immediately with HTTP (don't count this as a failed attempt)
-        continue;
-      }
-
       if (attempt < maxRetries) {
         log.debug(`Attempt ${attempt} failed, retrying in ${retryDelayMs}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
@@ -195,12 +218,10 @@ async function setCcmApiKey(
   }
 }
 
-export async function ensureEis({ log, ssl = true }: { log: ToolingLog; ssl?: boolean }) {
-  const protocol = ssl ? 'https' : 'http';
-  log.info(`Setting up Cloud Connected Mode for EIS (using ${protocol})`);
-
+export async function ensureEis({ log }: { log: ToolingLog }) {
+  log.info('Setting up Cloud Connected Mode for EIS');
   // Get Elasticsearch connection info
-  const es = await getES(log, ssl);
+  const es = await getES(log);
 
   // Get EIS API key from vault
   const apiKey = await getEisApiKey(log);
