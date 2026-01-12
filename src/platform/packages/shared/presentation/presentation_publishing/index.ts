@@ -49,6 +49,8 @@ export {
   type AppliesFilters,
   apiAppliesTimeslice,
   type AppliesTimeslice,
+  apiHasUseGlobalFiltersSetting,
+  type HasUseGlobalFiltersSetting,
 } from './interfaces/fetch/applies_filters';
 export {
   apiPublishesFilters,
