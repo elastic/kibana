@@ -206,6 +206,34 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       return this.createExceptionItem(trustedDevice, options);
     }
 
+    async createList(
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      options: ArtifactCreateOptions = {}
+    ): Promise<void> {
+      switch (listId) {
+        case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+          return this.ensureListExists(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id: {
+          return this.ensureListExists(TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+          return this.ensureListExists(EVENT_FILTER_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+          return this.ensureListExists(BLOCKLISTS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+          return this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id: {
+          return this.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION, options);
+        }
+        default:
+          throw new Error(`Unexpected list id ${listId}`);
+      }
+    }
+
     async createArtifact(
       listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
       overrides: Partial<CreateExceptionListItemSchema> = {},
