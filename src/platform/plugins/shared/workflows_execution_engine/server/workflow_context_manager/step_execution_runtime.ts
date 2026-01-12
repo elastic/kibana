@@ -9,12 +9,13 @@
 
 import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/common/errors';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
-import { ExecutionError, parseDuration } from '../utils';
+import { parseDuration } from '../utils';
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
