@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * SharePoint Online Connector
+ *
+ * This connector provides integration with Microsoft SharePoint Online via
+ * the Microsoft Graph API. Features include:
+ * - Site listing and retrieval
+ * - Page listing within sites
+ * - Cross-site search functionality
+ *
+ * Requires OAuth2 client credentials authentication with Microsoft Entra ID.
+ */
+
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
@@ -14,8 +26,10 @@ import type { ConnectorSpec } from '../../connector_spec';
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',
-    displayName: 'Sharepoint online',
-    description: 'Kibana Stack Connector for Sharepoint Online.', // replace with i18n thing
+    displayName: 'SharePoint Online',
+    description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.metadata.description', {
+      defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
+    }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
@@ -41,35 +55,34 @@ export const SharepointOnline: ConnectorSpec = {
       ),
   }),
 
-
   actions: {
-   listAllSites: {
+    listAllSites: {
       isTool: true,
       input: z.object({}).optional(),
       handler: async (ctx, input) => {
-        const url = 'https://graph.microsoft.com/v1.0/sites/getAllSites/';
-
         ctx.log.debug('SharePoint listing all sites');
-        const response = await ctx.client.get(url);
+        const response = await ctx.client.get(
+          'https://graph.microsoft.com/v1.0/sites/getAllSites/'
+        );
         return response.data;
       },
     },
+
     listSitePages: {
       isTool: true,
       input: z.object({
         siteId: z.string().describe('Site ID'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          siteId: string,
-        };
-        const url = `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`;
-
-        ctx.log.debug(`Sharepoint listing all pages from siteId ${typedInput.siteId}`);
-        const response = await ctx.client.get(url);
+        const typedInput = input as { siteId: string };
+        ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
+        const response = await ctx.client.get(
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`
+        );
         return response.data;
       },
     },
+
     getSite: {
       isTool: true,
       input: z.union([
@@ -77,22 +90,21 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({ relativeUrl: z.string().describe('Relative URL path') }).strict(),
       ]),
       handler: async (ctx, input) => {
-        const typedInput = input as
-          | { siteId: string }
-          | { relativeUrl: string }
+        const typedInput = input as { siteId: string } | { relativeUrl: string };
 
-        let url: string = 'https://graph.microsoft.com/v1.0/sites/';
+        let url = 'https://graph.microsoft.com/v1.0/sites/';
         if ('siteId' in typedInput) {
           url += typedInput.siteId;
-        } else if ('relativeUrl' in typedInput) {
+        } else {
           url += typedInput.relativeUrl;
         }
 
-        ctx.log.debug(`Getting site info via ${url}`);
+        ctx.log.debug(`SharePoint getting site info via ${url}`);
         const response = await ctx.client.get(url);
         return response.data;
       },
     },
+
     search: {
       isTool: true,
       input: z.object({
@@ -111,7 +123,6 @@ export const SharepointOnline: ConnectorSpec = {
           from?: number;
           size?: number;
         };
-
         const config = ctx.config as { region: string };
 
         const searchRequest = {
@@ -123,7 +134,7 @@ export const SharepointOnline: ConnectorSpec = {
               },
               region: config.region,
               ...(typedInput.from !== undefined && { from: typedInput.from }),
-              ...(typedInput.size !== undefined && { size: typedInput.size })
+              ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
           ],
         };
@@ -138,15 +149,12 @@ export const SharepointOnline: ConnectorSpec = {
     },
   },
 
-
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.test.description',
-      {
-        defaultMessage: 'Verifies Sharepoint Online connection by checking API access'
-      }
-    ),
+    description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.test.description', {
+      defaultMessage: 'Verifies SharePoint Online connection by checking API access',
+    }),
     handler: async (ctx) => {
-      ctx.log.debug('Sharepoint Online test handler');
+      ctx.log.debug('SharePoint Online test handler');
 
       try {
         const response = await ctx.client.get('https://graph.microsoft.com/v1.0/sites/root');
@@ -155,8 +163,9 @@ export const SharepointOnline: ConnectorSpec = {
           ok: true,
           message: `Successfully connected to SharePoint Online: ${siteName}`,
         };
-      } catch (error) {
-        return { ok: false, message: error.message };
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return { ok: false, message };
       }
     },
   },

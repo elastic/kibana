@@ -11,21 +11,6 @@ import type { ActionContext } from '../../connector_spec';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
- * Typed HTTP error interface for testing error scenarios
- */
-interface HttpError extends Error {
-  response?: {
-    status: number;
-    data?: {
-      error?: {
-        code?: string;
-        message?: string;
-      };
-    };
-  };
-}
-
-/**
  * Standard SharePoint API response structure
  */
 interface SharePointListResponse<T = unknown> {
@@ -53,28 +38,31 @@ interface SharePointPage {
 }
 
 /**
- * SharePoint search hit resource
- */
-interface SharePointSearchHit {
-  hitId: string;
-  resource: {
-    '@odata.type': string;
-    name?: string;
-    displayName?: string;
-  };
-}
-
-/**
  * SharePoint search response structure
  */
 interface SharePointSearchResponse {
   value: Array<{
     hitsContainers: Array<{
-      hits: SharePointSearchHit[];
+      hits: Array<{
+        hitId: string;
+        resource: {
+          '@odata.type': string;
+          name?: string;
+          displayName?: string;
+        };
+      }>;
       total: number;
       moreResultsAvailable?: boolean;
     }>;
   }>;
+}
+
+/**
+ * Test result structure
+ */
+interface TestResult {
+  ok: boolean;
+  message?: string;
 }
 
 describe('SharepointOnline', () => {
@@ -98,8 +86,16 @@ describe('SharepointOnline', () => {
       const mockResponse = {
         data: {
           value: [
-            { id: 'site-1', displayName: 'Site 1', webUrl: 'https://contoso.sharepoint.com/sites/site1' },
-            { id: 'site-2', displayName: 'Site 2', webUrl: 'https://contoso.sharepoint.com/sites/site2' },
+            {
+              id: 'site-1',
+              displayName: 'Site 1',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1',
+            },
+            {
+              id: 'site-2',
+              displayName: 'Site 2',
+              webUrl: 'https://contoso.sharepoint.com/sites/site2',
+            },
           ],
         },
       };
@@ -110,7 +106,9 @@ describe('SharepointOnline', () => {
         {}
       )) as SharePointListResponse<SharePointSite>;
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/getAllSites/');
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/'
+      );
       expect(mockContext.log.debug).toHaveBeenCalledWith('SharePoint listing all sites');
       expect(result).toEqual(mockResponse.data);
       expect(result.value).toHaveLength(2);
@@ -144,44 +142,18 @@ describe('SharepointOnline', () => {
         undefined
       )) as SharePointListResponse<SharePointSite>;
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/getAllSites/');
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/'
+      );
       expect(result).toEqual(mockResponse.data);
     });
 
     it('should propagate API errors', async () => {
-      const error: HttpError = new Error('Forbidden');
-      error.response = {
-        status: 403,
-        data: {
-          error: {
-            code: 'AccessDenied',
-            message: 'Access denied to this resource',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
+      mockClient.get.mockRejectedValue(new Error('Access denied'));
 
       await expect(
         SharepointOnline.actions.listAllSites.handler(mockContext, {})
-      ).rejects.toThrow('Forbidden');
-    });
-
-    it('should handle unauthorized errors', async () => {
-      const error: HttpError = new Error('Unauthorized');
-      error.response = {
-        status: 401,
-        data: {
-          error: {
-            code: 'InvalidAuthenticationToken',
-            message: 'Access token is invalid',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        SharepointOnline.actions.listAllSites.handler(mockContext, {})
-      ).rejects.toThrow('Unauthorized');
+      ).rejects.toThrow('Access denied');
     });
   });
 
@@ -190,8 +162,16 @@ describe('SharepointOnline', () => {
       const mockResponse = {
         data: {
           value: [
-            { id: 'page-1', name: 'Home.aspx', webUrl: 'https://contoso.sharepoint.com/sites/site1/SitePages/Home.aspx' },
-            { id: 'page-2', name: 'About.aspx', webUrl: 'https://contoso.sharepoint.com/sites/site1/SitePages/About.aspx' },
+            {
+              id: 'page-1',
+              name: 'Home.aspx',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/SitePages/Home.aspx',
+            },
+            {
+              id: 'page-2',
+              name: 'About.aspx',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/SitePages/About.aspx',
+            },
           ],
         },
       };
@@ -201,8 +181,12 @@ describe('SharepointOnline', () => {
         siteId: 'site-123',
       })) as SharePointListResponse<SharePointPage>;
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/site-123/pages/');
-      expect(mockContext.log.debug).toHaveBeenCalledWith('Sharepoint listing all pages from siteId site-123');
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/pages/'
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint listing all pages from siteId site-123'
+      );
       expect(result).toEqual(mockResponse.data);
       expect(result.value).toHaveLength(2);
     });
@@ -239,44 +223,14 @@ describe('SharepointOnline', () => {
       expect(result.value).toEqual([]);
     });
 
-    it('should handle site not found error', async () => {
-      const error: HttpError = new Error('Not Found');
-      error.response = {
-        status: 404,
-        data: {
-          error: {
-            code: 'itemNotFound',
-            message: 'The resource could not be found',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
+    it('should propagate site not found errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Site not found'));
 
       await expect(
         SharepointOnline.actions.listSitePages.handler(mockContext, {
           siteId: 'nonexistent-site',
         })
-      ).rejects.toThrow('Not Found');
-    });
-
-    it('should handle forbidden access to site', async () => {
-      const error: HttpError = new Error('Forbidden');
-      error.response = {
-        status: 403,
-        data: {
-          error: {
-            code: 'AccessDenied',
-            message: 'User does not have access to this site',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        SharepointOnline.actions.listSitePages.handler(mockContext, {
-          siteId: 'restricted-site',
-        })
-      ).rejects.toThrow('Forbidden');
+      ).rejects.toThrow('Site not found');
     });
   });
 
@@ -295,9 +249,11 @@ describe('SharepointOnline', () => {
         siteId: 'site-123',
       })) as SharePointSite;
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/site-123');
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123'
+      );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
-        'Getting site info via https://graph.microsoft.com/v1.0/sites/site-123'
+        'SharePoint getting site info via https://graph.microsoft.com/v1.0/sites/site-123'
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.id).toBe('site-123');
@@ -322,7 +278,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/hr:'
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
-        'Getting site info via https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/hr:'
+        'SharePoint getting site info via https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/hr:'
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.displayName).toBe('HR Site');
@@ -347,64 +303,24 @@ describe('SharepointOnline', () => {
       expect(result.id).toBe('root');
     });
 
-    it('should handle site not found by siteId', async () => {
-      const error: HttpError = new Error('Not Found');
-      error.response = {
-        status: 404,
-        data: {
-          error: {
-            code: 'itemNotFound',
-            message: 'Site not found',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
+    it('should propagate site not found errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Site not found'));
 
       await expect(
         SharepointOnline.actions.getSite.handler(mockContext, {
           siteId: 'nonexistent-site-id',
         })
-      ).rejects.toThrow('Not Found');
+      ).rejects.toThrow('Site not found');
     });
 
-    it('should handle invalid relativeUrl', async () => {
-      const error: HttpError = new Error('Bad Request');
-      error.response = {
-        status: 400,
-        data: {
-          error: {
-            code: 'invalidRequest',
-            message: 'The provided path is not valid',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
+    it('should propagate invalid URL errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Invalid request'));
 
       await expect(
         SharepointOnline.actions.getSite.handler(mockContext, {
           relativeUrl: 'invalid-path',
         })
-      ).rejects.toThrow('Bad Request');
-    });
-
-    it('should handle access denied to site', async () => {
-      const error: HttpError = new Error('Forbidden');
-      error.response = {
-        status: 403,
-        data: {
-          error: {
-            code: 'AccessDenied',
-            message: 'User does not have permission to access this site',
-          },
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        SharepointOnline.actions.getSite.handler(mockContext, {
-          siteId: 'private-site',
-        })
-      ).rejects.toThrow('Forbidden');
+      ).rejects.toThrow('Invalid request');
     });
   });
 
@@ -571,76 +487,18 @@ describe('SharepointOnline', () => {
       expect(result.value[0].hitsContainers[0].total).toBe(0);
     });
 
-    it('should handle search API errors', async () => {
-      const error: HttpError = new Error('Bad Request');
-      error.response = {
-        status: 400,
-        data: {
-          error: {
-            code: 'BadRequest',
-            message: 'Invalid search query syntax',
-          },
-        },
-      };
-      mockClient.post.mockRejectedValue(error);
-
-      await expect(
-        SharepointOnline.actions.search.handler(mockContext, {
-          query: 'invalid:query:syntax',
-        })
-      ).rejects.toThrow('Bad Request');
-    });
-
-    it('should handle rate limiting errors', async () => {
-      const error: HttpError = new Error('Too Many Requests');
-      error.response = {
-        status: 429,
-        data: {
-          error: {
-            code: 'TooManyRequests',
-            message: 'Rate limit exceeded. Please retry after some time.',
-          },
-        },
-      };
-      mockClient.post.mockRejectedValue(error);
+    it('should propagate search API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Invalid search query'));
 
       await expect(
         SharepointOnline.actions.search.handler(mockContext, {
           query: 'test',
         })
-      ).rejects.toThrow('Too Many Requests');
-    });
-
-    it('should handle unauthorized search requests', async () => {
-      const error: HttpError = new Error('Unauthorized');
-      error.response = {
-        status: 401,
-        data: {
-          error: {
-            code: 'InvalidAuthenticationToken',
-            message: 'Access token has expired or is not yet valid',
-          },
-        },
-      };
-      mockClient.post.mockRejectedValue(error);
-
-      await expect(
-        SharepointOnline.actions.search.handler(mockContext, {
-          query: 'documents',
-        })
-      ).rejects.toThrow('Unauthorized');
+      ).rejects.toThrow('Invalid search query');
     });
   });
 
   describe('test handler', () => {
-    /**
-     * Test result structure
-     */
-    interface TestResult {
-      ok: boolean;
-      message?: string;
-    }
-
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -702,18 +560,6 @@ describe('SharepointOnline', () => {
 
       expect(result.ok).toBe(false);
       expect(result.message).toBe('Network timeout');
-    });
-
-    it('should handle authentication errors', async () => {
-      mockClient.get.mockRejectedValue(new Error('401 Unauthorized'));
-
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('401 Unauthorized');
     });
   });
 });
