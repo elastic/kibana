@@ -42,7 +42,6 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
     ),
   };
 });
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
@@ -368,19 +367,32 @@ describe('<IndexManagementHome />', () => {
   describe('Index stats', () => {
     const indexName = 'test';
 
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-
+    const setupAndWaitForDocCount = async (overridingDependencies: any = {}) => {
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup(httpSetup, overridingDependencies);
       });
+      testBed.component.update();
 
-      const { component } = testBed;
+      // Doc count is fetched async with a 100ms RxJS bufferTime.
+      await act(async () => {
+        jest.advanceTimersByTime(150);
+        await Promise.resolve();
+      });
+      testBed.component.update();
+    };
 
-      component.update();
+    beforeEach(() => {
+      jest.useFakeTimers();
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setLoadIndexDocCountResponse({ [indexName]: 10000 });
     });
 
-    test('renders the table column with all index stats when enableIndexStats is true', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('renders the table column with all index stats when enableIndexStats is true', async () => {
+      await setupAndWaitForDocCount();
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('indexTable');
 
@@ -391,20 +403,14 @@ describe('<IndexManagementHome />', () => {
 
     describe('renders only size and docs count when enableIndexStats is false, enableSizeAndDocCount is true', () => {
       beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup(httpSetup, {
-            config: {
-              enableLegacyTemplates: true,
-              enableIndexActions: true,
-              enableIndexStats: false,
-              enableSizeAndDocCount: true,
-            },
-          });
+        await setupAndWaitForDocCount({
+          config: {
+            enableLegacyTemplates: true,
+            enableIndexActions: true,
+            enableIndexStats: false,
+            enableSizeAndDocCount: true,
+          },
         });
-
-        const { component } = testBed;
-
-        component.update();
       });
 
       test('hides some index stats information from table', async () => {
@@ -428,9 +434,7 @@ describe('<IndexManagementHome />', () => {
           });
         });
 
-        const { component } = testBed;
-
-        component.update();
+        testBed.component.update();
       });
 
       test('hides all index stats information from table', async () => {

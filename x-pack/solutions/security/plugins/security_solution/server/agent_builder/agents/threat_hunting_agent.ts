@@ -25,6 +25,8 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.getDocumentById,
   platformCoreTools.cases,
   platformCoreTools.productDocumentation,
+  platformCoreTools.generateEsql,
+  platformCoreTools.executeEsql,
 ];
 
 const SECURITY_TOOL_IDS = [

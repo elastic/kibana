@@ -37,21 +37,21 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
   {
     type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.alert.label', {
-      defaultMessage: 'Observability Alert',
+      defaultMessage: 'Observability alert',
     }),
     icon: 'warning',
   },
   {
     type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.error.label', {
-      defaultMessage: 'APM Error',
+      defaultMessage: 'APM error',
     }),
     icon: 'bug',
   },
   {
     type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.log.label', {
-      defaultMessage: 'Log Entry',
+      defaultMessage: 'Log entry',
     }),
     icon: 'logPatternAnalysis',
   },

@@ -213,6 +213,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+
+      // assert the grouped items are rendered correctly
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+      await expandedFlyoutGraph.assertGroupedItemActorAndTargetValues(
+        2,
+        'admin@example.com',
+        'projects/your-project-id/roles/customRole'
+      );
     });
 
     it('show related alerts', async () => {

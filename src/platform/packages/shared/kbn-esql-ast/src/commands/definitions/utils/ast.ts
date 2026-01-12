@@ -176,11 +176,17 @@ export function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
  *
  * A known limitation of this is that is not aware of commas "," or pipes "|"
  * so it is not yet helpful on a multiple commands errors (a workaround is to pass each command here...)
+ *
+ * It does not autocomplete missing brackets within quotes or triple quotes.
  * @param text
  * @returns
  */
 export function getBracketsToClose(text: string) {
   const stack: string[] = [];
+
+  // Order is important here, do not change it lightly,
+  // we want to consume first `"""` before `"` , as `"`'s can be found inside `"""` strings,
+  // and not the other way around.
   const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
   const pairsReversed: Record<string, string> = {
     '"""': '"""',
@@ -191,7 +197,8 @@ export function getBracketsToClose(text: string) {
   };
 
   for (let i = 0; i < text.length; i++) {
-    const isInsideString = stack.some((item) => item === '"' || item === '"""');
+    const isInsideString = stack.some((item) => item === '"');
+    const isInsideTripleQuotes = stack.some((item) => item === '"""');
 
     for (const openBracket in pairs) {
       if (!Object.hasOwn(pairs, openBracket)) {
@@ -200,16 +207,37 @@ export function getBracketsToClose(text: string) {
 
       const substr = text.slice(i, i + openBracket.length);
 
-      // Skip comment markers (/* and */) when inside a string
-      if (isInsideString && (openBracket === '/*' || substr === '*/')) {
+      // If inside string, only check for closing the string
+      if (isInsideString) {
+        if (substr === '"') {
+          stack.pop();
+          break;
+        }
+        continue;
+      }
+
+      // If inside triple quotes, only check for closing the triple quotes
+      if (isInsideTripleQuotes) {
+        if (substr === '"""') {
+          // If we found a tripple quote, but it's followed by more quotes, ignore, as they are part of an enclosed string.
+          // I.E. : KQL("""field: "something"""")
+          if (text[i + substr.length] === '"') {
+            continue;
+          }
+          stack.pop();
+          i += substr.length - 1; // We advance the cursor to consume the full lenght of the bracket
+          break;
+        }
         continue;
       }
 
       if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        i += substr.length - 1; // We advance the cursor to consume the full length of the bracket
         break;
       } else if (substr === openBracket) {
         stack.push(substr);
+        i += substr.length - 1; // We advance the cursor to consume the full length of the bracket
         break;
       }
     }

@@ -94,8 +94,11 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const { onGenerateDescription: generateDescription, onSaveDescription: saveDescription } =
-    useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures });
+  const {
+    onGenerateDescription: generateDescription,
+    onSaveDescription: saveDescription,
+    abort: abortDescription,
+  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
 
   const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
 
@@ -116,7 +119,8 @@ export function AddSignificantEventFlyout({
   const stopGeneration = useCallback(() => {
     setIsGenerating(false);
     abort();
-  }, [abort]);
+    abortDescription();
+  }, [abort, abortDescription]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);

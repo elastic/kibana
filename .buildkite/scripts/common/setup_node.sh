@@ -64,16 +64,3 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
-
-echo "--- Setup Yarn"
-
-YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
-export YARN_VERSION
-
-if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  npm_install_global yarn "^$YARN_VERSION"
-fi
-
-YARN_GLOBAL_BIN=$(yarn global bin)
-export YARN_GLOBAL_BIN
-export PATH="$PATH:$YARN_GLOBAL_BIN"

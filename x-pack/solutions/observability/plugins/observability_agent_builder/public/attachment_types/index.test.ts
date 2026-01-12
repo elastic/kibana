@@ -53,7 +53,7 @@ describe('registerAttachmentUiDefinitions', () => {
 
     const config = alertCall![1];
     expect(config.getIcon()).toBe('warning');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Observability Alert');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Observability alert');
   });
 
   it('registers error attachment type with correct config', () => {
@@ -66,7 +66,7 @@ describe('registerAttachmentUiDefinitions', () => {
 
     const config = errorCall![1];
     expect(config.getIcon()).toBe('bug');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('APM Error');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('APM error');
   });
 
   it('registers log attachment type with correct config', () => {
@@ -79,7 +79,7 @@ describe('registerAttachmentUiDefinitions', () => {
 
     const config = logCall![1];
     expect(config.getIcon()).toBe('logPatternAnalysis');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log Entry');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log entry');
   });
 
   it('returns attachmentLabel when provided in attachment data', () => {
@@ -111,7 +111,7 @@ describe('registerAttachmentUiDefinitions', () => {
       type: 'test',
       data: {},
     };
-    expect(config.getLabel(attachment)).toBe('Observability Alert');
+    expect(config.getLabel(attachment)).toBe('Observability alert');
   });
 
   it('returns default label when attachment data is undefined', () => {
@@ -127,6 +127,6 @@ describe('registerAttachmentUiDefinitions', () => {
       type: 'test',
       data: undefined,
     };
-    expect(config.getLabel(attachment)).toBe('Observability Alert');
+    expect(config.getLabel(attachment)).toBe('Observability alert');
   });
 });

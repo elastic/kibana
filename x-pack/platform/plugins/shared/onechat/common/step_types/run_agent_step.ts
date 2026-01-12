@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 /**
  * Step type ID for the onechat run agent step.
  */
-export const RunAgentStepTypeId = 'onechat.runAgent';
+export const RunAgentStepTypeId = 'ai.agent';
 
 /**
  * Input schema for the run agent step.

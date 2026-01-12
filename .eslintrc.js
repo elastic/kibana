@@ -1589,8 +1589,7 @@ module.exports = {
     {
       files: [
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
-        'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
-        'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
+        'x-pack/solutions/**/packages/kbn-scout-*/src/playwright/**/*.ts',
         'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
@@ -2596,6 +2595,12 @@ module.exports = {
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
             ],
+            patterns: [
+              {
+                group: ['@kbn/scout-*', '@playwright/test/**', 'playwright/**'],
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+            ],
           },
         ],
       },
@@ -2628,6 +2633,36 @@ module.exports = {
                 group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/search/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+              {
+                name: 'playwright',
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+            ],
+            patterns: [
+              {
+                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
             ],
           },
@@ -2680,6 +2715,8 @@ module.exports = {
         '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },

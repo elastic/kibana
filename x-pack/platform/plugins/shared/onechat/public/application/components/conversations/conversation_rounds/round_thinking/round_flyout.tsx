@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 const rawResponseFlyoutTitle = i18n.translate(
   'xpack.onechat.conversation.rawResponseFlyout.title',
   {
-    defaultMessage: 'Raw Response',
+    defaultMessage: 'Raw response',
   }
 );
 

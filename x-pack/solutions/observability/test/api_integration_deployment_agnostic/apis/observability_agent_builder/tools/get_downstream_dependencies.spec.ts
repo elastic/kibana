@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import { type ApmSynthtraceEsClient, generateDependenciesData } from '@kbn/synthtrace';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
@@ -20,7 +21,6 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
-import { createSyntheticApmDataWithDependency } from '../utils/synthtrace_scenarios';
 
 const SERVICE_NAME = 'service-a';
 const ENVIRONMENT = 'production';
@@ -35,6 +35,7 @@ const USER_PROMPT = `What are the downstream dependencies for the service ${SERV
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   let llmProxy: LlmProxy;
   let connectorId: string;
@@ -55,12 +56,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmDataWithDependency({
-          getService,
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+
+        const { client, generator } = generateDependenciesData({
+          range: timerange(START, END),
+          apmEsClient: apmSynthtraceEsClient,
           serviceName: SERVICE_NAME,
           environment: ENVIRONMENT,
-          dependencyResource: DEPENDENCY_RESOURCE,
-        }));
+          agentName: 'nodejs',
+          transactionName: 'POST /api/checkout',
+          dependencies: [
+            {
+              spanName: 'GET /dep',
+              spanType: 'db',
+              spanSubtype: 'elasticsearch',
+              destination: DEPENDENCY_RESOURCE,
+              duration: 100,
+            },
+          ],
+        });
+
+        await client.index(generator);
 
         setupToolCallThenAnswer({
           llmProxy,

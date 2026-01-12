@@ -20,17 +20,18 @@ const connectorIcons: Array<{ match: string[]; icon: IconType }> = [
   { match: ['elastic'], icon: 'logoElastic' },
 ];
 
-export const ConnectorIcon: React.FC<{ connectorName: string }> = ({ connectorName }) => {
-  const normalizedName = connectorName.toLowerCase();
+const fallbackIconType = 'compute';
 
-  const matchedIcon = connectorIcons.find((config) =>
-    config.match.some((matchString) => normalizedName.includes(matchString))
-  );
-
-  if (matchedIcon) {
-    return <EuiIcon type={matchedIcon.icon} />;
+export const ConnectorIcon: React.FC<{ connectorName?: string }> = ({ connectorName }) => {
+  let iconType: IconType = fallbackIconType;
+  if (connectorName) {
+    const normalizedName = connectorName.toLowerCase();
+    const matchedIcon = connectorIcons.find((config) =>
+      config.match.some((matchString) => normalizedName.includes(matchString))
+    );
+    if (matchedIcon) {
+      iconType = matchedIcon.icon;
+    }
   }
-
-  // Fallback to compute icon
-  return <EuiIcon type="compute" />;
+  return <EuiIcon type={iconType} />;
 };

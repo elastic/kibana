@@ -82,6 +82,31 @@ export interface OnechatTelemetry {
       agent_id: string;
     } & LatencyStats
   >;
+  /**
+   * Token consumption grouped by model
+   */
+  tokens_by_model: Array<{
+    model: string;
+    total_tokens: number;
+    avg_tokens_per_round: number;
+    sample_count: number;
+  }>;
+  /**
+   * Query-to-result timing (proxied by TTLT) grouped by model
+   */
+  query_to_result_time_by_model: Array<
+    {
+      model: string;
+      sample_count: number;
+    } & TimingPercentiles
+  >;
+  /**
+   * Tool calls grouped by model (derived from conversation round steps)
+   */
+  tool_calls_by_model: Array<{
+    model: string;
+    count: number;
+  }>;
   tool_calls: {
     total: number;
     by_source: {
@@ -419,6 +444,71 @@ export function registerTelemetryCollector(
             },
           },
         },
+        tokens_by_model: {
+          type: 'array',
+          items: {
+            model: {
+              type: 'keyword',
+              _meta: {
+                description: 'Model identifier for token usage grouping',
+              },
+            },
+            total_tokens: {
+              type: 'long',
+              _meta: {
+                description: 'Total tokens (input + output) consumed by this model',
+              },
+            },
+            avg_tokens_per_round: {
+              type: 'float',
+              _meta: {
+                description: 'Average tokens per conversation round for this model',
+              },
+            },
+            sample_count: {
+              type: 'long',
+              _meta: {
+                description: 'Number of rounds sampled for this model',
+              },
+            },
+          },
+        },
+        query_to_result_time_by_model: {
+          type: 'array',
+          items: {
+            model: {
+              type: 'keyword',
+              _meta: {
+                description: 'Model identifier for QTRT grouping',
+              },
+            },
+            p50: { type: 'long' },
+            p75: { type: 'long' },
+            p90: { type: 'long' },
+            p95: { type: 'long' },
+            p99: { type: 'long' },
+            mean: { type: 'long' },
+            total_samples: { type: 'long' },
+            sample_count: { type: 'long' },
+          },
+        },
+        tool_calls_by_model: {
+          type: 'array',
+          items: {
+            model: {
+              type: 'keyword',
+              _meta: {
+                description: 'Model identifier for tool-call grouping',
+              },
+            },
+            count: {
+              type: 'long',
+              _meta: {
+                description: 'Tool calls counted for this model',
+              },
+            },
+          },
+        },
         tool_calls: {
           total: {
             type: 'long',
@@ -558,6 +648,9 @@ export function registerTelemetryCollector(
           const timeToLastToken = await queryUtils.getTTLTMetrics();
           const latencyByModel = await queryUtils.getLatencyByModel();
           const latencyByAgentType = await queryUtils.getLatencyByAgentType();
+          const tokensByModel = await queryUtils.getTokensByModel();
+          const queryToResultTimeByModel = await queryUtils.getQueryToResultTimeByModel();
+          const toolCallsByModel = await queryUtils.getToolCallsByModel();
 
           const toolCallCounters = await queryUtils.getCountersByPrefix(
             ONECHAT_USAGE_DOMAIN,
@@ -640,6 +733,9 @@ export function registerTelemetryCollector(
             time_to_last_token: timeToLastToken,
             latency_by_model: latencyByModel,
             latency_by_agent_type: latencyByAgentType,
+            tokens_by_model: tokensByModel,
+            query_to_result_time_by_model: queryToResultTimeByModel,
+            tool_calls_by_model: toolCallsByModel,
             tool_calls: {
               total: totalToolCalls,
               by_source: toolCallsBySource,
@@ -699,6 +795,9 @@ export function registerTelemetryCollector(
             },
             latency_by_model: [],
             latency_by_agent_type: [],
+            tokens_by_model: [],
+            query_to_result_time_by_model: [],
+            tool_calls_by_model: [],
             tool_calls: {
               total: 0,
               by_source: {
