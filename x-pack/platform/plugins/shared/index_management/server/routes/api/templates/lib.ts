@@ -42,15 +42,8 @@ export const saveTemplate = async ({
     : serializeTemplate(template, dataStreamOptions);
 
   if (isLegacy) {
-    const {
-      order,
-
-      index_patterns,
-      version,
-      settings,
-      mappings,
-      aliases,
-    } = serializedTemplate as LegacyTemplateSerialized;
+    const { order, index_patterns, version, settings, mappings, aliases } =
+      serializedTemplate as LegacyTemplateSerialized;
 
     return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
