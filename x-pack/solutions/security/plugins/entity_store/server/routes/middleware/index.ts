@@ -21,7 +21,7 @@ type ReqHandler<P, Q, B> = (
   res: KibanaResponseFactory
 ) => Promise<IKibanaResponse>;
 
-const REGISTERED_MIDDLEWARES: Middleware[] = [featureFlagEnabledMiddleware];
+const REGISTERED_MIDDLEWARES: Readonly<Middleware>[] = [featureFlagEnabledMiddleware];
 
 export function wrapMiddlewares<P, Q, B>(
   handler: ReqHandler<P, Q, B>,
