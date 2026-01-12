@@ -7,6 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentActive, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 
 /**
  * Presentation mode for attachments in the LLM context.
@@ -85,10 +86,10 @@ const formatInlineAttachments = (
   attachments: VersionedAttachment[],
   maxContentLength: number
 ): string => {
-  const attachmentElements = attachments.map((attachment) => {
+  const attachmentElements: XmlNode[] = attachments.flatMap((attachment) => {
     const latest = getLatestVersion(attachment);
     if (!latest) {
-      return '';
+      return [];
     }
 
     let contentStr = formatAttachmentContent(attachment, latest.data);
@@ -100,44 +101,72 @@ const formatInlineAttachments = (
         '\n... [content truncated, use attachment_read for full content]';
     }
 
-    const descAttr = attachment.description
-      ? ` description="${escapeXml(attachment.description)}"`
-      : '';
+    const contentLines = contentStr.split('\n');
 
-    return `  <attachment id="${attachment.id}" type="${attachment.type}" version="${latest.version}"${descAttr}>
-${contentStr}
-  </attachment>`;
+    return [
+      {
+        tagName: 'attachment',
+        attributes: {
+          id: attachment.id,
+          type: attachment.type,
+          version: latest.version,
+          description: attachment.description,
+        },
+        children: contentLines,
+      } satisfies XmlNode,
+    ];
   });
 
-  return `<conversation-attachments count="${attachments.length}" mode="inline">
-${attachmentElements.join('\n')}
-</conversation-attachments>`;
+  return generateXmlTree(
+    {
+      tagName: 'conversation-attachments',
+      attributes: { count: attachments.length, mode: 'inline' },
+      children: attachmentElements,
+    },
+    { escapeContent: false }
+  );
 };
 
 /**
  * Formats attachments for summary mode with metadata only.
  */
 const formatSummaryAttachments = (attachments: VersionedAttachment[]): string => {
-  const attachmentElements = attachments.map((attachment) => {
+  const attachmentElements: XmlNode[] = attachments.flatMap((attachment) => {
     const latest = getLatestVersion(attachment);
     if (!latest) {
-      return '';
+      return [];
     }
 
-    const descAttr = attachment.description
-      ? ` description="${escapeXml(attachment.description)}"`
-      : '';
-    const tokensAttr = latest.estimated_tokens
-      ? ` estimated_tokens="${latest.estimated_tokens}"`
-      : '';
-
-    return `  <attachment id="${attachment.id}" type="${attachment.type}" version="${latest.version}"${tokensAttr}${descAttr} />`;
+    return [
+      {
+        tagName: 'attachment',
+        attributes: {
+          id: attachment.id,
+          type: attachment.type,
+          version: latest.version,
+          estimated_tokens: latest.estimated_tokens,
+          description: attachment.description,
+        },
+      } satisfies XmlNode,
+    ];
   });
 
-  return `<conversation-attachments count="${attachments.length}" mode="summary">
-  <note>Too many attachments to show inline. Use attachment_read(id) to access content.</note>
-${attachmentElements.join('\n')}
-</conversation-attachments>`;
+  return generateXmlTree(
+    {
+      tagName: 'conversation-attachments',
+      attributes: { count: attachments.length, mode: 'summary' },
+      children: [
+        {
+          tagName: 'note',
+          children: [
+            'Too many attachments to show inline. Use attachment_read(id) to access content.',
+          ],
+        },
+        ...attachmentElements,
+      ],
+    },
+    { escapeContent: false }
+  );
 };
 
 /**
@@ -149,18 +178,6 @@ const formatAttachmentContent = (attachment: VersionedAttachment, data: unknown)
     return data;
   }
   return JSON.stringify(data, null, 2);
-};
-
-/**
- * Escapes special XML characters in a string.
- */
-const escapeXml = (str: string): string => {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
 };
 
 /**
