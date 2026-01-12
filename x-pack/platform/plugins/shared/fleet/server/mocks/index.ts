@@ -380,6 +380,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     agentService: createMockAgentService(),
     packagePolicyService: createPackagePolicyServiceMock(),
     agentPolicyService: createMockAgentPolicyService(),
+    agentlessPoliciesService: createMockAgentlessPoliciesService(),
     cloudConnectorService: {
       create: jest.fn().mockReturnValue(Promise.resolve()),
       getList: jest.fn().mockReturnValue(Promise.resolve()),
