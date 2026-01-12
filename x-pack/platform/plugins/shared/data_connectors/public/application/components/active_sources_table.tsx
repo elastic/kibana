@@ -61,6 +61,62 @@ const ActionsCell: React.FC<{
 }> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const items = [
+    onEdit && (
+      <EuiContextMenuItem
+        key="edit"
+        icon="pencil"
+        onClick={() => {
+          setIsPopoverOpen(false);
+          onEdit(source);
+        }}
+        data-test-subj={`editActiveSource-${source.id}`}
+      >
+        {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
+          defaultMessage: 'Edit',
+        })}
+      </EuiContextMenuItem>
+    ),
+    onReconnect && (
+      <EuiContextMenuItem
+        key="reconnect"
+        icon="link"
+        disabled
+        onClick={() => {
+          setIsPopoverOpen(false);
+          onReconnect(source);
+        }}
+      >
+        {i18n.translate('xpack.dataConnectors.activeSources.reconnectAction', {
+          defaultMessage: 'Reconnect',
+        })}
+      </EuiContextMenuItem>
+    ),
+    onDelete && (
+      <EuiContextMenuItem
+        key="delete"
+        icon={<EuiIcon type="trash" color="danger" />}
+        css={({ euiTheme }) => ({
+          color: euiTheme.colors.danger,
+        })}
+        onClick={() => {
+          setIsPopoverOpen(false);
+          onDelete(source);
+        }}
+        data-test-subj={`deleteActiveSource-${source.id}`}
+      >
+        {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
+          defaultMessage: 'Delete',
+        })}
+      </EuiContextMenuItem>
+    ),
+  ].filter((item): item is React.ReactElement => Boolean(item));
+
+  // Don't render actions button if no actions are available
+  if (items.length === 0) {
+    return null;
+  }
+
   const button = (
     <EuiButtonIcon
       iconType="boxesHorizontal"
@@ -72,51 +128,6 @@ const ActionsCell: React.FC<{
       data-test-subj={`actionsButton-${source.id}`}
     />
   );
-
-  const items = [
-    <EuiContextMenuItem
-      key="edit"
-      icon="pencil"
-      onClick={() => {
-        setIsPopoverOpen(false);
-        onEdit?.(source);
-      }}
-      data-test-subj={`editActiveSource-${source.id}`}
-    >
-      {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
-        defaultMessage: 'Edit',
-      })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="reconnect"
-      icon="link"
-      disabled
-      onClick={() => {
-        setIsPopoverOpen(false);
-        onReconnect?.(source);
-      }}
-    >
-      {i18n.translate('xpack.dataConnectors.activeSources.reconnectAction', {
-        defaultMessage: 'Reconnect',
-      })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" color="danger" />}
-      css={({ euiTheme }) => ({
-        color: euiTheme.colors.danger,
-      })}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        onDelete?.(source);
-      }}
-      data-test-subj={`deleteActiveSource-${source.id}`}
-    >
-      {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
-        defaultMessage: 'Delete',
-      })}
-    </EuiContextMenuItem>,
-  ];
 
   return (
     <EuiPopover
