@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DataConnectorsRoutes } from './routes';
@@ -33,11 +32,9 @@ export const renderApp = ({ core, plugins, services, params }: DataConnectorsMou
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
-            <RedirectAppLinks coreStart={core}>
-              <Router history={params.history}>
-                <DataConnectorsRoutes />
-              </Router>
-            </RedirectAppLinks>
+            <Router history={params.history}>
+              <DataConnectorsRoutes />
+            </Router>
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>

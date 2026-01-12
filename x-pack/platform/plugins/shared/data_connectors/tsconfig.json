@@ -29,7 +29,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/react-query",
     "@kbn/kibana-utils-plugin",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
