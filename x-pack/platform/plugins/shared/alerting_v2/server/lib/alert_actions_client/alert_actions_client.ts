@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -57,7 +58,7 @@ export class AlertActionsClient {
       query: `FROM .alerts-events | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | LIMIT 1`,
     });
     if (result.values.length === 0) {
-      throw new Error(`Alert with series id [${alertSeriesId}] not found`);
+      throw Boom.notFound(`Alert with series id [${alertSeriesId}] not found`);
     }
 
     return result;

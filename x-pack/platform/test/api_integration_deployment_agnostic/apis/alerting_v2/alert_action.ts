@@ -209,5 +209,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(400);
     });
+
+    it('should return 404 for unknown alert_series_id', async () => {
+      const response = await supertestWithoutAuth
+        .post(`${ALERT_ACTION_API_PATH}/unknown-alert-series-id/action/ack`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({});
+
+      expect(response.status).to.be(404);
+    });
   });
 }

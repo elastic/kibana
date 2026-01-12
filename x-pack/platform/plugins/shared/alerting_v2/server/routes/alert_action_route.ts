@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
@@ -44,25 +45,30 @@ export class AlertActionRoute {
   ) {}
 
   async handle() {
-    const { alert_series_id, action_type } = this.request.params;
-    const body = this.request.body ?? {};
-    const result = alertActionSchema.safeParse({ action_type, ...body });
+    try {
+      const { alert_series_id, action_type } = this.request.params;
+      const body = this.request.body ?? {};
+      const result = alertActionSchema.safeParse({ action_type, ...body });
+      if (!result.success) {
+        throw Boom.badRequest(result.error.message);
+      }
 
-    if (!result.success) {
-      return this.response.badRequest({
-        body: { message: result.error.message },
+      await this.alertActionsClient.executeAction({
+        alertSeriesId: alert_series_id,
+        action: result.data,
+      });
+
+      return this.response.ok({
+        body: {
+          message: 'not implemented yet',
+        },
+      });
+    } catch (e) {
+      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
+      return this.response.customError({
+        statusCode: boom.output.statusCode,
+        body: boom.output.payload,
       });
     }
-
-    await this.alertActionsClient.executeAction({
-      alertSeriesId: alert_series_id,
-      action: result.data,
-    });
-
-    return this.response.ok({
-      body: {
-        message: 'not implemented yet',
-      },
-    });
   }
 }
