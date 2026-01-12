@@ -21,7 +21,12 @@ export interface SidebarServiceSetup {
 }
 
 export interface SidebarServiceStart extends SidebarStateServiceApi {
+  /** Update params for a sidebar app */
   setParams: SidebarAppStateServiceApi['setParams'];
+  /** Set the availability status of a sidebar app */
+  setAvailable: SidebarRegistryServiceApi['setAvailable'];
+  /** Observable of apps that are currently available */
+  availableApps$: SidebarRegistryServiceApi['availableApps$'];
 }
 
 /**
@@ -57,6 +62,8 @@ export class SidebarService {
       ...this.registry,
       ...this.state,
       setParams: this.appState.setParams.bind(this.appState),
+      setAvailable: this.registry.setAvailable.bind(this.registry),
+      availableApps$: this.registry.availableApps$,
     };
   }
 

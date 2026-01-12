@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { Subject, map, startWith } from 'rxjs';
 import type { ComponentType } from 'react';
 import type { z } from '@kbn/zod/v4';
 
@@ -90,33 +90,62 @@ export interface SidebarApp<TParams = unknown>
    * Unique identifier for the sidebar app
    */
   appId: string;
+  /**
+   * Whether the app is available. Defaults to true.
+   * Unavailable apps will have their buttons hidden from the sidebar.
+   * Use `setAvailable()` to update availability after registration (e.g., after permission checks).
+   */
+  available?: boolean;
 }
 
 export interface SidebarRegistryServiceApi {
+  /** Observable of all registered apps */
   apps$: Observable<SidebarApp[]>;
+  /** Get all registered apps */
   getApps: () => SidebarApp[];
+  /** Register a new sidebar app */
   registerApp<TParams = {}>(app: SidebarApp<TParams>): void;
+  /** Get a specific app by ID */
   getApp(appId: string): SidebarApp;
+  /** Check if an app is registered */
   hasApp: (appId: string) => boolean;
+  /** Set the availability status of an app */
+  setAvailable: (appId: string, available: boolean) => void;
+  /** Get reactive availability status for an app */
+  getAvailable$: (appId: string) => Observable<boolean>;
+  /** Get current availability status for an app */
+  isAvailable: (appId: string) => boolean;
+  /** Observable of apps ids that are currently available */
+  availableApps$: Observable<string[]>;
 }
 
 export class SidebarRegistryService implements SidebarRegistryServiceApi {
   private readonly registeredApps = new Map<string, SidebarApp>();
-  private readonly _apps$ = new BehaviorSubject<SidebarApp[]>([]);
-  public apps$ = this._apps$.asObservable();
+  private readonly _changed$ = new Subject<void>();
 
-  constructor() {}
+  public apps$ = this._changed$.pipe(
+    startWith(undefined),
+    map(() => Array.from(this.registeredApps.values()))
+  );
+
+  public availableApps$: Observable<string[]> = this.apps$.pipe(
+    map((apps) => apps.map((app) => app.appId).filter((appId) => this.isAvailable(appId)))
+  );
 
   registerApp<TParams = {}>(app: SidebarApp<TParams>): void {
     if (this.registeredApps.has(app.appId)) {
       throw new Error(`[Sidebar Registry] App already registered: ${app.appId}`);
     }
-    this.registeredApps.set(app.appId, app as unknown as SidebarApp);
-    this.updateAppsObservable();
+
+    this.registeredApps.set(app.appId, {
+      ...app,
+      available: app.available !== false,
+    } as SidebarApp);
+    this._changed$.next();
   }
 
   getApps(): SidebarApp[] {
-    return this._apps$.getValue();
+    return Array.from(this.registeredApps.values());
   }
 
   getApp(appId: string): SidebarApp {
@@ -131,7 +160,25 @@ export class SidebarRegistryService implements SidebarRegistryServiceApi {
     return this.registeredApps.has(appId);
   }
 
-  private updateAppsObservable(): void {
-    this._apps$.next(Array.from(this.registeredApps.values()));
+  setAvailable(appId: string, available: boolean): void {
+    const app = this.registeredApps.get(appId);
+    if (!app) {
+      throw new Error(`[Sidebar Registry] Cannot set availability. App not registered: ${appId}`);
+    }
+
+    this.registeredApps.set(appId, { ...app, available });
+    this._changed$.next();
+  }
+
+  getAvailable$(appId: string): Observable<boolean> {
+    if (!this.registeredApps.has(appId)) {
+      throw new Error(`[Sidebar Registry] Cannot get availability. App not registered: ${appId}`);
+    }
+    return this.availableApps$.pipe(map((availableAppIds) => availableAppIds.includes(appId)));
+  }
+
+  isAvailable(appId: string): boolean {
+    const app = this.registeredApps.get(appId);
+    return app ? app.available !== false : false;
   }
 }

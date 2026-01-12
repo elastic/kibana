@@ -8,8 +8,8 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, map } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, filter, map, take } from 'rxjs';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 import type { SidebarAppStateService } from './sidebar_app_state_service';
 
@@ -33,6 +33,7 @@ const MIN_WIDTH = 200;
 export class SidebarStateService implements SidebarStateServiceApi {
   private readonly _currentAppId$ = new BehaviorSubject<string | null>(null);
   private readonly _width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
+  private pendingRestoreSubscription?: Subscription;
 
   public readonly currentAppId$ = this._currentAppId$.asObservable();
   public readonly isOpen$ = this._currentAppId$.pipe(map((appId) => appId !== null));
@@ -47,8 +48,13 @@ export class SidebarStateService implements SidebarStateServiceApi {
     const currentAppId = StorageHelper.get<string>('currentAppId') ?? null;
 
     if (currentAppId && this.registry.hasApp(currentAppId)) {
-      // On restore, don't pass params - let the app state service load from storage
-      this.open(currentAppId);
+      if (this.registry.isAvailable(currentAppId)) {
+        // App exists and is available - restore immediately
+        this.open(currentAppId);
+      } else {
+        // App exists but not available yet - wait for it to become available
+        this.waitForAvailabilityAndRestore(currentAppId);
+      }
     }
 
     const width = StorageHelper.get<number>('width');
@@ -57,10 +63,40 @@ export class SidebarStateService implements SidebarStateServiceApi {
     }
   }
 
+  /**
+   * Subscribe to availability changes and restore the app when it becomes available.
+   * Only restores once, then cleans up the subscription.
+   */
+  private waitForAvailabilityAndRestore(appId: string): void {
+    // Clean up any existing pending restore
+    this.pendingRestoreSubscription?.unsubscribe();
+
+    this.pendingRestoreSubscription = this.registry
+      .getAvailable$(appId)
+      .pipe(
+        filter((available) => available), // Wait until available
+        take(1) // Only restore once
+      )
+      .subscribe(() => {
+        // Only restore if no other app has been opened in the meantime
+        if (this._currentAppId$.getValue() === null) {
+          this.open(appId);
+        }
+      });
+  }
+
   open<TParams = {}>(appId: string, params?: Partial<TParams>): void {
     if (!this.registry.hasApp(appId)) {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
+
+    if (!this.registry.isAvailable(appId)) {
+      throw new Error(`[Sidebar State] Cannot open sidebar. App not available: ${appId}`);
+    }
+
+    // Cancel any pending restore since user is explicitly opening an app
+    this.pendingRestoreSubscription?.unsubscribe();
+    this.pendingRestoreSubscription = undefined;
 
     // Initialize params if provided (merges with defaults from schema)
     if (params) {

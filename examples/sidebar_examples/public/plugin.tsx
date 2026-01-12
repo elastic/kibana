@@ -37,10 +37,12 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
+    // Register tab selection app as initially unavailable (simulating permission check)
     core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
       iconType: 'documents',
       title: 'Tab Selection Example',
+      available: false, // Initially unavailable
       getParamsSchema: getTabSelectionParamsSchema,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
@@ -65,6 +67,13 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   }
 
   public start(core: CoreStart) {
+    // Simulate async permission check - make tab selection app available after 2 seconds
+    setTimeout(() => {
+      core.chrome.sidebar.setAvailable(tabSelectionAppId, true);
+      // eslint-disable-next-line no-console
+      console.log('[Sidebar Example] Tab Selection app is now available after permission check');
+    }, 2000);
+
     return {};
   }
 
