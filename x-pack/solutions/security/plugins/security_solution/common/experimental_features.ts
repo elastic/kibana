@@ -135,7 +135,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI assisted rule creation feature
    */
-  aiAssistedRuleCreationEnabled: true,
+  aiAssistedRuleCreationEnabled: false,
 
   /**
    * Disables the siem migrations feature
