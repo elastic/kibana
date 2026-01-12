@@ -66,7 +66,11 @@ export class ResourceManager {
       // Fire-and-forget: initialization errors must NOT become unhandled rejections
       // (which would crash Kibana). The error is still stored on the resource state,
       // and consumers will fail fast when calling `waitUntilReady()` / `ensureResourceReady()`.
-      void this.startResource(key).catch(() => {});
+      void this.startResource(key).catch(() => {
+        this.logger.debug({
+          message: `ResourceManager: Initialization for resource [${key}] failed`,
+        });
+      });
     }
   }
 
@@ -92,39 +96,12 @@ export class ResourceManager {
    * If the resource permanently fails (even after retries), this rejects quickly for all callers.
    */
   public async ensureResourceReady(key: string): Promise<void> {
-    const state = this.resources.get(key);
-    if (!state?.initializer) {
-      throw new Error(`ResourceManager: resource [${key}] is not registered`);
-    }
-
-    if (state.status === 'failed') {
-      const err =
-        state.error ?? new Error(`ResourceManager: resource [${key}] failed to initialize`);
-      throw err;
-    }
-
-    if (state.status === 'ready') {
-      return;
-    }
-
     await this.startResource(key);
-  }
-
-  /**
-   * Ensure a resource is registered and ready (on-demand creation).
-   */
-  public async ensureResourceRegisteredAndReady(
-    key: string,
-    initializer: ResourceInitializer
-  ): Promise<void> {
-    if (!this.resources.has(key)) {
-      this.registerResource(key, initializer);
-    }
-    await this.ensureResourceReady(key);
   }
 
   private async startResource(key: string): Promise<void> {
     const state = this.resources.get(key);
+
     if (!state?.initializer) {
       throw new Error(`ResourceManager: resource [${key}] is not registered`);
     }
@@ -146,20 +123,13 @@ export class ResourceManager {
 
     state.status = 'pending';
 
-    state.promise = (async () => {
-      try {
-        this.logger.debug({
-          message: `ResourceManager: initializing resource [${key}]`,
-        });
-
-        await this.retryService.retry(() => state.initializer!.initialize());
+    state.promise = this.retryService
+      .retry(() => state.initializer!.initialize())
+      .then(() => {
         state.status = 'ready';
-
-        this.logger.debug({
-          message: `ResourceManager: resource [${key}] is ready`,
-        });
-      } catch (e) {
-        const err = e instanceof Error ? e : new Error(String(e));
+        this.logger.debug({ message: `ResourceManager: resource [${key}] is ready` });
+      })
+      .catch((err) => {
         state.status = 'failed';
         state.error = err;
 
@@ -169,9 +139,8 @@ export class ResourceManager {
           type: 'AlertingResourcesServiceError',
         });
 
-        throw err;
-      }
-    })();
+        throw state.error;
+      });
 
     await state.promise;
   }
