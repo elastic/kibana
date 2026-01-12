@@ -113,7 +113,7 @@ import {
 } from './stack_connectors_schema';
 
 /**
- * Connector input schemas
+ * Connector input schemas (from connector specs v2)
  */
 export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSchema>>(
   Object.values(connectorsSpecs).map((connectorSpec) => [
@@ -125,6 +125,24 @@ export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSc
       ])
     ),
   ])
+);
+
+/**
+ * Connector output schemas (from connector specs v2)
+ */
+export const ConnectorSpecsOutputSchemas = new Map<string, Record<string, z.ZodSchema>>(
+  Object.values(connectorsSpecs)
+    .filter((connectorSpec) =>
+      Object.values(connectorSpec.actions).some((action) => action.output !== undefined)
+    )
+    .map((connectorSpec) => [
+      connectorSpec.metadata.id,
+      Object.fromEntries(
+        Object.entries(connectorSpec.actions)
+          .filter(([_, action]) => action.output !== undefined)
+          .map(([actionName, action]) => [actionName, action.output as z.ZodSchema])
+      ),
+    ])
 );
 
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([

@@ -23,6 +23,15 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
+/**
+ * Common output schema for Microsoft Graph API responses that return a collection.
+ * Uses z.any() for the array items to avoid over-specifying the response structure.
+ */
+const GraphCollectionOutputSchema = z.object({
+  value: z.array(z.any()).describe('Array of items returned from the API'),
+  '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
+});
+
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',
@@ -59,6 +68,7 @@ export const SharepointOnline: ConnectorSpec = {
     getAllSites: {
       isTool: true,
       input: z.object({}).optional(),
+      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         ctx.log.debug('SharePoint listing all sites');
         const response = await ctx.client.get(
@@ -73,6 +83,7 @@ export const SharepointOnline: ConnectorSpec = {
       input: z.object({
         siteId: z.string().describe('Site ID'),
       }),
+      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { siteId: string };
         ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
@@ -110,6 +121,7 @@ export const SharepointOnline: ConnectorSpec = {
       input: z.object({
         siteId: z.string().describe('Site ID'),
       }),
+      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {siteId: string};
 
@@ -126,6 +138,7 @@ export const SharepointOnline: ConnectorSpec = {
       input: z.object({
         siteId: z.string().describe('Site ID'),
       }),
+      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {siteId: string};
 
@@ -143,6 +156,7 @@ export const SharepointOnline: ConnectorSpec = {
         siteId: z.string().describe('Site ID'),
         listId: z.string().describe('List ID'),
       }),
+      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {siteId: string, listId: string};
 
