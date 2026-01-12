@@ -27,14 +27,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 import { useFetchSignificantEvents } from '../../../hooks/use_fetch_significant_events';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 import { SeverityBadge } from './severity_badge';
 import { LoadingPanel } from '../../loading_panel';
 import { SparkPlot } from '../../spark_plot';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export function SignificantEventsTable() {
-  const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
@@ -46,15 +44,13 @@ export function SignificantEventsTable() {
   // TODO: Replace with new endpoint that fetches significant events from all streams
   const streamName = 'logs';
 
-  const { value, loading } = useFetchSignificantEvents({
+  const { data, isLoading: loading } = useFetchSignificantEvents({
     name: streamName,
-    start: timeState.start,
-    end: timeState.end,
     query: '',
   });
 
   const items: SignificantEventItem[] = useMemo(() => {
-    const significantEvents = value?.significant_events ?? [];
+    const significantEvents = data?.significant_events ?? [];
 
     if (!searchQuery.trim()) {
       return significantEvents;
@@ -67,9 +63,9 @@ export function SignificantEventsTable() {
       const featureMatch = item.query.feature?.name?.toLowerCase().includes(lowerQuery);
       return titleMatch || streamMatch || featureMatch;
     });
-  }, [value?.significant_events, searchQuery]);
+  }, [data?.significant_events, searchQuery]);
 
-  if (loading && !value) {
+  if (loading && !data) {
     return <LoadingPanel size="l" />;
   }
 
@@ -253,7 +249,7 @@ export function SignificantEventsTable() {
                     }
                   )}
                   type="bar"
-                  timeseries={value?.aggregated_occurrences ?? []}
+                  timeseries={data?.aggregated_occurrences ?? []}
                   annotations={[]}
                   height={180}
                 />
