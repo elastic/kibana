@@ -13,7 +13,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import type { DashboardControlsState } from '../../../../common';
+import type { DashboardPinnedPanelsState as DashboardControlsState } from '../../../../common';
 import type { StoredControlGroupInput, StoredControlState } from '../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../kibana_services';
 

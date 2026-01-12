@@ -9,13 +9,13 @@
 
 import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
-import type { DashboardPanel, DashboardState } from './types';
+import type { DashboardPanel, DashboardPinnedPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { panels, ...rest } = dashboardState;
+  const { panels, pinned_panels, ...rest } = dashboardState;
 
-  function isMappedPanelType(panel: DashboardPanel) {
+  function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (transforms?.throwOnUnmappedPanel) {
       try {
@@ -36,7 +36,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     return Boolean(transforms?.schema);
   }
 
-  function removeEnhancements(panel: DashboardPanel) {
+  function removeEnhancements(panel: DashboardPanel | DashboardPinnedPanel) {
     const { enhancements, ...restOfConfig } = panel.config as { enhancements?: unknown };
     if (enhancements) {
       warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
@@ -47,7 +47,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     };
   }
 
-  const mappedPanels = (panels ?? [])
+  const mappedPanels = [...(panels ?? []), ...(pinned_panels ?? [])]
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
