@@ -12,7 +12,7 @@ import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-bu
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction } from '../actions';
 import { attachmentTypeInstructions } from './utils/attachments';
-import { customInstructionsBlock } from './utils/custom_instructions';
+import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
 
@@ -29,6 +29,7 @@ interface ResearchAgentPromptParams {
   actions: ResearchAgentAction[];
   attachmentTypes: ProcessedAttachmentType[];
   clearSystemMessage?: boolean;
+  outputSchema?: Record<string, unknown>;
 }
 
 export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseMessageLike[] => {
@@ -46,6 +47,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
 export const getBaseSystemMessage = ({
   customInstructions,
   attachmentTypes,
+  outputSchema,
 }: ResearchAgentPromptParams): string => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -62,6 +64,8 @@ That answering agent will have access to the conversation history and to all inf
 
 ${customInstructions}
 
+${structuredOutputDescription(outputSchema)}
+
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
@@ -76,6 +80,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 export const getResearchSystemMessage = ({
   customInstructions,
   attachmentTypes,
+  outputSchema,
 }: ResearchAgentPromptParams): string => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -163,6 +168,8 @@ Constraints:
       - Keep the note concise and focused on insights that are not obvious from the data.
 
 ${customInstructionsBlock(customInstructions)}
+
+${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
