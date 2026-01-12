@@ -209,6 +209,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   disableActions={false}
                   dataTestSubj="sharedListOverflowCard"
                   actions={menuActionItems}
+                  ariaLabel={i18n.EXCEPTION_LIST_CARD_ACTIONS_ARIA_LABEL(listName)}
                 />
               </EuiFlexItem>
             </ListHeaderContainer>
