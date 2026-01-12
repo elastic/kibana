@@ -372,5 +372,39 @@ describe('datatable cell renderer', () => {
       const linkColor = '#1750BA';
       expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
     });
+
+    it('should not adjust link color when colorMode is none', () => {
+      const backgroundColor = '#FF0000'; // A distinct background color
+      const isDarkMode = false;
+      const columnConfigNonCellColorMode: DatatableArgs = {
+        ...columnConfig,
+        columns: [
+          {
+            ...columnConfig.columns[0],
+            colorMode: 'none',
+          },
+        ],
+      };
+      renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
+      const linkColor = '#1750BA'; // Default EuiLink color for light mode
+      expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
+    });
+
+    it('should not adjust link color when colorMode is text', () => {
+      const backgroundColor = '#FF0000'; // A distinct background color
+      const isDarkMode = false;
+      const columnConfigNonCellColorMode: DatatableArgs = {
+        ...columnConfig,
+        columns: [
+          {
+            ...columnConfig.columns[0],
+            colorMode: 'text',
+          },
+        ],
+      };
+      renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
+      const linkColor = '#1750BA'; // Default EuiLink color for light mode
+      expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
+    });
   });
 });
