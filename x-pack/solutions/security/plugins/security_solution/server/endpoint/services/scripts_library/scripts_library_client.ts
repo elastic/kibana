@@ -86,6 +86,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     instructions,
     requiresInput,
     pathToExecutable,
+    tags,
   }: Omit<CreateScriptRequestBody, 'file'>): ScriptsLibrarySavedObjectAttributes {
     const now = new Date().toISOString();
 
@@ -95,6 +96,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       example,
+      tags,
       id: '',
       file_id: '',
       file_size: 0,
@@ -120,6 +122,8 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       instructions,
       requires_input: requiresInput = false,
       path_to_executable: pathToExecutable = undefined,
+      tags = [],
+      file_id: fileId,
       file_name: fileName,
       file_size: fileSize,
       file_hash_sha256: fileHash,
@@ -135,6 +139,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       id,
       name,
       platform: platform as EndpointScript['platform'],
+      fileId,
       fileName,
       fileSize,
       fileHash,
@@ -144,6 +149,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       instructions,
       example,
       pathToExecutable,
+      tags: tags as EndpointScript['tags'],
       createdBy,
       updatedBy,
       createdAt,
@@ -254,6 +260,23 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         fileStorage.data.hash && fileStorage.data.hash.sha256,
         new ScriptLibraryError('File hash was not generated after upload!')
       );
+
+      // Now that we have a Hash, check to ensure that file has not been uploaded before
+      const existingScriptWithSameFile =
+        await this.soClient.find<ScriptsLibrarySavedObjectAttributes>({
+          type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+          filter: this.getKueryWithPrefixedSoType(
+            `file_hash_sha256:"${fileStorage.data.hash.sha256}" AND NOT id:"${scriptId}"`
+          ),
+          perPage: 1,
+        });
+
+      if (existingScriptWithSameFile.saved_objects.length > 0) {
+        throw new ScriptLibraryError(
+          `The file you are attempting to upload (hash: [${fileStorage.data.hash.sha256}]) already exists and is associated with a script entry named [${existingScriptWithSameFile.saved_objects[0].attributes.name}] (script ID: [${existingScriptWithSameFile.saved_objects[0].id}])`,
+          400
+        );
+      }
     } catch (error) {
       this.logger.error(`Error encountered while attempting to store file: ${error.message}`, {
         error,
