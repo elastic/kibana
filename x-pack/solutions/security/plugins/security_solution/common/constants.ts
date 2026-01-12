@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
@@ -261,10 +261,6 @@ export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConne
 
 /** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
 export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
-export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
-  'securitySolution:enablePrivilegedUserMonitoring' as const;
 
 /**
  * Id for the notifications alerting type

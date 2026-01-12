@@ -35,6 +35,7 @@ export class AddRuleFlyout {
   }
 
   public async fillIsAbove(amount: number) {
+    await this.isAboveExpression.waitFor();
     await this.isAboveExpression.click();
     await this.isAboveInput.fill(amount.toString());
   }

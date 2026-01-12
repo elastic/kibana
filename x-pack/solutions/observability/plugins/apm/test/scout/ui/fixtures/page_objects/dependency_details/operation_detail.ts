@@ -63,8 +63,8 @@ export class OperationDetailSubpage {
       `${this.kbnUrl.app('apm')}/dependencies/operation?${new URLSearchParams({
         dependencyName: this.defaultDependencyName,
         spanName: this.defaultSpanName,
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
         ...overrides,
       })}`
     );
