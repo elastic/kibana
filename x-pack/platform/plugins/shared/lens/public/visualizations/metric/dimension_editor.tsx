@@ -768,7 +768,7 @@ function StaticColorControl({
   setColor: (color: string) => void;
   swatches?: string[];
 }) {
-  const colorLabel = i18n.translate('xpack.lens.metric.selectColor.label', {
+  const colorLabel = i18n.translate('xpack.lens.metric.colorLabel', {
     defaultMessage: 'Color',
   });
 
