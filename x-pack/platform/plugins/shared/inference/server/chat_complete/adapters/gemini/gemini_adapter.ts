@@ -10,10 +10,15 @@ import { defer, map } from 'rxjs';
 import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorStreamResponse } from '../../utils';
+import { handleConnectorDataResponse, handleConnectorStreamResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { processVertexStream } from './process_vertex_stream';
-import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
+import { processVertexStream, processVertexResponse } from './process_vertex_stream';
+import type {
+  GenerateContentResponseChunk,
+  GeminiMessage,
+  GeminiToolConfig,
+  GenerateContentResponse,
+} from './types';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import { mustUseThoughtSignature } from './utils';
 
@@ -28,15 +33,16 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    stream = false,
   }) => {
     const connector = executor.getConnector();
     const useThoughtSignature = mustUseThoughtSignature(
       modelName ?? connector.config?.defaultModel
     );
 
-    return defer(() => {
+    const connectorResult$ = defer(() => {
       return executor.invoke({
-        subAction: 'invokeStream',
+        subAction: stream ? 'invokeStream' : 'invokeAIRaw',
         subActionParams: {
           messages: messagesToGemini({ messages, useThoughtSignature }),
           systemInstruction: system,
@@ -51,13 +57,22 @@ export const geminiAdapter: InferenceConnectorAdapter = {
             : {}),
         },
       });
-    }).pipe(
-      handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
-      map((line) => {
-        return JSON.parse(line) as GenerateContentResponseChunk;
-      }),
-      processVertexStream(modelName)
-    );
+    });
+
+    if (stream) {
+      return connectorResult$.pipe(
+        handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
+        map((line) => JSON.parse(line) as GenerateContentResponseChunk),
+        processVertexStream(modelName)
+      );
+    } else {
+      return connectorResult$.pipe(
+        handleConnectorDataResponse({
+          parseData: (data) => data as GenerateContentResponse,
+        }),
+        processVertexResponse(modelName)
+      );
+    }
   },
 };
 
