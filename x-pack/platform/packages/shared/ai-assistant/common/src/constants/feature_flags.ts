@@ -12,4 +12,4 @@
  * - Chat Experience setting in GenAI Settings
  */
 export const AI_AGENTS_FEATURE_FLAG = 'aiAssistant.aiAgents.enabled';
-export const AI_AGENTS_FEATURE_FLAG_DEFAULT = false;
+export const AI_AGENTS_FEATURE_FLAG_DEFAULT = true;
