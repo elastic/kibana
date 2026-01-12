@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -21,42 +20,26 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
-import { useFetchSignificantEvents } from '../../../hooks/use_fetch_significant_events';
+import React, { useState } from 'react';
+import {
+  useFetchSignificantEvents,
+  type SignificantEventItem,
+} from '../../../hooks/use_fetch_significant_events';
 import { SeverityBadge } from './severity_badge';
 import { LoadingPanel } from '../../loading_panel';
 import { SparkPlot } from '../../spark_plot';
+import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
+  const { unifiedSearch } = useKibana().dependencies.start;
   const [searchQuery, setSearchQuery] = useState('');
+  // TODO: the endpoint should support search queries
+  const significantEventsFetch = useFetchSignificantEvents({ query: searchQuery });
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
 
-  // TODO: Replace with new endpoint that fetches significant events from all streams
-  const streamName = 'logs';
-
-  const { data, isLoading: loading } = useFetchSignificantEvents({
-    name: streamName,
-    query: '',
-  });
-
-  const items: SignificantEventItem[] = useMemo(() => {
-    const significantEvents = data?.significant_events ?? [];
-
-    if (!searchQuery.trim()) {
-      return significantEvents;
-    }
-
-    const lowerQuery = searchQuery.toLowerCase();
-    return significantEvents.filter((item) => {
-      const titleMatch = item.query.title?.toLowerCase().includes(lowerQuery);
-      const streamMatch = streamName.toLowerCase().includes(lowerQuery);
-      const featureMatch = item.query.feature?.name?.toLowerCase().includes(lowerQuery);
-      return titleMatch || streamMatch || featureMatch;
-    });
-  }, [data?.significant_events, searchQuery]);
+  const { data, isLoading: loading } = significantEventsFetch;
 
   if (loading && !data) {
     return <LoadingPanel size="l" />;
@@ -92,7 +75,8 @@ export function QueriesTable() {
       name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.streamColumn', {
         defaultMessage: 'Stream',
       }),
-      render: () => <EuiBadge color="hollow">{streamName}</EuiBadge>,
+      // TODO: the endpoint should return the stream name
+      render: () => <EuiBadge color="hollow">{'--'}</EuiBadge>,
     },
     {
       field: 'query.feature',
@@ -174,19 +158,27 @@ export function QueriesTable() {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <EuiFieldSearch
+            <unifiedSearch.ui.SearchBar
+              appName="streamsApp"
+              showFilterBar={false}
+              showQueryMenu={false}
+              showQueryInput
+              showDatePicker={false}
+              submitButtonStyle="iconOnly"
+              displayStyle="inPage"
+              disableQueryLanguageSwitcher
+              onQuerySubmit={(queryPayload) => {
+                setSearchQuery(String(queryPayload.query?.query ?? ''));
+              }}
+              query={{
+                query: searchQuery,
+                language: 'text',
+              }}
+              isLoading={loading}
               placeholder={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.queriesTable.searchPlaceholder',
                 { defaultMessage: 'Search' }
               )}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              isClearable
-              aria-label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.queriesTable.searchAriaLabel',
-                { defaultMessage: 'Search queries' }
-              )}
-              fullWidth
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -231,7 +223,7 @@ export function QueriesTable() {
         <EuiText size="s">
           {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.eventsCount', {
             defaultMessage: '{count} Queries',
-            values: { count: items.length },
+            values: { count: data?.significant_events.length ?? 0 },
           })}
         </EuiText>
       </EuiFlexItem>
@@ -248,7 +240,7 @@ export function QueriesTable() {
           )}
           columns={columns}
           itemId="query.id"
-          items={items}
+          items={data?.significant_events ?? []}
           loading={loading}
           noItemsMessage={
             !loading
