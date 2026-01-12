@@ -10,9 +10,9 @@
 import type { UISession } from '../types';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { getStatusText, StatusIndicator } from './status';
 import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionStatus } from '../../../../../common';
+import { StatusIndicator } from './status';
 import userEvent from '@testing-library/user-event';
 
 let tz: string;
@@ -46,15 +46,6 @@ describe('Background Search Session management status labels', () => {
       version: '8.0.0',
       idMapping: {},
     };
-  });
-
-  describe('getStatusText', () => {
-    test.each(TEST_CASES)(
-      'when the status is $status it should return $expectedText',
-      ({ status, expectedText }) => {
-        expect(getStatusText(status)).toBe(expectedText);
-      }
-    );
   });
 
   describe('StatusIndicator', () => {
