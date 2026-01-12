@@ -153,7 +153,7 @@ export const SharepointOnline: ConnectorSpec = {
         const siteName = response.data.displayName || 'Unknown';
         return {
           ok: true,
-          message: `Successfully connected to Sharepoint Online: ${siteName}`,
+          message: `Successfully connected to SharePoint Online: ${siteName}`,
         };
       } catch (error) {
         return { ok: false, message: error.message };
