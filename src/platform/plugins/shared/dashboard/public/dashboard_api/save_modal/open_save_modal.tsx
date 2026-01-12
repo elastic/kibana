@@ -62,6 +62,9 @@ export async function openSaveModal({
     if (viewMode === 'edit' && isManaged) {
       return undefined;
     }
+    const shouldAddAccessControl =
+      Boolean(!lastSavedId) && Boolean((await coreServices.userProfile.getCurrent()).uid);
+
     const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
     return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
       (resolve) => {
@@ -116,8 +119,8 @@ export async function openSaveModal({
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
-              // Only pass access mode for new dashboard creation (no lastSavedId)
-              accessMode: !lastSavedId && newAccessMode ? newAccessMode : undefined,
+              // Only pass access mode for new dashboard creation (no lastSavedId) and when user can own a dashboard
+              accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;
@@ -154,7 +157,7 @@ export async function openSaveModal({
             onSave={onSaveAttempt}
             accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode)}
-            isDuplicateAction={Boolean(lastSavedId)}
+            shouldShowAccessContainer={shouldAddAccessControl}
           />
         );
       }
