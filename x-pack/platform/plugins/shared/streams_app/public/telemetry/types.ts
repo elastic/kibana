@@ -130,13 +130,6 @@ interface StreamsFeatureIdentificationDeletedProps {
   stream_type: StreamType;
 }
 
-interface StreamsDescriptionGeneratedProps {
-  stream_name: string;
-  stream_type: StreamType;
-  input_tokens_used: number;
-  output_tokens_used: number;
-}
-
 interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   stream_name: string;
   stream_type: StreamType;
@@ -187,7 +180,6 @@ export {
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
   type StreamsFeatureIdentificationDeletedProps,
-  type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
   type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,

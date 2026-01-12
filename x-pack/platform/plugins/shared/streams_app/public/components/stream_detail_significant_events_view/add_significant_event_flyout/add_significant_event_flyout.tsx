@@ -40,10 +40,8 @@ import { ALL_DATA_OPTION } from '../feature_selector';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
-import { useStreamDescriptionApi } from '../../stream_detail_features/stream_description/use_stream_description_api';
 
 interface Props {
-  refreshDefinition: () => void;
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
@@ -58,7 +56,6 @@ interface Props {
 
 export function AddSignificantEventFlyout({
   generateOnMount,
-  refreshDefinition,
   query,
   onClose,
   definition,
@@ -84,12 +81,6 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const {
-    onGenerateDescription: generateDescription,
-    onSaveDescription: saveDescription,
-    abort: abortDescription,
-  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
-
   const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name });
 
   const isEditMode = !!query?.id;
@@ -109,8 +100,7 @@ export function AddSignificantEventFlyout({
   const stopGeneration = useCallback(() => {
     setIsGenerating(false);
     abort();
-    abortDescription();
-  }, [abort, abortDescription]);
+  }, [abort]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -142,87 +132,80 @@ export function AddSignificantEventFlyout({
 
       const effectiveFeatures = featuresOverride ?? selectedFeatures;
 
-      const maybeGenerateDescription =
-        !definition.stream.description && effectiveFeatures.length === 0
-          ? generateDescription().then((description) => saveDescription(description))
-          : Promise.resolve();
+      const startTime = Date.now();
 
-      maybeGenerateDescription.then(() => {
-        const startTime = Date.now();
+      from(effectiveFeatures.length === 0 ? [ALL_DATA_OPTION.value] : effectiveFeatures)
+        .pipe(
+          concatMap((feature) =>
+            generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
+              concatMap(({ queries: nextQueries, tokensUsed }) => {
+                numberOfGeneratedQueries += nextQueries.length;
 
-        from(effectiveFeatures.length === 0 ? [ALL_DATA_OPTION.value] : effectiveFeatures)
-          .pipe(
-            concatMap((feature) =>
-              generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
-                concatMap(({ queries: nextQueries, tokensUsed }) => {
-                  numberOfGeneratedQueries += nextQueries.length;
+                inputTokensUsed += tokensUsed.prompt;
+                outputTokensUsed += tokensUsed.completion;
 
-                  inputTokensUsed += tokensUsed.prompt;
-                  outputTokensUsed += tokensUsed.completion;
-
-                  setGeneratedQueries((prev) => [
-                    ...prev,
-                    ...nextQueries
-                      .filter((nextQuery) => {
-                        const validation = validateQuery({
-                          title: nextQuery.title,
-                          kql: { query: nextQuery.kql },
-                        });
-
-                        return validation.kql.isInvalid === false;
-                      })
-                      .map((nextQuery) => ({
-                        id: v4(),
-                        kql: { query: nextQuery.kql },
+                setGeneratedQueries((prev) => [
+                  ...prev,
+                  ...nextQueries
+                    .filter((nextQuery) => {
+                      const validation = validateQuery({
                         title: nextQuery.title,
-                        feature: nextQuery.feature,
-                        severity_score: nextQuery.severity_score,
-                        evidence: nextQuery.evidence,
-                      })),
-                  ]);
+                        kql: { query: nextQuery.kql },
+                      });
 
-                  return [];
-                })
-              )
+                      return validation.kql.isInvalid === false;
+                    })
+                    .map((nextQuery) => ({
+                      id: v4(),
+                      kql: { query: nextQuery.kql },
+                      title: nextQuery.title,
+                      feature: nextQuery.feature,
+                      severity_score: nextQuery.severity_score,
+                      evidence: nextQuery.evidence,
+                    })),
+                ]);
+
+                return [];
+              })
             )
           )
-          .subscribe({
-            error: (error) => {
-              setIsGenerating(false);
-              if (error.name === 'AbortError') {
-                return;
-              }
-              notifications.showErrorDialog({
-                title: i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
-                  {
-                    defaultMessage: `Could not generate significant events queries`,
-                  }
-                ),
-                error,
-              });
-            },
-            complete: () => {
-              notifications.toasts.addSuccess({
-                title: i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
-                  { defaultMessage: `Generated significant events queries successfully` }
-                ),
-              });
-              telemetryClient.trackSignificantEventsSuggestionsGenerate({
-                duration_ms: Date.now() - startTime,
-                input_tokens_used: inputTokensUsed,
-                output_tokens_used: outputTokensUsed,
-                count: numberOfGeneratedQueries,
-                features_selected: selectedFeatures?.length ?? 0,
-                features_total: features.length,
-                stream_name: definition.stream.name,
-                stream_type: getStreamTypeFromDefinition(definition.stream),
-              });
-              setIsGenerating(false);
-            },
-          });
-      });
+        )
+        .subscribe({
+          error: (error) => {
+            setIsGenerating(false);
+            if (error.name === 'AbortError') {
+              return;
+            }
+            notifications.showErrorDialog({
+              title: i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
+                {
+                  defaultMessage: `Could not generate significant events queries`,
+                }
+              ),
+              error,
+            });
+          },
+          complete: () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
+                { defaultMessage: `Generated significant events queries successfully` }
+              ),
+            });
+            telemetryClient.trackSignificantEventsSuggestionsGenerate({
+              duration_ms: Date.now() - startTime,
+              input_tokens_used: inputTokensUsed,
+              output_tokens_used: outputTokensUsed,
+              count: numberOfGeneratedQueries,
+              features_selected: selectedFeatures?.length ?? 0,
+              features_total: features.length,
+              stream_name: definition.stream.name,
+              stream_type: getStreamTypeFromDefinition(definition.stream),
+            });
+            setIsGenerating(false);
+          },
+        });
     },
     [
       aiFeatures?.genAiConnectors.selectedConnector,
@@ -232,8 +215,6 @@ export function AddSignificantEventFlyout({
       telemetryClient,
       features.length,
       definition,
-      generateDescription,
-      saveDescription,
     ]
   );
 

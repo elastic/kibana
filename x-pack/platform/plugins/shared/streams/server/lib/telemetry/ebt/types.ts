@@ -30,8 +30,16 @@ interface StreamsSystemIdentificationIdentifiedProps {
   stream_type: StreamType;
 }
 
+interface StreamsDescriptionGeneratedProps {
+  input_tokens_used: number;
+  output_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
   type StreamsSystemIdentificationIdentifiedProps,
+  type StreamsDescriptionGeneratedProps,
 };

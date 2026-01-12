@@ -26,6 +26,7 @@ import { connectorRoutes } from './internal/connectors/route';
 import { docCountsRoutes } from './streams/doc_counts/route';
 import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
+import { internalDescriptionGenerationRoutes } from './internal/streams/description_generation/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -40,6 +41,7 @@ export const streamsRouteRepository = {
   ...internalIngestRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
+  ...internalDescriptionGenerationRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

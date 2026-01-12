@@ -13,15 +13,12 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import type { Observable } from 'rxjs';
-import { catchError, from, map } from 'rxjs';
 import { conflict } from '@hapi/boom';
-import { generateStreamDescription, type IdentifySystemsResult, sumTokens } from '@kbn/streams-ai';
+import { type IdentifySystemsResult } from '@kbn/streams-ai';
+import type { SystemIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/system_identification';
 import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
-import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
-import type { SystemIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/system_identification';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
@@ -29,9 +26,6 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import type { StreamDescriptionEvent } from './types';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -478,116 +472,6 @@ export const systemsTaskRoute = createServerRoute({
   },
 });
 
-export const describeStreamRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_describe_stream',
-  options: {
-    access: 'internal',
-    summary: 'Generate a stream description',
-    description: 'Generate a stream description based on data in the stream',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      from: dateFromString,
-      to: dateFromString,
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<Observable<StreamDescriptionEvent>> => {
-    const {
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-    } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { name },
-      query: { connectorId: connectorIdParam, from: start, to: end },
-    } = params;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(
-        `Cannot generate stream description for ${name}, insufficient privileges`
-      );
-    }
-
-    const connectorId = await resolveConnectorId({
-      connectorId: connectorIdParam,
-      uiSettingsClient,
-      logger,
-    });
-
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const stream = await streamsClient.getStream(name);
-
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
-
-    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
-
-    return from(
-      generateStreamDescription({
-        stream,
-        esClient: scopedClusterClient.asCurrentUser,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
-        start: start.valueOf(),
-        end: end.valueOf(),
-        signal: getRequestAbortSignal(request),
-        logger: logger.get('stream_description'),
-        systemPromptOverride: descriptionPromptOverride,
-      })
-    ).pipe(
-      map((result) => {
-        return {
-          type: 'stream_description' as const,
-          description: result.description,
-          tokensUsed: sumTokens(
-            {
-              prompt: 0,
-              completion: 0,
-              total: 0,
-              cached: 0,
-            },
-            result.tokensUsed
-          ),
-        };
-      }),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
-    );
-  },
-});
-
 export const systemRoutes = {
   ...getSystemRoute,
   ...deleteSystemRoute,
@@ -596,5 +480,4 @@ export const systemRoutes = {
   ...bulkSystemsRoute,
   ...systemsStatusRoute,
   ...systemsTaskRoute,
-  ...describeStreamRoute,
 };

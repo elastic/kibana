@@ -10,6 +10,7 @@ import {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
   streamsSystemIdentificationIdentifiedEventType,
+  streamsDescriptionGeneratedEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
 
@@ -23,6 +24,7 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(streamsEndpointLatencyEventType);
     this.analytics.registerEventType(streamsStateErrorEventType);
     this.analytics.registerEventType(streamsSystemIdentificationIdentifiedEventType);
+    this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
   }
 
   public getClient() {

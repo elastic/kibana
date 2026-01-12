@@ -9,11 +9,13 @@ import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
   STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsSystemIdentificationIdentifiedSchema,
+  streamsDescriptionGeneratedSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -31,8 +33,14 @@ const streamsSystemIdentificationIdentifiedEventType = {
   schema: streamsSystemIdentificationIdentifiedSchema,
 };
 
+const streamsDescriptionGeneratedEventType = {
+  eventType: STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  schema: streamsDescriptionGeneratedSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
   streamsSystemIdentificationIdentifiedEventType,
+  streamsDescriptionGeneratedEventType,
 };

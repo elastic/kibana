@@ -64,7 +64,6 @@ export const EditSignificantEventFlyout = ({
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
-      refreshDefinition={refreshDefinition}
       refreshFeatures={refreshFeatures}
       definition={definition}
       query={queryToEdit}
