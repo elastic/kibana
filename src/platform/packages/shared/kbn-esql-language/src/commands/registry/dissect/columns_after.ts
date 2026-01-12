@@ -9,28 +9,7 @@
 import { walk } from '../../../ast/walker';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData } from '../types';
-
-function unquoteTemplate(inputString: string): string {
-  if (inputString.startsWith('"') && inputString.endsWith('"') && inputString.length >= 2) {
-    return inputString.substring(1, inputString.length - 1);
-  }
-  return inputString;
-}
-
-export function extractDissectColumnNames(pattern: string): string[] {
-  const regex = /%\{(?:[?+]?)?([^}]+?)(?:->)?\}/g;
-  const matches = pattern.matchAll(regex);
-  const columns: string[] = [];
-  for (const match of matches) {
-    if (match && match[1]) {
-      const columnName = match[1];
-      if (!columns.includes(columnName)) {
-        columns.push(columnName);
-      }
-    }
-  }
-  return columns;
-}
+import { unquoteTemplate, extractDissectColumnNames } from './utils';
 
 export const columnsAfter = (
   command: ESQLCommand,
