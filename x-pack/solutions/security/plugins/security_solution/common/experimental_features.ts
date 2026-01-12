@@ -92,11 +92,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityThreatHuntingEnabled: false,
 
   /**
-   * Enabled new index sync update detection logic
-   */
-  privilegedMonitoringNewIndexSyncUpdateDetectionEnabled: true,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
