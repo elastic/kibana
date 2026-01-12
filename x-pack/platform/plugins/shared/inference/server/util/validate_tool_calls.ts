@@ -6,6 +6,7 @@
  */
 
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+
 import { z } from '@kbn/zod';
 import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
@@ -60,7 +61,9 @@ export function validateToolCalls({
     }
 
     try {
-      const zodSchema = jsonSchemaToZod(toolSchema) as z.ZodTypeAny;
+      // ToolSchema is compatible with JsonSchema but TypeScript can't infer
+      // the recursive type compatibility, so we assert it as JsonSchema
+      const zodSchema = jsonSchemaToZod(toolSchema as any) as z.ZodTypeAny;
       zodSchema.parse(serializedArguments);
     } catch (error) {
       const errorMessage =
