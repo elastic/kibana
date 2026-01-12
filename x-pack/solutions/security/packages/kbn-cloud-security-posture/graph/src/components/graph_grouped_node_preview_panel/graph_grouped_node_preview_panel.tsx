@@ -9,8 +9,6 @@ import React, { memo, useMemo, useState, useEffect, useCallback, type FC } from 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
 import { usePagination } from './use_pagination';
@@ -135,7 +133,6 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     const {
       services: { data: dataService },
     } = useKibana();
-
     // Search state management
     const [searchQuery, setSearchQuery] = useState<Query>(EMPTY_QUERY);
     const [searchFilters, setSearchFilters] = useState<Filter[]>([]);
@@ -230,46 +227,38 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
       setSearchFilters(newFilters);
     }, []);
 
+    // Handler for refresh button in empty state - clears search and refreshes data
+    const onRefreshClick = useCallback(() => {
+      setSearchQuery(EMPTY_QUERY);
+      setSearchFilters([]);
+      if (docMode === 'grouped-events') {
+        refresh();
+      }
+    }, [docMode, refresh]);
+
     if (isLoading || isDataViewLoading) {
       return <LoadingBody />;
     }
 
     if (items.length === 0) {
-      return <EmptyBody onRefresh={refresh} />;
+      return <EmptyBody onRefresh={onRefreshClick} />;
     }
-
     return (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <SearchBar<Query>
-            showFilterBar={true}
-            showDatePicker={true}
-            showAutoRefreshOnly={false}
-            showSaveQuery={false}
-            showQueryInput={true}
-            disableQueryLanguageSwitcher={true}
-            isLoading={isLoading}
-            isAutoRefreshDisabled={true}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
-            query={searchQuery}
-            indexPatterns={dataView ? [dataView] : undefined}
-            filters={searchFilters}
-            submitButtonStyle={'iconOnly'}
-            onFiltersUpdated={onFiltersUpdated}
-            onQuerySubmit={onQuerySubmit}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ContentBody
-            items={items}
-            totalHits={totalHits}
-            icon={icon}
-            groupedItemsType={groupedItemsType}
-            pagination={pagination}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ContentBody
+        items={items}
+        totalHits={totalHits}
+        icon={icon}
+        groupedItemsType={groupedItemsType}
+        pagination={pagination}
+        isLoading={isLoading}
+        timeRange={timeRange}
+        searchQuery={searchQuery}
+        dataView={dataView}
+        dataViewId={dataViewId}
+        searchFilters={searchFilters}
+        onFiltersUpdated={onFiltersUpdated}
+        onQuerySubmit={onQuerySubmit}
+      />
     );
   }
 );

@@ -8,6 +8,10 @@
 import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { css } from '@emotion/react';
 import { PanelBody, List } from '../styles';
 import { i18nNamespaceKey } from '../constants';
 import { CONTENT_BODY_TEST_ID } from '../test_ids';
@@ -28,6 +32,15 @@ export interface ContentBodyProps {
   icon: string;
   groupedItemsType: string;
   pagination: Pagination;
+  // Search bar props
+  isLoading: boolean;
+  timeRange: TimeRange;
+  searchQuery: Query;
+  dataView: DataView | null;
+  dataViewId: DataView['id'];
+  searchFilters: Filter[];
+  onFiltersUpdated: (filters: Filter[]) => void;
+  onQuerySubmit: (payload: { query?: Query }, isUpdate?: boolean) => void;
 }
 
 export const ContentBody: FC<ContentBodyProps> = ({
@@ -36,6 +49,14 @@ export const ContentBody: FC<ContentBodyProps> = ({
   icon,
   groupedItemsType,
   pagination,
+  isLoading,
+  timeRange,
+  searchQuery,
+  dataView,
+  dataViewId,
+  searchFilters,
+  onFiltersUpdated,
+  onQuerySubmit,
 }) => {
   // Show pagination only when there are more items than fit on a single page with default size
   const shouldShowPagination = totalHits > DEFAULT_PAGE_SIZE;
@@ -43,6 +64,33 @@ export const ContentBody: FC<ContentBodyProps> = ({
   return (
     <PanelBody data-test-subj={CONTENT_BODY_TEST_ID}>
       <Title icon={icon} text={groupedItemsType} count={totalHits} />
+      <div
+        css={css`
+          .uniSearchBar {
+            padding: 0;
+          }
+        `}
+      >
+        <SearchBar<Query>
+          displayStyle="inPage"
+          showFilterBar={false}
+          showDatePicker={false}
+          showAutoRefreshOnly={false}
+          showSaveQuery={false}
+          showQueryInput={true}
+          disableQueryLanguageSwitcher={true}
+          isLoading={isLoading}
+          isAutoRefreshDisabled={true}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          query={searchQuery}
+          indexPatterns={dataView ? [dataView] : dataViewId}
+          filters={searchFilters}
+          submitButtonStyle={'iconOnly'}
+          onFiltersUpdated={onFiltersUpdated}
+          onQuerySubmit={onQuerySubmit}
+        />
+      </div>
       <ListHeader groupedItemsType={groupedItemsType} />
       <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
       <List>
