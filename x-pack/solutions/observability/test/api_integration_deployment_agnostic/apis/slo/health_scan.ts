@@ -129,16 +129,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.eql('scheduled');
       });
 
-      it.skip('returns existing scan when recent scan exists within 1h', async () => {
+      it('returns existing scan when recent scan exists within 1h', async () => {
         const firstResponse = await sloApi.scheduleHealthScan(adminRoleAuthc, { force: true });
         expect(firstResponse).to.have.property('scanId');
 
-        await retry.tryForTime(30 * 1000, async () => {
-          const secondResponse = await sloApi.scheduleHealthScan(adminRoleAuthc);
-
-          expect(secondResponse).to.have.property('scanId');
-          expect(secondResponse.scanId).to.eql(firstResponse.scanId);
-        });
+        await retry.tryWithRetries(
+          'return existing scan',
+          async () => {
+            const secondResponse = await sloApi.scheduleHealthScan(adminRoleAuthc);
+            expect(secondResponse.scanId).to.eql(firstResponse.scanId);
+          },
+          { timeout: 5000, retryCount: 5 }
+        );
       });
 
       it('forces a new scan when force parameter is true', async () => {
