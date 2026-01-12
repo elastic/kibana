@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
@@ -33,15 +34,6 @@ interface SummaryTabProps {
  * and optionally the attack chain visualization.
  */
 export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized = false }) => {
-  // TODO: Add cell actions support
-  // https://github.com/elastic/kibana/issues/247850
-  const supportsCellActions = false;
-
-  const disabledActions = useMemo(
-    () => !supportsCellActions || showAnonymized,
-    [showAnonymized, supportsCellActions]
-  );
-
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => attack, [attack]);
 
   const summaryMarkdownWithReplacements = useMemo(
@@ -70,7 +62,8 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
 
       <div data-test-subj={SUMMARY_CONTENT_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
-          disableActions={disabledActions}
+          scopeId={TableId.alertsOnAttacksPage}
+          disableActions={showAnonymized}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
         />
       </div>
@@ -84,7 +77,8 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
 
       <div data-test-subj={DETAILS_CONTENT_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
-          disableActions={disabledActions}
+          scopeId={TableId.alertsOnAttacksPage}
+          disableActions={showAnonymized}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
         />
       </div>
