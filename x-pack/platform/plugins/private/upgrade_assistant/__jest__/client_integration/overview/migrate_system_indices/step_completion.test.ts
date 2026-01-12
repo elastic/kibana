@@ -6,36 +6,38 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import type { OverviewTestBed } from '../overview.helpers';
 import { setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment, advanceTime } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { advanceTime } from '../../helpers/time_manipulation';
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/constants';
 
 describe('Overview - Migrate system indices - Step completion', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
   });
+
+  const setupPage = async () => {
+    await setupOverviewPage(httpSetup, {
+      featureSet: {
+        migrateSystemIndices: true,
+      },
+    });
+  };
 
   test(`It's complete when no upgrade is needed`, async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    await act(async () => {
-      testBed = await setupOverviewPage(httpSetup);
-    });
-
-    const { exists, component } = testBed;
-
-    component.update();
-
-    expect(exists(`migrateSystemIndicesStep-complete`)).toBe(true);
+    await setupPage();
+    expect(await screen.findByTestId('migrateSystemIndicesStep-complete')).toBeInTheDocument();
   });
 
   test(`It's incomplete when migration is needed`, async () => {
@@ -43,37 +45,39 @@ describe('Overview - Migrate system indices - Step completion', () => {
       migration_status: 'MIGRATION_NEEDED',
     });
 
-    await act(async () => {
-      testBed = await setupOverviewPage(httpSetup);
-    });
-
-    const { exists, component } = testBed;
-
-    component.update();
-
-    expect(exists(`migrateSystemIndicesStep-incomplete`)).toBe(true);
+    await setupPage();
+    expect(await screen.findByTestId('migrateSystemIndicesStep-incomplete')).toBeInTheDocument();
   });
 
   describe('Poll for new status', () => {
     beforeEach(async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.useFakeTimers();
 
       // First request should make the step be incomplete
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'IN_PROGRESS',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      await setupPage();
+
+      // Wait for the initial status to be loaded and reflected in the UI.
+      await waitFor(() => {
+        expect(screen.getByTestId('startSystemIndicesMigrationButton')).toHaveTextContent(
+          'Migration in progress'
+        );
+      });
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+      jest.clearAllTimers();
       jest.useRealTimers();
     });
 
     test('renders step as complete when a upgraded needed status is followed by a no upgrade needed', async () => {
-      const { exists } = testBed;
-
-      expect(exists('migrateSystemIndicesStep-incomplete')).toBe(true);
+      expect(screen.getByTestId('migrateSystemIndicesStep-incomplete')).toBeInTheDocument();
 
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'NO_MIGRATION_NEEDED',
@@ -81,9 +85,9 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
       // Resolve the polling timeout.
       await advanceTime(SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS);
-      testBed.component.update();
+      expect(await screen.findByTestId('noMigrationNeededSection')).toBeInTheDocument();
 
-      expect(exists('migrateSystemIndicesStep-complete')).toBe(true);
+      expect(await screen.findByTestId('migrateSystemIndicesStep-complete')).toBeInTheDocument();
     });
   });
 });

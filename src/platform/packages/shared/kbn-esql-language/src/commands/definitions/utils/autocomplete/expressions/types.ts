@@ -55,6 +55,7 @@ export interface ExpressionContextOptions {
   addSpaceAfterFirstField?: boolean; // Whether to append a space after inserting the first field of a top-level expression
   ignoredColumnsForEmptyExpression?: string[]; // Field names to exclude when suggesting for an empty expression
   isCursorFollowedByComma?: boolean; // Computed from the remaining query to avoid inserting an extra comma after the cursor
+  isCursorFollowedByParens?: boolean; // Computed from the remaining query to avoid inserting an extra closing paren after the cursor
   suggestFields?: boolean; // Allow field/column suggestions when not inside a function parameter
   suggestFunctions?: boolean; // Allow function suggestions when not inside a function parameter
   controlType?: ESQLVariableType; // Type of control variable (??/?) to suggest in empty expressions
