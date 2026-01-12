@@ -41,11 +41,7 @@ export class StorageService {
         refresh: 'wait_for',
       });
 
-      this.logFirstError(response);
-
-      this.logger.debug({
-        message: `StorageService: Successfully bulk indexed ${docs.length} documents to index: ${index}`,
-      });
+      this.logBulkIndexResponse({ index, docsCount: docs.length, response });
     } catch (error) {
       this.logger.error({
         error,
@@ -57,21 +53,54 @@ export class StorageService {
     }
   }
 
-  private logFirstError(response: BulkResponse): void {
-    if (response.errors) {
-      const firstErrorItem = response.items.find((item) => item.index?.error);
+  private logBulkIndexResponse({
+    index,
+    docsCount,
+    response,
+  }: {
+    index: string;
+    docsCount: number;
+    response: BulkResponse;
+  }): void {
+    this.logFirstBulkIndexItemError(response);
+    const message = this.getBulkIndexDebugMessage({ index, docsCount, response });
+    this.logger.debug({ message });
+  }
 
-      if (firstErrorItem) {
-        const error = firstErrorItem.index?.error;
-
-        this.logger.error({
-          error: new Error(
-            `[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`
-          ),
-          code: 'BULK_INDEX_ERROR',
-          type: 'StorageServiceError',
-        });
-      }
+  private logFirstBulkIndexItemError(response: BulkResponse): void {
+    if (!response.errors) {
+      return;
     }
+
+    const firstErrorItem = response.items.find((item) => item.index?.error);
+    if (!firstErrorItem) {
+      return;
+    }
+
+    const error = firstErrorItem.index?.error;
+    this.logger.error({
+      error: new Error(`[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`),
+      code: 'BULK_INDEX_ERROR',
+      type: 'StorageServiceError',
+    });
+  }
+
+  private getBulkIndexDebugMessage({
+    index,
+    docsCount,
+    response,
+  }: {
+    index: string;
+    docsCount: number;
+    response: BulkResponse;
+  }): string {
+    const failedItemCount = response.items.filter((item) => item.index?.error).length;
+
+    if (!response.errors) {
+      return `StorageService: Successfully bulk indexed ${docsCount} documents to index: ${index}`;
+    }
+
+    const successItemCount = docsCount - failedItemCount;
+    return `StorageService: Bulk index completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
   }
 }
