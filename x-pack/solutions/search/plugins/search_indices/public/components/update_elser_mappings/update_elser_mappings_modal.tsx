@@ -132,7 +132,6 @@ export function UpdateElserMappingsModal({
       )}
       onClose={() => setIsModalOpen(false)}
       data-test-subj="updateElserMappingsModal"
-      data-telemetry-id="indexDetailsDataTabUpdateElserMappingsModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">
@@ -151,7 +150,7 @@ export function UpdateElserMappingsModal({
         <EuiSpacer size="s" />
         <EuiLink
           data-test-subj="updateElserMappingsModalLearnMoreLink"
-          data-telemetry-id="indexDetailsDataTabUpdateElserMappingsModalLearnMoreLink"
+          data-telemetry-id="indexDetailsData-updateElserMappingsModal-learnMore-link"
           href={docLinks.elasticInferenceServicePricing}
           target="_blank"
           external
@@ -185,7 +184,7 @@ export function UpdateElserMappingsModal({
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
           <EuiButtonEmpty
             data-test-subj="UpdateElserMappingsModalCancelBtn"
-            data-telemetry-id="indexDetailsDataTabUpdateElserMappingsModalCancelBtn"
+            data-telemetry-id="indexDetailsData-updateElserMappingsModal-cancel-btn"
             onClick={() => setIsModalOpen(false)}
             aria-label={i18n.translate(
               'xpack.searchIndices.updateElserMappingsModal.cancelButtonAriaLabel',
@@ -203,7 +202,7 @@ export function UpdateElserMappingsModal({
             onClick={handleApply}
             isLoading={isLoading}
             data-test-subj="UpdateElserMappingsModalApplyBtn"
-            data-telemetry-id="indexDetailsDataTabUpdateElserMappingsModalApplyBtn"
+            data-telemetry-id="indexDetailsData-updateElserMappingsModal-apply-btn"
             isDisabled={isApplyDisabled}
           >
             {i18n.translate('xpack.searchIndices.updateElserMappingsModal.applyButton', {

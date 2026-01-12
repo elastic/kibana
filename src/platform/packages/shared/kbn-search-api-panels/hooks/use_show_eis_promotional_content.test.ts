@@ -27,13 +27,13 @@ describe('useShowEisPromotionalContent', () => {
     expect(result.current.isPromoVisible).toBe(false);
   });
 
-  it('should hide the promo and set localStorage when onDismissTour is called', () => {
+  it('should hide the promo and set localStorage when OnDismissPromo is called', () => {
     const { result } = renderHook(() => useShowEisPromotionalContent({ promoId }));
 
     expect(result.current.isPromoVisible).toBe(true);
 
     act(() => {
-      result.current.onDismissTour();
+      result.current.onDismissPromo();
     });
 
     expect(localStorage.getItem(localStorageKey)).toBe('true');

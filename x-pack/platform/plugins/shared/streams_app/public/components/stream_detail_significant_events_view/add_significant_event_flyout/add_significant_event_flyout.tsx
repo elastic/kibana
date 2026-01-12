@@ -21,13 +21,7 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  isFeature,
-  type StreamQueryKql,
-  type Streams,
-  type Feature,
-  type FeatureType,
-} from '@kbn/streams-schema';
+import { type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -43,7 +37,6 @@ import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { ALL_DATA_OPTION } from '../feature_selector';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
@@ -54,11 +47,11 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  features: Feature[];
+  features: System[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedFeatures: Feature[];
-  onFeatureIdentificationClick: () => void;
+  initialSelectedFeatures: System[];
+  refreshFeatures: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }
@@ -73,7 +66,7 @@ export function AddSignificantEventFlyout({
   initialFlow = undefined,
   initialSelectedFeatures,
   features,
-  onFeatureIdentificationClick,
+  refreshFeatures,
   aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -84,9 +77,6 @@ export function AddSignificantEventFlyout({
       start: { data },
     },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
   const dataViewsFetch = useStreamsAppFetch(() => {
     return data.dataViews.create({ title: definition.stream.name }).then((value) => {
@@ -100,7 +90,7 @@ export function AddSignificantEventFlyout({
     abort: abortDescription,
   } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
 
-  const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
+  const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name });
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
@@ -111,7 +101,7 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>(initialSelectedFeatures);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -136,13 +126,10 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(
-    (featuresOverride?: Feature[]) => {
+    (featuresOverride?: System[]) => {
       setSelectedFlow('ai');
 
       let numberOfGeneratedQueries = 0;
-      const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
-        system: 0,
-      };
       let inputTokensUsed = 0;
       let outputTokensUsed = 0;
       const connector = aiFeatures?.genAiConnectors.selectedConnector;
@@ -169,9 +156,7 @@ export function AddSignificantEventFlyout({
               generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
                 concatMap(({ queries: nextQueries, tokensUsed }) => {
                   numberOfGeneratedQueries += nextQueries.length;
-                  if (isFeature(feature)) {
-                    numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
-                  }
+
                   inputTokensUsed += tokensUsed.prompt;
                   outputTokensUsed += tokensUsed.completion;
 
@@ -229,7 +214,6 @@ export function AddSignificantEventFlyout({
                 input_tokens_used: inputTokensUsed,
                 output_tokens_used: outputTokensUsed,
                 count: numberOfGeneratedQueries,
-                count_by_feature_type: numberOfGeneratedQueriesByFeature,
                 features_selected: selectedFeatures?.length ?? 0,
                 features_total: features.length,
                 stream_name: definition.stream.name,
@@ -309,7 +293,8 @@ export function AddSignificantEventFlyout({
                   selectedFeatures={selectedFeatures}
                   onFeaturesChange={setSelectedFeatures}
                   onGenerateSuggestionsClick={generateQueries}
-                  onFeatureIdentificationClick={onFeatureIdentificationClick}
+                  definition={definition.stream}
+                  refreshFeatures={refreshFeatures}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}

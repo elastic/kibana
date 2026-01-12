@@ -54,6 +54,18 @@ const getUserDefinedColumns = (
       continue;
     }
 
+    if (isColumn(expression)) {
+      const name = expression.parts.join('.');
+      const newColumn: ESQLUserDefinedColumn = {
+        name,
+        type: typeOf(expression),
+        location: expression.location,
+        userDefined: true,
+      };
+      columns.push(newColumn);
+      continue;
+    }
+
     if (!isOptionNode(expression) && !Array.isArray(expression)) {
       const newColumn: ESQLUserDefinedColumn = {
         name: query.substring(expression.location.min, expression.location.max + 1),
