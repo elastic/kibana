@@ -653,6 +653,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
+          hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo, assetsMap),
         }
       );
     }
@@ -668,6 +669,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
   }
 
+  private hasAgentVersionCondition(
+    pkgInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap
+  ): boolean {
+    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      return false;
+    }
+    if (pkgInfo.conditions?.agent?.version) {
+      return true;
+    }
+    let hasAgentVersionCondition = false;
+    assetsMap?.forEach((assetBuffer, assetPath) => {
+      if (assetPath.endsWith('.hbs') && assetBuffer?.toString().includes('_meta.agent.version')) {
+        hasAgentVersionCondition = true;
+      }
+    });
+    return hasAgentVersionCondition;
+  }
+
   private async bumpAgentPoliciesRevision(
     deps: { soClient: SavedObjectsClientContract; esClient: ElasticsearchClient },
     policyIds: string[],
@@ -675,6 +695,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       removeProtectionFn?: (policyId: string) => undefined | boolean;
       asyncDeploy?: boolean;
+      hasAgentVersionConditions?: boolean;
     } = {}
   ) {
     return runWithCache(() =>
@@ -687,6 +708,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
+            hasAgentVersionConditions: options?.hasAgentVersionConditions,
           }),
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
@@ -905,6 +927,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
         user: options?.user,
         asyncDeploy: options?.asyncDeploy,
+        hasAgentVersionConditions: packageInfos
+          .values()
+          .some((pkgInfo) =>
+            this.hasAgentVersionCondition(
+              pkgInfo,
+              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+            )
+          ),
       });
     }
     logger.debug(`Created new package policies`);
@@ -1575,6 +1605,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             (!assignedInOldPolicy && assignedInNewPolicy)
           );
         },
+        hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo, assetsMap),
       }
     );
 
@@ -1966,6 +1997,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           return removeProtection;
         },
+        hasAgentVersionConditions: packageInfos
+          .values()
+          .some((pkgInfo) =>
+            this.hasAgentVersionCondition(
+              pkgInfo,
+              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+            )
+          ),
       }
     ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
@@ -2248,12 +2287,35 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
+      let packageInfos: Map<string, PackageInfo> | undefined;
+      let packageInfosandAssetsMap:
+        | Map<string, { assetsMap: PackagePolicyAssetsMap; pkgInfo: PackageInfo }>
+        | undefined;
+
+      if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+        packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient, true);
+
+        packageInfosandAssetsMap = await getPkgInfoAssetsMap({
+          logger,
+          packageInfos: [...packageInfos.values()],
+          savedObjectsClient: soClient,
+        });
+      }
+
       await this.bumpAgentPoliciesRevision(
         { soClient, esClient },
         agentPolicies.map((p) => p.id),
         {
           user: options?.user,
           removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
+          hasAgentVersionConditions: packageInfos
+            ?.values()
+            .some((pkgInfo) =>
+              this.hasAgentVersionCondition(
+                pkgInfo,
+                packageInfosandAssetsMap?.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+              )
+            ),
         }
       );
     }
