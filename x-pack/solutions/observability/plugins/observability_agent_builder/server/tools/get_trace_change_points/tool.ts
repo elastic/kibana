@@ -26,14 +26,13 @@ const getTraceChangePointsSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'A KQL query to filter the trace documents. Examples: trace.id:"abc123", service.name:"my-service"'
+      'Optional KQL query to filter the trace documents. Examples: trace.id:"abc123", service.name:"my-service"'
     )
     .optional(),
   groupBy: z
     .string()
     .describe(
-      `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
-Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance. Common fields to group by include: 
+      `Field to group results by. Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance. Common fields to group by include: 
 - Service level: 'service.name', 'service.environment', 'service.version'
 - Transaction level: 'transaction.name', 'transaction.type'
 - Infrastructure level: 'host.name', 'container.id', 'kubernetes.pod.name' 
@@ -63,7 +62,17 @@ export function createGetTraceChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTraceChangePointsSchema> = {
     id: OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `TBD`,
+    description: `Analyzes traces to detect statistically significant change points in latency, throughput, and failure rate across group (e.g., service, transaction, host).
+Trace metrics:
+- Latency: avg/p95/p99 response time.
+- Throughput: requests per minute.
+- Failure rate: percentage of failed transactions.
+
+Supports optional KQL filtering
+
+When to use:
+- Detecting significant changes in trace behavior (spike, dip, step change, trend change, distribution change, stationary/non‑stationary, indeterminable) and identifying when they occur.
+`,
     schema: getTraceChangePointsSchema,
     tags: ['observability', 'traces'],
     handler: async (
