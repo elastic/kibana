@@ -97,9 +97,9 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
   );
 
   const confirmDelete = useCallback(() => {
-    deleteMigration(migrationStats.id);
+    deleteMigration(migrationStats);
     closeDeleteModal();
-  }, [deleteMigration, migrationStats.id, closeDeleteModal]);
+  }, [deleteMigration, migrationStats, closeDeleteModal]);
 
   const stopPropagation = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // prevent click events from bubbling up and toggle the collapsible panel
@@ -113,7 +113,12 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
       data-test-subj="migrationPanelTitle"
     >
       {migrationStats.vendor && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            marginRight: euiTheme.size.xs,
+          }}
+        >
           <EuiBadge
             color={MIGRATION_VENDOR_COLOR_CONFIG[migrationStats.vendor]}
             data-test-subj="migrationVendorBadge"
