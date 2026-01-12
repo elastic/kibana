@@ -107,7 +107,7 @@ const readAllSignificantEventsRoute = createServerRoute({
     summary: 'Read all significant events',
     description: 'Read all significant events',
     availability: {
-      since: '9.3.1',
+      since: '9.4.0',
       stability: 'experimental',
     },
   },
