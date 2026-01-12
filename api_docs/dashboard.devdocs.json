@@ -1850,6 +1850,21 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardInternalApi.arePanelsRelated$",
+            "type": "Object",
+            "tags": [],
+            "label": "arePanelsRelated$",
+            "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<(a: string, b: string) => boolean>"
+            ],
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

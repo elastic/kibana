@@ -23,17 +23,14 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
       serializeState: () => ({
-        rawState: {
-          name: initialState.rawState.name,
-          bork: initialState.rawState.bork,
-        },
+        name: initialState.name,
+        bork: initialState.bork,
       }),
     });
     return {
       Component: () => (
         <div data-test-subj="superTestEmbeddable">
-          SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
-          {initialState.rawState.bork}
+          SUPER TEST COMPONENT, name: {initialState.name} bork: {initialState.bork}
         </div>
       ),
       api,
@@ -58,16 +55,14 @@ describe('embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
+            bork: 'blorp?',
           }),
         })}
       />
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
         finalizeApi: expect.any(Function),
@@ -83,16 +78,14 @@ describe('embeddable renderer', () => {
         maybeId={'12345'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
+            bork: 'blorp?',
           }),
         })}
       />
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
         finalizeApi: expect.any(Function),
@@ -105,15 +98,13 @@ describe('embeddable renderer', () => {
     const parentApi = {
       ...getMockPresentationContainer(),
       getSerializedStateForChild: () => ({
-        rawState: {
-          bork: 'blorp?',
-        },
+        bork: 'blorp?',
       }),
     };
     render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),
         finalizeApi: expect.any(Function),
@@ -127,7 +118,8 @@ describe('embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu', bork: 'Dara' },
+            name: 'Kuni Garu',
+            bork: 'Dara',
           }),
         })}
       />
@@ -148,7 +140,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -178,7 +170,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -212,9 +204,7 @@ describe('embeddable renderer', () => {
           maybeId={'12345'}
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
-            getSerializedStateForChild: () => ({
-              rawState: {},
-            }),
+            getSerializedStateForChild: () => ({}),
           })}
         />
       </EuiThemeProvider>
@@ -253,7 +243,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -269,10 +259,8 @@ describe('reactEmbeddable phase events', () => {
         const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = finalizeApi({
           serializeState: () => ({
-            rawState: {
-              name: initialState.rawState.name,
-              bork: initialState.rawState.bork,
-            },
+            name: initialState.name,
+            bork: initialState.bork,
           }),
           dataLoading$,
         });
@@ -280,8 +268,7 @@ describe('reactEmbeddable phase events', () => {
           Component: () => (
             <>
               <div data-test-subj="superTestEmbeddable">
-                SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
-                {initialState.rawState.bork}
+                SUPER TEST COMPONENT, name: {initialState.name} bork: {initialState.bork}
               </div>
               <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading
@@ -309,7 +296,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
