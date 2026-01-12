@@ -15,12 +15,10 @@ import { useIsMutating } from '@kbn/react-query';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import dedent from 'dedent';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { LoadingState } from '../../components/loading_state';
-import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
-import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { ActionModalProvider } from '../../context/action_modal';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../hooks/use_kibana';
@@ -28,9 +26,11 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import PageNotFound from '../404';
+import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderControl } from './components/header_control';
 import { HeaderTitle } from './components/header_title';
 import { SloDetails } from './components/slo_details';
+import { useAutoRefreshState } from './hooks/use_auto_refresh_state';
 import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useSelectedTab } from './hooks/use_selected_tab';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
@@ -50,8 +50,8 @@ export function SloDetailsPage() {
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
-  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
+  const [isAutoRefreshing, setAutoRefresh] = useAutoRefreshState();
+
   const {
     isLoading,
     data: slo,
@@ -122,11 +122,6 @@ export function SloDetailsPage() {
 
   const isPerformingAction = isLoading || isDeleting;
 
-  const handleToggleAutoRefresh = () => {
-    setIsAutoRefreshing(!isAutoRefreshing);
-    storeAutoRefreshState(!isAutoRefreshing);
-  };
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -139,7 +134,7 @@ export function SloDetailsPage() {
               </ActionModalProvider>,
               <AutoRefreshButton
                 isAutoRefreshing={isAutoRefreshing}
-                onClick={handleToggleAutoRefresh}
+                onClick={() => setAutoRefresh((prev) => !prev)}
               />,
             ]
           : undefined,

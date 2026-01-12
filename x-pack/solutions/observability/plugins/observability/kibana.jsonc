@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": ["@elastic/observability-ui"],
+  "owner": ["@elastic/actionable-obs-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -62,6 +62,7 @@
       "cases",
       "data",
       "discover",
+      "fleet",
       "logsShared",
       "kibanaReact",
       "kibanaUtils",

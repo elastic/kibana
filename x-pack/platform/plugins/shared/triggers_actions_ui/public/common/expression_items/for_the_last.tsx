@@ -22,12 +22,14 @@ import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
 import type { IErrorObject } from '../../types';
+import RecommendedTimeSizeWarning from './components/recommended_time_size_warning';
 
 export interface ForLastExpressionProps {
   description?: string;
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
+  isTimeSizeBelowRecommended?: boolean;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -52,6 +54,7 @@ const FOR_LAST_LABEL = i18n.translate(
     defaultMessage: 'for the last',
   }
 );
+
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
@@ -60,6 +63,7 @@ export const ForLastExpression = ({
   onChangeWindowSize,
   onChangeWindowUnit,
   popupPosition,
+  isTimeSizeBelowRecommended = false,
   description = FOR_LAST_LABEL,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
@@ -134,6 +138,7 @@ export const ForLastExpression = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isTimeSizeBelowRecommended && <RecommendedTimeSizeWarning />}
       </div>
     </EuiPopover>
   );

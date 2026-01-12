@@ -9,6 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Observability Agent', function () {
+    // tools
     loadTestFile(require.resolve('./tools/get_data_sources.spec.ts'));
     loadTestFile(require.resolve('./tools/get_alerts.spec.ts'));
     loadTestFile(require.resolve('./tools/get_downstream_dependencies.spec.ts'));
@@ -18,6 +19,11 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_log_categories.spec.ts'));
     loadTestFile(require.resolve('./tools/get_correlated_logs.spec.ts'));
     loadTestFile(require.resolve('./tools/get_hosts.spec.ts'));
+    loadTestFile(require.resolve('./tools/get_trace_metrics.spec.ts'));
+    loadTestFile(require.resolve('./tools/get_log_change_points.spec.ts'));
+    loadTestFile(require.resolve('./tools/get_metric_change_points.spec.ts'));
+
+    // ai insights
     loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
     loadTestFile(require.resolve('./ai_insights/alert.spec.ts'));
   });

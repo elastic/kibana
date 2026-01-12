@@ -34,6 +34,7 @@ import {
   StreamRoutingContextProvider,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
+  selectHasRoutingChanges,
 } from './state_management/stream_routing_state_machine';
 import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
 
@@ -73,7 +74,15 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 }
 
 export function StreamDetailRoutingImpl() {
-  const { appParams, core } = useKibana();
+  const {
+    appParams,
+    core,
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
   const { onPageReady } = usePerformanceContext();
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -81,17 +90,12 @@ export function StreamDetailRoutingImpl() {
 
   const definition = routingSnapshot.context.definition;
 
+  const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
+
   const shouldDisplayBottomBar =
     routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' });
-
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
+    routingSnapshot.can({ type: 'routingRule.save' }) &&
+    hasRoutingChanges;
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
