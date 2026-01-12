@@ -25,13 +25,13 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
-import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { SeverityBadge } from '../../../stream_detail_significant_events_view/severity_badge';
-import { LoadingPanel } from '../../../loading_panel';
-import { SparkPlot } from '../../../spark_plot';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
+import { useFetchSignificantEvents } from '../../../hooks/use_fetch_significant_events';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { SeverityBadge } from './severity_badge';
+import { LoadingPanel } from '../../loading_panel';
+import { SparkPlot } from '../../spark_plot';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export function SignificantEventsTable() {
   const { timeState } = useTimefilter();
