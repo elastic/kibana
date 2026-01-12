@@ -49,7 +49,7 @@ export const AppMenuPopoverActionButtons = ({
       gutterSize="m"
       alignItems="center"
       css={containerCss}
-      data-test-subj="top-nav-menu-popover-action-buttons-container"
+      data-test-subj="app-menu-popover-action-buttons-container"
     >
       {secondaryActionItem && (
         <EuiFlexItem grow={false}>

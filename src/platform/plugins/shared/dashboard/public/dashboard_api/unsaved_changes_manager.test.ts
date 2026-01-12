@@ -140,13 +140,6 @@ describe('unsavedChangesManager', () => {
                   "type": "testType",
                 },
               ],
-              "references": Array [
-                Object {
-                  "id": "savedObject1",
-                  "name": "savedObjectRef",
-                  "type": "testType",
-                },
-              ],
               "viewMode": "edit",
             }
           `);

@@ -39,6 +39,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/calculate-width-from-char-count",
     "@kbn/ebt-tools"
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",
