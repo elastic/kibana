@@ -12,7 +12,7 @@ import type { ESQLCommand, ESQLMessage } from '../../types';
 import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands/registry';
 import { walk } from '../../ast';
-import type { ICommandCallbacks } from '../../commands/registry/types';
+import type { ICommandCallbacks, UnmappedFieldsTreatment } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
 import type { ESQLAstAllCommands } from '../../types';
 import { QueryColumns } from '../../query_columns_service';
@@ -133,8 +133,17 @@ async function validateAst(
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
+    const queryColumnsOptions = {
+      ...options,
+      unmappedFieldsTreatment,
+    };
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
+      ? await new QueryColumns(
+          subqueryForColumns,
+          queryString,
+          callbacks,
+          queryColumnsOptions
+        ).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -143,13 +152,18 @@ async function validateAst(
       policies: availablePolicies,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
-      unmappedFieldsTreatment,
     };
 
-    const commandMessages = validateCommand(currentCommand, references, rootCommands, {
-      ...callbacks,
-      hasMinimumLicenseRequired,
-    });
+    const commandMessages = validateCommand(
+      currentCommand,
+      references,
+      rootCommands,
+      {
+        ...callbacks,
+        hasMinimumLicenseRequired,
+      },
+      unmappedFieldsTreatment
+    );
     messages.push(...commandMessages);
   }
 
@@ -176,7 +190,8 @@ function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
-  callbacks?: ICommandCallbacks
+  callbacks?: ICommandCallbacks,
+  unmappedFieldsTreatment?: UnmappedFieldsTreatment
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -212,7 +227,7 @@ function validateCommand(
     policies: references.policies,
     sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
-    unmappedFieldsTreatment: references.unmappedFieldsTreatment,
+    unmappedFieldsTreatment,
   };
 
   if (commandDefinition.methods.validate) {

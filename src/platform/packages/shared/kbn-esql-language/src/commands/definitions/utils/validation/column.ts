@@ -29,7 +29,6 @@ export class ColumnValidator {
 
   validate(): ESQLMessage[] {
     const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
-
     if (!this.exists) {
       if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
         return [errors.unknownColumn(this.column)];

@@ -12,6 +12,7 @@ import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import type { ESQLColumnData, GetColumnsByTypeFn } from '../../commands/registry/types';
 import { buildFieldsDefinitionsWithMetadata } from '../../commands/definitions/utils';
 import { QueryColumns } from '../../query_columns_service';
+import { getUnmappedFieldsTreatment } from '../../commands/definitions/utils/settings';
 
 export type ColumnsMap = Map<string, ESQLColumnData>;
 export type GetColumnMapFn = () => Promise<ColumnsMap>;
@@ -21,7 +22,11 @@ export function getColumnsByTypeRetriever(
   queryText: string,
   resourceRetriever?: ESQLCallbacks
 ): { getColumnsByType: GetColumnsByTypeFn; getColumnMap: GetColumnMapFn } {
-  const helpers = new QueryColumns(query, queryText, resourceRetriever);
+  const unmappedFieldsTreatment = getUnmappedFieldsTreatment(query.header);
+
+  const helpers = new QueryColumns(query, queryText, resourceRetriever, {
+    unmappedFieldsTreatment,
+  });
   const getVariables = resourceRetriever?.getVariables;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 

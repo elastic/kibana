@@ -58,7 +58,7 @@ export function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
  * Default is FAIL.
  */
 export function getUnmappedFieldsTreatment(
-  headers: ESQLAstHeaderCommand[]
+  headers: ESQLAstHeaderCommand[] = []
 ): UnmappedFieldsTreatment {
   let unmappedFieldsTreatment: UnmappedFieldsTreatment = UnmappedFieldsTreatment.FAIL;
 
