@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { System, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -31,21 +31,21 @@ export function FeatureIdentificationControl({
 }: FeatureIdentificationControlProps) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const [features, setFeatures] = useState<Feature[]>([]);
+  const [features, setFeatures] = useState<System[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
-    getFeatureIdentificationStatus,
-    scheduleFeatureIdentificationTask,
-    cancelFeatureIdentificationTask,
-    acknowledgeFeatureIdentificationTask,
+    getSystemIdentificationStatus,
+    scheduleSystemIdentificationTask,
+    cancelSystemIdentificationTask,
+    acknowledgeSystemIdentificationTask,
   } = useStreamFeaturesApi(definition);
 
-  const [{ loading, value: task, error }, getTask] = useAsyncFn(getFeatureIdentificationStatus);
+  const [{ loading, value: task, error }, getTask] = useAsyncFn(getSystemIdentificationStatus);
   useEffect(() => {
     getTask();
   }, [getTask]);
-  useTaskPolling(task, getFeatureIdentificationStatus, getTask);
+  useTaskPolling(task, getSystemIdentificationStatus, getTask);
 
   const flyout = isFlyoutVisible && (
     <StreamFeaturesFlyout
@@ -57,11 +57,11 @@ export function FeatureIdentificationControl({
       }}
       onFeaturesAdded={() => {
         setIsFlyoutVisible(false);
-        acknowledgeFeatureIdentificationTask().then(getTask).then(refreshFeatures);
+        acknowledgeSystemIdentificationTask().then(getTask).then(refreshFeatures);
       }}
       onFeaturesDiscarded={() => {
         setIsFlyoutVisible(false);
-        acknowledgeFeatureIdentificationTask().then(getTask);
+        acknowledgeSystemIdentificationTask().then(getTask);
       }}
     />
   );
@@ -95,7 +95,7 @@ export function FeatureIdentificationControl({
         isDisabled: disabled,
         onClick: () => {
           setIsLoading(true);
-          scheduleFeatureIdentificationTask(aiFeatures?.genAiConnectors.selectedConnector!).then(
+          scheduleSystemIdentificationTask(aiFeatures?.genAiConnectors.selectedConnector!).then(
             () => {
               setIsLoading(false);
               getTask();
@@ -143,7 +143,7 @@ export function FeatureIdentificationControl({
           <EuiButtonEmpty
             data-test-subj="feature_identification_cancel_feature_identification_button"
             onClick={() => {
-              cancelFeatureIdentificationTask().then(() => {
+              cancelSystemIdentificationTask().then(() => {
                 getTask();
               });
             }}
@@ -182,7 +182,7 @@ export function FeatureIdentificationControl({
   }
 
   if (task.status === 'completed') {
-    if (task.features.length === 0) {
+    if (task.systems.length === 0) {
       return (
         <EuiFlexGroup direction="column">
           <EuiFlexItem>{triggerButton}</EuiFlexItem>
@@ -195,7 +195,7 @@ export function FeatureIdentificationControl({
               color="primary"
               iconType="search"
               onDismiss={() => {
-                acknowledgeFeatureIdentificationTask().then(getTask);
+                acknowledgeSystemIdentificationTask().then(getTask);
               }}
             >
               {i18n.translate('xpack.streams.streamDetailView.noFeaturesIdentifiedDescription', {
@@ -212,7 +212,7 @@ export function FeatureIdentificationControl({
       <>
         <EuiButton
           onClick={() => {
-            setFeatures(task.features);
+            setFeatures(task.systems);
             setIsFlyoutVisible(true);
           }}
           data-test-subj="feature_identification_review_features_button"
@@ -220,7 +220,7 @@ export function FeatureIdentificationControl({
           {i18n.translate('xpack.streams.streamDetailView.reviewIdentifiedFeaturesButtonLabel', {
             defaultMessage:
               'Review {count} identified {count, plural, one {feature} other {features}}',
-            values: { count: task.features.length },
+            values: { count: task.systems.length },
           })}
         </EuiButton>
         {flyout}
