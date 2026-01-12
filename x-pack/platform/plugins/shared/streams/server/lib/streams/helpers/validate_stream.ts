@@ -237,4 +237,3 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
     validateSteps(definition.ingest.processing.steps);
   }
 }
-
