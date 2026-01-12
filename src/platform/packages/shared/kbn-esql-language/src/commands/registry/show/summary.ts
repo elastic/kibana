@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLCommand } from '../../../types';
+import type { ESQLCommandSummary } from '../types';
+import { SHOW_INFO_FIELDS } from './columns_after';
 
-export function isMac() {
-  return ((navigator as any)?.userAgentData?.platform || navigator.userAgent) // eslint-disable-line @typescript-eslint/no-explicit-any
-    .toLowerCase()
-    .includes('mac');
-}
+export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
+  return { newColumns: new Set(SHOW_INFO_FIELDS.map((col) => col.name)) };
+};

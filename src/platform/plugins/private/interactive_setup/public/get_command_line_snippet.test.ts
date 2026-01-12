@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getCommandLineSnippet } from './get_command_line_snippet';
-
 describe('getCommandLineSnippet', () => {
   const originalNavigator = window.navigator;
 
-  it('should format windows correctly', () => {
+  afterEach(() => {
+    jest.resetModules();
+  });
+
+  it('should format windows correctly', async () => {
     Object.defineProperty(window, 'navigator', {
       value: { userAgent: 'Windows' },
       writable: true,
     });
+    const { getCommandLineSnippet } = await import('./get_command_line_snippet');
     expect(getCommandLineSnippet('kibana')).toEqual('bin\\kibana.bat');
     expect(getCommandLineSnippet('kibana', '--silent')).toEqual('bin\\kibana.bat --silent');
   });
 
-  it('should format unix correctly', () => {
+  it('should format unix correctly', async () => {
     Object.defineProperty(window, 'navigator', {
       value: { userAgent: 'Linux' },
       writable: true,
     });
+    const { getCommandLineSnippet } = await import('./get_command_line_snippet');
     expect(getCommandLineSnippet('kibana')).toEqual('bin/kibana');
     expect(getCommandLineSnippet('kibana', '--silent')).toEqual('bin/kibana --silent');
   });
