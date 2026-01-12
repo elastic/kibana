@@ -124,7 +124,7 @@ export function initializeLayoutManager(
       const expectedChildCount =
         Object.values(layout.panels).filter((panel) => {
           return panel.grid.sectionId ? !isSectionCollapsed(panel.grid.sectionId) : true;
-        }).length + (viewMode === 'print' ? 0 : Object.values(layout.pinnedPanels).length); // pinned controls are not rendered in print mode
+        }).length + (viewMode === 'print' ? 0 : Object.values(layout.pinnedPanels).length); // pinned panels are not rendered in print mode
 
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
@@ -316,20 +316,20 @@ export function initializeLayoutManager(
   const removePanel = (uuid: string) => {
     const currentLayout = layout$.value;
     const panels = { ...currentLayout.panels };
-    const controls = { ...currentLayout.pinnedPanels };
+    const pinnedPanels = { ...currentLayout.pinnedPanels };
     if (panels[uuid]) {
       delete panels[uuid];
       layout$.next({ ...layout$.value, panels });
-    } else if (controls[uuid]) {
-      delete controls[uuid];
-      // Recompute the order of the remaining controls
-      const nextControls: typeof controls = Object.entries(controls)
+    } else if (pinnedPanels[uuid]) {
+      delete pinnedPanels[uuid];
+      // Recompute the order of the remaining pinned panels
+      const newPinnedPanels: typeof pinnedPanels = Object.entries(pinnedPanels)
         .sort(([, a], [, b]) => a.order - b.order)
         .reduce(
           (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
           {}
         );
-      layout$.next({ ...layout$.value, pinnedPanels: nextControls });
+      layout$.next({ ...layout$.value, pinnedPanels: newPinnedPanels });
     }
 
     const children = { ...children$.value };
@@ -408,21 +408,21 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
   };
 
-  const pinPanel = (uuid: string, controlToPin: DashboardPinnablePanel) => {
-    // add control panel to the end of the pinned controls
-    const newControls = { ...layout$.getValue().pinnedPanels };
+  const pinPanel = (uuid: string, panelToPin: DashboardPinnablePanel) => {
+    // add control panel to the end of the pinned panels
+    const newPinnedPanels = { ...layout$.getValue().pinnedPanels };
 
-    newControls[uuid] = {
-      type: controlToPin.type as PinnedControlLayoutState['type'],
-      order: controlToPin.order ?? Object.keys(newControls).length,
-      width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
-      grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
+    newPinnedPanels[uuid] = {
+      type: panelToPin.type as PinnedControlLayoutState['type'],
+      order: panelToPin.order ?? Object.keys(newPinnedPanels).length,
+      width: panelToPin.width ?? DEFAULT_CONTROL_WIDTH,
+      grow: panelToPin.grow ?? DEFAULT_CONTROL_GROW,
     };
     const newPanels = { ...layout$.getValue().panels };
     delete newPanels[uuid];
 
     // update the layout with the control panel removed and added as a pinned control
-    layout$.next({ ...layout$.getValue(), panels: newPanels, pinnedPanels: newControls });
+    layout$.next({ ...layout$.getValue(), panels: newPanels, pinnedPanels: newPinnedPanels });
   };
 
   const addPinnedPanel = async (
@@ -444,13 +444,13 @@ export function initializeLayoutManager(
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
-    const { panels, pinnedPanels: controls } = layout$.value;
+    const { panels, pinnedPanels } = layout$.value;
     // Typescript erroneously believes panels[uuid] cannot be undefined, so we need to add these Object.hasOwn
     // checks to get the type signature of panelLayout to be correct
     const panelLayout = Object.hasOwn(panels, uuid)
       ? panels[uuid]
-      : Object.hasOwn(controls, uuid)
-      ? controls[uuid]
+      : Object.hasOwn(pinnedPanels, uuid)
+      ? pinnedPanels[uuid]
       : undefined;
     if (!panelLayout) throw new PanelNotFoundError();
     if (children$.value[uuid]) return children$.value[uuid];
@@ -468,7 +468,7 @@ export function initializeLayoutManager(
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
-        if (!Object.hasOwn(panels, uuid) && !Object.hasOwn(controls, uuid)) {
+        if (!Object.hasOwn(panels, uuid) && !Object.hasOwn(pinnedPanels, uuid)) {
           subscription.unsubscribe();
           resolve(undefined);
         }
@@ -548,12 +548,12 @@ export function initializeLayoutManager(
         const controlToUnpin = layout$.getValue().pinnedPanels[uuid];
         if (!controlToUnpin) return;
 
-        const newControls = { ...layout$.getValue().pinnedPanels };
-        const originalOrder = newControls[uuid].order;
-        delete newControls[uuid];
-        // adjust the order of the remaining controls
-        for (const controlId of Object.keys(newControls)) {
-          if (newControls[controlId].order > originalOrder) newControls[controlId].order--;
+        const newPinnedPanels = { ...layout$.getValue().pinnedPanels };
+        const originalOrder = newPinnedPanels[uuid].order;
+        delete newPinnedPanels[uuid];
+        // adjust the order of the remaining pinned panels
+        for (const controlId of Object.keys(newPinnedPanels)) {
+          if (newPinnedPanels[controlId].order > originalOrder) newPinnedPanels[controlId].order--;
         }
 
         // place the new control panel in the top left corner, bumping other panels down as necessary
@@ -576,7 +576,7 @@ export function initializeLayoutManager(
               grid: { ...newPanelPlacement },
             },
           },
-          pinnedPanels: newControls,
+          pinnedPanels: newPinnedPanels,
         });
       },
       pinPanel: (uuid: string) => {

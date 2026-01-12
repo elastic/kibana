@@ -81,7 +81,7 @@ function getLocatorParams({
 
   const { panels, pinned_panels, references } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'references' | 'pinned_panels'
+    'panels' | 'pinned_panels' | 'references'
   >;
 
   return {

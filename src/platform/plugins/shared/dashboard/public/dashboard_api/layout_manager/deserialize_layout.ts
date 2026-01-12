@@ -22,11 +22,11 @@ export function deserializeLayout(
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
-    pinnedPanels: (pinnedPanels ?? []).reduce((prev, control, index) => {
-      const controlId = control.uid ?? v4();
-      const { width, grow, type, config } = control;
-      childState[controlId] = { rawState: config }; // push to child state
-      return { ...prev, [controlId]: { type, width, grow, order: index } };
+    pinnedPanels: (pinnedPanels ?? []).reduce((prev, panel, index) => {
+      const panelId = panel.uid ?? v4();
+      const { width, grow, type, config } = panel;
+      childState[panelId] = { rawState: config }; // push to child state
+      return { ...prev, [panelId]: { type, width, grow, order: index } };
     }, {}),
   };
 
