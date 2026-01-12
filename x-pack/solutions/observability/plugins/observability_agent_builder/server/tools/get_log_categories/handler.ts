@@ -14,8 +14,7 @@ import type {
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
-import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
-import { timeRangeFilter } from '../../utils/dsl_filters';
+import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
 
 export async function getToolHandler({
@@ -25,7 +24,8 @@ export async function getToolHandler({
   index,
   start,
   end,
-  terms,
+  kqlFilter: kuery,
+  fields,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -36,15 +36,16 @@ export async function getToolHandler({
   index?: string;
   start: string;
   end: string;
-  terms?: Record<string, string>;
+  kqlFilter?: string;
+  fields: string[];
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const boolFilters = [
     ...timeRangeFilter('@timestamp', {
-      ...getShouldMatchOrNotExistFilter(terms),
       start: parseDatemath(start),
       end: parseDatemath(end, { roundUp: true }),
     }),
+    ...kqlFilter(kuery),
     { exists: { field: 'message' } },
   ];
 
@@ -66,7 +67,7 @@ export async function getToolHandler({
       boolQuery: { filter: boolFilters, must_not: lowSeverityLogLevels },
       logger,
       categoryCount: 20,
-      terms,
+      fields,
     }),
     getFilteredLogCategories({
       esClient,
@@ -74,7 +75,7 @@ export async function getToolHandler({
       boolQuery: { filter: boolFilters, must: lowSeverityLogLevels },
       logger,
       categoryCount: 10,
-      terms,
+      fields,
     }),
   ]);
 
@@ -87,14 +88,14 @@ export async function getFilteredLogCategories({
   boolQuery,
   logger,
   categoryCount,
-  terms,
+  fields,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
   boolQuery: QueryDslBoolQuery;
   logger: Logger;
   categoryCount: number;
-  terms: Record<string, string> | undefined;
+  fields: string[];
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -143,7 +144,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: ['message', '@timestamp', ...Object.keys(terms ?? {})],
+                  fields: ['message', '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },
