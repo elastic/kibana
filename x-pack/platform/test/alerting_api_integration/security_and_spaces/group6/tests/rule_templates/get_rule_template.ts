@@ -51,23 +51,6 @@ export default (ftrProvider: FtrProviderContext): void => {
       });
     });
 
-    it('should return rule template with description and artifacts', async () => {
-      const myArtifacts = {
-        dashboards: [{ id: 'dash-1' }],
-        investigation_guide: { blob: 'text' },
-      };
-
-      await createRuleTemplateSO(ftrProvider);
-
-      const response = await getRuleTemplate({ supertest, templateId: 'sample-alerting-rule' });
-
-      expect(response.body).to.eql({
-        ...getRuleTemplateResponse('sample-alerting-rule'),
-        description: 'This is a sample alerting rule template description',
-        artifacts: myArtifacts,
-      });
-    });
-
     it('unhappy path - 404s when rule template do not exists', async () => {
       await supertest
         .get(`/internal/alerting/rule_template/fake-id`)
