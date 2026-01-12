@@ -15451,10 +15451,10 @@ base@^0.11.1:
     mixin-deep "^1.2.0"
     pascalcase "^0.1.1"
 
-baseline-browser-mapping@^2.8.25:
-  version "2.8.26"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.8.26.tgz#2c7e2f840f0ae4d83782bdfe795229a43dfc3e59"
-  integrity sha512-73lC1ugzwoaWCLJ1LvOgrR5xsMLTqSKIEoMHVtL9E/HNk0PXtTM76ZIm84856/SF7Nv8mPZxKoBsgpm0tR1u1Q==
+baseline-browser-mapping@2.9.14, baseline-browser-mapping@^2.8.25:
+  version "2.9.14"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.14.tgz#3b6af0bc032445bca04de58caa9a87cfe921cbb3"
+  integrity sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==
 
 basic-auth-parser@0.0.2-1:
   version "0.0.2-1"
