@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Schema, SwitchCases } from 'joi';
 import typeDetect from 'type-detect';
 
-import type { Schema, SwitchCases } from 'joi';
 import { internals } from '../internals';
+import { META_FIELD_X_OAS_DISCRIMINATOR } from '../oas_meta_fields';
 import type { ExtendsDeepOptions } from './type';
 import { Type } from './type';
 import type { ObjectResultType, Props } from './object_type';
@@ -75,7 +76,7 @@ export class DiscriminatedUnionType<
       return acc;
     }, []);
 
-    const schema = internals
+    let schema = internals
       .alternatives()
       .match('any')
       .conditional(
@@ -85,6 +86,8 @@ export class DiscriminatedUnionType<
           otherwise,
         }
       );
+
+    schema = schema.meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator });
 
     super(schema, options);
 
