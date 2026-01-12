@@ -97,6 +97,50 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreUpdate.callback;
         },
       ],
+
+      [
+        'createEndpointListItem',
+        (): ReturnType<ExceptionListClient['createEndpointListItem']> => {
+          const mockOptions = getCreateExceptionListItemOptionsMock();
+          return exceptionListClient.createEndpointListItem({
+            comments: mockOptions.comments,
+            description: mockOptions.description,
+            entries: mockOptions.entries,
+            itemId: mockOptions.itemId,
+            meta: mockOptions.meta,
+            name: mockOptions.name,
+            osTypes: mockOptions.osTypes,
+            tags: mockOptions.tags,
+            type: mockOptions.type,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreCreate']['callback'] => {
+          return extensionPointStorageContext.exceptionPreCreate.callback;
+        },
+      ],
+
+      [
+        'updateEndpointListItem',
+        (): ReturnType<ExceptionListClient['updateEndpointListItem']> => {
+          const mockOptions = getUpdateExceptionListItemOptionsMock();
+          return exceptionListClient.updateEndpointListItem({
+            _version: mockOptions._version,
+            comments: mockOptions.comments,
+            description: mockOptions.description,
+            entries: mockOptions.entries,
+            id: mockOptions.id,
+            itemId: mockOptions.itemId,
+            meta: mockOptions.meta,
+            name: mockOptions.name,
+            osTypes: mockOptions.osTypes,
+            tags: mockOptions.tags,
+            type: mockOptions.type,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreUpdate']['callback'] => {
+          return extensionPointStorageContext.exceptionPreUpdate.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {
@@ -294,6 +338,48 @@ describe('exception_list_client', () => {
         },
         (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
           return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'getEndpointListItem',
+        (): ReturnType<ExceptionListClient['getEndpointListItem']> => {
+          return exceptionListClient.getEndpointListItem({
+            id: '1',
+            itemId: '1',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreGetOne']['callback'] => {
+          return extensionPointStorageContext.exceptionPreGetOne.callback;
+        },
+      ],
+      [
+        'deleteEndpointListItem',
+        (): ReturnType<ExceptionListClient['deleteEndpointListItem']> => {
+          return exceptionListClient.deleteEndpointListItem({
+            id: '1',
+            itemId: '1',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'findEndpointListItem',
+        (): ReturnType<ExceptionListClient['findEndpointListItem']> => {
+          return exceptionListClient.findEndpointListItem({
+            filter: undefined,
+            page: 1,
+            perPage: 1,
+            pit: undefined,
+            search: undefined,
+            searchAfter: undefined,
+            sortField: 'name',
+            sortOrder: 'asc',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreSingleListFind']['callback'] => {
+          return extensionPointStorageContext.exceptionPreSingleListFind.callback;
         },
       ],
       [

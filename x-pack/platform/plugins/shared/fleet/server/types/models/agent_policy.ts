@@ -64,7 +64,7 @@ function validateCloudProvider(s: string) {
 
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
-  space_ids: schema.maybe(schema.arrayOf(schema.string())),
+  space_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
   namespace: AgentPolicyNamespaceSchema,
   description: schema.maybe(schema.string()),
@@ -84,7 +84,8 @@ export const AgentPolicyBaseSchema = {
         schema.literal(dataTypes.Logs),
         schema.literal(dataTypes.Metrics),
         schema.literal(dataTypes.Traces),
-      ])
+      ]),
+      { maxSize: 3 }
     )
   ),
   keep_monitoring_alive: schema.maybe(
@@ -108,7 +109,8 @@ export const AgentPolicyBaseSchema = {
       schema.object({
         name: schema.string(),
         enabled: schema.boolean(),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   is_protected: schema.maybe(schema.boolean()),
@@ -152,6 +154,7 @@ export const AgentPolicyBaseSchema = {
           description:
             'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
         },
+        maxSize: 10,
       }
     )
   ),
@@ -218,7 +221,8 @@ export const AgentPolicyBaseSchema = {
               description: 'Target percentage of agents to auto upgrade',
             },
           }),
-        })
+        }),
+        { maxSize: 100 }
       ),
     ])
   ),
@@ -262,7 +266,7 @@ function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
 
 const BaseSSLSchema = schema.object({
   verification_mode: schema.maybe(schema.string()),
-  certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+  certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   certificate: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
   renegotiation: schema.maybe(schema.string()),
@@ -296,7 +300,10 @@ export const AgentPolicySchema = schema.object({
     schema.literal(agentPolicyStatuses.Inactive),
   ]),
   package_policies: schema.maybe(
-    schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(PackagePolicySchema)])
+    schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      schema.arrayOf(PackagePolicySchema, { maxSize: 1000 }),
+    ])
   ),
   updated_at: schema.string(),
   updated_by: schema.string(),
@@ -317,12 +324,13 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   schema_version: schema.maybe(schema.string()),
   package_policies: schema.maybe(
     schema.oneOf([
-      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
       schema.arrayOf(PackagePolicyResponseSchema, {
         meta: {
           description:
             'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter',
         },
+        maxSize: 10000,
       }),
     ])
   ),
@@ -345,13 +353,13 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
 
 export const FullAgentPolicyResponseSchema = schema.object({
   id: schema.string(),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   outputs: schema
     .recordOf(
       schema.string(),
       schema.object({
         type: schema.string(),
-        hosts: schema.maybe(schema.arrayOf(schema.string())),
+        hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
         ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         proxy_url: schema.maybe(schema.string()),
         proxy_headers: schema.maybe(ProxyHeadersSchema),
@@ -366,7 +374,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
   fleet: schema.maybe(
     schema.oneOf([
       schema.object({
-        hosts: schema.arrayOf(schema.string()),
+        hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
         proxy_url: schema.maybe(schema.string()),
         proxy_headers: schema.maybe(ProxyHeadersSchema),
         ssl: schema.maybe(BaseSSLSchema),
@@ -374,7 +382,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       }),
       schema.object({
         kibana: schema.object({
-          hosts: schema.arrayOf(schema.string()),
+          hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
           protocol: schema.string(),
           path: schema.maybe(schema.string()),
         }),
@@ -416,7 +424,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
                   dataset: schema.string(),
                   type: schema.maybe(schema.string()),
                 }),
-              })
+              }),
+              { maxSize: 10000 }
             )
             .extendsDeep({
               unknowns: 'allow',
@@ -432,13 +441,15 @@ export const FullAgentPolicyResponseSchema = schema.object({
                   schema.oneOf([schema.string(), schema.number()])
                 ),
               }),
-            })
+            }),
+            { maxSize: 10000 }
           )
         ),
       })
       .extendsDeep({
         unknowns: 'allow',
-      })
+      }),
+    { maxSize: 10000 }
   ),
   revision: schema.maybe(schema.number()),
   agent: schema.maybe(
@@ -504,7 +515,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
     schema.arrayOf(
       schema.object({
         id: schema.string(),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
   signed: schema.maybe(
@@ -525,7 +537,8 @@ const IntegrationsOutputSchema = schema.arrayOf(
     integrationPolicyName: schema.maybe(schema.string()),
     id: schema.maybe(schema.string()),
     name: schema.maybe(schema.string()),
-  })
+  }),
+  { maxSize: 1000 }
 );
 
 const OutputsForAgentPolicySchema = schema.object({
@@ -544,5 +557,5 @@ export const GetAgentPolicyOutputsResponseSchema = schema.object({
 });
 
 export const GetListAgentPolicyOutputsResponseSchema = schema.object({
-  items: schema.arrayOf(OutputsForAgentPolicySchema),
+  items: schema.arrayOf(OutputsForAgentPolicySchema, { maxSize: 10000 }),
 });
