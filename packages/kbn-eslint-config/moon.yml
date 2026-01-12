@@ -25,8 +25,8 @@ tags:
   - private
 fileGroups:
   src:
-    - '*.js'
-    - .eslintrc.js
+    - javascript.js
+    - jest.js
     - react.js
     - restricted_globals.js
     - typescript.js

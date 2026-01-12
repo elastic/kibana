@@ -1,6 +1,0 @@
-$schema: https://moonrepo.dev/schemas/project.json
-
-fileGroups:
-  src:
-    - '*.js'
-    - '.eslintrc.js'
