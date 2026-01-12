@@ -35,11 +35,12 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
+import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
+import { AlertsTab } from './attack_details/alerts_tab';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
-import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -156,6 +157,16 @@ export const TableSection = React.memo(
         // attack is undefined for the generic group marked as `-` which means this is the group of alerts that do not belong to any attack.
         const attack =
           selectedGroup && fieldBucket ? getAttack(selectedGroup, fieldBucket) : undefined;
+
+        if (!attack) {
+          return (
+            <AlertsTab
+              groupingFilters={groupingFilters}
+              defaultFilters={defaultFilters}
+              isTableLoading={isLoading}
+            />
+          );
+        }
 
         return (
           <AttackDetailsContainer
