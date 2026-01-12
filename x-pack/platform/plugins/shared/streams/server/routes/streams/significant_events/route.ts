@@ -97,7 +97,92 @@ const previewSignificantEventsRoute = createServerRoute({
   },
 });
 
-const readSignificantEventsRoute = createServerRoute({
+const readAllSignificantEventsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_significant_events 2023-10-31',
+  params: z.object({
+    query: z.object({
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
+      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+    }),
+  }),
+  options: {
+    access: 'public',
+    summary: 'Read all significant events',
+    description: 'Read all significant events',
+    availability: {
+      since: '9.4.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              readAllExample: {
+                value: {},
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully retrieved all significant events',
+          content: {
+            'application/json': {
+              examples: {
+                readAllResponse: {
+                  value: {
+                    significant_events: [
+                      {
+                        kql: { query: 'log.level: error' },
+                        occurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 10 }],
+                        change_points: { type: {} },
+                      },
+                    ],
+                    aggregated_occurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 10 }],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  },
+
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsGetResponse> => {
+    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { from, to, bucketSize } = params.query;
+
+    return await readSignificantEventsFromAlertsIndices(
+      {
+        from,
+        to,
+        bucketSize,
+      },
+      { queryClient, scopedClusterClient }
+    );
+  },
+});
+
+const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
@@ -262,7 +347,8 @@ const generateSignificantEventsRoute = createServerRoute({
 });
 
 export const significantEventsRoutes = {
-  ...readSignificantEventsRoute,
+  ...readAllSignificantEventsRoute,
+  ...readStreamSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,
 };
