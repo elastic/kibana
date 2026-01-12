@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-search';
 import { test } from '../fixtures';
 
-test.describe('Homepage - Viewer', { tag: ['@svlSearch'] }, () => {
+test.describe('Homepage - Viewer', { tag: ['@svlSearch', '@ess'] }, () => {
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await page.addInitScript(() => {
