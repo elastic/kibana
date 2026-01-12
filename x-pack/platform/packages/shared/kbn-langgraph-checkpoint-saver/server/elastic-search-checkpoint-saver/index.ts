@@ -213,12 +213,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-            configurable: {
-              thread_id: threadId,
-              checkpoint_ns: checkpointNs,
-              checkpoint_id: doc.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: threadId,
+                checkpoint_ns: checkpointNs,
+                checkpoint_id: doc.parent_checkpoint_id,
+              },
+            }
           : undefined,
     };
   }
@@ -290,12 +290,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-            configurable: {
-              thread_id: source.thread_id,
-              checkpoint_ns: source.checkpoint_ns,
-              checkpoint_id: source.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: source.thread_id,
+                checkpoint_ns: source.checkpoint_ns,
+                checkpoint_id: source.parent_checkpoint_id,
+              },
+            }
           : undefined,
       };
     }
@@ -347,7 +347,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     // Use storage adapter which handles index creation automatically
     await this.checkpointsStorage.update({
       id: compositeId,
-      doc: doc,
+      doc,
       doc_as_upsert: true,
       refresh: this.refreshPolicy,
       retry_on_conflict: 3,
@@ -437,7 +437,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
           `Failed to index writes for checkpoint ${checkpointId}. Errors: ${errorDetails}`
         );
       }
-
     } catch (error) {
       console.error(error);
       throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
@@ -445,5 +444,5 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   }
 
   // TODO: Implement this
-  async deleteThread() { }
+  async deleteThread() {}
 }
