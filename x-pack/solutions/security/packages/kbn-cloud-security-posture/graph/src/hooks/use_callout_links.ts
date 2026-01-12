@@ -10,6 +10,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 
+const CLOUD_ASSET_DISCOVERY_INTEGRATION_ID =
+  'cloud_asset_inventory-2773feaf-50bb-43f8-9fa9-8f9a5f85e566';
+
 /**
  * Hook to build Discover URL with cloud asset inventory data view preselected.
  *
@@ -27,10 +30,10 @@ const useDiscoverUrl = (
   useEffect(() => {
     if (!dataViews) return;
 
-    dataViews.find('Cloud Asset Discovery').then(
-      (dataViewList) => {
-        if (dataViewList && dataViewList.length > 0) {
-          setCloudAssetDataViewId(dataViewList[0].id);
+    dataViews.get(CLOUD_ASSET_DISCOVERY_INTEGRATION_ID).then(
+      (dataView) => {
+        if (dataView) {
+          setCloudAssetDataViewId(dataView.id);
         }
       },
       () => {
