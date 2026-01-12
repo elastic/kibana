@@ -12,6 +12,7 @@ import { UpdateRuleRoute } from '../routes/update_rule_route';
 import { GetRulesRoute } from '../routes/get_rules_route';
 import { GetRuleRoute } from '../routes/get_rule_route';
 import { DeleteRuleRoute } from '../routes/delete_rule_route';
+import { AlertActionRoute } from '../routes/alert_action_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -19,4 +20,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(GetRulesRoute);
   bind(Route).toConstantValue(GetRuleRoute);
   bind(Route).toConstantValue(DeleteRuleRoute);
+  bind(Route).toConstantValue(AlertActionRoute);
 }

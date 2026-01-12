@@ -20,6 +20,7 @@ export const ALERTING_V2_API_PRIVILEGES = {
   },
   alerts: {
     read: 'read-alerting-v2-alerts',
+    write: 'write-alerting-v2-alerts',
   },
 } as const;
 
@@ -35,6 +36,7 @@ const getPrivileges = () => ({
       ALERTING_V2_API_PRIVILEGES.rules.read,
       ALERTING_V2_API_PRIVILEGES.rules.write,
       ALERTING_V2_API_PRIVILEGES.alerts.read,
+      ALERTING_V2_API_PRIVILEGES.alerts.write,
     ],
   },
   read: {
