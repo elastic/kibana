@@ -89,12 +89,10 @@ export class ShareMenuManager {
 
         const exportIntegration = menuItems.find(
           (item) =>
-            item.shareType === 'integration' &&
-            item.id === exportId &&
-            item.groupId !== 'exportDerivatives'
+            item.shareType === 'integration' && item.id === exportId && item.groupId === 'export'
         );
 
-        if (!exportIntegration || exportIntegration.shareType !== 'integration') {
+        if (!exportIntegration) {
           return null;
         }
 
