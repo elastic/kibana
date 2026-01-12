@@ -88,10 +88,11 @@ export class ShareMenuManager {
         });
 
         const exportIntegration = menuItems.find(
-          (item) => item.shareType === 'integration' && item.id === exportId
+          (item) =>
+            item.shareType === 'integration' && item.id === exportId && item.groupId === 'export'
         );
 
-        if (!exportIntegration || exportIntegration.shareType !== 'integration') {
+        if (!exportIntegration) {
           return null;
         }
 
@@ -168,11 +169,7 @@ export class ShareMenuManager {
             item.id === derivativeId
         );
 
-        if (
-          !derivative ||
-          derivative.shareType !== 'integration' ||
-          derivative.groupId !== 'exportDerivatives'
-        ) {
+        if (!derivative) {
           return null;
         }
 
