@@ -8,6 +8,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
+import { SourceType } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
 import type { SyncTaskState } from './sync_private_locations_monitors_task';
@@ -53,11 +55,17 @@ export async function cleanUpDuplicatedPackagePolicies(
       result.saved_objects.forEach((monitor) => {
         monitor.attributes.locations?.forEach((location) => {
           const spaceId = monitor.namespaces?.[0];
+          const monOrigin = monitor.attributes.origin;
+          let monId = monitor.id;
+          if (monOrigin === SourceType.PROJECT) {
+            monId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
+          }
+
           if (!location.isServiceManaged && spaceId) {
             const policyId = privateLocationAPI.getPolicyId(
               {
-                origin: monitor.attributes.origin,
-                id: monitor.id,
+                origin: monOrigin,
+                id: monId,
               },
               location.id,
               spaceId
