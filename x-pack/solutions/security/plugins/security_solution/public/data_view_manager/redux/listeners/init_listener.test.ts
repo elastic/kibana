@@ -6,6 +6,7 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -17,6 +18,7 @@ import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../utils/create_default_data_view', () => ({
   createDefaultDataView: jest.fn(),
@@ -55,6 +57,7 @@ const mockListenerApi = {
   getState: mockGetState,
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
+const mockLogger = loggingSystemMock.createLogger();
 describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
 
@@ -69,10 +72,17 @@ describe('createInitListener', () => {
 
     listener = createInitListener({
       dataViews: mockDataViewsService,
+      logger: mockLogger,
       http,
       application,
       uiSettings,
       spaces,
+      storage: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      } as unknown as Storage,
     });
   });
 

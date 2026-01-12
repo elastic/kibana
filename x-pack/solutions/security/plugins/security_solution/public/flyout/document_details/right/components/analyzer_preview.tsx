@@ -9,6 +9,7 @@ import { find } from 'lodash/fp';
 import { EuiSkeletonText, EuiTreeView } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
@@ -21,6 +22,20 @@ import { getField } from '../../shared/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+
+const DATAVIEW_ERROR = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.dataViewErrorDescription"
+    defaultMessage="Unable to retrieve the data view for analyzer."
+  />
+);
+
+const ANALYZER_ERROR = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+    defaultMessage="An error is preventing this alert from being analyzed."
+  />
+);
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -57,10 +72,20 @@ export const AnalyzerPreview: React.FC = () => {
     ? experimentalAnalyzerPatterns
     : oldAnalyzerPatterns;
 
-  const index = find({ category: 'kibana', field: RULE_INDICES }, data);
-  const indices = index?.values ?? selectedPatterns; // adding sourcerer indices for non-alert documents
+  const { dataView, status } = useDataView(DataViewManagerScopeName.analyzer);
 
-  const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
+  const index = find({ category: 'kibana', field: RULE_INDICES }, data);
+  const indices = index?.values ?? selectedPatterns;
+
+  const needToFallbackToDataViewIndices = Boolean(index?.values);
+  const dataViewLoading =
+    needToFallbackToDataViewIndices && (status === 'loading' || status === 'pristine');
+
+  const {
+    statsNodes,
+    loading: dataLoading,
+    error,
+  } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimeline(scopeId),
     documentId,
     indices,
@@ -79,17 +104,29 @@ export const AnalyzerPreview: React.FC = () => {
 
   const showAnalyzerTree = items && items.length > 0 && !error;
 
-  return loading ? (
-    <EuiSkeletonText
-      data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
-      contentAriaLabel={i18n.translate(
-        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
-        {
-          defaultMessage: 'analyzer preview',
-        }
-      )}
-    />
-  ) : showAnalyzerTree ? (
+  if (dataViewLoading || dataLoading) {
+    return (
+      <EuiSkeletonText
+        data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
+        contentAriaLabel={i18n.translate(
+          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+          {
+            defaultMessage: 'analyzer preview',
+          }
+        )}
+      />
+    );
+  }
+
+  if (status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices())) {
+    return DATAVIEW_ERROR;
+  }
+
+  if (!showAnalyzerTree) {
+    return ANALYZER_ERROR;
+  }
+
+  return (
     <EuiTreeView
       items={items}
       display="compressed"
@@ -101,11 +138,6 @@ export const AnalyzerPreview: React.FC = () => {
       )}
       showExpansionArrows
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
-      defaultMessage="An error is preventing this alert from being analyzed."
     />
   );
 };

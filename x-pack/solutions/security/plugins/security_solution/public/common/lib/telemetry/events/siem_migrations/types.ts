@@ -16,7 +16,7 @@ export enum SiemMigrationsDashboardEventTypes {
   SetupMigrationDeleted = 'siem_migrations_dashboard_setup_migration_deleted',
   SetupResourcesUploaded = 'siem_migrations_dashboard_setup_resources_uploaded',
   SetupMigrationOpenResources = 'siem_migrations_dashboard_setup_migration_open_resources',
-  SetupQueryCopied = 'siem_migrations_dashboard_setup_rules_query_copied',
+  SetupQueryCopied = 'siem_migrations_dashboard_setup_query_copied',
   SetupMacrosQueryCopied = 'siem_migrations_dashboard_setup_macros_query_copied',
   SetupLookupNameCopied = 'siem_migrations_dashboard_setup_lookup_name_copied',
   StartMigration = 'siem_migrations_dashboard_start_migration',
@@ -111,7 +111,7 @@ export interface ReportSetupQueryCopiedActionParams {
 export interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId?: string;
-  rulesCount: number;
+  count: number;
 }
 export interface ReportSetupMigrationDeletedActionParams extends BaseResultActionParams {
   eventName: string;

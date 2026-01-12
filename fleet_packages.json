@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.6.10"
+    "version": "2.6.11"
   },
   {
     "name": "endpoint",
@@ -60,7 +60,7 @@
   },
   {
     "name": "security_ai_prompts",
-    "version": "1.0.12",
+    "version": "1.0.13",
     "allowSyncToPrerelease": true
   }
 ]

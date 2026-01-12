@@ -24,6 +24,9 @@ import {
 } from '../../../shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
@@ -33,6 +36,7 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
 
 const mockNavigateToAnalyzer = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_analyzer', () => {
@@ -50,6 +54,10 @@ jest.mock('react-redux', () => {
     ...original,
     useDispatch: () => jest.fn(),
   };
+});
+
+const dataView: DataView = createStubDataView({
+  spec: { title: '.alerts-security.alerts-default' },
 });
 
 const NO_ANALYZER_MESSAGE =
@@ -81,6 +89,13 @@ describe('AnalyzerPreviewContainer', () => {
       });
       (useInvestigateInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
+      });
+      (useDataView as jest.Mock).mockReturnValue({
+        status: 'ready',
+        dataView: {
+          ...dataView,
+          hasMatchedIndices: jest.fn().mockReturnValue(true),
+        },
       });
 
       const { getByTestId } = renderAnalyzerPreview();

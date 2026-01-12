@@ -89,6 +89,18 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       const serversConfigDir = projectUse.serversConfigDir;
       const configInstance = createScoutConfig(serversConfigDir, projectUse.configName, log);
 
+      log.info(
+        `Running tests against ${
+          configInstance.isCloud
+            ? configInstance.serverless
+              ? `MKI ${configInstance.projectType} project`
+              : 'ECH deployment'
+            : `local ${
+                configInstance.serverless ? `serverless ${configInstance.projectType}` : 'stateful'
+              } cluster`
+        }`
+      );
+
       use(configInstance);
     },
     { scope: 'worker' },
@@ -179,6 +191,8 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
         customRoleHash = newRoleHash;
       };
+      // Hide the announcements (including the sidenav tour) in the default space
+      await kbnClient.uiSettings.update({ hideAnnouncements: true });
 
       await use({ session, customRoleName, setCustomRole });
 
