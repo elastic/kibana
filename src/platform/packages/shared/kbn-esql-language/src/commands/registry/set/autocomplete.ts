@@ -36,10 +36,23 @@ export async function autocomplete(
 
   // SET /
   if (!settingArg) {
-    // settingLeftSide is not built until user types '=', so we need to check with regex if the leftside is present
+    const hasAssignmentOperator = /SET\s+\S+\s*=\s*$/.test(innerText);
     const hasSettingLeftSide = /SET\s+\S+\s+$/.test(innerText);
-    if (hasSettingLeftSide) {
+
+    // SET <setting> = /
+    if (hasAssignmentOperator) {
+      const settingNameMatch = innerText.match(/SET\s+(\S+)\s*=/);
+      // left side without the assignment operator
+      const settingName = settingNameMatch ? settingNameMatch[1] : '';
+      const settingsValueCompletions = COMPLETIONS_BY_SETTING_NAME[settingName] ?? [];
+      return settingsValueCompletions.map((item) => ({
+        ...item,
+        text: `"${item.text}";`,
+      }));
+      // SET <setting> /
+    } else if (hasSettingLeftSide) {
       return [{ ...assignCompletionItem, detail: '' }];
+      // SET /
     } else {
       return getSettingsCompletionItems(callbacks?.isServerless);
     }

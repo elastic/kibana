@@ -286,21 +286,40 @@ export class CstToAstConverter {
 
   private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
     const leftCtx = ctx.identifier();
-    const rightCtx = ctx.constant();
+    const constantCtx = ctx.constant();
+    const mapExpressionCtx = ctx.mapExpression();
 
-    if (!leftCtx || !rightCtx) {
+    if (!leftCtx || (!constantCtx && !mapExpressionCtx)) {
       return null;
     }
 
     const left = this.toIdentifierFromContext(leftCtx);
-    const right = this.fromConstantToArray(rightCtx) as ast.ESQLLiteral;
-    const expression = this.toBinaryExpression('=', ctx, [left, right]);
 
-    if (left.incomplete || right.incomplete) {
-      expression.incomplete = true;
+    // Handle constant value
+    if (constantCtx) {
+      const right = this.fromConstantToArray(constantCtx) as ast.ESQLLiteral;
+      const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+      if (left.incomplete || right.incomplete) {
+        expression.incomplete = true;
+      }
+
+      return expression;
     }
 
-    return expression;
+    // Handle map expression
+    if (mapExpressionCtx) {
+      const right = this.fromMapExpression(mapExpressionCtx);
+      const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+      if (left.incomplete || right?.incomplete) {
+        expression.incomplete = true;
+      }
+
+      return expression;
+    }
+
+    return null;
   }
 
   private toIdentifierFromContext(ctx: cst.IdentifierContext): ast.ESQLIdentifier {
