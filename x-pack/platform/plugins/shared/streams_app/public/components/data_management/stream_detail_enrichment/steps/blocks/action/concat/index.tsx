@@ -12,7 +12,6 @@ import { IgnoreFailureToggle } from '../ignore_toggles';
 export const ConcatProcessorForm = () => {
   return (
     <>
-      TODO: Implement Concat Processor Form
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
     </>
