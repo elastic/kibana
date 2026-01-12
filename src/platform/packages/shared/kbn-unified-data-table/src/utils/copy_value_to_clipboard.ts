@@ -193,7 +193,7 @@ export const copyRowsAsTextToClipboard = async ({
     const isLast = index === columns.length - 1;
 
     if (format === CopyAsTextFormat.markdown) {
-      const escapedText = text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+      const escapedText = text.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ');
       const start = isFirst ? '| ' : ' | ';
       const end = isLast ? ' |' : '';
       return `${start}${escapedText}${end}`;

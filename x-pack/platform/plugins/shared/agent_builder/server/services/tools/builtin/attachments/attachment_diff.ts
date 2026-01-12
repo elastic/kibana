@@ -13,8 +13,8 @@ import type { AttachmentToolsOptions } from './types';
 
 const attachmentDiffSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to compare versions'),
-  from_version: z.number().int().positive().describe('Starting version number'),
-  to_version: z.number().int().positive().describe('Ending version number'),
+  from_version: z.number().min(1).describe('Starting version number'),
+  to_version: z.number().min(1).describe('Ending version number'),
 });
 
 /**

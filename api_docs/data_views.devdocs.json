@@ -13704,10 +13704,6 @@
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
-              },
-              {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
@@ -13888,6 +13884,10 @@
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/platform/plugins/shared/vis_types/timeseries/common/index_patterns_utils.ts"
               },
@@ -13950,6 +13950,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/indicators/hooks/use_ti_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/redux/listeners/init_listener.ts"
               },
               {
                 "plugin": "securitySolution",
