@@ -968,6 +968,7 @@ export const QueryBarTopRow = React.memo(
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
+            openVisorOnSourceCommands
           />
         )
       );
