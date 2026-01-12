@@ -52,28 +52,29 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
 };
 
 /**
- * Generates an ESQL CASE statement that conditionally concatenates a JSON property.
- * If the value is NOT NULL, it returns the concatenated string, otherwise returns empty string.
+ * Generates an ESQL CASE statement that formats a JSON property.
+ * If the value is NOT NULL, it returns the value, otherwise returns "undefined".
+ * This ensures the JSON structure remains valid even when values are missing.
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
  * @param includeComma - Whether to include a comma prefix (default: true)
- * @returns ESQL CASE statement string
+ * @returns ESQL CONCAT statement string that always outputs a valid JSON property
  *
  * @example
  * ```typescript
- * concatPropIfExists('name', 'actorEntityName', false)
- * // Returns: CASE(actorEntityName IS NOT NULL, CONCAT("\"name\":\"", actorEntityName, "\""), "")
+ * formatJsonProperty('name', 'actorEntityName', false)
+ * // Returns: CONCAT("\"name\":\"", COALESCE(actorEntityName, "undefined"), "\"")
  *
- * concatPropIfExists('type', 'actorEntityType')
- * // Returns: CASE(actorEntityType IS NOT NULL, CONCAT(",\"type\":\"", actorEntityType, "\""), "")
+ * formatJsonProperty('type', 'actorEntityType')
+ * // Returns: CONCAT(",\"type\":\"", COALESCE(actorEntityType, "undefined"), "\"")
  * ```
  */
-export const concatPropIfExists = (
+export const formatJsonProperty = (
   propertyName: string,
   valueVar: string,
   includeComma: boolean = true
 ): string => {
   const comma = includeComma ? ',' : '';
-  return `CASE(${valueVar} IS NOT NULL, CONCAT("${comma}\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+  return `CONCAT("${comma}\\"${propertyName}\\":\\"", COALESCE(${valueVar}, "undefined"), "\\"")`;
 };

@@ -27,6 +27,27 @@ import {
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
 
+/**
+ * Recursively removes properties with string value "undefined" from an object.
+ * This handles cases where ESQL COALESCE returns "undefined" as a fallback string.
+ */
+const filterUndefinedStringValues = <T extends Record<string, unknown>>(obj: T): T => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === 'undefined') {
+      // Skip properties with string value "undefined"
+      continue;
+    }
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      // Recursively filter nested objects
+      result[key] = filterUndefinedStringValues(value as Record<string, unknown>);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result as T;
+};
+
 interface LabelEdges {
   source: string;
   target: string;
@@ -196,7 +217,7 @@ const createGroupedActorAndTargetNodes = (
   const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
     ? castArray(actorsDocData)
         .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
-        .map((actorData) => JSON.parse(actorData))
+        .map((actorData) => filterUndefinedStringValues(JSON.parse(actorData)))
     : [];
 
   const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
@@ -204,7 +225,7 @@ const createGroupedActorAndTargetNodes = (
         .filter(
           (targetData): targetData is string => targetData !== null && targetData !== undefined
         )
-        .map((targetData) => JSON.parse(targetData))
+        .map((targetData) => filterUndefinedStringValues(JSON.parse(targetData)))
     : [];
 
   const actorGroup: {

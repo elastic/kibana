@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFieldNamespace, generateFieldHintCases, concatPropIfExists } from './esql.utils';
+import { getFieldNamespace, generateFieldHintCases, formatJsonProperty } from './esql.utils';
 
 describe('esql_utils', () => {
   describe('getFieldNamespace', () => {
@@ -78,44 +78,44 @@ describe('esql_utils', () => {
     });
   });
 
-  describe('concatPropIfExists', () => {
-    it('should generate CASE statement with comma prefix by default', () => {
-      const result = concatPropIfExists('type', 'actorEntityType');
+  describe('formatJsonProperty', () => {
+    it('should generate CONCAT statement with comma prefix by default', () => {
+      const result = formatJsonProperty('type', 'actorEntityType');
 
       expect(result).toBe(
-        `CASE(actorEntityType IS NOT NULL, CONCAT(",\\"type\\":\\"", actorEntityType, "\\""), "")`
+        'CONCAT(",\\"type\\":\\"", COALESCE(actorEntityType, "undefined"), "\\"")'
       );
     });
 
-    it('should generate CASE statement without comma when includeComma is false', () => {
-      const result = concatPropIfExists('name', 'actorEntityName', false);
+    it('should generate CONCAT statement without comma when includeComma is false', () => {
+      const result = formatJsonProperty('name', 'actorEntityName', false);
 
       expect(result).toBe(
-        `CASE(actorEntityName IS NOT NULL, CONCAT("\\"name\\":\\"", actorEntityName, "\\""), "")`
+        'CONCAT("\\"name\\":\\"", COALESCE(actorEntityName, "undefined"), "\\"")'
       );
     });
 
     it('should handle sub_type property', () => {
-      const result = concatPropIfExists('sub_type', 'actorEntitySubType');
+      const result = formatJsonProperty('sub_type', 'actorEntitySubType');
 
       expect(result).toBe(
-        `CASE(actorEntitySubType IS NOT NULL, CONCAT(",\\"sub_type\\":\\"", actorEntitySubType, "\\""), "")`
+        'CONCAT(",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, "undefined"), "\\"")'
       );
     });
 
     it('should handle target entity properties', () => {
-      const result = concatPropIfExists('type', 'targetEntityType');
+      const result = formatJsonProperty('type', 'targetEntityType');
 
       expect(result).toBe(
-        `CASE(targetEntityType IS NOT NULL, CONCAT(",\\"type\\":\\"", targetEntityType, "\\""), "")`
+        'CONCAT(",\\"type\\":\\"", COALESCE(targetEntityType, "undefined"), "\\"")'
       );
     });
 
     it('should handle target name property without comma', () => {
-      const result = concatPropIfExists('name', 'targetEntityName', false);
+      const result = formatJsonProperty('name', 'targetEntityName', false);
 
       expect(result).toBe(
-        `CASE(targetEntityName IS NOT NULL, CONCAT("\\"name\\":\\"", targetEntityName, "\\""), "")`
+        'CONCAT("\\"name\\":\\"", COALESCE(targetEntityName, "undefined"), "\\"")'
       );
     });
   });

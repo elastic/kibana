@@ -1273,6 +1273,141 @@ describe('parseRecords', () => {
     });
   });
 
+  describe('filterUndefinedStringValues', () => {
+    it('should filter out entity properties with string value "undefined"', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorNodeId: 'actor1',
+          targetNodeId: 'target1',
+          actorEntityType: '',
+          targetEntityType: '',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"name":"undefined","type":"undefined","sub_type":"undefined","ecsParentField":"service","availableInEntityStore":false}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"name":"ValidName","type":"undefined","sub_type":"ValidSubType","ecsParentField":"entity","availableInEntityStore":false}}',
+          ],
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"id":"event1","type":"event"}'],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
+
+      const result = parseRecords(mockLogger, records);
+
+      // Actor node should have entity with only non-"undefined" properties
+      const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+      expect(actorNode).toBeDefined();
+      expect(actorNode.documentsData).toHaveLength(1);
+      expect(actorNode.documentsData![0]).toEqual({
+        id: 'actor1',
+        type: 'entity',
+        entity: {
+          ecsParentField: 'service',
+          availableInEntityStore: false,
+        },
+      });
+      // Verify "undefined" string values are filtered out
+      expect(actorNode.documentsData![0].entity).not.toHaveProperty('name');
+      expect(actorNode.documentsData![0].entity).not.toHaveProperty('type');
+      expect(actorNode.documentsData![0].entity).not.toHaveProperty('sub_type');
+
+      // Target node should keep valid values and filter out "undefined" ones
+      const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
+      expect(targetNode).toBeDefined();
+      expect(targetNode.documentsData).toHaveLength(1);
+      expect(targetNode.documentsData![0]).toEqual({
+        id: 'target1',
+        type: 'entity',
+        entity: {
+          name: 'ValidName',
+          sub_type: 'ValidSubType',
+          ecsParentField: 'entity',
+          availableInEntityStore: false,
+        },
+      });
+      // Verify only "type" with "undefined" value is filtered out
+      expect(targetNode.documentsData![0].entity).toHaveProperty('name', 'ValidName');
+      expect(targetNode.documentsData![0].entity).not.toHaveProperty('type');
+      expect(targetNode.documentsData![0].entity).toHaveProperty('sub_type', 'ValidSubType');
+    });
+
+    it('should preserve valid entity properties when no "undefined" values exist', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorNodeId: 'actor1',
+          targetNodeId: 'target1',
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorEntityName: 'John Doe',
+          targetEntityName: 'web-server-01',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"name":"web-server-01","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
+          ],
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"id":"event1","type":"event"}'],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
+
+      const result = parseRecords(mockLogger, records);
+
+      // All properties should be preserved
+      const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+      expect(actorNode).toBeDefined();
+      expect(actorNode.documentsData![0]).toEqual({
+        id: 'actor1',
+        type: 'entity',
+        entity: {
+          name: 'John Doe',
+          type: 'user',
+          sub_type: 'Identity Users',
+          ecsParentField: 'user',
+          availableInEntityStore: true,
+        },
+      });
+
+      const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
+      expect(targetNode).toBeDefined();
+      expect(targetNode.documentsData![0]).toEqual({
+        id: 'target1',
+        type: 'entity',
+        entity: {
+          name: 'web-server-01',
+          type: 'host',
+          sub_type: 'Server',
+          ecsParentField: 'host',
+          availableInEntityStore: true,
+        },
+      });
+    });
+  });
+
   describe('ecsParentField handling', () => {
     it('returns actor and target documentsData with ecsParentField when there is no matching entity enrichment - single actor and target', () => {
       const records: GraphEdge[] = [

@@ -23,7 +23,7 @@ import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
-import { generateFieldHintCases, concatPropIfExists } from './utils';
+import { generateFieldHintCases, formatJsonProperty } from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
@@ -230,9 +230,9 @@ const buildEnrichedEntityFieldsEsql = (): string => {
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      ${concatPropIfExists('name', 'actorEntityName', false)},
-      ${concatPropIfExists('type', 'actorEntityType')},
-      ${concatPropIfExists('sub_type', 'actorEntitySubType')},
+      ${formatJsonProperty('name', 'actorEntityName', false)},
+      ${formatJsonProperty('type', 'actorEntityType')},
+      ${formatJsonProperty('sub_type', 'actorEntitySubType')},
       CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -249,9 +249,9 @@ const buildEnrichedEntityFieldsEsql = (): string => {
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      ${concatPropIfExists('name', 'targetEntityName', false)},
-      ${concatPropIfExists('type', 'targetEntityType')},
-      ${concatPropIfExists('sub_type', 'targetEntitySubType')},
+      ${formatJsonProperty('name', 'targetEntityName', false)},
+      ${formatJsonProperty('type', 'targetEntityType')},
+      ${formatJsonProperty('sub_type', 'targetEntitySubType')},
       CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
@@ -329,8 +329,8 @@ ${targetFieldHintCases},
 ${
   isLookupIndexAvailable
     ? `
-| RENAME original_entity_id = entity.id
-| RENAME original_entity_target_id = entity.target.id  
+| DROP entity.id
+| DROP entity.target.id  
 // rename entity.*fields before next pipeline to avoid name collisions
 | EVAL entity.id = actorEntityId
 | LOOKUP JOIN ${getEntitiesLatestIndexName(spaceId)} ON entity.id
