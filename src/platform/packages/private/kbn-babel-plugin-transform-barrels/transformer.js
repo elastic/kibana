@@ -9,10 +9,19 @@
 
 const path = require('path');
 const fs = require('fs');
-const { createImportDeclaration, isTypeOnlyImport } = require('./ast_utils');
+const {
+  createImportDeclaration,
+  createExportNamedDeclaration,
+  isTypeOnlyImport,
+  isTypeOnlyExport,
+} = require('./ast_utils');
 
 /**
  * @typedef {import('./ast_utils').ImportSpecifierInfo} ImportSpecifierInfo
+ */
+
+/**
+ * @typedef {import('./ast_utils').ExportSpecifierInfo} ExportSpecifierInfo
  */
 
 /**
@@ -46,7 +55,7 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
    * @returns {boolean}
    */
   const isTypeSpecifier = (specifier) =>
-    specifier.importKind === 'type' ||
+    ('importKind' in specifier && specifier.importKind === 'type') ||
     (specifier.type === 'ImportSpecifier' && isTypeOnlyImport(specifier));
 
   // Resolve the import source to absolute path and get barrel entry
@@ -262,4 +271,200 @@ function toImportPath(absolutePath, fromDir, packageName, packageRoot, publicSub
   return relativePath;
 }
 
-module.exports = { transformImportDeclaration };
+/**
+ * Transform a barrel re-export to direct re-exports.
+ *
+ * Example:
+ *   export { Button, Modal } from './components';
+ * Becomes:
+ *   export { Button } from './components/Button/Button';
+ *   export { Modal } from './components/Modal/Modal';
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').ExportNamedDeclaration>} nodePath
+ * @param {import('@babel/core').PluginPass} state
+ * @param {typeof import('@babel/types')} t
+ * @param {import('./types').BarrelIndex} barrelIndex
+ */
+function transformExportNamedDeclaration(nodePath, state, t, barrelIndex) {
+  const node = nodePath.node;
+
+  // Skip type-only exports: export type { X } from 'pkg'
+  if (node.exportKind === 'type') {
+    return;
+  }
+
+  // Must have a source (this is a re-export)
+  if (!node.source) {
+    return;
+  }
+
+  const exportSource = node.source.value;
+  const currentFileDir = path.dirname(state.filename);
+
+  // Resolve the export source to barrel entry
+  const barrelEntry = resolveToBarrelEntry(exportSource, currentFileDir, barrelIndex);
+  if (!barrelEntry) {
+    return;
+  }
+
+  const { exports, packageName, packageRoot } = barrelEntry;
+
+  // Collect new exports grouped by target path
+  /** @type {Map<string, { specifiers: ExportSpecifierInfo[], publicSubpath?: string }>} */
+  const newExports = new Map();
+
+  /** @type {Array<import('@babel/types').ExportSpecifier | import('@babel/types').ExportNamespaceSpecifier>} */
+  const unchangedSpecifiers = [];
+
+  for (const specifier of node.specifiers) {
+    // Keep type-only specifiers unchanged
+    if (specifier.type === 'ExportSpecifier' && isTypeOnlyExport(specifier)) {
+      unchangedSpecifiers.push(specifier);
+      continue;
+    }
+
+    if (specifier.type === 'ExportSpecifier') {
+      // In ExportSpecifier, local is always an Identifier
+      const localName = specifier.local.name;
+      const exported = specifier.exported;
+      // exported can be Identifier or StringLiteral
+      const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
+      const exportInfo = exports[localName];
+
+      if (exportInfo) {
+        if (!newExports.has(exportInfo.path)) {
+          newExports.set(exportInfo.path, {
+            specifiers: [],
+            publicSubpath: exportInfo.publicSubpath,
+          });
+        }
+        newExports.get(exportInfo.path)?.specifiers.push({
+          localName: exportInfo.localName,
+          exportedName,
+        });
+      } else {
+        unchangedSpecifiers.push(specifier);
+      }
+    } else if (specifier.type === 'ExportNamespaceSpecifier') {
+      // Cannot transform namespace exports: export * as X from 'pkg'
+      unchangedSpecifiers.push(specifier);
+    }
+  }
+
+  if (newExports.size === 0) {
+    return;
+  }
+
+  /** @type {import('@babel/types').ExportNamedDeclaration[]} */
+  const newNodes = [];
+
+  for (const [targetPath, { specifiers, publicSubpath }] of newExports) {
+    const outputPath = toImportPath(
+      targetPath,
+      currentFileDir,
+      packageName,
+      packageRoot,
+      publicSubpath
+    );
+    newNodes.push(createExportNamedDeclaration(t, specifiers, outputPath));
+  }
+
+  if (unchangedSpecifiers.length > 0) {
+    // Keep fallback export for unchanged specifiers FIRST (circular dependency safety)
+    const fallback = t.exportNamedDeclaration(
+      null,
+      unchangedSpecifiers,
+      t.stringLiteral(exportSource)
+    );
+    fallback.exportKind = node.exportKind;
+    newNodes.unshift(fallback);
+  }
+
+  if (newNodes.length === 1) {
+    nodePath.replaceWith(newNodes[0]);
+  } else {
+    nodePath.replaceWithMultiple(newNodes);
+  }
+}
+
+/**
+ * Transform a barrel star re-export to direct re-exports.
+ *
+ * Example:
+ *   export * from './components';
+ * Becomes:
+ *   export { Button } from './components/Button/Button';
+ *   export { Modal } from './components/Modal/Modal';
+ *
+ * Note: This expands the star export into individual named exports.
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').ExportAllDeclaration>} nodePath
+ * @param {import('@babel/core').PluginPass} state
+ * @param {typeof import('@babel/types')} t
+ * @param {import('./types').BarrelIndex} barrelIndex
+ */
+function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
+  const node = nodePath.node;
+  const exportSource = node.source.value;
+  const currentFileDir = path.dirname(state.filename);
+
+  // Resolve the export source to barrel entry
+  const barrelEntry = resolveToBarrelEntry(exportSource, currentFileDir, barrelIndex);
+  if (!barrelEntry) {
+    return;
+  }
+
+  const { exports, packageName, packageRoot } = barrelEntry;
+
+  // Group all exports by their target path
+  /** @type {Map<string, { specifiers: ExportSpecifierInfo[], publicSubpath?: string }>} */
+  const newExports = new Map();
+
+  for (const [exportName, exportInfo] of Object.entries(exports)) {
+    // Skip default export (export * doesn't re-export default)
+    if (exportName === 'default') {
+      continue;
+    }
+
+    if (!newExports.has(exportInfo.path)) {
+      newExports.set(exportInfo.path, {
+        specifiers: [],
+        publicSubpath: exportInfo.publicSubpath,
+      });
+    }
+    newExports.get(exportInfo.path)?.specifiers.push({
+      localName: exportInfo.localName,
+      exportedName: exportName,
+    });
+  }
+
+  if (newExports.size === 0) {
+    return;
+  }
+
+  /** @type {import('@babel/types').ExportNamedDeclaration[]} */
+  const newNodes = [];
+
+  for (const [targetPath, { specifiers, publicSubpath }] of newExports) {
+    const outputPath = toImportPath(
+      targetPath,
+      currentFileDir,
+      packageName,
+      packageRoot,
+      publicSubpath
+    );
+    newNodes.push(createExportNamedDeclaration(t, specifiers, outputPath));
+  }
+
+  if (newNodes.length === 1) {
+    nodePath.replaceWith(newNodes[0]);
+  } else {
+    nodePath.replaceWithMultiple(newNodes);
+  }
+}
+
+module.exports = {
+  transformImportDeclaration,
+  transformExportNamedDeclaration,
+  transformExportAllDeclaration,
+};

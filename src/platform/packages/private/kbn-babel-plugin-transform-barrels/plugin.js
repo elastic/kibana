@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { transformImportDeclaration } = require('./transformer');
+const {
+  transformImportDeclaration,
+  transformExportNamedDeclaration,
+  transformExportAllDeclaration,
+} = require('./transformer');
 
 /**
- * Babel plugin that transforms barrel imports to direct imports.
+ * Babel plugin that transforms barrel imports and re-exports to direct paths.
  *
  * @param {{ types: typeof import('@babel/types') }} babel
  * @returns {import('@babel/core').PluginObj<import('@babel/core').PluginPass & { opts: import('./types').PluginOptions }>}
@@ -22,13 +26,21 @@ module.exports = function barrelTransformPlugin({ types: t }) {
     visitor: {
       ImportDeclaration(nodePath, state) {
         const { barrelIndex } = state.opts;
-
-        // NO-OP if barrelIndex is not provided
-        if (!barrelIndex) {
-          return;
-        }
-
+        if (!barrelIndex) return;
         transformImportDeclaration(nodePath, state, t, barrelIndex);
+      },
+
+      ExportNamedDeclaration(nodePath, state) {
+        const { barrelIndex } = state.opts;
+        if (!barrelIndex) return;
+        if (!nodePath.node.source) return;
+        transformExportNamedDeclaration(nodePath, state, t, barrelIndex);
+      },
+
+      ExportAllDeclaration(nodePath, state) {
+        const { barrelIndex } = state.opts;
+        if (!barrelIndex) return;
+        transformExportAllDeclaration(nodePath, state, t, barrelIndex);
       },
     },
   };

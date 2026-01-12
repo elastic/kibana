@@ -15,6 +15,12 @@
  */
 
 /**
+ * @typedef {Object} ExportSpecifierInfo
+ * @property {string} localName - The local name in the source module
+ * @property {string} exportedName - The name to export as
+ */
+
+/**
  * Create an import declaration AST node.
  *
  * @param {typeof import('@babel/types')} t - Babel types
@@ -40,6 +46,24 @@ function createImportDeclaration(t, specifiers, sourcePath) {
 }
 
 /**
+ * Create an export named declaration AST node with a source.
+ * e.g., export { Foo, Bar as Baz } from './source'
+ *
+ * @param {typeof import('@babel/types')} t - Babel types
+ * @param {ExportSpecifierInfo[]} specifiers - Export specifiers to create
+ * @param {string} sourcePath - The source path to export from
+ * @returns {import('@babel/types').ExportNamedDeclaration}
+ */
+function createExportNamedDeclaration(t, specifiers, sourcePath) {
+  const exportSpecifiers = specifiers.map((spec) => {
+    // export { localName as exportedName } from 'source'
+    return t.exportSpecifier(t.identifier(spec.localName), t.identifier(spec.exportedName));
+  });
+
+  return t.exportNamedDeclaration(null, exportSpecifiers, t.stringLiteral(sourcePath));
+}
+
+/**
  * Check if an import specifier is for a type-only import.
  *
  * @param {import('@babel/types').ImportSpecifier} specifier
@@ -49,4 +73,19 @@ function isTypeOnlyImport(specifier) {
   return specifier.importKind === 'type';
 }
 
-module.exports = { createImportDeclaration, isTypeOnlyImport };
+/**
+ * Check if an export specifier is for a type-only export.
+ *
+ * @param {import('@babel/types').ExportSpecifier} specifier
+ * @returns {boolean}
+ */
+function isTypeOnlyExport(specifier) {
+  return specifier.exportKind === 'type';
+}
+
+module.exports = {
+  createImportDeclaration,
+  createExportNamedDeclaration,
+  isTypeOnlyImport,
+  isTypeOnlyExport,
+};

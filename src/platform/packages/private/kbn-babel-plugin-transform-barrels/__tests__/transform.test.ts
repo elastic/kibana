@@ -601,4 +601,113 @@ describe('barrel transform plugin', () => {
       );
     });
   });
+
+  describe('named export re-export transformations', () => {
+    it('transforms a single named re-export to direct path', () => {
+      const result = transform({ code: `export { Button } from './components';` });
+
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+      // Barrel path should be replaced with direct path
+      expect(result?.code).not.toMatch(/['"]\.\/components['"]/);
+      expect(result?.code).toContain('export {');
+    });
+
+    it('transforms multiple named re-exports to separate direct paths', () => {
+      const result = transform({ code: `export { Button, Modal } from './components';` });
+
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Modal.expectedPath);
+    });
+
+    it('preserves export alias when transforming', () => {
+      const result = transform({ code: `export { Button as MyButton } from './components';` });
+
+      expect(result?.code).toContain('MyButton');
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+    });
+
+    it('keeps unresolvable exports in original barrel', () => {
+      const result = transform({ code: `export { Button, Unknown } from './components';` });
+
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+      // Barrel path can use single or double quotes depending on Babel output
+      expect(result?.code).toMatch(/['"]\.\/components['"]/);
+      expect(result?.code).toContain('Unknown');
+    });
+
+    it('skips type-only re-exports', () => {
+      const result = transform({ code: `export type { Button } from './components';` });
+
+      // Type-only exports should not be transformed, so barrel path remains
+      expect(result?.code).toMatch(/['"]\.\/components['"]/);
+      expect(result?.code).not.toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+    });
+
+    it('emits barrel export BEFORE direct exports for circular dependency safety', () => {
+      const result = transform({ code: `export { Button, Unknown } from './components';` });
+
+      // Barrel export (with Unknown) should come before direct export
+      const barrelExportMatch = result?.code?.match(/['"]\.\/components['"]/);
+      const barrelExportPos = barrelExportMatch?.index ?? -1;
+      const directExportPos =
+        result?.code?.indexOf(COMPONENTS_BARREL.exports.Button.expectedPath) ?? -1;
+
+      expect(barrelExportPos).toBeGreaterThan(-1);
+      expect(directExportPos).toBeGreaterThan(-1);
+      expect(barrelExportPos).toBeLessThan(directExportPos);
+    });
+  });
+
+  describe('star export transformations', () => {
+    it('transforms export * to individual named exports', () => {
+      const result = transform({ code: `export * from './components';` });
+
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Modal.expectedPath);
+      // Barrel path should be replaced with direct paths
+      expect(result?.code).not.toMatch(/['"]\.\/components['"]/);
+      expect(result?.code).not.toContain('export *');
+    });
+
+    it('does not re-export default from star export', () => {
+      const BARREL_WITH_DEFAULT_PATH = '/test/src/barrel-with-default/index.ts';
+      const barrelWithDefault: TestBarrelIndex = {
+        [BARREL_WITH_DEFAULT_PATH]: {
+          exports: {
+            Button: {
+              path: '/test/src/barrel-with-default/Button.ts',
+              type: 'named',
+              localName: 'Button',
+              importedName: 'Button',
+              expectedPath: './barrel-with-default/Button',
+            },
+            default: {
+              path: '/test/src/barrel-with-default/Default.ts',
+              type: 'default',
+              localName: 'Default',
+              importedName: 'default',
+              expectedPath: './barrel-with-default/Default',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `export * from './barrel-with-default';`,
+        barrelIndex: barrelWithDefault,
+      });
+
+      expect(result?.code).toContain('Button');
+      // default should not be re-exported via export *
+      expect(result?.code).not.toMatch(/export\s*{\s*default/);
+    });
+
+    it('leaves export * unchanged when barrel not in index', () => {
+      const result = transform({
+        code: `export * from './unknown-barrel';`,
+      });
+
+      expect(result?.code).toContain(`export * from './unknown-barrel'`);
+    });
+  });
 });
