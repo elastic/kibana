@@ -40,7 +40,6 @@ export interface RenderingServiceContextDeps {
   userProfile: UserProfileService;
   chrome: InternalChromeStart;
   coreEnv: CoreEnv;
-  chrome: InternalChromeStart;
 }
 
 export interface RenderingServiceRenderCoreDeps {

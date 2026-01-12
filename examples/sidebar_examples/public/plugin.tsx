@@ -21,6 +21,7 @@ interface SetupDeps {
 
 export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
+    debugger;
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
       iconType: 'editorAlignLeft',

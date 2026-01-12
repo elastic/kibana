@@ -169,7 +169,6 @@ export class ChromeService {
   public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
-    return {};
 
     return {
       sidebar: this.sidebar.setup(),

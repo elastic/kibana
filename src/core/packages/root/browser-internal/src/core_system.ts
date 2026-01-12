@@ -266,6 +266,7 @@ export class CoreSystem {
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       const chrome = this.chrome.setup({ analytics });
+      debugger;
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
