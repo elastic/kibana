@@ -12,7 +12,6 @@ import {
   mockHandoverToAnswer,
   mockFinalAnswer,
 } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/proxy_scenario/calls';
-import { createToolCallMessage } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { LLM_PROXY_FINAL_MESSAGE } from './constants';
 
 const MOCKED_TITLE = 'Mocked conversation title';
@@ -41,49 +40,6 @@ export function setupToolCallThenAnswer({
   });
 
   mockHandoverToAnswer(llmProxy, handoverResponse);
-
-  mockFinalAnswer(llmProxy, finalResponse);
-}
-
-function interceptSelectRelevantAlertFields({
-  llmProxy,
-  fieldIds = [],
-}: {
-  llmProxy: LlmProxy;
-  fieldIds?: string[];
-}) {
-  void llmProxy.interceptors.toolChoice({
-    name: 'structuredOutput',
-    response: createToolCallMessage('structuredOutput', {
-      fieldIds,
-    }),
-  });
-}
-
-export function setupObservabilityAlertsToolThenAnswer({
-  llmProxy,
-  toolName,
-  toolArg,
-  title = MOCKED_TITLE,
-  fieldIds = [],
-  finalResponse = LLM_PROXY_FINAL_MESSAGE,
-}: {
-  llmProxy: LlmProxy;
-  toolName: string;
-  toolArg: Record<string, unknown>;
-  title?: string;
-  fieldIds?: string[];
-  finalResponse?: string;
-}) {
-  mockTitleGeneration(llmProxy, title);
-
-  mockAgentToolCall({
-    llmProxy,
-    toolName,
-    toolArg,
-  });
-
-  interceptSelectRelevantAlertFields({ llmProxy, fieldIds });
 
   mockFinalAnswer(llmProxy, finalResponse);
 }
