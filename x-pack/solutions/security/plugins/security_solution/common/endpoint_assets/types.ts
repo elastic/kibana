@@ -1,0 +1,392 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Endpoint Asset Visibility & Security Posture - Type Definitions
+ *
+ * Schema is designed to be compatible with:
+ * - Entity Store (.entities.v1.latest.security_*)
+ * - Asset Inventory (entities-generic-latest)
+ * - ECS (host.*, agent.*)
+ *
+ * @see /Users/tomaszciecierski/Projects/elastic/kibana/.claude/plans/asset-management/schema-alignment-entity-store.md
+ */
+
+import {
+  POSTURE_LEVELS,
+  POSTURE_STATUS,
+  ENTITY_TYPE,
+  ENTITY_SUB_TYPE,
+  ENTITY_SOURCE,
+  ASSET_CRITICALITY_LEVELS,
+} from './constants';
+
+// =============================================================================
+// Core Enums & Literal Types
+// =============================================================================
+
+/** Posture level: LOW, MEDIUM, HIGH, CRITICAL */
+export type PostureLevel = (typeof POSTURE_LEVELS)[keyof typeof POSTURE_LEVELS];
+
+/** Posture status: OK, FAIL, UNKNOWN */
+export type PostureStatus = (typeof POSTURE_STATUS)[keyof typeof POSTURE_STATUS];
+
+/** Entity type: host */
+export type EntityType = (typeof ENTITY_TYPE)[keyof typeof ENTITY_TYPE];
+
+/** Entity sub-type: endpoint, cloud_host */
+export type EntitySubType = (typeof ENTITY_SUB_TYPE)[keyof typeof ENTITY_SUB_TYPE];
+
+/** Entity source: osquery, cloud_asset_discovery */
+export type EntitySourceType = (typeof ENTITY_SOURCE)[keyof typeof ENTITY_SOURCE];
+
+/** Asset criticality levels from Asset Inventory */
+export type AssetCriticality = (typeof ASSET_CRITICALITY_LEVELS)[keyof typeof ASSET_CRITICALITY_LEVELS];
+
+/** Platform type */
+export type Platform = 'windows' | 'macos' | 'linux' | 'unknown';
+
+/** Asset category */
+export type AssetCategory = 'endpoint' | 'cloud_resource';
+
+// =============================================================================
+// Entity Store Compatible Fields
+// =============================================================================
+
+/**
+ * Entity identity fields - compatible with Entity Store
+ */
+export interface EntityIdentity {
+  /** Primary identifier - maps to host.id */
+  id: string;
+  /** Display name - maps to host.name */
+  name: string;
+  /** Entity type - always 'host' for endpoints */
+  type: EntityType;
+  /** Sub-type to differentiate from cloud hosts */
+  sub_type: EntitySubType;
+  /** Data source identifier */
+  source: EntitySourceType;
+  /** Risk from Risk Engine (future integration) */
+  risk?: {
+    calculated_level?: 'Low' | 'Moderate' | 'High' | 'Critical';
+    calculated_score?: number;
+  };
+}
+
+// =============================================================================
+// Asset Inventory Compatible Fields
+// =============================================================================
+
+/**
+ * Asset fields - compatible with Asset Inventory
+ */
+export interface AssetAttributes {
+  /** Asset criticality level - shared with Asset Inventory */
+  criticality?: AssetCriticality;
+  /** Platform: windows, macos, linux */
+  platform: Platform;
+  /** Asset category: 'endpoint' vs 'cloud_resource' */
+  category: AssetCategory;
+}
+
+// =============================================================================
+// ECS Compatible Fields
+// =============================================================================
+
+/**
+ * ECS Host fields for correlation with other security data
+ */
+export interface HostFields {
+  id: string;
+  name: string;
+  hostname?: string;
+  os: {
+    name?: string;
+    version?: string;
+    platform?: string;
+    family?: string;
+  };
+  architecture?: string;
+  ip?: string[];
+  mac?: string[];
+}
+
+/**
+ * ECS Agent fields
+ */
+export interface AgentFields {
+  id?: string;
+  name?: string;
+  type?: string;
+  version?: string;
+}
+
+// =============================================================================
+// Endpoint-Specific Domain Fields
+// =============================================================================
+
+/**
+ * Endpoint lifecycle tracking
+ */
+export interface EndpointLifecycle {
+  /** First time this asset was seen */
+  first_seen: string;
+  /** Last time this asset was seen */
+  last_seen: string;
+  /** Last time this document was updated */
+  last_updated?: string;
+}
+
+/**
+ * Hardware facts from osquery
+ */
+export interface EndpointHardware {
+  cpu?: string;
+  cpu_cores?: number;
+  memory_gb?: number;
+  vendor?: string;
+  model?: string;
+}
+
+/**
+ * Network interface information
+ */
+export interface NetworkInterface {
+  name: string;
+  mac?: string;
+  ip?: string[];
+}
+
+/**
+ * Network facts
+ */
+export interface EndpointNetwork {
+  interfaces?: NetworkInterface[];
+  listening_ports_count?: number;
+}
+
+/**
+ * Software inventory summary
+ */
+export interface EndpointSoftware {
+  installed_count?: number;
+  services_count?: number;
+}
+
+/**
+ * Security posture checks result
+ */
+export interface PostureChecks {
+  passed: number;
+  failed: number;
+  total: number;
+}
+
+/**
+ * Security posture assessment
+ */
+export interface EndpointPosture {
+  /** Posture score 0-100 */
+  score: number;
+  /** Posture level: LOW, MEDIUM, HIGH, CRITICAL */
+  level: PostureLevel;
+  /** Disk encryption status */
+  disk_encryption: PostureStatus;
+  /** Firewall enabled status */
+  firewall_enabled: boolean;
+  /** Secure boot status */
+  secure_boot: boolean;
+  /** Check results summary */
+  checks: PostureChecks;
+  /** List of failed check names */
+  failed_checks: string[];
+}
+
+/**
+ * Privilege analysis
+ */
+export interface EndpointPrivileges {
+  /** List of local admin usernames */
+  local_admins: string[];
+  /** Count of local admins */
+  admin_count: number;
+  /** List of root/UID 0 users */
+  root_users: string[];
+  /** Whether elevated privilege risk exists */
+  elevated_risk: boolean;
+}
+
+/**
+ * Drift detection
+ */
+export interface EndpointDrift {
+  /** Last configuration change timestamp */
+  last_change?: string;
+  /** Types of changes detected */
+  change_types: string[];
+  /** Whether recently changed (within threshold) */
+  recently_changed: boolean;
+}
+
+/**
+ * All endpoint-specific fields
+ */
+export interface EndpointDomainFields {
+  lifecycle: EndpointLifecycle;
+  hardware: EndpointHardware;
+  network: EndpointNetwork;
+  software: EndpointSoftware;
+  posture: EndpointPosture;
+  privileges: EndpointPrivileges;
+  drift: EndpointDrift;
+}
+
+// =============================================================================
+// Complete Endpoint Asset Document
+// =============================================================================
+
+/**
+ * Complete Endpoint Asset document as stored in asset_manager_assets-*
+ *
+ * This schema is designed to be compatible with Entity Store for future integration.
+ */
+export interface EndpointAsset {
+  /** Entity Store compatible identity fields */
+  entity: EntityIdentity;
+
+  /** Asset Inventory compatible fields */
+  asset: AssetAttributes;
+
+  /** ECS host fields for correlation */
+  host: HostFields;
+
+  /** ECS agent fields */
+  agent?: AgentFields;
+
+  /** Endpoint-specific domain fields */
+  endpoint: EndpointDomainFields;
+
+  /** Document timestamp */
+  '@timestamp': string;
+
+  /** Event metadata for Entity Store compatibility */
+  event?: {
+    ingested?: string;
+    kind?: 'state';
+  };
+}
+
+// =============================================================================
+// API Request/Response Types
+// =============================================================================
+
+export interface ListAssetsRequest {
+  page?: number;
+  per_page?: number;
+  sort_field?: string;
+  sort_direction?: 'asc' | 'desc';
+  platform?: Platform;
+  posture_level?: PostureLevel;
+  criticality?: AssetCriticality;
+  search?: string;
+}
+
+export interface ListAssetsResponse {
+  assets: EndpointAsset[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface GetAssetRequest {
+  asset_id: string;
+}
+
+export interface GetAssetResponse {
+  asset: EndpointAsset;
+}
+
+export interface PostureSummaryResponse {
+  total_assets: number;
+  posture_distribution: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+  failed_checks_by_type: Record<string, number>;
+  average_score: number;
+}
+
+export interface PrivilegesSummaryResponse {
+  total_assets: number;
+  assets_with_elevated_privileges: number;
+  total_local_admins: number;
+  average_admin_count: number;
+}
+
+export interface DriftSummaryResponse {
+  total_assets: number;
+  recently_changed_assets: number;
+  change_types_distribution: Record<string, number>;
+}
+
+export interface TransformStatusResponse {
+  transform_id: string;
+  status: 'started' | 'stopped' | 'failed' | 'indexing' | 'not_found';
+  documents_processed?: number;
+  last_checkpoint?: string;
+  error?: string;
+}
+
+// =============================================================================
+// Posture Check Types
+// =============================================================================
+
+export interface PostureCheck {
+  id: string;
+  name: string;
+  description: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  deduction: number;
+  evaluate: (asset: EndpointAsset) => PostureCheckResult;
+}
+
+export interface PostureCheckResult {
+  check_id: string;
+  passed: boolean;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+// =============================================================================
+// Query Types
+// =============================================================================
+
+export interface SavedOsqueryQuery {
+  id: string;
+  name: string;
+  query: string;
+  description?: string;
+  platform?: Platform | 'all';
+  interval?: number;
+  category: 'core' | 'software' | 'posture' | 'privilege' | 'control' | 'drift';
+}
+
+// =============================================================================
+// Transform Types
+// =============================================================================
+
+export interface AssetTransformConfig {
+  transform_id: string;
+  source_index: string;
+  dest_index: string;
+  frequency: string;
+  sync_delay: string;
+  query_filter?: Record<string, unknown>;
+}

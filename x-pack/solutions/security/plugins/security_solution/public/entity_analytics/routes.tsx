@@ -16,6 +16,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH,
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   SecurityPageName,
 } from '../../common/constants';
@@ -25,6 +26,7 @@ import { EntityStoreManagementPage } from './pages/entity_store_management_page'
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
+import { EntityAnalyticsEndpointAssetsPage } from './pages/entity_analytics_endpoint_assets_page';
 import { EntityThreatHuntingPage } from './pages/entity_threat_hunting_page';
 
 const EntityAnalyticsManagementWrapper = () => (
@@ -131,6 +133,27 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
 EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
+const EntityAnalyticsEndpointAssetsWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityAnalyticsEndpointAssetsPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityAnalyticsEndpointAssetsContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH}
+        exact
+        component={EntityAnalyticsEndpointAssetsWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsEndpointAssetsContainer.displayName = 'EntityAnalyticsEndpointAssetsContainer';
+
 const EntityAnalyticsOverviewWrapper = () => (
   <PluginTemplateWrapper>
     <OverviewDashboard />
@@ -204,6 +227,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
       SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsEndpointAssetsContainer,
+      SecurityPageName.entityAnalyticsEndpointAssets
     ),
   },
   {

@@ -56,6 +56,7 @@ import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
+import { registerEndpointAssetsRoutes } from '../lib/endpoint_assets';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -147,6 +148,8 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, logger });
+
+  registerEndpointAssetsRoutes(router, logger);
 
   registerSiemReadinessRoutes({ router, logger });
 };
