@@ -13,7 +13,7 @@ import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  getSystemIdentificationTask: () => Promise<SystemIdentificationTaskResult>;
+  getSystemIdentificationStatus: () => Promise<SystemIdentificationTaskResult>;
   scheduleSystemIdentificationTask: (connectorId: string) => Promise<void>;
   cancelSystemIdentificationTask: () => Promise<void>;
   acknowledgeSystemIdentificationTask: () => Promise<void>;
@@ -35,61 +35,47 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal } = useAbortController();
 
   return {
-    getSystemIdentificationTask: async () => {
-      return await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/systems/_identify',
-        {
-          signal,
-          params: {
-            path: { name: definition.name },
-            query: {
-              connectorId: '',
-              to: '',
-              from: '',
-            },
-          },
-        }
-      );
-    },
-    scheduleSystemIdentificationTask: async (connectorId: string) => {
-      const now = Date.now();
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_identify', {
+    getSystemIdentificationStatus: async () => {
+      return await streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems/_status', {
         signal,
         params: {
           path: { name: definition.name },
-          query: {
-            schedule: true,
-            connectorId,
+        },
+      });
+    },
+    scheduleSystemIdentificationTask: async (connectorId: string) => {
+      const now = Date.now();
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'schedule',
             to: new Date(now).toISOString(),
             from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+            connectorId,
           },
         },
       });
     },
     cancelSystemIdentificationTask: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_identify', {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
         signal,
         params: {
           path: { name: definition.name },
-          query: {
-            cancel: true,
-            connectorId: '',
-            to: '',
-            from: '',
+          body: {
+            action: 'cancel',
           },
         },
       });
     },
     acknowledgeSystemIdentificationTask: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_identify', {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
         signal,
         params: {
           path: { name: definition.name },
-          query: {
-            acknowledge: true,
-            connectorId: '',
-            to: '',
-            from: '',
+          body: {
+            action: 'acknowledge',
           },
         },
       });
